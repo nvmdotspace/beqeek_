@@ -27,6 +27,7 @@ out/
 build
 dist
 
+docs/technical/html-module
 
 # Debug
 npm-debug.log*
