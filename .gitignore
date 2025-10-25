@@ -34,6 +34,7 @@ npm-debug.log*
 # Misc
 .DS_Store
 *.pem
+.pnpm-store/
 
 # Ai editor
 .trae
