@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query"
 import { useForm } from "@tanstack/react-form"
 
 import { ModeToggle } from "@/components/mode-toggle"
+import { useAppStore } from "@/stores"
 
 import { Button, buttonVariants } from "@workspace/ui/components/button"
 import { cn } from "@workspace/ui/lib/utils"
@@ -23,7 +24,10 @@ const fetchRandomDog = async (): Promise<DogResponse> => {
 }
 
 export const HomeRoute = () => {
-  const [submissionMessage, setSubmissionMessage] = React.useState<string | null>(null)
+  const submissionMessage = useAppStore((state) => state.lastSubscriberMessage)
+  const setSubmissionMessage = useAppStore((state) => state.setSubscriberMessage)
+  const dogRefreshCount = useAppStore((state) => state.dogRefreshCount)
+  const incrementDogRefresh = useAppStore((state) => state.incrementDogRefresh)
 
   const {
     data: dogData,
@@ -35,6 +39,14 @@ export const HomeRoute = () => {
     queryKey: ["dog"],
     queryFn: fetchRandomDog,
   })
+
+  const handleRefresh = React.useCallback(async () => {
+    const result = await refetch()
+
+    if (!result.error) {
+      incrementDogRefresh()
+    }
+  }, [refetch, incrementDogRefresh])
 
   const contactForm = useForm({
     defaultValues: {
@@ -94,8 +106,10 @@ export const HomeRoute = () => {
             ) : (
               <>
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
-                  <span>{isPending ? "Loading..." : "Freshly cached data"}</span>
-                  <Button size="sm" variant="outline" onClick={() => refetch()}>
+                  <span>
+                    {isPending ? "Loading..." : `Freshly cached data • ${dogRefreshCount} refreshes`}
+                  </span>
+                  <Button size="sm" variant="outline" onClick={() => void handleRefresh()}>
                     {isRefetching ? "Refreshing..." : "Refresh"}
                   </Button>
                 </div>

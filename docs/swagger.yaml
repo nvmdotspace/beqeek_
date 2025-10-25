@@ -1,0 +1,2895 @@
+openapi: 3.0.3
+info:
+  title: BEQEEK HTML Module API
+  description: >
+    OpenAPI documentation capturing the API surface consumed by the HTML module
+    front-ends under `resources/views/html-module`. Paths reflect the POST-based
+    RPC style that the module uses for both reads and mutations.
+  version: 1.0.0
+servers:
+  - url: https://{host}
+    description: Base URL for the BEQEEK backend targeted by the HTML module
+    variables:
+      host:
+        default: app.o1erp.com
+        description: Hostname for production or staging (override as needed)
+tags:
+  - name: Auth
+    description: Authentication and registration endpoints
+  - name: Workspaces
+    description: Manage user workspaces
+  - name: Workspace Teams
+    description: Manage teams inside a workspace
+  - name: Workspace Roles
+    description: Manage workspace team roles
+  - name: Workspace Users
+    description: Manage workspace membership and invitations
+  - name: Active Tables
+    description: Configure workflow active tables
+  - name: Active Table Records
+    description: |
+      Work with records stored in active tables.
+
+      Data Encryption Mechanism (End-to-End Encryption - E2EE)
+
+      This application implements an End-to-End Encryption (E2EE) mechanism for sensitive record data.
+      The encryption process involves several steps to ensure data confidentiality and integrity.
+
+      1. Encryption Key Management:
+        - Each active table can be configured with E2EE.
+        - When E2EE is enabled for a table, a unique `encryptionKey` (32 characters) is generated.
+        - This `encryptionKey` is NOT stored on the server. It is managed and stored by the user (e.g., in local storage).
+        - An `encryptionAuthKey` (a SHA256 hash of the `encryptionKey` repeated 3 times) is stored on the server to verify the user-provided `encryptionKey`.
+
+      2. Data Encryption (Client-Side):
+        - Before sending data to the API (e.g., when creating or updating records), sensitive fields are encrypted client-side.
+        - The `encryptTableData` method categorizes fields into different encryption types:
+        - `encryptFields` (e.g., SHORT_TEXT, RICH_TEXT): Encrypted using AES-256 in CBC mode with a random IV. The IV is prepended to the ciphertext.
+        - `opeEncryptFields` (e.g., INTEGER, NUMERIC, DATE, DATETIME): Encrypted using Order-Preserving Encryption (OPE) via the `OPEncryptor` class. This allows for range queries on encrypted data.
+        - `hashEncryptFields` (e.g., SELECT_ONE, SELECT_LIST): Hashed using HMAC-SHA256. This allows for equality checks on encrypted data without revealing the original value.
+        - The `encryptionKey` is used as the secret key for all encryption and hashing operations.
+
+      3. Hashed Keywords:
+        - For fields configured as `hashedKeywordFields` (e.g., `task_title`, `task_description`), their values are tokenized and then each token is hashed using HMAC-SHA256.
+        - These `hashed_keywords` are sent to the server alongside the encrypted record data. This enables server-side searching on encrypted content without decrypting the entire record.
+
+      4. Data Decryption (Client-Side):
+        - When receiving encrypted data from the API, the `decryptTableData` method is used to decrypt the fields client-side using the same `encryptionKey`.
+        - The decryption process reverses the encryption steps based on the field type.
+
+      5. Security Considerations:
+        - The `encryptionKey` is crucial for data access. Loss of this key means permanent loss of access to encrypted data.
+        - The `encryptionAuthKey` on the server only verifies the correctness of the `encryptionKey` but cannot decrypt data itself.
+        - The use of OPE and HMAC allows for certain operations (range queries, equality checks, full-text search) on encrypted data without compromising E2EE.
+  - name: Active Table Comments
+    description: Manage comments attached to active table records
+  - name: Active Table Actions
+    description: Trigger custom workflow actions on records
+  - name: Workflow Workgroups
+    description: Supporting metadata used for grouping tables
+  - name: Workflow Connectors
+    description: Manage workflow connector definitions
+  - name: Workflow Forms
+    description: Manage workflow form definitions
+  - name: Workflow Units
+    description: Manage workflow automation units
+  - name: Workflow Events
+    description: Manage workflow unit events and triggers
+security:
+  - BearerAuth: []
+paths:
+  /api/auth/post/authenticate:
+    post:
+      tags:
+        - Auth
+      summary: Authenticate user credentials
+      description: >
+        Authenticates a user and returns access and refresh tokens used by the
+        HTML module.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+            examples:
+              default:
+                value:
+                  username: captainbolt
+                  password: nvmteam
+      responses:
+        "200":
+          description: Authentication succeeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthTokens"
+        "401":
+          description: Invalid credentials
+  /api/auth/post/refresh_token:
+    post:
+      tags:
+        - Auth
+      summary: Refresh access token
+      description: >
+        Exchanges a refresh token for a new access token. Supply the refresh
+        token in both the request body and the `Authorization: Bearer` header.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshTokenRequest"
+      responses:
+        "200":
+          description: Tokens refreshed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthTokens"
+        "401":
+          description: Refresh token expired or invalid
+  /api/user/me/get/workspaces:
+    post:
+      tags:
+        - Workspaces
+      summary: List workspaces for the current user
+      description: |
+        List workspaces for the current user, supported_filtering:
+        `id:eq,in`
+        `labelId:eq,in`
+        `teamRoleUser:eq`
+        `workspaceName:eq,contains`
+        `createdAt:eq,lte,gte,lt,gt|format:Y-m-d H:i:s`
+        `updatedAt:eq,lte,gte,lt,gt|format:Y-m-d H:i:s`
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkspaceQueryRequest"
+            examples:
+              selectMinimal:
+                value:
+                  queries:
+                    fields: id,namespace,workspaceName,myWorkspaceUser{id,fullName,email,phone,phoneCountryCode,avatar,thumbnailAvatar,emailVerifiedAt,phoneVerifiedAt,createdAt,updatedAt},ownedByUser,ownedBy,logo,thumbnailLogo,createdAt,updatedAt
+      responses:
+        "200":
+          description: Workspace list returned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkspaceListResponse"
+  /api/user/me/get/workspaces/{workspaceId}:
+    post:
+      tags:
+        - Workspaces
+      summary: Get workspace details
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkspaceQueryRequest"
+            examples:
+              selectMinimal:
+                value:
+                  queries:
+                    fields: id,namespace,workspaceName,myWorkspaceUser{id,fullName,email,phone,phoneCountryCode,avatar,thumbnailAvatar,emailVerifiedAt,phoneVerifiedAt,createdAt,updatedAt},ownedByUser,ownedBy,logo,thumbnailLogo,createdAt,updatedAt
+      responses:
+        "200":
+          description: Workspace detail returned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkspaceDetailResponse"
+        "404":
+          description: Workspace not found
+  /api/workspace/{workspaceId}/workspace/get/teams:
+    post:
+      tags:
+        - Workspace Teams
+      summary: List teams in a workspace
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TeamQueryRequest"
+      responses:
+        "200":
+          description: Team list returned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkspaceTeamListResponse"
+  /api/workspace/{workspaceId}/workspace/get/p/teams:
+    post:
+      tags:
+        - Workspace Teams
+      summary: List teams in a workspace with advanced queries
+      description: |
+        supported_filtering:
+        `id:eq,in`
+        `labelId:eq,in`
+        `teamName:eq,contains`
+        `teamDescription:eq,contains`
+        `createdAt:eq,lte,gte,lt,gt|format:Y-m-d H:i:s`
+        `updatedAt:eq,lte,gte,lt,gt|format:Y-m-d H:i:s`
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TeamQueryRequest"
+            examples:
+              default:
+                value:
+                  queries:
+                    fields: id,teamName,teamDescription,teamRoleIds,teamRoles{id,isDefault,workspaceTeamId,roleCode,roleName,roleDescription,createdBy,updatedBy,createdAt,updatedAt,labelIds}
+      responses:
+        "200":
+          description: Team list returned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkspaceTeamListResponse"
+  /api/workspace/{workspaceId}/workspace/get/teams/{teamId}:
+    post:
+      tags:
+        - Workspace Teams
+      summary: Get team details
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+        - $ref: "#/components/parameters/TeamId"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TeamQueryRequest"
+      responses:
+        "200":
+          description: Team detail returned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkspaceTeamDetailResponse"
+        "404":
+          description: Team not found
+  /api/workspace/{workspaceId}/workspace/post/teams:
+    post:
+      tags:
+        - Workspace Teams
+      summary: Create a team
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TeamMutationRequest"
+            examples:
+              default:
+                value:
+                  data:
+                    teamName: Sales
+                    teamDescription: Handles inbound deals
+      responses:
+        "200":
+          description: Team created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TeamMutationResponse"
+  /api/workspace/{workspaceId}/workspace/patch/teams/{teamId}:
+    post:
+      tags:
+        - Workspace Teams
+      summary: Update a team
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+        - $ref: "#/components/parameters/TeamId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TeamMutationRequest"
+      responses:
+        "200":
+          description: Team updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StandardResponse"
+  /api/workspace/{workspaceId}/workspace/delete/teams/{teamId}:
+    post:
+      tags:
+        - Workspace Teams
+      summary: Delete a team
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+        - $ref: "#/components/parameters/TeamId"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmptyObject"
+      responses:
+        "200":
+          description: Team deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StandardResponse"
+  /api/workspace/{workspaceId}/workspace/get/team_roles:
+    post:
+      tags:
+        - Workspace Roles
+      summary: List roles in a workspace team
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TeamRoleQueryRequest"
+            examples:
+              byTeam:
+                value:
+                  constraints:
+                    workspaceTeamId: 1234567890
+                  queries:
+                    fields: id,isDefault,workspaceTeamId,roleCode,roleName,roleDescription,createdBy,createdAt,updatedAt
+      responses:
+        "200":
+          description: Role list returned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TeamRoleListResponse"
+  /api/workspace/{workspaceId}/workspace/get/p/team_roles:
+    post:
+      tags:
+        - Workspace Roles
+      summary: List team roles in a workspace with advanced queries
+      description: |
+        supported_filtering:
+        `id:eq,in`
+        `labelId:eq,in`
+        `roleName:eq,contains`
+        `roleDescription:eq,contains`
+        `createdAt:eq,lte,gte,lt,gt|format:Y-m-d H:i:s`
+        `updatedAt:eq,lte,gte,lt,gt|format:Y-m-d H:i:s`
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TeamRoleQueryRequest"
+            examples:
+              default:
+                value:
+                  constraints:
+                    workspaceTeamId: 806075211030986753
+                  queries:
+                    fields: id,workspaceTeamId,roleCode,roleName,roleDescription
+      responses:
+        "200":
+          description: Team role list returned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TeamRoleListResponse"
+  /api/workspace/{workspaceId}/workspace/post/team_roles:
+    post:
+      tags:
+        - Workspace Roles
+      summary: Create a team role
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TeamRoleMutationRequest"
+            examples:
+              default:
+                value:
+                  constraints:
+                    workspaceTeamId: 1234567890
+                  data:
+                    roleName: Manager
+                    roleDescription: Oversees team members
+      responses:
+        "200":
+          description: Role created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TeamRoleMutationResponse"
+  /api/workspace/{workspaceId}/workspace/patch/team_roles/{roleId}:
+    post:
+      tags:
+        - Workspace Roles
+      summary: Update a team role
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+        - $ref: "#/components/parameters/RoleId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TeamRoleMutationRequest"
+      responses:
+        "200":
+          description: Role updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StandardResponse"
+  /api/workspace/{workspaceId}/workspace/delete/team_roles/{roleId}:
+    post:
+      tags:
+        - Workspace Roles
+      summary: Delete a team role
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+        - $ref: "#/components/parameters/RoleId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TeamRoleDeleteRequest"
+      responses:
+        "200":
+          description: Role deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StandardResponse"
+  /api/workspace/{workspaceId}/workspace/get/users:
+    post:
+      tags:
+        - Workspace Users
+      summary: List users in a workspace
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserQueryRequest"
+            examples:
+              withMemberships:
+                value:
+                  queries:
+                    fields: id,fullName,avatar,thumbnailAvatar,globalUser{username},workspaceMemberships{userId,workspaceTeamRoleId,workspaceTeamId,invitedAt},createdAt
+                    filtering:
+                      workspaceTeamRole:
+                        workspaceTeamId: 789
+      responses:
+        "200":
+          description: User list returned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkspaceUserListResponse"
+  /api/workspace/{workspaceId}/workspace/post/users:
+    post:
+      tags:
+        - Workspace Users
+      summary: Create a workspace-local user and add to a team
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserCreateRequest"
+            examples:
+              default:
+                value:
+                  constraints:
+                    workspaceTeamId: 789
+                    workspaceTeamRoleId: 456
+                  data:
+                    username: john.doe
+                    password: secret123
+                    email: john@example.com
+                    fullName: John Doe
+      responses:
+        "200":
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserMutationResponse"
+  /api/workspace/{workspaceId}/workspace/post/invitations/bulk:
+    post:
+      tags:
+        - Workspace Users
+      summary: Invite existing users to a workspace team
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InvitationBulkRequest"
+      responses:
+        "200":
+          description: Invitations created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StandardResponse"
+  /api/user/get/users/via-username/{username}:
+    post:
+      tags:
+        - Workspace Users
+      summary: Look up a user by username
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Username or email to look up
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserLookupRequest"
+      responses:
+        "200":
+          description: User details returned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserLookupResponse"
+        "404":
+          description: User not found
+  /api/workspace/{workspaceId}/workflow/get/active_tables:
+    post:
+      tags:
+        - Active Tables
+      summary: List active tables
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ActiveTableQueryRequest"
+      responses:
+        "200":
+          description: Active table list returned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ActiveTableListResponse"
+  /api/workspace/{workspaceId}/workflow/get/active_tables/{tableId}:
+    post:
+      tags:
+        - Active Tables
+      summary: Get an active table definition
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+        - $ref: "#/components/parameters/TableId"
+      responses:
+        "200":
+          description: Active table detail returned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ActiveTableDetailResponse"
+        "404":
+          description: Active table not found
+  /api/workspace/{workspaceId}/workflow/post/active_tables:
+    post:
+      tags:
+        - Active Tables
+      summary: Create an active table
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ActiveTableMutationRequest"
+      responses:
+        "200":
+          description: Active table created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ActiveTableMutationResponse"
+  /api/workspace/{workspaceId}/workflow/patch/active_tables/{tableId}:
+    post:
+      tags:
+        - Active Tables
+      summary: Update an active table
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+        - $ref: "#/components/parameters/TableId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ActiveTableMutationRequest"
+      responses:
+        "200":
+          description: Active table updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StandardResponse"
+  /api/workspace/{workspaceId}/workflow/delete/active_tables/{tableId}:
+    post:
+      tags:
+        - Active Tables
+      summary: Delete an active table
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+        - $ref: "#/components/parameters/TableId"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmptyObject"
+      responses:
+        "200":
+          description: Active table deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StandardResponse"
+  /api/workspace/{workspaceId}/workflow/get/active_tables/{tableId}/records:
+    post:
+      tags:
+        - Active Table Records
+      summary: List records for an active table
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+        - $ref: "#/components/parameters/TableId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RecordQueryRequest"
+            examples:
+              cursorPaging:
+                value:
+                  paging: cursor
+                  filtering:
+                    record:
+                      status:eq: OPEN
+                  direction: asc
+                  limit: 50
+      responses:
+        "200":
+          description: Record page returned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ActiveTableRecordListResponse"
+  /api/workspace/{workspaceId}/workflow/post/active_tables/{tableId}/records:
+    post:
+      tags:
+        - Active Table Records
+      summary: Create a record
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+        - $ref: "#/components/parameters/TableId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ActiveTableRecordCreateRequest"
+      responses:
+        "200":
+          description: Record created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ActiveTableRecordMutationResponse"
+  /api/workspace/{workspaceId}/workflow/patch/active_tables/{tableId}/records/{recordId}:
+    post:
+      tags:
+        - Active Table Records
+      summary: Update a record
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+        - $ref: "#/components/parameters/TableId"
+        - $ref: "#/components/parameters/RecordId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ActiveTableRecordUpdateRequest"
+      responses:
+        "200":
+          description: Record updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StandardResponse"
+  /api/workspace/{workspaceId}/workflow/delete/active_tables/{tableId}/records/{recordId}:
+    post:
+      tags:
+        - Active Table Records
+      summary: Delete a record
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+        - $ref: "#/components/parameters/TableId"
+        - $ref: "#/components/parameters/RecordId"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmptyObject"
+      responses:
+        "200":
+          description: Record deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StandardResponse"
+  /api/workspace/{workspaceId}/workflow/active_tables/{tableId}/records/{recordId}/get/comments:
+    post:
+      tags:
+        - Active Table Comments
+      summary: List comments for a record
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+        - $ref: "#/components/parameters/TableId"
+        - $ref: "#/components/parameters/RecordId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CommentQueryRequest"
+      responses:
+        "200":
+          description: Comment page returned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommentListResponse"
+  /api/workspace/{workspaceId}/workflow/active_tables/{tableId}/records/{recordId}/get/comments/{commentId}:
+    post:
+      tags:
+        - Active Table Comments
+      summary: Get a specific comment
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+        - $ref: "#/components/parameters/TableId"
+        - $ref: "#/components/parameters/RecordId"
+        - $ref: "#/components/parameters/CommentId"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CommentQueryRequest"
+      responses:
+        "200":
+          description: Comment returned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommentDetailResponse"
+        "404":
+          description: Comment not found
+  /api/workspace/{workspaceId}/workflow/active_tables/{tableId}/records/{recordId}/post/comments:
+    post:
+      tags:
+        - Active Table Comments
+      summary: Create a comment
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+        - $ref: "#/components/parameters/TableId"
+        - $ref: "#/components/parameters/RecordId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CommentPayload"
+      responses:
+        "200":
+          description: Comment created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommentMutationResponse"
+  /api/workspace/{workspaceId}/workflow/active_tables/{tableId}/records/{recordId}/patch/comments/{commentId}:
+    post:
+      tags:
+        - Active Table Comments
+      summary: Update a comment
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+        - $ref: "#/components/parameters/TableId"
+        - $ref: "#/components/parameters/RecordId"
+        - $ref: "#/components/parameters/CommentId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CommentPayload"
+      responses:
+        "200":
+          description: Comment updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StandardResponse"
+  /api/workspace/{workspaceId}/workflow/active_tables/{tableId}/records/{recordId}/delete/comments/{commentId}:
+    post:
+      tags:
+        - Active Table Comments
+      summary: Delete a comment
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+        - $ref: "#/components/parameters/TableId"
+        - $ref: "#/components/parameters/RecordId"
+        - $ref: "#/components/parameters/CommentId"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmptyObject"
+      responses:
+        "200":
+          description: Comment deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StandardResponse"
+  /api/workspace/{workspaceId}/workflow/post/active_tables/{tableId}/records/{recordId}/action/{actionId}:
+    post:
+      tags:
+        - Active Table Actions
+      summary: Trigger a custom action for a record
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+        - $ref: "#/components/parameters/TableId"
+        - $ref: "#/components/parameters/RecordId"
+        - $ref: "#/components/parameters/ActionId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ActionTriggerRequest"
+      responses:
+        "200":
+          description: Action triggered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StandardResponse"
+  /api/workspace/{workspaceId}/workflow/get/active_work_groups:
+    post:
+      tags:
+        - Workflow Workgroups
+      summary: List workgroups used for active table grouping
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmptyObject"
+      responses:
+        "200":
+          description: Workgroups returned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ActiveWorkGroupListResponse"
+  /api/workspace/{workspaceId}/workflow/get/workflow_connectors:
+    post:
+      tags:
+        - Workflow Connectors
+      summary: List workflow connectors
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConnectorQueryRequest"
+      responses:
+        "200":
+          description: Connector list returned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkflowConnectorListResponse"
+  /api/workspace/{workspaceId}/workflow/get/workflow_connectors/{connectorId}:
+    post:
+      tags:
+        - Workflow Connectors
+      summary: Get connector details
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+        - $ref: "#/components/parameters/ConnectorId"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConnectorQueryRequest"
+      responses:
+        "200":
+          description: Connector detail returned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkflowConnectorDetailResponse"
+        "404":
+          description: Connector not found
+  /api/workspace/{workspaceId}/workflow/post/workflow_connectors:
+    post:
+      tags:
+        - Workflow Connectors
+      summary: Create a connector
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkflowConnectorMutationRequest"
+      responses:
+        "200":
+          description: Connector created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkflowConnectorMutationResponse"
+  /api/workspace/{workspaceId}/workflow/patch/workflow_connectors/{connectorId}:
+    post:
+      tags:
+        - Workflow Connectors
+      summary: Update a connector
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+        - $ref: "#/components/parameters/ConnectorId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkflowConnectorMutationRequest"
+      responses:
+        "200":
+          description: Connector updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StandardResponse"
+  /api/workspace/{workspaceId}/workflow/delete/workflow_connectors/{connectorId}:
+    post:
+      tags:
+        - Workflow Connectors
+      summary: Delete a connector
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+        - $ref: "#/components/parameters/ConnectorId"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmptyObject"
+      responses:
+        "200":
+          description: Connector deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StandardResponse"
+  /api/workspace/{workspaceId}/workflow/get/workflow_forms:
+    post:
+      tags:
+        - Workflow Forms
+      summary: List workflow forms
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FormQueryRequest"
+      responses:
+        "200":
+          description: Form list returned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkflowFormListResponse"
+  /api/workspace/{workspaceId}/workflow/get/workflow_forms/{formId}:
+    post:
+      tags:
+        - Workflow Forms
+      summary: Get form details
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+        - $ref: "#/components/parameters/FormId"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FormQueryRequest"
+      responses:
+        "200":
+          description: Form detail returned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkflowFormDetailResponse"
+        "404":
+          description: Form not found
+  /api/workspace/{workspaceId}/workflow/post/workflow_forms:
+    post:
+      tags:
+        - Workflow Forms
+      summary: Create a workflow form
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkflowFormMutationRequest"
+      responses:
+        "200":
+          description: Form created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkflowFormMutationResponse"
+  /api/workspace/{workspaceId}/workflow/patch/workflow_forms/{formId}:
+    post:
+      tags:
+        - Workflow Forms
+      summary: Update a workflow form
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+        - $ref: "#/components/parameters/FormId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkflowFormMutationRequest"
+      responses:
+        "200":
+          description: Form updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StandardResponse"
+  /api/workspace/{workspaceId}/workflow/delete/workflow_forms/{formId}:
+    post:
+      tags:
+        - Workflow Forms
+      summary: Delete a workflow form
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+        - $ref: "#/components/parameters/FormId"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmptyObject"
+      responses:
+        "200":
+          description: Form deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StandardResponse"
+  /api/workspace/{workspaceId}/workflow/get/workflow_units:
+    post:
+      tags:
+        - Workflow Units
+      summary: List workflow units
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkflowUnitQueryRequest"
+      responses:
+        "200":
+          description: Workflow unit list returned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkflowUnitListResponse"
+  /api/workspace/{workspaceId}/workflow/get/workflow_units/{workflowUnitId}:
+    post:
+      tags:
+        - Workflow Units
+      summary: Get workflow unit details
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+        - $ref: "#/components/parameters/WorkflowUnitId"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkflowUnitQueryRequest"
+      responses:
+        "200":
+          description: Workflow unit returned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkflowUnitDetailResponse"
+        "404":
+          description: Workflow unit not found
+  /api/workspace/{workspaceId}/workflow/post/workflow_units:
+    post:
+      tags:
+        - Workflow Units
+      summary: Create a workflow unit
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkflowUnitMutationRequest"
+      responses:
+        "200":
+          description: Workflow unit created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkflowUnitMutationResponse"
+  /api/workspace/{workspaceId}/workflow/patch/workflow_units/{workflowUnitId}:
+    post:
+      tags:
+        - Workflow Units
+      summary: Update a workflow unit
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+        - $ref: "#/components/parameters/WorkflowUnitId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkflowUnitMutationRequest"
+      responses:
+        "200":
+          description: Workflow unit updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StandardResponse"
+  /api/workspace/{workspaceId}/workflow/delete/workflow_units/{workflowUnitId}:
+    post:
+      tags:
+        - Workflow Units
+      summary: Delete a workflow unit
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+        - $ref: "#/components/parameters/WorkflowUnitId"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmptyObject"
+      responses:
+        "200":
+          description: Workflow unit deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StandardResponse"
+  /api/workspace/{workspaceId}/workflow/post/workflow_units/{workflowUnitId}/deploy:
+    post:
+      tags:
+        - Workflow Units
+      summary: Deploy a workflow unit
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+        - $ref: "#/components/parameters/WorkflowUnitId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkflowDeployRequest"
+      responses:
+        "200":
+          description: Workflow unit deployed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StandardResponse"
+  /api/workspace/{workspaceId}/workflow/post/workflow_units/{workflowUnitId}/disable:
+    post:
+      tags:
+        - Workflow Units
+      summary: Disable a workflow unit
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+        - $ref: "#/components/parameters/WorkflowUnitId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkflowDeployRequest"
+      responses:
+        "200":
+          description: Workflow unit disabled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StandardResponse"
+  /api/workspace/{workspaceId}/workflow/get/workflow_events:
+    post:
+      tags:
+        - Workflow Events
+      summary: List workflow events for a workspace
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkflowEventQueryRequest"
+      responses:
+        "200":
+          description: Workflow events returned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkflowEventListResponse"
+  /api/workspace/{workspaceId}/workflow/get/workflow_events/{eventId}:
+    post:
+      tags:
+        - Workflow Events
+      summary: Get workflow event details
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+        - $ref: "#/components/parameters/EventId"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkflowEventQueryRequest"
+      responses:
+        "200":
+          description: Workflow event returned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkflowEventDetailResponse"
+        "404":
+          description: Workflow event not found
+  /api/workspace/{workspaceId}/workflow/post/workflow_events:
+    post:
+      tags:
+        - Workflow Events
+      summary: Create a workflow event
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkflowEventMutationRequest"
+      responses:
+        "200":
+          description: Workflow event created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkflowEventMutationResponse"
+  /api/workspace/{workspaceId}/workflow/patch/workflow_events/{eventId}:
+    post:
+      tags:
+        - Workflow Events
+      summary: Update a workflow event
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+        - $ref: "#/components/parameters/EventId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkflowEventMutationRequest"
+      responses:
+        "200":
+          description: Workflow event updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StandardResponse"
+  /api/workspace/{workspaceId}/workflow/delete/workflow_events/{eventId}:
+    post:
+      tags:
+        - Workflow Events
+      summary: Delete a workflow event
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+        - $ref: "#/components/parameters/EventId"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmptyObject"
+      responses:
+        "200":
+          description: Workflow event deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StandardResponse"
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    WorkspaceId:
+      name: workspaceId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Workspace identifier
+    TeamId:
+      name: teamId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Workspace team identifier
+    RoleId:
+      name: roleId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Workspace team role identifier
+    TableId:
+      name: tableId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Active table identifier
+    RecordId:
+      name: recordId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Active table record identifier
+    CommentId:
+      name: commentId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Comment identifier
+    ActionId:
+      name: actionId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Custom action identifier defined on the active table
+    ConnectorId:
+      name: connectorId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Workflow connector identifier
+    FormId:
+      name: formId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Workflow form identifier
+    WorkflowUnitId:
+      name: workflowUnitId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Workflow unit identifier
+    EventId:
+      name: eventId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Workflow event identifier
+  schemas:
+    ActiveTableField:
+      type: object
+      properties:
+        type:
+          type: string
+        label:
+          type: string
+        name:
+          type: string
+        placeholder:
+          type: string
+        defaultValue:
+          type: string
+        required:
+          type: boolean
+        options:
+          type: array
+          items:
+            $ref: "#/components/schemas/ActiveTableFieldOption"
+        referenceLabelField:
+          type: string
+      required:
+        - type
+        - label
+        - name
+    ActiveTableFieldOption:
+      type: object
+      properties:
+        text:
+          type: string
+        value:
+          type: string
+        text_color:
+          type: string
+        background_color:
+          type: string
+      required:
+        - text
+        - value
+    ActiveTableAction:
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+        icon:
+          type: string
+          nullable: true
+        actionId:
+          type: string
+      required:
+        - name
+        - type
+        - actionId
+    ActiveTableQuickFilter:
+      type: object
+      properties:
+        fieldName:
+          type: string
+      required:
+        - fieldName
+    KanbanConfig:
+      type: object
+      properties:
+        kanbanScreenId:
+          type: string
+        screenName:
+          type: string
+        screenDescription:
+          type: string
+        statusField:
+          type: string
+        kanbanHeadlineField:
+          type: string
+        displayFields:
+          type: array
+          items:
+            type: string
+      required:
+        - kanbanScreenId
+        - screenName
+        - statusField
+        - kanbanHeadlineField
+        - displayFields
+    RecordListConfig:
+      type: object
+      properties:
+        layout:
+          type: string
+        titleField:
+          type: string
+        subLineFields:
+          type: array
+          items:
+            type: string
+        tailFields:
+          type: array
+          items:
+            type: string
+      required:
+        - layout
+        - titleField
+        - subLineFields
+        - tailFields
+    RecordDetailConfig:
+      type: object
+      properties:
+        layout:
+          type: string
+        commentsPosition:
+          type: string
+        headTitleField:
+          type: string
+        headSubLineFields:
+          type: array
+          items:
+            type: string
+        rowTailFields:
+          type: array
+          items:
+            type: string
+      required:
+        - layout
+        - commentsPosition
+        - headTitleField
+        - headSubLineFields
+        - rowTailFields
+    PermissionAction:
+      type: object
+      properties:
+        actionId:
+          type: string
+        permission:
+          type: string
+      required:
+        - actionId
+        - permission
+    PermissionsConfig:
+      type: object
+      properties:
+        teamId:
+          type: string
+        roleId:
+          type: string
+        actions:
+          type: array
+          items:
+            $ref: "#/components/schemas/PermissionAction"
+      required:
+        - teamId
+        - roleId
+        - actions
+    GanttChart:
+      type: object
+      properties:
+        ganttScreenId:
+          type: string
+        screenName:
+          type: string
+        screenDescription:
+          type: string
+        taskNameField:
+          type: string
+        startDateField:
+          type: string
+        endDateField:
+          type: string
+        progressField:
+          type: string
+          nullable: true
+        dependencyField:
+          type: string
+          nullable: true
+      required:
+        - ganttScreenId
+        - screenName
+        - taskNameField
+        - startDateField
+        - endDateField
+    ActiveTableConfig:
+      type: object
+      properties:
+        title:
+          type: string
+        fields:
+          type: array
+          items:
+            $ref: "#/components/schemas/ActiveTableField"
+        actions:
+          type: array
+          items:
+            $ref: "#/components/schemas/ActiveTableAction"
+        quickFilters:
+          type: array
+          items:
+            $ref: "#/components/schemas/ActiveTableQuickFilter"
+        tableLimit:
+          type: integer
+        e2eeEncryption:
+          type: boolean
+        hashedKeywordFields:
+          type: array
+          items:
+            type: string
+        defaultSort:
+          type: string
+        kanbanConfigs:
+          type: array
+          items:
+            $ref: "#/components/schemas/KanbanConfig"
+        recordListConfig:
+          $ref: "#/components/schemas/RecordListConfig"
+        recordDetailConfig:
+          $ref: "#/components/schemas/RecordDetailConfig"
+        permissionsConfig:
+          type: array
+          items:
+            $ref: "#/components/schemas/PermissionsConfig"
+        ganttCharts:
+          type: array
+          items:
+            $ref: "#/components/schemas/GanttChart"
+        encryptionKey:
+          type: string
+        encryptionAuthKey:
+          type: string
+      required:
+        - title
+        - fields
+        - actions
+        - quickFilters
+        - tableLimit
+        - e2eeEncryption
+        - hashedKeywordFields
+        - defaultSort
+        - kanbanConfigs
+        - recordListConfig
+        - recordDetailConfig
+        - permissionsConfig
+        - ganttCharts
+        - encryptionKey
+        - encryptionAuthKey
+    RecordValueUpdatedAt:
+      type: object
+      additionalProperties:
+        type: string
+    RecordPermissions:
+      type: object
+      additionalProperties:
+        type: boolean
+    EmptyObject:
+      type: object
+      description: Empty object used when the API expects a JSON body but no fields
+        are required.
+      additionalProperties: false
+    LoginRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          description: Username or email
+        password:
+          type: string
+          format: password
+    RegisterRequest:
+      type: object
+      required:
+        - name
+        - email
+        - password
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+    RefreshTokenRequest:
+      type: object
+      required:
+        - refreshToken
+      properties:
+        refreshToken:
+          type: string
+          description: Refresh token previously issued by the authenticate endpoint
+    AuthTokens:
+      type: object
+      required:
+        - userId
+        - accessToken
+        - refreshToken
+      properties:
+        userId:
+          type: string
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+    StandardResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          nullable: true
+        data:
+          nullable: true
+          description: API payload (structure varies per endpoint)
+    CollectionResponse:
+      allOf:
+        - $ref: "#/components/schemas/StandardResponse"
+        - type: object
+          properties:
+            data:
+              type: array
+              items: {}
+    CursorCollectionResponse:
+      allOf:
+        - $ref: "#/components/schemas/CollectionResponse"
+        - type: object
+          properties:
+            next_id:
+              type: string
+              nullable: true
+            previous_id:
+              type: string
+              nullable: true
+    QueryOptions:
+      type: object
+      description: Common query options used by listing endpoints.
+      properties:
+        fields:
+          type: string
+          description: Comma separated list of fields to include in the response
+        filtering:
+          type: object
+          additionalProperties: true
+        sorting:
+          type: object
+          additionalProperties: true
+        limit:
+          type: integer
+        offset:
+          type: integer
+        paging:
+          type: string
+        next_id:
+          type: string
+        direction:
+          type: string
+      additionalProperties: true
+    ConstraintMap:
+      type: object
+      additionalProperties: true
+      description: Constraint fields applied server-side (for example workspaceTeamId)
+    WorkspaceInput:
+      type: object
+      required:
+        - workspaceName
+        - namespace
+      properties:
+        workspaceName:
+          type: string
+        namespace:
+          type: string
+    WorkspaceQueryRequest:
+      type: object
+      properties:
+        queries:
+          $ref: "#/components/schemas/QueryOptions"
+    WorkspaceMutationRequest:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          $ref: "#/components/schemas/WorkspaceInput"
+    WorkspaceMutationResponse:
+      allOf:
+        - $ref: "#/components/schemas/StandardResponse"
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                id:
+                  type: string
+                  description: Newly created workspace ID
+    Workspace:
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+        data:
+          $ref: '#/components/schemas/WorkspaceData'
+        meta:
+          type: object
+          properties:
+            limit:
+              type: integer
+              example: 1000
+      required:
+        - status
+        - data
+
+    WorkspaceData:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "732878538910205325"
+        namespace:
+          type: string
+          example: "nvmteam"
+        workspaceName:
+          type: string
+          example: "Nvmteam"
+        myWorkspaceUser:
+          $ref: '#/components/schemas/MyWorkspaceUser'
+        ownedByUser:
+          type: object
+          nullable: true
+          example: null
+        ownedBy:
+          type: string
+          example: "806075204051664897"
+        logo:
+          type: string
+          example: ""
+        thumbnailLogo:
+          type: string
+          example: ""
+        createdAt:
+          type: string
+          example: "2025-09-09 16:23:12"
+        updatedAt:
+          type: string
+          nullable: true
+          example: null
+      required:
+        - id
+        - namespace
+        - workspaceName
+
+    MyWorkspaceUser:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "806075204051664897"
+        fullName:
+          type: string
+          example: "Lưu Thanh Sang"
+        email:
+          type: string
+          example: "sangdung.ts@gmail.com"
+        phone:
+          type: string
+          example: ""
+        phoneCountryCode:
+          type: string
+          example: ""
+        avatar:
+          type: string
+          example: ""
+        thumbnailAvatar:
+          type: string
+          example: ""
+        emailVerifiedAt:
+          type: string
+          nullable: true
+          example: null
+        phoneVerifiedAt:
+          type: string
+          nullable: true
+          example: null
+        createdAt:
+          type: string
+          nullable: true
+          example: null
+        updatedAt:
+          type: string
+          nullable: true
+          example: null
+    WorkspaceListResponse:
+      allOf:
+        - $ref: "#/components/schemas/CollectionResponse"
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: "#/components/schemas/Workspace"
+    WorkspaceDetailResponse:
+      allOf:
+        - $ref: "#/components/schemas/StandardResponse"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/Workspace"
+    WorkspaceTeam:
+      type: object
+      properties:
+        id:
+          type: string
+        teamName:
+          type: string
+        teamDescription:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+          nullable: true
+        updatedAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdByUser:
+          type: object
+          nullable: true
+          additionalProperties: true
+        teamRoleIds:
+          type: array
+          items:
+            type: string
+        teamRoles:
+          type: array
+          items:
+            $ref: "#/components/schemas/WorkspaceRole"
+      additionalProperties: true
+    WorkspaceTeamListResponse:
+      allOf:
+        - $ref: "#/components/schemas/CollectionResponse"
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: "#/components/schemas/WorkspaceTeam"
+    WorkspaceTeamDetailResponse:
+      allOf:
+        - $ref: "#/components/schemas/StandardResponse"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/WorkspaceTeam"
+    TeamMutationRequest:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: object
+          required:
+            - teamName
+          properties:
+            teamName:
+              type: string
+            teamDescription:
+              type: string
+              nullable: true
+    TeamMutationResponse:
+      allOf:
+        - $ref: "#/components/schemas/StandardResponse"
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                id:
+                  type: string
+    TeamQueryRequest:
+      type: object
+      properties:
+        queries:
+          $ref: "#/components/schemas/QueryOptions"
+    WorkspaceRole:
+      type: object
+      properties:
+        id:
+          type: string
+        isDefault:
+          type: boolean
+          nullable: true
+        workspaceTeamId:
+          type: string
+        roleCode:
+          type: string
+          nullable: true
+        roleName:
+          type: string
+        roleDescription:
+          type: string
+          nullable: true
+        createdBy:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+          nullable: true
+        updatedAt:
+          type: string
+          format: date-time
+          nullable: true
+      additionalProperties: true
+    TeamRoleQueryRequest:
+      type: object
+      properties:
+        constraints:
+          $ref: "#/components/schemas/ConstraintMap"
+        queries:
+          $ref: "#/components/schemas/QueryOptions"
+    TeamRoleMutationRequest:
+      type: object
+      required:
+        - constraints
+        - data
+      properties:
+        constraints:
+          $ref: "#/components/schemas/ConstraintMap"
+        data:
+          type: object
+          required:
+            - roleName
+          properties:
+            roleName:
+              type: string
+            roleDescription:
+              type: string
+              nullable: true
+            roleCode:
+              type: string
+              nullable: true
+            isDefault:
+              type: boolean
+              nullable: true
+    TeamRoleMutationResponse:
+      allOf:
+        - $ref: "#/components/schemas/StandardResponse"
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                id:
+                  type: string
+    TeamRoleDeleteRequest:
+      type: object
+      required:
+        - constraints
+      properties:
+        constraints:
+          $ref: "#/components/schemas/ConstraintMap"
+    TeamRoleListResponse:
+      allOf:
+        - $ref: "#/components/schemas/CollectionResponse"
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: "#/components/schemas/WorkspaceRole"
+    WorkspaceUser:
+      type: object
+      properties:
+        id:
+          type: string
+        fullName:
+          type: string
+          nullable: true
+        avatar:
+          type: string
+          nullable: true
+        thumbnailAvatar:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+          nullable: true
+        globalUser:
+          type: object
+          nullable: true
+          additionalProperties: true
+        workspaceMemberships:
+          type: array
+          items:
+            $ref: "#/components/schemas/WorkspaceMembership"
+      additionalProperties: true
+    WorkspaceMembership:
+      type: object
+      properties:
+        userId:
+          type: string
+        workspaceTeamRoleId:
+          type: string
+          nullable: true
+        workspaceTeamId:
+          type: string
+        invitedAt:
+          type: string
+          format: date-time
+          nullable: true
+      additionalProperties: true
+    WorkspaceUserListResponse:
+      allOf:
+        - $ref: "#/components/schemas/CollectionResponse"
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: "#/components/schemas/WorkspaceUser"
+    UserQueryRequest:
+      type: object
+      properties:
+        queries:
+          $ref: "#/components/schemas/QueryOptions"
+    UserCreateRequest:
+      type: object
+      required:
+        - constraints
+        - data
+      properties:
+        constraints:
+          $ref: "#/components/schemas/ConstraintMap"
+        data:
+          type: object
+          required:
+            - username
+            - password
+            - email
+            - fullName
+          properties:
+            username:
+              type: string
+            password:
+              type: string
+            email:
+              type: string
+              format: email
+            fullName:
+              type: string
+    UserMutationResponse:
+      allOf:
+        - $ref: "#/components/schemas/StandardResponse"
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                id:
+                  type: string
+    InvitationBulkRequest:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            required:
+              - workspaceTeamId
+              - workspaceTeamRoleId
+              - userId
+            properties:
+              workspaceTeamId:
+                type: string
+              workspaceTeamRoleId:
+                type: string
+              userId:
+                type: string
+    UserLookupRequest:
+      type: object
+      properties:
+        queries:
+          $ref: "#/components/schemas/QueryOptions"
+    UserLookupResponse:
+      allOf:
+        - $ref: "#/components/schemas/StandardResponse"
+        - type: object
+          properties:
+            data:
+              type: object
+              additionalProperties: true
+    ActiveTable:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        workGroupId:
+          type: string
+        tableType:
+          type: string
+        description:
+          type: string
+          nullable: true
+        config:
+          $ref: "#/components/schemas/ActiveTableConfig"
+        createdAt:
+          type: string
+          format: date-time
+          nullable: true
+        updatedAt:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+        - id
+        - name
+        - tableType
+        - config
+      additionalProperties: true
+    ActiveTableQueryRequest:
+      type: object
+      properties:
+        queries:
+          $ref: "#/components/schemas/QueryOptions"
+    ActiveTableMutationRequest:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          $ref: "#/components/schemas/ActiveTable"
+    ActiveTableMutationResponse:
+      allOf:
+        - $ref: "#/components/schemas/StandardResponse"
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                id:
+                  type: string
+    ActiveTableListResponse:
+      allOf:
+        - $ref: "#/components/schemas/CollectionResponse"
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: "#/components/schemas/ActiveTable"
+    ActiveTableDetailResponse:
+      allOf:
+        - $ref: "#/components/schemas/StandardResponse"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/ActiveTable"
+    RecordQueryRequest:
+      type: object
+      properties:
+        paging:
+          type: string
+          description: When set to `cursor`, enables cursor-based pagination.
+        filtering:
+          type: object
+          additionalProperties: true
+        next_id:
+          type: string
+          nullable: true
+        previous_id:
+          type: string
+          nullable: true
+        direction:
+          type: string
+          enum:
+            - asc
+            - desc
+          nullable: true
+        limit:
+          type: integer
+          nullable: true
+        group:
+          type: string
+          nullable: true
+      additionalProperties: true
+    ActiveTableRecord:
+      type: object
+      properties:
+        id:
+          type: string
+        record:
+          type: object
+          additionalProperties: true
+        createdBy:
+          type: string
+        updatedBy:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+          nullable: true
+        updatedAt:
+          type: string
+          format: date-time
+          nullable: true
+        valueUpdatedAt:
+          $ref: "#/components/schemas/RecordValueUpdatedAt"
+        relatedUserIds:
+          type: array
+          items:
+            type: string
+        assignedUserIds:
+          type: array
+          items:
+            type: string
+        record_hashes:
+          type: array
+          items:
+            type: string
+        hashed_keywords:
+          type: array
+          items:
+            type: string
+        permissions:
+          $ref: "#/components/schemas/RecordPermissions"
+      required:
+        - id
+        - record
+        - createdBy
+        - updatedAt
+        - createdAt
+        - valueUpdatedAt
+        - relatedUserIds
+        - assignedUserIds
+        - record_hashes
+        - hashed_keywords
+        - permissions
+      additionalProperties: true
+    ActiveTableRecordListResponse:
+      allOf:
+        - $ref: "#/components/schemas/CursorCollectionResponse"
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: "#/components/schemas/ActiveTableRecord"
+    ActiveTableRecordCreateRequest:
+      type: object
+      required:
+        - record
+      properties:
+        record:
+          type: object
+          additionalProperties: true
+        hashed_keywords:
+          type: object
+          nullable: true
+          additionalProperties: true
+        record_hashes:
+          type: object
+          nullable: true
+          additionalProperties: true
+    ActiveTableRecordUpdateRequest:
+      type: object
+      required:
+        - record
+      properties:
+        record:
+          type: object
+          additionalProperties: true
+        hashed_keywords:
+          type: object
+          nullable: true
+          additionalProperties: true
+        record_hashes:
+          type: object
+          nullable: true
+          additionalProperties: true
+    ActiveTableRecordMutationResponse:
+      allOf:
+        - $ref: "#/components/schemas/StandardResponse"
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                id:
+                  type: string
+    CommentQueryRequest:
+      type: object
+      properties:
+        paging:
+          type: string
+          nullable: true
+        filtering:
+          type: object
+          additionalProperties: true
+        next_id:
+          type: string
+          nullable: true
+        direction:
+          type: string
+          enum:
+            - asc
+            - desc
+          nullable: true
+        limit:
+          type: integer
+          nullable: true
+      additionalProperties: true
+    WorkflowComment:
+      type: object
+      properties:
+        id:
+          type: string
+        parentId:
+          type: string
+          nullable: true
+        commentContent:
+          type: string
+          nullable: true
+        hashed_keywords:
+          type: object
+          nullable: true
+          additionalProperties: true
+        createdBy:
+          type: object
+          nullable: true
+          additionalProperties: true
+        createdAt:
+          type: string
+          format: date-time
+          nullable: true
+      additionalProperties: true
+    CommentListResponse:
+      allOf:
+        - $ref: "#/components/schemas/CursorCollectionResponse"
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: "#/components/schemas/WorkflowComment"
+    CommentDetailResponse:
+      allOf:
+        - $ref: "#/components/schemas/StandardResponse"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/WorkflowComment"
+    CommentPayload:
+      type: object
+      required:
+        - commentContent
+      properties:
+        commentContent:
+          type: string
+        parentId:
+          type: string
+          nullable: true
+        mentions:
+          type: array
+          nullable: true
+          items:
+            type: string
+        hashed_keywords:
+          type: object
+          nullable: true
+          additionalProperties: true
+    CommentMutationResponse:
+      allOf:
+        - $ref: "#/components/schemas/StandardResponse"
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                id:
+                  type: string
+    ActionTriggerRequest:
+      type: object
+      required:
+        - responseId
+        - workflowData
+      properties:
+        responseId:
+          type: string
+          description: UUID generated client-side to correlate async workflows
+        workflowData:
+          type: object
+          description: Full record payload forwarded to the workflow action
+          additionalProperties: true
+    WorkflowConnector:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        connectorType:
+          type: string
+        description:
+          type: string
+          nullable: true
+        config:
+          type: object
+          nullable: true
+          additionalProperties: true
+        documentation:
+          type: string
+          nullable: true
+      additionalProperties: true
+    ConnectorQueryRequest:
+      type: object
+      properties:
+        queries:
+          $ref: "#/components/schemas/QueryOptions"
+    WorkflowConnectorListResponse:
+      allOf:
+        - $ref: "#/components/schemas/CollectionResponse"
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: "#/components/schemas/WorkflowConnector"
+    WorkflowConnectorDetailResponse:
+      allOf:
+        - $ref: "#/components/schemas/StandardResponse"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/WorkflowConnector"
+    WorkflowConnectorMutationRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+        connectorType:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        config:
+          type: object
+          nullable: true
+          additionalProperties: true
+    WorkflowConnectorMutationResponse:
+      allOf:
+        - $ref: "#/components/schemas/StandardResponse"
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                id:
+                  type: string
+    WorkflowForm:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        formType:
+          type: string
+        description:
+          type: string
+          nullable: true
+        config:
+          type: object
+          nullable: true
+          additionalProperties: true
+      additionalProperties: true
+    FormQueryRequest:
+      type: object
+      properties:
+        queries:
+          $ref: "#/components/schemas/QueryOptions"
+    WorkflowFormListResponse:
+      allOf:
+        - $ref: "#/components/schemas/CollectionResponse"
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: "#/components/schemas/WorkflowForm"
+    WorkflowFormDetailResponse:
+      allOf:
+        - $ref: "#/components/schemas/StandardResponse"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/WorkflowForm"
+    WorkflowFormMutationRequest:
+      type: object
+      required:
+        - name
+        - config
+      properties:
+        name:
+          type: string
+        formType:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        config:
+          type: object
+          additionalProperties: true
+    WorkflowFormMutationResponse:
+      allOf:
+        - $ref: "#/components/schemas/StandardResponse"
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                id:
+                  type: string
+    WorkflowUnit:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        status:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+          nullable: true
+        updatedAt:
+          type: string
+          format: date-time
+          nullable: true
+      additionalProperties: true
+    WorkflowUnitQueryRequest:
+      type: object
+      properties:
+        queries:
+          $ref: "#/components/schemas/QueryOptions"
+    WorkflowUnitListResponse:
+      allOf:
+        - $ref: "#/components/schemas/CollectionResponse"
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: "#/components/schemas/WorkflowUnit"
+    WorkflowUnitDetailResponse:
+      allOf:
+        - $ref: "#/components/schemas/StandardResponse"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/WorkflowUnit"
+    WorkflowUnitMutationRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+    WorkflowUnitMutationResponse:
+      allOf:
+        - $ref: "#/components/schemas/StandardResponse"
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                id:
+                  type: string
+    WorkflowDeployRequest:
+      type: object
+      required:
+        - eventIds
+      properties:
+        eventIds:
+          type: array
+          items:
+            type: string
+          description: IDs of workflow events to include in the deploy/disable action
+    WorkflowEvent:
+      type: object
+      properties:
+        id:
+          type: string
+        workflowUnit:
+          type: string
+          nullable: true
+        eventName:
+          type: string
+        eventSourceType:
+          type: string
+        eventSourceParams:
+          type: object
+          additionalProperties: true
+        workflowDefinition:
+          type: object
+          nullable: true
+          additionalProperties: true
+        handlerConfig:
+          type: object
+          nullable: true
+          additionalProperties: true
+        status:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+          nullable: true
+        updatedAt:
+          type: string
+          format: date-time
+          nullable: true
+      additionalProperties: true
+    WorkflowEventQueryRequest:
+      type: object
+      properties:
+        filtering:
+          type: object
+          additionalProperties: true
+        queries:
+          $ref: "#/components/schemas/QueryOptions"
+    WorkflowEventListResponse:
+      allOf:
+        - $ref: "#/components/schemas/CollectionResponse"
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: "#/components/schemas/WorkflowEvent"
+    WorkflowEventDetailResponse:
+      allOf:
+        - $ref: "#/components/schemas/StandardResponse"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/WorkflowEvent"
+    WorkflowEventMutationRequest:
+      type: object
+      required:
+        - eventName
+      properties:
+        workflowUnit:
+          type: string
+          nullable: true
+        eventName:
+          type: string
+        eventSourceType:
+          type: string
+          nullable: true
+        eventSourceParams:
+          type: object
+          nullable: true
+          additionalProperties: true
+        workflowDefinition:
+          type: object
+          nullable: true
+          additionalProperties: true
+        handlerConfig:
+          type: object
+          nullable: true
+          additionalProperties: true
+        eventStatus:
+          type: string
+          nullable: true
+    WorkflowEventMutationResponse:
+      allOf:
+        - $ref: "#/components/schemas/StandardResponse"
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                id:
+                  type: string
+    ActiveWorkGroup:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        code:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+      additionalProperties: true
+    ActiveWorkGroupListResponse:
+      allOf:
+        - $ref: "#/components/schemas/CollectionResponse"
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: "#/components/schemas/ActiveWorkGroup"
