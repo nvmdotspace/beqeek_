@@ -233,19 +233,35 @@ class MockDataStore {
 
   // Token methods
   createToken(userId: string): string {
-    const token = `mock_token_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
     const expiresAt = Date.now() + 3600000; // 1 hour
+    const rand = Math.random().toString(36).substring(2, 11);
+    const token = `mock_token_u_${userId}_e_${expiresAt}_${rand}`;
     this.tokens.set(token, { userId, expiresAt });
     return token;
   }
 
   validateToken(token: string): string | null {
     const tokenData = this.tokens.get(token);
-    if (!tokenData || tokenData.expiresAt < Date.now()) {
-      this.tokens.delete(token);
+    if (tokenData) {
+      if (tokenData.expiresAt < Date.now()) {
+        this.tokens.delete(token);
+        return null;
+      }
+      return tokenData.userId;
+    }
+
+    // Fallback: decode stateless token format for resilience across reloads
+    const match = token.match(/^mock_token_u_(.+?)_e_(\d+)_/);
+    if (!match) {
       return null;
     }
-    return tokenData.userId;
+    const userIdFromToken = match[1] as string;
+    const expStr = match[2] as string;
+    const exp = Number(expStr);
+    if (!Number.isFinite(exp) || exp < Date.now()) {
+      return null;
+    }
+    return userIdFromToken;
   }
 
   // Generic CRUD helpers
