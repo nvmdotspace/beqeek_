@@ -22,7 +22,7 @@ function getUserIdFromAuth(request: Request): string | null {
 
 export const workspaceHandlers = [
   // POST /api/user/me/get/workspaces
-  http.post('/api/user/me/get/workspaces', async ({ request }) => {
+  http.post('*/api/user/me/get/workspaces', async ({ request }) => {
     const userId = getUserIdFromAuth(request);
 
     if (!userId) {
@@ -67,7 +67,7 @@ export const workspaceHandlers = [
   }),
 
   // POST /api/workspace/post/workspaces
-  http.post('/api/workspace/post/workspaces', async ({ request }) => {
+  http.post('*/api/workspace/post/workspaces', async ({ request }) => {
     const userId = getUserIdFromAuth(request);
 
     if (!userId) {
@@ -107,7 +107,7 @@ export const workspaceHandlers = [
   }),
 
   // POST /api/user/me/get/workspaces/{workspaceId}
-  http.post('/api/user/me/get/workspaces/:workspaceId', async ({ request, params }) => {
+  http.post('*/api/user/me/get/workspaces/:workspaceId', async ({ request, params }) => {
     const userId = getUserIdFromAuth(request);
 
     if (!userId) {

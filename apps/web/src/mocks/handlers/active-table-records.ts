@@ -74,7 +74,7 @@ function mockDecryptData(encryptedData: Record<string, unknown>): Record<string,
 
 export const activeTableRecordHandlers = [
   // POST /api/workspace/{workspaceId}/workflow/get/active_tables/{tableId}/records
-  http.post('/api/workspace/:workspaceId/workflow/active_tables/:tableId/records', async ({ request, params }) => {
+  http.post('*/api/workspace/:workspaceId/workflow/active_tables/:tableId/records', async ({ request, params }) => {
     const userId = getUserIdFromAuth(request);
 
     if (!userId) {
@@ -159,65 +159,68 @@ export const activeTableRecordHandlers = [
   }),
 
   // POST /api/workspace/{workspaceId}/workflow/post/active_tables/{tableId}/records
-  http.post('/api/workspace/:workspaceId/workflow/post/active_tables/:tableId/records', async ({ request, params }) => {
-    const userId = getUserIdFromAuth(request);
+  http.post(
+    '*/api/workspace/:workspaceId/workflow/post/active_tables/:tableId/records',
+    async ({ request, params }) => {
+      const userId = getUserIdFromAuth(request);
 
-    if (!userId) {
-      return HttpResponse.json({ message: 'Unauthorized' }, { status: 401 });
-    }
-
-    const { tableId } = params;
-    const table = mockStore.getActiveTable(tableId as string);
-
-    if (!table) {
-      return HttpResponse.json({ message: 'Active table not found' }, { status: 404 });
-    }
-
-    try {
-      const body = (await request.json()) as MutationRequest<Record<string, unknown>> & {
-        encryptionKey?: string;
-        hashedKeywordFields?: string[];
-      };
-
-      if (!body.data) {
-        return HttpResponse.json({ message: 'Record data is required' }, { status: 400 });
+      if (!userId) {
+        return HttpResponse.json({ message: 'Unauthorized' }, { status: 401 });
       }
 
-      let recordData = body.data;
-      let encryptedData: Record<string, unknown> = {};
-      let hashedKeywords: string[] = [];
+      const { tableId } = params;
+      const table = mockStore.getActiveTable(tableId as string);
 
-      // If table has encryption enabled and encryption key provided
-      if (table.encryptionEnabled && body.encryptionKey) {
-        const encrypted = mockEncryptData(body.data);
-        encryptedData = encrypted.encryptedData;
-        hashedKeywords = encrypted.hashedKeywords;
-        recordData = {}; // Clear plain data when encrypted
+      if (!table) {
+        return HttpResponse.json({ message: 'Active table not found' }, { status: 404 });
       }
 
-      const newRecord: ActiveTableRecord = {
-        id: mockStore.generateId(),
-        tableId: tableId as string,
-        data: recordData,
-        encryptedData: table.encryptionEnabled ? encryptedData : undefined,
-        hashedKeywords: table.encryptionEnabled ? hashedKeywords : undefined,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
+      try {
+        const body = (await request.json()) as MutationRequest<Record<string, unknown>> & {
+          encryptionKey?: string;
+          hashedKeywordFields?: string[];
+        };
 
-      return HttpResponse.json({
-        data: newRecord,
-        success: true,
-        message: 'Record created successfully',
-      });
-    } catch {
-      return HttpResponse.json({ message: 'Invalid request body' }, { status: 400 });
-    }
-  }),
+        if (!body.data) {
+          return HttpResponse.json({ message: 'Record data is required' }, { status: 400 });
+        }
+
+        let recordData = body.data;
+        let encryptedData: Record<string, unknown> = {};
+        let hashedKeywords: string[] = [];
+
+        // If table has encryption enabled and encryption key provided
+        if (table.encryptionEnabled && body.encryptionKey) {
+          const encrypted = mockEncryptData(body.data);
+          encryptedData = encrypted.encryptedData;
+          hashedKeywords = encrypted.hashedKeywords;
+          recordData = {}; // Clear plain data when encrypted
+        }
+
+        const newRecord: ActiveTableRecord = {
+          id: mockStore.generateId(),
+          tableId: tableId as string,
+          data: recordData,
+          encryptedData: table.encryptionEnabled ? encryptedData : undefined,
+          hashedKeywords: table.encryptionEnabled ? hashedKeywords : undefined,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+
+        return HttpResponse.json({
+          data: newRecord,
+          success: true,
+          message: 'Record created successfully',
+        });
+      } catch {
+        return HttpResponse.json({ message: 'Invalid request body' }, { status: 400 });
+      }
+    },
+  ),
 
   // POST /api/workspace/{workspaceId}/workflow/patch/active_tables/{tableId}/records/{recordId}
   http.post(
-    '/api/workspace/:workspaceId/workflow/patch/active_tables/:tableId/records/:recordId',
+    '*/api/workspace/:workspaceId/workflow/patch/active_tables/:tableId/records/:recordId',
     async ({ request, params }) => {
       const userId = getUserIdFromAuth(request);
 
@@ -261,7 +264,7 @@ export const activeTableRecordHandlers = [
 
   // POST /api/workspace/{workspaceId}/workflow/delete/active_tables/{tableId}/records/{recordId}
   http.post(
-    '/api/workspace/:workspaceId/workflow/delete/active_tables/:tableId/records/:recordId',
+    '*/api/workspace/:workspaceId/workflow/delete/active_tables/:tableId/records/:recordId',
     async ({ request, params }) => {
       const userId = getUserIdFromAuth(request);
 

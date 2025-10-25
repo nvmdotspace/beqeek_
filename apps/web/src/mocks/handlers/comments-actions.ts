@@ -126,7 +126,7 @@ const mockActions: Action[] = [
 
 export const commentsActionsHandlers = [
   // POST /api/workspace/{workspaceId}/workflow/get/records/{recordId}/comments
-  http.post('/api/workspace/:workspaceId/workflow/get/records/:recordId/comments', async ({ request, params }) => {
+  http.post('*/api/workspace/:workspaceId/workflow/get/records/:recordId/comments', async ({ request, params }) => {
     const userId = getUserIdFromAuth(request);
 
     if (!userId) {
@@ -206,7 +206,7 @@ export const commentsActionsHandlers = [
   }),
 
   // POST /api/workspace/{workspaceId}/workflow/post/records/{recordId}/comments
-  http.post('/api/workspace/:workspaceId/workflow/post/records/:recordId/comments', async ({ request, params }) => {
+  http.post('*/api/workspace/:workspaceId/workflow/post/records/:recordId/comments', async ({ request, params }) => {
     const userId = getUserIdFromAuth(request);
 
     if (!userId) {
@@ -255,7 +255,7 @@ export const commentsActionsHandlers = [
   }),
 
   // POST /api/workspace/{workspaceId}/workflow/patch/comments/{commentId}
-  http.post('/api/workspace/:workspaceId/workflow/patch/comments/:commentId', async ({ request, params }) => {
+  http.post('*/api/workspace/:workspaceId/workflow/patch/comments/:commentId', async ({ request, params }) => {
     const userId = getUserIdFromAuth(request);
 
     if (!userId) {
@@ -312,7 +312,7 @@ export const commentsActionsHandlers = [
   }),
 
   // POST /api/workspace/{workspaceId}/workflow/delete/comments/{commentId}
-  http.post('/api/workspace/:workspaceId/workflow/delete/comments/:commentId', async ({ request, params }) => {
+  http.post('*/api/workspace/:workspaceId/workflow/delete/comments/:commentId', async ({ request, params }) => {
     const userId = getUserIdFromAuth(request);
 
     if (!userId) {
@@ -355,7 +355,7 @@ export const commentsActionsHandlers = [
   }),
 
   // POST /api/workspace/{workspaceId}/workflow/post/comments/{commentId}/reactions
-  http.post('/api/workspace/:workspaceId/workflow/post/comments/:commentId/reactions', async ({ request, params }) => {
+  http.post('*/api/workspace/:workspaceId/workflow/post/comments/:commentId/reactions', async ({ request, params }) => {
     const userId = getUserIdFromAuth(request);
 
     if (!userId) {
@@ -418,7 +418,7 @@ export const commentsActionsHandlers = [
   }),
 
   // POST /api/workspace/{workspaceId}/workflow/get/records/{recordId}/actions
-  http.post('/api/workspace/:workspaceId/workflow/get/records/:recordId/actions', async ({ request, params }) => {
+  http.post('*/api/workspace/:workspaceId/workflow/get/records/:recordId/actions', async ({ request, params }) => {
     const userId = getUserIdFromAuth(request);
 
     if (!userId) {
@@ -468,7 +468,7 @@ export const commentsActionsHandlers = [
   }),
 
   // POST /api/workspace/{workspaceId}/workflow/post/records/{recordId}/actions
-  http.post('/api/workspace/:workspaceId/workflow/post/records/:recordId/actions', async ({ request, params }) => {
+  http.post('*/api/workspace/:workspaceId/workflow/post/records/:recordId/actions', async ({ request, params }) => {
     const userId = getUserIdFromAuth(request);
 
     if (!userId) {

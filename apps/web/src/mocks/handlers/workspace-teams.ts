@@ -15,7 +15,7 @@ function getUserIdFromAuth(request: Request): string | null {
 
 export const workspaceTeamHandlers = [
   // POST /api/workspace/{workspaceId}/workspace/get/teams
-  http.post('/api/workspace/:workspaceId/workspace/get/teams', async ({ request, params }) => {
+  http.post('*/api/workspace/:workspaceId/workspace/get/teams', async ({ request, params }) => {
     const userId = getUserIdFromAuth(request);
 
     if (!userId) {
@@ -51,7 +51,7 @@ export const workspaceTeamHandlers = [
   }),
 
   // POST /api/workspace/{workspaceId}/workspace/get/p/teams
-  http.post('/api/workspace/:workspaceId/workspace/get/p/teams', async ({ request, params }) => {
+  http.post('*/api/workspace/:workspaceId/workspace/get/p/teams', async ({ request, params }) => {
     const userId = getUserIdFromAuth(request);
 
     if (!userId) {
@@ -98,7 +98,7 @@ export const workspaceTeamHandlers = [
   }),
 
   // POST /api/workspace/{workspaceId}/workspace/get/teams/{teamId}
-  http.post('/api/workspace/:workspaceId/workspace/get/teams/:teamId', async ({ request, params }) => {
+  http.post('*/api/workspace/:workspaceId/workspace/get/teams/:teamId', async ({ request, params }) => {
     const userId = getUserIdFromAuth(request);
 
     if (!userId) {
@@ -124,7 +124,7 @@ export const workspaceTeamHandlers = [
   }),
 
   // POST /api/workspace/{workspaceId}/workspace/post/teams
-  http.post('/api/workspace/:workspaceId/workspace/post/teams', async ({ request }) => {
+  http.post('*/api/workspace/:workspaceId/workspace/post/teams', async ({ request }) => {
     const userId = getUserIdFromAuth(request);
 
     if (!userId) {
@@ -161,7 +161,7 @@ export const workspaceTeamHandlers = [
   }),
 
   // POST /api/workspace/{workspaceId}/workspace/patch/teams/{teamId}
-  http.post('/api/workspace/:workspaceId/workspace/patch/teams/:teamId', async ({ request, params }) => {
+  http.post('*/api/workspace/:workspaceId/workspace/patch/teams/:teamId', async ({ request, params }) => {
     const userId = getUserIdFromAuth(request);
 
     if (!userId) {
@@ -195,7 +195,7 @@ export const workspaceTeamHandlers = [
   }),
 
   // POST /api/workspace/{workspaceId}/workspace/delete/teams/{teamId}
-  http.post('/api/workspace/:workspaceId/workspace/delete/teams/:teamId', async ({ request, params }) => {
+  http.post('*/api/workspace/:workspaceId/workspace/delete/teams/:teamId', async ({ request, params }) => {
     const userId = getUserIdFromAuth(request);
 
     if (!userId) {

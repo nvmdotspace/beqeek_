@@ -173,7 +173,7 @@ const mockForms: WorkflowForm[] = [
 
 export const workflowFormHandlers = [
   // POST /api/workspace/{workspaceId}/workflow/get/forms
-  http.post('/api/workspace/:workspaceId/workflow/get/forms', async ({ request, params }) => {
+  http.post('*/api/workspace/:workspaceId/workflow/get/forms', async ({ request, params }) => {
     const userId = getUserIdFromAuth(request);
 
     if (!userId) {
@@ -241,7 +241,7 @@ export const workflowFormHandlers = [
   }),
 
   // POST /api/workspace/{workspaceId}/workflow/get/forms/{formId}
-  http.post('/api/workspace/:workspaceId/workflow/get/forms/:formId', async ({ request, params }) => {
+  http.post('*/api/workspace/:workspaceId/workflow/get/forms/:formId', async ({ request, params }) => {
     const userId = getUserIdFromAuth(request);
 
     if (!userId) {
@@ -262,7 +262,7 @@ export const workflowFormHandlers = [
   }),
 
   // POST /api/workspace/{workspaceId}/workflow/post/forms
-  http.post('/api/workspace/:workspaceId/workflow/post/forms', async ({ request, params }) => {
+  http.post('*/api/workspace/:workspaceId/workflow/post/forms', async ({ request, params }) => {
     const userId = getUserIdFromAuth(request);
 
     if (!userId) {
@@ -309,7 +309,7 @@ export const workflowFormHandlers = [
   }),
 
   // PATCH /api/workspace/:workspaceId/workflow/patch/forms/:formId
-  http.post('/api/workspace/:workspaceId/workflow/patch/forms/:formId', async ({ request, params }) => {
+  http.post('*/api/workspace/:workspaceId/workflow/patch/forms/:formId', async ({ request, params }) => {
     const userId = getUserIdFromAuth(request);
 
     if (!userId) {
@@ -360,7 +360,7 @@ export const workflowFormHandlers = [
   }),
 
   // DELETE /api/workspace/:workspaceId/workflow/delete/forms/:formId
-  http.post('/api/workspace/:workspaceId/workflow/delete/forms/:formId', async ({ request, params }) => {
+  http.post('*/api/workspace/:workspaceId/workflow/delete/forms/:formId', async ({ request, params }) => {
     const userId = getUserIdFromAuth(request);
 
     if (!userId) {
@@ -384,7 +384,7 @@ export const workflowFormHandlers = [
   }),
 
   // POST /api/workspace/{workspaceId}/workflow/post/forms/{formId}/submit
-  http.post('/api/workspace/:workspaceId/workflow/post/forms/:formId/submit', async ({ request, params }) => {
+  http.post('*/api/workspace/:workspaceId/workflow/post/forms/:formId/submit', async ({ request, params }) => {
     const { workspaceId, formId } = params;
 
     const form = mockForms.find((f) => f.id === formId && f.workspaceId === workspaceId);

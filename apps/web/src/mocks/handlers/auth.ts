@@ -4,7 +4,7 @@ import { LoginRequest, AuthTokens, RefreshTokenRequest } from '../types';
 
 export const authHandlers = [
   // POST /api/auth/post/authenticate
-  http.post('/api/auth/post/authenticate', async ({ request }) => {
+  http.post('*/api/auth/post/authenticate', async ({ request }) => {
     try {
       const body = (await request.json()) as LoginRequest;
       const { username, password } = body;
@@ -38,7 +38,7 @@ export const authHandlers = [
   }),
 
   // POST /api/auth/post/refresh_token
-  http.post('/api/auth/post/refresh_token', async ({ request }) => {
+  http.post('*/api/auth/post/refresh_token', async ({ request }) => {
     try {
       const body = (await request.json()) as RefreshTokenRequest;
       const { refreshToken } = body;

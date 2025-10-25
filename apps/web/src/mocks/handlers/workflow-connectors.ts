@@ -77,7 +77,7 @@ const mockConnectors: WorkflowConnector[] = [
 
 export const workflowConnectorHandlers = [
   // POST /api/workspace/{workspaceId}/workflow/get/connectors
-  http.post('/api/workspace/:workspaceId/workflow/get/connectors', async ({ request, params }) => {
+  http.post('*/api/workspace/:workspaceId/workflow/get/connectors', async ({ request, params }) => {
     const userId = getUserIdFromAuth(request);
 
     if (!userId) {
@@ -151,7 +151,7 @@ export const workflowConnectorHandlers = [
   }),
 
   // POST /api/workspace/{workspaceId}/workflow/get/connectors/{connectorId}
-  http.post('/api/workspace/:workspaceId/workflow/get/connectors/:connectorId', async ({ request, params }) => {
+  http.post('*/api/workspace/:workspaceId/workflow/get/connectors/:connectorId', async ({ request, params }) => {
     const userId = getUserIdFromAuth(request);
 
     if (!userId) {
@@ -172,7 +172,7 @@ export const workflowConnectorHandlers = [
   }),
 
   // POST /api/workspace/{workspaceId}/workflow/post/connectors
-  http.post('/api/workspace/:workspaceId/workflow/post/connectors', async ({ request, params }) => {
+  http.post('*/api/workspace/:workspaceId/workflow/post/connectors', async ({ request, params }) => {
     const userId = getUserIdFromAuth(request);
 
     if (!userId) {
@@ -219,7 +219,7 @@ export const workflowConnectorHandlers = [
   }),
 
   // PATCH /api/workspace/:workspaceId/workflow/patch/connectors/:connectorId
-  http.post('/api/workspace/:workspaceId/workflow/patch/connectors/:connectorId', async ({ request, params }) => {
+  http.post('*/api/workspace/:workspaceId/workflow/patch/connectors/:connectorId', async ({ request, params }) => {
     const userId = getUserIdFromAuth(request);
 
     if (!userId) {
@@ -271,7 +271,7 @@ export const workflowConnectorHandlers = [
   }),
 
   // DELETE /api/workspace/:workspaceId/workflow/delete/connectors/:connectorId
-  http.post('/api/workspace/:workspaceId/workflow/delete/connectors/:connectorId', async ({ request, params }) => {
+  http.post('*/api/workspace/:workspaceId/workflow/delete/connectors/:connectorId', async ({ request, params }) => {
     const userId = getUserIdFromAuth(request);
 
     if (!userId) {
@@ -295,7 +295,7 @@ export const workflowConnectorHandlers = [
   }),
 
   // POST /api/workspace/{workspaceId}/workflow/post/connectors/{connectorId}/test
-  http.post('/api/workspace/:workspaceId/workflow/post/connectors/:connectorId/test', async ({ request, params }) => {
+  http.post('*/api/workspace/:workspaceId/workflow/post/connectors/:connectorId/test', async ({ request, params }) => {
     const userId = getUserIdFromAuth(request);
 
     if (!userId) {

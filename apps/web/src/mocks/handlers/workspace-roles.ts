@@ -15,7 +15,7 @@ function getUserIdFromAuth(request: Request): string | null {
 
 export const workspaceRoleHandlers = [
   // POST /api/workspace/{workspaceId}/workspace/get/team_roles
-  http.post('/api/workspace/:workspaceId/workspace/get/team_roles', async ({ request }) => {
+  http.post('*/api/workspace/:workspaceId/workspace/get/team_roles', async ({ request }) => {
     const userId = getUserIdFromAuth(request);
 
     if (!userId) {
@@ -46,7 +46,7 @@ export const workspaceRoleHandlers = [
   }),
 
   // POST /api/workspace/{workspaceId}/workspace/get/p/team_roles
-  http.post('/api/workspace/:workspaceId/workspace/get/p/team_roles', async ({ request }) => {
+  http.post('*/api/workspace/:workspaceId/workspace/get/p/team_roles', async ({ request }) => {
     const userId = getUserIdFromAuth(request);
 
     if (!userId) {
@@ -88,7 +88,7 @@ export const workspaceRoleHandlers = [
   }),
 
   // POST /api/workspace/{workspaceId}/workspace/post/team_roles
-  http.post('/api/workspace/:workspaceId/workspace/post/team_roles', async ({ request }) => {
+  http.post('*/api/workspace/:workspaceId/workspace/post/team_roles', async ({ request }) => {
     const userId = getUserIdFromAuth(request);
 
     if (!userId) {
@@ -133,7 +133,7 @@ export const workspaceRoleHandlers = [
   }),
 
   // POST /api/workspace/{workspaceId}/workspace/patch/team_roles/{roleId}
-  http.post('/api/workspace/:workspaceId/workspace/patch/team_roles/:roleId', async ({ request, params }) => {
+  http.post('*/api/workspace/:workspaceId/workspace/patch/team_roles/:roleId', async ({ request, params }) => {
     const userId = getUserIdFromAuth(request);
 
     if (!userId) {
@@ -169,7 +169,7 @@ export const workspaceRoleHandlers = [
   }),
 
   // POST /api/workspace/{workspaceId}/workspace/delete/team_roles/{roleId}
-  http.post('/api/workspace/:workspaceId/workspace/delete/team_roles/:roleId', async ({ request, params }) => {
+  http.post('*/api/workspace/:workspaceId/workspace/delete/team_roles/:roleId', async ({ request, params }) => {
     const userId = getUserIdFromAuth(request);
 
     if (!userId) {

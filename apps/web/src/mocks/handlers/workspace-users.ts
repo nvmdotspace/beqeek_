@@ -15,7 +15,7 @@ function getUserIdFromAuth(request: Request): string | null {
 
 export const workspaceUserHandlers = [
   // POST /api/workspace/{workspaceId}/workspace/get/users
-  http.post('/api/workspace/:workspaceId/workspace/get/users', async ({ request }) => {
+  http.post('*/api/workspace/:workspaceId/workspace/get/users', async ({ request }) => {
     const userId = getUserIdFromAuth(request);
 
     if (!userId) {
@@ -81,7 +81,7 @@ export const workspaceUserHandlers = [
   }),
 
   // POST /api/workspace/{workspaceId}/workspace/post/users
-  http.post('/api/workspace/:workspaceId/workspace/post/users', async ({ request }) => {
+  http.post('*/api/workspace/:workspaceId/workspace/post/users', async ({ request }) => {
     const userId = getUserIdFromAuth(request);
 
     if (!userId) {
@@ -159,7 +159,7 @@ export const workspaceUserHandlers = [
   }),
 
   // POST /api/workspace/{workspaceId}/workspace/post/invitations/bulk
-  http.post('/api/workspace/:workspaceId/workspace/post/invitations/bulk', async ({ request }) => {
+  http.post('*/api/workspace/:workspaceId/workspace/post/invitations/bulk', async ({ request }) => {
     const userId = getUserIdFromAuth(request);
 
     if (!userId) {
@@ -201,7 +201,7 @@ export const workspaceUserHandlers = [
   }),
 
   // POST /api/user/get/users/via-username/{username}
-  http.post('/api/user/get/users/via-username/:username', async ({ request, params }) => {
+  http.post('*/api/user/get/users/via-username/:username', async ({ request, params }) => {
     const userId = getUserIdFromAuth(request);
 
     if (!userId) {

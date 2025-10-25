@@ -15,7 +15,7 @@ function getUserIdFromAuth(request: Request): string | null {
 
 export const activeTableHandlers = [
   // POST /api/workspace/{workspaceId}/workflow/get/active_tables
-  http.post('/api/workspace/:workspaceId/workflow/get/active_tables', async ({ request, params }) => {
+  http.post('*/api/workspace/:workspaceId/workflow/get/active_tables', async ({ request, params }) => {
     const userId = getUserIdFromAuth(request);
 
     if (!userId) {
@@ -63,7 +63,7 @@ export const activeTableHandlers = [
   }),
 
   // POST /api/workspace/{workspaceId}/workflow/get/active_tables/{tableId}
-  http.post('/api/workspace/:workspaceId/workflow/get/active_tables/:tableId', async ({ request, params }) => {
+  http.post('*/api/workspace/:workspaceId/workflow/get/active_tables/:tableId', async ({ request, params }) => {
     const userId = getUserIdFromAuth(request);
 
     if (!userId) {
@@ -98,7 +98,7 @@ export const activeTableHandlers = [
   }),
 
   // POST /api/workspace/{workspaceId}/workflow/post/active_tables
-  http.post('/api/workspace/:workspaceId/workflow/post/active_tables', async ({ request }) => {
+  http.post('*/api/workspace/:workspaceId/workflow/post/active_tables', async ({ request }) => {
     const userId = getUserIdFromAuth(request);
 
     if (!userId) {
@@ -146,7 +146,7 @@ export const activeTableHandlers = [
   }),
 
   // POST /api/workspace/{workspaceId}/workflow/patch/active_tables/{tableId}
-  http.post('/api/workspace/:workspaceId/workflow/patch/active_tables/:tableId', async ({ request, params }) => {
+  http.post('*/api/workspace/:workspaceId/workflow/patch/active_tables/:tableId', async ({ request, params }) => {
     const userId = getUserIdFromAuth(request);
 
     if (!userId) {
@@ -183,7 +183,7 @@ export const activeTableHandlers = [
   }),
 
   // POST /api/workspace/{workspaceId}/workflow/delete/active_tables/{tableId}
-  http.post('/api/workspace/:workspaceId/workflow/delete/active_tables/:tableId', async ({ request, params }) => {
+  http.post('*/api/workspace/:workspaceId/workflow/delete/active_tables/:tableId', async ({ request, params }) => {
     const userId = getUserIdFromAuth(request);
 
     if (!userId) {

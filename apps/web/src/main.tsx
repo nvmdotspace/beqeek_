@@ -10,14 +10,18 @@ const enableMocking = async () => {
   const mode = import.meta.env.VITE_API_MODE ?? 'mock';
   console.log('API Mode:', mode, 'DEV:', import.meta.env.DEV);
 
-  if (import.meta.env.DEV && mode === 'mock') {
+  if (mode === 'mock') {
     const { worker } = await import('./mocks/browser');
     console.log('Starting MSW worker...');
 
-    await worker.start({
-      onUnhandledRequest: 'warn',
-    });
-    console.log('MSW worker started successfully!');
+    try {
+      await worker.start({
+        onUnhandledRequest: 'warn',
+      });
+      console.log('MSW worker started successfully!');
+    } catch (error) {
+      console.error('Failed to start MSW worker:', error);
+    }
   }
 };
 

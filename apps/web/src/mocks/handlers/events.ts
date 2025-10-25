@@ -179,7 +179,7 @@ const mockEvents: WorkflowEvent[] = [
 
 export const eventHandlers = [
   // POST /api/workspace/{workspaceId}/workflow/get/events
-  http.post('/api/workspace/:workspaceId/workflow/get/events', async ({ request, params }) => {
+  http.post('*/api/workspace/:workspaceId/workflow/get/events', async ({ request, params }) => {
     const userId = getUserIdFromAuth(request);
 
     if (!userId) {
@@ -251,7 +251,7 @@ export const eventHandlers = [
   }),
 
   // POST /api/workspace/{workspaceId}/workflow/get/events/{eventId}
-  http.post('/api/workspace/:workspaceId/workflow/get/events/:eventId', async ({ request, params }) => {
+  http.post('*/api/workspace/:workspaceId/workflow/get/events/:eventId', async ({ request, params }) => {
     const userId = getUserIdFromAuth(request);
 
     if (!userId) {
@@ -272,7 +272,7 @@ export const eventHandlers = [
   }),
 
   // POST /api/workspace/{workspaceId}/workflow/post/events
-  http.post('/api/workspace/:workspaceId/workflow/post/events', async ({ request, params }) => {
+  http.post('*/api/workspace/:workspaceId/workflow/post/events', async ({ request, params }) => {
     const userId = getUserIdFromAuth(request);
 
     if (!userId) {
@@ -328,7 +328,7 @@ export const eventHandlers = [
   }),
 
   // POST /api/workspace/{workspaceId}/workflow/patch/events/{eventId}
-  http.post('/api/workspace/:workspaceId/workflow/patch/events/:eventId', async ({ request, params }) => {
+  http.post('*/api/workspace/:workspaceId/workflow/patch/events/:eventId', async ({ request, params }) => {
     const userId = getUserIdFromAuth(request);
 
     if (!userId) {
@@ -386,7 +386,7 @@ export const eventHandlers = [
   }),
 
   // POST /api/workspace/{workspaceId}/workflow/delete/events/{eventId}
-  http.post('/api/workspace/:workspaceId/workflow/delete/events/:eventId', async ({ request, params }) => {
+  http.post('*/api/workspace/:workspaceId/workflow/delete/events/:eventId', async ({ request, params }) => {
     const userId = getUserIdFromAuth(request);
 
     if (!userId) {
@@ -410,7 +410,7 @@ export const eventHandlers = [
   }),
 
   // POST /api/workspace/{workspaceId}/workflow/post/events/{eventId}/trigger
-  http.post('/api/workspace/:workspaceId/workflow/post/events/:eventId/trigger', async ({ request, params }) => {
+  http.post('*/api/workspace/:workspaceId/workflow/post/events/:eventId/trigger', async ({ request, params }) => {
     const userId = getUserIdFromAuth(request);
 
     if (!userId) {
@@ -481,7 +481,7 @@ export const eventHandlers = [
   }),
 
   // POST /api/workspace/{workspaceId}/workflow/get/events/{eventId}/executions
-  http.post('/api/workspace/:workspaceId/workflow/get/events/:eventId/executions', async ({ request, params }) => {
+  http.post('*/api/workspace/:workspaceId/workflow/get/events/:eventId/executions', async ({ request, params }) => {
     const userId = getUserIdFromAuth(request);
 
     if (!userId) {
