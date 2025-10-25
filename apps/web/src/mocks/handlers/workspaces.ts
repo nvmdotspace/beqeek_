@@ -1,6 +1,6 @@
 import { http, HttpResponse } from 'msw';
 import { mockStore } from '../data/store';
-import { QueryRequest } from '../types';
+import { QueryRequest, WorkspaceMutationRequest } from '../types';
 
 // Helper to extract user ID from Authorization header
 function getUserIdFromAuth(request: Request): string | null {
@@ -56,6 +56,46 @@ export const workspaceHandlers = [
           total: workspaces.length,
         },
       });
+    }
+  }),
+
+  // POST /api/workspace/post/workspaces
+  http.post('/api/workspace/post/workspaces', async ({ request }) => {
+    const userId = getUserIdFromAuth(request);
+
+    if (!userId) {
+      return HttpResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
+
+    try {
+      const body = (await request.json()) as WorkspaceMutationRequest;
+
+      if (!body?.data?.workspaceName || !body?.data?.namespace) {
+        return HttpResponse.json(
+          {
+            message: 'workspaceName and namespace are required',
+            errors: {
+              workspaceName: ['workspaceName is required'],
+              namespace: ['namespace is required'],
+            },
+          },
+          { status: 400 },
+        );
+      }
+
+      const newWorkspace = mockStore.createWorkspace(userId, {
+        workspaceName: body.data.workspaceName,
+        namespace: body.data.namespace,
+        description: body.data.description,
+        logo: body.data.logo,
+      });
+
+      return HttpResponse.json({
+        success: true,
+        data: newWorkspace,
+      });
+    } catch (error) {
+      return HttpResponse.json({ message: 'Invalid request body', details: String(error) }, { status: 400 });
     }
   }),
 

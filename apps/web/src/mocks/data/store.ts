@@ -53,6 +53,7 @@ class MockDataStore {
       id: '1001',
       namespace: 'beqeek-main',
       workspaceName: 'BEQEEK Main Workspace',
+      description: 'Workspace chính quản lý toàn bộ cấu hình demo',
       myWorkspaceUser: user1,
       ownedByUser: true,
       ownedBy: '1',
@@ -147,6 +148,30 @@ class MockDataStore {
 
   getUserWorkspaces(userId: string): Workspace[] {
     return Array.from(this.workspaces.values()).filter((workspace) => workspace.ownedBy === userId);
+  }
+
+  createWorkspace(userId: string, data: { workspaceName: string; namespace: string; description?: string; logo?: string }): Workspace {
+    const id = (Date.now() + Math.random()).toString(36);
+    const now = new Date().toISOString();
+    const owner = this.getUser(userId);
+
+    const workspace: Workspace = {
+      id,
+      namespace: data.namespace,
+      workspaceName: data.workspaceName,
+      description: data.description,
+      myWorkspaceUser: owner,
+      ownedByUser: true,
+      ownedBy: userId,
+      logo: data.logo,
+      thumbnailLogo: data.logo,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    this.workspaces.set(id, workspace);
+
+    return workspace;
   }
 
   // Team methods
