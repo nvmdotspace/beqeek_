@@ -142,7 +142,12 @@ interface SidebarItemProps {
   isCollapsed?: boolean;
 }
 
-const SidebarItem = ({ item, level = 0, isCollapsed = false }: SidebarItemProps) => {
+const SidebarItem = ({
+  item,
+  level = 0,
+  isCollapsed = false,
+  onItemClick,
+}: SidebarItemProps & { onItemClick?: () => void }) => {
   const location = useLocation();
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -187,6 +192,7 @@ const SidebarItem = ({ item, level = 0, isCollapsed = false }: SidebarItemProps)
   return (
     <Link
       to={item.href!}
+      onClick={onItemClick}
       className={cn(
         'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
         isActive ? 'bg-primary text-primary-foreground' : 'hover:bg-accent hover:text-accent-foreground',
@@ -207,11 +213,13 @@ const SidebarItem = ({ item, level = 0, isCollapsed = false }: SidebarItemProps)
 interface AppSidebarProps {
   isCollapsed?: boolean;
   onToggle?: () => void;
+  isMobile?: boolean;
+  onCloseMobile?: () => void;
 }
 
-export const AppSidebar = ({ isCollapsed = false, onToggle }: AppSidebarProps) => {
+export const AppSidebar = ({ isCollapsed = false, onToggle, isMobile = false, onCloseMobile }: AppSidebarProps) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const { data: workspaces } = useWorkspaces();
+  const { data: workspaces, isLoading: workspacesLoading } = useWorkspaces();
   const userId = useAuthStore((state) => state.userId);
 
   const currentWorkspace = workspaces?.data?.[0];
@@ -222,8 +230,20 @@ export const AppSidebar = ({ isCollapsed = false, onToggle }: AppSidebarProps) =
       item.children?.some((child) => child.label.toLowerCase().includes(searchQuery.toLowerCase())),
   );
 
+  const handleItemClick = () => {
+    if (isMobile && onCloseMobile) {
+      onCloseMobile();
+    }
+  };
+
   return (
-    <div className={cn('flex h-full flex-col border-r bg-background', isCollapsed ? 'w-16' : 'w-64')}>
+    <div
+      className={cn(
+        'flex h-full flex-col border-r bg-background',
+        isMobile ? 'w-64 fixed inset-y-0 left-0 z-50' : '',
+        isCollapsed && !isMobile ? 'w-16' : 'w-64',
+      )}
+    >
       {/* Header */}
       <div className="flex h-16 items-center justify-between border-b px-4">
         {!isCollapsed && (
@@ -235,9 +255,18 @@ export const AppSidebar = ({ isCollapsed = false, onToggle }: AppSidebarProps) =
           </div>
         )}
 
-        <Button variant="ghost" size="icon" onClick={onToggle} className="h-8 w-8">
-          {isCollapsed ? <Menu className="h-4 w-4" /> : <X className="h-4 w-4" />}
-        </Button>
+        <div className="flex items-center gap-2">
+          {isMobile && (
+            <Button variant="ghost" size="icon" onClick={onCloseMobile} className="h-8 w-8 lg:hidden">
+              <X className="h-4 w-4" />
+            </Button>
+          )}
+          {!isMobile && (
+            <Button variant="ghost" size="icon" onClick={onToggle} className="h-8 w-8">
+              {isCollapsed ? <Menu className="h-4 w-4" /> : <X className="h-4 w-4" />}
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Workspace Switcher */}
@@ -248,9 +277,15 @@ export const AppSidebar = ({ isCollapsed = false, onToggle }: AppSidebarProps) =
               <Button variant="outline" className="w-full justify-between">
                 <div className="flex items-center gap-2">
                   <div className="flex h-6 w-6 items-center justify-center rounded bg-muted text-xs">
-                    {currentWorkspace?.workspaceName?.[0]?.toUpperCase() || 'W'}
+                    {workspacesLoading ? (
+                      <div className="animate-spin h-3 w-3 border border-current border-t-transparent rounded-full" />
+                    ) : (
+                      currentWorkspace?.workspaceName?.[0]?.toUpperCase() || 'W'
+                    )}
                   </div>
-                  <span className="truncate">{currentWorkspace?.workspaceName || 'Select Workspace'}</span>
+                  <span className="truncate">
+                    {workspacesLoading ? 'Loading...' : currentWorkspace?.workspaceName || 'Select Workspace'}
+                  </span>
                 </div>
                 <ChevronDown className="h-4 w-4" />
               </Button>
@@ -292,7 +327,7 @@ export const AppSidebar = ({ isCollapsed = false, onToggle }: AppSidebarProps) =
       {/* Navigation */}
       <nav className="flex-1 space-y-2 p-4">
         {filteredNavItems.map((item) => (
-          <SidebarItem key={item.id} item={item} isCollapsed={isCollapsed} />
+          <SidebarItem key={item.id} item={item} isCollapsed={isCollapsed} onItemClick={handleItemClick} />
         ))}
       </nav>
 

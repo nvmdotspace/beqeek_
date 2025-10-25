@@ -1,3 +1,4 @@
+import { ReactNode } from 'react';
 import { Outlet } from '@tanstack/react-router';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { TanStackRouterDevtools } from '@tanstack/router-devtools';
@@ -5,12 +6,15 @@ import { TanStackRouterDevtools } from '@tanstack/router-devtools';
 import { AppProviders } from '@/providers/app-providers';
 import { AppLayout } from '@/components/app-layout';
 
-export const RootLayout = () => {
+interface RootLayoutProps {
+  children?: ReactNode;
+  showSidebar?: boolean;
+}
+
+export const RootLayout = ({ children, showSidebar = true }: RootLayoutProps) => {
   return (
     <AppProviders>
-      <AppLayout>
-        <Outlet />
-      </AppLayout>
+      <AppLayout showSidebar={showSidebar}>{children || <Outlet />}</AppLayout>
       {import.meta.env.DEV ? (
         <>
           <ReactQueryDevtools buttonPosition="bottom-right" />

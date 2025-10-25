@@ -42,9 +42,9 @@ export const LoginPage = () => {
   };
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800">
+    <div className="relative min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 overflow-hidden">
       {/* Background Pattern */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.15),_transparent_55%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.15),_transparent_55%)]" />
       <div className="absolute inset-0 opacity-10">
         <div
           className="absolute inset-0"
@@ -54,7 +54,7 @@ export const LoginPage = () => {
         />
       </div>
 
-      <div className="relative z-10 flex min-h-screen">
+      <div className="relative z-10 flex min-h-screen w-full max-w-screen-xl mx-auto">
         {/* Left Side - Brand & Features */}
         <div className="hidden lg:flex lg:flex-1 flex-col justify-center px-12 xl:px-16">
           <div className="max-w-lg space-y-8">
@@ -65,7 +65,7 @@ export const LoginPage = () => {
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-white">BEQEEK</h1>
-                <p className="text-sm text-blue-300">Low-Code Platform</p>
+                <p className="text-sm text-blue-400">Low-Code Platform</p>
               </div>
             </div>
 
@@ -73,11 +73,11 @@ export const LoginPage = () => {
             <div className="space-y-4">
               <h2 className="text-4xl font-semibold leading-tight text-white">
                 Chào mừng trở lại
-                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300">
+                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">
                   Nền tảng số hóa quy trình
                 </span>
               </h2>
-              <p className="text-lg text-white/70 leading-relaxed">
+              <p className="text-lg text-slate-300 leading-relaxed">
                 Quản trị workspace, tự động hóa workflow và vận hành dữ liệu Active Table với bảo mật E2EE.
               </p>
             </div>
@@ -96,7 +96,7 @@ export const LoginPage = () => {
                 </div>
                 <div>
                   <h3 className="font-medium text-white">Active Tables</h3>
-                  <p className="text-sm text-white/60">Quản lý dữ liệu cấu trúc với schema linh hoạt</p>
+                  <p className="text-sm text-slate-400">Quản lý dữ liệu cấu trúc với schema linh hoạt</p>
                 </div>
               </div>
 
@@ -112,7 +112,7 @@ export const LoginPage = () => {
                 </div>
                 <div>
                   <h3 className="font-medium text-white">Workflow Automation</h3>
-                  <p className="text-sm text-white/60">Tự động hóa quy trình làm việc hiệu quả</p>
+                  <p className="text-sm text-slate-400">Tự động hóa quy trình làm việc hiệu quả</p>
                 </div>
               </div>
 
@@ -128,29 +128,29 @@ export const LoginPage = () => {
                 </div>
                 <div>
                   <h3 className="font-medium text-white">End-to-End Encryption</h3>
-                  <p className="text-sm text-white/60">Bảo mật dữ liệu với mã hóa đầu cuối</p>
+                  <p className="text-sm text-slate-400">Bảo mật dữ liệu với mã hóa đầu cuối</p>
                 </div>
               </div>
             </div>
 
             {/* Demo Account Info */}
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
+            <div className="rounded-2xl border border-slate-700 bg-slate-800/50 p-6 backdrop-blur-sm">
               <div className="flex items-center gap-2 mb-3">
                 <div className="h-2 w-2 rounded-full bg-green-400 animate-pulse"></div>
                 <span className="text-sm font-semibold uppercase tracking-wide text-green-400">Demo Environment</span>
               </div>
-              <p className="text-sm text-white/70 leading-relaxed">
+              <p className="text-sm text-slate-300 leading-relaxed">
                 Sử dụng tài khoản demo:{' '}
-                <span className="font-mono bg-white/10 px-2 py-1 rounded text-white">captainbolt / nvmteam</span>
+                <span className="font-mono bg-slate-700 px-2 py-1 rounded text-slate-200">captainbolt / nvmteam</span>
               </p>
-              <p className="text-xs text-white/50 mt-2">Hoặc tạo workspace mới sau khi đăng nhập</p>
+              <p className="text-xs text-slate-400 mt-2">Hoặc tạo workspace mới sau khi đăng nhập</p>
             </div>
           </div>
         </div>
 
         {/* Right Side - Login Form */}
-        <div className="flex-1 lg:max-w-md flex items-center justify-center px-6 py-12">
-          <div className="w-full max-w-sm space-y-8">
+        <div className="flex-1 lg:max-w-md xl:max-w-lg flex items-center justify-center px-6 py-12">
+          <div className="w-full max-w-sm lg:max-w-md space-y-8">
             {/* Mobile Logo */}
             <div className="lg:hidden flex items-center justify-center gap-3 mb-8">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-cyan-400 text-white">
@@ -158,21 +158,21 @@ export const LoginPage = () => {
               </div>
               <div>
                 <h1 className="text-xl font-bold text-white">BEQEEK</h1>
-                <p className="text-xs text-blue-300">Low-Code Platform</p>
+                <p className="text-xs text-blue-400">Low-Code Platform</p>
               </div>
             </div>
 
             {/* Login Card */}
-            <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-8">
+            <div className="rounded-2xl border border-slate-700 bg-slate-800/50 backdrop-blur-sm p-8">
               <div className="space-y-6">
                 <div className="text-center">
                   <h2 className="text-2xl font-semibold text-white">Đăng nhập</h2>
-                  <p className="text-sm text-white/60 mt-2">Truy cập tài khoản BEQEEK của bạn</p>
+                  <p className="text-sm text-slate-400 mt-2">Truy cập tài khoản BEQEEK của bạn</p>
                 </div>
 
                 <form className="space-y-5" onSubmit={handleSubmit}>
                   <div className="space-y-2">
-                    <label htmlFor="username" className="text-sm font-medium text-white/80">
+                    <label htmlFor="username" className="text-sm font-medium text-slate-200">
                       Tên đăng nhập
                     </label>
                     <Input
@@ -184,13 +184,13 @@ export const LoginPage = () => {
                       onChange={(event) => setUsername(event.target.value)}
                       disabled={isPending}
                       required
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/40 focus:border-blue-400 focus:ring-blue-400"
+                      className="bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400 focus:border-blue-400 focus:ring-blue-400"
                     />
                   </div>
 
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <label htmlFor="password" className="text-sm font-medium text-white/80">
+                      <label htmlFor="password" className="text-sm font-medium text-slate-200">
                         Mật khẩu
                       </label>
                       <button
@@ -211,7 +211,7 @@ export const LoginPage = () => {
                       onChange={(event) => setPassword(event.target.value)}
                       disabled={isPending}
                       required
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/40 focus:border-blue-400 focus:ring-blue-400"
+                      className="bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400 focus:border-blue-400 focus:ring-blue-400"
                     />
                   </div>
 
@@ -231,7 +231,7 @@ export const LoginPage = () => {
                 </form>
 
                 <div className="text-center">
-                  <p className="text-xs text-white/50">Cần tài khoản mới? Liên hệ admin workspace</p>
+                  <p className="text-xs text-slate-400">Cần tài khoản mới? Liên hệ admin workspace</p>
                 </div>
               </div>
             </div>
