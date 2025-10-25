@@ -37,7 +37,7 @@ Keep this managed block so 'openspec update' can refresh the instructions.
 - Prettier (root `format` script) enforces two-space indentation and double-quoted JSX props; run `pnpm format` for bulk updates.
 - Follow React conventions: components in PascalCase (`Button.tsx`), hooks in camelCase starting with `use`, and directories in lowercase-hyphen (`form-fields`).
 - Re-export UI primitives from `packages/ui/src/index.ts` so consumers keep a single import surface.
-- Use TanStack libraries for routing/data/forms; avoid reintroducing Next.js or React Router.
+- Use TanStack libraries for routing/data/forms;
 
 ## Global State Rules
 - Zustand is the approved global state solution. Create stores under `apps/web/src/stores`, export typed hooks (e.g. `useAppStore`), and keep server state in React Query—not in Zustand.
