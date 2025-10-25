@@ -1,0 +1,9 @@
+{
+  "$schema": "https://inlang.com/schema/project-settings",
+  "baseLocale": "vi",
+  "locales": ["vi", "en"],
+  "modules": ["https://cdn.jsdelivr.net/npm/@inlang/paraglide-js@2/dist/index.js"],
+  "plugin.inlang.paraglideJs": {
+    "path": "./src/paraglide"
+  }
+}

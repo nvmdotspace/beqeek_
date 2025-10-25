@@ -7,10 +7,14 @@ import { Input } from '@workspace/ui/components/input';
 
 import { useLogin } from '../hooks/use-login';
 import { useAuthStore } from '../stores/auth-store';
+import { useLanguageStore } from '@/stores/language-store';
+import { useTranslation } from '@/hooks/use-translation';
 
 export const LoginPage = () => {
   const router = useRouter();
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const { locale } = useLanguageStore();
+  const { t } = useTranslation();
   const [username, setUsername] = useState('captainbolt');
   const [password, setPassword] = useState('nvmteam');
 
@@ -72,14 +76,12 @@ export const LoginPage = () => {
             {/* Main Heading */}
             <div className="space-y-4">
               <h2 className="text-4xl font-semibold leading-tight text-white">
-                Chào mừng trở lại
+                {t('auth.welcomeBack')}
                 <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">
-                  Nền tảng số hóa quy trình
+                  {t('auth.digitalProcessPlatform')}
                 </span>
               </h2>
-              <p className="text-lg text-slate-300 leading-relaxed">
-                Quản trị workspace, tự động hóa workflow và vận hành dữ liệu Active Table với bảo mật E2EE.
-              </p>
+              <p className="text-lg text-slate-300 leading-relaxed">{t('auth.manageWorkspaces')}</p>
             </div>
 
             {/* Features */}
@@ -96,7 +98,11 @@ export const LoginPage = () => {
                 </div>
                 <div>
                   <h3 className="font-medium text-white">Active Tables</h3>
-                  <p className="text-sm text-slate-400">Quản lý dữ liệu cấu trúc với schema linh hoạt</p>
+                  <p className="text-sm text-slate-400">
+                    {locale === 'vi'
+                      ? 'Quản lý dữ liệu cấu trúc với schema linh hoạt'
+                      : 'Manage structured data with flexible schema'}
+                  </p>
                 </div>
               </div>
 
@@ -112,7 +118,11 @@ export const LoginPage = () => {
                 </div>
                 <div>
                   <h3 className="font-medium text-white">Workflow Automation</h3>
-                  <p className="text-sm text-slate-400">Tự động hóa quy trình làm việc hiệu quả</p>
+                  <p className="text-sm text-slate-400">
+                    {locale === 'vi'
+                      ? 'Tự động hóa quy trình làm việc hiệu quả'
+                      : 'Automate work processes efficiently'}
+                  </p>
                 </div>
               </div>
 
@@ -128,7 +138,7 @@ export const LoginPage = () => {
                 </div>
                 <div>
                   <h3 className="font-medium text-white">End-to-End Encryption</h3>
-                  <p className="text-sm text-slate-400">Bảo mật dữ liệu với mã hóa đầu cuối</p>
+                  <p className="text-sm text-slate-400">{t('auth.secureDataE2E')}</p>
                 </div>
               </div>
             </div>
@@ -137,13 +147,15 @@ export const LoginPage = () => {
             <div className="rounded-2xl border border-slate-700 bg-slate-800/50 p-6 backdrop-blur-sm">
               <div className="flex items-center gap-2 mb-3">
                 <div className="h-2 w-2 rounded-full bg-green-400 animate-pulse"></div>
-                <span className="text-sm font-semibold uppercase tracking-wide text-green-400">Demo Environment</span>
+                <span className="text-sm font-semibold uppercase tracking-wide text-green-400">
+                  {t('auth.demoEnvironment')}
+                </span>
               </div>
               <p className="text-sm text-slate-300 leading-relaxed">
-                Sử dụng tài khoản demo:{' '}
+                {t('auth.useDemoAccount')}{' '}
                 <span className="font-mono bg-slate-700 px-2 py-1 rounded text-slate-200">captainbolt / nvmteam</span>
               </p>
-              <p className="text-xs text-slate-400 mt-2">Hoặc tạo workspace mới sau khi đăng nhập</p>
+              <p className="text-xs text-slate-400 mt-2">{t('auth.orCreateNewWorkspace')}</p>
             </div>
           </div>
         </div>
@@ -166,20 +178,20 @@ export const LoginPage = () => {
             <div className="rounded-2xl border border-slate-700 bg-slate-800/50 backdrop-blur-sm p-8">
               <div className="space-y-6">
                 <div className="text-center">
-                  <h2 className="text-2xl font-semibold text-white">Đăng nhập</h2>
-                  <p className="text-sm text-slate-400 mt-2">Truy cập tài khoản BEQEEK của bạn</p>
+                  <h2 className="text-2xl font-semibold text-white">{t('auth.signIn')}</h2>
+                  <p className="text-sm text-slate-400 mt-2">{t('auth.accessYourAccount')}</p>
                 </div>
 
                 <form className="space-y-5" onSubmit={handleSubmit}>
                   <div className="space-y-2">
                     <label htmlFor="username" className="text-sm font-medium text-slate-200">
-                      Tên đăng nhập
+                      {t('auth.username')}
                     </label>
                     <Input
                       id="username"
                       name="username"
                       autoComplete="username"
-                      placeholder="Nhập tên đăng nhập"
+                      placeholder={t('auth.enterUsername')}
                       value={username}
                       onChange={(event) => setUsername(event.target.value)}
                       disabled={isPending}
@@ -191,14 +203,14 @@ export const LoginPage = () => {
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <label htmlFor="password" className="text-sm font-medium text-slate-200">
-                        Mật khẩu
+                        {t('auth.password')}
                       </label>
                       <button
                         type="button"
                         className="text-xs font-medium text-blue-400 hover:text-blue-300 transition-colors"
                         onClick={() => setPassword('nvmteam')}
                       >
-                        Dùng mẫu
+                        {t('auth.useDemo')}
                       </button>
                     </div>
                     <Input
@@ -226,12 +238,12 @@ export const LoginPage = () => {
                     className="w-full bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 text-white font-medium transition-all duration-200 shadow-lg hover:shadow-xl"
                     disabled={isPending}
                   >
-                    {isPending ? 'Đang xử lý...' : 'Đăng nhập'}
+                    {isPending ? t('auth.processing') : t('auth.signIn')}
                   </Button>
                 </form>
 
                 <div className="text-center">
-                  <p className="text-xs text-slate-400">Cần tài khoản mới? Liên hệ admin workspace</p>
+                  <p className="text-xs text-slate-400">{t('auth.needNewAccount')}</p>
                 </div>
               </div>
             </div>

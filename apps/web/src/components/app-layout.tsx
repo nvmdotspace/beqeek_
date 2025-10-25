@@ -17,6 +17,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@workspace/ui/components/av
 import { cn } from '@workspace/ui/lib/utils';
 import { useAuthStore } from '@/features/auth';
 import { useLogout } from '@/features/auth/hooks/use-logout';
+import { useLanguageStore } from '@/stores/language-store';
+import { useTranslation } from '@/hooks/use-translation';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -31,6 +33,8 @@ export const AppLayout = ({ children, showSidebar = true }: AppLayoutProps) => {
   const [isListening, setIsListening] = useState(false);
   const { userId } = useAuthStore();
   const logout = useLogout();
+  const { locale } = useLanguageStore();
+  const { t } = useTranslation();
 
   // Close mobile sidebar when clicking outside and handle responsive behavior
   useEffect(() => {
@@ -61,7 +65,7 @@ export const AppLayout = ({ children, showSidebar = true }: AppLayoutProps) => {
 
       recognition.continuous = false;
       recognition.interimResults = false;
-      recognition.lang = 'vi-VN'; // Vietnamese language support
+      recognition.lang = locale === 'vi' ? 'vi-VN' : 'en-US'; // Dynamic language support
 
       recognition.onstart = () => setIsListening(true);
       recognition.onend = () => setIsListening(false);
@@ -120,7 +124,7 @@ export const AppLayout = ({ children, showSidebar = true }: AppLayoutProps) => {
             <div className="hidden md:flex relative max-w-md flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="Search across workspace..."
+                placeholder={locale === 'vi' ? 'Tìm kiếm trong không gian làm việc...' : 'Search across workspace...'}
                 className="pl-9 w-full"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -135,7 +139,7 @@ export const AppLayout = ({ children, showSidebar = true }: AppLayoutProps) => {
               className="md:hidden flex items-center gap-2 px-3"
             >
               <Search className="h-4 w-4" />
-              <span>Search</span>
+              <span>{t('common.search')}</span>
             </Button>
           </div>
 
@@ -154,11 +158,11 @@ export const AppLayout = ({ children, showSidebar = true }: AppLayoutProps) => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem>Workspace Settings</DropdownMenuItem>
-                <DropdownMenuItem>Integrations</DropdownMenuItem>
-                <DropdownMenuItem>Security</DropdownMenuItem>
+                <DropdownMenuItem>{t('common.workspaceSettings') || 'Workspace Settings'}</DropdownMenuItem>
+                <DropdownMenuItem>{t('common.integrations') || 'Integrations'}</DropdownMenuItem>
+                <DropdownMenuItem>{t('common.security') || 'Security'}</DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>Help & Support</DropdownMenuItem>
+                <DropdownMenuItem>{t('common.helpSupport') || 'Help & Support'}</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
 
@@ -180,12 +184,12 @@ export const AppLayout = ({ children, showSidebar = true }: AppLayoutProps) => {
                   </div>
                 </div>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>Profile</DropdownMenuItem>
-                <DropdownMenuItem>Settings</DropdownMenuItem>
-                <DropdownMenuItem>Billing</DropdownMenuItem>
+                <DropdownMenuItem>{t('common.profile') || 'Profile'}</DropdownMenuItem>
+                <DropdownMenuItem>{t('common.settings') || 'Settings'}</DropdownMenuItem>
+                <DropdownMenuItem>{t('common.billing') || 'Billing'}</DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => logout()}>
-                  Log out
+                  {t('common.logout') || 'Log out'}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -202,7 +206,7 @@ export const AppLayout = ({ children, showSidebar = true }: AppLayoutProps) => {
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
-                  placeholder="Search across workspace..."
+                  placeholder={t('common.searchPlaceholder') || 'Search...'}
                   className="pl-9 pr-20"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -224,11 +228,17 @@ export const AppLayout = ({ children, showSidebar = true }: AppLayoutProps) => {
               </div>
             </div>
             <div className="p-4">
-              <p className="text-sm text-muted-foreground">Recent searches</p>
+              <p className="text-sm text-muted-foreground">{t('common.recentSearches') || 'Recent searches'}</p>
               <div className="mt-2 space-y-2">
-                <div className="p-2 rounded-lg hover:bg-accent cursor-pointer">Active tables</div>
-                <div className="p-2 rounded-lg hover:bg-accent cursor-pointer">Team members</div>
-                <div className="p-2 rounded-lg hover:bg-accent cursor-pointer">Workflow settings</div>
+                <div className="p-2 rounded-lg hover:bg-accent cursor-pointer">
+                  {t('common.activeTables') || 'Active tables'}
+                </div>
+                <div className="p-2 rounded-lg hover:bg-accent cursor-pointer">
+                  {t('common.teamMembers') || 'Team members'}
+                </div>
+                <div className="p-2 rounded-lg hover:bg-accent cursor-pointer">
+                  {t('common.workflowSettings') || 'Workflow settings'}
+                </div>
               </div>
             </div>
           </div>
