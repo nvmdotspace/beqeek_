@@ -3,8 +3,21 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useLanguageStore } from '@/stores/language-store';
 
 import { ThemeProvider } from './theme-provider';
+import { ApiErrorBoundary } from '@/components/api-error-boundary';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: (failureCount, error: any) => {
+        // Don't retry on 401 errors
+        if (error?.status === 401) {
+          return false;
+        }
+        return failureCount < 3;
+      },
+    },
+  },
+});
 
 // Component to handle language detection from URL
 function LanguageDetector({ children }: { children: React.ReactNode }) {
@@ -29,7 +42,9 @@ export const AppProviders = ({ children }: { children: React.ReactNode }) => {
   return (
     <ThemeProvider>
       <QueryClientProvider client={queryClient}>
-        <LanguageDetector>{children}</LanguageDetector>
+        <ApiErrorBoundary>
+          <LanguageDetector>{children}</LanguageDetector>
+        </ApiErrorBoundary>
       </QueryClientProvider>
     </ThemeProvider>
   );

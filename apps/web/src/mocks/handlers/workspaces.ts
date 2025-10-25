@@ -5,12 +5,19 @@ import { QueryRequest, WorkspaceMutationRequest } from '../types';
 // Helper to extract user ID from Authorization header
 function getUserIdFromAuth(request: Request): string | null {
   const authHeader = request.headers.get('Authorization');
+  console.log('Workspace API - Auth header:', authHeader);
+
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    console.log('Workspace API - No valid auth header found');
     return null;
   }
 
   const token = authHeader.substring(7);
-  return mockStore.validateToken(token);
+  console.log('Workspace API - Extracted token:', token.substring(0, 20) + '...');
+  const userId = mockStore.validateToken(token);
+  console.log('Workspace API - Validated userId:', userId);
+
+  return userId;
 }
 
 export const workspaceHandlers = [

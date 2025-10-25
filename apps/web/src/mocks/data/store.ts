@@ -150,7 +150,10 @@ class MockDataStore {
     return Array.from(this.workspaces.values()).filter((workspace) => workspace.ownedBy === userId);
   }
 
-  createWorkspace(userId: string, data: { workspaceName: string; namespace: string; description?: string; logo?: string }): Workspace {
+  createWorkspace(
+    userId: string,
+    data: { workspaceName: string; namespace: string; description?: string; logo?: string },
+  ): Workspace {
     const id = (Date.now() + Math.random()).toString(36);
     const now = new Date().toISOString();
     const owner = this.getUser(userId);
@@ -160,7 +163,7 @@ class MockDataStore {
       namespace: data.namespace,
       workspaceName: data.workspaceName,
       description: data.description,
-      myWorkspaceUser: owner,
+      myWorkspaceUser: owner || undefined,
       ownedByUser: true,
       ownedBy: userId,
       logo: data.logo,
@@ -230,7 +233,7 @@ class MockDataStore {
 
   // Token methods
   createToken(userId: string): string {
-    const token = `mock_token_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const token = `mock_token_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
     const expiresAt = Date.now() + 3600000; // 1 hour
     this.tokens.set(token, { userId, expiresAt });
     return token;
@@ -247,7 +250,7 @@ class MockDataStore {
 
   // Generic CRUD helpers
   generateId(): string {
-    return Date.now().toString() + Math.random().toString(36).substr(2, 9);
+    return Date.now().toString() + Math.random().toString(36).substring(2, 11);
   }
 }
 
