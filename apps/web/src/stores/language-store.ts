@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import { devtools, persist, createJSONStorage } from 'zustand/middleware';
-import React from 'react';
 // @ts-expect-error - Paraglide runtime doesn't have TypeScript declarations
 import { baseLocale, isLocale } from '@/paraglide/runtime';
 
@@ -10,7 +9,6 @@ type LanguageState = {
 
 type LanguageActions = {
   setLanguage: (locale: string) => void;
-  syncWithRouter: () => void;
   getLocalizedPath: (path: string) => string;
 };
 
@@ -39,9 +37,6 @@ export const useLanguageStore = create<LanguageStore>()(
             document.documentElement.lang = locale;
           }
         },
-        syncWithRouter: () => {
-          // Sync is now handled by LanguageDetector component
-        },
         getLocalizedPath: (path: string) => {
           const { locale } = get();
           if (locale === baseLocale) {
@@ -59,12 +54,3 @@ export const useLanguageStore = create<LanguageStore>()(
     { name: 'language-store' },
   ),
 );
-
-// Hook to initialize language store on app start
-export const useInitializeLanguage = () => {
-  const syncWithRouter = useLanguageStore((state) => state.syncWithRouter);
-
-  React.useEffect(() => {
-    syncWithRouter();
-  }, [syncWithRouter]);
-};

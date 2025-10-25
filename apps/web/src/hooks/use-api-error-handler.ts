@@ -5,8 +5,8 @@ import { router } from '@/router';
 import { ApiError } from '@/shared/api/api-error';
 
 export const useApiErrorHandler = () => {
-  const { locale } = useLanguageStore();
-  const { logout } = useAuthStore();
+  const locale = useLanguageStore((state) => state.locale);
+  const logout = useAuthStore((state) => state.logout);
 
   const handleError = useCallback(
     (error: unknown) => {

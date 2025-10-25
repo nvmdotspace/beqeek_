@@ -11,8 +11,8 @@ interface ApiErrorBoundaryProps {
 
 export const ApiErrorBoundary: React.FC<ApiErrorBoundaryProps> = ({ children }) => {
   const { reset } = useQueryErrorResetBoundary();
-  const { locale } = useLanguageStore();
-  const { logout } = useAuthStore();
+  const locale = useLanguageStore((state) => state.locale);
+  const logout = useAuthStore((state) => state.logout);
 
   useEffect(() => {
     const handleUnhandledRejection = (event: PromiseRejectionEvent) => {

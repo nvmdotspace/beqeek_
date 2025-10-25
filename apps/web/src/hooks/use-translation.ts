@@ -3,7 +3,7 @@ import { useLanguageStore } from '@/stores/language-store';
 import { getMessage } from '@/paraglide/messages';
 
 export function useTranslation() {
-  const { locale } = useLanguageStore();
+  const locale = useLanguageStore((state) => state.locale);
 
   const t = (key: string) => {
     return getMessage(key, locale);

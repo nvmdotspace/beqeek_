@@ -16,7 +16,7 @@ export const WorkspaceDashboardPage = () => {
   const { data, isLoading, error } = useWorkspaces();
   const [showCreateForm, setShowCreateForm] = useState(false);
 
-  const totalWorkspaces = data?.meta.total ?? 0;
+  const totalWorkspaces = data?.meta?.total ?? data?.data?.length ?? 0;
   const workspaces = data?.data ?? [];
 
   const subtitle = useMemo(() => {

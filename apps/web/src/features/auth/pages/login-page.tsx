@@ -6,14 +6,14 @@ import { Button } from '@workspace/ui/components/button';
 import { Input } from '@workspace/ui/components/input';
 
 import { useLogin } from '../hooks/use-login';
-import { useAuthStore } from '../stores/auth-store';
+import { useAuthStore, selectIsAuthenticated } from '../stores/auth-store';
 import { useLanguageStore } from '@/stores/language-store';
 import { useTranslation } from '@/hooks/use-translation';
 
 export const LoginPage = () => {
   const router = useRouter();
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-  const { locale } = useLanguageStore();
+  const isAuthenticated = useAuthStore(selectIsAuthenticated);
+  const locale = useLanguageStore((state) => state.locale);
   const { t } = useTranslation();
   const [username, setUsername] = useState('captainbolt');
   const [password, setPassword] = useState('nvmteam');

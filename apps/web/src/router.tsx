@@ -4,7 +4,7 @@ import { createRootRoute, createRoute, createRouter } from '@tanstack/react-rout
 
 import { RootLayout } from './routes/root-layout';
 import { AppProviders } from '@/providers/app-providers';
-import { LoginPage, useAuthStore } from '@/features/auth';
+import { LoginPage, getIsAuthenticated } from '@/features/auth';
 import { WorkspaceDashboardPage } from '@/features/workspace';
 
 const rootRoute = createRootRoute({
@@ -16,7 +16,7 @@ const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
   beforeLoad: () => {
-    const { isAuthenticated } = useAuthStore.getState();
+    const isAuthenticated = getIsAuthenticated();
 
     throw redirect({
       to: isAuthenticated ? '/workspaces' : '/login',
@@ -35,7 +35,7 @@ const loginRoute = createRoute({
     </AppProviders>
   ),
   beforeLoad: () => {
-    const { isAuthenticated } = useAuthStore.getState();
+    const isAuthenticated = getIsAuthenticated();
 
     if (isAuthenticated) {
       throw redirect({ to: '/workspaces' });
@@ -54,7 +54,7 @@ const workspacesRoute = createRoute({
     </AppProviders>
   ),
   beforeLoad: () => {
-    const { isAuthenticated } = useAuthStore.getState();
+    const isAuthenticated = getIsAuthenticated();
 
     if (!isAuthenticated) {
       throw redirect({ to: '/login' });
@@ -67,7 +67,7 @@ const enIndexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/en',
   beforeLoad: () => {
-    const { isAuthenticated } = useAuthStore.getState();
+    const isAuthenticated = getIsAuthenticated();
 
     throw redirect({
       to: isAuthenticated ? '/en/workspaces' : '/en/login',
@@ -86,7 +86,7 @@ const enLoginRoute = createRoute({
     </AppProviders>
   ),
   beforeLoad: () => {
-    const { isAuthenticated } = useAuthStore.getState();
+    const isAuthenticated = getIsAuthenticated();
 
     if (isAuthenticated) {
       throw redirect({ to: '/en/workspaces' });
@@ -105,7 +105,7 @@ const enWorkspacesRoute = createRoute({
     </AppProviders>
   ),
   beforeLoad: () => {
-    const { isAuthenticated } = useAuthStore.getState();
+    const isAuthenticated = getIsAuthenticated();
 
     if (!isAuthenticated) {
       throw redirect({ to: '/en/login' });

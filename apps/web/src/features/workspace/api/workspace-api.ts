@@ -1,4 +1,4 @@
-import { apiFetch } from "@/shared/api/http-client"
+import { apiRequest } from "@/shared/api/http-client"
 import type {
   MutationRequest,
   StandardResponse,
@@ -10,26 +10,36 @@ import type {
 const LIST_ENDPOINT = "/api/user/me/get/workspaces"
 const DETAIL_ENDPOINT = (workspaceId: string) => `/api/user/me/get/workspaces/${workspaceId}`
 const CREATE_ENDPOINT = "/api/workspace/post/workspaces"
+const DEFAULT_WORKSPACE_FIELDS =
+  "id,namespace,workspaceName,myWorkspaceUser{id,fullName,email,phone,phoneCountryCode,avatar,thumbnailAvatar,emailVerifiedAt,phoneVerifiedAt,createdAt,updatedAt},ownedByUser,ownedBy,logo,thumbnailLogo,createdAt,updatedAt"
 
-export const getWorkspaces = (fields?: string) =>
-  apiFetch<WorkspaceListResponse>(LIST_ENDPOINT, {
+export const getWorkspaces = (fields: string = DEFAULT_WORKSPACE_FIELDS) =>
+  apiRequest<WorkspaceListResponse>({
+    url: LIST_ENDPOINT,
     method: "POST",
-    body: JSON.stringify({
+    data: {
       queries: {
         fields,
       },
-    }),
+    },
   })
 
-export const getWorkspace = (workspaceId: string) =>
-  apiFetch<{ data: Workspace }>(DETAIL_ENDPOINT(workspaceId), {
+export const getWorkspace = (workspaceId: string, fields: string = DEFAULT_WORKSPACE_FIELDS) =>
+  apiRequest<StandardResponse<Workspace>>({
+    url: DETAIL_ENDPOINT(workspaceId),
     method: "POST",
+    data: {
+      queries: {
+        fields,
+      },
+    },
   })
 
 export const createWorkspace = (payload: WorkspaceMutationData) =>
-  apiFetch<StandardResponse & { data?: Workspace }>(CREATE_ENDPOINT, {
+  apiRequest<StandardResponse<Workspace>, MutationRequest<WorkspaceMutationData>>({
+    url: CREATE_ENDPOINT,
     method: "POST",
-    body: JSON.stringify({
+    data: {
       data: payload,
-    } satisfies MutationRequest<WorkspaceMutationData>),
+    } satisfies MutationRequest<WorkspaceMutationData>,
   })

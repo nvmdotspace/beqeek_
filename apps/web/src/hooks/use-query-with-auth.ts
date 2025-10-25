@@ -1,8 +1,8 @@
-import { useQuery, UseQueryOptions } from '@tanstack/react-query';
+import { useQuery, UseQueryOptions, QueryKey } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { useApiErrorHandler } from './use-api-error-handler';
 
-export const useQueryWithAuth = <T>(options: UseQueryOptions<T, Error, T, any>) => {
+export const useQueryWithAuth = <T>(options: UseQueryOptions<T, Error, T, QueryKey>) => {
   const { handleError } = useApiErrorHandler();
 
   const query = useQuery(options);

@@ -5,7 +5,6 @@ import { TanStackRouterDevtools } from '@tanstack/router-devtools';
 
 import { AppProviders } from '@/providers/app-providers';
 import { AppLayout } from '@/components/app-layout';
-import { useInitializeLanguage } from '@/stores/language-store';
 
 interface RootLayoutProps {
   children?: ReactNode;
@@ -13,9 +12,6 @@ interface RootLayoutProps {
 }
 
 export const RootLayout = ({ children, showSidebar = true }: RootLayoutProps) => {
-  // Initialize language on app start
-  useInitializeLanguage();
-
   return (
     <AppProviders>
       <AppLayout showSidebar={showSidebar}>

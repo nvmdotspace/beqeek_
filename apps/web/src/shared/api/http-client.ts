@@ -1,91 +1,124 @@
-import { useAuthStore } from '@/features/auth/stores/auth-store';
+import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, InternalAxiosRequestConfig } from "axios"
 
-import { ApiError } from './api-error';
+import { useAuthStore } from "@/features/auth/stores/auth-store"
 
-type RequestOptions = RequestInit & {
-  /** Use bearer token automatically when true */
-  useAuth?: boolean;
-};
+import { ApiError } from "./api-error"
+import { getApiBaseUrl, resolveApiUrl } from "./config"
 
-const createHeaders = (init?: HeadersInit) => {
-  const headers = new Headers(init ?? {});
-  if (!headers.has('Content-Type')) {
-    headers.set('Content-Type', 'application/json');
-  }
-  return headers;
-};
-
-export async function apiFetch<T>(
-  input: string,
-  { useAuth = true, headers, ...init }: RequestOptions = {},
-): Promise<T> {
-  const requestHeaders = createHeaders(headers);
-
-  if (useAuth) {
-    const authStore = useAuthStore.getState();
-
-    // Try to refresh token if needed
-    if (authStore.refreshToken && !authStore.accessToken) {
-      await authStore.refreshTokenIfNeeded();
-    }
-
-    // Get fresh auth state after potential refresh
-    const { accessToken } = useAuthStore.getState();
-
-    if (accessToken) {
-      requestHeaders.set('Authorization', `Bearer ${accessToken}`);
-      console.log('API Request with token:', input, accessToken.substring(0, 20) + '...');
-    } else {
-      console.log('API Request without token:', input);
-    }
-  }
-
-  const response = await fetch(input, {
-    ...init,
-    headers: requestHeaders,
-  });
-
-  const contentType = response.headers.get('content-type') ?? '';
-
-  if (!response.ok) {
-    let errorPayload: unknown = null;
-
-    if (contentType.includes('application/json')) {
-      try {
-        errorPayload = await response.json();
-      } catch {
-        errorPayload = null;
-      }
-    } else {
-      const text = await response.text();
-      errorPayload = text.length > 0 ? text : null;
-    }
-
-    let message = response.statusText || 'Request failed';
-
-    if (typeof errorPayload === 'string' && errorPayload.length > 0) {
-      message = errorPayload;
-    } else if (
-      typeof errorPayload === 'object' &&
-      errorPayload !== null &&
-      'message' in errorPayload &&
-      typeof (errorPayload as Record<string, unknown>).message === 'string'
-    ) {
-      message = (errorPayload as Record<string, unknown>).message as string;
-    } else {
-      message = `Request failed with status ${response.status}`;
-    }
-
-    throw new ApiError(message, response.status, errorPayload);
-  }
-
-  if (response.status === 204 || contentType.length === 0) {
-    return undefined as T;
-  }
-
-  if (contentType.includes('application/json')) {
-    return response.json() as Promise<T>;
-  }
-
-  return (await response.text()) as T;
+export interface ApiRequestConfig<TData = unknown> extends AxiosRequestConfig<TData> {
+  /**
+   * Skip adding Authorization header and refresh handling.
+   * Useful for public endpoints such as login.
+   */
+  skipAuth?: boolean
+  /**
+   * Internal flag used to prevent infinite retry loops.
+   */
+  _retry?: boolean
 }
+
+const apiClient: AxiosInstance = axios.create({
+  baseURL: getApiBaseUrl(),
+  headers: {
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  },
+})
+
+const ensureUrl = (config: AxiosRequestConfig) => {
+  if (config.url) {
+    config.url = resolveApiUrl(config.url)
+  }
+}
+
+apiClient.interceptors.request.use(async (config) => {
+  const typedConfig = config as InternalAxiosRequestConfig & ApiRequestConfig
+
+  ensureUrl(typedConfig)
+
+  if (typedConfig.skipAuth) {
+    return typedConfig
+  }
+
+  const authStore = useAuthStore.getState()
+  let { accessToken, refreshToken } = authStore
+
+  if (!accessToken && refreshToken) {
+    const refreshed = await authStore.refreshTokenIfNeeded()
+    if (refreshed) {
+      accessToken = useAuthStore.getState().accessToken
+    }
+  }
+
+  if (accessToken) {
+    typedConfig.headers = typedConfig.headers ?? {}
+    const headers = typedConfig.headers as Record<string, string>
+    headers.Authorization = `Bearer ${accessToken}`
+  }
+
+  return typedConfig
+})
+
+const buildApiError = (error: AxiosError) => {
+  const status = error.response?.status ?? 0
+  const details = error.response?.data ?? error.cause
+
+  let message = error.message || "Request failed"
+
+  if (error.response?.data) {
+    const data = error.response.data as Record<string, unknown>
+    if (typeof data === "object") {
+      if (typeof data.message === "string" && data.message.length > 0) {
+        message = data.message
+      } else if (typeof data.error === "string" && data.error.length > 0) {
+        message = data.error
+      }
+    }
+  } else if (error.response?.statusText) {
+    message = error.response.statusText
+  }
+
+  return new ApiError(message, status, details)
+}
+
+apiClient.interceptors.response.use(
+  (response) => response,
+  async (error: AxiosError) => {
+    if (!error.config) {
+      throw buildApiError(error)
+    }
+
+    const originalRequest = error.config as ApiRequestConfig
+
+    if (error.response?.status === 401 && !originalRequest.skipAuth) {
+      if (originalRequest._retry) {
+        useAuthStore.getState().logout()
+        throw buildApiError(error)
+      }
+
+      originalRequest._retry = true
+
+      const refreshed = await useAuthStore.getState().refreshTokenIfNeeded(true)
+      if (refreshed) {
+        const nextToken = useAuthStore.getState().accessToken
+        if (nextToken) {
+          originalRequest.headers = originalRequest.headers ?? {}
+          const headers = originalRequest.headers as Record<string, string>
+          headers.Authorization = `Bearer ${nextToken}`
+          return apiClient(originalRequest)
+        }
+      }
+
+      useAuthStore.getState().logout()
+    }
+
+    throw buildApiError(error)
+  },
+)
+
+export const apiRequest = async <TResponse, TData = unknown>(config: ApiRequestConfig<TData>) => {
+  const response = await apiClient.request<TResponse, { data: TResponse }, TData>(config)
+  return response.data
+}
+
+export { apiClient }

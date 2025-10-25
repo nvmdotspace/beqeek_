@@ -1,17 +1,21 @@
-export interface StandardResponse {
-  success: boolean
-  message?: string
-  errors?: Record<string, string[]>
+export interface StandardResponse<T = unknown> {
+  success?: boolean
+  message?: string | null
+  errors?: Record<string, string[]> | null
+  data?: T
 }
 
-export interface PaginatedResponse<T> {
+export interface PaginationMeta {
+  current_page?: number
+  last_page?: number
+  per_page?: number
+  total?: number
+  [key: string]: unknown
+}
+
+export interface PaginatedResponse<T> extends StandardResponse<T[]> {
   data: T[]
-  meta: {
-    current_page: number
-    last_page: number
-    per_page: number
-    total: number
-  }
+  meta?: PaginationMeta
 }
 
 // Auth types
@@ -35,17 +39,17 @@ export interface User {
   id: string
   fullName: string
   email: string
-  phone?: string
-  phoneCountryCode?: string
-  avatar?: string
-  thumbnailAvatar?: string
-  emailVerifiedAt?: string
-  phoneVerifiedAt?: string
-  createdAt: string
-  updatedAt: string
+  phone?: string | null
+  phoneCountryCode?: string | null
+  avatar?: string | null
+  thumbnailAvatar?: string | null
+  emailVerifiedAt?: string | null
+  phoneVerifiedAt?: string | null
+  createdAt?: string | null
+  updatedAt?: string | null
   globalUser?: {
     username: string
-  }
+  } | null
 }
 
 // Workspace types
@@ -53,14 +57,14 @@ export interface Workspace {
   id: string
   namespace: string
   workspaceName: string
-  description?: string
-  myWorkspaceUser?: User
-  ownedByUser: boolean
-  ownedBy: string
-  logo?: string
-  thumbnailLogo?: string
-  createdAt: string
-  updatedAt: string
+  description?: string | null
+  myWorkspaceUser?: User | null
+  ownedByUser?: User | boolean | null
+  ownedBy?: string
+  logo?: string | null
+  thumbnailLogo?: string | null
+  createdAt?: string | null
+  updatedAt?: string | null
 }
 
 export interface WorkspaceMutationData {

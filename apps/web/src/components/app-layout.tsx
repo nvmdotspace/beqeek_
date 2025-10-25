@@ -31,9 +31,9 @@ export const AppLayout = ({ children, showSidebar = true }: AppLayoutProps) => {
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isListening, setIsListening] = useState(false);
-  const { userId } = useAuthStore();
+  const userId = useAuthStore((state) => state.userId);
   const logout = useLogout();
-  const { locale } = useLanguageStore();
+  const locale = useLanguageStore((state) => state.locale);
   const { t } = useTranslation();
 
   // Close mobile sidebar when clicking outside and handle responsive behavior

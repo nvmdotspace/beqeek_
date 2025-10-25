@@ -4,13 +4,14 @@ import { useLanguageStore } from '@/stores/language-store';
 
 import { ThemeProvider } from './theme-provider';
 import { ApiErrorBoundary } from '@/components/api-error-boundary';
+import { ApiError } from '@/shared/api/api-error';
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: (failureCount, error: any) => {
+      retry: (failureCount, error: unknown) => {
         // Don't retry on 401 errors
-        if (error?.status === 401) {
+        if (error instanceof ApiError && error.status === 401) {
           return false;
         }
         return failureCount < 3;
@@ -21,7 +22,7 @@ const queryClient = new QueryClient({
 
 // Component to handle language detection from URL
 function LanguageDetector({ children }: { children: React.ReactNode }) {
-  const { setLanguage } = useLanguageStore();
+  const setLanguage = useLanguageStore((state) => state.setLanguage);
 
   React.useEffect(() => {
     // Detect language from URL path
