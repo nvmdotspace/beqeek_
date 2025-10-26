@@ -1,0 +1,18 @@
+{
+  "$schema": "https://inlang.com/schema/inlang-message-format",
+  "example_message": "Xin chào {username}",
+  "common_searchPlaceholder": "Tìm kiếm trong không gian làm việc...",
+  "auth_welcomeBack": "Chào mừng trở lại",
+  "auth_digitalProcessPlatform": "Nền tảng số hóa quy trình",
+  "auth_manageWorkspaces": "Quản trị workspace, tự động hóa workflow và vận hành dữ liệu Active Table với bảo mật E2EE.",
+  "auth_manageStructuredData": "Quản lý dữ liệu cấu trúc với schema linh hoạt",
+  "auth_automateWorkProcesses": "Tự động hóa quy trình làm việc hiệu quả",
+  "auth_secureDataE2E": "Bảo mật dữ liệu với mã hóa đầu cuối",
+  "auth_demoEnvironment": "Môi trường Demo",
+  "auth_useDemoAccount": "Sử dụng tài khoản demo:",
+  "auth_orCreateNewWorkspace": "Hoặc tạo workspace mới sau khi đăng nhập",
+  "auth_enterUsername": "Nhập tên đăng nhập",
+  "auth_password": "Mật khẩu",
+  "auth_useDemo": "Dùng mẫu",
+  "auth_signIn": "Đăng nhập"
+}

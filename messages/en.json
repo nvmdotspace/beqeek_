@@ -1,4 +1,18 @@
 {
   "$schema": "https://inlang.com/schema/inlang-message-format",
-  "example_message": "Hello world {username}"
+  "example_message": "Hello world {username}",
+  "common_searchPlaceholder": "Search your workspace...",
+  "auth_welcomeBack": "Welcome back",
+  "auth_digitalProcessPlatform": "Digital process platform",
+  "auth_manageWorkspaces": "Manage workspaces, automate workflows, and operate Active Table data with E2EE security.",
+  "auth_manageStructuredData": "Manage structured data with flexible schemas",
+  "auth_automateWorkProcesses": "Automate work processes efficiently",
+  "auth_secureDataE2E": "Secure data with end-to-end encryption",
+  "auth_demoEnvironment": "Demo Environment",
+  "auth_useDemoAccount": "Use demo account:",
+  "auth_orCreateNewWorkspace": "Or create a new workspace after login",
+  "auth_enterUsername": "Enter username",
+  "auth_password": "Password",
+  "auth_useDemo": "Use demo",
+  "auth_signIn": "Sign in"
 }

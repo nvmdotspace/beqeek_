@@ -124,7 +124,7 @@ export const AppLayout = ({ children, showSidebar = true }: AppLayoutProps) => {
             <div className="hidden md:flex relative max-w-md flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder={locale === 'vi' ? 'Tìm kiếm trong không gian làm việc...' : 'Search across workspace...'}
+                placeholder={t('common.searchPlaceholder')}
                 className="pl-9 w-full"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -206,7 +206,7 @@ export const AppLayout = ({ children, showSidebar = true }: AppLayoutProps) => {
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
-                  placeholder={t('common.searchPlaceholder') || 'Search...'}
+                  placeholder={t('common.searchPlaceholder')}
                   className="pl-9 pr-20"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}

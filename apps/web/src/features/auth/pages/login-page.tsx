@@ -99,11 +99,7 @@ export const LoginPage = () => {
                 </div>
                 <div>
                   <h3 className="font-medium text-white">Active Tables</h3>
-                  <p className="text-sm text-slate-400">
-                    {locale === 'vi'
-                      ? 'Quản lý dữ liệu cấu trúc với schema linh hoạt'
-                      : 'Manage structured data with flexible schema'}
-                  </p>
+                  <p className="text-sm text-slate-400">{t('auth.manageStructuredData')}</p>
                 </div>
               </div>
 
@@ -119,11 +115,7 @@ export const LoginPage = () => {
                 </div>
                 <div>
                   <h3 className="font-medium text-white">Workflow Automation</h3>
-                  <p className="text-sm text-slate-400">
-                    {locale === 'vi'
-                      ? 'Tự động hóa quy trình làm việc hiệu quả'
-                      : 'Automate work processes efficiently'}
-                  </p>
+                  <p className="text-sm text-slate-400">{t('auth.automateWorkProcesses')}</p>
                 </div>
               </div>
 
