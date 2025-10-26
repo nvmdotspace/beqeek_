@@ -31,21 +31,40 @@ export const AppLayout = ({ children, showSidebar = true }: AppLayoutProps) => {
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isListening, setIsListening] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [isTablet, setIsTablet] = useState(false);
+  
   const userId = useAuthStore((state) => state.userId);
   const logout = useLogout();
   const locale = useLanguageStore((state) => state.locale);
   const { t } = useTranslation();
 
-  // Close mobile sidebar when clicking outside and handle responsive behavior
+  // Improved responsive behavior with proper breakpoint handling
   useEffect(() => {
     const handleResize = () => {
       const width = window.innerWidth;
+      
+      // Update device type states
+      setIsMobile(width < 768);
+      setIsTablet(width >= 768 && width < 1024);
+      
+      // Close mobile sidebar when switching to desktop
       if (width >= 1024) {
         setMobileSidebarOpen(false);
+        // Reset sidebar collapsed state on desktop
+        setSidebarCollapsed(false);
       }
-      // Auto-collapse sidebar on tablet
+      
+      // Auto-collapse sidebar on tablet for better space utilization
       if (width >= 768 && width < 1024) {
         setSidebarCollapsed(true);
+      }
+      
+      // Ensure mobile sidebar is closed when resizing to mobile
+      if (width < 768) {
+        setMobileSidebarOpen(false);
+        // Reset collapsed state for mobile (will be handled by mobile overlay)
+        setSidebarCollapsed(false);
       }
     };
 
@@ -56,69 +75,120 @@ export const AppLayout = ({ children, showSidebar = true }: AppLayoutProps) => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const handleVoiceSearch = () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
+  // Close mobile sidebar when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (mobileSidebarOpen && isMobile) {
+        const sidebar = document.querySelector('[data-sidebar]');
+        const menuButton = document.querySelector('[data-menu-button]');
+        
+        if (
+          sidebar && 
+          !sidebar.contains(event.target as Node) &&
+          menuButton &&
+          !menuButton.contains(event.target as Node)
+        ) {
+          setMobileSidebarOpen(false);
+        }
+      }
+    };
 
-    if (SpeechRecognition) {
-      const recognition = new SpeechRecognition();
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [mobileSidebarOpen, isMobile]);
 
-      recognition.continuous = false;
-      recognition.interimResults = false;
-      recognition.lang = locale === 'vi' ? 'vi-VN' : 'en-US'; // Dynamic language support
+  // Close mobile search when clicking outside
+  useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        if (mobileSearchOpen) {
+          setMobileSearchOpen(false);
+        }
+        if (mobileSidebarOpen && isMobile) {
+          setMobileSidebarOpen(false);
+        }
+      }
+    };
 
-      recognition.onstart = () => setIsListening(true);
-      recognition.onend = () => setIsListening(false);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      recognition.onresult = (event: any) => {
-        const transcript = event.results[0][0].transcript;
-        setSearchQuery(transcript);
-        setMobileSearchOpen(false);
-      };
-
-      recognition.onerror = () => {
-        setIsListening(false);
-      };
-
-      recognition.start();
-    }
-  };
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [mobileSearchOpen, mobileSidebarOpen, isMobile]);
 
   if (!showSidebar) {
     return <div className="min-h-screen bg-background">{children}</div>;
   }
 
   return (
-    <div className="flex h-screen bg-background relative">
-      {/* Mobile Sidebar Overlay */}
-      {mobileSidebarOpen && (
-        <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={() => setMobileSidebarOpen(false)} />
+    <div className="flex h-screen bg-background relative mobile-viewport-fix">
+      {/* Mobile Sidebar Overlay - Only show on mobile */}
+      {mobileSidebarOpen && isMobile && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 transition-opacity duration-300" 
+          onClick={() => setMobileSidebarOpen(false)}
+          aria-label="Close sidebar"
+        />
       )}
 
       {/* Sidebar */}
       <div
+        data-sidebar
         className={cn(
-          'fixed inset-y-0 left-0 z-50 transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0',
-          mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
+          'transition-all duration-300 ease-in-out',
+          // Mobile: Fixed positioning with transform
+          isMobile && [
+            'fixed inset-y-0 left-0 z-50',
+            mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          ],
+          // Tablet and Desktop: Relative positioning
+          !isMobile && 'relative',
+          // Desktop: Normal behavior
+          !isMobile && !isTablet && 'translate-x-0'
         )}
       >
         <AppSidebar
-          isCollapsed={sidebarCollapsed}
+          isCollapsed={!isMobile && sidebarCollapsed}
           onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
-          isMobile={typeof window !== 'undefined' && window.innerWidth < 1024}
+          isMobile={isMobile}
           onCloseMobile={() => setMobileSidebarOpen(false)}
         />
       </div>
 
       {/* Main Content */}
-      <div className="flex flex-1 flex-col overflow-hidden lg:ml-0">
+      <div className={cn(
+        'flex flex-1 flex-col overflow-hidden',
+        // Adjust margin based on sidebar state and device type
+        !isMobile && !sidebarCollapsed && 'ml-0',
+        isMobile && 'ml-0'
+      )}>
         {/* Header */}
-        <header className="flex h-16 items-center justify-between border-b bg-background px-4 sm:px-6">
+        <header className="flex h-16 items-center justify-between border-b bg-background px-4 sm:px-6 relative z-30">
           <div className="flex items-center gap-3 flex-1">
-            {/* Mobile/Tablet Menu Toggle */}
-            <Button variant="ghost" size="icon" onClick={() => setMobileSidebarOpen(true)} className="lg:hidden">
-              <Menu className="h-5 w-5" />
-            </Button>
+            {/* Mobile Menu Toggle */}
+            {isMobile && (
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => setMobileSidebarOpen(true)}
+                data-menu-button
+                className="h-9 w-9"
+                aria-label="Open sidebar"
+              >
+                <Menu className="h-5 w-5" />
+              </Button>
+            )}
+
+            {/* Tablet/Desktop Sidebar Toggle */}
+            {!isMobile && (
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                className="h-9 w-9"
+                aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+              >
+                <Menu className="h-5 w-5" />
+              </Button>
+            )}
 
             {/* Desktop/Tablet Search Bar */}
             <div className="hidden md:flex relative max-w-md flex-1">
@@ -207,37 +277,25 @@ export const AppLayout = ({ children, showSidebar = true }: AppLayoutProps) => {
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   placeholder={t('common.searchPlaceholder')}
-                  className="pl-9 pr-20"
+                  className="pl-9 w-full"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   autoFocus
                 />
-                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={handleVoiceSearch}
-                    className={cn('h-7 w-7', isListening && 'text-red-500 animate-pulse')}
-                  >
-                    <Mic className="h-3 w-3" />
-                  </Button>
-                  <Button variant="ghost" size="icon" className="h-7 w-7">
-                    <Filter className="h-3 w-3" />
-                  </Button>
-                </div>
               </div>
             </div>
             <div className="p-4">
-              <p className="text-sm text-muted-foreground">{t('common.recentSearches') || 'Recent searches'}</p>
-              <div className="mt-2 space-y-2">
-                <div className="p-2 rounded-lg hover:bg-accent cursor-pointer">
-                  {t('common.activeTables') || 'Active tables'}
+              <div className="space-y-2">
+                <div className="text-sm font-medium text-muted-foreground">
+                  {t('common.quickActions') || 'Quick Actions'}
                 </div>
-                <div className="p-2 rounded-lg hover:bg-accent cursor-pointer">
-                  {t('common.teamMembers') || 'Team members'}
-                </div>
-                <div className="p-2 rounded-lg hover:bg-accent cursor-pointer">
-                  {t('common.workflowSettings') || 'Workflow settings'}
+                <div className="space-y-1">
+                  <div className="p-2 rounded-lg hover:bg-accent cursor-pointer">
+                    {t('common.createTable') || 'Create new table'}
+                  </div>
+                  <div className="p-2 rounded-lg hover:bg-accent cursor-pointer">
+                    {t('common.workflowSettings') || 'Workflow settings'}
+                  </div>
                 </div>
               </div>
             </div>
@@ -245,7 +303,7 @@ export const AppLayout = ({ children, showSidebar = true }: AppLayoutProps) => {
         )}
 
         {/* Page Content */}
-        <main className="flex-1 overflow-auto">{children}</main>
+        <main className="flex-1 overflow-auto hide-scrollbar-mobile">{children}</main>
       </div>
     </div>
   );

@@ -171,5 +171,27 @@
   "encryption_clearAllDataConfirm": "Are you sure you want to clear all encryption data? This action cannot be undone.",
   "encryption_allDataCleared": "All data cleared successfully",
   "encryption_clearDataFailed": "Failed to clear data",
-  "encryption_allFieldsRequired": "All fields are required"
+  "encryption_allFieldsRequired": "All fields are required",
+
+  "sidebar_workspace": "Beqeek Workspace",
+  "sidebar_quickActions": "QUICK ACTIONS",
+  "sidebar_newTable": "New Table",
+  "sidebar_search": "Search",
+  "sidebar_navigation": "NAVIGATION",
+  "sidebar_dashboard": "Dashboard",
+  "sidebar_tables": "Tables",
+  "sidebar_team": "Team",
+  "sidebar_analytics": "Analytics",
+  "sidebar_calendar": "Calendar",
+  "sidebar_messages": "Messages",
+  "sidebar_workspace_section": "WORKSPACE",
+  "sidebar_starred": "Starred",
+  "sidebar_projects": "Projects",
+  "sidebar_archived": "Archived",
+  "sidebar_settings": "Settings",
+  "sidebar_help": "Help & Support",
+  "sidebar_close": "Close sidebar",
+  "sidebar_toggle": "Toggle sidebar",
+  "sidebar_collapse": "Collapse sidebar",
+  "sidebar_expand": "Expand sidebar"
 }

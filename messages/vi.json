@@ -174,5 +174,27 @@
   "encryption_clearAllDataConfirm": "Bạn có chắc muốn xóa tất cả dữ liệu mã hóa? Hành động này không thể hoàn tác.",
   "encryption_allDataCleared": "Xóa dữ liệu thành công",
   "encryption_clearDataFailed": "Không thể xóa dữ liệu",
-  "encryption_allFieldsRequired": "Bắt buộc nhập tất cả các trường"
+  "encryption_allFieldsRequired": "Bắt buộc nhập tất cả các trường",
+
+  "sidebar_workspace": "Beqeek Workspace",
+  "sidebar_quickActions": "THAO TÁC NHANH",
+  "sidebar_newTable": "Tạo bảng mới",
+  "sidebar_search": "Tìm kiếm",
+  "sidebar_navigation": "ĐIỀU HƯỚNG",
+  "sidebar_dashboard": "Bảng điều khiển",
+  "sidebar_tables": "Bảng dữ liệu",
+  "sidebar_team": "Đội nhóm",
+  "sidebar_analytics": "Phân tích",
+  "sidebar_calendar": "Lịch",
+  "sidebar_messages": "Tin nhắn",
+  "sidebar_workspace_section": "KHÔNG GIAN LÀM VIỆC",
+  "sidebar_starred": "Đã đánh dấu",
+  "sidebar_projects": "Dự án",
+  "sidebar_archived": "Đã lưu trữ",
+  "sidebar_settings": "Cài đặt",
+  "sidebar_help": "Trợ giúp & Hỗ trợ",
+  "sidebar_close": "Đóng sidebar",
+  "sidebar_toggle": "Bật/tắt sidebar",
+  "sidebar_collapse": "Thu gọn sidebar",
+  "sidebar_expand": "Mở rộng sidebar"
 }
