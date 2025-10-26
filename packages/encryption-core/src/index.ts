@@ -23,7 +23,9 @@ export {
   buildEncryptedRecord,
   buildHashedKeywords,
   buildRecordHashes,
-  buildEncryptedPayload
+  buildEncryptedPayload,
+  buildTotalRecordHash,
+  verifyRecordIntegrity
 } from './payload/payload-builder';
 export type {
   EncryptedPayload,

@@ -4,6 +4,7 @@ import { OPE } from '../algorithms/ope';
 import { EncryptedSearch } from '../search/encrypted-search';
 import type { EncryptedData } from '../types';
 import type { FieldEncryptionConfig } from '../field-types';
+import CryptoJS from 'crypto-js';
 
 export type EncryptedRecord = Record<string, EncryptedData | EncryptedData[]>;
 export type HashedKeywords = Record<string, string[]>;
@@ -13,6 +14,7 @@ export interface EncryptedPayload {
   record: EncryptedRecord;
   hashed_keywords: HashedKeywords;
   record_hashes: RecordHashes;
+  record_hash: string;
 }
 
 export interface BuildPayloadOptions {
@@ -162,6 +164,34 @@ export async function buildRecordHashes(
 }
 
 /**
+ * Build overall record_hash from field-level record_hashes.
+ * Uses a canonical string of `field=hashes` joined by '|' in sorted field order,
+ * and derives a composite key by SHA-256 over the concatenated per-field keys.
+ */
+export async function buildTotalRecordHash(
+  recordHashes: RecordHashes,
+  encryptionKeys: Map<string, string>
+): Promise<string> {
+  const fields = Object.keys(recordHashes).sort();
+  const canonicalParts: string[] = [];
+  const keyParts: string[] = [];
+
+  for (const field of fields) {
+    const val = recordHashes[field];
+    keyParts.push(encryptionKeys.get(field) || '');
+    if (Array.isArray(val)) {
+      canonicalParts.push(`${field}=${val.join(',')}`);
+    } else {
+      canonicalParts.push(`${field}=${val}`);
+    }
+  }
+
+  const canonical = canonicalParts.join('|');
+  const compositeKeyHex = CryptoJS.SHA256(keyParts.join('|')).toString();
+  return await HMAC.createSearchableHash(canonical, compositeKeyHex);
+}
+
+/**
  * Build the full encrypted payload according to BE expectations.
  */
 export async function buildEncryptedPayload(
@@ -173,6 +203,61 @@ export async function buildEncryptedPayload(
   const record = await buildEncryptedRecord(rawRecord, fieldConfigs, encryptionKeys, options);
   const hashed_keywords = await buildHashedKeywords(rawRecord, fieldConfigs, encryptionKeys);
   const record_hashes = await buildRecordHashes(record, encryptionKeys);
+  const record_hash = await buildTotalRecordHash(record_hashes, encryptionKeys);
 
-  return { record, hashed_keywords, record_hashes };
+  return { record, hashed_keywords, record_hashes, record_hash };
+}
+
+/**
+ * Verify record integrity by recomputing field hashes and total record_hash.
+ * Returns { ok, mismatches } where mismatches lists fields that differ and 'total'.
+ */
+export async function verifyRecordIntegrity(
+  record: EncryptedRecord,
+  recordHashes: RecordHashes,
+  encryptionKeys: Map<string, string>,
+  expectedRecordHash?: string
+): Promise<{ ok: boolean; mismatches: string[] }> {
+  const mismatches: string[] = [];
+  const recomputed = await buildRecordHashes(record, encryptionKeys);
+
+  const fields = Array.from(new Set([
+    ...Object.keys(recordHashes),
+    ...Object.keys(recomputed)
+  ])).sort();
+
+  for (const field of fields) {
+    const a = (recordHashes as Record<string, string | string[] | undefined>)[field];
+    const b = (recomputed as Record<string, string | string[] | undefined>)[field];
+
+    if (Array.isArray(a) && Array.isArray(b)) {
+      const aa = a as string[];
+      const bb = b as string[];
+      if (aa.length !== bb.length) {
+        mismatches.push(field);
+        continue;
+      }
+      for (let i = 0; i < aa.length; i++) {
+        if (!HMAC.compare(aa[i]!, bb[i]!)) {
+          mismatches.push(field);
+          break;
+        }
+      }
+    } else if (typeof a === 'string' && typeof b === 'string') {
+      if (!HMAC.compare(a, b)) {
+        mismatches.push(field);
+      }
+    } else {
+      // Type mismatch or missing value
+      mismatches.push(field);
+    }
+  }
+
+  const recomputedTotal = await buildTotalRecordHash(recomputed, encryptionKeys);
+  const expectedTotal = expectedRecordHash ?? await buildTotalRecordHash(recordHashes, encryptionKeys);
+  if (!HMAC.compare(recomputedTotal, expectedTotal)) {
+    mismatches.push('total');
+  }
+
+  return { ok: mismatches.length === 0, mismatches };
 }

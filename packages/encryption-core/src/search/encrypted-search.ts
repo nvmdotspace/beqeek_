@@ -94,7 +94,7 @@ export class EncryptedSearch {
     } = options;
 
     const results: SearchResult[] = [];
-    const queryTokens = this.tokenizeQuery(query);
+    const queryTokens = this.tokenizeQuery(query, caseSensitive);
 
     // Search through all indexes
     for (const [field, fieldIndex] of this.searchIndexes) {
@@ -257,9 +257,10 @@ export class EncryptedSearch {
     encryptionKey: string
   ): Promise<SearchTokenData[]> {
     const tokens: SearchTokenData[] = [];
+    const normalized = this.normalizeText(value);
 
     // Exact match token
-    const exactToken = await HMAC.createSearchableHash(value, encryptionKey);
+    const exactToken = await HMAC.createSearchableHash(normalized, encryptionKey);
     tokens.push({
       type: 'exact',
       token: exactToken,
@@ -267,7 +268,7 @@ export class EncryptedSearch {
     });
 
     // Prefix tokens for autocomplete
-    const prefixes = this.generatePrefixes(value);
+    const prefixes = this.generatePrefixes(normalized);
     for (const prefix of prefixes) {
       const prefixToken = await HMAC.createSearchableHash(prefix, encryptionKey);
       tokens.push({
@@ -278,7 +279,7 @@ export class EncryptedSearch {
     }
 
     // Word tokens for full-text search
-    const words = this.tokenizeWords(value);
+    const words = this.tokenizeWords(normalized);
     for (const word of words) {
       const wordToken = await HMAC.createSearchableHash(word, encryptionKey);
       tokens.push({
@@ -343,6 +344,7 @@ export class EncryptedSearch {
     encryptionKey: string
   ): Promise<SearchTokenData[]> {
     const tokens: SearchTokenData[] = [];
+    const normalized = this.normalizeText(value);
 
     // Exact match token
     const hashed = await HMAC.hash(value, encryptionKey);
@@ -355,7 +357,7 @@ export class EncryptedSearch {
     // For selection fields, also store original value for exact matching
     tokens.push({
       type: 'exact',
-      token: await HMAC.createSearchableHash(value, encryptionKey),
+      token: await HMAC.createSearchableHash(normalized, encryptionKey),
       weight: 1.0
     });
 
@@ -439,9 +441,8 @@ export class EncryptedSearch {
   /**
    * Tokenize search query
    */
-  private tokenizeQuery(query: string): string[] {
-    return query
-      .toLowerCase()
+  private tokenizeQuery(query: string, caseSensitive: boolean = false): string[] {
+    return this.normalizeText(query, caseSensitive)
       .split(/\s+/)
       .filter(token => token.length > 0);
   }
@@ -451,7 +452,7 @@ export class EncryptedSearch {
    */
   private generatePrefixes(value: string, minLength: number = 2): string[] {
     const prefixes: string[] = [];
-    const normalizedValue = value.toLowerCase();
+    const normalizedValue = value;
 
     for (let i = minLength; i <= normalizedValue.length; i++) {
       prefixes.push(normalizedValue.substring(0, i));
@@ -465,8 +466,16 @@ export class EncryptedSearch {
    */
   private tokenizeWords(value: string): string[] {
     return value
-      .toLowerCase()
       .split(/\W+/)
       .filter(word => word.length > 2);
+  }
+
+  /**
+   * Normalize text by removing diacritics and applying Unicode normalization.
+   * Lowercases by default unless caseSensitive is true.
+   */
+  private normalizeText(value: string, caseSensitive: boolean = false): string {
+    const stripped = value.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    return caseSensitive ? stripped : stripped.toLowerCase();
   }
 }
