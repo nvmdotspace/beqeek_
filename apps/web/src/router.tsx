@@ -4,9 +4,6 @@ import { lazy, Suspense } from 'react';
 
 import { RootLayout } from './routes/root-layout';
 import { getIsAuthenticated } from '@/features/auth';
-import { queryClient } from '@/shared/query-client';
-import { workspaceQueryKey } from '@/features/workspace/hooks/use-workspaces';
-import { getWorkspaces } from '@/features/workspace/api/workspace-api';
 import { NotFound } from '@/components/not-found';
 import { RoutePending } from '@/components/route-pending';
 import { RouteError } from '@/components/route-error';
@@ -87,9 +84,6 @@ const workspacesRoute = createRoute({
     if (!isAuthenticated) {
       throw redirect({ to: '/login' });
     }
-  },
-  loader: async () => {
-    await queryClient.ensureQueryData({ queryKey: workspaceQueryKey, queryFn: () => getWorkspaces() });
   },
 });
 
@@ -205,9 +199,6 @@ const localeWorkspacesRoute = createRoute({
     if (!isAuthenticated) {
       throw redirect({ to: lp('/login', locale) });
     }
-  },
-  loader: async () => {
-    await queryClient.ensureQueryData({ queryKey: workspaceQueryKey, queryFn: () => getWorkspaces() });
   },
 });
 

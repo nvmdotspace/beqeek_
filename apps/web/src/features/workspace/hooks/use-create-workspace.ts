@@ -13,8 +13,10 @@ export const useCreateWorkspace = () => {
   return useMutation({
     mutationFn: (payload: WorkspaceMutationData) => createWorkspace(payload),
     onSuccess: async () => {
+      // Invalidate to refetch fresh data
       await queryClient.invalidateQueries({
         queryKey: workspaceQueryKey,
+        refetchType: 'active', // Only refetch active queries
       });
     },
     onError: (error) => {

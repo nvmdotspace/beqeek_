@@ -6,9 +6,8 @@ import type {
   ValidationResult,
   CreateTableRequest,
   UpdateTableRequest,
-  ActiveTablesApiClient
+  ActiveTablesApiClient,
 } from '../types';
-
 
 export class TableManager {
   private keyManager: KeyManager;
@@ -26,7 +25,7 @@ export class TableManager {
     // Validate request
     const validation = this.validateCreateRequest(request);
     if (!validation.isValid) {
-      throw new Error(`Invalid table creation request: ${validation.errors.map(e => e.message).join(', ')}`);
+      throw new Error(`Invalid table creation request: ${validation.errors.map((e) => e.message).join(', ')}`);
     }
 
     // Generate table ID
@@ -34,7 +33,7 @@ export class TableManager {
 
     // Create encryption keys for the table
     const fieldTypes: Record<string, string> = {};
-    request.fields.forEach(field => {
+    request.fields.forEach((field) => {
       fieldTypes[field.name] = field.type;
     });
 
@@ -42,7 +41,7 @@ export class TableManager {
       tableId,
       request.workspaceId,
       fieldTypes,
-      request.e2eeEnabled || false
+      request.e2eeEnabled || false,
     );
 
     // Prepare table configuration
@@ -57,7 +56,7 @@ export class TableManager {
       createdAt: new Date(),
       updatedAt: new Date(),
       createdBy: 'current-user', // TODO: Get actual user ID
-      settings: this.getDefaultTableSettings()
+      settings: this.getDefaultTableSettings(),
     };
 
     try {
@@ -106,13 +105,13 @@ export class TableManager {
     // Validate update
     const validation = this.validateUpdateRequest(request, existingTable);
     if (!validation.isValid) {
-      throw new Error(`Invalid table update request: ${validation.errors.map(e => e.message).join(', ')}`);
+      throw new Error(`Invalid table update request: ${validation.errors.map((e) => e.message).join(', ')}`);
     }
 
     const updatedTable: TableConfig = {
       ...existingTable,
       ...request,
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     // Handle field changes
@@ -156,7 +155,7 @@ export class TableManager {
    */
   async listTables(workspaceId: string): Promise<TableConfig[]> {
     try {
-      const response = await this.apiClient.get(`/workspaces/${workspaceId}/tables`);
+      const response = await this.apiClient.get(`/tables`);
       return response.data;
     } catch (error) {
       // Fallback to locally cached tables
@@ -177,10 +176,7 @@ export class TableManager {
   /**
    * Duplicate table
    */
-  async duplicateTable(
-    sourceTableId: string,
-    newName: string
-  ): Promise<TableConfig> {
+  async duplicateTable(sourceTableId: string, newName: string): Promise<TableConfig> {
     const sourceTable = await this.getTable(sourceTableId);
     if (!sourceTable) {
       throw new Error('Source table not found');
@@ -190,17 +186,17 @@ export class TableManager {
       name: newName,
       description: sourceTable.description ? `Copy of ${sourceTable.description}` : undefined,
       workspaceId: sourceTable.workspaceId,
-      fields: sourceTable.fields.map(field => ({
+      fields: sourceTable.fields.map((field) => ({
         name: field.name,
         type: field.type,
         label: field.label,
         required: field.required,
         description: field.description,
         defaultValue: field.defaultValue,
-        validation: field.validation
+        validation: field.validation,
       })),
       encryptionEnabled: sourceTable.encryptionEnabled,
-      e2eeEnabled: sourceTable.e2eeEnabled
+      e2eeEnabled: sourceTable.e2eeEnabled,
     };
 
     return this.createTable(duplicateRequest);
@@ -222,14 +218,11 @@ export class TableManager {
   /**
    * Update table permissions
    */
-  async updateTablePermissions(
-    tableId: string,
-    permissions: Partial<TablePermission>[]
-  ): Promise<TablePermission[]> {
+  async updateTablePermissions(tableId: string, permissions: Partial<TablePermission>[]): Promise<TablePermission[]> {
     try {
       const response = await this.apiClient.put(`/tables/${tableId}/permissions`, {
         permissions,
-        updatedBy: 'current-user' // TODO: Get actual user ID
+        updatedBy: 'current-user', // TODO: Get actual user ID
       });
       return response.data;
     } catch (error) {
@@ -251,15 +244,17 @@ export class TableManager {
 
     return {
       table,
-      tableKey: tableKey ? {
-        id: tableKey.tableId,
-        version: tableKey.version,
-        e2eeEnabled: tableKey.e2eeEnabled,
-        fieldTypes: Object.keys(tableKey.fieldKeys)
-      } : null,
+      tableKey: tableKey
+        ? {
+            id: tableKey.tableId,
+            version: tableKey.version,
+            e2eeEnabled: tableKey.e2eeEnabled,
+            fieldTypes: Object.keys(tableKey.fieldKeys),
+          }
+        : null,
       permissions,
       exportedAt: new Date().toISOString(),
-      version: '1.0'
+      version: '1.0',
     };
   }
 
@@ -282,10 +277,10 @@ export class TableManager {
         required: field.required,
         description: field.description,
         defaultValue: field.defaultValue,
-        validation: field.validation
+        validation: field.validation,
       })),
       encryptionEnabled: config.table.encryptionEnabled,
-      e2eeEnabled: config.table.e2eeEnabled
+      e2eeEnabled: config.table.e2eeEnabled,
     };
 
     const newTable = await this.createTable(importRequest);
@@ -296,7 +291,7 @@ export class TableManager {
         ...perm,
         tableId: newTable.id,
         grantedBy: 'current-user', // TODO: Get actual user ID
-        grantedAt: new Date()
+        grantedAt: new Date(),
       }));
 
       await this.updateTablePermissions(newTable.id, adaptedPermissions);
@@ -317,7 +312,7 @@ export class TableManager {
         value: request.name,
         rule: 'required',
         message: 'Table name is required',
-        code: 'REQUIRED_FIELD'
+        code: 'REQUIRED_FIELD',
       });
     }
 
@@ -327,7 +322,7 @@ export class TableManager {
         value: request.workspaceId,
         rule: 'required',
         message: 'Workspace ID is required',
-        code: 'REQUIRED_FIELD'
+        code: 'REQUIRED_FIELD',
       });
     }
 
@@ -337,13 +332,13 @@ export class TableManager {
         value: request.fields,
         rule: 'required',
         message: 'At least one field is required',
-        code: 'REQUIRED_FIELD'
+        code: 'REQUIRED_FIELD',
       });
     }
 
     // Validate field names are unique
     if (request.fields) {
-      const fieldNames = request.fields.map(f => f.name);
+      const fieldNames = request.fields.map((f) => f.name);
       const duplicates = fieldNames.filter((name, index) => fieldNames.indexOf(name) !== index);
       if (duplicates.length > 0) {
         errors.push({
@@ -351,7 +346,7 @@ export class TableManager {
           value: duplicates,
           rule: 'unique',
           message: `Field names must be unique: ${duplicates.join(', ')}`,
-          code: 'DUPLICATE_FIELD_NAMES'
+          code: 'DUPLICATE_FIELD_NAMES',
         });
       }
     }
@@ -359,7 +354,7 @@ export class TableManager {
     return {
       isValid: errors.length === 0,
       errors,
-      warnings: []
+      warnings: [],
     };
   }
 
@@ -371,7 +366,7 @@ export class TableManager {
 
     if (request.fields) {
       // Validate field names are unique
-      const fieldNames = request.fields.map(f => f.name);
+      const fieldNames = request.fields.map((f) => f.name);
       const duplicates = fieldNames.filter((name, index) => fieldNames.indexOf(name) !== index);
       if (duplicates.length > 0) {
         errors.push({
@@ -379,7 +374,7 @@ export class TableManager {
           value: duplicates,
           rule: 'unique',
           message: `Field names must be unique: ${duplicates.join(', ')}`,
-          code: 'DUPLICATE_FIELD_NAMES'
+          code: 'DUPLICATE_FIELD_NAMES',
         });
       }
     }
@@ -387,7 +382,7 @@ export class TableManager {
     return {
       isValid: errors.length === 0,
       errors,
-      warnings: []
+      warnings: [],
     };
   }
 
@@ -404,8 +399,8 @@ export class TableManager {
         searchable: this.isSearchableFieldType(field.type),
         orderPreserving: this.isOrderPreservingFieldType(field.type),
         e2ee: tableKey.e2eeEnabled,
-        keyRotation: true
-      }
+        keyRotation: true,
+      },
     }));
   }
 
@@ -425,8 +420,8 @@ export class TableManager {
         showRowNumbers: true,
         enableFilters: true,
         enableSearch: true,
-        enableSorting: true
-      }
+        enableSorting: true,
+      },
     };
   }
 
@@ -449,21 +444,21 @@ export class TableManager {
    */
   private getEncryptionTypeForFieldType(fieldType: string): string {
     const encryptionMap: Record<string, string> = {
-      'SHORT_TEXT': 'AES-256-CBC',
-      'TEXT': 'AES-256-CBC',
-      'RICH_TEXT': 'AES-256-CBC',
-      'EMAIL': 'AES-256-CBC',
-      'URL': 'AES-256-CBC',
-      'INTEGER': 'OPE',
-      'NUMERIC': 'OPE',
-      'DATE': 'OPE',
-      'DATETIME': 'OPE',
-      'TIME': 'OPE',
-      'CHECKBOX_YES_NO': 'HMAC-SHA256',
-      'CHECKBOX_ONE': 'HMAC-SHA256',
-      'CHECKBOX_LIST': 'HMAC-SHA256',
-      'SELECT_ONE': 'HMAC-SHA256',
-      'SELECT_LIST': 'HMAC-SHA256'
+      SHORT_TEXT: 'AES-256-CBC',
+      TEXT: 'AES-256-CBC',
+      RICH_TEXT: 'AES-256-CBC',
+      EMAIL: 'AES-256-CBC',
+      URL: 'AES-256-CBC',
+      INTEGER: 'OPE',
+      NUMERIC: 'OPE',
+      DATE: 'OPE',
+      DATETIME: 'OPE',
+      TIME: 'OPE',
+      CHECKBOX_YES_NO: 'HMAC-SHA256',
+      CHECKBOX_ONE: 'HMAC-SHA256',
+      CHECKBOX_LIST: 'HMAC-SHA256',
+      SELECT_ONE: 'HMAC-SHA256',
+      SELECT_LIST: 'HMAC-SHA256',
     };
 
     return encryptionMap[fieldType] || 'NONE';
@@ -474,10 +469,20 @@ export class TableManager {
    */
   private isSearchableFieldType(fieldType: string): boolean {
     const searchableTypes = [
-      'SHORT_TEXT', 'TEXT', 'EMAIL', 'URL',
-      'INTEGER', 'NUMERIC', 'DATE', 'DATETIME', 'TIME',
-      'CHECKBOX_YES_NO', 'CHECKBOX_ONE', 'CHECKBOX_LIST',
-      'SELECT_ONE', 'SELECT_LIST'
+      'SHORT_TEXT',
+      'TEXT',
+      'EMAIL',
+      'URL',
+      'INTEGER',
+      'NUMERIC',
+      'DATE',
+      'DATETIME',
+      'TIME',
+      'CHECKBOX_YES_NO',
+      'CHECKBOX_ONE',
+      'CHECKBOX_LIST',
+      'SELECT_ONE',
+      'SELECT_LIST',
     ];
 
     return searchableTypes.includes(fieldType);
@@ -487,9 +492,7 @@ export class TableManager {
    * Check if field type supports order preservation
    */
   private isOrderPreservingFieldType(fieldType: string): boolean {
-    const orderPreservingTypes = [
-      'INTEGER', 'NUMERIC', 'DATE', 'DATETIME', 'TIME'
-    ];
+    const orderPreservingTypes = ['INTEGER', 'NUMERIC', 'DATE', 'DATETIME', 'TIME'];
 
     return orderPreservingTypes.includes(fieldType);
   }
