@@ -12,7 +12,7 @@ interface RootLayoutProps {
 export const RootLayout = ({ children }: RootLayoutProps) => {
   const location = useLocation();
   const pathname = location.pathname;
-  const hideSidebar = pathname === '/login' || pathname === '/en/login';
+  const hideSidebar = pathname.endsWith('/login');
   const showSidebar = !hideSidebar;
 
   return (

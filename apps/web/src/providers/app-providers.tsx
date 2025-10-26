@@ -1,6 +1,8 @@
 import * as React from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { useLanguageStore } from '@/stores/language-store';
+// @ts-expect-error - Paraglide runtime doesn't have TypeScript declarations
+import { baseLocale, isLocale } from '@/paraglide/runtime';
 
 import { ThemeProvider } from './theme-provider';
 import { ApiErrorBoundary } from '@/components/api-error-boundary';
@@ -12,19 +14,14 @@ function LanguageDetector({ children }: { children: React.ReactNode }) {
   const setLanguage = useLanguageStore((state) => state.setLanguage);
 
   React.useEffect(() => {
-    // Detect language from URL path
+    // Detect language from URL path (first segment)
     const pathname = window.location.pathname;
-    let detectedLocale = 'vi'; // default
-
-    // support '/en' and '/en/...'
-    if (pathname === '/en' || pathname.startsWith('/en/')) {
-      detectedLocale = 'en';
-    }
-
-    setLanguage(detectedLocale);
+    const first = pathname.split('/')[1] || '';
+    const detected = isLocale(first) ? first : baseLocale;
+    setLanguage(detected);
   }, [setLanguage]);
 
-  return <>{children}</>;
+  return <>{children}</>; 
 }
 
 export const AppProviders = ({ children }: { children: React.ReactNode }) => {

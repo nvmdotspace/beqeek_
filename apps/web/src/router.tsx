@@ -3,8 +3,6 @@ import { createRootRoute, createRoute, createRouter } from '@tanstack/react-rout
 import { lazy, Suspense } from 'react';
 
 import { RootLayout } from './routes/root-layout';
-// import { LoginPage, getIsAuthenticated } from '@/features/auth';
-// import { WorkspaceDashboardPage } from '@/features/workspace';
 import { getIsAuthenticated } from '@/features/auth';
 import { queryClient } from '@/shared/query-client';
 import { workspaceQueryKey } from '@/features/workspace/hooks/use-workspaces';
@@ -19,9 +17,13 @@ const WorkspaceDashboardPageLazy = lazy(() =>
   import('@/features/workspace/pages/workspace-dashboard').then((m) => ({ default: m.WorkspaceDashboardPage })),
 );
 
-// Helpers for locale-aware paths
-const getLocaleFromPathname = (pathname: string) => (pathname === '/en' || pathname.startsWith('/en/') ? 'en' : 'vi');
-const lp = (path: string, locale: string) => (locale === 'en' ? `/en${path}` : path);
+// Locale helpers: default vi, support en; fallback to vi for others
+const SUPPORTED_LOCALES = ['vi', 'en'] as const;
+type Locale = (typeof SUPPORTED_LOCALES)[number];
+const DEFAULT_LOCALE: Locale = 'vi';
+const isSupportedLocale = (loc?: string): loc is Locale => !!loc && SUPPORTED_LOCALES.includes(loc.toLowerCase() as Locale);
+const normalizeLocale = (loc?: string): Locale => (isSupportedLocale(loc) ? (loc!.toLowerCase() as Locale) : DEFAULT_LOCALE);
+const lp = (path: string, locale: Locale) => (locale !== DEFAULT_LOCALE ? `/${locale}${path}` : path);
 
 const rootRoute = createRootRoute({
   component: RootLayout,
@@ -29,20 +31,17 @@ const rootRoute = createRootRoute({
   errorComponent: ({ error }) => <RouteError error={error} />,
 });
 
-// Index route: decide auth redirect with locale
+// Index route: default to vi, redirect to login/workspaces
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
   beforeLoad: () => {
     const isAuthenticated = getIsAuthenticated();
-    const locale = getLocaleFromPathname(window.location.pathname);
-
-    throw redirect({
-      to: lp(isAuthenticated ? '/workspaces' : '/login', locale),
-    });
+    throw redirect({ to: isAuthenticated ? '/workspaces' : '/login' });
   },
 });
 
+// vi (default) routes
 const loginRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/login',
@@ -53,10 +52,8 @@ const loginRoute = createRoute({
   ),
   beforeLoad: () => {
     const isAuthenticated = getIsAuthenticated();
-    const locale = getLocaleFromPathname(window.location.pathname);
-
     if (isAuthenticated) {
-      throw redirect({ to: lp('/workspaces', locale) });
+      throw redirect({ to: '/workspaces' });
     }
   },
 });
@@ -71,10 +68,8 @@ const workspacesRoute = createRoute({
   ),
   beforeLoad: () => {
     const isAuthenticated = getIsAuthenticated();
-    const locale = getLocaleFromPathname(window.location.pathname);
-
     if (!isAuthenticated) {
-      throw redirect({ to: lp('/login', locale) });
+      throw redirect({ to: '/login' });
     }
   },
   loader: async () => {
@@ -82,44 +77,47 @@ const workspacesRoute = createRoute({
   },
 });
 
-// English routes (prefix group)
-const enIndexRoute = createRoute({
+// Dynamic locale-prefixed routes (e.g., /en/*). Unsupported locale => fallback to vi.
+const localeIndexRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/en',
-  beforeLoad: () => {
+  path: '/$locale',
+  beforeLoad: ({ params }) => {
+    const locale = normalizeLocale(params.locale);
     const isAuthenticated = getIsAuthenticated();
-    throw redirect({ to: isAuthenticated ? '/en/workspaces' : '/en/login' });
+    throw redirect({ to: lp(isAuthenticated ? '/workspaces' : '/login', locale) });
   },
 });
 
-const enLoginRoute = createRoute({
+const localeLoginRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/en/login',
+  path: '/$locale/login',
   component: () => (
     <Suspense fallback={<div className="p-6">Loading...</div>}>
       <LoginPageLazy />
     </Suspense>
   ),
-  beforeLoad: () => {
+  beforeLoad: ({ params }) => {
+    const locale = normalizeLocale(params.locale);
     const isAuthenticated = getIsAuthenticated();
     if (isAuthenticated) {
-      throw redirect({ to: '/en/workspaces' });
+      throw redirect({ to: lp('/workspaces', locale) });
     }
   },
 });
 
-const enWorkspacesRoute = createRoute({
+const localeWorkspacesRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/en/workspaces',
+  path: '/$locale/workspaces',
   component: () => (
     <Suspense fallback={<div className="p-6">Loading...</div>}>
       <WorkspaceDashboardPageLazy />
     </Suspense>
   ),
-  beforeLoad: () => {
+  beforeLoad: ({ params }) => {
+    const locale = normalizeLocale(params.locale);
     const isAuthenticated = getIsAuthenticated();
     if (!isAuthenticated) {
-      throw redirect({ to: '/en/login' });
+      throw redirect({ to: lp('/login', locale) });
     }
   },
   loader: async () => {
@@ -137,9 +135,9 @@ const routeTree = rootRoute.addChildren([
   indexRoute,
   loginRoute,
   workspacesRoute,
-  enIndexRoute,
-  enLoginRoute,
-  enWorkspacesRoute,
+  localeIndexRoute,
+  localeLoginRoute,
+  localeWorkspacesRoute,
   notFoundRoute,
 ]);
 
