@@ -143,7 +143,7 @@ const SidebarContent = ({
       {/* Sidebar Header - Logo Only */}
       <div
         className={cn(
-          'flex items-center justify-between border-b border-border p-4',
+          'flex items-center justify-between p-4',
           isCollapsed && 'justify-center px-2 py-3',
         )}
       >
