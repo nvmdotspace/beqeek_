@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 
 import { AppSidebar } from './app-sidebar';
+import { MobileBottomNav, MobileFloatingAction } from './mobile-bottom-nav';
 import { Button } from '@workspace/ui/components/button';
-import { Menu, Search, Bell, Settings, X, Mic, Filter } from 'lucide-react';
+import { Menu, Search, Bell, Settings, X } from 'lucide-react';
 import { Input } from '@workspace/ui/components/input';
 import {
   DropdownMenu,
@@ -14,11 +15,16 @@ import {
 import { Badge } from '@workspace/ui/components/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@workspace/ui/components/avatar';
 
-import { cn } from '@workspace/ui/lib/utils';
 import { useAuthStore } from '@/features/auth';
 import { useLogout } from '@/features/auth/hooks/use-logout';
-import { useLanguageStore } from '@/stores/language-store';
+
 import { useTranslation } from '@/hooks/use-translation';
+import {
+  useAppKeyboardShortcuts,
+  useAccessibilityEnhancements,
+  useAriaManagement,
+} from '@/hooks/use-keyboard-shortcuts';
+import { useSidebarStore } from '@/stores/sidebar-store';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -26,63 +32,30 @@ interface AppLayoutProps {
 }
 
 export const AppLayout = ({ children, showSidebar = true }: AppLayoutProps) => {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [isListening, setIsListening] = useState(false);
+
   const userId = useAuthStore((state) => state.userId);
   const logout = useLogout();
-  const locale = useLanguageStore((state) => state.locale);
   const { t } = useTranslation();
+  const setSidebarOpen = useSidebarStore((state) => state.setSidebarOpen);
 
-  // Close mobile sidebar when clicking outside and handle responsive behavior
+  // Initialize keyboard shortcuts and accessibility
+  useAppKeyboardShortcuts();
+  useAccessibilityEnhancements();
+  useAriaManagement();
+
+  // Close mobile search when clicking outside
   useEffect(() => {
-    const handleResize = () => {
-      const width = window.innerWidth;
-      if (width >= 1024) {
-        setMobileSidebarOpen(false);
-      }
-      // Auto-collapse sidebar on tablet
-      if (width >= 768 && width < 1024) {
-        setSidebarCollapsed(true);
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && mobileSearchOpen) {
+        setMobileSearchOpen(false);
       }
     };
 
-    // Initial check
-    handleResize();
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  const handleVoiceSearch = () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
-
-    if (SpeechRecognition) {
-      const recognition = new SpeechRecognition();
-
-      recognition.continuous = false;
-      recognition.interimResults = false;
-      recognition.lang = locale === 'vi' ? 'vi-VN' : 'en-US'; // Dynamic language support
-
-      recognition.onstart = () => setIsListening(true);
-      recognition.onend = () => setIsListening(false);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      recognition.onresult = (event: any) => {
-        const transcript = event.results[0][0].transcript;
-        setSearchQuery(transcript);
-        setMobileSearchOpen(false);
-      };
-
-      recognition.onerror = () => {
-        setIsListening(false);
-      };
-
-      recognition.start();
-    }
-  };
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [mobileSearchOpen]);
 
   if (!showSidebar) {
     return <div className="min-h-screen bg-background">{children}</div>;
@@ -90,37 +63,27 @@ export const AppLayout = ({ children, showSidebar = true }: AppLayoutProps) => {
 
   return (
     <div className="flex h-screen bg-background relative">
-      {/* Mobile Sidebar Overlay */}
-      {mobileSidebarOpen && (
-        <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={() => setMobileSidebarOpen(false)} />
-      )}
-
-      {/* Sidebar */}
-      <div
-        className={cn(
-          'fixed inset-y-0 left-0 z-50 transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0',
-          mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
-        )}
-      >
-        <AppSidebar
-          isCollapsed={sidebarCollapsed}
-          onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
-          isMobile={typeof window !== 'undefined' && window.innerWidth < 1024}
-          onCloseMobile={() => setMobileSidebarOpen(false)}
-        />
-      </div>
+      <AppSidebar />
 
       {/* Main Content */}
-      <div className="flex flex-1 flex-col overflow-hidden lg:ml-0">
+      <div className="flex flex-1 flex-col overflow-hidden">
         {/* Header */}
-        <header className="flex h-16 items-center justify-between border-b bg-background px-4 sm:px-6">
+        <header className="flex h-16 items-center justify-between border-b bg-background px-4 sm:px-6 relative z-30">
           <div className="flex items-center gap-3 flex-1">
-            {/* Mobile/Tablet Menu Toggle */}
-            <Button variant="ghost" size="icon" onClick={() => setMobileSidebarOpen(true)} className="lg:hidden">
-              <Menu className="h-5 w-5" />
-            </Button>
+            {/* Mobile Menu Toggle - handled by sidebar now */}
+            <div className="md:hidden">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setSidebarOpen(true)}
+                className="h-9 w-9"
+                aria-label="Open sidebar"
+              >
+                <Menu className="h-5 w-5" />
+              </Button>
+            </div>
 
-            {/* Desktop/Tablet Search Bar */}
+            {/* Desktop Search Bar */}
             <div className="hidden md:flex relative max-w-md flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
@@ -147,7 +110,7 @@ export const AppLayout = ({ children, showSidebar = true }: AppLayoutProps) => {
             {/* Notifications */}
             <Button variant="ghost" size="icon" className="relative h-9 w-9 sm:h-10 sm:w-10">
               <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
-              <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs">3</Badge>
+              <Badge className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full p-0 text-[10px] font-semibold flex items-center justify-center">3</Badge>
             </Button>
 
             {/* Quick Actions */}
@@ -188,6 +151,10 @@ export const AppLayout = ({ children, showSidebar = true }: AppLayoutProps) => {
                 <DropdownMenuItem>{t('common.settings') || 'Settings'}</DropdownMenuItem>
                 <DropdownMenuItem>{t('common.billing') || 'Billing'}</DropdownMenuItem>
                 <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => window.open('/keyboard-shortcuts', '_blank')}>
+                  Keyboard Shortcuts
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => logout()}>
                   {t('common.logout') || 'Log out'}
                 </DropdownMenuItem>
@@ -207,37 +174,25 @@ export const AppLayout = ({ children, showSidebar = true }: AppLayoutProps) => {
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   placeholder={t('common.searchPlaceholder')}
-                  className="pl-9 pr-20"
+                  className="pl-9 w-full"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   autoFocus
                 />
-                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={handleVoiceSearch}
-                    className={cn('h-7 w-7', isListening && 'text-red-500 animate-pulse')}
-                  >
-                    <Mic className="h-3 w-3" />
-                  </Button>
-                  <Button variant="ghost" size="icon" className="h-7 w-7">
-                    <Filter className="h-3 w-3" />
-                  </Button>
-                </div>
               </div>
             </div>
             <div className="p-4">
-              <p className="text-sm text-muted-foreground">{t('common.recentSearches') || 'Recent searches'}</p>
-              <div className="mt-2 space-y-2">
-                <div className="p-2 rounded-lg hover:bg-accent cursor-pointer">
-                  {t('common.activeTables') || 'Active tables'}
+              <div className="space-y-2">
+                <div className="text-sm font-medium text-muted-foreground">
+                  {t('common.quickActions') || 'Quick Actions'}
                 </div>
-                <div className="p-2 rounded-lg hover:bg-accent cursor-pointer">
-                  {t('common.teamMembers') || 'Team members'}
-                </div>
-                <div className="p-2 rounded-lg hover:bg-accent cursor-pointer">
-                  {t('common.workflowSettings') || 'Workflow settings'}
+                <div className="space-y-1">
+                  <div className="p-2 rounded-lg hover:bg-accent cursor-pointer">
+                    {t('common.createTable') || 'Create new table'}
+                  </div>
+                  <div className="p-2 rounded-lg hover:bg-accent cursor-pointer">
+                    {t('common.workflowSettings') || 'Workflow settings'}
+                  </div>
                 </div>
               </div>
             </div>
@@ -245,8 +200,14 @@ export const AppLayout = ({ children, showSidebar = true }: AppLayoutProps) => {
         )}
 
         {/* Page Content */}
-        <main className="flex-1 overflow-auto">{children}</main>
+        <main className="flex-1 overflow-auto hide-scrollbar-mobile pb-16 md:pb-0">{children}</main>
       </div>
+
+      {/* Mobile Bottom Navigation */}
+      <MobileBottomNav />
+
+      {/* Mobile Floating Action Button */}
+      <MobileFloatingAction />
     </div>
   );
 };

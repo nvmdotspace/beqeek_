@@ -1,12 +1,12 @@
 import { useMemo, useState } from 'react';
 import { Link } from '@tanstack/react-router';
 
-import { PlusCircle, Folder, Zap, Users, Database } from 'lucide-react';
+import { PlusCircle, Folder, Zap, Users } from 'lucide-react';
 
 import { useWorkspaces } from '../hooks/use-workspaces';
 
 import { Button } from '@workspace/ui/components/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@workspace/ui/components/card';
+import { Card, CardContent } from '@workspace/ui/components/card';
 import { Skeleton } from '@workspace/ui/components/skeleton';
 
 import { WorkspaceCreateForm } from '../components/workspace-create-form';
@@ -171,36 +171,16 @@ export const WorkspaceDashboardPage = () => {
         />
       ) : null}
 
-      {/* Quick Access */}
+      {/* Workspace List Section */}
       {!isLoading && !error && totalWorkspaces > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Database className="h-5 w-5" />
-              {t('workspace.dashboard.quickAccess')}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <Button asChild variant="outline" className="w-full justify-start">
-              <Link to="/workspaces/tables">
-                <Database className="mr-2 h-4 w-4" />
-                {t('workspace.dashboard.viewAllTables')}
-              </Link>
-            </Button>
-            {workspaces.slice(0, 3).map((workspace) => (
-              <Button key={workspace.id} asChild variant="ghost" size="sm" className="w-full justify-start">
-                <Link to="/workspaces/tables" search={{ workspaceId: workspace.id }}>
-                  <Folder className="mr-2 h-4 w-4" />
-                  {t('workspace.dashboard.workspaceTables', { name: workspace.workspaceName })}
-                </Link>
-              </Button>
-            ))}
-          </CardContent>
-        </Card>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold">Danh sách workspace của bạn</h2>
+            <p className="text-sm text-muted-foreground">{totalWorkspaces} workspace</p>
+          </div>
+          <WorkspaceGrid workspaces={workspaces} />
+        </div>
       )}
-
-      {/* Workspace Grid */}
-      {!isLoading && !error && totalWorkspaces > 0 && <WorkspaceGrid workspaces={workspaces} />}
     </div>
   );
 };

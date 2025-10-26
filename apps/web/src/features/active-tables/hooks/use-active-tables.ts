@@ -4,8 +4,8 @@ import { useQueryWithAuth } from '@/hooks/use-query-with-auth';
 import { useAuthStore, selectIsAuthenticated } from '@/features/auth';
 
 import { getActiveTables, getActiveWorkGroups } from '../api/active-tables-api';
-import { useTableManager, useEncryption } from '@workspace/active-tables-hooks';
-import { createActiveTablesApiClient } from '@/shared/api/active-tables-client';
+import { useEncryption } from '@workspace/active-tables-hooks';
+
 import type { ActiveTable, ActiveWorkGroup } from '../types';
 
 export const activeWorkGroupsQueryKey = (workspaceId?: string) => ['active-work-groups', workspaceId ?? 'unknown'];
@@ -36,24 +36,8 @@ export const useActiveTablesGroupedByWorkGroup = (workspaceId?: string) => {
   const tablesQuery = useActiveTables(workspaceId);
   const isEnabled = Boolean(workspaceId);
 
-  // Initialize encryption and table manager hooks
+  // Initialize encryption hook
   const { isReady: isEncryptionReady, initialize: initializeEncryption } = useEncryption();
-
-  // Create real API client if workspaceId is available
-  const apiClient = useMemo(() => {
-    if (!workspaceId) return null;
-    return createActiveTablesApiClient(workspaceId);
-  }, [workspaceId]);
-
-  const { tables: coreTables, isLoadingTables } = useTableManager({
-    apiClient: apiClient || {
-      get: async (_url: string) => ({ data: {} }),
-      post: async (_url: string, _data?: any) => ({ data: {} }),
-      put: async (_url: string, _data?: any) => ({ data: {} }),
-      delete: async (_url: string) => {},
-    },
-    workspaceId: workspaceId || '',
-  });
 
   const workGroups = isEnabled ? (workGroupsQuery.data?.data ?? []) : [];
   const tables = isEnabled ? (tablesQuery.data?.data ?? []) : [];
@@ -96,7 +80,5 @@ export const useActiveTablesGroupedByWorkGroup = (workspaceId?: string) => {
     // Additional hooks integration
     isEncryptionReady,
     initializeEncryption,
-    coreTables,
-    isLoadingCoreTables: isLoadingTables,
   };
 };

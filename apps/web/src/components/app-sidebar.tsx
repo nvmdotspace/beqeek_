@@ -1,369 +1,253 @@
-import React, { useState } from 'react';
-import { Link, useLocation } from '@tanstack/react-router';
-import {
-  Home,
-  BarChart3,
-  Folder,
-  Zap,
-  Users,
-  Settings,
-  Shield,
-  HelpCircle,
-  ChevronDown,
-  ChevronRight,
-  Search,
-  Plus,
-  Menu,
-  X,
-} from 'lucide-react';
-
-import { Button } from '@workspace/ui/components/button';
-import { Input } from '@workspace/ui/components/input';
-import { Badge } from '@workspace/ui/components/badge';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-} from '@workspace/ui/components/dropdown-menu';
-
+import { useEffect } from 'react';
 import { cn } from '@workspace/ui/lib/utils';
-import { useAuthStore } from '@/features/auth';
-import { useWorkspaces } from '@/features/workspace/hooks/use-workspaces';
-import { useLanguageStore } from '@/stores/language-store';
-
-interface NavItem {
-  id: string;
-  label: string;
-  icon: React.ComponentType<{ className?: string }>;
-  href?: string;
-  children?: NavItem[];
-  badge?: string;
-}
-
-const navItems: NavItem[] = [
-  {
-    id: 'dashboard',
-    label: 'Dashboard',
-    icon: Home,
-    href: '/workspaces',
-  },
-  {
-    id: 'analytics',
-    label: 'Analytics',
-    icon: BarChart3,
-    href: '/analytics',
-  },
-  {
-    id: 'workspaces',
-    label: 'Workspaces',
-    icon: Folder,
-    children: [
-      {
-        id: 'active-tables',
-        label: 'Active Tables',
-        icon: Folder,
-        href: '/workspaces/tables',
-      },
-      {
-        id: 'workflows',
-        label: 'Workflows',
-        icon: Zap,
-        href: '/workflows',
-      },
-      {
-        id: 'connectors',
-        label: 'Connectors',
-        icon: Settings,
-        href: '/connectors',
-      },
-    ],
-  },
-  {
-    id: 'team',
-    label: 'Team Management',
-    icon: Users,
-    children: [
-      {
-        id: 'members',
-        label: 'Members',
-        icon: Users,
-        href: '/team/members',
-      },
-      {
-        id: 'roles',
-        label: 'Roles',
-        icon: Settings,
-        href: '/team/roles',
-      },
-      {
-        id: 'permissions',
-        label: 'Permissions',
-        icon: Settings,
-        href: '/team/permissions',
-      },
-    ],
-  },
-  {
-    id: 'settings',
-    label: 'Settings',
-    icon: Settings,
-    children: [
-      {
-        id: 'workspace-settings',
-        label: 'Workspace Settings',
-        icon: Settings,
-        href: '/settings/workspace',
-      },
-      {
-        id: 'encryption-settings',
-        label: 'Encryption',
-        icon: Shield,
-        href: '/settings/encryption',
-      },
-      {
-        id: 'integrations',
-        label: 'Integrations',
-        icon: Settings,
-        href: '/settings/integrations',
-      },
-      {
-        id: 'security',
-        label: 'Security',
-        icon: Settings,
-        href: '/settings/security',
-      },
-    ],
-  },
-  {
-    id: 'help',
-    label: 'Help & Support',
-    icon: HelpCircle,
-    href: '/help',
-  },
-];
-
-interface SidebarItemProps {
-  item: NavItem;
-  level?: number;
-  isCollapsed?: boolean;
-}
-
-const SidebarItem = ({
-  item,
-  level = 0,
-  isCollapsed = false,
-  onItemClick,
-}: SidebarItemProps & { onItemClick?: () => void }) => {
-  const location = useLocation();
-  const [isExpanded, setIsExpanded] = useState(false);
-  const getLocalizedPath = useLanguageStore((state) => state.getLocalizedPath);
-
-  const toPath = item.href ? getLocalizedPath(item.href) : undefined;
-  const isActive = toPath ? location.pathname === toPath : false;
-  const hasChildren = item.children && item.children.length > 0;
-
-  const toggleExpanded = () => {
-    if (hasChildren) {
-      setIsExpanded(!isExpanded);
-    }
-  };
-
-  if (hasChildren) {
-    return (
-      <div className="w-full">
-        <button
-          onClick={toggleExpanded}
-          className={cn(
-            'flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-            'hover:bg-accent hover:text-accent-foreground',
-            level > 0 && 'pl-6',
-          )}
-        >
-          <div className="flex items-center gap-3">
-            <item.icon className="h-4 w-4" />
-            {!isCollapsed && <span>{item.label}</span>}
-          </div>
-          {!isCollapsed && <ChevronRight className={cn('h-4 w-4 transition-transform', isExpanded && 'rotate-90')} />}
-        </button>
-
-        {isExpanded && !isCollapsed && item.children && (
-          <div className="mt-1 space-y-1">
-            {item.children.map((child) => (
-              <SidebarItem key={child.id} item={child} level={level + 1} isCollapsed={isCollapsed} />
-            ))}
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  return (
-    <Link
-      to={toPath!}
-      preload="intent"
-      activeOptions={{ exact: true }}
-      activeProps={{ className: 'bg-primary text-primary-foreground' }}
-      onClick={onItemClick}
-      className={cn(
-        'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-        isActive ? 'bg-primary text-primary-foreground' : 'hover:bg-accent hover:text-accent-foreground',
-        level > 0 && 'pl-6',
-      )}
-    >
-      <item.icon className="h-4 w-4" />
-      {!isCollapsed && <span>{item.label}</span>}
-      {!isCollapsed && item.badge && (
-        <Badge variant="secondary" className="ml-auto">
-          {item.badge}
-        </Badge>
-      )}
-    </Link>
-  );
-};
+import { Button } from '@workspace/ui/components/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@workspace/ui/components/avatar';
+import { ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { useTranslation } from '@/hooks/use-translation';
+import { useBadgeCounts } from '@/hooks/use-badge-counts';
+import {
+  useSidebarStore,
+  selectIsCollapsed,
+  selectIsMobile,
+  selectIsTablet,
+  selectIsSidebarOpen,
+} from '@/stores/sidebar-store';
+import { useAuthStore, selectIsAuthenticated } from '@/features/auth/stores/auth-store';
+import { WorkspaceSelector } from './workspace-selector';
+import { NavigationMenu } from './navigation-menu';
+import { ActivityTracking } from './activity-tracking';
 
 interface AppSidebarProps {
-  isCollapsed?: boolean;
   onToggle?: () => void;
-  isMobile?: boolean;
   onCloseMobile?: () => void;
 }
 
-export const AppSidebar = ({ isCollapsed = false, onToggle, isMobile = false, onCloseMobile }: AppSidebarProps) => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const { data: workspaces, isLoading: workspacesLoading } = useWorkspaces();
-  const userId = useAuthStore((state) => state.userId);
+export const AppSidebar = ({ onToggle, onCloseMobile }: AppSidebarProps) => {
+  const isAuthenticated = useAuthStore(selectIsAuthenticated);
 
-  const currentWorkspace = workspaces?.data?.[0];
+  const isCollapsed = useSidebarStore(selectIsCollapsed);
+  const isMobile = useSidebarStore(selectIsMobile);
+  const isTablet = useSidebarStore(selectIsTablet);
+  const isSidebarOpen = useSidebarStore(selectIsSidebarOpen);
 
-  const filteredNavItems = navItems.filter(
-    (item) =>
-      item.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.children?.some((child) => child.label.toLowerCase().includes(searchQuery.toLowerCase())),
-  );
+  const { setCollapsed, setMobile, setTablet, setSidebarOpen, toggleSidebar } = useSidebarStore();
 
-  const handleItemClick = () => {
-    if (isMobile && onCloseMobile) {
-      onCloseMobile();
+  // Initialize real-time badge counts
+  useBadgeCounts();
+
+  // Handle responsive behavior
+  useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth;
+      const newIsMobile = width < 768;
+      const newIsTablet = width >= 768 && width < 1024;
+
+      setMobile(newIsMobile);
+      setTablet(newIsTablet);
+
+      // Auto-collapse on tablet
+      if (newIsTablet && !isCollapsed) {
+        setCollapsed(true);
+      }
+
+      // Auto-expand on desktop if previously collapsed on tablet
+      if (!newIsTablet && !newIsMobile && isCollapsed) {
+        setCollapsed(false);
+      }
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [isCollapsed, setCollapsed, setMobile, setTablet]);
+
+  const handleToggle = () => {
+    if (isMobile) {
+      toggleSidebar();
+    } else {
+      setCollapsed(!isCollapsed);
     }
+    onToggle?.();
   };
 
+  const handleCloseMobile = () => {
+    if (isMobile) {
+      setSidebarOpen(false);
+    }
+    onCloseMobile?.();
+  };
+
+  if (!isAuthenticated) {
+    return null;
+  }
+
+  // Mobile overlay behavior
+  if (isMobile) {
+    return (
+      <>
+        {/* Backdrop */}
+        {isSidebarOpen && (
+          <div
+            className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+            onClick={handleCloseMobile}
+            aria-label="Close sidebar"
+          />
+        )}
+
+        {/* Sidebar */}
+        <div
+          className={cn(
+            'fixed top-0 left-0 z-50 h-full w-80 max-w-[85vw] bg-sidebar border-r border-border transition-transform duration-300 ease-in-out lg:hidden',
+            isSidebarOpen ? 'translate-x-0' : '-translate-x-full',
+          )}
+          data-sidebar
+        >
+          <SidebarContent onCloseMobile={handleCloseMobile} />
+        </div>
+      </>
+    );
+  }
+
+  // Desktop/Tablet sidebar
   return (
     <div
       className={cn(
-        'flex h-full flex-col border-r bg-background',
-        isMobile ? 'w-64 fixed inset-y-0 left-0 z-50' : '',
-        isCollapsed && !isMobile ? 'w-16' : 'w-64',
+        'flex h-full flex-col bg-sidebar border-r border-border transition-all duration-300 ease-in-out',
+        // Responsive width
+        isTablet ? 'w-16' : isCollapsed ? 'w-16' : 'w-64',
+        'relative z-10',
       )}
+      data-sidebar
     >
-      {/* Header */}
-      <div className="flex h-16 items-center justify-between border-b px-4">
-        {!isCollapsed && (
-          <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <span className="text-sm font-bold">B</span>
-            </div>
-            <span className="text-lg font-semibold">BEQEEK</span>
-          </div>
-        )}
-
-        <div className="flex items-center gap-2">
-          {isMobile && (
-            <Button variant="ghost" size="icon" onClick={onCloseMobile} className="h-8 w-8 lg:hidden">
-              <X className="h-4 w-4" />
-            </Button>
-          )}
-          {!isMobile && (
-            <Button variant="ghost" size="icon" onClick={onToggle} className="h-8 w-8">
-              {isCollapsed ? <Menu className="h-4 w-4" /> : <X className="h-4 w-4" />}
-            </Button>
-          )}
-        </div>
-      </div>
-
-      {/* Workspace Switcher */}
-      {!isCollapsed && (
-        <div className="border-b p-4">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="w-full justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="flex h-6 w-6 items-center justify-center rounded bg-muted text-xs">
-                    {workspacesLoading ? (
-                      <div className="animate-spin h-3 w-3 border border-current border-t-transparent rounded-full" />
-                    ) : (
-                      currentWorkspace?.workspaceName?.[0]?.toUpperCase() || 'W'
-                    )}
-                  </div>
-                  <span className="truncate">
-                    {workspacesLoading ? 'Loading...' : currentWorkspace?.workspaceName || 'Select Workspace'}
-                  </span>
-                </div>
-                <ChevronDown className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56">
-              <DropdownMenuItem>
-                <Plus className="mr-2 h-4 w-4" />
-                Create New Workspace
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              {workspaces?.data?.map((workspace) => (
-                <DropdownMenuItem key={workspace.id}>
-                  <div className="flex h-6 w-6 items-center justify-center rounded bg-muted text-xs mr-2">
-                    {workspace.workspaceName[0]?.toUpperCase()}
-                  </div>
-                  {workspace.workspaceName}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      )}
-
-      {/* Search */}
-      {!isCollapsed && (
-        <div className="p-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Search..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9"
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Navigation */}
-      <nav className="flex-1 space-y-2 p-4">
-        {filteredNavItems.map((item) => (
-          <SidebarItem key={item.id} item={item} isCollapsed={isCollapsed} onItemClick={handleItemClick} />
-        ))}
-      </nav>
-
-      {/* User Section */}
-      <div className="border-t p-4">
-        {!isCollapsed ? (
-          <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted">
-              <span className="text-sm">{userId?.[0]?.toUpperCase() || 'U'}</span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">{userId || 'User'}</p>
-              <p className="text-xs text-muted-foreground">Online</p>
-            </div>
-          </div>
-        ) : (
-          <div className="flex justify-center">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted">
-              <span className="text-sm">{userId?.[0]?.toUpperCase() || 'U'}</span>
-            </div>
-          </div>
-        )}
-      </div>
+      <SidebarContent isCollapsed={isCollapsed || isTablet} onToggle={handleToggle} showCloseButton={false} />
     </div>
+  );
+};
+
+interface SidebarContentProps {
+  isCollapsed?: boolean;
+  onToggle?: () => void;
+  onCloseMobile?: () => void;
+  showCloseButton?: boolean;
+}
+
+const SidebarContent = ({
+  isCollapsed = false,
+  onToggle,
+  onCloseMobile,
+  showCloseButton = true,
+}: SidebarContentProps) => {
+  const { t } = useTranslation();
+  return (
+    <>
+      {/* Sidebar Header - Logo Only */}
+      <div
+        className={cn(
+          'flex items-center justify-between border-b border-border p-4',
+          isCollapsed && 'justify-center px-2 py-3',
+        )}
+      >
+        {/* Logo */}
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-foreground text-background">
+            <span className="text-lg font-bold">B</span>
+          </div>
+          {!isCollapsed && (
+            <div>
+              <h1 className="text-lg font-semibold">BEQEEK</h1>
+            </div>
+          )}
+        </div>
+
+        {/* Action Buttons */}
+        {!isCollapsed && (
+          <div className="flex items-center gap-1">
+            {/* Close button for mobile */}
+            {showCloseButton && onCloseMobile && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onCloseMobile}
+                className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                aria-label="Close sidebar"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+
+            {/* Collapse toggle for desktop/tablet */}
+            {onToggle && !showCloseButton && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onToggle}
+                className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Workspace Selector Section */}
+      <div className={cn('border-b border-border p-4', isCollapsed && 'px-2 py-3')}>
+        {isCollapsed ? (
+          <WorkspaceSelector isCollapsed disablePadding className="w-full justify-center" />
+        ) : (
+          <div className="space-y-2">
+            <p className="text-xs font-medium uppercase text-muted-foreground">{t('sidebar.workspace')}</p>
+            <WorkspaceSelector disablePadding showAvatar={true} className="w-full" />
+          </div>
+        )}
+      </div>
+
+      {/* Sidebar Content */}
+      <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border">
+        <div className={cn('space-y-4', isCollapsed ? 'p-2' : 'p-4')}>
+          {/* Navigation Menu */}
+          <NavigationMenu isCollapsed={isCollapsed} />
+
+          {/* Activity Tracking - Only show when not collapsed */}
+          {!isCollapsed && <ActivityTracking />}
+        </div>
+      </div>
+
+      {/* Sidebar Footer */}
+      <div className={cn('border-t border-border p-4', isCollapsed && 'px-2')}>
+        {/* User Profile */}
+        <div
+          className={cn(
+            'flex items-center gap-3 rounded-lg p-2 hover:bg-accent transition-colors cursor-pointer',
+            isCollapsed && 'justify-center',
+          )}
+        >
+          <Avatar className="h-8 w-8 shrink-0">
+            <AvatarImage src="/placeholder-avatar.jpg" alt="User" />
+            <AvatarFallback className="text-xs">JD</AvatarFallback>
+          </Avatar>
+          {!isCollapsed && (
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium truncate">John Doe</p>
+              <p className="text-xs text-muted-foreground truncate">john@example.com</p>
+            </div>
+          )}
+        </div>
+
+        {/* Expand button for collapsed state */}
+        {isCollapsed && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onToggle}
+            className="w-full mt-2 h-8 text-muted-foreground hover:text-foreground"
+            aria-label="Expand sidebar"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        )}
+      </div>
+    </>
   );
 };

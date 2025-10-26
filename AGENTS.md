@@ -3,6 +3,7 @@
 # OpenSpec Instructions
 
 These instructions are for AI assistants working in this project.
+
 - Mentions planning or proposals (words like proposal, spec, change, plan)
 - Introduces new capabilities, breaking changes, architecture shifts, or big performance/security work
 - Sounds ambiguous and you need the authoritative spec before coding
@@ -73,10 +74,171 @@ rg -n "className=" src/ --type tsx        # Check Tailwind usage
 rg -n "interface.*Props" src/ --type tsx   # Verify TypeScript interfaces
 ```
 
-## Global State Rules
+## State Management Rules (MANDATORY)
 
-- Zustand is the approved global state solution. Create stores under `apps/web/src/stores`, export typed hooks (e.g. `useAppStore`), and keep server state in React Query—not in Zustand.
-- When adding new shared state, document the shape and usage inside the relevant store file and ensure components subscribe using selector functions to avoid unnecessary re-renders.
+### State Design First Principle
+
+**ALWAYS design state architecture before coding**. Every feature must include state design decisions in implementation plan.
+
+### State Type Decision Tree
+
+#### 1. Local State (useState)
+
+**Use when:**
+
+- UI-only state that affects single component
+- Form inputs, toggles, modals, dropdown states
+- Temporary state that resets on component unmount
+- Component-specific animations or visual states
+
+**Examples:**
+
+```typescript
+// ✅ Correct: Form input
+const [email, setEmail] = useState('');
+
+// ✅ Correct: Modal visibility
+const [isOpen, setIsOpen] = useState(false);
+
+// ✅ Correct: Loading spinner
+const [isLoading, setIsLoading] = useState(false);
+```
+
+#### 2. Server State (React Query/TanStack Query)
+
+**Use when:**
+
+- Data fetched from API endpoints
+- Data that needs caching, background updates, invalidation
+- Shared across multiple components
+- Requires optimistic updates, pagination, infinite scroll
+
+**Examples:**
+
+```typescript
+// ✅ Correct: API data
+const { data: users, isLoading } = useQuery({
+  queryKey: ['users'],
+  queryFn: fetchUsers,
+});
+
+// ✅ Correct: Mutations with invalidation
+const createUserMutation = useMutation({
+  mutationFn: createUser,
+  onSuccess: () => queryClient.invalidateQueries({ queryKey: ['users'] }),
+});
+```
+
+#### 3. Global State (Zustand)
+
+**Use when:**
+
+- State shared across many unrelated components
+- Complex state logic with multiple actions
+- User preferences, authentication status, theme
+- State that persists across route navigation
+- When React Query is overkill for non-server state
+
+**Examples:**
+
+```typescript
+// ✅ Correct: Auth state
+interface AuthStore {
+  user: User | null;
+  isAuthenticated: boolean;
+  login: (credentials: Credentials) => Promise<void>;
+  logout: () => void;
+}
+
+// ✅ Correct: UI preferences
+interface UIStore {
+  sidebarCollapsed: boolean;
+  theme: 'light' | 'dark';
+  language: string;
+  setSidebarCollapsed: (collapsed: boolean) => void;
+}
+```
+
+### State Design Checklist
+
+Before implementing any feature, answer:
+
+1. **Data Source**: Where does this data come from?
+   - API → React Query
+   - User input → Local State
+   - App configuration → Global State
+
+2. **Scope**: Who needs this data?
+   - Single component → Local State
+   - Few related components → Lift state up
+   - Many unrelated components → Global State
+
+3. **Persistence**: Should this survive navigation?
+   - No → Local State
+   - Yes → Global State or React Query (if from server)
+
+4. **Complexity**: How complex is the state logic?
+   - Simple values → Local State
+   - Multiple related values → Global State
+   - Server synchronization → React Query
+
+### Anti-Patterns to Avoid
+
+❌ **NEVER use Zustand for server data** - Use React Query instead
+❌ **NEVER use useState for global preferences** - Use Zustand
+❌ **NEVER duplicate state** - Single source of truth
+❌ **NEVER use local state for data fetched from API** - Use React Query
+
+### Implementation Requirements
+
+1. **State Documentation**: Every store must include:
+
+   ```typescript
+   /**
+    * Auth Store - Manages user authentication state
+    *
+    * State:
+    * - user: Current authenticated user or null
+    * - isAuthenticated: Boolean flag for auth status
+    *
+    * Usage:
+    * - Use in components that need auth status
+    * - Persist across navigation
+    * - Don't use for server data (use React Query)
+    */
+   ```
+
+2. **Type Safety**: All state must be fully typed with TypeScript interfaces
+
+3. **Selector Pattern**: Components must use selectors to prevent unnecessary re-renders:
+
+   ```typescript
+   // ✅ Good: Selective subscription
+   const user = useAuthStore((state) => state.user);
+
+   // ❌ Bad: Subscribes to entire store
+   const authState = useAuthStore();
+   ```
+
+4. **State Validation**: New state implementations must pass:
+   ```bash
+   # Check for proper state patterns
+   rg -n "useState.*\[\]" src/ --type tsx  # Review useState usage
+   rg -n "useQuery\|useMutation" src/ --type tsx  # Verify React Query usage
+   rg -n "use.*Store" src/ --type tsx  # Check Zustand patterns
+   ```
+
+### Migration Path
+
+When refactoring existing state:
+
+1. Identify current state type and usage
+2. Apply decision tree to determine correct type
+3. Create migration plan with minimal breaking changes
+4. Update all consuming components
+5. Remove old state implementation
+
+**All new features MUST include state design decisions in their implementation plan.**
 
 ## Testing Guidelines
 
