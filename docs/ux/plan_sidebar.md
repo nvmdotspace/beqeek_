@@ -24,11 +24,16 @@ Weaknesses cần cải thiện:
 #### 1. Cấu Trúc Sidebar Mới
 
 ┌─────────────────────────────────┐
+│ Logo dự án     │ ← sidebar header
+├─────────────────────────────────┤
+┌─────────────────────────────────┐
 │ [⚡] Workspace Selector [▼]      │ ← NEW: Dropdown chọn workspace
 ├─────────────────────────────────┤
 │ QUICK ACTIONS                   │
-│ [+] New Table    [⚡] New Flow   │ ← Context-aware actions
-│ [🔍] Search      [📝] New Form   │
+│ [🔍] Search
+│ [+] New Table
+│ [⚡] New Flow
+│ [📝] New Form
 ├─────────────────────────────────┤
 │ WORKSPACE FEATURES               │ ← API-aligned navigation
 │ [📊] Active Tables    [12]      │ ← Real-time counts
@@ -48,6 +53,14 @@ Weaknesses cần cải thiện:
 ├─────────────────────────────────┤
 │ [👤] John Doe    [Sign Out]     │ ← Enhanced user section
 └─────────────────────────────────┘
+
+#### 1.1 Chi Tiết Layout & Khoảng Cách
+
+- Header giữ logo và Workspace Selector theo chiều ngang ở desktop, tự động xếp dọc khi sidebar collapse hoặc trên tablet.
+- Quick Actions hiển thị dưới dạng grid 2 cột với separator riêng, giữ nguyên hành vi icon-only ở chế độ collapse.
+- Mỗi nhóm điều hướng (Workspace Features, Organization, System) có heading uppercase + border-bottom, bảo đảm visual rhythm ổn định.
+- Badge hiển thị real-time count `tables/workflows/teamMembers/notifications`, tự ẩn khi = 0.
+- Footer user card thu gọn về icon trên tablet/collapse; nút expand nằm dưới card nhằm đảm bảo tap target trên mobile.
 
 #### 2. Flow Người Dùng Mới
 
@@ -117,6 +130,7 @@ Mobile (< 768px):
 • Bottom navigation bar cho primary features (Tables, Workflow, Team)
 • Swipe-up drawer cho secondary features
 • Workspace selector ở top bar
+• Sidebar xuất hiện dưới dạng overlay với backdrop; Quick Actions chuyển thành icon stack dễ thao tác cảm ứng.
 
 Tablet (768px - 1024px):
 
@@ -129,6 +143,7 @@ Desktop (> 1024px):
 • Full sidebar với workspace dropdown
 • Real-time badge updates
 • Keyboard shortcuts support
+• Hover state + tooltip hỗ trợ collapsed mode
 
 #### 5. Implementation Steps
 
