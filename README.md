@@ -39,15 +39,73 @@ pnpm build
 pnpm -C apps/web preview
 ```
 
-## Cấu trúc chính
+## Cấu trúc chi tiết
 
-- `apps/web` — Ứng dụng web (Vite)
-- `packages/ui` — Thư viện UI (shadcn/ui, styles, hooks)
-- `packages/active-tables-core` — Core logic cho Active Tables
-- `packages/active-tables-hooks` — Hooks cho Active Tables
-- `packages/encryption-core` — Mã hoá và tiện ích liên quan
-- `docs/` — Tài liệu kiến trúc & đặc tả tính năng
-- `project.inlang/` + `paraglide.config.js` — Cấu hình i18n (Paraglide)
+```
+beqeek/
+├── apps/                          # Applications
+│   ├── web/                       # Ứng dụng web chính (Vite + React 19)
+│   │   ├── src/
+│   │   │   ├── components/        # Shared components (layout, error boundaries, etc.)
+│   │   │   ├── features/          # Feature modules
+│   │   │   │   ├── auth/         # Authentication (login, logout, stores)
+│   │   │   │   └── workspace/    # Workspace management
+│   │   │   ├── hooks/            # Custom React hooks
+│   │   │   ├── providers/        # React providers (theme, app context)
+│   │   │   ├── routes/           # TanStack Router file-based routes
+│   │   │   ├── shared/           # Shared utilities and API clients
+│   │   │   ├── stores/           # Global state (Zustand)
+│   │   │   ├── main.tsx         # App entry point
+│   │   │   └── router.tsx        # Router configuration
+│   │   ├── public/               # Static assets
+│   │   ├── package.json
+│   │   ├── vite.config.ts        # Vite configuration
+│   │   └── components.json       # shadcn/ui configuration
+│   ├── admin/                     # Admin application (placeholder)
+│   └── product-page/              # Product page application (placeholder)
+│
+├── packages/                       # Shared packages
+│   ├── ui/                       # UI component library
+│   │   ├── src/
+│   │   │   ├── components/       # shadcn/ui components
+│   │   │   ├── lib/
+│   │   │   │   └── utils.ts      # Utility functions (cn, etc.)
+│   │   │   └── styles/
+│   │   │       └── globals.css   # Global TailwindCSS styles
+│   │   ├── components.json       # shadcn/ui configuration
+│   │   └── postcss.config.mjs    # PostCSS/TailwindCSS v4 config
+│   ├── active-tables-core/       # Core Active Tables logic
+│   ├── active-tables-hooks/       # React hooks for Active Tables
+│   ├── encryption-core/           # Encryption utilities
+│   ├── eslint-config/            # Shared ESLint configuration
+│   │   ├── base.js               # Base ESLint config
+│   │   ├── next.js               # Next.js specific config
+│   │   └── react-internal.js     # React internal config
+│   └── typescript-config/        # Shared TypeScript configuration
+│       ├── base.json             # Base TypeScript config
+│       ├── nextjs.json           # Next.js specific config
+│       └── react-library.json    # React library config
+│
+├── docs/                         # Documentation
+│   ├── design-system.md          # Design system documentation
+│   ├── feature-*.md              # Feature specifications
+│   │   ├── feature-auth.md
+│   │   ├── feature-workspaces.md
+│   │   ├── feature-active-tables.md
+│   │   └── feature-workflow-*.md
+│   ├── monorepo-architecture-proposal.md
+│   ├── react-active-tables-plan.md
+│   ├── roadmap.md
+│   └── swagger.yaml              # API documentation
+│
+├── project.inlang/               # Parag.js i18n configuration
+├── paraglide.config.js           # Paraglide.js configuration
+├── messages/                     # Translation strings
+├── turbo.json                    # Turborepo configuration
+├── pnpm-workspace.yaml           # PNPM workspace configuration
+├── package.json                  # Root package configuration
+└── tsconfig.json                 # Root TypeScript configuration
+```
 
 ## UI Components (packages/ui)
 
