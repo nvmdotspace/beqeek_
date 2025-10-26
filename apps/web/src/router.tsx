@@ -16,13 +16,29 @@ const LoginPageLazy = lazy(() => import('@/features/auth/pages/login-page').then
 const WorkspaceDashboardPageLazy = lazy(() =>
   import('@/features/workspace/pages/workspace-dashboard').then((m) => ({ default: m.WorkspaceDashboardPage })),
 );
+const ActiveTablesPageLazy = lazy(() =>
+  import('@/features/active-tables/pages/active-tables-page').then((m) => ({ default: m.ActiveTablesPage })),
+);
+const ActiveTableDetailPageLazy = lazy(() =>
+  import('@/features/active-tables/pages/active-table-detail-page').then((m) => ({ default: m.ActiveTableDetailPage })),
+);
+const ActiveTableRecordsPageLazy = lazy(() =>
+  import('@/features/active-tables/pages/active-table-records-page').then((m) => ({
+    default: m.ActiveTableRecordsPage,
+  })),
+);
+const EncryptionSettingsPageLazy = lazy(() =>
+  import('@/features/encryption/pages/encryption-settings-page').then((m) => ({ default: m.EncryptionSettingsPage })),
+);
 
 // Locale helpers: default vi, support en; fallback to vi for others
 const SUPPORTED_LOCALES = ['vi', 'en'] as const;
 type Locale = (typeof SUPPORTED_LOCALES)[number];
 const DEFAULT_LOCALE: Locale = 'vi';
-const isSupportedLocale = (loc?: string): loc is Locale => !!loc && SUPPORTED_LOCALES.includes(loc.toLowerCase() as Locale);
-const normalizeLocale = (loc?: string): Locale => (isSupportedLocale(loc) ? (loc!.toLowerCase() as Locale) : DEFAULT_LOCALE);
+const isSupportedLocale = (loc?: string): loc is Locale =>
+  !!loc && SUPPORTED_LOCALES.includes(loc.toLowerCase() as Locale);
+const normalizeLocale = (loc?: string): Locale =>
+  isSupportedLocale(loc) ? (loc!.toLowerCase() as Locale) : DEFAULT_LOCALE;
 const lp = (path: string, locale: Locale) => (locale !== DEFAULT_LOCALE ? `/${locale}${path}` : path);
 
 const rootRoute = createRootRoute({
@@ -77,7 +93,77 @@ const workspacesRoute = createRoute({
   },
 });
 
-// Dynamic locale-prefixed routes (e.g., /en/*). Unsupported locale => fallback to vi.
+const activeTablesRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/workspaces/tables',
+  component: () => (
+    <Suspense fallback={<div className="p-6">Loading...</div>}>
+      <ActiveTablesPageLazy />
+    </Suspense>
+  ),
+  beforeLoad: () => {
+    const isAuthenticated = getIsAuthenticated();
+    if (!isAuthenticated) {
+      throw redirect({ to: '/login' });
+    }
+  },
+});
+
+const activeTableDetailRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/workspaces/tables/$tableId',
+  validateSearch: (search: Record<string, unknown>) => ({
+    workspaceId: typeof search.workspaceId === 'string' ? search.workspaceId : undefined,
+  }),
+  component: () => (
+    <Suspense fallback={<div className="p-6">Loading...</div>}>
+      <ActiveTableDetailPageLazy />
+    </Suspense>
+  ),
+  beforeLoad: () => {
+    const isAuthenticated = getIsAuthenticated();
+    if (!isAuthenticated) {
+      throw redirect({ to: '/login' });
+    }
+  },
+});
+
+const activeTableRecordsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/workspaces/tables/$tableId/records',
+  validateSearch: (search: Record<string, unknown>) => ({
+    workspaceId: typeof search.workspaceId === 'string' ? search.workspaceId : undefined,
+  }),
+  component: () => (
+    <Suspense fallback={<div className="p-6">Loading...</div>}>
+      <ActiveTableRecordsPageLazy />
+    </Suspense>
+  ),
+  beforeLoad: () => {
+    const isAuthenticated = getIsAuthenticated();
+    if (!isAuthenticated) {
+      throw redirect({ to: '/login' });
+    }
+  },
+});
+
+const encryptionSettingsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/settings/encryption',
+  component: () => (
+    <Suspense fallback={<div className="p-6">Loading...</div>}>
+      <EncryptionSettingsPageLazy />
+    </Suspense>
+  ),
+  beforeLoad: () => {
+    const isAuthenticated = getIsAuthenticated();
+    if (!isAuthenticated) {
+      throw redirect({ to: '/login' });
+    }
+  },
+});
+
+// Locale-prefixed routes
 const localeIndexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/$locale',
@@ -125,6 +211,80 @@ const localeWorkspacesRoute = createRoute({
   },
 });
 
+const localeActiveTablesRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/$locale/workspaces/tables',
+  component: () => (
+    <Suspense fallback={<div className="p-6">Loading...</div>}>
+      <ActiveTablesPageLazy />
+    </Suspense>
+  ),
+  beforeLoad: ({ params }) => {
+    const locale = normalizeLocale(params.locale);
+    const isAuthenticated = getIsAuthenticated();
+    if (!isAuthenticated) {
+      throw redirect({ to: lp('/login', locale) });
+    }
+  },
+});
+
+const localeActiveTableDetailRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/$locale/workspaces/tables/$tableId',
+  validateSearch: (search: Record<string, unknown>) => ({
+    workspaceId: typeof search.workspaceId === 'string' ? search.workspaceId : undefined,
+  }),
+  component: () => (
+    <Suspense fallback={<div className="p-6">Loading...</div>}>
+      <ActiveTableDetailPageLazy />
+    </Suspense>
+  ),
+  beforeLoad: ({ params }) => {
+    const locale = normalizeLocale(params.locale);
+    const isAuthenticated = getIsAuthenticated();
+    if (!isAuthenticated) {
+      throw redirect({ to: lp('/login', locale) });
+    }
+  },
+});
+
+const localeActiveTableRecordsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/$locale/workspaces/tables/$tableId/records',
+  validateSearch: (search: Record<string, unknown>) => ({
+    workspaceId: typeof search.workspaceId === 'string' ? search.workspaceId : undefined,
+  }),
+  component: () => (
+    <Suspense fallback={<div className="p-6">Loading...</div>}>
+      <ActiveTableRecordsPageLazy />
+    </Suspense>
+  ),
+  beforeLoad: ({ params }) => {
+    const locale = normalizeLocale(params.locale);
+    const isAuthenticated = getIsAuthenticated();
+    if (!isAuthenticated) {
+      throw redirect({ to: lp('/login', locale) });
+    }
+  },
+});
+
+const localeEncryptionSettingsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/$locale/settings/encryption',
+  component: () => (
+    <Suspense fallback={<div className="p-6">Loading...</div>}>
+      <EncryptionSettingsPageLazy />
+    </Suspense>
+  ),
+  beforeLoad: ({ params }) => {
+    const locale = normalizeLocale(params.locale);
+    const isAuthenticated = getIsAuthenticated();
+    if (!isAuthenticated) {
+      throw redirect({ to: lp('/login', locale) });
+    }
+  },
+});
+
 const notFoundRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '*',
@@ -135,9 +295,17 @@ const routeTree = rootRoute.addChildren([
   indexRoute,
   loginRoute,
   workspacesRoute,
+  activeTablesRoute,
+  activeTableDetailRoute,
+  activeTableRecordsRoute,
+  encryptionSettingsRoute,
   localeIndexRoute,
   localeLoginRoute,
   localeWorkspacesRoute,
+  localeActiveTablesRoute,
+  localeActiveTableDetailRoute,
+  localeActiveTableRecordsRoute,
+  localeEncryptionSettingsRoute,
   notFoundRoute,
 ]);
 

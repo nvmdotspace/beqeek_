@@ -301,6 +301,14 @@ export interface UpdateRecordRequest {
   version?: number;
 }
 
+// API Client Interface
+export interface ActiveTablesApiClient {
+  get<T = any>(url: string, config?: any): Promise<{ data: T }>;
+  post<T = any>(url: string, data?: any, config?: any): Promise<{ data: T }>;
+  put<T = any>(url: string, data?: any, config?: any): Promise<{ data: T }>;
+  delete(url: string, config?: any): Promise<void>;
+}
+
 // Error types
 export class ActiveTablesError extends Error {
   constructor(

@@ -19,6 +19,7 @@
     "lint": "eslint . --max-warnings 0"
   },
   "dependencies": {
+    "@tanstack/react-table": "^8.21.3",
     "@workspace/encryption-core": "workspace:*"
   },
   "devDependencies": {

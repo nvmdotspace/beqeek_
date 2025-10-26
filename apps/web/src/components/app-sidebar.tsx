@@ -29,7 +29,7 @@ import {
 
 import { cn } from '@workspace/ui/lib/utils';
 import { useAuthStore } from '@/features/auth';
-import { useWorkspaces } from '@/features/workspace';
+import { useWorkspaces } from '@/features/workspace/hooks/use-workspaces';
 import { useLanguageStore } from '@/stores/language-store';
 
 interface NavItem {

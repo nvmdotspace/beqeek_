@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 
 import { PlusCircle, Folder, Zap, Users } from 'lucide-react';
 
-import { useWorkspaces } from '@/features/workspace';
+import { useWorkspaces } from '../hooks/use-workspaces';
 
 import { Button } from '@workspace/ui/components/button';
 import { Card, CardContent } from '@workspace/ui/components/card';
@@ -161,4 +161,4 @@ export const WorkspaceDashboardPage = () => {
       {!isLoading && !error && totalWorkspaces > 0 && <WorkspaceGrid workspaces={workspaces} />}
     </div>
   );
-};
+}

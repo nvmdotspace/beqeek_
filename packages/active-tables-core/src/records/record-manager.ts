@@ -11,16 +11,17 @@ import type {
   ValidationResult,
   FieldChange,
   CreateRecordRequest,
-  UpdateRecordRequest
+  UpdateRecordRequest,
+  ActiveTablesApiClient
 } from '../types';
 
 
 export class RecordManager {
   private keyManager: KeyManager;
   private searchEngine: EncryptedSearch;
-  private apiClient: any;
+  private apiClient: ActiveTablesApiClient;
 
-  constructor(apiClient: any) {
+  constructor(apiClient: ActiveTablesApiClient) {
     this.keyManager = KeyManager.getInstance();
     this.searchEngine = new EncryptedSearch();
     this.apiClient = apiClient;

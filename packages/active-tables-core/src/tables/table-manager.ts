@@ -5,15 +5,16 @@ import type {
   Workspace,
   ValidationResult,
   CreateTableRequest,
-  UpdateTableRequest
+  UpdateTableRequest,
+  ActiveTablesApiClient
 } from '../types';
 
 
 export class TableManager {
   private keyManager: KeyManager;
-  private apiClient: any; // Will be injected or configured
+  private apiClient: ActiveTablesApiClient;
 
-  constructor(apiClient: any) {
+  constructor(apiClient: ActiveTablesApiClient) {
     this.keyManager = KeyManager.getInstance();
     this.apiClient = apiClient;
   }
