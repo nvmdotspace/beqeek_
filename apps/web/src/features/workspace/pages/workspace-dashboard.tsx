@@ -11,34 +11,36 @@ import { Skeleton } from '@workspace/ui/components/skeleton';
 import { WorkspaceCreateForm } from '../components/workspace-create-form';
 import { WorkspaceEmptyState } from '../components/workspace-empty-state';
 import { WorkspaceGrid } from '../components/workspace-grid';
+import { useTranslation } from '@/hooks/use-translation'
 
 export const WorkspaceDashboardPage = () => {
   const { data, isLoading, error } = useWorkspaces();
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const { t } = useTranslation()
 
   const totalWorkspaces = data?.meta?.total ?? data?.data?.length ?? 0;
   const workspaces = data?.data ?? [];
 
   const subtitle = useMemo(() => {
-    if (isLoading) return 'Loading workspaces...';
-    if (error) return 'Unable to load data. Please try again.';
+    if (isLoading) return t('workspace.dashboard.loading');
+    if (error) return t('workspace.dashboard.error');
     if (totalWorkspaces === 0)
-      return 'No workspaces yet. Create your first workspace to start digitizing your work processes.';
-    return `${totalWorkspaces} workspaces active`;
-  }, [error, isLoading, totalWorkspaces]);
+      return t('workspace.dashboard.noWorkspacesSubtitle');
+    return `${totalWorkspaces} ${t('workspace.dashboard.activeWorkspaces')}`;
+  }, [error, isLoading, totalWorkspaces, t]);
 
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight">Workspace Dashboard</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t('workspace.dashboard.title')}</h1>
           <p className="text-muted-foreground">{subtitle}</p>
         </div>
         <div className="flex items-center gap-2">
           <Button onClick={() => setShowCreateForm((prev) => !prev)}>
             <PlusCircle className="mr-2 h-4 w-4" />
-            New Workspace
+            {t('workspace.dashboard.newWorkspace')}
           </Button>
         </div>
       </div>
@@ -50,7 +52,7 @@ export const WorkspaceDashboardPage = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Total Workspaces</p>
+                  <p className="text-sm font-medium text-muted-foreground">{t('workspace.dashboard.totalWorkspaces')}</p>
                   <p className="text-2xl font-bold">{totalWorkspaces}</p>
                 </div>
                 <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
@@ -64,7 +66,7 @@ export const WorkspaceDashboardPage = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Active Tables</p>
+                  <p className="text-sm font-medium text-muted-foreground">{t('workspace.dashboard.activeTables')}</p>
                   <p className="text-2xl font-bold">24</p>
                 </div>
                 <div className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
@@ -78,7 +80,7 @@ export const WorkspaceDashboardPage = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Workflows</p>
+                  <p className="text-sm font-medium text-muted-foreground">{t('workspace.dashboard.workflows')}</p>
                   <p className="text-2xl font-bold">8</p>
                 </div>
                 <div className="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center">
@@ -92,7 +94,7 @@ export const WorkspaceDashboardPage = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Team Members</p>
+                  <p className="text-sm font-medium text-muted-foreground">{t('workspace.dashboard.teamMembers')}</p>
                   <p className="text-2xl font-bold">15</p>
                 </div>
                 <div className="h-8 w-8 rounded-full bg-orange-100 flex items-center justify-center">
@@ -109,10 +111,9 @@ export const WorkspaceDashboardPage = () => {
         <Card>
           <CardContent className="pt-6">
             <div className="mb-6 space-y-1">
-              <h2 className="text-xl font-semibold">Create New Workspace</h2>
+              <h2 className="text-xl font-semibold">{t('workspace.dashboard.createNewTitle')}</h2>
               <p className="text-sm text-muted-foreground">
-                Set up your workspace name, namespace, and description. You can configure teams, roles, and Active
-                Tables after creation.
+                {t('workspace.dashboard.createNewDescription')}
               </p>
             </div>
             <WorkspaceCreateForm onSuccess={() => setShowCreateForm(false)} />
@@ -139,10 +140,9 @@ export const WorkspaceDashboardPage = () => {
       {!isLoading && error && (
         <Card className="border-destructive/50 bg-destructive/10">
           <CardContent className="pt-6">
-            <h2 className="text-lg font-semibold text-destructive">Failed to load workspaces</h2>
+            <h2 className="text-lg font-semibold text-destructive">{t('workspace.dashboard.loadFailed')}</h2>
             <p className="text-sm text-destructive/90 mt-2">
-              {(error instanceof Error && error.message) ||
-                'An error occurred while connecting to the service. Please try refreshing the page.'}
+              {(error instanceof Error && error.message) || t('workspace.dashboard.errorRetry')}
             </p>
           </CardContent>
         </Card>

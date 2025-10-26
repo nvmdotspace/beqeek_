@@ -15,6 +15,7 @@ import { Badge } from "@workspace/ui/components/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@workspace/ui/components/avatar"
 
 import { initialsFromName } from "../utils/initials"
+import { useTranslation } from '@/hooks/use-translation'
 
 type WorkspaceCardProps = {
   workspace: Workspace
@@ -31,11 +32,14 @@ export const WorkspaceCard = ({ workspace }: WorkspaceCardProps) => {
     ownedByUser,
   } = workspace
 
+  const imgSrc: string | undefined = logo ?? thumbnailLogo ?? undefined
+  const { t } = useTranslation()
+
   return (
     <Card className="h-full transition hover:-translate-y-0.5 hover:shadow-lg">
       <CardHeader className="flex flex-row items-start gap-4">
         <Avatar className="size-12">
-          <AvatarImage src={logo ?? thumbnailLogo} alt={workspaceName} />
+          <AvatarImage src={imgSrc} alt={workspaceName} />
           <AvatarFallback>{initialsFromName(workspaceName)}</AvatarFallback>
         </Avatar>
         <div className="grow space-y-2">
@@ -50,7 +54,7 @@ export const WorkspaceCard = ({ workspace }: WorkspaceCardProps) => {
         {ownedByUser ? (
           <Badge variant="secondary" className="self-start text-[11px] font-semibold">
             <ShieldCheck className="mr-1.5 size-3" />
-            Chủ sở hữu
+            {t('workspace.card.owner')}
           </Badge>
         ) : null}
       </CardHeader>
@@ -58,17 +62,17 @@ export const WorkspaceCard = ({ workspace }: WorkspaceCardProps) => {
         <div className="flex items-center gap-3 rounded-lg border border-border/60 bg-card/60 p-3 text-sm text-muted-foreground">
           <Users className="size-4 text-primary" />
           <div className="space-y-1">
-            <p className="text-xs uppercase tracking-wide text-foreground/70">Người phụ trách</p>
+            <p className="text-xs uppercase tracking-wide text-foreground/70">{t('workspace.card.managerLabel')}</p>
             <p className="text-sm font-medium text-foreground">
-              {myWorkspaceUser?.fullName ?? "Chưa có thông tin"}
+              {myWorkspaceUser?.fullName ?? t('workspace.card.noInfo')}
             </p>
             <p className="text-xs text-muted-foreground">{myWorkspaceUser?.email}</p>
           </div>
         </div>
         <div className="rounded-lg border border-dashed border-border/60 bg-muted/40 p-3 text-xs text-muted-foreground">
-          <p>Ngày tạo: {format(new Date(createdAt), "dd/MM/yyyy HH:mm")}</p>
+          <p>{t('workspace.card.createdAt')} {createdAt ? format(new Date(createdAt), "dd/MM/yyyy HH:mm") : "—"}</p>
           <p>
-            Mã hóa E2EE: <span className="font-medium text-emerald-400">Đã bật</span>
+            {t('workspace.card.e2eeLabel')} <span className="font-medium text-emerald-400">{t('workspace.card.e2eeEnabled')}</span>
           </p>
         </div>
       </CardContent>
@@ -77,7 +81,7 @@ export const WorkspaceCard = ({ workspace }: WorkspaceCardProps) => {
           href="#"
           className="text-sm font-medium text-primary transition hover:text-primary/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         >
-          Vào trang workspace
+          {t('workspace.card.openWorkspace')}
         </a>
       </CardFooter>
     </Card>

@@ -20,6 +20,12 @@ export default defineConfig({
     host: "localhost",
     port: 4173,
     strictPort: true,
+    fs: {
+      allow: [
+        path.resolve(__dirname, "../../.."),
+        path.resolve(__dirname, "../../../messages"),
+      ],
+    },
   },
   preview: {
     host: "localhost",

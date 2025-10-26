@@ -13,7 +13,6 @@ import { useTranslation } from '@/hooks/use-translation';
 export const LoginPage = () => {
   const router = useRouter();
   const isAuthenticated = useAuthStore(selectIsAuthenticated);
-  const locale = useLanguageStore((state) => state.locale);
   const getLocalizedPath = useLanguageStore((state) => state.getLocalizedPath);
   const { t } = useTranslation();
   const [username, setUsername] = useState('captainbolt');

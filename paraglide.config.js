@@ -1,13 +1,15 @@
 /** @type {import('@inlang/paraglide-js').Config} */
 export default {
-  project: {
-    sourceLanguageTag: 'vi',
-    languageTags: ['vi', 'en'],
-    path: './src/paraglide',
-  },
-  outdir: './src/paraglide/generated',
-  strategy: {
-    read: ['filesystem'],
-    write: ['filesystem'],
-  },
+  project: "./project.inlang",
+  outdir: "./apps/web/src/paraglide/generated",
+  strategy: ["cookie", "globalVariable", "baseLocale"],
+  urlPatterns: [
+    {
+      pattern: ":protocol://:domain(.*)::port?/:path(.*)?",
+      localized: [
+        ["en", ":protocol://:domain(.*)::port?/en/:path(.*)?"],
+        ["vi", ":protocol://:domain(.*)::port?/:path(.*)?"],
+      ],
+    },
+  ],
 };

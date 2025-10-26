@@ -8,6 +8,8 @@ import { Input } from "@workspace/ui/components/input"
 import { Label } from "@workspace/ui/components/label"
 import { Textarea } from "@workspace/ui/components/textarea"
 
+import { useTranslation } from '@/hooks/use-translation'
+
 type WorkspaceCreateFormProps = {
   onSuccess?: () => void
 }
@@ -28,6 +30,7 @@ export const WorkspaceCreateForm = ({ onSuccess }: WorkspaceCreateFormProps) => 
   const [description, setDescription] = useState("")
 
   const createWorkspaceMutation = useCreateWorkspace()
+  const { t } = useTranslation()
 
   const canSubmit = useMemo(() => workspaceName.trim().length > 2 && namespace.trim().length > 2, [workspaceName, namespace])
 
@@ -63,19 +66,19 @@ export const WorkspaceCreateForm = ({ onSuccess }: WorkspaceCreateFormProps) => 
   return (
     <form className="space-y-4" onSubmit={handleSubmit}>
       <div className="space-y-2">
-        <Label htmlFor="workspaceName">Tên workspace</Label>
+        <Label htmlFor="workspaceName">{t('workspace.form.nameLabel')}</Label>
         <Input
           id="workspaceName"
           value={workspaceName}
           onChange={(event) => setWorkspaceName(event.target.value)}
-          placeholder="Ví dụ: Vận hành CRM Bất động sản"
+          placeholder={t('workspace.form.namePlaceholder')}
           autoFocus
         />
       </div>
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <Label htmlFor="namespace">Namespace</Label>
-          <span className="text-[11px] text-muted-foreground">Dùng để tạo URL và định danh duy nhất</span>
+          <Label htmlFor="namespace">{t('workspace.form.namespaceLabel')}</Label>
+          <span className="text-[11px] text-muted-foreground">{t('workspace.form.namespaceHelp')}</span>
         </div>
         <Input
           id="namespace"
@@ -84,34 +87,34 @@ export const WorkspaceCreateForm = ({ onSuccess }: WorkspaceCreateFormProps) => 
             setNamespace(event.target.value)
             setNamespaceDirty(true)
           }}
-          placeholder="vd: van-hanh-crm"
+          placeholder={t('workspace.form.namespacePlaceholder')}
         />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="description">Mô tả</Label>
+        <Label htmlFor="description">{t('workspace.form.descriptionLabel')}</Label>
         <Textarea
           id="description"
           value={description}
           onChange={(event) => setDescription(event.target.value)}
-          placeholder="Ghi chú nhanh về mục đích của workspace"
+          placeholder={t('workspace.form.descriptionPlaceholder')}
         />
       </div>
       {createWorkspaceMutation.isError ? (
         <p className="text-sm text-destructive">
           {(createWorkspaceMutation.error instanceof Error && createWorkspaceMutation.error.message) ||
-            "Không thể tạo workspace. Vui lòng thử lại."}
+            t('workspace.form.createError')}
         </p>
       ) : null}
       <Button type="submit" className="w-full" disabled={!canSubmit || createWorkspaceMutation.isPending}>
         {createWorkspaceMutation.isPending ? (
           <>
             <Loader2 className="mr-2 size-4 animate-spin" />
-            Đang tạo workspace...
+            {t('workspace.form.creating')}
           </>
         ) : (
           <>
             <Sparkles className="mr-2 size-4" />
-            Tạo workspace
+            {t('workspace.form.create')}
           </>
         )}
       </Button>

@@ -1,5 +1,4 @@
 import { useQuery } from '@tanstack/react-query';
-import { useCallback } from 'react';
 import { TableManager } from '@workspace/active-tables-core';
 import type { TableConfig } from '@workspace/active-tables-core';
 

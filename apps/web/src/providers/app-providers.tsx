@@ -2,7 +2,7 @@ import * as React from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { useLanguageStore } from '@/stores/language-store';
 // @ts-expect-error - Paraglide runtime doesn't have TypeScript declarations
-import { baseLocale, isLocale } from '@/paraglide/runtime';
+import { baseLocale, isLocale } from '@/paraglide/generated/runtime.js';
 
 import { ThemeProvider } from './theme-provider';
 import { ApiErrorBoundary } from '@/components/api-error-boundary';

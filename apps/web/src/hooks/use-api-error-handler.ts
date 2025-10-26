@@ -16,8 +16,10 @@ export const useApiErrorHandler = () => {
         logout()
 
         // Redirect to login page with current language
-        const loginPath = getLocalizedPath('/login')
-        router.navigate({ to: loginPath })
+        const locale = useLanguageStore.getState().locale
+        const to = locale === 'vi' ? '/login' : '/$locale/login'
+        const params = locale === 'vi' ? undefined : { locale }
+        router.navigate({ to, ...(params ? { params } : {}) })
 
         return true // Error was handled
       }
