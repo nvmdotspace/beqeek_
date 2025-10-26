@@ -18,4 +18,7 @@ export const refreshSession = (payload: RefreshTokenRequest) =>
     method: "POST",
     data: payload,
     skipAuth: true,
+    headers: {
+      Authorization: `Bearer ${payload.refreshToken}`,
+    },
   })

@@ -1,9 +1,7 @@
-import axios from "axios"
 import { create } from "zustand"
 import { devtools, persist, createJSONStorage } from "zustand/middleware"
 
-import { resolveApiUrl } from "@/shared/api/config"
-import type { AuthTokens } from "@/shared/api/types"
+import { refreshSession } from "@/features/auth/api/auth-api"
 
 type Tokens = {
   accessToken: string
@@ -67,10 +65,7 @@ export const useAuthStore = create<AuthStore>()(
                   return false
                 }
 
-                const refreshUrl = resolveApiUrl("/api/auth/post/refresh_token")
-                const { data } = await axios.post<AuthTokens>(refreshUrl, {
-                  refreshToken: currentRefreshToken,
-                })
+                const data = await refreshSession({ refreshToken: currentRefreshToken })
 
                 get().setTokens({
                   accessToken: data.accessToken,
