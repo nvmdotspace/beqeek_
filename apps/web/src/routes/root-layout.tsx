@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { Outlet, useLocation } from '@tanstack/react-router';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { TanStackRouterDevtools } from '@tanstack/router-devtools';
+import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 
 import { AppLayout } from '@/components/app-layout';
 
