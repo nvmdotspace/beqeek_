@@ -23,6 +23,7 @@ import {
 import { useWorkspaces } from '@/features/workspace/hooks/use-workspaces';
 import { useAuthStore, selectIsAuthenticated } from '@/features/auth/stores/auth-store';
 import type { Workspace as ApiWorkspace } from '@/shared/api/types';
+import { initialsFromName } from '@/features/workspace/utils/initials';
 
 interface WorkspaceSelectorProps {
   isCollapsed?: boolean;
@@ -107,14 +108,7 @@ export const WorkspaceSelector = ({
     }
   };
 
-  const getWorkspaceInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map((word) => word.charAt(0))
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  };
+
 
   if (!isAuthenticated) {
     return null;
@@ -171,7 +165,7 @@ export const WorkspaceSelector = ({
                     }
                   />
                   <AvatarFallback className="text-xs bg-primary text-primary-foreground">
-                    {getWorkspaceInitials(currentWorkspace.workspaceName)}
+                    {initialsFromName(currentWorkspace.workspaceName)}
                   </AvatarFallback>
                 </Avatar>
               )}
@@ -237,15 +231,6 @@ const WorkspaceDropdownContent = ({
   t,
   searchInputRef,
 }: WorkspaceDropdownContentProps) => {
-  const getWorkspaceInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map((word) => word.charAt(0))
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
   return (
     <DropdownMenuContent className="w-80" align="start" sideOffset={4}>
       {/* Current Workspace Info */}
@@ -261,7 +246,7 @@ const WorkspaceDropdownContent = ({
                       : undefined
                   }
                 />
-                <AvatarFallback className="text-xs">{getWorkspaceInitials(currentWorkspace.workspaceName)}</AvatarFallback>
+                <AvatarFallback className="text-xs">{initialsFromName(currentWorkspace.workspaceName)}</AvatarFallback>
               </Avatar>
               <div className="flex flex-col">
                 <span className="text-sm font-medium">{currentWorkspace.workspaceName}</span>
@@ -323,7 +308,7 @@ const WorkspaceDropdownContent = ({
                         : undefined
                     }
                   />
-                  <AvatarFallback className="text-xs">{getWorkspaceInitials(workspace.workspaceName)}</AvatarFallback>
+                  <AvatarFallback className="text-xs">{initialsFromName(workspace.workspaceName)}</AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col min-w-0 flex-1">
                   <span className="text-sm font-medium truncate">{workspace.workspaceName}</span>
