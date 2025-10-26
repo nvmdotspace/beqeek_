@@ -161,24 +161,23 @@ export const WorkspaceSelector = ({
             aria-label={t('workspace.selector.ariaLabel') || 'Select workspace'}
           >
             <div className="flex items-center gap-2 min-w-0 flex-1">
-              {showAvatar && (
+              {showAvatar && currentWorkspace && (
+                <Avatar className="h-7 w-7 flex-shrink-0">
+                  <AvatarImage
+                    src={
+                      currentWorkspace.namespace
+                        ? `https://api.dicebear.com/7.x/initials/svg?seed=${currentWorkspace.namespace}`
+                        : undefined
+                    }
+                  />
+                  <AvatarFallback className="text-xs bg-primary text-primary-foreground">
+                    {getWorkspaceInitials(currentWorkspace.workspaceName)}
+                  </AvatarFallback>
+                </Avatar>
+              )}
+              {showAvatar && !currentWorkspace && (
                 <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary text-primary-foreground flex-shrink-0">
-                  {currentWorkspace ? (
-                    <Avatar className="h-7 w-7">
-                      <AvatarImage
-                        src={
-                          currentWorkspace.namespace
-                            ? `https://api.dicebear.com/7.x/initials/svg?seed=${currentWorkspace.namespace}`
-                            : undefined
-                        }
-                      />
-                      <AvatarFallback className="text-xs bg-primary text-primary-foreground">
-                        {getWorkspaceInitials(currentWorkspace.workspaceName)}
-                      </AvatarFallback>
-                    </Avatar>
-                  ) : (
-                    <Zap className="h-4 w-4" />
-                  )}
+                  <Zap className="h-4 w-4" />
                 </div>
               )}
               <div className="flex flex-col items-start min-w-0 flex-1">

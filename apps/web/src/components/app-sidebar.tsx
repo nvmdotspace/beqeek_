@@ -140,60 +140,72 @@ const SidebarContent = ({
   const { t } = useTranslation();
   return (
     <>
-      {/* Sidebar Header */}
+      {/* Sidebar Header - Logo Only */}
       <div
         className={cn(
-          'flex items-center gap-2 border-b border-border p-4',
-          isCollapsed && 'flex-col space-y-2 px-2 py-3 gap-0',
+          'flex items-center justify-between border-b border-border p-4',
+          isCollapsed && 'justify-center px-2 py-3',
         )}
       >
+        {/* Logo */}
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+            <span className="text-lg font-semibold">⚡</span>
+          </div>
+          {!isCollapsed && (
+            <div>
+              <h1 className="text-lg font-semibold">BEQEEK</h1>
+            </div>
+          )}
+        </div>
+
+        {/* Action Buttons */}
+        {!isCollapsed && (
+          <div className="flex items-center gap-1">
+            {/* Close button for mobile */}
+            {showCloseButton && onCloseMobile && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onCloseMobile}
+                className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                aria-label="Close sidebar"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+
+            {/* Collapse toggle for desktop/tablet */}
+            {onToggle && !showCloseButton && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onToggle}
+                className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Workspace Selector Section */}
+      <div className={cn('border-b border-border p-4', isCollapsed && 'px-2 py-3')}>
         {isCollapsed ? (
           <WorkspaceSelector isCollapsed disablePadding className="w-full justify-center" />
         ) : (
-          <div className="flex items-center gap-3 flex-1 overflow-hidden">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <span className="text-lg font-semibold">⚡</span>
-            </div>
-            <div className="flex-1">
-              <p className="text-xs font-medium uppercase text-muted-foreground">{t('sidebar.workspace')}</p>
-              <WorkspaceSelector disablePadding showAvatar={false} className="mt-1" />
-            </div>
+          <div className="space-y-2">
+            <p className="text-xs font-medium uppercase text-muted-foreground">{t('sidebar.workspace')}</p>
+            <WorkspaceSelector disablePadding showAvatar={true} className="w-full" />
           </div>
         )}
-
-        {/* Action Buttons */}
-        <div className={cn('flex items-center gap-1', isCollapsed ? 'w-full justify-center' : 'pl-2 flex-none')}>
-          {/* Close button for mobile */}
-          {showCloseButton && onCloseMobile && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onCloseMobile}
-              className="h-8 w-8 text-muted-foreground hover:text-foreground"
-              aria-label="Close sidebar"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          )}
-
-          {/* Collapse toggle for desktop/tablet */}
-          {onToggle && !showCloseButton && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onToggle}
-              className={cn('h-8 w-8 text-muted-foreground hover:text-foreground', isCollapsed && 'hidden')}
-              aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-          )}
-        </div>
       </div>
 
       {/* Sidebar Content */}
       <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border">
-        <div className="space-y-4">
+        <div className={cn('space-y-4', isCollapsed ? 'p-2' : 'p-4')}>
           {/* Navigation Menu */}
           <NavigationMenu isCollapsed={isCollapsed} />
 

@@ -10,14 +10,17 @@ import {
   ChevronRight,
   Clock,
   Database,
+  FileText,
   HelpCircle,
   Home,
+  Plus,
   Search as SearchIcon,
   Settings,
   Shield,
   Star,
   Users,
   Workflow,
+  Zap,
 } from 'lucide-react';
 import { useTranslation } from '@/hooks/use-translation';
 import {
@@ -77,6 +80,41 @@ export const NavigationMenu = ({ isCollapsed = false, className }: NavigationMen
         icon: Bell,
         badge: 'notifications',
       },
+
+      // Quick Actions (require workspace selection)
+      ...(currentWorkspace
+        ? [
+            {
+              id: 'quick-actions',
+              label: t('navigation.quickActions') || 'Quick Actions',
+              icon: Zap,
+              isSection: true,
+              children: [
+                {
+                  id: 'new-table',
+                  label: t('navigation.newTable') || 'New Table',
+                  href: '/workspaces/tables/new',
+                  icon: Database,
+                  requiresPermission: 'tables',
+                },
+                {
+                  id: 'new-workflow',
+                  label: t('navigation.newWorkflow') || 'New Workflow',
+                  href: '/workspaces/workflows/new',
+                  icon: Workflow,
+                  requiresPermission: 'workflow',
+                },
+                {
+                  id: 'new-form',
+                  label: t('navigation.newForm') || 'New Form',
+                  href: '/workspaces/forms/new',
+                  icon: FileText,
+                  requiresPermission: 'forms',
+                },
+              ],
+            },
+          ]
+        : []),
 
       // Workspace Features (require workspace selection)
       ...(currentWorkspace
@@ -233,7 +271,7 @@ export const NavigationMenu = ({ isCollapsed = false, className }: NavigationMen
     if (item.isSection) {
       // Section header
       return (
-        <div key={item.id} className="space-y-1">
+        <div key={item.id} className="space-y-1 mt-4 first:mt-0">
           {!isCollapsed && (
             <button
               onClick={() => handleSectionToggle(item.id)}
@@ -290,6 +328,6 @@ export const NavigationMenu = ({ isCollapsed = false, className }: NavigationMen
   };
 
   return (
-    <nav className={cn('space-y-4', className)}>{navigationStructure.map((item) => renderNavigationItem(item))}</nav>
+    <nav className={cn('space-y-2', className)}>{navigationStructure.map((item) => renderNavigationItem(item))}</nav>
   );
 };

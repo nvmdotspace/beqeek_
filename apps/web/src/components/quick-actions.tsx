@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { cn } from '@workspace/ui/lib/utils';
 import { Button } from '@workspace/ui/components/button';
@@ -33,6 +33,69 @@ export const QuickActions = ({ isCollapsed = false, className }: QuickActionsPro
   const currentWorkspace = useSidebarStore(selectCurrentWorkspace);
   const activeSection = useSidebarStore(selectActiveSection);
   const canCreateItem = useSidebarStore(selectCanCreateItem);
+
+  // Action handlers
+  const handleSearch = useCallback(() => {
+    // For now, navigate to workspaces page (placeholder for search)
+    navigate({ to: '/workspaces' });
+  }, [navigate]);
+
+  const handleCreateTable = useCallback(() => {
+    if (currentWorkspace) {
+      // For now, navigate to tables page with workspace context
+      navigate({
+        to: '/workspaces/tables',
+        search: { workspaceId: currentWorkspace.id },
+      });
+    }
+  }, [currentWorkspace, navigate]);
+
+  const handleCreateWorkflow = useCallback(() => {
+    if (currentWorkspace) {
+      // For now, navigate to tables page (placeholder for workflow)
+      navigate({
+        to: '/workspaces/tables',
+        search: { workspaceId: currentWorkspace.id },
+      });
+    }
+  }, [currentWorkspace, navigate]);
+
+  const handleCreateForm = useCallback(() => {
+    if (currentWorkspace) {
+      // For now, navigate to tables page (placeholder for forms)
+      navigate({
+        to: '/workspaces/tables',
+        search: { workspaceId: currentWorkspace.id },
+      });
+    }
+  }, [currentWorkspace, navigate]);
+
+  const handleImportData = useCallback(() => {
+    if (currentWorkspace) {
+      // For now, navigate to tables page (placeholder for import)
+      navigate({
+        to: '/workspaces/tables',
+        search: { workspaceId: currentWorkspace.id },
+      });
+    }
+  }, [currentWorkspace, navigate]);
+
+  const handleExportData = useCallback(() => {
+    if (currentWorkspace) {
+      // For now, navigate to tables page (placeholder for export)
+      navigate({
+        to: '/workspaces/tables',
+        search: { workspaceId: currentWorkspace.id },
+      });
+    }
+  }, [currentWorkspace, navigate]);
+
+  const handleInviteMember = useCallback(() => {
+    if (currentWorkspace) {
+      // For now, navigate to workspaces page (placeholder for team)
+      navigate({ to: '/workspaces' });
+    }
+  }, [currentWorkspace, navigate]);
 
   // Context-aware quick actions based on current section
   const contextualActions = useMemo<QuickAction[]>(() => {
@@ -108,69 +171,17 @@ export const QuickActions = ({ isCollapsed = false, className }: QuickActionsPro
       if (!activeSection) return true;
       return action.context.includes(activeSection) || action.context.includes('dashboard');
     });
-  }, [activeSection, t]);
-
-  const handleSearch = () => {
-    // For now, navigate to workspaces page (placeholder for search)
-    navigate({ to: '/workspaces' });
-  };
-
-  const handleCreateTable = () => {
-    if (currentWorkspace) {
-      // For now, navigate to tables page with workspace context
-      navigate({
-        to: '/workspaces/tables',
-        search: { workspaceId: currentWorkspace.id },
-      });
-    }
-  };
-
-  const handleCreateWorkflow = () => {
-    if (currentWorkspace) {
-      // For now, navigate to tables page (placeholder for workflow)
-      navigate({
-        to: '/workspaces/tables',
-        search: { workspaceId: currentWorkspace.id },
-      });
-    }
-  };
-
-  const handleCreateForm = () => {
-    if (currentWorkspace) {
-      // For now, navigate to tables page (placeholder for forms)
-      navigate({
-        to: '/workspaces/tables',
-        search: { workspaceId: currentWorkspace.id },
-      });
-    }
-  };
-
-  const handleImportData = () => {
-    if (currentWorkspace) {
-      // For now, navigate to tables page (placeholder for import)
-      navigate({
-        to: '/workspaces/tables',
-        search: { workspaceId: currentWorkspace.id },
-      });
-    }
-  };
-
-  const handleExportData = () => {
-    if (currentWorkspace) {
-      // For now, navigate to tables page (placeholder for export)
-      navigate({
-        to: '/workspaces/tables',
-        search: { workspaceId: currentWorkspace.id },
-      });
-    }
-  };
-
-  const handleInviteMember = () => {
-    if (currentWorkspace) {
-      // For now, navigate to workspaces page (placeholder for team)
-      navigate({ to: '/workspaces' });
-    }
-  };
+  }, [
+    activeSection,
+    t,
+    handleSearch,
+    handleCreateTable,
+    handleCreateWorkflow,
+    handleCreateForm,
+    handleImportData,
+    handleExportData,
+    handleInviteMember,
+  ]);
 
   const isActionDisabled = (action: QuickAction) => {
     const lacksWorkspace = action.requiresWorkspace && !currentWorkspace;

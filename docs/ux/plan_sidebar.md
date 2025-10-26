@@ -30,7 +30,6 @@ Weaknesses cần cải thiện:
 │ [⚡] Workspace Selector [▼]      │ ← NEW: Dropdown chọn workspace
 ├─────────────────────────────────┤
 │ QUICK ACTIONS                   │
-│ [🔍] Search
 │ [+] New Table
 │ [⚡] New Flow
 │ [📝] New Form
