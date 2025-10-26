@@ -14,6 +14,7 @@ export const LoginPage = () => {
   const router = useRouter();
   const isAuthenticated = useAuthStore(selectIsAuthenticated);
   const locale = useLanguageStore((state) => state.locale);
+  const getLocalizedPath = useLanguageStore((state) => state.getLocalizedPath);
   const { t } = useTranslation();
   const [username, setUsername] = useState('captainbolt');
   const [password, setPassword] = useState('nvmteam');
@@ -22,9 +23,9 @@ export const LoginPage = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      void router.navigate({ to: '/workspaces' });
+      void router.navigate({ to: getLocalizedPath('/workspaces') });
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, router, getLocalizedPath]);
 
   useEffect(() => {
     return () => {
@@ -39,7 +40,7 @@ export const LoginPage = () => {
       { username, password },
       {
         onSuccess: async () => {
-          await router.navigate({ to: '/workspaces' });
+          await router.navigate({ to: getLocalizedPath('/workspaces') });
         },
       },
     );

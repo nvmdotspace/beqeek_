@@ -5,6 +5,7 @@ import { RouterProvider } from '@tanstack/react-router';
 import '@workspace/ui/globals.css';
 
 import { router } from './router';
+import { AppProviders } from '@/providers/app-providers';
 
 const bootstrap = () => {
   const rootElement = document.getElementById('root');
@@ -24,7 +25,9 @@ const bootstrap = () => {
 
   ReactDOM.createRoot(rootElement).render(
     <React.StrictMode>
-      <RouterProvider router={router} />
+      <AppProviders>
+        <RouterProvider router={router} />
+      </AppProviders>
     </React.StrictMode>,
   );
 };

@@ -1,24 +1,11 @@
 import * as React from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { useLanguageStore } from '@/stores/language-store';
 
 import { ThemeProvider } from './theme-provider';
 import { ApiErrorBoundary } from '@/components/api-error-boundary';
 import { ApiError } from '@/shared/api/api-error';
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: (failureCount, error: unknown) => {
-        // Don't retry on 401 errors
-        if (error instanceof ApiError && error.status === 401) {
-          return false;
-        }
-        return failureCount < 3;
-      },
-    },
-  },
-});
+import { queryClient } from '@/shared/query-client';
 
 // Component to handle language detection from URL
 function LanguageDetector({ children }: { children: React.ReactNode }) {
@@ -29,7 +16,8 @@ function LanguageDetector({ children }: { children: React.ReactNode }) {
     const pathname = window.location.pathname;
     let detectedLocale = 'vi'; // default
 
-    if (pathname.startsWith('/en/')) {
+    // support '/en' and '/en/...'
+    if (pathname === '/en' || pathname.startsWith('/en/')) {
       detectedLocale = 'en';
     }
 

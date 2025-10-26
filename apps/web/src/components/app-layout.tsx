@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import { AppSidebar } from './app-sidebar';
 import { Button } from '@workspace/ui/components/button';

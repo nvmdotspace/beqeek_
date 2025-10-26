@@ -1,9 +1,17 @@
 import path from "node:path"
 import { defineConfig, splitVendorChunkPlugin } from "vite"
 import react from "@vitejs/plugin-react"
+import { paraglide } from "@inlang/paraglide-js-adapter-vite"
 
 export default defineConfig({
-  plugins: [react(), splitVendorChunkPlugin()],
+  plugins: [
+    react(),
+    paraglide({
+      project: path.resolve(__dirname, "../../project.inlang"),
+      outdir: path.resolve(__dirname, "src/paraglide/generated"),
+    }),
+    splitVendorChunkPlugin(),
+  ],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "src"),

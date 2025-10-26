@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation } from '@tanstack/react-router';
 import {
   Home,
@@ -30,6 +30,7 @@ import {
 import { cn } from '@workspace/ui/lib/utils';
 import { useAuthStore } from '@/features/auth';
 import { useWorkspaces } from '@/features/workspace';
+import { useLanguageStore } from '@/stores/language-store';
 
 interface NavItem {
   id: string;
@@ -150,8 +151,10 @@ const SidebarItem = ({
 }: SidebarItemProps & { onItemClick?: () => void }) => {
   const location = useLocation();
   const [isExpanded, setIsExpanded] = useState(false);
+  const getLocalizedPath = useLanguageStore((state) => state.getLocalizedPath);
 
-  const isActive = item.href ? location.pathname === item.href : false;
+  const toPath = item.href ? getLocalizedPath(item.href) : undefined;
+  const isActive = toPath ? location.pathname === toPath : false;
   const hasChildren = item.children && item.children.length > 0;
 
   const toggleExpanded = () => {
@@ -191,7 +194,10 @@ const SidebarItem = ({
 
   return (
     <Link
-      to={item.href!}
+      to={toPath!}
+      preload="intent"
+      activeOptions={{ exact: true }}
+      activeProps={{ className: 'bg-primary text-primary-foreground' }}
       onClick={onItemClick}
       className={cn(
         'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',

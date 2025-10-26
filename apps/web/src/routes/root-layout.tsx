@@ -1,28 +1,29 @@
 import { ReactNode } from 'react';
-import { Outlet } from '@tanstack/react-router';
+import { Outlet, useLocation } from '@tanstack/react-router';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { TanStackRouterDevtools } from '@tanstack/router-devtools';
 
-import { AppProviders } from '@/providers/app-providers';
 import { AppLayout } from '@/components/app-layout';
 
 interface RootLayoutProps {
   children?: ReactNode;
-  showSidebar?: boolean;
 }
 
-export const RootLayout = ({ children, showSidebar = true }: RootLayoutProps) => {
+export const RootLayout = ({ children }: RootLayoutProps) => {
+  const location = useLocation();
+  const pathname = location.pathname;
+  const hideSidebar = pathname === '/login' || pathname === '/en/login';
+  const showSidebar = !hideSidebar;
+
   return (
-    <AppProviders>
-      <AppLayout showSidebar={showSidebar}>
-        {children || <Outlet />}
-      </AppLayout>
+    <>
+      <AppLayout showSidebar={showSidebar}>{children || <Outlet />}</AppLayout>
       {import.meta.env.DEV ? (
         <>
           <ReactQueryDevtools buttonPosition="bottom-right" />
           <TanStackRouterDevtools position="bottom-left" />
         </>
       ) : null}
-    </AppProviders>
+    </>
   );
 };
