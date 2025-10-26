@@ -304,30 +304,39 @@ const WorkspaceDropdownContent = ({
             {searchQuery ? t('workspace.selector.noResults') : t('workspace.selector.noWorkspaces')}
           </div>
         ) : (
-          filteredWorkspaces.map((workspace) => (
-            <DropdownMenuItem
-              key={workspace.id}
-              onClick={() => handleWorkspaceSelect(workspace)}
-              className="flex items-center gap-3 p-3 cursor-pointer"
-            >
-              <Avatar className="h-8 w-8">
-                <AvatarImage
-                  src={
-                    workspace.namespace
-                      ? `https://api.dicebear.com/7.x/initials/svg?seed=${workspace.namespace}`
-                      : undefined
-                  }
-                />
-                <AvatarFallback className="text-xs">{getWorkspaceInitials(workspace.workspaceName)}</AvatarFallback>
-              </Avatar>
-              <div className="flex flex-col min-w-0 flex-1">
-                <span className="text-sm font-medium truncate">{workspace.workspaceName}</span>
-                {workspace.namespace && (
-                  <span className="text-xs text-muted-foreground truncate">{workspace.namespace}</span>
+          filteredWorkspaces.map((workspace) => {
+            const isSelected = currentWorkspace?.id === workspace.id;
+            return (
+              <DropdownMenuItem
+                key={workspace.id}
+                onClick={() => handleWorkspaceSelect(workspace)}
+                className={cn(
+                  "flex items-center gap-3 p-3 cursor-pointer",
+                  isSelected && "bg-accent text-accent-foreground"
                 )}
-              </div>
-            </DropdownMenuItem>
-          ))
+              >
+                <Avatar className="h-8 w-8">
+                  <AvatarImage
+                    src={
+                      workspace.namespace
+                        ? `https://api.dicebear.com/7.x/initials/svg?seed=${workspace.namespace}`
+                        : undefined
+                    }
+                  />
+                  <AvatarFallback className="text-xs">{getWorkspaceInitials(workspace.workspaceName)}</AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col min-w-0 flex-1">
+                  <span className="text-sm font-medium truncate">{workspace.workspaceName}</span>
+                  {workspace.namespace && (
+                    <span className="text-xs text-muted-foreground truncate">{workspace.namespace}</span>
+                  )}
+                </div>
+                {isSelected && (
+                  <div className="h-2 w-2 rounded-full bg-primary flex-shrink-0" />
+                )}
+              </DropdownMenuItem>
+            );
+          })
         )}
       </DropdownMenuGroup>
 

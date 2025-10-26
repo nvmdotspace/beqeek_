@@ -171,8 +171,16 @@ export const WorkspaceDashboardPage = () => {
         />
       ) : null}
 
-      {/* Workspace Grid */}
-      {!isLoading && !error && totalWorkspaces > 0 && <WorkspaceGrid workspaces={workspaces} />}
+      {/* Workspace List Section */}
+      {!isLoading && !error && totalWorkspaces > 0 && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold">Danh sách workspace của bạn</h2>
+            <p className="text-sm text-muted-foreground">{totalWorkspaces} workspace</p>
+          </div>
+          <WorkspaceGrid workspaces={workspaces} />
+        </div>
+      )}
     </div>
   );
 };
