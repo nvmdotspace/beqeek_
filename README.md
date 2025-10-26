@@ -1,55 +1,128 @@
-[![GitHub][opengraph-image]][opengraph-image-url]
+# Beqeek Monorepo (React 19, Vite, Tailwind v4, shadcn/ui)
 
-# shadcn/ui and tailwindcss v4 monorepo template
+Monorepo sử dụng Turborepo + PNPM cho ứng dụng web React, tích hợp TailwindCSS v4, shadcn/ui và i18n qua Paraglide.
 
-This template is for creating a monorepo with Turborepo, shadcn/ui, tailwindcss v4, and react v19.
+## Yêu cầu môi trường
 
-## One-click Deploy
+- Node `>=22`
+- PNPM `10.x`
 
-You can deploy this template to Vercel with the button below:
+## Cài đặt & chạy
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?build-command=cd+..%2F..%2F+%26%26+pnpm+turbo+build+--filter%3Dweb...&demo-description=This+is+a+template+Turborepo+with+ShadcnUI+tailwindv4&demo-image=%2F%2Fimages.ctfassets.net%2Fe5382hct74si%2F2JxNyYATuuV7WPuJ31kF9Q%2F433990aa4c8e7524a9095682fb08f0b1%2FBasic.png&demo-title=Turborepo+%26+Next.js+Starter&demo-url=https%3A%2F%2Fexamples-basic-web.vercel.sh%2F&from=templates&project-name=Turborepo+%26+Next.js+Starter&repository-name=turborepo-shadcn-tailwind&repository-url=https%3A%2F%2Fgithub.com%2Flinkb15%2Fturborepo-shadcn-ui-tailwind-4&root-directory=apps%2Fweb&skippable-integrations=1)
-
-## Usage
-
-in the root directory run:
+- Cài đặt dependencies ở thư mục gốc:
 
 ```bash
 pnpm install
+```
+
+- Chạy development toàn monorepo:
+
+```bash
 pnpm dev
 ```
 
-## Contributor Guide
+- Hoặc chỉ app web (từ thư mục app):
 
-See [Repository Guidelines](AGENTS.md) for structure, commands, and PR conventions.
+```bash
+pnpm -C apps/web dev
+```
 
-## Adding components
+- Build toàn monorepo:
 
-To add components to your app, run the following command at the root of your `web` app:
+```bash
+pnpm build
+```
+
+- Preview app web sau khi build:
+
+```bash
+pnpm -C apps/web preview
+```
+
+## Cấu trúc chính
+
+- `apps/web` — Ứng dụng web (Vite)
+- `packages/ui` — Thư viện UI (shadcn/ui, styles, hooks)
+- `packages/active-tables-core` — Core logic cho Active Tables
+- `packages/active-tables-hooks` — Hooks cho Active Tables
+- `packages/encryption-core` — Mã hoá và tiện ích liên quan
+- `docs/` — Tài liệu kiến trúc & đặc tả tính năng
+- `project.inlang/` + `paraglide.config.js` — Cấu hình i18n (Paraglide)
+
+## UI Components (packages/ui)
+
+- Import styles toàn cục:
+
+```ts
+import "@workspace/ui/globals.css"
+```
+
+- Import component ví dụ:
+
+```tsx
+import { Button } from "@workspace/ui/components/button"
+```
+
+- Thêm component từ shadcn/ui vào app web:
 
 ```bash
 pnpm dlx shadcn@latest add button -c apps/web
 ```
 
-This will place the ui components in the `packages/ui/src/components` directory.
+Thành phần sẽ được đồng bộ hoá sang `packages/ui/src/components` theo cấu hình xuất của package.
 
-## Tailwind
+## TailwindCSS v4
 
-Your `globals.css` are already set up to use the components from the `ui` package which is imported in the `web` app.
+- Đã cấu hình PostCSS/Tailwind v4 trong `apps/web` và `packages/ui`
+- Sử dụng cơ chế "explicit sources" của Tailwind v4 theo tài liệu chính thức
 
-## Using components
+## i18n (Paraglide)
 
-To use the components in your app, import them from the `ui` package.
+- Plugin Paraglide đã bật trong `apps/web/vite.config.ts`
+- Chuỗi dịch nằm trong `messages/` và được phát sinh vào `apps/web/src/paraglide/generated`
 
-```tsx
-import { Button } from '@workspace/ui/components/ui/button';
+## Router (TanStack)
+
+- Export `router` từ `apps/web/src/router.tsx`:
+
+```ts
+import { createRouter } from '@tanstack/react-router'
+// ...
+export const router = createRouter({ routeTree })
+
+declare module '@tanstack/react-router' {
+  interface Register {
+    router: typeof router
+  }
+}
 ```
 
-## More Resources
+- Sử dụng `RouterProvider` trong `apps/web/src/main.tsx`:
 
-- [shadcn/ui - Monorepo](https://ui.shadcn.com/docs/monorepo)
-- [Turborepo - shadcn/ui](https://turbo.build/repo/docs/guides/tools/shadcn-ui)
-- [TailwindCSS v4 - Explicitly Registering Sources](https://tailwindcss.com/docs/detecting-classes-in-source-files#explicitly-registering-sources)
+```tsx
+import { RouterProvider } from '@tanstack/react-router'
+import { router } from './router'
 
-[opengraph-image]: https://turborepo-shadcn-tailwind.vercel.app/opengraph-image.png
-[opengraph-image-url]: https://turborepo-shadcn-tailwind.vercel.app/
+// ...
+<RouterProvider router={router} />
+```
+
+## Scripts hữu ích
+
+- `pnpm dev` — chạy dev pipeline toàn repo (Turbo)
+- `pnpm build` — build toàn repo
+- `pnpm -C apps/web dev` — chạy dev riêng app web
+- `pnpm -C apps/web preview` — preview app web
+- `pnpm lint` — lint toàn repo
+- `pnpm format` — format `ts/tsx/md`
+
+## Hướng dẫn đóng góp
+
+Xem thêm: [AGENTS.md](AGENTS.md) để biết quy ước cấu trúc, câu lệnh và conventions khi tạo PR.
+
+## Tài nguyên tham khảo
+
+- shadcn/ui — Monorepo: https://ui.shadcn.com/docs/monorepo
+- Turborepo: https://turbo.build/repo/docs
+- TailwindCSS v4: https://tailwindcss.com/docs
+- Paraglide (inlang): https://www.inlang.com/m/gercan/paraglide-js
