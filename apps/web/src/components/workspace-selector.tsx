@@ -352,30 +352,6 @@ const WorkspaceDropdownContent = ({
       </DropdownMenuGroup>
 
       <DropdownMenuSeparator />
-
-      {/* User Actions */}
-      <DropdownMenuGroup>
-        <DropdownMenuLabel className="text-xs font-medium text-muted-foreground">
-          {t('workspace.selector.userActions')}
-        </DropdownMenuLabel>
-        <DropdownMenuItem className="flex items-center gap-2 cursor-pointer">
-          <User className="h-4 w-4" />
-          <span>{t('workspace.selector.profile')}</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem className="flex items-center gap-2 cursor-pointer">
-          <Crown className="h-4 w-4" />
-          <span>{t('workspace.selector.billing')}</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem className="flex items-center gap-2 cursor-pointer">
-          <Shield className="h-4 w-4" />
-          <span>{t('workspace.selector.security')}</span>
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem className="flex items-center gap-2 cursor-pointer text-destructive">
-          <LogOut className="h-4 w-4" />
-          <span>{t('workspace.selector.signOut')}</span>
-        </DropdownMenuItem>
-      </DropdownMenuGroup>
     </DropdownMenuContent>
   );
 };

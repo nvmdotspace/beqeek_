@@ -311,7 +311,10 @@ export const NavigationMenu = ({ isCollapsed = false, className }: NavigationMen
           <>
             <span className="truncate flex-1">{item.label}</span>
             {badgeValue !== undefined && badgeValue > 0 && (
-              <Badge variant="secondary" className="h-5 px-1.5 text-xs">
+              <Badge 
+                variant="default" 
+                className="h-5 min-w-[20px] px-1.5 text-xs font-semibold flex items-center justify-center ml-auto"
+              >
                 {badgeValue > 99 ? '99+' : badgeValue}
               </Badge>
             )}
