@@ -1,39 +1,26 @@
-import { format } from "date-fns"
-import { Globe, ShieldCheck, Users } from "lucide-react"
+import { format } from 'date-fns';
+import { Globe, ShieldCheck, Users, Database } from 'lucide-react';
+import { Link } from '@tanstack/react-router';
 
-import type { Workspace } from "@/shared/api/types"
+import type { Workspace } from '@/shared/api/types';
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@workspace/ui/components/card"
-import { Badge } from "@workspace/ui/components/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@workspace/ui/components/avatar"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@workspace/ui/components/card';
+import { Badge } from '@workspace/ui/components/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@workspace/ui/components/avatar';
+import { Button } from '@workspace/ui/components/button';
 
-import { initialsFromName } from "../utils/initials"
-import { useTranslation } from '@/hooks/use-translation'
+import { initialsFromName } from '../utils/initials';
+import { useTranslation } from '@/hooks/use-translation';
 
 type WorkspaceCardProps = {
-  workspace: Workspace
-}
+  workspace: Workspace;
+};
 
 export const WorkspaceCard = ({ workspace }: WorkspaceCardProps) => {
-  const {
-    workspaceName,
-    namespace,
-    myWorkspaceUser,
-    logo,
-    thumbnailLogo,
-    createdAt,
-    ownedByUser,
-  } = workspace
+  const { workspaceName, namespace, myWorkspaceUser, logo, thumbnailLogo, createdAt, ownedByUser } = workspace;
 
-  const imgSrc: string | undefined = logo ?? thumbnailLogo ?? undefined
-  const { t } = useTranslation()
+  const imgSrc: string | undefined = logo ?? thumbnailLogo ?? undefined;
+  const { t } = useTranslation();
 
   return (
     <Card className="h-full transition hover:-translate-y-0.5 hover:shadow-lg">
@@ -70,20 +57,28 @@ export const WorkspaceCard = ({ workspace }: WorkspaceCardProps) => {
           </div>
         </div>
         <div className="rounded-lg border border-dashed border-border/60 bg-muted/40 p-3 text-xs text-muted-foreground">
-          <p>{t('workspace.card.createdAt')} {createdAt ? format(new Date(createdAt), "dd/MM/yyyy HH:mm") : "—"}</p>
           <p>
-            {t('workspace.card.e2eeLabel')} <span className="font-medium text-emerald-400">{t('workspace.card.e2eeEnabled')}</span>
+            {t('workspace.card.createdAt')} {createdAt ? format(new Date(createdAt), 'dd/MM/yyyy HH:mm') : '—'}
+          </p>
+          <p>
+            {t('workspace.card.e2eeLabel')}{' '}
+            <span className="font-medium text-emerald-400">{t('workspace.card.e2eeEnabled')}</span>
           </p>
         </div>
       </CardContent>
-      <CardFooter>
-        <a
-          href="#"
-          className="text-sm font-medium text-primary transition hover:text-primary/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-        >
-          {t('workspace.card.openWorkspace')}
-        </a>
+      <CardFooter className="flex gap-2">
+        <Button asChild variant="outline" size="sm" className="flex-1">
+          <Link to="/workspaces/tables" search={{ workspaceId: workspace.id }}>
+            <Database className="mr-2 h-4 w-4" />
+            {t('workspace.card.activeTables')}
+          </Link>
+        </Button>
+        <Button asChild size="sm" className="flex-1">
+          <Link to="/workspaces" search={{ workspaceId: workspace.id }}>
+            {t('workspace.card.openWorkspace')}
+          </Link>
+        </Button>
       </CardFooter>
     </Card>
-  )
-}
+  );
+};

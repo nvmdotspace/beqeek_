@@ -32,6 +32,9 @@
   "workspace_dashboard_teamMembers": "Thành viên",
   "workspace_dashboard_createNewTitle": "Tạo Workspace mới",
   "workspace_dashboard_createNewDescription": "Thiết lập tên, namespace và mô tả. Bạn có thể cấu hình đội nhóm, vai trò và Active Tables sau khi tạo.",
+  "workspace_dashboard_quickAccess": "Truy cập nhanh",
+  "workspace_dashboard_viewAllTables": "Xem tất cả Active Tables",
+  "workspace_dashboard_workspaceTables": "Tables {name}",
   "workspace_dashboard_loadFailed": "Tải danh sách workspace thất bại",
   "workspace_dashboard_errorRetry": "Đã xảy ra lỗi khi kết nối dịch vụ. Vui lòng thử tải lại trang.",
 
@@ -57,6 +60,7 @@
   "workspace_card_e2eeLabel": "E2EE",
   "workspace_card_e2eeEnabled": "Bật",
   "workspace_card_openWorkspace": "Mở Workspace",
+  "workspace_card_activeTables": "Active Tables",
 
   "activeTables_page_title": "Active Tables",
   "activeTables_page_subtitle": "Quản lý các bảng dữ liệu bảo mật theo nhóm công việc.",

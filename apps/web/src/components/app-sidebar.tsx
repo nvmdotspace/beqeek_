@@ -7,6 +7,7 @@ import {
   Zap,
   Users,
   Settings,
+  Shield,
   HelpCircle,
   ChevronDown,
   ChevronRight,
@@ -114,6 +115,12 @@ const navItems: NavItem[] = [
         label: 'Workspace Settings',
         icon: Settings,
         href: '/settings/workspace',
+      },
+      {
+        id: 'encryption-settings',
+        label: 'Encryption',
+        icon: Shield,
+        href: '/settings/encryption',
       },
       {
         id: 'integrations',

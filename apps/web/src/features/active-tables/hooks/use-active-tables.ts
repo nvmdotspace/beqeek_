@@ -5,6 +5,7 @@ import { useAuthStore, selectIsAuthenticated } from '@/features/auth';
 
 import { getActiveTables, getActiveWorkGroups } from '../api/active-tables-api';
 import { useTableManager, useEncryption } from '@workspace/active-tables-hooks';
+import { createActiveTablesApiClient } from '@/shared/api/active-tables-client';
 import type { ActiveTable, ActiveWorkGroup } from '../types';
 
 export const activeWorkGroupsQueryKey = (workspaceId?: string) => ['active-work-groups', workspaceId ?? 'unknown'];
@@ -41,7 +42,6 @@ export const useActiveTablesGroupedByWorkGroup = (workspaceId?: string) => {
   // Create real API client if workspaceId is available
   const apiClient = useMemo(() => {
     if (!workspaceId) return null;
-    const { createActiveTablesApiClient } = require('@/shared/api/active-tables-client');
     return createActiveTablesApiClient(workspaceId);
   }, [workspaceId]);
 

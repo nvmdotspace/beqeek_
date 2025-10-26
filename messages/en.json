@@ -32,6 +32,9 @@
   "workspace_dashboard_teamMembers": "Team Members",
   "workspace_dashboard_createNewTitle": "Create New Workspace",
   "workspace_dashboard_createNewDescription": "Set up your workspace name, namespace, and description. You can configure teams, roles, and Active Tables after creation.",
+  "workspace_dashboard_quickAccess": "Quick Access",
+  "workspace_dashboard_viewAllTables": "View All Active Tables",
+  "workspace_dashboard_workspaceTables": "{name} Tables",
   "workspace_dashboard_loadFailed": "Failed to load workspaces",
   "workspace_dashboard_errorRetry": "An error occurred while connecting to the service. Please try refreshing the page.",
 
@@ -57,6 +60,7 @@
   "workspace_card_e2eeLabel": "E2EE",
   "workspace_card_e2eeEnabled": "Enabled",
   "workspace_card_openWorkspace": "Open Workspace",
+  "workspace_card_activeTables": "Active Tables",
 
   "activeTables_page_title": "Active Tables",
   "activeTables_page_subtitle": "Explore encrypted data tables across your workspace groups.",

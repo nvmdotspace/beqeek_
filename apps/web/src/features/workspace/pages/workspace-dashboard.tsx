@@ -1,22 +1,23 @@
 import { useMemo, useState } from 'react';
+import { Link } from '@tanstack/react-router';
 
-import { PlusCircle, Folder, Zap, Users } from 'lucide-react';
+import { PlusCircle, Folder, Zap, Users, Database } from 'lucide-react';
 
 import { useWorkspaces } from '../hooks/use-workspaces';
 
 import { Button } from '@workspace/ui/components/button';
-import { Card, CardContent } from '@workspace/ui/components/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@workspace/ui/components/card';
 import { Skeleton } from '@workspace/ui/components/skeleton';
 
 import { WorkspaceCreateForm } from '../components/workspace-create-form';
 import { WorkspaceEmptyState } from '../components/workspace-empty-state';
 import { WorkspaceGrid } from '../components/workspace-grid';
-import { useTranslation } from '@/hooks/use-translation'
+import { useTranslation } from '@/hooks/use-translation';
 
 export const WorkspaceDashboardPage = () => {
   const { data, isLoading, error } = useWorkspaces();
   const [showCreateForm, setShowCreateForm] = useState(false);
-  const { t } = useTranslation()
+  const { t } = useTranslation();
 
   const totalWorkspaces = data?.meta?.total ?? data?.data?.length ?? 0;
   const workspaces = data?.data ?? [];
@@ -24,8 +25,7 @@ export const WorkspaceDashboardPage = () => {
   const subtitle = useMemo(() => {
     if (isLoading) return t('workspace.dashboard.loading');
     if (error) return t('workspace.dashboard.error');
-    if (totalWorkspaces === 0)
-      return t('workspace.dashboard.noWorkspacesSubtitle');
+    if (totalWorkspaces === 0) return t('workspace.dashboard.noWorkspacesSubtitle');
     return `${totalWorkspaces} ${t('workspace.dashboard.activeWorkspaces')}`;
   }, [error, isLoading, totalWorkspaces, t]);
 
@@ -52,7 +52,9 @@ export const WorkspaceDashboardPage = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">{t('workspace.dashboard.totalWorkspaces')}</p>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    {t('workspace.dashboard.totalWorkspaces')}
+                  </p>
                   <p className="text-2xl font-bold">{totalWorkspaces}</p>
                 </div>
                 <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
@@ -112,9 +114,7 @@ export const WorkspaceDashboardPage = () => {
           <CardContent className="pt-6">
             <div className="mb-6 space-y-1">
               <h2 className="text-xl font-semibold">{t('workspace.dashboard.createNewTitle')}</h2>
-              <p className="text-sm text-muted-foreground">
-                {t('workspace.dashboard.createNewDescription')}
-              </p>
+              <p className="text-sm text-muted-foreground">{t('workspace.dashboard.createNewDescription')}</p>
             </div>
             <WorkspaceCreateForm onSuccess={() => setShowCreateForm(false)} />
           </CardContent>
@@ -157,8 +157,36 @@ export const WorkspaceDashboardPage = () => {
         />
       ) : null}
 
+      {/* Quick Access */}
+      {!isLoading && !error && totalWorkspaces > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Database className="h-5 w-5" />
+              {t('workspace.dashboard.quickAccess')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Button asChild variant="outline" className="w-full justify-start">
+              <Link to="/workspaces/tables">
+                <Database className="mr-2 h-4 w-4" />
+                {t('workspace.dashboard.viewAllTables')}
+              </Link>
+            </Button>
+            {workspaces.slice(0, 3).map((workspace) => (
+              <Button key={workspace.id} asChild variant="ghost" size="sm" className="w-full justify-start">
+                <Link to="/workspaces/tables" search={{ workspaceId: workspace.id }}>
+                  <Folder className="mr-2 h-4 w-4" />
+                  {t('workspace.dashboard.workspaceTables', { name: workspace.workspaceName })}
+                </Link>
+              </Button>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+
       {/* Workspace Grid */}
       {!isLoading && !error && totalWorkspaces > 0 && <WorkspaceGrid workspaces={workspaces} />}
     </div>
   );
-}
+};
