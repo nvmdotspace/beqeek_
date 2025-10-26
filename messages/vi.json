@@ -71,6 +71,7 @@
   "activeTables_page_workGroupAll": "Tất cả nhóm",
   "activeTables_page_groupTableCount": "{count} bảng",
   "activeTables_page_errorGeneric": "Không thể tải Active Tables. Vui lòng thử lại.",
+  "activeTables_page_searchPlaceholder": "Tìm kiếm Active Tables...",
 
   "activeTables_card_e2ee": "E2EE",
   "activeTables_card_serverEncryption": "Mã hóa máy chủ",
@@ -78,6 +79,10 @@
   "activeTables_card_updatedAt": "Cập nhật {when}",
   "activeTables_card_viewDetails": "Xem chi tiết",
   "activeTables_card_encryptionNotReady": "Mã hóa chưa sẵn sàng",
+  "activeTables_card.statusEditing": "Đang chỉnh sửa",
+  "activeTables_card.edit": "Sửa",
+  "activeTables_card.delete": "Xóa",
+  "activeTables_card_statusEditing": "Đang chỉnh sửa",
 
   "activeTables_empty_title": "Chưa có Active Table",
   "activeTables_empty_description": "Active Table giúp đội ngũ quản lý dữ liệu cấu trúc an toàn. Tạo bảng mới để bắt đầu.",

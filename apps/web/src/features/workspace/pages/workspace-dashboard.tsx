@@ -71,8 +71,22 @@ export const WorkspaceDashboardPage = () => {
                   <p className="text-sm font-medium text-muted-foreground">{t('workspace.dashboard.activeTables')}</p>
                   <p className="text-2xl font-bold">24</p>
                 </div>
-                <div className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
-                  <Folder className="h-4 w-4 text-green-600" />
+                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Folder className="h-4 w-4 text-primary" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">{t('workspace.dashboard.activeTables')}</p>
+                  <p className="text-2xl font-bold">24</p>
+                </div>
+                <div className="h-8 w-8 rounded-full bg-success/10 flex items-center justify-center">
+                  <Folder className="h-4 w-4 text-success" />
                 </div>
               </div>
             </CardContent>
@@ -85,8 +99,8 @@ export const WorkspaceDashboardPage = () => {
                   <p className="text-sm font-medium text-muted-foreground">{t('workspace.dashboard.workflows')}</p>
                   <p className="text-2xl font-bold">8</p>
                 </div>
-                <div className="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center">
-                  <Zap className="h-4 w-4 text-purple-600" />
+                <div className="h-8 w-8 rounded-full bg-accent/10 flex items-center justify-center">
+                  <Zap className="h-4 w-4 text-accent" />
                 </div>
               </div>
             </CardContent>
@@ -99,8 +113,8 @@ export const WorkspaceDashboardPage = () => {
                   <p className="text-sm font-medium text-muted-foreground">{t('workspace.dashboard.teamMembers')}</p>
                   <p className="text-2xl font-bold">15</p>
                 </div>
-                <div className="h-8 w-8 rounded-full bg-orange-100 flex items-center justify-center">
-                  <Users className="h-4 w-4 text-orange-600" />
+                <div className="h-8 w-8 rounded-full bg-warning/10 flex items-center justify-center">
+                  <Users className="h-4 w-4 text-warning" />
                 </div>
               </div>
             </CardContent>

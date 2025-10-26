@@ -71,6 +71,7 @@
   "activeTables_page_workGroupAll": "All work groups",
   "activeTables_page_groupTableCount": "{count} tables",
   "activeTables_page_errorGeneric": "Unable to load active tables. Please try again.",
+  "activeTables_page_searchPlaceholder": "Search active tables...",
 
   "activeTables_card_e2ee": "E2EE",
   "activeTables_card_serverEncryption": "Server Encrypt",
@@ -78,6 +79,7 @@
   "activeTables_card_updatedAt": "Updated {when}",
   "activeTables_card_viewDetails": "View details",
   "activeTables_card_encryptionNotReady": "Encryption not ready",
+  "activeTables_card_statusEditing": "Editing",
 
   "activeTables_empty_title": "No Active Tables yet",
   "activeTables_empty_description": "Active Tables help your teams manage structured data securely. Create a new table to get started.",

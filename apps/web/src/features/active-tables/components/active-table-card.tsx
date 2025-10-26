@@ -1,19 +1,27 @@
 import { memo } from 'react';
-import { ShieldCheck, Shield, Table, ArrowRight, AlertTriangle } from 'lucide-react';
+import { ShieldCheck, Shield, Table, ArrowRight, AlertTriangle, MoreVertical, Edit, Trash2 } from 'lucide-react';
 
 import type { ActiveTable } from '../types';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@workspace/ui/components/card';
 import { Badge } from '@workspace/ui/components/badge';
 import { Button } from '@workspace/ui/components/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@workspace/ui/components/dropdown-menu';
 import { useTranslation } from '@/hooks/use-translation';
 import { useEncryption } from '@workspace/active-tables-hooks';
 
 interface ActiveTableCardProps {
   table: ActiveTable;
   onOpen?: (table: ActiveTable) => void;
+  onEdit?: (table: ActiveTable) => void;
+  onDelete?: (table: ActiveTable) => void;
 }
 
-export const ActiveTableCard = memo(({ table, onOpen }: ActiveTableCardProps) => {
+export const ActiveTableCard = memo(({ table, onOpen, onEdit, onDelete }: ActiveTableCardProps) => {
   const { t, locale } = useTranslation();
   const { isReady: isEncryptionReady } = useEncryption();
   const fieldCount = table.config?.fields?.length ?? 0;
@@ -26,15 +34,42 @@ export const ActiveTableCard = memo(({ table, onOpen }: ActiveTableCardProps) =>
         }).format(new Date(table.updatedAt))
       : null;
 
+  // Example of a real-time status (can be dynamic based on actual data)
+  const isEditing = Math.random() > 0.7; // Placeholder for real-time status
+
   return (
     <Card className="flex h-full flex-col border-border/60">
       <CardHeader className="space-y-3">
         <div className="flex items-start justify-between gap-2">
           <CardTitle className="text-xl font-semibold leading-tight">{table.name}</CardTitle>
-          <Badge variant={isE2EE ? 'default' : 'secondary'} className="flex items-center gap-1">
-            {isE2EE ? <ShieldCheck className="h-3.5 w-3.5" /> : <Shield className="h-3.5 w-3.5" />}
-            {isE2EE ? t('activeTables.card.e2ee') : t('activeTables.card.serverEncryption')}
-          </Badge>
+          <div className="flex items-center gap-2">
+            {isEditing && (
+              <Badge variant="outline" className="bg-orange-100 text-orange-700 border-orange-300">
+                {t('activeTables.card.statusEditing')}
+              </Badge>
+            )}
+            <Badge variant={isE2EE ? 'default' : 'secondary'} className="flex items-center gap-1">
+              {isE2EE ? <ShieldCheck className="h-3.5 w-3.5" /> : <Shield className="h-3.5 w-3.5" />}
+              {isE2EE ? t('activeTables.card.e2ee') : t('activeTables.card.serverEncryption')}
+            </Badge>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => onEdit?.(table)}>
+                  <Edit className="mr-2 h-4 w-4" />
+                  {t('activeTables.card.edit')}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onDelete?.(table)} className="text-destructive">
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  {t('activeTables.card.delete')}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
         {table.description ? (
           <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2">{table.description}</p>

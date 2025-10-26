@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ChevronDown, RefreshCw } from 'lucide-react';
+import { ChevronDown, RefreshCw, Search } from 'lucide-react';
 
 import { useWorkspaces } from '@/features/workspace/hooks/use-workspaces';
 import { ActiveTableCard } from '../components/active-table-card';
@@ -17,6 +17,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@workspace/ui/components/dropdown-menu';
+import { Input } from '@workspace/ui/components/input';
 import type { ActiveTable } from '../types';
 
 export const ActiveTablesPage = () => {
@@ -29,6 +30,7 @@ export const ActiveTablesPage = () => {
   const workspaceParam = typeof search.workspaceId === 'string' ? search.workspaceId : undefined;
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string>(workspaceParam || '');
   const [selectedWorkGroupId, setSelectedWorkGroupId] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const localePrefix = locale === 'vi' ? '' : `/${locale}`;
 
   useEffect(() => {
@@ -61,6 +63,21 @@ export const ActiveTablesPage = () => {
 
   const totalTables = grouped.reduce((count, entry) => count + entry.tables.length, 0);
 
+  const filteredGroups = useMemo(() => {
+    if (!searchQuery) {
+      return visibleGroups;
+    }
+    const lowerCaseQuery = searchQuery.toLowerCase();
+    return visibleGroups.map((groupEntry) => ({
+      ...groupEntry,
+      tables: groupEntry.tables.filter(
+        (table) =>
+          table.name.toLowerCase().includes(lowerCaseQuery) ||
+          table.description?.toLowerCase().includes(lowerCaseQuery),
+      ),
+    })).filter(groupEntry => groupEntry.tables.length > 0);
+  }, [visibleGroups, searchQuery]);
+
   const handleOpenTable = (table: ActiveTable) => {
     if (!selectedWorkspaceId) {
       return;
@@ -80,6 +97,15 @@ export const ActiveTablesPage = () => {
           <p className="text-muted-foreground">{t('activeTables.page.subtitle')}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          <div className="relative w-full md:w-auto">
+            <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder={t('activeTables.page.searchPlaceholder')}
+              className="pl-8"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="min-w-[220px] justify-between">
@@ -118,7 +144,7 @@ export const ActiveTablesPage = () => {
           <Badge variant="outline" className="bg-background">
             {t('activeTables.page.totalTables', { count: totalTables })}
           </Badge>
-          <Badge variant="secondary">{t('activeTables.page.totalWorkGroups', { count: workGroups.length })}</Badge>
+          <Badge variant="default">{t('activeTables.page.totalWorkGroups', { count: workGroups.length })}</Badge>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -151,7 +177,7 @@ export const ActiveTablesPage = () => {
       ) : null}
 
       {!isTablesLoading && error ? (
-        <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-6 text-sm text-destructive">
+        <div className="rounded-lg border border-destructive bg-destructive/20 p-6 text-sm text-destructive">
           {error instanceof Error ? error.message : t('activeTables.page.errorGeneric')}
         </div>
       ) : null}
@@ -160,7 +186,7 @@ export const ActiveTablesPage = () => {
 
       {!isTablesLoading && !error && hasAnyTables ? (
         <div className="space-y-8">
-          {visibleGroups.map(({ group, tables }) => (
+          {filteredGroups.map(({ group, tables }) => (
             <section key={group.id} className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
