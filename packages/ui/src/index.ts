@@ -12,3 +12,5 @@ export * from './components/tabs.js';
 export * from './components/dialog.js';
 export * from './components/select.js';
 export * from './components/switch.js';
+export * from './components/popover.js';
+export * from './components/color-picker.js';

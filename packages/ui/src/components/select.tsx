@@ -33,16 +33,18 @@ const SelectContext = React.createContext<{
   onValueChange?: (value: string) => void;
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
+  disabled: boolean;
 }>({
   isOpen: false,
   setIsOpen: () => {},
+  disabled: false,
 });
 
 export const Select: React.FC<SelectProps> = ({ value, onValueChange, disabled, children }) => {
   const [isOpen, setIsOpen] = React.useState(false);
 
   return (
-    <SelectContext.Provider value={{ value, onValueChange, isOpen, setIsOpen }}>
+    <SelectContext.Provider value={{ value, onValueChange, isOpen, setIsOpen, disabled: disabled ?? false }}>
       <div className="relative">
         {children}
       </div>
@@ -52,13 +54,17 @@ export const Select: React.FC<SelectProps> = ({ value, onValueChange, disabled, 
 
 export const SelectTrigger = React.forwardRef<HTMLButtonElement, SelectTriggerProps>(
   ({ children, className = '', ...props }, ref) => {
-    const { isOpen, setIsOpen } = React.useContext(SelectContext);
+    const { isOpen, setIsOpen, disabled } = React.useContext(SelectContext);
 
     return (
       <button
         ref={ref}
         type="button"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => {
+          if (!disabled) {
+            setIsOpen(!isOpen);
+          }
+        }}
         className={`
           flex h-10 w-full items-center justify-between rounded-md border border-input
           bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground
@@ -66,6 +72,7 @@ export const SelectTrigger = React.forwardRef<HTMLButtonElement, SelectTriggerPr
           disabled:cursor-not-allowed disabled:opacity-50
           ${className}
         `}
+        disabled={disabled}
         {...props}
       >
         {children}
@@ -81,6 +88,7 @@ export const SelectTrigger = React.forwardRef<HTMLButtonElement, SelectTriggerPr
     );
   }
 );
+SelectTrigger.displayName = 'SelectTrigger';
 
 export const SelectValue: React.FC<SelectValueProps> = ({ placeholder, className = '' }) => {
   const { value } = React.useContext(SelectContext);
