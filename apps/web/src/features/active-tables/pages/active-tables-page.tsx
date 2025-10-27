@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ChevronDown, RefreshCw, Search } from 'lucide-react';
+import { ChevronDown, RefreshCw, Search, Plus, Edit, Trash2, ShieldCheck, Database, FolderOpen } from 'lucide-react';
 
 import { useWorkspaces } from '@/features/workspace/hooks/use-workspaces';
 import { ActiveTableCard } from '../components/active-table-card';
 import { useActiveTablesGroupedByWorkGroup } from '../hooks/use-active-tables';
 import { ActiveTablesEmptyState } from '../components/active-tables-empty-state';
+import { TableManagementDialog } from '../components/table-management-dialog';
+import { useTableManagement } from '../hooks/use-table-management';
 // @ts-ignore
 import { m } from "@/paraglide/generated/messages.js";
 import { useLocation, useNavigate } from '@tanstack/react-router';
@@ -32,6 +34,8 @@ export const ActiveTablesPage = () => {
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string>(workspaceParam || '');
   const [selectedWorkGroupId, setSelectedWorkGroupId] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [isTableDialogOpen, setIsTableDialogOpen] = useState(false);
+  const [editingTable, setEditingTable] = useState<ActiveTable | null>(null);
   const localePrefix = (locale as string) === 'vi' ? '' : `/${locale}`;
 
   useEffect(() => {
@@ -49,6 +53,19 @@ export const ActiveTablesPage = () => {
     error,
     refetch,
   } = useActiveTablesGroupedByWorkGroup(selectedWorkspaceId || '');
+
+  const { createTable, updateTable, deleteTable, isCreating, isUpdating, isDeleting } = useTableManagement({
+    workspaceId: selectedWorkspaceId || '',
+    onSuccess: (message) => {
+      console.log(message);
+      setIsTableDialogOpen(false);
+      setEditingTable(null);
+      refetch();
+    },
+    onError: (error) => {
+      console.error(error);
+    },
+  });
 
   useEffect(() => {
     setSelectedWorkGroupId('all');
@@ -90,23 +107,65 @@ export const ActiveTablesPage = () => {
     });
   };
 
+  const handleCreateTable = () => {
+    setEditingTable(null);
+    setIsTableDialogOpen(true);
+  };
+
+  const handleEditTable = (table: ActiveTable) => {
+    setEditingTable(table);
+    setIsTableDialogOpen(true);
+  };
+
+  const handleDeleteTable = async (table: ActiveTable) => {
+    if (confirm(`Are you sure you want to delete "${table.name}"? This action cannot be undone.`)) {
+      await deleteTable(table.id);
+    }
+  };
+
+  const handleSaveTable = async (tableData: any) => {
+    if (editingTable) {
+      await updateTable(editingTable.id, tableData);
+    } else {
+      await createTable(tableData);
+    }
+  };
+
   return (
     <div className="space-y-6 p-6">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight">{m.activeTables_page_title()}</h1>
-          <p className="text-muted-foreground">{m.activeTables_page_subtitle()}</p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="relative w-full md:w-auto">
-            <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder={m.activeTables_page_searchPlaceholder()}
-              className="pl-8"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
+      {/* Hero Section */}
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 rounded-xl p-6 border">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="space-y-2">
+            <h1 className="text-3xl font-bold tracking-tight">Active Tables</h1>
+            <p className="text-lg text-muted-foreground">
+              Structured data management with workflows, encryption & team collaboration
+            </p>
+            <div className="flex flex-wrap gap-2 mt-3">
+              <div className="flex items-center gap-2 text-sm bg-white/60 dark:bg-gray-800/60 px-3 py-1 rounded-full">
+                <ShieldCheck className="h-4 w-4 text-green-600" />
+                End-to-End Encryption
+              </div>
+              <div className="flex items-center gap-2 text-sm bg-white/60 dark:bg-gray-800/60 px-3 py-1 rounded-full">
+                <Database className="h-4 w-4 text-blue-600" />
+                Flexible Schema
+              </div>
+              <div className="flex items-center gap-2 text-sm bg-white/60 dark:bg-gray-800/60 px-3 py-1 rounded-full">
+                <FolderOpen className="h-4 w-4 text-purple-600" />
+                Workflow Integration
+              </div>
+            </div>
           </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="relative w-full md:w-auto">
+              <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder={m.activeTables_page_searchPlaceholder()}
+                className="pl-8"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="min-w-[220px] justify-between">
@@ -137,6 +196,11 @@ export const ActiveTablesPage = () => {
           <Button variant="outline" size="icon" disabled={isTablesLoading} onClick={() => refetch()}>
             <RefreshCw className={`h-4 w-4 ${isFetching ? 'animate-spin' : ''}`} />
           </Button>
+            <Button onClick={handleCreateTable} disabled={!selectedWorkspaceId}>
+              <Plus className="h-4 w-4 mr-2" />
+              Create Table
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -200,13 +264,28 @@ export const ActiveTablesPage = () => {
               </div>
               <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
                 {tables.map((table) => (
-                  <ActiveTableCard key={table.id} table={table} onOpen={handleOpenTable} />
+                  <ActiveTableCard
+                    key={table.id}
+                    table={table}
+                    onOpen={handleOpenTable}
+                    onEdit={handleEditTable}
+                    onDelete={handleDeleteTable}
+                  />
                 ))}
               </div>
             </section>
           ))}
         </div>
       ) : null}
+
+      <TableManagementDialog
+        open={isTableDialogOpen}
+        onOpenChange={setIsTableDialogOpen}
+        table={editingTable}
+        workGroups={workGroups}
+        onSave={handleSaveTable}
+        isLoading={isCreating || isUpdating}
+      />
     </div>
   );
 };

@@ -10,3 +10,5 @@ export * from './components/textarea.js';
 export * from './components/alert.js';
 export * from './components/tabs.js';
 export * from './components/dialog.js';
+export * from './components/select.js';
+export * from './components/switch.js';

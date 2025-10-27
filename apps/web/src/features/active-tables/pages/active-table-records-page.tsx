@@ -1,4 +1,5 @@
-import { ArrowLeft, Database, FolderOpen, ShieldCheck } from 'lucide-react';
+import { useState } from 'react';
+import { ArrowLeft, Database, FolderOpen, ShieldCheck, Plus, Edit, Trash2, MoreVertical } from 'lucide-react';
 import { useLocation, useNavigate, useParams } from '@tanstack/react-router';
 
 // @ts-ignore
@@ -14,6 +15,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@workspace/ui/componen
 import { Badge } from '@workspace/ui/components/badge';
 import { Skeleton } from '@workspace/ui/components/skeleton';
 import { Input } from '@workspace/ui/components/input';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@workspace/ui/components/dropdown-menu';
+import { RecordManagementDialog } from '../components/record-management-dialog';
+import { useRecordManagement } from '../hooks/use-record-management';
 
 const formatRecordValue = (value: unknown): string => {
   if (value == null) return '—';
@@ -42,10 +51,14 @@ const RecordsTable = ({
   fields,
   records,
   emptyLabel,
+  onEdit,
+  onDelete,
 }: {
   fields: ActiveFieldConfig[];
   records: ActiveTableRecord[];
   emptyLabel: string;
+  onEdit?: (record: ActiveTableRecord) => void;
+  onDelete?: (record: ActiveTableRecord) => void;
 }) => {
   if (!records.length) {
     return (
@@ -74,6 +87,11 @@ const RecordsTable = ({
             <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Updated At
             </th>
+            {(onEdit || onDelete) && (
+              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Actions
+              </th>
+            )}
           </tr>
         </thead>
         <tbody className="divide-y divide-border/60 bg-background">
@@ -88,6 +106,34 @@ const RecordsTable = ({
               <td className="px-4 py-3 text-xs text-muted-foreground">
                 {record.updatedAt ? new Date(record.updatedAt).toLocaleString() : '—'}
               </td>
+              {(onEdit || onDelete) && (
+                <td className="px-4 py-3">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm">
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      {onEdit && (
+                        <DropdownMenuItem onClick={() => onEdit(record)}>
+                          <Edit className="mr-2 h-4 w-4" />
+                          Edit Record
+                        </DropdownMenuItem>
+                      )}
+                      {onDelete && (
+                        <DropdownMenuItem
+                          onClick={() => onDelete(record)}
+                          className="text-destructive focus:text-destructive"
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Delete Record
+                        </DropdownMenuItem>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </td>
+              )}
             </tr>
           ))}
         </tbody>
@@ -103,6 +149,8 @@ export const ActiveTableRecordsPage = () => {
   const locale = 'en'; // Placeholder for locale
   const { isReady: isEncryptionReady } = useEncryption();
   const tableId = params.tableId as string;
+  const [isRecordDialogOpen, setIsRecordDialogOpen] = useState(false);
+  const [editingRecord, setEditingRecord] = useState<ActiveTableRecord | null>(null);
 
   const search = (location.search ?? {}) as Record<string, unknown>;
   const searchWorkspaceId = typeof search.workspaceId === 'string' ? search.workspaceId : undefined;
@@ -126,11 +174,49 @@ export const ActiveTableRecordsPage = () => {
     refetch,
   } = useActiveTableRecords({ workspaceId, tableId });
 
+  const { createRecord, updateRecord, deleteRecord, isCreating, isUpdating, isDeleting } = useRecordManagement({
+    workspaceId: workspaceId || '',
+    tableId: tableId || '',
+    onSuccess: (message) => {
+      console.log(message);
+      setIsRecordDialogOpen(false);
+      setEditingRecord(null);
+      refetch();
+    },
+    onError: (error) => {
+      console.error(error);
+    },
+  });
+
   const handleBack = () => {
     navigate({
       to: `${localePrefix}/workspaces/tables/${tableId ?? ''}`,
       search: workspaceId ? { workspaceId } : undefined,
     });
+  };
+
+  const handleCreateRecord = () => {
+    setEditingRecord(null);
+    setIsRecordDialogOpen(true);
+  };
+
+  const handleEditRecord = (record: ActiveTableRecord) => {
+    setEditingRecord(record);
+    setIsRecordDialogOpen(true);
+  };
+
+  const handleDeleteRecord = async (record: ActiveTableRecord) => {
+    if (confirm(`Are you sure you want to delete this record? This action cannot be undone.`)) {
+      await deleteRecord(record.id);
+    }
+  };
+
+  const handleSaveRecord = async (recordData: Record<string, any>) => {
+    if (editingRecord) {
+      await updateRecord(editingRecord.id, recordData);
+    } else {
+      await createRecord(recordData);
+    }
   };
 
   if (!tableId || !workspaceId) {
@@ -207,6 +293,10 @@ export const ActiveTableRecordsPage = () => {
             <Button variant="outline" size="sm" onClick={refetch} disabled={isFetching}>
               {isFetching ? m.activeTables_records_refreshing() : m.activeTables_records_refresh()}
             </Button>
+            <Button onClick={handleCreateRecord} disabled={!table}>
+              <Plus className="h-4 w-4 mr-2" />
+              Create Record
+            </Button>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -217,7 +307,13 @@ export const ActiveTableRecordsPage = () => {
               {error instanceof Error ? error.message : m.activeTables_records_errorGeneric()}
             </div>
           ) : (
-            <RecordsTable fields={fields} records={records} emptyLabel={m.activeTables_records_emptyState()} />
+            <RecordsTable
+              fields={fields}
+              records={records}
+              emptyLabel={m.activeTables_records_emptyState()}
+              onEdit={handleEditRecord}
+              onDelete={handleDeleteRecord}
+            />
           )}
 
           <div className="flex items-center justify-between border-t border-border/60 pt-4 text-xs text-muted-foreground">
@@ -238,6 +334,17 @@ export const ActiveTableRecordsPage = () => {
           </div>
         </CardContent>
       </Card>
+
+      {table && (
+        <RecordManagementDialog
+          open={isRecordDialogOpen}
+          onOpenChange={setIsRecordDialogOpen}
+          table={table}
+          record={editingRecord}
+          onSave={handleSaveRecord}
+          isLoading={isCreating || isUpdating}
+        />
+      )}
     </div>
   );
 };

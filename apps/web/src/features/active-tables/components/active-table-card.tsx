@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { ShieldCheck, Shield, Table, ArrowRight, AlertTriangle, MoreVertical, Edit, Trash2 } from 'lucide-react';
+import { ShieldCheck, Shield, Table, ArrowRight, AlertTriangle, MoreVertical, Edit, Trash2, Database, FolderOpen } from 'lucide-react';
 
 import type { ActiveTable } from '../types';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@workspace/ui/components/card';
@@ -40,19 +40,36 @@ export const ActiveTableCard = memo(({ table, onOpen, onEdit, onDelete }: Active
 
   return (
     <Card className="flex h-full flex-col border-border/60">
-      <CardHeader className="space-y-3">
-        <div className="flex items-start justify-between gap-2">
-          <CardTitle className="text-xl font-semibold leading-tight">{table.name}</CardTitle>
-          <div className="flex items-center gap-2">
-            {isEditing && (
-              <Badge variant="outline" className="bg-orange-100 text-orange-700 border-orange-300">
-                {m.activeTables_card_statusEditing()}
+      <CardHeader className="pb-3">
+        <div className="flex items-start justify-between">
+          <div className="space-y-2 flex-1">
+            <div className="flex items-center gap-2">
+              <CardTitle className="text-lg leading-none">{table.name}</CardTitle>
+              <Badge variant="outline" className="text-xs capitalize">
+                {table.tableType || 'standard'}
+              </Badge>
+            </div>
+            {table.description && (
+              <p className="text-sm text-muted-foreground line-clamp-2">{table.description}</p>
+            )}
+            <div className="flex items-center gap-3 text-xs text-muted-foreground">
+              <span className="flex items-center gap-1">
+                <Table className="h-3 w-3" />
+                {table.config?.fields?.length || 0} fields
+              </span>
+            </div>
+          </div>
+          <div className="flex flex-col items-end gap-2">
+            {table.config?.e2eeEncryption ? (
+              <Badge variant="secondary" className="text-xs flex items-center gap-1">
+                <ShieldCheck className="h-3 w-3" />
+                E2EE
+              </Badge>
+            ) : (
+              <Badge variant="outline" className="text-xs">
+                Server Encrypted
               </Badge>
             )}
-            <Badge variant={isE2EE ? 'default' : 'secondary'} className="flex items-center gap-1">
-              {isE2EE ? <ShieldCheck className="h-3.5 w-3.5" /> : <Shield className="h-3.5 w-3.5" />}
-              {isE2EE ? m.activeTables_card_e2ee() : m.activeTables_card_serverEncryption()}
-            </Badge>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -72,9 +89,6 @@ export const ActiveTableCard = memo(({ table, onOpen, onEdit, onDelete }: Active
             </DropdownMenu>
           </div>
         </div>
-        {table.description ? (
-          <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2">{table.description}</p>
-        ) : null}
       </CardHeader>
 
       <CardContent className="flex flex-col gap-3 text-sm text-muted-foreground">
@@ -109,10 +123,40 @@ export const ActiveTableCard = memo(({ table, onOpen, onEdit, onDelete }: Active
         <div className="text-xs text-muted-foreground">
           {updatedAtLabel ? m.activeTables_card_updatedAt({ when: updatedAtLabel }) : '\u00A0'}
         </div>
-        <Button variant="outline" size="sm" onClick={() => onOpen?.(table)}>
-          {m.activeTables_card_viewDetails()}
-          <ArrowRight className="ml-2 h-4 w-4" />
-        </Button>
+        <div className="flex items-center gap-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm">
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => onOpen?.(table)}>
+                <ArrowRight className="mr-2 h-4 w-4" />
+                {m.activeTables_card_viewDetails()}
+              </DropdownMenuItem>
+              {onEdit && (
+                <DropdownMenuItem onClick={() => onEdit(table)}>
+                  <Edit className="mr-2 h-4 w-4" />
+                  Edit Table
+                </DropdownMenuItem>
+              )}
+              {onDelete && (
+                <DropdownMenuItem
+                  onClick={() => onDelete(table)}
+                  className="text-destructive focus:text-destructive"
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete Table
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <Button variant="outline" size="sm" onClick={() => onOpen?.(table)}>
+            {m.activeTables_card_viewDetails()}
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+        </div>
       </CardFooter>
     </Card>
   );

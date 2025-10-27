@@ -21,11 +21,79 @@ export interface ActiveFieldConfig {
   options?: ActiveTableOption[];
 }
 
+export interface ActiveTableAction {
+  name: string;
+  type: string;
+  icon?: string;
+  actionId: string;
+}
+
+export interface ActiveTableQuickFilter {
+  fieldName: string;
+}
+
+export interface KanbanConfig {
+  kanbanScreenId: string;
+  screenName: string;
+  screenDescription?: string;
+  statusField: string;
+  kanbanHeadlineField: string;
+  displayFields: string[];
+}
+
+export interface RecordListConfig {
+  layout: string;
+  titleField: string;
+  subLineFields: string[];
+  tailFields: string[];
+}
+
+export interface RecordDetailConfig {
+  layout: string;
+  commentsPosition: string;
+  headTitleField: string;
+  headSubLineFields: string[];
+  rowTailFields: string[];
+}
+
+export interface PermissionAction {
+  actionId: string;
+  permission: string;
+}
+
+export interface PermissionsConfig {
+  teamId: string;
+  roleId: string;
+  actions: PermissionAction[];
+}
+
+export interface GanttChart {
+  ganttScreenId: string;
+  screenName: string;
+  screenDescription?: string;
+  taskNameField: string;
+  startDateField: string;
+  endDateField: string;
+  progressField?: string;
+  dependencyField?: string;
+}
+
 export interface ActiveTableConfig {
   title: string;
   fields: ActiveFieldConfig[];
-  e2eeEncryption?: boolean;
-  encryptionKey?: string | null;
+  actions: ActiveTableAction[];
+  quickFilters: ActiveTableQuickFilter[];
+  tableLimit: number;
+  e2eeEncryption: boolean;
+  hashedKeywordFields: string[];
+  defaultSort: string;
+  kanbanConfigs: KanbanConfig[];
+  recordListConfig: RecordListConfig;
+  recordDetailConfig: RecordDetailConfig;
+  permissionsConfig: PermissionsConfig[];
+  ganttCharts: GanttChart[];
+  encryptionKey?: string;
+  encryptionAuthKey: string;
 }
 
 export interface ActiveTable {
