@@ -39,6 +39,10 @@ export interface KanbanConfig {
   statusField: string;
   kanbanHeadlineField: string;
   displayFields: string[];
+  columnStyles?: {
+    value: string;
+    color: string;
+  }[];
 }
 
 export interface RecordListConfig {

@@ -8,6 +8,7 @@ import { ThemeProvider } from './theme-provider';
 import { ApiErrorBoundary } from '@/components/api-error-boundary';
 import { ApiError } from '@/shared/api/api-error';
 import { queryClient } from '@/shared/query-client';
+import { Toaster } from '@workspace/ui/components/sonner';
 
 // Component to handle language detection from URL
 function LanguageDetector({ children }: { children: React.ReactNode }) {
@@ -29,7 +30,10 @@ export const AppProviders = ({ children }: { children: React.ReactNode }) => {
     <ThemeProvider>
       <QueryClientProvider client={queryClient}>
         <ApiErrorBoundary>
-          <LanguageDetector>{children}</LanguageDetector>
+          <LanguageDetector>
+            {children}
+            <Toaster position="top-center" richColors />
+          </LanguageDetector>
         </ApiErrorBoundary>
       </QueryClientProvider>
     </ThemeProvider>
