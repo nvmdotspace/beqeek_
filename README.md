@@ -9,35 +9,214 @@ Monorepo sử dụng Turborepo + PNPM cho ứng dụng web React, tích hợp Ta
 
 ## Cài đặt & chạy
 
-- Cài đặt dependencies ở thư mục gốc:
+### Cài đặt dependencies
+
+Cài đặt dependencies cho toàn bộ monorepo từ thư mục gốc:
 
 ```bash
 pnpm install
 ```
 
-- Chạy development toàn monorepo:
+### Development
+
+#### Chạy toàn bộ monorepo (khuyến nghị)
 
 ```bash
 pnpm dev
 ```
 
-- Hoặc chỉ app web (từ thư mục app):
+Lệnh này sẽ:
+- Compile i18n messages (Paraglide)
+- Chạy development server cho tất cả apps
+- Tự động reload khi có thay đổi
 
+#### Chạy từng app riêng lẻ
+
+**App Web chính:**
 ```bash
-pnpm -C apps/web dev
+# Từ thư mục gốc
+pnpm --filter web dev
+
+# Hoặc từ thư mục app
+cd apps/web && pnpm dev
+
+# Chạy với host cụ thể (nếu cần)
+pnpm --filter web dev -- --host 127.0.0.1
 ```
 
-- Build toàn monorepo:
+**App Admin (khi có):**
+```bash
+pnpm --filter admin dev
+```
+
+**Product Page App (khi có):**
+```bash
+pnpm --filter product-page dev
+```
+
+### Production Build
+
+#### Build toàn bộ monorepo
 
 ```bash
 pnpm build
 ```
 
-- Preview app web sau khi build:
+Lệnh này sẽ:
+1. Compile i18n messages
+2. Build tất cả packages theo thứ tự dependency
+3. Build tất cả applications
+
+#### Build từng app riêng lẻ
+
+**App Web:**
+```bash
+# Build app web và dependencies
+pnpm --filter web build
+
+# Hoặc từ thư mục app
+cd apps/web && pnpm build
+```
+
+**Build packages riêng:**
+```bash
+# Build UI package
+pnpm --filter @workspace/ui build
+
+# Build core packages
+pnpm --filter @workspace/active-tables-core build
+pnpm --filter @workspace/encryption-core build
+```
+
+#### Preview sau khi build
+
+**Preview app web:**
+```bash
+# Từ thư mục gốc
+pnpm --filter web preview
+
+# Hoặc từ thư mục app
+cd apps/web && pnpm preview
+```
+
+#### Deployment Production
+
+**Build optimized cho production:**
+```bash
+# Set NODE_ENV và build
+NODE_ENV=production pnpm build
+
+# Hoặc chỉ app web
+NODE_ENV=production pnpm --filter web build
+```
+
+**Kiểm tra build output:**
+```bash
+# Kiểm tra kích thước bundle
+ls -la apps/web/dist/
+
+# Preview production build
+pnpm --filter web preview
+```
+
+**4. Docker deployment:**
+
+Dự án đã bao gồm các file cấu hình Docker sẵn sàng:
 
 ```bash
-pnpm -C apps/web preview
+# Build Docker image
+docker build -t beqeek-web .
+
+# Chạy container đơn giản
+docker run -p 3000:80 beqeek-web
+
+# Chạy với docker-compose (khuyến nghị)
+docker-compose up -d
+
+# Chạy với nginx proxy (cho production)
+docker-compose --profile proxy up -d
+
+# Xem logs
+docker-compose logs -f web
+
+# Stop services
+docker-compose down
 ```
+
+**Cấu trúc Docker files:**
+- `Dockerfile` - Multi-stage build cho production
+- `docker-compose.yml` - Orchestration với nginx
+- `nginx.conf` - Cấu hình nginx tối ưu cho SPA
+- `.dockerignore` - Loại trừ files không cần thiết
+
+**5. Nginx deployment trực tiếp:**
+
+**Cài đặt và cấu hình:**
+```bash
+# Ubuntu/Debian
+sudo apt update && sudo apt install nginx
+
+# CentOS/RHEL
+sudo yum install nginx
+
+# Copy build files
+sudo cp -r apps/web/dist/* /var/www/html/
+
+# Copy nginx config
+sudo cp nginx.conf /etc/nginx/sites-available/beqeek
+sudo ln -s /etc/nginx/sites-available/beqeek /etc/nginx/sites-enabled/
+
+# Test và restart nginx
+sudo nginx -t
+sudo systemctl restart nginx
+sudo systemctl enable nginx
+```
+
+**Nginx config highlights:**
+- ✅ SPA routing support (`try_files`)
+- ✅ Gzip compression
+- ✅ Static asset caching (1 year)
+- ✅ Security headers
+- ✅ Health check endpoint
+- ✅ API proxy ready (commented)
+
+## 🚀 Script Deployment Tự động
+
+Dự án bao gồm script `deploy.sh` để tự động hóa quá trình deployment:
+
+```bash
+# Cấp quyền thực thi (chỉ cần làm 1 lần)
+chmod +x deploy.sh
+
+# Deploy với Docker
+./deploy.sh docker
+
+# Deploy với Nginx (cần sudo)
+./deploy.sh nginx
+
+# Chạy local preview
+./deploy.sh local
+
+# Xem hướng dẫn
+./deploy.sh --help
+```
+
+**Tính năng của script:**
+- ✅ Kiểm tra prerequisites tự động
+- ✅ Install dependencies
+- ✅ Build application
+- ✅ Health checks
+- ✅ Error handling và logging
+- ✅ Support cả Docker và Nginx
+- ✅ Colored output cho dễ đọc
+
+**Files deployment đã tạo:**
+- `Dockerfile` - Multi-stage production build
+- `docker-compose.yml` - Container orchestration
+- `nginx.conf` - Nginx configuration tối ưu
+- `.dockerignore` - Optimize Docker build
+- `deploy.sh` - Automated deployment script
+- `DEPLOYMENT.md` - Chi tiết hướng dẫn deployment
 
 ## Cấu trúc chi tiết
 
@@ -167,12 +346,26 @@ import { router } from './router'
 
 ## Scripts hữu ích
 
+### Development
 - `pnpm dev` — chạy dev pipeline toàn repo (Turbo)
+- `pnpm --filter web dev` — chạy dev riêng app web
+- `pnpm --filter admin dev` — chạy dev app admin
+- `pnpm --filter product-page dev` — chạy dev product page
+
+### Build & Preview
 - `pnpm build` — build toàn repo
-- `pnpm -C apps/web dev` — chạy dev riêng app web
-- `pnpm -C apps/web preview` — preview app web
+- `pnpm --filter web build` — build riêng app web
+- `pnpm --filter web preview` — preview app web sau build
+- `NODE_ENV=production pnpm build` — build optimized cho production
+
+### Code Quality
 - `pnpm lint` — lint toàn repo
+- `pnpm --filter web lint` — lint riêng app web
+- `pnpm --filter web check-types` — type check app web
 - `pnpm format` — format `ts/tsx/md`
+
+### i18n
+- `pnpm machine-translate` — dịch tự động các message
 
 ## Hướng dẫn đóng góp
 
