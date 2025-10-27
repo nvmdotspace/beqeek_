@@ -158,12 +158,12 @@ export const TableManagementDialog = ({
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {table ? "Edit Active Table" : "Create New Active Table"}
+            {table ? m.modules_dialog_editTitle() : m.modules_dialog_createTitle()}
           </DialogTitle>
           <DialogDescription>
             {table
-              ? "Update your table configuration, fields, and security settings. Changes will affect all existing records."
-              : "Set up a new Active Table to manage structured data with workflows, encryption, and team collaboration."
+              ? m.modules_dialog_editDescription()
+              : m.modules_dialog_createDescription()
             }
           </DialogDescription>
         </DialogHeader>

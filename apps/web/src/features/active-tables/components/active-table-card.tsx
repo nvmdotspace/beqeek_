@@ -12,6 +12,7 @@ import {
   Workflow,
   Settings2,
   AlertTriangle,
+  FolderOpen,
 } from 'lucide-react';
 
 import type { ActiveTable } from '../types';
@@ -28,6 +29,7 @@ import {
 import { m } from "@/paraglide/generated/messages.js";
 import { useEncryption } from '@workspace/active-tables-hooks';
 import { cn } from '@workspace/ui/lib/utils';
+import { getModuleIcon, getModuleColors, getModuleTypeLabel } from '../utils/module-icons';
 
 interface ActiveTableCardProps {
   table: ActiveTable;
@@ -72,46 +74,55 @@ export const ActiveTableCard = memo(
 
     const statusLabel = useMemo(() => formatTableStatus(table.tableType), [table.tableType]);
     const fieldPreview = useMemo(() => table.config?.fields?.slice(0, 3) ?? [], [table.config?.fields]);
+    const ModuleIcon = useMemo(() => getModuleIcon(table.tableType), [table.tableType]);
+    const moduleColors = useMemo(() => getModuleColors(table.tableType), [table.tableType]);
+    const moduleTypeLabel = useMemo(() => getModuleTypeLabel(table.tableType), [table.tableType]);
 
     return (
-      <Card className="group relative flex h-full flex-col overflow-hidden border-border/70 bg-background/90 shadow-sm transition-shadow hover:shadow-md">
-        <CardHeader className="pb-4">
+      <Card className="group relative flex h-full flex-col overflow-hidden border-border/70 bg-background/50 shadow-sm transition-all duration-200 hover:border-border hover:shadow-lg hover:bg-background">
+        <CardHeader className="pb-3 px-4 pt-4">
           <div className="flex items-start justify-between gap-3">
-            <div className="space-y-2">
-              <div className="flex flex-wrap items-center gap-2">
-                <CardTitle className="text-xl font-semibold tracking-tight">{table.name}</CardTitle>
-                <Badge variant="outline" className="text-xs capitalize">
-                  {statusLabel}
-                </Badge>
+            <div className="flex items-start gap-3 flex-1 min-w-0">
+              {/* Module Icon */}
+              <div className={cn('flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors', moduleColors.bg)}>
+                <ModuleIcon className={cn('h-4.5 w-4.5', moduleColors.text)} />
               </div>
-              {table.description ? (
-                <p className="text-sm text-muted-foreground line-clamp-2">{table.description}</p>
-              ) : null}
+
+              <div className="space-y-1.5 flex-1 min-w-0">
+                <CardTitle className="text-lg font-semibold tracking-tight break-words">{table.name}</CardTitle>
+                <Badge variant="outline" className={cn('text-[11px] capitalize font-medium w-fit', moduleColors.badge)}>
+                  <ModuleIcon className="mr-1 h-2.5 w-2.5" />
+                  {moduleTypeLabel}
+                </Badge>
+                {table.description ? (
+                  <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{table.description}</p>
+                ) : null}
+              </div>
             </div>
-            <div className="flex flex-col items-end gap-2">
+            <div className="flex flex-col items-end gap-1.5 shrink-0">
               <Badge
                 variant={isE2EE ? 'default' : 'outline'}
                 className={cn(
-                  'flex items-center gap-1 text-xs',
+                  'flex items-center gap-1 text-[11px] whitespace-nowrap h-5 px-1.5',
                   isE2EE ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : '',
                 )}
               >
                 {isE2EE ? (
                   <>
-                    <ShieldCheck className="h-3.5 w-3.5" />
-                    End-to-end encrypted
+                    <ShieldCheck className="h-3 w-3 shrink-0" />
+                    <span>E2EE</span>
                   </>
                 ) : (
                   <>
-                    <Shield className="h-3.5 w-3.5" />
-                    Server encrypted
+                    <Shield className="h-3 w-3 shrink-0" />
+                    <span>Server</span>
                   </>
                 )}
               </Badge>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <MoreVertical className="h-4 w-4" />
+                  <Button variant="ghost" size="icon" className="h-7 w-7">
+                    <MoreVertical className="h-3.5 w-3.5" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
@@ -136,48 +147,48 @@ export const ActiveTableCard = memo(
           </div>
         </CardHeader>
 
-        <CardContent className="flex flex-col gap-3 text-sm text-muted-foreground">
-          <div className="grid grid-cols-2 gap-3 text-xs sm:grid-cols-3">
-            <div className="rounded-lg border border-border/50 bg-muted/30 p-3">
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <Table className="h-3.5 w-3.5 text-primary" />
-                {m.activeTables_card_fieldsLabel({ count: fieldCount })}
+        <CardContent className="flex flex-col gap-3 text-sm text-muted-foreground px-4 pb-3">
+          <div className="grid grid-cols-1 gap-2.5 text-xs md:grid-cols-3">
+            <div className="rounded-lg border border-border/50 bg-muted/30 p-2.5 transition-colors hover:bg-muted/40">
+              <div className="flex items-center gap-1.5 font-medium text-foreground mb-1.5">
+                <Table className="h-3 w-3 text-blue-500" />
+                <span className="text-[11px]">{fieldCount} {fieldCount === 1 ? 'field' : 'fields'}</span>
               </div>
               {fieldPreview.length ? (
-                <div className="mt-2 flex flex-wrap gap-1">
+                <div className="flex flex-wrap gap-1">
                   {fieldPreview.map((field) => (
-                    <Badge key={field.name} variant="secondary" className="max-w-[120px] truncate text-[10px] uppercase">
+                    <Badge key={field.name} variant="secondary" className="max-w-[120px] truncate text-[10px] font-medium h-4 px-1">
                       {field.label}
                     </Badge>
                   ))}
                   {fieldCount > fieldPreview.length ? (
-                    <Badge variant="outline" className="text-[10px]">
+                    <Badge variant="outline" className="text-[10px] font-medium h-4 px-1">
                       +{fieldCount - fieldPreview.length}
                     </Badge>
                   ) : null}
                 </div>
               ) : null}
             </div>
-            <div className="rounded-lg border border-border/50 bg-muted/30 p-3">
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <Workflow className="h-3.5 w-3.5 text-purple-500" />
-                {actionsCount} automation{actionsCount === 1 ? '' : 's'}
+            <div className="rounded-lg border border-border/50 bg-muted/30 p-2.5 transition-colors hover:bg-muted/40">
+              <div className="flex items-center gap-1.5 font-medium text-foreground mb-1.5">
+                <Workflow className="h-3 w-3 text-purple-500" />
+                <span className="text-[11px]">{actionsCount} {actionsCount === 1 ? 'automation' : 'automations'}</span>
               </div>
-              <p className="mt-2 text-xs leading-relaxed">
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
                 {actionsCount
-                  ? `Runs ${actionsCount === 1 ? '1 workflow' : `${actionsCount} workflows`} when triggered`
-                  : 'No automation rules configured yet'}
+                  ? 'Workflows trigger on events'
+                  : 'No automations yet'}
               </p>
             </div>
-            <div className="rounded-lg border border-border/50 bg-muted/30 p-3">
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <Database className="h-3.5 w-3.5 text-blue-500" />
-                {quickFilterCount} smart filter{quickFilterCount === 1 ? '' : 's'}
+            <div className="rounded-lg border border-border/50 bg-muted/30 p-2.5 transition-colors hover:bg-muted/40">
+              <div className="flex items-center gap-1.5 font-medium text-foreground mb-1.5">
+                <Database className="h-3 w-3 text-emerald-500" />
+                <span className="text-[11px]">{quickFilterCount} {quickFilterCount === 1 ? 'filter' : 'filters'}</span>
               </div>
-              <p className="mt-2 text-xs leading-relaxed">
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
                 {quickFilterCount
-                  ? 'Saved quick filters available'
-                  : 'No quick filters defined'}
+                  ? 'Saved quick filters'
+                  : 'No filters defined'}
               </p>
             </div>
           </div>
@@ -190,50 +201,57 @@ export const ActiveTableCard = memo(
           ) : null}
         </CardContent>
 
-        <CardFooter className="mt-auto flex flex-col gap-3 border-t border-border/60 pt-4">
-          <div className="flex flex-wrap items-center gap-2">
-            <Button size="sm" onClick={() => onOpen?.(table)}>
-              {m.activeTables_card_viewDetails()}
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
+        <CardFooter className="mt-auto flex flex-col gap-2 border-t border-border/60 bg-muted/20 py-3 px-4">
+          <div className="flex items-center justify-between gap-3">
+            {/* Primary action */}
             <Button
               size="sm"
-              variant="outline"
-              onClick={() => onConfigure?.(table)}
-              disabled={!onConfigure}
-            >
-              <Settings2 className="mr-2 h-4 w-4" />
-              Configure
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
+              variant="default"
               onClick={() => onOpenRecords?.(table)}
               disabled={!onOpenRecords}
+              className="h-8 px-3 text-xs font-medium shadow-sm bg-primary hover:bg-primary/90"
             >
-              <Database className="mr-2 h-4 w-4" />
-              Records
+              <FolderOpen className="mr-1.5 h-3.5 w-3.5" />
+              Open Records
             </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => onOpenComments?.(table)}
-              disabled={!onOpenComments}
-            >
-              <MessageSquare className="mr-2 h-4 w-4" />
-              Comments
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => onOpenAutomations?.(table)}
-              disabled={!onOpenAutomations}
-            >
-              <Workflow className="mr-2 h-4 w-4" />
-              Automations
-            </Button>
+
+            {/* Secondary & Tertiary actions group */}
+            <div className="flex items-center gap-1">
+              {/* View Details - Link style */}
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => onOpen?.(table)}
+                className="h-7 px-2 text-xs font-normal text-muted-foreground hover:text-foreground"
+              >
+                {m.activeTables_card_viewDetails()}
+                <ArrowRight className="ml-1 h-3 w-3" />
+              </Button>
+
+              {/* Icon-only actions */}
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={() => onOpenComments?.(table)}
+                disabled={!onOpenComments}
+                className="h-7 w-7"
+                title="Comments"
+              >
+                <MessageSquare className="h-3.5 w-3.5" />
+              </Button>
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={() => onOpenAutomations?.(table)}
+                disabled={!onOpenAutomations}
+                className="h-7 w-7"
+                title="Automations"
+              >
+                <Workflow className="h-3.5 w-3.5" />
+              </Button>
+            </div>
           </div>
-          <div className="text-xs text-muted-foreground">
+          <div className="text-[11px] text-muted-foreground/80">
             {updatedAtLabel ? m.activeTables_card_updatedAt({ when: updatedAtLabel }) : '\u00A0'}
           </div>
         </CardFooter>

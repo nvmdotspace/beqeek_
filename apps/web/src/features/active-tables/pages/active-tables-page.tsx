@@ -58,8 +58,12 @@ export const ActiveTablesPage = () => {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [encryptionFilter, setEncryptionFilter] = useState<'all' | 'encrypted' | 'standard'>('all');
   const [automationFilter, setAutomationFilter] = useState<'all' | 'automated' | 'manual'>('all');
+  const [showAllStatusFilters, setShowAllStatusFilters] = useState<boolean>(false);
   const localePrefix = (locale as string) === 'vi' ? '' : `/${locale}`;
   const { isReady: isEncryptionReady } = useEncryption();
+
+  // Priority STATUS filters (most common, shown by default)
+  const priorityStatusFilters = ['employee profile', 'department', 'work process', 'contract'];
 
   useEffect(() => {
     if (!selectedWorkspaceId && workspaceOptions.length > 0) {
@@ -72,6 +76,7 @@ export const ActiveTablesPage = () => {
     setEncryptionFilter('all');
     setAutomationFilter('all');
     setSearchQuery('');
+    setShowAllStatusFilters(false);
   }, [selectedWorkspaceId]);
 
   const {
@@ -261,11 +266,11 @@ export const ActiveTablesPage = () => {
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div className="space-y-1">
-            <h1 className="text-3xl font-bold tracking-tight">Active Tables</h1>
+            <h1 className="text-3xl font-bold tracking-tight">{m.activeTables_page_title()}</h1>
             <p className="text-sm text-muted-foreground">
               {workspaceName
                 ? `Workspace • ${workspaceName}`
-                : 'Select a workspace to explore configured Active Tables.'}
+                : m.activeTables_page_subtitle()}
             </p>
           </div>
 
@@ -320,47 +325,53 @@ export const ActiveTablesPage = () => {
         </div>
 
         <div className="grid gap-4 md:grid-cols-3">
-          <Card className="border-border/60">
+          <Card className="border-border/60 bg-gradient-to-br from-background to-muted/20 shadow-sm">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                <Database className="h-4 w-4 text-primary" />
-                Active tables
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/20">
+                  <Database className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                </div>
+                <span>Modules</span>
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-3xl font-semibold text-foreground">{totalTables}</p>
+              <p className="text-3xl font-bold tracking-tight text-foreground">{totalTables}</p>
               <p className="mt-1 text-xs text-muted-foreground">
                 Across {workGroups.length} workgroup{workGroups.length === 1 ? '' : 's'}
               </p>
             </CardContent>
           </Card>
 
-          <Card className="border-border/60">
+          <Card className="border-border/60 bg-gradient-to-br from-background to-muted/20 shadow-sm">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                <ShieldCheck className="h-4 w-4 text-emerald-500" />
-                End-to-end encrypted
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-900/20">
+                  <ShieldCheck className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <span>Encrypted</span>
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-3xl font-semibold text-foreground">{encryptedTables}</p>
+              <p className="text-3xl font-bold tracking-tight text-foreground">{encryptedTables}</p>
               <p className="mt-1 text-xs text-muted-foreground">
-                {encryptedTables ? `${encryptedPercentage}% of catalog` : 'Ready to secure sensitive data'}
+                {encryptedTables ? `${encryptedPercentage}% with E2EE protection` : 'Ready to secure sensitive data'}
               </p>
             </CardContent>
           </Card>
 
-          <Card className="border-border/60">
+          <Card className="border-border/60 bg-gradient-to-br from-background to-muted/20 shadow-sm">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                <Workflow className="h-4 w-4 text-purple-500" />
-                Automation ready
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-900/20">
+                  <Workflow className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                </div>
+                <span>Automations</span>
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-3xl font-semibold text-foreground">{automationEnabledTables}</p>
+              <p className="text-3xl font-bold tracking-tight text-foreground">{automationEnabledTables}</p>
               <p className="mt-1 text-xs text-muted-foreground">
-                Trigger workflows directly from table records
+                Trigger workflows from records
               </p>
             </CardContent>
           </Card>
@@ -414,83 +425,110 @@ export const ActiveTablesPage = () => {
         </div>
 
           {statusOptions.length ? (
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="outline" className="bg-background text-xs uppercase tracking-wide">
-                Status
-              </Badge>
-              <Button
-                size="sm"
-                variant={statusFilter === 'all' ? 'default' : 'outline'}
-                onClick={() => setStatusFilter('all')}
-              >
-                All
-              </Button>
-              {statusOptions.map((status) => (
-                <Button
-                  key={status}
-                  size="sm"
-                  variant={statusFilter === status ? 'default' : 'outline'}
-                  className="capitalize"
-                  onClick={() => setStatusFilter(status)}
-                >
-                  {status}
-                </Button>
-              ))}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-medium text-muted-foreground min-w-[80px]">Status</span>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <Button
+                    size="sm"
+                    variant={statusFilter === 'all' ? 'default' : 'outline'}
+                    onClick={() => setStatusFilter('all')}
+                    className="h-7 px-2.5 text-xs"
+                  >
+                    All
+                  </Button>
+                  {statusOptions
+                    .filter((status) => showAllStatusFilters || priorityStatusFilters.includes(status))
+                    .map((status) => (
+                      <Button
+                        key={status}
+                        size="sm"
+                        variant={statusFilter === status ? 'default' : 'outline'}
+                        className="capitalize h-7 px-2.5 text-xs"
+                        onClick={() => setStatusFilter(status)}
+                      >
+                        {status}
+                      </Button>
+                    ))}
+                  {statusOptions.length > priorityStatusFilters.length && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setShowAllStatusFilters(!showAllStatusFilters)}
+                      className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
+                    >
+                      {showAllStatusFilters
+                        ? '− Less'
+                        : `+ More (${statusOptions.length - priorityStatusFilters.filter((pf) => statusOptions.includes(pf)).length})`}
+                    </Button>
+                  )}
+                </div>
+              </div>
             </div>
           ) : null}
 
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="outline" className="bg-background text-xs uppercase tracking-wide">
-              Encryption
-            </Badge>
-            <Button
-              size="sm"
-              variant={encryptionFilter === 'all' ? 'default' : 'outline'}
-              onClick={() => setEncryptionFilter('all')}
-            >
-              All
-            </Button>
-            <Button
-              size="sm"
-              variant={encryptionFilter === 'encrypted' ? 'default' : 'outline'}
-              onClick={() => setEncryptionFilter('encrypted')}
-            >
-              E2EE
-            </Button>
-            <Button
-              size="sm"
-              variant={encryptionFilter === 'standard' ? 'default' : 'outline'}
-              onClick={() => setEncryptionFilter('standard')}
-            >
-              Server-side
-            </Button>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-medium text-muted-foreground min-w-[80px]">Encryption</span>
+              <div className="flex flex-wrap items-center gap-1.5">
+                <Button
+                  size="sm"
+                  variant={encryptionFilter === 'all' ? 'default' : 'outline'}
+                  onClick={() => setEncryptionFilter('all')}
+                  className="h-7 px-2.5 text-xs"
+                >
+                  All
+                </Button>
+                <Button
+                  size="sm"
+                  variant={encryptionFilter === 'encrypted' ? 'default' : 'outline'}
+                  onClick={() => setEncryptionFilter('encrypted')}
+                  className="h-7 px-2.5 text-xs"
+                >
+                  E2EE
+                </Button>
+                <Button
+                  size="sm"
+                  variant={encryptionFilter === 'standard' ? 'default' : 'outline'}
+                  onClick={() => setEncryptionFilter('standard')}
+                  className="h-7 px-2.5 text-xs"
+                >
+                  Server-side
+                </Button>
+              </div>
+            </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="outline" className="bg-background text-xs uppercase tracking-wide">
-              Automation
-            </Badge>
-            <Button
-              size="sm"
-              variant={automationFilter === 'all' ? 'default' : 'outline'}
-              onClick={() => setAutomationFilter('all')}
-            >
-              All
-            </Button>
-            <Button
-              size="sm"
-              variant={automationFilter === 'automated' ? 'default' : 'outline'}
-              onClick={() => setAutomationFilter('automated')}
-            >
-              With workflows
-            </Button>
-            <Button
-              size="sm"
-              variant={automationFilter === 'manual' ? 'default' : 'outline'}
-              onClick={() => setAutomationFilter('manual')}
-            >
-              Manual only
-            </Button>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-medium text-muted-foreground min-w-[80px]">Automation</span>
+              <div className="flex flex-wrap items-center gap-1.5">
+                <Button
+                  size="sm"
+                  variant={automationFilter === 'all' ? 'default' : 'outline'}
+                  onClick={() => setAutomationFilter('all')}
+                  className="h-7 px-2.5 text-xs"
+                >
+                  All
+                </Button>
+                <Button
+                  size="sm"
+                  variant={automationFilter === 'automated' ? 'default' : 'outline'}
+                  onClick={() => setAutomationFilter('automated')}
+                  className="h-7 px-2.5 text-xs"
+                >
+                  With workflows
+                </Button>
+                <Button
+                  size="sm"
+                  variant={automationFilter === 'manual' ? 'default' : 'outline'}
+                  onClick={() => setAutomationFilter('manual')}
+                  className="h-7 px-2.5 text-xs"
+                >
+                  Manual only
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
