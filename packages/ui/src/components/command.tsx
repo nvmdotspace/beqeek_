@@ -30,7 +30,7 @@ const CommandInput = React.forwardRef<React.ElementRef<typeof CommandPrimitive.I
 );
 CommandInput.displayName = CommandPrimitive.Input.displayName;
 
-const CommandList = React.forwardRef<React.ElementRef<typeof CommandPrimitive.List>, React.ComponentPropsWithoutRef<typeof CommandPrimitive.List>>(
+const CommandList = React.forwardRef<React.ComponentRef<typeof CommandPrimitive.List>, React.ComponentPropsWithoutRef<typeof CommandPrimitive.List>>(
   ({ className, ...props }, ref) => (
     <CommandPrimitive.List
       ref={ref}

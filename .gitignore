@@ -41,3 +41,5 @@ npm-debug.log*
 
 # Ai editor
 .trae
+.claude
+.workflow

@@ -194,12 +194,13 @@ export const ActiveTableRecordsPage = () => {
   const tableId = params.tableId as string;
   const [isRecordDialogOpen, setIsRecordDialogOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState<ActiveTableRecord | null>(null);
-  const [isCommentsOpen, setIsCommentsOpen] = useState(false);
   const [commentsRecord, setCommentsRecord] = useState<ActiveTableRecord | null>(null);
   const [activeTab, setActiveTab] = useState<'table' | 'kanban' | 'permissions'>('table');
 
   const search = (location.search ?? {}) as Record<string, unknown>;
   const searchWorkspaceId = typeof search.workspaceId === 'string' ? search.workspaceId : undefined;
+  const searchPanel = typeof search.panel === 'string' ? search.panel : undefined;
+  const [isCommentsOpen, setIsCommentsOpen] = useState(searchPanel === 'comments');
   const localePrefix = (locale as string) === 'vi' ? '' : `/${locale}`;
 
   const { data: workspacesData } = useWorkspaces();
@@ -219,6 +220,10 @@ export const ActiveTableRecordsPage = () => {
     loadPrevious,
     refetch,
   } = useActiveTableRecords({ workspaceId, tableId });
+
+  useEffect(() => {
+    setIsCommentsOpen(searchPanel === 'comments');
+  }, [searchPanel]);
 
   useEffect(() => {
     if (!commentsRecord) return;
@@ -249,6 +254,24 @@ export const ActiveTableRecordsPage = () => {
     });
   };
 
+  const recordsRoute = `${localePrefix}/workspaces/tables/${tableId}/records`;
+
+  const updatePanelSearch = (panel?: 'comments') => {
+    if (!tableId) return;
+    const nextSearch: Record<string, unknown> = {};
+    if (workspaceId) {
+      nextSearch.workspaceId = workspaceId;
+    }
+    if (panel) {
+      nextSearch.panel = panel;
+    }
+    navigate({
+      to: recordsRoute,
+      search: nextSearch,
+      replace: true,
+    });
+  };
+
   const handleCreateRecord = () => {
     setEditingRecord(null);
     setIsRecordDialogOpen(true);
@@ -276,6 +299,17 @@ export const ActiveTableRecordsPage = () => {
   const handleSelectRecord = (record: ActiveTableRecord) => {
     setCommentsRecord(record);
     setIsCommentsOpen(true);
+    updatePanelSearch('comments');
+  };
+
+  const handleCommentsPanelChange = (open: boolean) => {
+    setIsCommentsOpen(open);
+    if (!open) {
+      updatePanelSearch(undefined);
+      setCommentsRecord(null);
+      return;
+    }
+    updatePanelSearch('comments');
   };
 
   if (!tableId || !workspaceId) {
@@ -448,7 +482,7 @@ export const ActiveTableRecordsPage = () => {
             tableId={tableId}
             record={commentsRecord}
             open={isCommentsOpen}
-            onOpenChange={setIsCommentsOpen}
+            onOpenChange={handleCommentsPanelChange}
           />
           <div className="hidden lg:block">
             {(!isCommentsOpen || !commentsRecord) && (
