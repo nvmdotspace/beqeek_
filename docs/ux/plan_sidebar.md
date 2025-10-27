@@ -55,12 +55,6 @@ Weaknesses cần cải thiện:
 
 #### 1.1 Chi Tiết Layout & Khoảng Cách
 
-- Header giữ logo và Workspace Selector theo chiều ngang ở desktop, tự động xếp dọc khi sidebar collapse hoặc trên tablet.
-- Quick Actions hiển thị dưới dạng grid 2 cột với separator riêng, giữ nguyên hành vi icon-only ở chế độ collapse.
-- Mỗi nhóm điều hướng (Workspace Features, Organization, System) có heading uppercase + border-bottom, bảo đảm visual rhythm ổn định.
-- Badge hiển thị real-time count `tables/workflows/teamMembers/notifications`, tự ẩn khi = 0.
-- Footer user card thu gọn về icon trên tablet/collapse; nút expand nằm dưới card nhằm đảm bảo tap target trên mobile.
-
 #### 2. Flow Người Dùng Mới
 
 Flow 1: Workspace Selection

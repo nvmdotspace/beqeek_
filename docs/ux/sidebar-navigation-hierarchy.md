@@ -36,12 +36,9 @@ Workspace Selector
     │   ├── All Workspaces (alphabetical)
     │   └── Workspace Search
     ├── Workspace Actions
-    │   ├── Create New Workspace
-    │   ├── Join Workspace
-    │   └── Workspace Settings
-    └── User Context
-        ├── Switch Account
-        └── Manage Organizations
+        ├── Create New Workspace
+        ├── Join Workspace
+        └── Workspace Settings
 ```
 
 ### 2.2 Level 1: Global Navigation
@@ -347,21 +344,21 @@ interface NavigationState {
   isCollapsed: boolean;
   isMobile: boolean;
   isLoading: boolean;
-  
+
   // Workspace States
   hasWorkspace: boolean;
   workspaceId: string | null;
   workspacePermissions: Permission[];
-  
+
   // Section States
   expandedSections: string[];
   activeSection: string;
   activeItem: string;
-  
+
   // User States
   userRole: UserRole;
   userPreferences: UserPreferences;
-  
+
   // System States
   connectionStatus: 'online' | 'offline' | 'syncing';
   notificationCount: number;
@@ -406,7 +403,7 @@ Permission Changes:
       Current workspace
     </button>
   </section>
-  
+
   <!-- Level 1: Global Navigation -->
   <section aria-label="Global navigation">
     <ul role="menubar">
@@ -414,7 +411,7 @@ Permission Changes:
       <li role="menuitem">Search</li>
     </ul>
   </section>
-  
+
   <!-- Level 2: Quick Actions -->
   <section aria-label="Quick actions">
     <ul role="toolbar">
@@ -422,7 +419,7 @@ Permission Changes:
       <li role="button">New Workflow</li>
     </ul>
   </section>
-  
+
   <!-- Level 2: Workspace Features -->
   <section aria-label="Workspace features">
     <ul role="tree">

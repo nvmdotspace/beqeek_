@@ -98,7 +98,7 @@ export const AppSidebar = ({ onToggle, onCloseMobile }: AppSidebarProps) => {
         {/* Sidebar */}
         <div
           className={cn(
-            'fixed top-0 left-0 z-50 h-full w-80 max-w-[85vw] bg-sidebar border-r border-border transition-transform duration-300 ease-in-out lg:hidden',
+            'fixed top-0 left-0 z-50 h-full w-80 max-w-[85vw] bg-background border-r border-border transition-transform duration-300 ease-in-out lg:hidden',
             isSidebarOpen ? 'translate-x-0' : '-translate-x-full',
           )}
           data-sidebar
@@ -113,7 +113,7 @@ export const AppSidebar = ({ onToggle, onCloseMobile }: AppSidebarProps) => {
   return (
     <div
       className={cn(
-        'flex h-full flex-col bg-sidebar border-r border-border transition-all duration-300 ease-in-out',
+        'flex h-full flex-col bg-background border-r border-border transition-all duration-300 ease-in-out',
         // Responsive width
         isTablet ? 'w-16' : isCollapsed ? 'w-16' : 'w-64',
         'relative z-10',
