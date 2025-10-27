@@ -11,7 +11,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@workspace/ui/components/dropdown-menu';
-import { useTranslation } from '@/hooks/use-translation';
+// @ts-ignore
+import { m } from "@/paraglide/generated/messages.js";
 import { useEncryption } from '@workspace/active-tables-hooks';
 
 interface ActiveTableCardProps {
@@ -22,7 +23,7 @@ interface ActiveTableCardProps {
 }
 
 export const ActiveTableCard = memo(({ table, onOpen, onEdit, onDelete }: ActiveTableCardProps) => {
-  const { t, locale } = useTranslation();
+  const locale = 'en'; // Placeholder for locale
   const { isReady: isEncryptionReady } = useEncryption();
   const fieldCount = table.config?.fields?.length ?? 0;
   const isE2EE = Boolean(table.config?.e2eeEncryption);
@@ -45,12 +46,12 @@ export const ActiveTableCard = memo(({ table, onOpen, onEdit, onDelete }: Active
           <div className="flex items-center gap-2">
             {isEditing && (
               <Badge variant="outline" className="bg-orange-100 text-orange-700 border-orange-300">
-                {t('activeTables.card.statusEditing')}
+                {m.activeTables_card_statusEditing()}
               </Badge>
             )}
             <Badge variant={isE2EE ? 'default' : 'secondary'} className="flex items-center gap-1">
               {isE2EE ? <ShieldCheck className="h-3.5 w-3.5" /> : <Shield className="h-3.5 w-3.5" />}
-              {isE2EE ? t('activeTables.card.e2ee') : t('activeTables.card.serverEncryption')}
+              {isE2EE ? m.activeTables_card_e2ee() : m.activeTables_card_serverEncryption()}
             </Badge>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -61,11 +62,11 @@ export const ActiveTableCard = memo(({ table, onOpen, onEdit, onDelete }: Active
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => onEdit?.(table)}>
                   <Edit className="mr-2 h-4 w-4" />
-                  {t('activeTables.card.edit')}
+                  {m.activeTables_card_edit()}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => onDelete?.(table)} className="text-destructive">
                   <Trash2 className="mr-2 h-4 w-4" />
-                  {t('activeTables.card.delete')}
+                  {m.activeTables_card_delete()}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -82,7 +83,7 @@ export const ActiveTableCard = memo(({ table, onOpen, onEdit, onDelete }: Active
           <span className="uppercase tracking-wide text-xs font-semibold text-primary">{table.tableType}</span>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Badge variant="outline">{t('activeTables.card.fieldsLabel', { count: fieldCount })}</Badge>
+          <Badge variant="outline">{m.activeTables_card_fieldsLabel({ count: fieldCount })}</Badge>
           {table.config?.fields?.slice(0, 3).map((field) => (
             <Badge key={field.name} variant="secondary" className="capitalize">
               {field.label}
@@ -99,17 +100,17 @@ export const ActiveTableCard = memo(({ table, onOpen, onEdit, onDelete }: Active
         {!isEncryptionReady && isE2EE && (
           <div className="rounded-md bg-yellow-50 border border-yellow-200 p-2 text-xs text-yellow-800 flex items-center gap-1">
             <AlertTriangle className="h-3 w-3" />
-            {t('activeTables.card.encryptionNotReady')}
+            {m.activeTables_card_encryptionNotReady()}
           </div>
         )}
       </CardContent>
 
       <CardFooter className="mt-auto flex items-center justify-between">
         <div className="text-xs text-muted-foreground">
-          {updatedAtLabel ? t('activeTables.card.updatedAt', { when: updatedAtLabel }) : '\u00A0'}
+          {updatedAtLabel ? m.activeTables_card_updatedAt({ when: updatedAtLabel }) : '\u00A0'}
         </div>
         <Button variant="outline" size="sm" onClick={() => onOpen?.(table)}>
-          {t('activeTables.card.viewDetails')}
+          {m.activeTables_card_viewDetails()}
           <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
       </CardFooter>

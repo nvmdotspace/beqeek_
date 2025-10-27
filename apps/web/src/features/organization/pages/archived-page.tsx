@@ -1,16 +1,14 @@
 import { Archive } from 'lucide-react';
 import { FeaturePlaceholder } from '@/components/feature-placeholder';
-import { useTranslation } from '@/hooks/use-translation';
+// @ts-ignore
+import { m } from "@/paraglide/generated/messages.js";
 
 export const ArchivedPage = () => {
-  const { t } = useTranslation();
-
   return (
     <FeaturePlaceholder
-      title={t('workspace.archived.title') || 'Archived workspace items'}
+      title={m.workspace_archived_title()}
       description={
-        t('workspace.archived.description') ||
-        'Restore tables, workflows, and forms that are no longer active. We are wiring retention policies and restore actions right now.'
+        m.workspace_archived_description()
       }
       icon={<Archive className="h-6 w-6 text-primary" />}
     />

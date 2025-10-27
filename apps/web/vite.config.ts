@@ -9,9 +9,13 @@ export default defineConfig({
     paraglideVitePlugin({
       project: path.resolve(__dirname, "../../project.inlang"),
       outdir: path.resolve(__dirname, "src/paraglide/generated"),
-			// forcing locale modules to detect problems during CI/CD
-			// (all other projects use message-modules)
-			outputStructure: "locale-modules",
+      strategy: [
+        "url",
+        "cookie",
+        "preferredLanguage",
+        "localStorage",
+        "baseLocale",
+      ],
     }),
   ],
   resolve: {

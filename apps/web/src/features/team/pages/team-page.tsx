@@ -1,16 +1,14 @@
 import { Users } from 'lucide-react';
 import { FeaturePlaceholder } from '@/components/feature-placeholder';
-import { useTranslation } from '@/hooks/use-translation';
+// @ts-ignore
+import { m } from "@/paraglide/generated/messages.js";
 
 export const TeamPage = () => {
-  const { t } = useTranslation();
-
   return (
     <FeaturePlaceholder
-      title={t('workspace.team.title') || 'Manage your workspace team'}
+      title={m.workspace_team_title()}
       description={
-        t('workspace.team.description') ||
-        'Invite collaborators, review roles, and manage permissions for every workspace member. The dedicated experience is on its way.'
+        m.workspace_team_description()
       }
       icon={<Users className="h-6 w-6 text-primary" />}
     />

@@ -3,7 +3,8 @@ import { cn } from '@workspace/ui/lib/utils';
 import { Button } from '@workspace/ui/components/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@workspace/ui/components/avatar';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
-import { useTranslation } from '@/hooks/use-translation';
+// @ts-ignore
+import { m } from "@/paraglide/generated/messages.js";
 import { useBadgeCounts } from '@/hooks/use-badge-counts';
 import {
   useSidebarStore,
@@ -137,8 +138,7 @@ const SidebarContent = ({
   onCloseMobile,
   showCloseButton = true,
 }: SidebarContentProps) => {
-  const { t } = useTranslation();
-  return (
+    return (
     <>
       {/* Sidebar Header - Logo Only */}
       <div
@@ -197,7 +197,7 @@ const SidebarContent = ({
           <WorkspaceSelector isCollapsed disablePadding className="w-full justify-center" />
         ) : (
           <div className="space-y-2">
-            <p className="text-xs font-medium uppercase text-muted-foreground">{t('sidebar.workspace')}</p>
+            <p className="text-xs font-medium uppercase text-muted-foreground">{m.sidebar_workspace()}</p>
             <WorkspaceSelector disablePadding showAvatar={true} className="w-full" />
           </div>
         )}

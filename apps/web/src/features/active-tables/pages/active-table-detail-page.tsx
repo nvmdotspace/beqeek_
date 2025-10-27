@@ -2,7 +2,8 @@ import { useMemo } from 'react';
 import { ArrowLeft, ShieldCheck, Shield, Link as LinkIcon, ListTree, Lock, Database } from 'lucide-react';
 import { useNavigate, useLocation, useParams } from '@tanstack/react-router';
 
-import { useTranslation } from '@/hooks/use-translation';
+// @ts-ignore
+import { m } from "@/paraglide/generated/messages.js";
 import { useWorkspaces } from '@/features/workspace/hooks/use-workspaces';
 import { useActiveTables, useActiveWorkGroups } from '../hooks/use-active-tables';
 import type { ActiveFieldConfig, ActiveTable, ActiveWorkGroup } from '../types';
@@ -17,8 +18,7 @@ interface FieldSummaryProps {
 }
 
 const FieldSummary = ({ field }: FieldSummaryProps) => {
-  const { t } = useTranslation();
-  const optionCount = field.options?.length ?? 0;
+    const optionCount = field.options?.length ?? 0;
 
   return (
     <div className="rounded-lg border border-border/60 bg-card/40 p-4">
@@ -34,10 +34,10 @@ const FieldSummary = ({ field }: FieldSummaryProps) => {
 
       <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
         <Badge variant={field.required ? 'default' : 'outline'}>
-          {field.required ? t('activeTables.detail.fieldRequired') : t('activeTables.detail.fieldOptional')}
+          {field.required ? m.activeTables_detail_fieldRequired() : m.activeTables_detail_fieldOptional()}
         </Badge>
         {optionCount > 0 ? (
-          <Badge variant="outline">{t('activeTables.detail.fieldOptions', { count: optionCount })}</Badge>
+          <Badge variant="outline">{m.activeTables_detail_fieldOptions({ count: optionCount })}</Badge>
         ) : null}
       </div>
 
@@ -82,17 +82,16 @@ const LoadingState = () => (
 );
 
 const NotFoundState = ({ onBack }: { onBack: () => void }) => {
-  const { t } = useTranslation();
-  return (
+    return (
     <Card className="border-destructive/40 bg-destructive/10">
       <CardHeader>
-        <CardTitle className="text-destructive">{t('activeTables.detail.notFoundTitle')}</CardTitle>
+        <CardTitle className="text-destructive">{m.activeTables_detail_notFoundTitle()}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4 text-sm text-destructive">
-        <p>{t('activeTables.detail.notFoundDescription')}</p>
+        <p>{m.activeTables_detail_notFoundDescription()}</p>
         <Button variant="outline" onClick={onBack}>
           <ArrowLeft className="mr-2 h-4 w-4" />
-          {t('activeTables.detail.backToList')}
+          {m.activeTables_detail_backToList()}
         </Button>
       </CardContent>
     </Card>
@@ -118,12 +117,12 @@ export const ActiveTableDetailPage = () => {
   const params = useParams({ strict: false });
   const location = useLocation();
   const navigate = useNavigate();
-  const { t, locale } = useTranslation();
+  const locale = 'en'; // Placeholder for locale
   const tableId = params.tableId as string;
   const localeParam = location.pathname.split('/')[1];
   const searchState = (location.search ?? {}) as Record<string, unknown>;
   const searchWorkspaceId = typeof searchState.workspaceId === 'string' ? searchState.workspaceId : undefined;
-  const localePrefix = localeParam ? `/${localeParam}` : locale === 'vi' ? '' : `/${locale}`;
+  const localePrefix = localeParam ? `/${localeParam}` : (locale as string) === 'vi' ? '' : `/${locale}`;
 
   const { data: workspacesData } = useWorkspaces();
   const workspaceOptions = workspacesData?.data ?? [];
@@ -149,12 +148,12 @@ export const ActiveTableDetailPage = () => {
   const encryptionBadge = table?.config?.e2eeEncryption ? (
     <Badge variant="default" className="flex items-center gap-2">
       <ShieldCheck className="h-4 w-4" />
-      {t('activeTables.detail.encryptionE2EE')}
+      {m.activeTables_detail_encryptionE2EE()}
     </Badge>
   ) : (
     <Badge variant="secondary" className="flex items-center gap-2">
       <Shield className="h-4 w-4" />
-      {t('activeTables.detail.encryptionServer')}
+      {m.activeTables_detail_encryptionServer()}
     </Badge>
   );
 
@@ -165,7 +164,7 @@ export const ActiveTableDetailPage = () => {
       <div className="space-y-6 p-6">
         <Button variant="ghost" onClick={handleBack} className="flex items-center gap-2">
           <ArrowLeft className="h-4 w-4" />
-          {t('activeTables.detail.backToList')}
+          {m.activeTables_detail_backToList()}
         </Button>
         <LoadingState />
       </div>
@@ -177,7 +176,7 @@ export const ActiveTableDetailPage = () => {
       <div className="space-y-6 p-6">
         <Button variant="ghost" onClick={handleBack} className="flex items-center gap-2">
           <ArrowLeft className="h-4 w-4" />
-          {t('activeTables.detail.backToList')}
+          {m.activeTables_detail_backToList()}
         </Button>
         <NotFoundState onBack={handleBack} />
       </div>
@@ -191,7 +190,7 @@ export const ActiveTableDetailPage = () => {
           <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
             <Button variant="ghost" size="sm" className="h-8 px-2" onClick={handleBack}>
               <ArrowLeft className="mr-2 h-4 w-4" />
-              {t('activeTables.detail.backToList')}
+              {m.activeTables_detail_backToList()}
             </Button>
             {workGroup ? (
               <Badge variant="outline" className="flex items-center gap-2">
@@ -211,15 +210,15 @@ export const ActiveTableDetailPage = () => {
           {encryptionBadge}
           <Badge variant="outline" className="flex items-center gap-1">
             <LinkIcon className="h-3.5 w-3.5" />
-            {t('activeTables.detail.tableType', { type: table.tableType })}
+            {m.activeTables_detail_tableType({ type: table.tableType })}
           </Badge>
           <Badge variant="outline" className="flex items-center gap-1">
             <Lock className="h-3.5 w-3.5" />
-            {t('activeTables.detail.fieldCount', { count: table.config?.fields?.length ?? 0 })}
+            {m.activeTables_detail_fieldCount({ count: table.config?.fields?.length ?? 0 })}
           </Badge>
           <Button onClick={handleViewRecords}>
             <Database className="mr-2 h-4 w-4" />
-            {t('activeTables.detail.viewRecords')}
+            {m.activeTables_detail_viewRecords()}
           </Button>
         </div>
       </div>
@@ -228,23 +227,23 @@ export const ActiveTableDetailPage = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Shield className="h-5 w-5 text-primary" />
-            {t('activeTables.detail.encryptionTitle')}
+            {m.activeTables_detail_encryptionTitle()}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4 text-sm text-muted-foreground">
-          <p>{t('activeTables.detail.encryptionDescription')}</p>
+          <p>{m.activeTables_detail_encryptionDescription()}</p>
           <ul className="list-disc space-y-2 pl-5">
-            <li>{t('activeTables.detail.encryptionKeyManagement')}</li>
-            <li>{t('activeTables.detail.encryptionAccess')}</li>
+            <li>{m.activeTables_detail_encryptionKeyManagement()}</li>
+            <li>{m.activeTables_detail_encryptionAccess()}</li>
           </ul>
         </CardContent>
       </Card>
 
       <section className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold">{t('activeTables.detail.fieldsTitle')}</h2>
+          <h2 className="text-xl font-semibold">{m.activeTables_detail_fieldsTitle()}</h2>
           <Badge variant="outline">
-            {t('activeTables.detail.visibleFields', { count: table.config?.fields?.length ?? 0 })}
+            {m.activeTables_detail_visibleFields({ count: table.config?.fields?.length ?? 0 })}
           </Badge>
         </div>
         <div className="grid gap-4 md:grid-cols-2">

@@ -8,7 +8,8 @@ import { Input } from "@workspace/ui/components/input"
 import { Label } from "@workspace/ui/components/label"
 import { Textarea } from "@workspace/ui/components/textarea"
 
-import { useTranslation } from '@/hooks/use-translation'
+// @ts-ignore
+import { m } from "@/paraglide/generated/messages.js";
 
 type WorkspaceCreateFormProps = {
   onSuccess?: () => void
@@ -30,7 +31,6 @@ export const WorkspaceCreateForm = ({ onSuccess }: WorkspaceCreateFormProps) => 
   const [description, setDescription] = useState("")
 
   const createWorkspaceMutation = useCreateWorkspace()
-  const { t } = useTranslation()
 
   const canSubmit = useMemo(() => workspaceName.trim().length > 2 && namespace.trim().length > 2, [workspaceName, namespace])
 
@@ -66,19 +66,19 @@ export const WorkspaceCreateForm = ({ onSuccess }: WorkspaceCreateFormProps) => 
   return (
     <form className="space-y-4" onSubmit={handleSubmit}>
       <div className="space-y-2">
-        <Label htmlFor="workspaceName">{t('workspace.form.nameLabel')}</Label>
+        <Label htmlFor="workspaceName">{m.workspace_form_nameLabel()}</Label>
         <Input
           id="workspaceName"
           value={workspaceName}
           onChange={(event) => setWorkspaceName(event.target.value)}
-          placeholder={t('workspace.form.namePlaceholder')}
+          placeholder={m.workspace_form_namePlaceholder()}
           autoFocus
         />
       </div>
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <Label htmlFor="namespace">{t('workspace.form.namespaceLabel')}</Label>
-          <span className="text-[11px] text-muted-foreground">{t('workspace.form.namespaceHelp')}</span>
+          <Label htmlFor="namespace">{m.workspace_form_namespaceLabel()}</Label>
+          <span className="text-[11px] text-muted-foreground">{m.workspace_form_namespaceHelp()}</span>
         </div>
         <Input
           id="namespace"
@@ -87,34 +87,34 @@ export const WorkspaceCreateForm = ({ onSuccess }: WorkspaceCreateFormProps) => 
             setNamespace(event.target.value)
             setNamespaceDirty(true)
           }}
-          placeholder={t('workspace.form.namespacePlaceholder')}
+          placeholder={m.workspace_form_namespacePlaceholder()}
         />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="description">{t('workspace.form.descriptionLabel')}</Label>
+        <Label htmlFor="description">{m.workspace_form_descriptionLabel()}</Label>
         <Textarea
           id="description"
           value={description}
           onChange={(event) => setDescription(event.target.value)}
-          placeholder={t('workspace.form.descriptionPlaceholder')}
+          placeholder={m.workspace_form_descriptionPlaceholder()}
         />
       </div>
       {createWorkspaceMutation.isError ? (
         <p className="text-sm text-destructive">
           {(createWorkspaceMutation.error instanceof Error && createWorkspaceMutation.error.message) ||
-            t('workspace.form.createError')}
+            m.workspace_form_createError()}
         </p>
       ) : null}
       <Button type="submit" className="w-full" disabled={!canSubmit || createWorkspaceMutation.isPending}>
         {createWorkspaceMutation.isPending ? (
           <>
             <Loader2 className="mr-2 size-4 animate-spin" />
-            {t('workspace.form.creating')}
+            {m.workspace_form_creating()}
           </>
         ) : (
           <>
             <Sparkles className="mr-2 size-4" />
-            {t('workspace.form.create')}
+            {m.workspace_form_create()}
           </>
         )}
       </Button>

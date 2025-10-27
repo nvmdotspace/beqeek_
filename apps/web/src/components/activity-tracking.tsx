@@ -1,9 +1,9 @@
-import { Link } from '@tanstack/react-router';
 import { cn } from '@workspace/ui/lib/utils';
 import { Button } from '@workspace/ui/components/button';
 import { Badge } from '@workspace/ui/components/badge';
-import { Clock, Database, Workflow, FileText, X, TrendingUp, Users, Activity } from 'lucide-react';
-import { useTranslation } from '@/hooks/use-translation';
+import { Clock, Database, Workflow, FileText, X, TrendingUp, Activity } from 'lucide-react';
+// @ts-ignore
+import { m } from "@/paraglide/generated/messages.js";
 import { useSidebarStore, selectRecentItems, selectCurrentWorkspace } from '@/stores/sidebar-store';
 import type { RecentItem } from '@/stores/sidebar-store';
 
@@ -27,18 +27,18 @@ const getItemIcon = (type: RecentItem['type']) => {
   }
 };
 
-const getItemTypeLabel = (type: RecentItem['type'], t: (key: string) => string) => {
+const getItemTypeLabel = (type: RecentItem['type']) => {
   switch (type) {
     case 'table':
-      return t('activity.table') || 'Table';
+      return m.activity_table();
     case 'workflow':
-      return t('activity.workflow') || 'Workflow';
+      return m.activity_workflow();
     case 'form':
-      return t('activity.form') || 'Form';
+      return m.activity_form();
     case 'record':
-      return t('activity.record') || 'Record';
+      return m.activity_record();
     default:
-      return t('activity.item') || 'Item';
+      return m.activity_item();
   }
 };
 
@@ -64,7 +64,6 @@ const formatRelativeTime = (dateString: string) => {
 };
 
 export const ActivityTracking = ({ isCollapsed = false, className }: ActivityTrackingProps) => {
-  const { t } = useTranslation();
   const currentWorkspace = useSidebarStore(selectCurrentWorkspace);
   const recentItems = useSidebarStore(selectRecentItems);
   const { removeRecentItem, clearRecentItems } = useSidebarStore();
@@ -117,7 +116,7 @@ export const ActivityTracking = ({ isCollapsed = false, className }: ActivityTra
       {/* Section Header */}
       <div className="flex items-center justify-between mb-2">
         <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-          {t('activity.recentActivity') || 'Recent Activity'}
+          {m.activity_recentActivity()}
         </h3>
         {workspaceRecentItems.length > 0 && (
           <Button
@@ -126,7 +125,7 @@ export const ActivityTracking = ({ isCollapsed = false, className }: ActivityTra
             onClick={handleClearAll}
             className="h-6 px-2 text-xs text-muted-foreground hover:text-foreground"
           >
-            {t('activity.clearAll') || 'Clear'}
+            {m.activity_clearAll()}
           </Button>
         )}
       </div>
@@ -135,13 +134,13 @@ export const ActivityTracking = ({ isCollapsed = false, className }: ActivityTra
       {workspaceRecentItems.length === 0 ? (
         <div className="text-center py-4 text-sm text-muted-foreground">
           <Clock className="h-8 w-8 mx-auto mb-2 opacity-50" />
-          <p>{t('activity.noRecentItems') || 'No recent activity'}</p>
+          <p>{m.activity_noRecentItems()}</p>
         </div>
       ) : (
         <div className="space-y-1">
           {workspaceRecentItems.slice(0, 5).map((item) => {
             const Icon = getItemIcon(item.type);
-            const typeLabel = getItemTypeLabel(item.type, t);
+            const typeLabel = getItemTypeLabel(item.type);
             const timeAgo = formatRelativeTime(item.accessedAt);
 
             return (
@@ -181,7 +180,7 @@ export const ActivityTracking = ({ isCollapsed = false, className }: ActivityTra
           {workspaceRecentItems.length > 5 && (
             <div className="pt-2 text-center">
               <Button variant="ghost" size="sm" className="text-xs text-muted-foreground hover:text-foreground">
-                {t('activity.viewAll') || `View all ${workspaceRecentItems.length} items`}
+                {m.activity_viewAll()}
               </Button>
             </div>
           )}
@@ -193,10 +192,7 @@ export const ActivityTracking = ({ isCollapsed = false, className }: ActivityTra
         <div className="mt-4 pt-3 border-t border-border">
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <TrendingUp className="h-3 w-3" />
-            <span>
-              {t('activity.summary', { count: workspaceRecentItems.length }) ||
-                `${workspaceRecentItems.length} recent items`}
-            </span>
+            <span>{m.activity_summary({ count: workspaceRecentItems.length })}</span>
           </div>
         </div>
       )}

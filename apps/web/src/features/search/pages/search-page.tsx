@@ -1,16 +1,14 @@
 import { Search } from 'lucide-react';
 import { FeaturePlaceholder } from '@/components/feature-placeholder';
-import { useTranslation } from '@/hooks/use-translation';
+// @ts-ignore
+import { m } from "@/paraglide/generated/messages.js";
 
 export const SearchPage = () => {
-  const { t } = useTranslation();
-
   return (
     <FeaturePlaceholder
-      title={t('search.title') || 'Universal workspace search'}
+      title={m.search_title()}
       description={
-        t('search.description') ||
-        'Search across tables, records, and workflows from a single surface. The command palette and filters are in development.'
+        m.search_description()
       }
       icon={<Search className="h-6 w-6 text-primary" />}
     />

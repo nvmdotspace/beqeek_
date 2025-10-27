@@ -18,7 +18,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@workspace/ui/components/av
 import { useAuthStore } from '@/features/auth';
 import { useLogout } from '@/features/auth/hooks/use-logout';
 
-import { useTranslation } from '@/hooks/use-translation';
+// @ts-ignore
+import { m } from "@/paraglide/generated/messages.js";
 import {
   useAppKeyboardShortcuts,
   useAccessibilityEnhancements,
@@ -37,8 +38,7 @@ export const AppLayout = ({ children, showSidebar = true }: AppLayoutProps) => {
 
   const userId = useAuthStore((state) => state.userId);
   const logout = useLogout();
-  const { t } = useTranslation();
-  const setSidebarOpen = useSidebarStore((state) => state.setSidebarOpen);
+    const setSidebarOpen = useSidebarStore((state) => state.setSidebarOpen);
 
   // Initialize keyboard shortcuts and accessibility
   useAppKeyboardShortcuts();
@@ -87,7 +87,7 @@ export const AppLayout = ({ children, showSidebar = true }: AppLayoutProps) => {
             <div className="hidden md:flex relative max-w-md flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder={t('common.searchPlaceholder')}
+                placeholder={m.common_searchPlaceholder()}
                 className="pl-9 w-full"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -102,7 +102,7 @@ export const AppLayout = ({ children, showSidebar = true }: AppLayoutProps) => {
               className="md:hidden flex items-center gap-2 px-3"
             >
               <Search className="h-4 w-4" />
-              <span>{t('common.search')}</span>
+              <span>Search</span>
             </Button>
           </div>
 
@@ -121,11 +121,11 @@ export const AppLayout = ({ children, showSidebar = true }: AppLayoutProps) => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem>{t('common.workspaceSettings') || 'Workspace Settings'}</DropdownMenuItem>
-                <DropdownMenuItem>{t('common.integrations') || 'Integrations'}</DropdownMenuItem>
-                <DropdownMenuItem>{t('common.security') || 'Security'}</DropdownMenuItem>
+                <DropdownMenuItem>Workspace Settings</DropdownMenuItem>
+                <DropdownMenuItem>Integrations</DropdownMenuItem>
+                <DropdownMenuItem>Security</DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>{t('common.helpSupport') || 'Help & Support'}</DropdownMenuItem>
+                <DropdownMenuItem>Help & Support</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
 
@@ -147,16 +147,16 @@ export const AppLayout = ({ children, showSidebar = true }: AppLayoutProps) => {
                   </div>
                 </div>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>{t('common.profile') || 'Profile'}</DropdownMenuItem>
-                <DropdownMenuItem>{t('common.settings') || 'Settings'}</DropdownMenuItem>
-                <DropdownMenuItem>{t('common.billing') || 'Billing'}</DropdownMenuItem>
+                <DropdownMenuItem>Profile</DropdownMenuItem>
+                <DropdownMenuItem>Settings</DropdownMenuItem>
+                <DropdownMenuItem>Billing</DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => window.open('/keyboard-shortcuts', '_blank')}>
                   Keyboard Shortcuts
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => logout()}>
-                  {t('common.logout') || 'Log out'}
+                  Log out
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -173,7 +173,7 @@ export const AppLayout = ({ children, showSidebar = true }: AppLayoutProps) => {
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
-                  placeholder={t('common.searchPlaceholder')}
+                  placeholder={m.common_searchPlaceholder()}
                   className="pl-9 w-full"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -184,14 +184,14 @@ export const AppLayout = ({ children, showSidebar = true }: AppLayoutProps) => {
             <div className="p-4">
               <div className="space-y-2">
                 <div className="text-sm font-medium text-muted-foreground">
-                  {t('common.quickActions') || 'Quick Actions'}
+                  Quick Actions
                 </div>
                 <div className="space-y-1">
                   <div className="p-2 rounded-lg hover:bg-accent cursor-pointer">
-                    {t('common.createTable') || 'Create new table'}
+                    Create new table
                   </div>
                   <div className="p-2 rounded-lg hover:bg-accent cursor-pointer">
-                    {t('common.workflowSettings') || 'Workflow settings'}
+                    Workflow settings
                   </div>
                 </div>
               </div>

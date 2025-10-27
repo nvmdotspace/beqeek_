@@ -2,7 +2,8 @@ import { Link, useLocation } from '@tanstack/react-router';
 import { cn } from '@workspace/ui/lib/utils';
 import { Badge } from '@workspace/ui/components/badge';
 import { Home, Database, Bell, Menu, Plus, Search } from 'lucide-react';
-import { useTranslation } from '@/hooks/use-translation';
+// @ts-ignore
+import { m } from "@/paraglide/generated/messages.js";
 import {
   useSidebarStore,
   selectCurrentWorkspace,
@@ -26,7 +27,6 @@ interface MobileNavItem {
 }
 
 export const MobileBottomNav = ({ className }: MobileBottomNavProps) => {
-  const { t } = useTranslation();
   const location = useLocation();
   const currentWorkspace = useSidebarStore(selectCurrentWorkspace);
   const badgeCounts = useSidebarStore(selectBadgeCounts);
@@ -43,13 +43,13 @@ export const MobileBottomNav = ({ className }: MobileBottomNavProps) => {
   const mobileNavItems: MobileNavItem[] = [
     {
       id: 'dashboard',
-      label: t('navigation.dashboard') || 'Dashboard',
+      label: m.navigation_dashboard(),
       href: '/workspaces',
       icon: Home,
     },
     {
       id: 'tables',
-      label: t('navigation.tables') || 'Tables',
+      label: m.navigation_tables(),
       href: currentWorkspace ? '/workspaces/tables' : '/workspaces',
       icon: Database,
       badge: 'tables',
@@ -57,20 +57,20 @@ export const MobileBottomNav = ({ className }: MobileBottomNavProps) => {
     },
     {
       id: 'notifications',
-      label: t('navigation.notifications') || 'Notifications',
+      label: m.navigation_notifications(),
       href: '/notifications',
       icon: Bell,
       badge: 'notifications',
     },
     {
       id: 'search',
-      label: t('navigation.search') || 'Search',
+      label: m.navigation_search(),
       href: '/search',
       icon: Search,
     },
     {
       id: 'menu',
-      label: t('navigation.menu') || 'Menu',
+      label: m.navigation_menu(),
       icon: Menu,
       action: () => toggleSidebar(),
     },
@@ -165,8 +165,7 @@ export const MobileBottomNav = ({ className }: MobileBottomNavProps) => {
 
 // Floating Action Button for quick actions on mobile
 export const MobileFloatingAction = () => {
-  const { t } = useTranslation();
-  const currentWorkspace = useSidebarStore(selectCurrentWorkspace);
+    const currentWorkspace = useSidebarStore(selectCurrentWorkspace);
   const canCreateItem = useSidebarStore(selectCanCreateItem);
 
   // Only show if user can create something in current workspace

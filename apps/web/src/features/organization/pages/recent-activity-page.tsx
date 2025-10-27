@@ -1,16 +1,14 @@
 import { Clock } from 'lucide-react';
 import { FeaturePlaceholder } from '@/components/feature-placeholder';
-import { useTranslation } from '@/hooks/use-translation';
+// @ts-ignore
+import { m } from "@/paraglide/generated/messages.js";
 
 export const RecentActivityPage = () => {
-  const { t } = useTranslation();
-
   return (
     <FeaturePlaceholder
-      title={t('workspace.activity.title') || 'Recent activity'}
+      title={m.workspace_activity_title()}
       description={
-        t('workspace.activity.description') ||
-        'Review workspace changes, approvals, and audit logs in one timeline. The activity feed is being connected to live events.'
+        m.workspace_activity_description()
       }
       icon={<Clock className="h-6 w-6 text-primary" />}
     />

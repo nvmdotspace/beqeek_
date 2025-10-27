@@ -1,16 +1,14 @@
 import { HelpCircle } from 'lucide-react';
 import { FeaturePlaceholder } from '@/components/feature-placeholder';
-import { useTranslation } from '@/hooks/use-translation';
+// @ts-ignore
+import { m } from "@/paraglide/generated/messages.js";
 
 export const HelpCenterPage = () => {
-  const { t } = useTranslation();
-
   return (
     <FeaturePlaceholder
-      title={t('help.title') || 'Help & support'}
+      title={m.help_title()}
       description={
-        t('help.description') ||
-        'Browse guides, contact support, and review status updates. The help center is launching alongside the new navigation IA.'
+        m.help_description()
       }
       icon={<HelpCircle className="h-6 w-6 text-primary" />}
     />

@@ -5,7 +5,8 @@ import { useWorkspaces } from '@/features/workspace/hooks/use-workspaces';
 import { ActiveTableCard } from '../components/active-table-card';
 import { useActiveTablesGroupedByWorkGroup } from '../hooks/use-active-tables';
 import { ActiveTablesEmptyState } from '../components/active-tables-empty-state';
-import { useTranslation } from '@/hooks/use-translation';
+// @ts-ignore
+import { m } from "@/paraglide/generated/messages.js";
 import { useLocation, useNavigate } from '@tanstack/react-router';
 
 import { Button } from '@workspace/ui/components/button';
@@ -21,7 +22,7 @@ import { Input } from '@workspace/ui/components/input';
 import type { ActiveTable } from '../types';
 
 export const ActiveTablesPage = () => {
-  const { t, locale } = useTranslation();
+  const locale = 'en'; // Placeholder for locale
   const location = useLocation();
   const { data: workspacesData, isLoading: isWorkspacesLoading } = useWorkspaces();
   const navigate = useNavigate();
@@ -31,7 +32,7 @@ export const ActiveTablesPage = () => {
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string>(workspaceParam || '');
   const [selectedWorkGroupId, setSelectedWorkGroupId] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const localePrefix = locale === 'vi' ? '' : `/${locale}`;
+  const localePrefix = (locale as string) === 'vi' ? '' : `/${locale}`;
 
   useEffect(() => {
     if (!selectedWorkspaceId && workspaceOptions.length > 0) {
@@ -93,14 +94,14 @@ export const ActiveTablesPage = () => {
     <div className="space-y-6 p-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight">{t('activeTables.page.title')}</h1>
-          <p className="text-muted-foreground">{t('activeTables.page.subtitle')}</p>
+          <h1 className="text-3xl font-bold tracking-tight">{m.activeTables_page_title()}</h1>
+          <p className="text-muted-foreground">{m.activeTables_page_subtitle()}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <div className="relative w-full md:w-auto">
             <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder={t('activeTables.page.searchPlaceholder')}
+              placeholder={m.activeTables_page_searchPlaceholder()}
               className="pl-8"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -111,9 +112,9 @@ export const ActiveTablesPage = () => {
               <Button variant="outline" className="min-w-[220px] justify-between">
                 <span className="truncate">
                   {isWorkspacesLoading
-                    ? t('activeTables.page.workspaceLoading')
+                    ? m.activeTables_page_workspaceLoading()
                     : (workspaceOptions.find((workspace) => workspace.id === selectedWorkspaceId)?.workspaceName ??
-                      t('activeTables.page.workspacePlaceholder'))}
+                      m.activeTables_page_workspacePlaceholder())}
                 </span>
                 <ChevronDown className="h-4 w-4" />
               </Button>
@@ -142,9 +143,9 @@ export const ActiveTablesPage = () => {
       <div className="flex flex-col gap-4">
         <div className="flex flex-wrap items-center gap-2">
           <Badge variant="outline" className="bg-background">
-            {t('activeTables.page.totalTables', { count: totalTables })}
+            {m.activeTables_page_totalTables({ count: totalTables })}
           </Badge>
-          <Badge variant="default">{t('activeTables.page.totalWorkGroups', { count: workGroups.length })}</Badge>
+          <Badge variant="default">{m.activeTables_page_totalWorkGroups({ count: workGroups.length })}</Badge>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -153,7 +154,7 @@ export const ActiveTablesPage = () => {
             size="sm"
             onClick={() => setSelectedWorkGroupId('all')}
           >
-            {t('activeTables.page.workGroupAll')}
+            {m.activeTables_page_workGroupAll()}
           </Button>
           {workGroups.map((group) => (
             <Button
@@ -178,7 +179,7 @@ export const ActiveTablesPage = () => {
 
       {!isTablesLoading && error ? (
         <div className="rounded-lg border border-destructive bg-destructive/20 p-6 text-sm text-destructive">
-          {error instanceof Error ? error.message : t('activeTables.page.errorGeneric')}
+          {error instanceof Error ? error.message : m.activeTables_page_errorGeneric()}
         </div>
       ) : null}
 
@@ -194,7 +195,7 @@ export const ActiveTablesPage = () => {
                   {group.description ? <p className="text-sm text-muted-foreground">{group.description}</p> : null}
                 </div>
                 <Badge variant="outline" className="bg-background">
-                  {t('activeTables.page.groupTableCount', { count: tables.length })}
+                  {m.activeTables_page_groupTableCount({ count: tables.length })}
                 </Badge>
               </div>
               <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">

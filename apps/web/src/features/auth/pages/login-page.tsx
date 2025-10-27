@@ -8,13 +8,13 @@ import { Input } from '@workspace/ui/components/input';
 import { useLogin } from '../hooks/use-login';
 import { useAuthStore, selectIsAuthenticated } from '../stores/auth-store';
 import { useLanguageStore } from '@/stores/language-store';
-import { useTranslation } from '@/hooks/use-translation';
+// @ts-ignore
+import { m } from "@/paraglide/generated/messages.js";
 
 export const LoginPage = () => {
   const router = useRouter();
   const isAuthenticated = useAuthStore(selectIsAuthenticated);
   const getLocalizedPath = useLanguageStore((state) => state.getLocalizedPath);
-  const { t } = useTranslation();
   const [username, setUsername] = useState('captainbolt');
   const [password, setPassword] = useState('nvmteam');
 
@@ -76,12 +76,12 @@ export const LoginPage = () => {
             {/* Main Heading */}
             <div className="space-y-4">
               <h2 className="text-4xl font-semibold leading-tight text-white">
-                {t('auth.welcomeBack')}
+                {m.auth_welcomeBack()}
                 <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">
-                  {t('auth.digitalProcessPlatform')}
+                  {m.auth_digitalProcessPlatform()}
                 </span>
               </h2>
-              <p className="text-lg text-slate-300 leading-relaxed">{t('auth.manageWorkspaces')}</p>
+              <p className="text-lg text-slate-300 leading-relaxed">{m.auth_manageWorkspaces()}</p>
             </div>
 
             {/* Features */}
@@ -98,7 +98,7 @@ export const LoginPage = () => {
                 </div>
                 <div>
                   <h3 className="font-medium text-white">Active Tables</h3>
-                  <p className="text-sm text-slate-400">{t('auth.manageStructuredData')}</p>
+                  <p className="text-sm text-slate-400">{m.auth_manageStructuredData()}</p>
                 </div>
               </div>
 
@@ -114,7 +114,7 @@ export const LoginPage = () => {
                 </div>
                 <div>
                   <h3 className="font-medium text-white">Workflow Automation</h3>
-                  <p className="text-sm text-slate-400">{t('auth.automateWorkProcesses')}</p>
+                  <p className="text-sm text-slate-400">{m.auth_automateWorkProcesses()}</p>
                 </div>
               </div>
 
@@ -130,7 +130,7 @@ export const LoginPage = () => {
                 </div>
                 <div>
                   <h3 className="font-medium text-white">End-to-End Encryption</h3>
-                  <p className="text-sm text-slate-400">{t('auth.secureDataE2E')}</p>
+                  <p className="text-sm text-slate-400">{m.auth_secureDataE2E()}</p>
                 </div>
               </div>
             </div>
@@ -140,14 +140,14 @@ export const LoginPage = () => {
               <div className="flex items-center gap-2 mb-3">
                 <div className="h-2 w-2 rounded-full bg-green-400 animate-pulse"></div>
                 <span className="text-sm font-semibold uppercase tracking-wide text-green-400">
-                  {t('auth.demoEnvironment')}
+                  {m.auth_demoEnvironment()}
                 </span>
               </div>
               <p className="text-sm text-slate-300 leading-relaxed">
-                {t('auth.useDemoAccount')}{' '}
+                {m.auth_useDemoAccount()}{' '}
                 <span className="font-mono bg-slate-700 px-2 py-1 rounded text-slate-200">captainbolt / nvmteam</span>
               </p>
-              <p className="text-xs text-slate-400 mt-2">{t('auth.orCreateNewWorkspace')}</p>
+              <p className="text-xs text-slate-400 mt-2">{m.auth_orCreateNewWorkspace()}</p>
             </div>
           </div>
         </div>
@@ -170,20 +170,20 @@ export const LoginPage = () => {
             <div className="rounded-2xl border border-slate-700 bg-slate-800/50 backdrop-blur-sm p-8">
               <div className="space-y-6">
                 <div className="text-center">
-                  <h2 className="text-2xl font-semibold text-white">{t('auth.signIn')}</h2>
-                  <p className="text-sm text-slate-400 mt-2">{t('auth.accessYourAccount')}</p>
+                  <h2 className="text-2xl font-semibold text-white">{m.auth_signIn()}</h2>
+                  <p className="text-sm text-slate-400 mt-2">{m.auth_accessYourAccount()}</p>
                 </div>
 
                 <form className="space-y-5" onSubmit={handleSubmit}>
                   <div className="space-y-2">
                     <label htmlFor="username" className="text-sm font-medium text-slate-200">
-                      {t('auth.username')}
+                      {m.auth_username()}
                     </label>
                     <Input
                       id="username"
                       name="username"
                       autoComplete="username"
-                      placeholder={t('auth.enterUsername')}
+                      placeholder={m.auth_enterUsername()}
                       value={username}
                       onChange={(event) => setUsername(event.target.value)}
                       disabled={isPending}
@@ -195,14 +195,14 @@ export const LoginPage = () => {
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <label htmlFor="password" className="text-sm font-medium text-slate-200">
-                        {t('auth.password')}
+                        {m.auth_password()}
                       </label>
                       <button
                         type="button"
                         className="text-xs font-medium text-blue-400 hover:text-blue-300 transition-colors"
                         onClick={() => setPassword('nvmteam')}
                       >
-                        {t('auth.useDemo')}
+                        {m.auth_useDemo()}
                       </button>
                     </div>
                     <Input
@@ -230,12 +230,12 @@ export const LoginPage = () => {
                     className="w-full bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 text-white font-medium transition-all duration-200 shadow-lg hover:shadow-xl"
                     disabled={isPending}
                   >
-                    {isPending ? t('auth.processing') : t('auth.signIn')}
+                    {isPending ? m.auth_processing() : m.auth_signIn()}
                   </Button>
                 </form>
 
                 <div className="text-center">
-                  <p className="text-xs text-slate-400">{t('auth.needNewAccount')}</p>
+                  <p className="text-xs text-slate-400">{m.auth_needNewAccount()}</p>
                 </div>
               </div>
             </div>

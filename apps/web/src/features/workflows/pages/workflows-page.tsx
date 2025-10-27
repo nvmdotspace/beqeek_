@@ -1,16 +1,14 @@
 import { Workflow } from 'lucide-react';
 import { FeaturePlaceholder } from '@/components/feature-placeholder';
-import { useTranslation } from '@/hooks/use-translation';
+// @ts-ignore
+import { m } from "@/paraglide/generated/messages.js";
 
 export const WorkflowsPage = () => {
-  const { t } = useTranslation();
-
   return (
     <FeaturePlaceholder
-      title={t('workspace.workflow.title') || 'Workflow automation is coming soon'}
+      title={m.workspace_workflow_title()}
       description={
-        t('workspace.workflow.description') ||
-        'Design workflows, orchestrate automations, and track progress in real time. This module is being wired to the new sidebar experience.'
+        m.workspace_workflow_description()
       }
       icon={<Workflow className="h-6 w-6 text-primary" />}
     />

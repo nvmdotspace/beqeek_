@@ -1,16 +1,14 @@
 import { Activity } from 'lucide-react';
 import { FeaturePlaceholder } from '@/components/feature-placeholder';
-import { useTranslation } from '@/hooks/use-translation';
+// @ts-ignore
+import { m } from "@/paraglide/generated/messages.js";
 
 export const AnalyticsPage = () => {
-  const { t } = useTranslation();
-
   return (
     <FeaturePlaceholder
-      title={t('workspace.analytics.title') || 'Workspace analytics'}
+      title={m.workspace_analytics_title()}
       description={
-        t('workspace.analytics.description') ||
-        'Monitor usage trends, automation throughput, and team health with interactive dashboards. Visual reports will appear here shortly.'
+        m.workspace_analytics_description()
       }
       icon={<Activity className="h-6 w-6 text-primary" />}
     />

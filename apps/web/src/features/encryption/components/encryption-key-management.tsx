@@ -14,7 +14,8 @@ import {
 } from 'lucide-react';
 
 import { useEncryption } from '@workspace/active-tables-hooks';
-import { useTranslation } from '@/hooks/use-translation';
+// @ts-ignore
+import { m } from "@/paraglide/generated/messages.js";
 
 import { Button } from '@workspace/ui/components/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@workspace/ui/components/card';
@@ -27,7 +28,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Textarea } from '@workspace/ui/components/textarea';
 
 const EncryptionKeyManagement = () => {
-  const { t } = useTranslation();
   const {
     isInitialized,
     isReady,
@@ -61,22 +61,22 @@ const EncryptionKeyManagement = () => {
 
   const handleInitialize = async () => {
     if (!newPassword) {
-      showMessage('error', t('encryption.passwordRequired'));
+      showMessage('error', m.encryption_passwordRequired());
       return;
     }
 
     if (newPassword.length < 8) {
-      showMessage('error', t('encryption.passwordTooShort'));
+      showMessage('error', m.encryption_passwordTooShort());
       return;
     }
 
     setActionLoading(true);
     try {
       await initialize(newPassword);
-      showMessage('success', t('encryption.initialized'));
+      showMessage('success', m.encryption_initialized());
       setNewPassword('');
     } catch (error) {
-      showMessage('error', error instanceof Error ? error.message : t('encryption.initializeFailed'));
+      showMessage('error', error instanceof Error ? error.message : m.encryption_initializeFailed());
     } finally {
       setActionLoading(false);
     }
@@ -84,17 +84,17 @@ const EncryptionKeyManagement = () => {
 
   const handleChangePassword = async () => {
     if (!currentPassword || !newPassword || !confirmPassword) {
-      showMessage('error', t('encryption.allFieldsRequired'));
+      showMessage('error', m.encryption_allFieldsRequired());
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      showMessage('error', t('encryption.passwordsNotMatch'));
+      showMessage('error', m.encryption_passwordsNotMatch());
       return;
     }
 
     if (newPassword.length < 8) {
-      showMessage('error', t('encryption.passwordTooShort'));
+      showMessage('error', m.encryption_passwordTooShort());
       return;
     }
 
@@ -102,17 +102,17 @@ const EncryptionKeyManagement = () => {
     try {
       const isValid = await validatePassword(currentPassword);
       if (!isValid) {
-        showMessage('error', t('encryption.currentPasswordInvalid'));
+        showMessage('error', m.encryption_currentPasswordInvalid());
         return;
       }
 
       await changePassword(currentPassword, newPassword);
-      showMessage('success', t('encryption.passwordChanged'));
+      showMessage('success', m.encryption_passwordChanged());
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
     } catch (error) {
-      showMessage('error', error instanceof Error ? error.message : t('encryption.changePasswordFailed'));
+      showMessage('error', error instanceof Error ? error.message : m.encryption_changePasswordFailed());
     } finally {
       setActionLoading(false);
     }
@@ -136,9 +136,9 @@ const EncryptionKeyManagement = () => {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
-      showMessage('success', t('encryption.keysExported'));
+      showMessage('success', m.encryption_keysExported());
     } catch (error) {
-      showMessage('error', error instanceof Error ? error.message : t('encryption.exportFailed'));
+      showMessage('error', error instanceof Error ? error.message : m.encryption_exportFailed());
     } finally {
       setActionLoading(false);
     }
@@ -146,7 +146,7 @@ const EncryptionKeyManagement = () => {
 
   const handleImportKeys = async () => {
     if (!importData.trim()) {
-      showMessage('error', t('encryption.importDataRequired'));
+      showMessage('error', m.encryption_importDataRequired());
       return;
     }
 
@@ -154,10 +154,10 @@ const EncryptionKeyManagement = () => {
     try {
       const keys = JSON.parse(importData);
       await importKeys(keys);
-      showMessage('success', t('encryption.keysImported'));
+      showMessage('success', m.encryption_keysImported());
       setImportData('');
     } catch (error) {
-      showMessage('error', error instanceof Error ? error.message : t('encryption.importFailed'));
+      showMessage('error', error instanceof Error ? error.message : m.encryption_importFailed());
     } finally {
       setActionLoading(false);
     }
@@ -176,16 +176,16 @@ const EncryptionKeyManagement = () => {
   };
 
   const handleClearAllData = async () => {
-    if (!confirm(t('encryption.clearAllDataConfirm'))) {
+    if (!confirm(m.encryption_clearAllDataConfirm())) {
       return;
     }
 
     setActionLoading(true);
     try {
       await clearAllData();
-      showMessage('success', t('encryption.allDataCleared'));
+      showMessage('success', m.encryption_allDataCleared());
     } catch (error) {
-      showMessage('error', error instanceof Error ? error.message : t('encryption.clearDataFailed'));
+      showMessage('error', error instanceof Error ? error.message : m.encryption_clearDataFailed());
     } finally {
       setActionLoading(false);
     }
@@ -193,7 +193,7 @@ const EncryptionKeyManagement = () => {
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-    showMessage('success', t('encryption.copiedToClipboard'));
+    showMessage('success', m.encryption_copiedToClipboard());
   };
 
   if (!isInitialized) {
@@ -203,24 +203,24 @@ const EncryptionKeyManagement = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Shield className="h-5 w-5" />
-              {t('encryption.initializeTitle')}
+              {m.encryption_initializeTitle()}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <Alert>
               <AlertTriangle className="h-4 w-4" />
-              <AlertDescription>{t('encryption.initializeDescription')}</AlertDescription>
+              <AlertDescription>{m.encryption_initializeDescription()}</AlertDescription>
             </Alert>
 
             <div className="space-y-2">
-              <Label htmlFor="new-password">{t('encryption.masterPassword')}</Label>
+              <Label htmlFor="new-password">{m.encryption_masterPassword()}</Label>
               <div className="relative">
                 <Input
                   id="new-password"
                   type={showPassword ? 'text' : 'password'}
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder={t('encryption.enterMasterPassword')}
+                  placeholder={m.encryption_enterMasterPassword()}
                   disabled={isLoading || actionLoading}
                 />
                 <Button
@@ -245,7 +245,7 @@ const EncryptionKeyManagement = () => {
 
             <Button onClick={handleInitialize} disabled={isLoading || actionLoading || !newPassword} className="w-full">
               {actionLoading ? <RefreshCw className="mr-2 h-4 w-4 animate-spin" /> : <Key className="mr-2 h-4 w-4" />}
-              {t('encryption.initialize')}
+              {m.encryption_initialize()}
             </Button>
           </CardContent>
         </Card>
@@ -257,12 +257,12 @@ const EncryptionKeyManagement = () => {
     <div className="max-w-4xl mx-auto space-y-6 p-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">{t('encryption.keyManagement')}</h1>
-          <p className="text-muted-foreground">{t('encryption.keyManagementDescription')}</p>
+          <h1 className="text-3xl font-bold tracking-tight">{m.encryption_keyManagement()}</h1>
+          <p className="text-muted-foreground">{m.encryption_keyManagementDescription()}</p>
         </div>
         <Badge variant={isReady ? 'default' : 'secondary'} className="flex items-center gap-2">
           <Shield className="h-4 w-4" />
-          {isReady ? t('encryption.ready') : t('encryption.notReady')}
+          {isReady ? m.encryption_ready() : m.encryption_notReady()}
         </Badge>
       </div>
 
@@ -279,9 +279,9 @@ const EncryptionKeyManagement = () => {
 
       <Tabs defaultValue="security" className="space-y-6">
         <TabsList>
-          <TabsTrigger value="security">{t('encryption.security')}</TabsTrigger>
-          <TabsTrigger value="backup">{t('encryption.backupRestore')}</TabsTrigger>
-          <TabsTrigger value="advanced">{t('encryption.advanced')}</TabsTrigger>
+          <TabsTrigger value="security">{m.encryption_security()}</TabsTrigger>
+          <TabsTrigger value="backup">{m.encryption_backupRestore()}</TabsTrigger>
+          <TabsTrigger value="advanced">{m.encryption_advanced()}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="security" className="space-y-6">
@@ -289,20 +289,20 @@ const EncryptionKeyManagement = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Key className="h-5 w-5" />
-                {t('encryption.changePassword')}
+                {m.encryption_changePassword()}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 md:grid-cols-3">
                 <div className="space-y-2">
-                  <Label htmlFor="current-password">{t('encryption.currentPassword')}</Label>
+                  <Label htmlFor="current-password">{m.encryption_currentPassword()}</Label>
                   <div className="relative">
                     <Input
                       id="current-password"
                       type={showPassword ? 'text' : 'password'}
                       value={currentPassword}
                       onChange={(e) => setCurrentPassword(e.target.value)}
-                      placeholder={t('encryption.enterCurrentPassword')}
+                      placeholder={m.encryption_enterCurrentPassword()}
                       disabled={actionLoading}
                     />
                     <Button
@@ -319,14 +319,14 @@ const EncryptionKeyManagement = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="new-password">{t('encryption.newPassword')}</Label>
+                  <Label htmlFor="new-password">{m.encryption_newPassword()}</Label>
                   <div className="relative">
                     <Input
                       id="new-password"
                       type={showNewPassword ? 'text' : 'password'}
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
-                      placeholder={t('encryption.enterNewPassword')}
+                      placeholder={m.encryption_enterNewPassword()}
                       disabled={actionLoading}
                     />
                     <Button
@@ -343,14 +343,14 @@ const EncryptionKeyManagement = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="confirm-password">{t('encryption.confirmPassword')}</Label>
+                  <Label htmlFor="confirm-password">{m.encryption_confirmPassword()}</Label>
                   <div className="relative">
                     <Input
                       id="confirm-password"
                       type={showConfirmPassword ? 'text' : 'password'}
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      placeholder={t('encryption.confirmNewPassword')}
+                      placeholder={m.encryption_confirmNewPassword()}
                       disabled={actionLoading}
                     />
                     <Button
@@ -376,7 +376,7 @@ const EncryptionKeyManagement = () => {
                 ) : (
                   <RefreshCw className="mr-2 h-4 w-4" />
                 )}
-                {t('encryption.changePassword')}
+                {m.encryption_changePassword()}
               </Button>
             </CardContent>
           </Card>
@@ -388,18 +388,18 @@ const EncryptionKeyManagement = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Download className="h-5 w-5" />
-                  {t('encryption.exportKeys')}
+                  {m.encryption_exportKeys()}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <p className="text-sm text-muted-foreground">{t('encryption.exportKeysDescription')}</p>
+                <p className="text-sm text-muted-foreground">{m.encryption_exportKeysDescription()}</p>
                 <Button onClick={handleExportKeys} disabled={actionLoading} className="w-full">
                   {actionLoading ? (
                     <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
                   ) : (
                     <Download className="mr-2 h-4 w-4" />
                   )}
-                  {t('encryption.export')}
+                  {m.encryption_export()}
                 </Button>
               </CardContent>
             </Card>
@@ -408,14 +408,14 @@ const EncryptionKeyManagement = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Upload className="h-5 w-5" />
-                  {t('encryption.importKeys')}
+                  {m.encryption_importKeys()}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <p className="text-sm text-muted-foreground">{t('encryption.importKeysDescription')}</p>
+                <p className="text-sm text-muted-foreground">{m.encryption_importKeysDescription()}</p>
 
                 <div className="space-y-2">
-                  <Label htmlFor="file-input">{t('encryption.selectFile')}</Label>
+                  <Label htmlFor="file-input">{m.encryption_selectFile()}</Label>
                   <Input
                     id="file-input"
                     type="file"
@@ -427,12 +427,12 @@ const EncryptionKeyManagement = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="import-data">{t('encryption.orPasteData')}</Label>
+                  <Label htmlFor="import-data">{m.encryption_orPasteData()}</Label>
                   <Textarea
                     id="import-data"
                     value={importData}
                     onChange={(e) => setImportData(e.target.value)}
-                    placeholder={t('encryption.pasteKeysHere')}
+                    placeholder={m.encryption_pasteKeysHere()}
                     rows={6}
                     disabled={actionLoading}
                   />
@@ -444,7 +444,7 @@ const EncryptionKeyManagement = () => {
                   ) : (
                     <Upload className="mr-2 h-4 w-4" />
                   )}
-                  {t('encryption.import')}
+                  {m.encryption_import()}
                 </Button>
               </CardContent>
             </Card>
@@ -456,13 +456,13 @@ const EncryptionKeyManagement = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Trash2 className="h-5 w-5 text-destructive" />
-                {t('encryption.dangerZone')}
+                {m.encryption_dangerZone()}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <Alert>
                 <AlertTriangle className="h-4 w-4" />
-                <AlertDescription>{t('encryption.dangerZoneDescription')}</AlertDescription>
+                <AlertDescription>{m.encryption_dangerZoneDescription()}</AlertDescription>
               </Alert>
 
               <div className="flex flex-wrap gap-4">
@@ -470,18 +470,18 @@ const EncryptionKeyManagement = () => {
                   <DialogTrigger asChild>
                     <Button variant="outline">
                       <Copy className="mr-2 h-4 w-4" />
-                      {t('encryption.viewExportedData')}
+                      {m.encryption_viewExportedData()}
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="max-w-2xl">
                     <DialogHeader>
-                      <DialogTitle>{t('encryption.exportedData')}</DialogTitle>
+                      <DialogTitle>{m.encryption_exportedData()}</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4">
                       <Textarea value={exportedData} readOnly rows={10} className="font-mono text-xs" />
                       <Button onClick={() => copyToClipboard(exportedData)} disabled={!exportedData} className="w-full">
                         <Copy className="mr-2 h-4 w-4" />
-                        {t('encryption.copyToClipboard')}
+                        {m.encryption_copyToClipboard()}
                       </Button>
                     </div>
                   </DialogContent>
@@ -493,7 +493,7 @@ const EncryptionKeyManagement = () => {
                   ) : (
                     <Trash2 className="mr-2 h-4 w-4" />
                   )}
-                  {t('encryption.clearAllData')}
+                  {m.encryption_clearAllData()}
                 </Button>
               </div>
             </CardContent>

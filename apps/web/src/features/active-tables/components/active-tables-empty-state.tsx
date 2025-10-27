@@ -2,7 +2,8 @@ import { Database } from 'lucide-react';
 
 import { Card, CardContent } from '@workspace/ui/components/card';
 import { Button } from '@workspace/ui/components/button';
-import { useTranslation } from '@/hooks/use-translation';
+// @ts-ignore
+import { m } from "@/paraglide/generated/messages.js";
 
 interface ActiveTablesEmptyStateProps {
   onCreate?: () => void;
@@ -10,8 +11,6 @@ interface ActiveTablesEmptyStateProps {
 }
 
 export const ActiveTablesEmptyState = ({ onCreate, showCreate = false }: ActiveTablesEmptyStateProps) => {
-  const { t } = useTranslation();
-
   return (
     <Card className="border-dashed border-border/60 bg-muted/40">
       <CardContent className="flex flex-col items-center justify-center space-y-4 py-12 text-center">
@@ -19,14 +18,14 @@ export const ActiveTablesEmptyState = ({ onCreate, showCreate = false }: ActiveT
           <Database className="h-7 w-7" />
         </div>
         <div className="space-y-1">
-          <h2 className="text-xl font-semibold">{t('activeTables.empty.title')}</h2>
+          <h2 className="text-xl font-semibold">{m.activeTables_empty_title()}</h2>
           <p className="max-w-md text-sm text-muted-foreground leading-relaxed">
-            {t('activeTables.empty.description')}
+            {m.activeTables_empty_description()}
           </p>
         </div>
         {showCreate ? (
           <Button variant="default" onClick={onCreate}>
-            {t('activeTables.empty.createCta')}
+            {m.activeTables_empty_createCta()}
           </Button>
         ) : null}
       </CardContent>

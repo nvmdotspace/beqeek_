@@ -13,7 +13,8 @@ import {
   DropdownMenuGroup,
 } from '@workspace/ui/components/dropdown-menu';
 import { ChevronDown, Plus, Settings, Users, Zap, Search, LogOut, User, Crown, Shield } from 'lucide-react';
-import { useTranslation } from '@/hooks/use-translation';
+// @ts-ignore
+import { m } from "@/paraglide/generated/messages.js";
 import {
   useSidebarStore,
   selectCurrentWorkspace,
@@ -38,8 +39,7 @@ export const WorkspaceSelector = ({
   disablePadding = false,
   showAvatar = true,
 }: WorkspaceSelectorProps) => {
-  const { t } = useTranslation();
-  const navigate = useNavigate();
+    const navigate = useNavigate();
   const { data: workspacesData, isLoading } = useWorkspaces();
   const isAuthenticated = useAuthStore(selectIsAuthenticated);
 
@@ -124,7 +124,7 @@ export const WorkspaceSelector = ({
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="h-9 w-9 rounded-lg bg-primary text-primary-foreground">
               <Zap className="h-5 w-5" />
-              <span className="sr-only">{t('workspace.selector.ariaLabel') || 'Select workspace'}</span>
+              <span className="sr-only">{m.workspace_selector_ariaLabel()}</span>
             </Button>
           </DropdownMenuTrigger>
           <WorkspaceDropdownContent
@@ -137,7 +137,6 @@ export const WorkspaceSelector = ({
             handleCreateWorkspace={handleCreateWorkspace}
             handleJoinWorkspace={handleJoinWorkspace}
             handleWorkspaceSettings={handleWorkspaceSettings}
-            t={t}
             searchInputRef={searchInputRef}
           />
         </DropdownMenu>
@@ -152,7 +151,7 @@ export const WorkspaceSelector = ({
           <Button
             variant="outline"
             className="w-full justify-between bg-background hover:bg-accent border-border h-10 rounded-lg"
-            aria-label={t('workspace.selector.ariaLabel') || 'Select workspace'}
+            aria-label={m.workspace_selector_ariaLabel()}
           >
             <div className="flex items-center gap-2 min-w-0 flex-1">
               {showAvatar && currentWorkspace && (
@@ -176,7 +175,7 @@ export const WorkspaceSelector = ({
               )}
               <div className="flex flex-col items-start min-w-0 flex-1">
                 <span className="text-sm font-medium truncate">
-                  {currentWorkspace?.workspaceName || t('workspace.selector.noWorkspace')}
+                  {currentWorkspace?.workspaceName || m.workspace_selector_noWorkspace()}
                 </span>
                 {currentWorkspace?.namespace && (
                   <span className="text-xs text-muted-foreground truncate">{currentWorkspace.namespace}</span>
@@ -196,7 +195,6 @@ export const WorkspaceSelector = ({
           handleCreateWorkspace={handleCreateWorkspace}
           handleJoinWorkspace={handleJoinWorkspace}
           handleWorkspaceSettings={handleWorkspaceSettings}
-          t={t}
           searchInputRef={searchInputRef}
         />
       </DropdownMenu>
@@ -214,7 +212,6 @@ interface WorkspaceDropdownContentProps {
   handleCreateWorkspace: () => void;
   handleJoinWorkspace: () => void;
   handleWorkspaceSettings: () => void;
-  t: (key: string) => string;
   searchInputRef: React.Ref<HTMLInputElement>;
 }
 
@@ -228,7 +225,6 @@ const WorkspaceDropdownContent = ({
   handleCreateWorkspace,
   handleJoinWorkspace,
   handleWorkspaceSettings,
-  t,
   searchInputRef,
 }: WorkspaceDropdownContentProps) => {
   return (
@@ -267,7 +263,7 @@ const WorkspaceDropdownContent = ({
           <input
             ref={searchInputRef}
             type="text"
-            placeholder={t('workspace.selector.searchPlaceholder') || 'Search workspaces...'}
+            placeholder={m.workspace_selector_searchPlaceholder()}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-8 pr-3 py-2 text-sm bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
@@ -280,13 +276,13 @@ const WorkspaceDropdownContent = ({
       {/* Workspace List */}
       <DropdownMenuGroup>
         <DropdownMenuLabel className="text-xs font-medium text-muted-foreground">
-          {t('workspace.selector.yourWorkspaces')}
+          {m.workspace_selector_yourWorkspaces()}
         </DropdownMenuLabel>
         {isLoading ? (
-          <div className="p-2 text-center text-sm text-muted-foreground">{t('workspace.selector.loading')}</div>
+          <div className="p-2 text-center text-sm text-muted-foreground">{m.workspace_selector_loading()}</div>
         ) : filteredWorkspaces.length === 0 ? (
           <div className="p-2 text-center text-sm text-muted-foreground">
-            {searchQuery ? t('workspace.selector.noResults') : t('workspace.selector.noWorkspaces')}
+            {searchQuery ? m.workspace_selector_noResults() : m.workspace_selector_noWorkspaces()}
           </div>
         ) : (
           filteredWorkspaces.map((workspace) => {
@@ -331,16 +327,16 @@ const WorkspaceDropdownContent = ({
       <DropdownMenuGroup>
         <DropdownMenuItem onClick={handleCreateWorkspace} className="flex items-center gap-2 cursor-pointer">
           <Plus className="h-4 w-4" />
-          <span>{t('workspace.selector.createWorkspace')}</span>
+          <span>{m.workspace_selector_createWorkspace()}</span>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={handleJoinWorkspace} className="flex items-center gap-2 cursor-pointer">
           <Users className="h-4 w-4" />
-          <span>{t('workspace.selector.joinWorkspace')}</span>
+          <span>{m.workspace_selector_joinWorkspace()}</span>
         </DropdownMenuItem>
         {currentWorkspace && (
           <DropdownMenuItem onClick={handleWorkspaceSettings} className="flex items-center gap-2 cursor-pointer">
             <Settings className="h-4 w-4" />
-            <span>{t('workspace.selector.workspaceSettings')}</span>
+            <span>{m.workspace_selector_workspaceSettings()}</span>
           </DropdownMenuItem>
         )}
       </DropdownMenuGroup>

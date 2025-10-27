@@ -22,7 +22,8 @@ import {
   Workflow,
   Zap,
 } from 'lucide-react';
-import { useTranslation } from '@/hooks/use-translation';
+// @ts-ignore
+import { m } from "@/paraglide/generated/messages.js";
 import {
   useSidebarStore,
   selectCurrentWorkspace,
@@ -48,7 +49,6 @@ interface NavigationItem {
 }
 
 export const NavigationMenu = ({ isCollapsed = false, className }: NavigationMenuProps) => {
-  const { t } = useTranslation();
   const location = useLocation();
   const currentWorkspace = useSidebarStore(selectCurrentWorkspace);
   const badgeCounts = useSidebarStore(selectBadgeCounts);
@@ -63,19 +63,19 @@ export const NavigationMenu = ({ isCollapsed = false, className }: NavigationMen
       // Global Navigation (always visible)
       {
         id: 'dashboard',
-        label: t('navigation.dashboard') || 'Dashboard',
+        label: m.navigation_dashboard(),
         href: '/workspaces',
         icon: Home,
       },
       {
         id: 'search',
-        label: t('navigation.search') || 'Search',
+        label: m.navigation_search(),
         href: '/search',
         icon: SearchIcon,
       },
       {
         id: 'notifications',
-        label: t('navigation.notifications') || 'Notifications',
+        label: m.navigation_notifications(),
         href: '/notifications',
         icon: Bell,
         badge: 'notifications',
@@ -86,27 +86,27 @@ export const NavigationMenu = ({ isCollapsed = false, className }: NavigationMen
         ? [
             {
               id: 'quick-actions',
-              label: t('navigation.quickActions') || 'Quick Actions',
+              label: m.navigation_quickActions(),
               icon: Zap,
               isSection: true,
               children: [
                 {
                   id: 'new-table',
-                  label: t('navigation.newTable') || 'New Table',
+                  label: m.navigation_newTable(),
                   href: '/workspaces/tables/new',
                   icon: Database,
                   requiresPermission: 'tables',
                 },
                 {
                   id: 'new-workflow',
-                  label: t('navigation.newWorkflow') || 'New Workflow',
+                  label: m.navigation_newWorkflow(),
                   href: '/workspaces/workflows/new',
                   icon: Workflow,
                   requiresPermission: 'workflow',
                 },
                 {
                   id: 'new-form',
-                  label: t('navigation.newForm') || 'New Form',
+                  label: m.navigation_newForm(),
                   href: '/workspaces/forms/new',
                   icon: FileText,
                   requiresPermission: 'forms',
@@ -121,13 +121,13 @@ export const NavigationMenu = ({ isCollapsed = false, className }: NavigationMen
         ? [
             {
               id: 'workspace-features',
-              label: t('navigation.workspaceFeatures') || 'Workspace Features',
+              label: m.navigation_workspaceFeatures(),
               icon: ChevronDown,
               isSection: true,
               children: [
                 {
                   id: 'tables',
-                  label: t('navigation.tables') || 'Active Tables',
+                  label: m.navigation_tables(),
                   href: '/workspaces/tables',
                   icon: Database,
                   badge: 'tables' as keyof ReturnType<typeof selectBadgeCounts>,
@@ -135,7 +135,7 @@ export const NavigationMenu = ({ isCollapsed = false, className }: NavigationMen
                 },
                 {
                   id: 'workflow',
-                  label: t('navigation.workflow') || 'Workflow',
+                  label: m.navigation_workflow(),
                   href: '/workspaces/workflows',
                   icon: Workflow,
                   badge: 'workflows' as keyof ReturnType<typeof selectBadgeCounts>,
@@ -143,7 +143,7 @@ export const NavigationMenu = ({ isCollapsed = false, className }: NavigationMen
                 },
                 {
                   id: 'team',
-                  label: t('navigation.team') || 'Team',
+                  label: m.navigation_team(),
                   href: '/workspaces/team',
                   icon: Users,
                   badge: 'teamMembers' as keyof ReturnType<typeof selectBadgeCounts>,
@@ -151,14 +151,14 @@ export const NavigationMenu = ({ isCollapsed = false, className }: NavigationMen
                 },
                 {
                   id: 'roles',
-                  label: t('navigation.roles') || 'Roles & Permissions',
+                  label: m.navigation_roles(),
                   href: '/workspaces/roles',
                   icon: Shield,
                   requiresPermission: 'roles',
                 },
                 {
                   id: 'analytics',
-                  label: t('navigation.analytics') || 'Analytics',
+                  label: m.navigation_analytics(),
                   href: '/workspaces/analytics',
                   icon: Activity,
                   requiresPermission: 'analytics',
@@ -173,25 +173,25 @@ export const NavigationMenu = ({ isCollapsed = false, className }: NavigationMen
         ? [
             {
               id: 'organization',
-              label: t('navigation.organization') || 'Organization',
+              label: m.navigation_organization(),
               icon: ChevronDown,
               isSection: true,
               children: [
                 {
                   id: 'starred',
-                  label: t('navigation.starred') || 'Starred',
+                  label: m.navigation_starred(),
                   href: '/workspaces/starred',
                   icon: Star,
                 },
                 {
                   id: 'recent-activity',
-                  label: t('navigation.recentActivity') || 'Recent Activity',
+                  label: m.navigation_recentActivity(),
                   href: '/workspaces/recent-activity',
                   icon: Clock,
                 },
                 {
                   id: 'archived',
-                  label: t('navigation.archived') || 'Archived',
+                  label: m.navigation_archived(),
                   href: '/workspaces/archived',
                   icon: Archive,
                 },
@@ -203,26 +203,26 @@ export const NavigationMenu = ({ isCollapsed = false, className }: NavigationMen
       // System Navigation (always visible)
       {
         id: 'system',
-        label: t('navigation.system') || 'System',
+        label: m.navigation_system(),
         icon: ChevronDown,
         isSection: true,
         children: [
           {
             id: 'settings',
-            label: t('navigation.settings') || 'Settings',
+            label: m.navigation_settings(),
             href: '/settings/encryption',
             icon: Settings,
           },
           {
             id: 'help',
-            label: t('navigation.help') || 'Help & Support',
+            label: m.navigation_help(),
             href: '/help',
             icon: HelpCircle,
           },
         ],
       },
     ],
-    [badgeCounts, currentWorkspace, t],
+    [badgeCounts, currentWorkspace],
   );
 
   const isActive = (href?: string) => {
@@ -311,8 +311,8 @@ export const NavigationMenu = ({ isCollapsed = false, className }: NavigationMen
           <>
             <span className="truncate flex-1">{item.label}</span>
             {badgeValue !== undefined && badgeValue > 0 && (
-              <Badge 
-                variant="default" 
+              <Badge
+                variant="default"
                 className="h-5 min-w-[20px] px-1.5 text-xs font-semibold flex items-center justify-center ml-auto"
               >
                 {badgeValue > 99 ? '99+' : badgeValue}

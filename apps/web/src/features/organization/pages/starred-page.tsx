@@ -1,16 +1,14 @@
 import { Star } from 'lucide-react';
 import { FeaturePlaceholder } from '@/components/feature-placeholder';
-import { useTranslation } from '@/hooks/use-translation';
+// @ts-ignore
+import { m } from "@/paraglide/generated/messages.js";
 
 export const StarredPage = () => {
-  const { t } = useTranslation();
-
   return (
     <FeaturePlaceholder
-      title={t('workspace.starred.title') || 'Starred collections'}
+      title={m.workspace_starred_title()}
       description={
-        t('workspace.starred.description') ||
-        'Keep your most important tables, workflows, and dashboards a click away. Pinning is being added alongside the redesigned sidebar.'
+        m.workspace_starred_description()
       }
       icon={<Star className="h-6 w-6 text-primary" />}
     />

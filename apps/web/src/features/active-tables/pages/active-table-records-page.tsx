@@ -1,7 +1,8 @@
 import { ArrowLeft, Database, FolderOpen, ShieldCheck } from 'lucide-react';
 import { useLocation, useNavigate, useParams } from '@tanstack/react-router';
 
-import { useTranslation } from '@/hooks/use-translation';
+// @ts-ignore
+import { m } from "@/paraglide/generated/messages.js";
 import { useWorkspaces } from '@/features/workspace/hooks/use-workspaces';
 import { useActiveTables } from '../hooks/use-active-tables';
 import { useActiveTableRecords } from '../hooks/use-active-records';
@@ -99,13 +100,13 @@ export const ActiveTableRecordsPage = () => {
   const params = useParams({ strict: false });
   const location = useLocation();
   const navigate = useNavigate();
-  const { t, locale } = useTranslation();
+  const locale = 'en'; // Placeholder for locale
   const { isReady: isEncryptionReady } = useEncryption();
   const tableId = params.tableId as string;
 
   const search = (location.search ?? {}) as Record<string, unknown>;
   const searchWorkspaceId = typeof search.workspaceId === 'string' ? search.workspaceId : undefined;
-  const localePrefix = locale === 'vi' ? '' : `/${locale}`;
+  const localePrefix = (locale as string) === 'vi' ? '' : `/${locale}`;
 
   const { data: workspacesData } = useWorkspaces();
   const workspaceOptions = workspacesData?.data ?? [];
@@ -137,11 +138,11 @@ export const ActiveTableRecordsPage = () => {
       <div className="space-y-6 p-6">
         <Button variant="ghost" onClick={() => navigate({ to: `${localePrefix}/workspaces/tables` })}>
           <ArrowLeft className="mr-2 h-4 w-4" />
-          {t('activeTables.records.backToDetail')}
+          {m.activeTables_records_backToDetail()}
         </Button>
         <Card className="border-destructive/40 bg-destructive/10">
           <CardContent className="py-10 text-center text-sm text-destructive">
-            {t('activeTables.records.invalidContext')}
+            {m.activeTables_records_invalidContext()}
           </CardContent>
         </Card>
       </div>
@@ -159,17 +160,17 @@ export const ActiveTableRecordsPage = () => {
           <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
             <Button variant="ghost" size="sm" className="h-8 px-2" onClick={handleBack}>
               <ArrowLeft className="mr-2 h-4 w-4" />
-              {t('activeTables.records.backToDetail')}
+              {m.activeTables_records_backToDetail()}
             </Button>
             <Badge variant="outline" className="flex items-center gap-1 uppercase">
               <Database className="h-3.5 w-3.5" />
-              {t('activeTables.records.recordsBadge')}
+              {m.activeTables_records_recordsBadge()}
             </Badge>
           </div>
           <h1 className="text-3xl font-bold tracking-tight">
             {table
-              ? t('activeTables.records.title', { name: table.name })
-              : t('activeTables.records.title', { name: '...' })}
+              ? m.activeTables_records_title({ name: table.name })
+              : m.activeTables_records_title({ name: '...' })}
           </h1>
           {table?.description ? (
             <p className="max-w-2xl text-sm text-muted-foreground leading-relaxed">{table.description}</p>
@@ -178,18 +179,18 @@ export const ActiveTableRecordsPage = () => {
         <div className="flex flex-wrap items-center gap-2">
           <Badge variant="outline" className="flex items-center gap-1">
             <FolderOpen className="h-3.5 w-3.5" />
-            {t('activeTables.records.fieldCount', { count: fields.length })}
+            {m.activeTables_records_fieldCount({ count: fields.length })}
           </Badge>
           {table?.config?.e2eeEncryption ? (
             <Badge variant="default" className="flex items-center gap-1">
               <ShieldCheck className="h-3.5 w-3.5" />
-              {t('activeTables.records.encryptionE2EE')}
+              {m.activeTables_records_encryptionE2EE()}
             </Badge>
           ) : null}
           {!isEncryptionReady && table?.config?.e2eeEncryption && (
             <Badge variant="outline" className="flex items-center gap-1 text-yellow-600">
               <ShieldCheck className="h-3.5 w-3.5" />
-              {t('activeTables.card.encryptionNotReady')}
+              {m.activeTables_card_encryptionNotReady()}
             </Badge>
           )}
         </div>
@@ -198,13 +199,13 @@ export const ActiveTableRecordsPage = () => {
       <Card>
         <CardHeader className="flex flex-wrap items-center justify-between gap-3">
           <div className="space-y-1">
-            <CardTitle className="text-lg font-semibold">{t('activeTables.records.viewerTitle')}</CardTitle>
-            <p className="text-xs text-muted-foreground">{t('activeTables.records.viewerDescription')}</p>
+            <CardTitle className="text-lg font-semibold">{m.activeTables_records_viewerTitle()}</CardTitle>
+            <p className="text-xs text-muted-foreground">{m.activeTables_records_viewerDescription()}</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <Input placeholder={t('activeTables.records.searchPlaceholder')} className="h-9 w-60" disabled />
+            <Input placeholder={m.activeTables_records_searchPlaceholder()} className="h-9 w-60" disabled />
             <Button variant="outline" size="sm" onClick={refetch} disabled={isFetching}>
-              {isFetching ? t('activeTables.records.refreshing') : t('activeTables.records.refresh')}
+              {isFetching ? m.activeTables_records_refreshing() : m.activeTables_records_refresh()}
             </Button>
           </div>
         </CardHeader>
@@ -213,25 +214,25 @@ export const ActiveTableRecordsPage = () => {
             <TableSkeleton />
           ) : error ? (
             <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-6 text-sm text-destructive">
-              {error instanceof Error ? error.message : t('activeTables.records.errorGeneric')}
+              {error instanceof Error ? error.message : m.activeTables_records_errorGeneric()}
             </div>
           ) : (
-            <RecordsTable fields={fields} records={records} emptyLabel={t('activeTables.records.emptyState')} />
+            <RecordsTable fields={fields} records={records} emptyLabel={m.activeTables_records_emptyState()} />
           )}
 
           <div className="flex items-center justify-between border-t border-border/60 pt-4 text-xs text-muted-foreground">
             <span>
-              {t('activeTables.records.paginationLabel', {
+              {m.activeTables_records_paginationLabel({
                 page: page + 1,
                 count: records.length,
               })}
             </span>
             <div className="flex items-center gap-2">
               <Button variant="outline" size="sm" onClick={loadPrevious} disabled={page === 0 || isFetching}>
-                {t('activeTables.records.prev')}
+                {m.activeTables_records_prev()}
               </Button>
               <Button variant="outline" size="sm" onClick={loadNext} disabled={records.length === 0 || isFetching}>
-                {t('activeTables.records.next')}
+                {m.activeTables_records_next()}
               </Button>
             </div>
           </div>

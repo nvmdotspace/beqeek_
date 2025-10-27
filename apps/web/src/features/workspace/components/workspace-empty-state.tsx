@@ -4,7 +4,8 @@ import { Building2, Sparkles } from "lucide-react"
 
 import { Button } from "@workspace/ui/components/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card"
-import { useTranslation } from '@/hooks/use-translation'
+// @ts-ignore
+import { m } from "@/paraglide/generated/messages.js";
 
 export type WorkspaceEmptyStateProps = {
   onCreateClick: () => void
@@ -13,7 +14,6 @@ export type WorkspaceEmptyStateProps = {
 }
 
 export const WorkspaceEmptyState = ({ onCreateClick, createForm, showForm }: WorkspaceEmptyStateProps) => {
-  const { t } = useTranslation()
   return (
     <Card className="border-dashed bg-muted/40 text-muted-foreground">
       <CardHeader className="space-y-4 text-center">
@@ -21,15 +21,15 @@ export const WorkspaceEmptyState = ({ onCreateClick, createForm, showForm }: Wor
           <Building2 className="size-6" />
         </div>
         <div className="space-y-2">
-          <CardTitle className="text-2xl text-foreground">{t('workspace.emptyState')}</CardTitle>
+          <CardTitle className="text-2xl text-foreground">{m.workspace_emptyState()}</CardTitle>
           <CardDescription className="text-base">
-            {t('workspace.empty.description')}
+            {m.workspace_empty_description()}
           </CardDescription>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
         <Button onClick={onCreateClick} className="w-full" variant="secondary">
-          <Sparkles className="mr-2 size-4" /> {t('workspace.empty.createNew')}
+          <Sparkles className="mr-2 size-4" /> {m.workspace_empty_createNew()}
         </Button>
         {showForm ? <div className="rounded-lg border border-border/70 bg-card p-4 text-left">{createForm}</div> : null}
       </CardContent>

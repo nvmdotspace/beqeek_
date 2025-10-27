@@ -79,10 +79,9 @@
   "activeTables_card_updatedAt": "Cập nhật {when}",
   "activeTables_card_viewDetails": "Xem chi tiết",
   "activeTables_card_encryptionNotReady": "Mã hóa chưa sẵn sàng",
-  "activeTables_card.statusEditing": "Đang chỉnh sửa",
-  "activeTables_card.edit": "Sửa",
-  "activeTables_card.delete": "Xóa",
   "activeTables_card_statusEditing": "Đang chỉnh sửa",
+  "activeTables_card_edit": "Sửa",
+  "activeTables_card_delete": "Xóa",
 
   "activeTables_empty_title": "Chưa có Active Table",
   "activeTables_empty_description": "Active Table giúp đội ngũ quản lý dữ liệu cấu trúc an toàn. Tạo bảng mới để bắt đầu.",
