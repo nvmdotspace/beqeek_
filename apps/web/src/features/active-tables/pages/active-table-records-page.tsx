@@ -1,14 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import {
-  ArrowLeft,
-  Database,
+  ChevronRight,
   FolderOpen,
-  ShieldCheck,
-  Plus,
-  Edit,
-  Trash2,
-  MoreVertical,
   MessageSquare,
+  Table2,
 } from 'lucide-react';
 import { useLocation, useNavigate, useParams } from '@tanstack/react-router';
 
@@ -17,42 +12,34 @@ import { m } from "@/paraglide/generated/messages.js";
 import { useWorkspaces } from '@/features/workspace/hooks/use-workspaces';
 import { useActiveTables } from '../hooks/use-active-tables';
 import { useActiveTableRecords } from '../hooks/use-active-records';
-import { useEncryption } from '@workspace/active-tables-hooks';
-import type { ActiveFieldConfig, ActiveTableRecord } from '../types';
+import { useTableEncryption } from '../hooks/use-table-encryption';
+import { useDecryptedRecords } from '../hooks/use-decrypted-records';
+import type { ActiveTableRecord } from '../types';
 
 import { Button } from '@workspace/ui/components/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@workspace/ui/components/card';
 import { Badge } from '@workspace/ui/components/badge';
 import { Skeleton } from '@workspace/ui/components/skeleton';
-import { Input } from '@workspace/ui/components/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@workspace/ui/components/tabs';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@workspace/ui/components/dropdown-menu';
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@workspace/ui/components/breadcrumb';
 import { RecordManagementDialog } from '../components/record-management-dialog';
 import { useRecordManagement } from '../hooks/use-record-management';
-import { RecordCommentsPanel } from '../components/record-comments-panel';
-import { RecordKanbanView } from '../components/record-kanban-view';
 import { PermissionsMatrix } from '../components/permissions-matrix';
 
-const formatRecordValue = (value: unknown): string => {
-  if (value == null) return '—';
-  if (Array.isArray(value)) {
-    return value.map((item) => (typeof item === 'object' ? JSON.stringify(item) : String(item))).join(', ');
-  }
-  if (typeof value === 'object') {
-    try {
-      return JSON.stringify(value);
-    } catch (error) {
-      console.warn('Failed to stringify record value', error);
-      return '[Encrypted]';
-    }
-  }
-  return String(value);
-};
+// New components
+import { DataTable } from '../components/data-table/data-table';
+import { createColumns } from '../components/data-table/data-table-columns';
+import { KanbanBoard } from '../components/kanban/kanban-board';
+import { CommentsPanel } from '../components/comments/comments-panel';
+import { EncryptionKeyDialog } from '../components/encryption/encryption-key-dialog';
+import { EncryptionStatus, useEncryptionStatus } from '../components/encryption/encryption-status';
 
 const TableSkeleton = () => (
   <div className="space-y-3">
@@ -61,141 +48,17 @@ const TableSkeleton = () => (
   </div>
 );
 
-const RecordsTable = ({
-  fields,
-  records,
-  emptyLabel,
-  onEdit,
-  onDelete,
-  onSelect,
-}: {
-  fields: ActiveFieldConfig[];
-  records: ActiveTableRecord[];
-  emptyLabel: string;
-  onEdit?: (record: ActiveTableRecord) => void;
-  onDelete?: (record: ActiveTableRecord) => void;
-  onSelect?: (record: ActiveTableRecord) => void;
-}) => {
-  if (!records.length) {
-    return (
-      <div className="rounded-lg border border-dashed border-border/60 bg-muted/30 p-10 text-center text-sm text-muted-foreground">
-        {emptyLabel}
-      </div>
-    );
-  }
-
-  return (
-    <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-border/70 text-sm">
-        <thead className="bg-muted/50">
-          <tr>
-            <th className="sticky left-0 z-10 bg-muted/80 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              ID
-            </th>
-            {fields.map((field) => (
-              <th
-                key={field.name}
-                className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground"
-              >
-                {field.label}
-              </th>
-            ))}
-            <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Updated At
-            </th>
-            {(onEdit || onDelete) && (
-              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                Actions
-              </th>
-            )}
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-border/60 bg-background">
-          {records.map((record) => (
-            <tr
-              key={record.id}
-              className="cursor-pointer hover:bg-muted/30"
-              onClick={() => onSelect?.(record)}
-            >
-              <td className="sticky left-0 z-10 bg-background/95 px-4 py-3 font-medium text-foreground">{record.id}</td>
-              {fields.map((field) => (
-                <td key={field.name} className="max-w-[280px] truncate px-4 py-3 text-muted-foreground">
-                  {formatRecordValue(record.record[field.name])}
-                </td>
-              ))}
-              <td className="px-4 py-3 text-xs text-muted-foreground">
-                {record.updatedAt ? new Date(record.updatedAt).toLocaleString() : '—'}
-              </td>
-              {(onEdit || onDelete) && (
-                <td className="px-4 py-3">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={(event) => event.stopPropagation()}
-                      >
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      {onEdit && (
-                        <DropdownMenuItem
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            onEdit(record);
-                          }}
-                        >
-                          <Edit className="mr-2 h-4 w-4" />
-                          Edit Record
-                        </DropdownMenuItem>
-                      )}
-                      {onDelete && (
-                        <DropdownMenuItem
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            onDelete(record);
-                          }}
-                          className="text-destructive focus:text-destructive"
-                        >
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Delete Record
-                        </DropdownMenuItem>
-                      )}
-                      {onSelect ? (
-                        <DropdownMenuItem
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            onSelect(record);
-                          }}
-                        >
-                          <MessageSquare className="mr-2 h-4 w-4" />
-                          {m.activeTables_comments_title()}
-                        </DropdownMenuItem>
-                      ) : null}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </td>
-              )}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-};
-
 export const ActiveTableRecordsPage = () => {
   const params = useParams({ strict: false });
   const location = useLocation();
   const navigate = useNavigate();
   const locale = 'en'; // Placeholder for locale
-  const { isReady: isEncryptionReady } = useEncryption();
   const tableId = params.tableId as string;
   const [isRecordDialogOpen, setIsRecordDialogOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState<ActiveTableRecord | null>(null);
   const [commentsRecord, setCommentsRecord] = useState<ActiveTableRecord | null>(null);
   const [activeTab, setActiveTab] = useState<'table' | 'kanban' | 'permissions'>('table');
+  const [isEncryptionDialogOpen, setIsEncryptionDialogOpen] = useState(false);
 
   const search = (location.search ?? {}) as Record<string, unknown>;
   const searchWorkspaceId = typeof search.workspaceId === 'string' ? search.workspaceId : undefined;
@@ -220,6 +83,39 @@ export const ActiveTableRecordsPage = () => {
     loadPrevious,
     refetch,
   } = useActiveTableRecords({ workspaceId, tableId });
+
+  // Encryption management
+  const {
+    isE2EEEnabled,
+    encryptionKey,
+    isKeyLoaded,
+    isLoading: isLoadingEncryption,
+    error: encryptionError,
+    saveKey,
+    encryptionAuthKey,
+    isEncryptionRequired,
+  } = useTableEncryption({
+    table,
+    workspaceId: workspaceId || '',
+  });
+
+  // Decrypt records
+  const { records: decryptedRecords, isDecrypting } = useDecryptedRecords({
+    records,
+    fields: table?.config?.fields ?? [],
+    encryptionKey,
+    isE2EEEnabled,
+  });
+
+  // Get encryption status for badge
+  const encryptionStatus = useEncryptionStatus(isE2EEEnabled, isKeyLoaded);
+
+  // Show encryption dialog if key is required but not loaded
+  useEffect(() => {
+    if (isEncryptionRequired && !isKeyLoaded && !isLoadingEncryption) {
+      setIsEncryptionDialogOpen(true);
+    }
+  }, [isEncryptionRequired, isKeyLoaded, isLoadingEncryption]);
 
   useEffect(() => {
     setIsCommentsOpen(searchPanel === 'comments');
@@ -312,13 +208,69 @@ export const ActiveTableRecordsPage = () => {
     updatePanelSearch('comments');
   };
 
+  const handleEncryptionKeySubmit = (key: string, rememberKey: boolean) => {
+    try {
+      if (rememberKey) {
+        saveKey(key);
+      }
+      setIsEncryptionDialogOpen(false);
+    } catch (error) {
+      console.error('Failed to save encryption key:', error);
+    }
+  };
+
+  const handleManageEncryptionKey = () => {
+    setIsEncryptionDialogOpen(true);
+  };
+
+  // Create table columns with row actions
+  const columns = useMemo(
+    () =>
+      createColumns(table?.config?.fields ?? [], {
+        enableRowActions: true,
+        onEdit: handleEditRecord,
+        onDelete: handleDeleteRecord,
+        onViewComments: handleSelectRecord,
+      }),
+    [table?.config?.fields]
+  );
+
+  // Kanban config and handlers
+  const kanbanConfig = useMemo(() => {
+    // Use first kanban config or create default
+    const configs = table?.config?.kanbanConfigs ?? [];
+    return configs[0] ?? {
+      kanbanScreenId: 'default',
+      statusField: '',
+      kanbanHeadlineField: '',
+      displayFields: [],
+      screenName: 'Kanban Board',
+      screenDescription: '',
+      columnStyles: [],
+    };
+  }, [table?.config?.kanbanConfigs]);
+
+  const handleUpdateKanbanConfig = async (config: typeof kanbanConfig) => {
+    // TODO: Implement API call to update kanban config
+    console.log('Update kanban config:', config);
+  };
+
+  const handleKanbanCardClick = (record: ActiveTableRecord) => {
+    handleSelectRecord(record);
+  };
+
   if (!tableId || !workspaceId) {
     return (
       <div className="space-y-6 p-6">
-        <Button variant="ghost" onClick={() => navigate({ to: `${localePrefix}/workspaces/tables` })}>
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          {m.activeTables_records_backToDetail()}
-        </Button>
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink onClick={() => navigate({ to: `${localePrefix}/workspaces/tables` })}>
+                Active Tables
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
         <Card className="border-destructive/40 bg-destructive/10">
           <CardContent className="py-10 text-center text-sm text-destructive">
             {m.activeTables_records_invalidContext()}
@@ -334,43 +286,67 @@ export const ActiveTableRecordsPage = () => {
 
   return (
     <div className="space-y-6 p-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="space-y-2">
-          <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-            <Button variant="ghost" size="sm" className="h-8 px-2" onClick={handleBack}>
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              {m.activeTables_records_backToDetail()}
-            </Button>
-            <Badge variant="outline" className="flex items-center gap-1 uppercase">
-              <Database className="h-3.5 w-3.5" />
-              {m.activeTables_records_recordsBadge()}
-            </Badge>
+      {/* Breadcrumb Navigation */}
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink onClick={() => navigate({ to: `${localePrefix}/workspaces/tables` })}>
+              Active Tables
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator>
+            <ChevronRight className="h-4 w-4" />
+          </BreadcrumbSeparator>
+          <BreadcrumbItem>
+            <BreadcrumbLink onClick={handleBack}>
+              {table?.name || '...'}
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator>
+            <ChevronRight className="h-4 w-4" />
+          </BreadcrumbSeparator>
+          <BreadcrumbItem>
+            <BreadcrumbPage>{m.activeTables_records_recordsBadge()}</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+
+      {/* Page Header */}
+      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+              <Table2 className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-semibold tracking-tight">
+                {table?.name || '...'}
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                {m.activeTables_records_recordsBadge()}
+              </p>
+            </div>
           </div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            {table
-              ? m.activeTables_records_title({ name: table.name })
-              : m.activeTables_records_title({ name: '...' })}
-          </h1>
           {table?.description ? (
-            <p className="max-w-2xl text-sm text-muted-foreground leading-relaxed">{table.description}</p>
+            <p className="max-w-2xl text-sm text-muted-foreground leading-relaxed">
+              {table.description}
+            </p>
           ) : null}
         </div>
+
         <div className="flex flex-wrap items-center gap-2">
-          <Badge variant="outline" className="flex items-center gap-1">
+          <Badge variant="secondary" className="flex items-center gap-1.5 px-3 py-1">
             <FolderOpen className="h-3.5 w-3.5" />
-            {m.activeTables_records_fieldCount({ count: fields.length })}
+            <span>{fields.length} fields</span>
           </Badge>
-          {table?.config?.e2eeEncryption ? (
-            <Badge variant="default" className="flex items-center gap-1">
-              <ShieldCheck className="h-3.5 w-3.5" />
-              {m.activeTables_records_encryptionE2EE()}
-            </Badge>
-          ) : null}
-          {!isEncryptionReady && table?.config?.e2eeEncryption && (
-            <Badge variant="outline" className="flex items-center gap-1 text-yellow-600">
-              <ShieldCheck className="h-3.5 w-3.5" />
-              {m.activeTables_card_encryptionNotReady()}
-            </Badge>
+          {isE2EEEnabled && (
+            <EncryptionStatus
+              status={encryptionStatus}
+              isE2EEEnabled={isE2EEEnabled}
+              isKeyLoaded={isKeyLoaded}
+              onManageKey={handleManageEncryptionKey}
+              interactive
+            />
           )}
         </div>
       </div>
@@ -401,60 +377,42 @@ export const ActiveTableRecordsPage = () => {
             </CardHeader>
             <CardContent className="space-y-6">
               <TabsContent value="table" className="space-y-4">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Input placeholder={m.activeTables_records_searchPlaceholder()} className="h-9 w-60" disabled />
-                    <Button variant="outline" size="sm" onClick={refetch} disabled={isFetching}>
-                      {isFetching ? m.activeTables_records_refreshing() : m.activeTables_records_refresh()}
-                    </Button>
-                  </div>
-                  <Button onClick={handleCreateRecord} disabled={!table}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    {m.activeTables_records_createRecord()}
-                  </Button>
-                </div>
-                {isLoading ? (
+                {isLoading || isDecrypting ? (
                   <TableSkeleton />
                 ) : error ? (
                   <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-6 text-sm text-destructive">
                     {error instanceof Error ? error.message : m.activeTables_records_errorGeneric()}
                   </div>
-                ) : (
-                  <RecordsTable
-                    fields={fields}
-                    records={records}
-                    emptyLabel={m.activeTables_records_emptyState()}
-                    onEdit={handleEditRecord}
-                    onDelete={handleDeleteRecord}
-                    onSelect={handleSelectRecord}
+                ) : table ? (
+                  <DataTable
+                    table={table}
+                    records={decryptedRecords}
+                    columns={columns}
+                    isLoading={isLoadingRecords || isDecrypting}
+                    isE2EEEnabled={isE2EEEnabled}
+                    hasEncryptionKey={isKeyLoaded}
+                    onRefresh={refetch}
+                    onCreate={handleCreateRecord}
                   />
-                )}
-
-                <div className="flex items-center justify-between border-t border-border/60 pt-4 text-xs text-muted-foreground">
-                  <span>
-                    {m.activeTables_records_paginationLabel({
-                      page: page + 1,
-                      count: records.length,
-                    })}
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" onClick={loadPrevious} disabled={page === 0 || isFetching}>
-                      {m.activeTables_records_prev()}
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={loadNext} disabled={records.length === 0 || isFetching}>
-                      {m.activeTables_records_next()}
-                    </Button>
+                ) : (
+                  <div className="rounded-lg border border-dashed border-border/60 bg-muted/20 p-6 text-sm text-muted-foreground">
+                    {m.activeTables_records_invalidContext()}
                   </div>
-                </div>
+                )}
               </TabsContent>
 
               <TabsContent value="kanban">
                 {table ? (
-                  <RecordKanbanView
+                  <KanbanBoard
                     workspaceId={workspaceId}
                     table={table}
                     records={records}
-                    isLoading={isLoadingRecords}
+                    encryptionKey={encryptionKey}
+                    config={kanbanConfig}
+                    isLoading={isLoadingRecords || isDecrypting}
+                    onUpdateConfig={handleUpdateKanbanConfig}
+                    onUpdateRecord={updateRecord}
+                    onCardClick={handleKanbanCardClick}
                   />
                 ) : (
                   <div className="rounded-lg border border-dashed border-border/60 bg-muted/20 p-6 text-sm text-muted-foreground">
@@ -477,13 +435,15 @@ export const ActiveTableRecordsPage = () => {
         </Tabs>
 
         <div className="space-y-4">
-          <RecordCommentsPanel
-            workspaceId={workspaceId}
-            tableId={tableId}
-            record={commentsRecord}
-            open={isCommentsOpen}
-            onOpenChange={handleCommentsPanelChange}
-          />
+          {table && (
+            <CommentsPanel
+              workspaceId={workspaceId}
+              table={table}
+              record={commentsRecord}
+              open={isCommentsOpen}
+              onOpenChange={handleCommentsPanelChange}
+            />
+          )}
           <div className="hidden lg:block">
             {(!isCommentsOpen || !commentsRecord) && (
               <Card className="flex min-h-[360px] flex-col items-center justify-center border-dashed border-border/60 bg-muted/20 text-center text-sm text-muted-foreground">
@@ -505,6 +465,18 @@ export const ActiveTableRecordsPage = () => {
           record={editingRecord}
           onSave={handleSaveRecord}
           isLoading={isCreating || isUpdating}
+        />
+      )}
+
+      {/* Encryption Key Dialog */}
+      {isE2EEEnabled && (
+        <EncryptionKeyDialog
+          open={isEncryptionDialogOpen}
+          onOpenChange={setIsEncryptionDialogOpen}
+          tableName={table?.name}
+          encryptionAuthKey={encryptionAuthKey}
+          onKeySubmit={handleEncryptionKeySubmit}
+          error={encryptionError}
         />
       )}
     </div>
