@@ -74,32 +74,32 @@ deploy_docker() {
         exit 1
     fi
     
-    # Build and run with docker-compose
-    if [ -f "docker-compose.yml" ]; then
-        log_info "Using docker-compose..."
-        docker-compose down 2>/dev/null || true
-        docker-compose build
-        docker-compose up -d
-        
+    # Build and run with docker compose
+    if [ -f "compose.yml" ]; then
+        log_info "Using docker compose..."
+        docker compose down 2>/dev/null || true
+        docker compose build
+        docker compose up -d --remove-orphans
+
         # Wait for container to be ready
         log_info "Waiting for container to be ready..."
         sleep 10
-        
+
         # Health check
         if curl -f http://localhost:3000/health >/dev/null 2>&1; then
             log_success "Docker deployment successful! App is running at http://localhost:3000"
         else
-            log_error "Health check failed. Check container logs with: docker-compose logs"
+            log_error "Health check failed. Check container logs with: docker compose logs"
             exit 1
         fi
     else
         # Fallback to simple docker build
         log_info "Using simple Docker build..."
-        docker build -t beqeek-web .
+        docker build -f Dockerfile.web -t beqeek-web .
         docker stop beqeek-app 2>/dev/null || true
         docker rm beqeek-app 2>/dev/null || true
         docker run -d --name beqeek-app -p 3000:80 --restart unless-stopped beqeek-web
-        
+
         sleep 5
         if curl -f http://localhost:3000/health >/dev/null 2>&1; then
             log_success "Docker deployment successful! App is running at http://localhost:3000"
@@ -110,61 +110,6 @@ deploy_docker() {
     fi
 }
 
-# Nginx deployment
-deploy_nginx() {
-    log_info "Starting Nginx deployment..."
-    
-    if ! command_exists nginx; then
-        log_error "Nginx is not installed. Please install Nginx first."
-        exit 1
-    fi
-    
-    # Build first
-    build_app
-    
-    # Check if running as root or with sudo
-    if [ "$EUID" -ne 0 ]; then
-        log_warning "Nginx deployment requires sudo privileges"
-        SUDO="sudo"
-    else
-        SUDO=""
-    fi
-    
-    # Create web directory
-    $SUDO mkdir -p /var/www/beqeek
-    
-    # Copy built files
-    log_info "Copying built files to /var/www/beqeek..."
-    $SUDO cp -r apps/web/dist/* /var/www/beqeek/
-    
-    # Copy nginx config if it doesn't exist
-    if [ ! -f "/etc/nginx/sites-available/beqeek" ]; then
-        log_info "Installing nginx configuration..."
-        $SUDO cp nginx.conf /etc/nginx/sites-available/beqeek
-        $SUDO ln -sf /etc/nginx/sites-available/beqeek /etc/nginx/sites-enabled/beqeek
-        
-        # Remove default site if it exists
-        $SUDO rm -f /etc/nginx/sites-enabled/default
-    fi
-    
-    # Test nginx config
-    log_info "Testing nginx configuration..."
-    $SUDO nginx -t
-    
-    # Restart nginx
-    log_info "Restarting nginx..."
-    $SUDO systemctl restart nginx
-    $SUDO systemctl enable nginx
-    
-    # Health check
-    sleep 2
-    if curl -f http://localhost/health >/dev/null 2>&1; then
-        log_success "Nginx deployment successful! App is running at http://localhost"
-    else
-        log_error "Health check failed. Check nginx logs with: sudo journalctl -u nginx"
-        exit 1
-    fi
-}
 
 # Local preview
 deploy_local() {
@@ -181,16 +126,14 @@ deploy_local() {
 
 # Show usage
 show_usage() {
-    echo "Usage: $0 [docker|nginx|local]"
+    echo "Usage: $0 [docker|local]"
     echo ""
     echo "Options:"
-    echo "  docker  - Deploy using Docker (recommended for development)"
-    echo "  nginx   - Deploy using Nginx (recommended for production)"
+    echo "  docker  - Deploy using Docker (recommended)"
     echo "  local   - Start local preview server"
     echo ""
     echo "Examples:"
     echo "  $0 docker   # Deploy with Docker"
-    echo "  $0 nginx    # Deploy with Nginx (requires sudo)"
     echo "  $0 local    # Start local preview"
 }
 
@@ -209,11 +152,6 @@ main() {
             check_prerequisites
             install_deps
             deploy_docker
-            ;;
-        "nginx")
-            check_prerequisites
-            install_deps
-            deploy_nginx
             ;;
         "local")
             check_prerequisites

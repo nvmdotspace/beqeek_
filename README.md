@@ -144,41 +144,9 @@ docker-compose down
 ```
 
 **Cấu trúc Docker files:**
-- `Dockerfile` - Multi-stage build cho production
-- `docker-compose.yml` - Orchestration với nginx
-- `nginx.conf` - Cấu hình nginx tối ưu cho SPA
+- `Dockerfile.web` - Multi-stage build cho production
+- `compose.yml` - Container orchestration
 - `.dockerignore` - Loại trừ files không cần thiết
-
-**5. Nginx deployment trực tiếp:**
-
-**Cài đặt và cấu hình:**
-```bash
-# Ubuntu/Debian
-sudo apt update && sudo apt install nginx
-
-# CentOS/RHEL
-sudo yum install nginx
-
-# Copy build files
-sudo cp -r apps/web/dist/* /var/www/html/
-
-# Copy nginx config
-sudo cp nginx.conf /etc/nginx/sites-available/beqeek
-sudo ln -s /etc/nginx/sites-available/beqeek /etc/nginx/sites-enabled/
-
-# Test và restart nginx
-sudo nginx -t
-sudo systemctl restart nginx
-sudo systemctl enable nginx
-```
-
-**Nginx config highlights:**
-- ✅ SPA routing support (`try_files`)
-- ✅ Gzip compression
-- ✅ Static asset caching (1 year)
-- ✅ Security headers
-- ✅ Health check endpoint
-- ✅ API proxy ready (commented)
 
 ## 🚀 Script Deployment Tự động
 
@@ -190,9 +158,6 @@ chmod +x deploy.sh
 
 # Deploy với Docker
 ./deploy.sh docker
-
-# Deploy với Nginx (cần sudo)
-./deploy.sh nginx
 
 # Chạy local preview
 ./deploy.sh local
@@ -207,13 +172,12 @@ chmod +x deploy.sh
 - ✅ Build application
 - ✅ Health checks
 - ✅ Error handling và logging
-- ✅ Support cả Docker và Nginx
+- ✅ Docker deployment support
 - ✅ Colored output cho dễ đọc
 
 **Files deployment đã tạo:**
-- `Dockerfile` - Multi-stage production build
-- `docker-compose.yml` - Container orchestration
-- `nginx.conf` - Nginx configuration tối ưu
+- `Dockerfile.web` - Multi-stage production build
+- `compose.yml` - Container orchestration
 - `.dockerignore` - Optimize Docker build
 - `deploy.sh` - Automated deployment script
 - `DEPLOYMENT.md` - Chi tiết hướng dẫn deployment
