@@ -86,8 +86,8 @@ deploy_docker() {
         sleep 10
 
         # Health check
-        if curl -f http://localhost:3000/health >/dev/null 2>&1; then
-            log_success "Docker deployment successful! App is running at http://localhost:3000"
+        if curl -f http://localhost:82/health >/dev/null 2>&1; then
+            log_success "Docker deployment successful! App is running at http://localhost:82"
         else
             log_error "Health check failed. Check container logs with: docker compose logs"
             exit 1
@@ -98,11 +98,11 @@ deploy_docker() {
         docker build -f Dockerfile.web -t beqeek-web .
         docker stop beqeek-app 2>/dev/null || true
         docker rm beqeek-app 2>/dev/null || true
-        docker run -d --name beqeek-app -p 3000:80 --restart unless-stopped beqeek-web
+        docker run -d --name beqeek-app -p 82:80 --restart unless-stopped beqeek-web
 
         sleep 5
-        if curl -f http://localhost:3000/health >/dev/null 2>&1; then
-            log_success "Docker deployment successful! App is running at http://localhost:3000"
+        if curl -f http://localhost:82/health >/dev/null 2>&1; then
+            log_success "Docker deployment successful! App is running at http://localhost:82"
         else
             log_error "Health check failed. Check container logs with: docker logs beqeek-app"
             exit 1

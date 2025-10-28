@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile.web
     ports:
-      - "3000:80"  # Expose on 3000 for development, internal 80 for nginx
+      - "82:80"  # Expose on 3000 for development, internal 80 for nginx
     environment:
       - NODE_ENV=production
     restart: unless-stopped
