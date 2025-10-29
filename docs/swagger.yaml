@@ -5,7 +5,7 @@ info:
     OpenAPI documentation capturing the API surface consumed by the HTML module
     front-ends under `resources/views/html-module`. Paths reflect the POST-based
     RPC style that the module uses for both reads and mutations.
-  version: 1.0.0
+  version: 1.0.2
 servers:
   - url: https://{host}
     description: Base URL for the BEQEEK backend targeted by the HTML module
@@ -22,18 +22,26 @@ tags:
     description: Manage teams inside a workspace
   - name: Workspace Roles
     description: Manage workspace team roles
+  - name: Global Users
+    description: Manage global users
   - name: Workspace Users
     description: Manage workspace membership and invitations
   - name: Active Tables
     description: Configure workflow active tables
   - name: Active Table Records
-    description: |
+    description: >
       Work with records stored in active tables.
+
 
       Data Encryption Mechanism (End-to-End Encryption - E2EE)
 
-      This application implements an End-to-End Encryption (E2EE) mechanism for sensitive record data.
-      The encryption process involves several steps to ensure data confidentiality and integrity.
+
+      This application implements an End-to-End Encryption (E2EE) mechanism for
+      sensitive record data.
+
+      The encryption process involves several steps to ensure data
+      confidentiality and integrity.
+
 
       1. Encryption Key Management:
         - Each active table can be configured with E2EE.
@@ -75,6 +83,10 @@ tags:
     description: Manage workflow automation units
   - name: Workflow Events
     description: Manage workflow unit events and triggers
+  - name: User Device
+    description: Manage user devices
+  - name: File
+    description: Manage file uploads
 security:
   - BearerAuth: []
 paths:
@@ -384,7 +396,7 @@ paths:
               default:
                 value:
                   constraints:
-                    workspaceTeamId: 806075211030986753
+                    workspaceTeamId: 806075211030986800
                   queries:
                     fields: id,workspaceTeamId,roleCode,roleName,roleDescription
       responses:
@@ -464,6 +476,90 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/StandardResponse"
+  /api/workspace/{workspaceId}/workspace_permission/get/permissions/{permissionId}:
+    post:
+      tags:
+        - Workspace Roles
+      summary: Get role permissions
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+        - $ref: "#/components/parameters/PermissionId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PermissionQueryRequest"
+            examples:
+              default:
+                value:
+                  constraints:
+                    workspaceTeamId: "806075211030986753"
+      responses:
+        "200":
+          description: Role permissions returned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PermissionQueryResponse"
+  /api/workspace/{workspaceId}/workspace_permission/patch/grant_permission:
+    post:
+      tags:
+        - Workspace Roles
+      summary: Grant role permissions
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GrantPermissionRequest"
+            examples:
+              default:
+                value:
+                  constraints:
+                    workspaceTeamId: "806075211030986753"
+                    workspaceTeamRoleId: "806075211488165889"
+                  data:
+                    canGrantPermission: true
+      responses:
+        "200":
+          description: Role permissions granted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GrantPermissionResponse"
+  /api/workspace/{workspaceId}/workspace_permission/patch/static_subject_actions:
+    post:
+      tags:
+        - Workspace Roles
+      summary: Update static subject actions
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StaticSubjectActionsRequest"
+            examples:
+              default:
+                value:
+                  constraints:
+                    workspaceTeamId: "806075211030986753"
+                    workspaceTeamRoleId: "806075211488165889"
+                    staticSubjectCode: "PROJECT"
+                  data:
+                    - staticActionType: "UPDATE"
+                      scope: "SELF_WITH_ASSIGN"
+      responses:
+        "200":
+          description: Static subject actions updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GrantPermissionResponse"
   /api/workspace/{workspaceId}/workspace/get/users:
     post:
       tags:
@@ -492,6 +588,26 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/WorkspaceUserListResponse"
+  /api/workspace/{workspaceId}/workspace/get/me:
+    post:
+      tags:
+        - Workspace Users
+      summary: Get current user details in a workspace
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserLookupRequest"
+      responses:
+        "200":
+          description: User details returned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkspaceGetUserMeResponse"
   /api/workspace/{workspaceId}/workspace/post/users:
     post:
       tags:
@@ -527,7 +643,7 @@ paths:
     post:
       tags:
         - Workspace Users
-      summary: Invite existing users to a workspace team
+      summary: Invite existing global users to a workspace team
       parameters:
         - $ref: "#/components/parameters/WorkspaceId"
       requestBody:
@@ -546,7 +662,7 @@ paths:
   /api/user/get/users/via-username/{username}:
     post:
       tags:
-        - Workspace Users
+        - Global Users
       summary: Look up a user by username
       parameters:
         - name: username
@@ -570,6 +686,32 @@ paths:
                 $ref: "#/components/schemas/UserLookupResponse"
         "404":
           description: User not found
+  /api/user/patch/me:
+    post:
+      tags:
+        - Global Users
+      summary: Update current user profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUpdateRequest"
+            examples:
+              default:
+                value:
+                  data:
+                    password: "user22222"
+                    email: "user22222@gmail.com"
+                    fullName: "User Two"
+                    avatarUpload: "230bZ1OY5FbLkYxuFGolNNSFSzJZyFaF61E9E1S2"
+      responses:
+        "200":
+          description: User profile updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserUpdateResponse"
   /api/workspace/{workspaceId}/workflow/get/active_tables:
     post:
       tags:
@@ -1384,6 +1526,49 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/StandardResponse"
+  /api/user-device/post/register-device:
+    post:
+      tags:
+        - Auth
+      summary: Register a user device
+      description: Register a user's device for push notifications and device tracking.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserDeviceRegisterRequest'
+      responses:
+        '200':
+          description: Device registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDeviceRegisterResponse'
+  /api/file/post/temp-files:
+    post:
+      tags:
+        - File
+      summary: Upload temporary files
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                'data[files][]':
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+      responses:
+        "200":
+          description: Temporary files uploaded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TempFilesUploadResponse"
 components:
   securitySchemes:
     BearerAuth:
@@ -1407,6 +1592,13 @@ components:
       description: Workspace team identifier
     RoleId:
       name: roleId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Workspace team role identifier
+    PermissionId:
+      name: permissionId
       in: path
       required: true
       schema:
@@ -1811,19 +2003,14 @@ components:
         filtering:
           type: object
           additionalProperties: true
-        sorting:
-          type: object
-          additionalProperties: true
+        sort:
+          type: string
+        direction:
+          type: string
         limit:
           type: integer
         offset:
           type: integer
-        paging:
-          type: string
-        next_id:
-          type: string
-        direction:
-          type: string
       additionalProperties: true
     ConstraintMap:
       type: object
@@ -1869,7 +2056,7 @@ components:
           type: string
           example: success
         data:
-          $ref: '#/components/schemas/WorkspaceData'
+          $ref: "#/components/schemas/WorkspaceData"
         meta:
           type: object
           properties:
@@ -1879,7 +2066,6 @@ components:
       required:
         - status
         - data
-
     WorkspaceData:
       type: object
       properties:
@@ -1888,12 +2074,12 @@ components:
           example: "732878538910205325"
         namespace:
           type: string
-          example: "nvmteam"
+          example: nvmteam
         workspaceName:
           type: string
-          example: "Nvmteam"
+          example: Nvmteam
         myWorkspaceUser:
-          $ref: '#/components/schemas/MyWorkspaceUser'
+          $ref: "#/components/schemas/MyWorkspaceUser"
         ownedByUser:
           type: object
           nullable: true
@@ -1909,7 +2095,7 @@ components:
           example: ""
         createdAt:
           type: string
-          example: "2025-09-09 16:23:12"
+          example: 2025-09-09 16:23:12
         updatedAt:
           type: string
           nullable: true
@@ -1918,7 +2104,6 @@ components:
         - id
         - namespace
         - workspaceName
-
     MyWorkspaceUser:
       type: object
       properties:
@@ -1927,10 +2112,10 @@ components:
           example: "806075204051664897"
         fullName:
           type: string
-          example: "Lưu Thanh Sang"
+          example: Lưu Thanh Sang
         email:
           type: string
-          example: "sangdung.ts@gmail.com"
+          example: sangdung.ts@gmail.com
         phone:
           type: string
           example: ""
@@ -1959,6 +2144,122 @@ components:
           type: string
           nullable: true
           example: null
+    WorkspaceGetUserMeResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        data:
+          $ref: '#/components/schemas/UserMe'
+        meta:
+          type: object
+    UserMe:
+      type: object
+      properties:
+        id:
+          type: string
+        fullName:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        phoneCountryCode:
+          type: string
+        avatar:
+          type: string
+        thumbnailAvatar:
+          type: string
+        emailVerifiedAt:
+          type: string
+          nullable: true
+        phoneVerifiedAt:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          nullable: true
+        updatedAt:
+          type: string
+          nullable: true
+        globalUser:
+          $ref: '#/components/schemas/GlobalUser'
+        projectTeamRoleJoinStatuses:
+          type: array
+          items:
+            type: object
+        workspaceMemberships:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkspaceMembership'
+    GlobalUser:
+      type: object
+      properties:
+        id:
+          type: string
+        username:
+          type: string
+        userCode:
+          type: string
+        password:
+          type: string
+        fullName:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        phoneCountryCode:
+          type: string
+        avatar:
+          type: string
+        avatarUpload:
+          type: string
+        thumbnailAvatar:
+          type: string
+        emailVerifiedAt:
+          type: string
+          nullable: true
+        phoneVerifiedAt:
+          type: string
+          nullable: true
+        trustLevel:
+          type: integer
+        createdBy:
+          type: string
+        fromWorkspaceId:
+          type: string
+        createdAt:
+          type: string
+          nullable: true
+        updatedAt:
+          type: string
+          nullable: true
+    UserUpdateRequest:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            password:
+              type: string
+              format: password
+            email:
+              type: string
+              format: email
+            fullName:
+              type: string
+            avatarUpload:
+              type: string
+    UserUpdateResponse:
+      type: object
+      properties:
+        httpCode:
+          type: integer
+        status:
+          type: string
+        data:
+          $ref: "#/components/schemas/GlobalUser"
     WorkspaceListResponse:
       allOf:
         - $ref: "#/components/schemas/CollectionResponse"
@@ -2006,6 +2307,53 @@ components:
           items:
             $ref: "#/components/schemas/WorkspaceRole"
       additionalProperties: true
+    UserDeviceRegisterRequest:
+      type: object
+      required:
+        - fcmToken
+        - platform
+        - deviceModel
+        - deviceName
+        - deviceAppVersion
+      properties:
+        fcmToken:
+          type: string
+        platform:
+          type: string
+        deviceModel:
+          type: string
+        deviceName:
+          type: string
+        deviceAppVersion:
+          type: string
+    UserDevice:
+      type: object
+      properties:
+        id:
+          type: string
+        fcmToken:
+          type: string
+        platform:
+          type: string
+        deviceName:
+          type: string
+        deviceModel:
+          type: string
+        deviceOs:
+          type: string
+        deviceOsVersion:
+          type: string
+        deviceAppVersion:
+          type: string
+        lastActiveAt:
+          type: string
+    UserDeviceRegisterResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        data:
+          $ref: '#/components/schemas/UserDevice'
     WorkspaceTeamListResponse:
       allOf:
         - $ref: "#/components/schemas/CollectionResponse"
@@ -2139,6 +2487,97 @@ components:
               type: array
               items:
                 $ref: "#/components/schemas/WorkspaceRole"
+    PermissionQueryRequest:
+      type: object
+      properties:
+        constraints:
+          type: object
+          properties:
+            workspaceTeamId:
+              type: string
+    PermissionQueryResponse:
+      type: object
+      properties:
+        httpCode:
+          type: integer
+        status:
+          type: string
+        data:
+          type: object
+          properties:
+            workspaceId:
+              type: string
+            workspaceTeamId:
+              type: string
+            workspaceTeamRoleId:
+              type: string
+            canGrantPermission:
+              type: boolean
+            activeSubjects:
+              type: array
+              items:
+                type: object
+            staticSubjects:
+              type: array
+              items:
+                type: object
+                properties:
+                  staticSubjectCode:
+                    type: string
+                  staticActions:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        staticActionName:
+                          type: string
+                        staticActionType:
+                          type: string
+                        scope:
+                          type: string
+    GrantPermissionRequest:
+      type: object
+      properties:
+        constraints:
+          type: object
+          properties:
+            workspaceTeamId:
+              type: string
+            workspaceTeamRoleId:
+              type: string
+        data:
+          type: object
+          properties:
+            canGrantPermission:
+              type: boolean
+    GrantPermissionResponse:
+      type: object
+      properties:
+        httpCode:
+          type: integer
+        status:
+          type: string
+    StaticSubjectActionsRequest:
+      type: object
+      properties:
+        constraints:
+          type: object
+          properties:
+            workspaceTeamId:
+              type: string
+            workspaceTeamRoleId:
+              type: string
+            staticSubjectCode:
+              type: string
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              staticActionType:
+                type: string
+              scope:
+                type: string
     WorkspaceUser:
       type: object
       properties:
@@ -2893,3 +3332,17 @@ components:
               type: array
               items:
                 $ref: "#/components/schemas/ActiveWorkGroup"
+    TempFilesUploadResponse:
+      type: object
+      properties:
+        httpCode:
+          type: integer
+        status:
+          type: string
+        data:
+          type: object
+          properties:
+            paths:
+              type: array
+              items:
+                type: string

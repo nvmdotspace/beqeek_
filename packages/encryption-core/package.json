@@ -16,7 +16,8 @@
   "scripts": {
     "build": "tsc",
     "check-types": "tsc --noEmit",
-    "lint": "eslint . --max-warnings 0"
+    "lint": "eslint . --max-warnings 0",
+    "test:verify": "tsx src/legacy/__tests__/verify.ts"
   },
   "dependencies": {
     "crypto-js": "^4.2.0"
@@ -26,6 +27,7 @@
     "@workspace/eslint-config": "workspace:*",
     "@workspace/typescript-config": "workspace:*",
     "eslint": "^9.36.0",
+    "tsx": "^4.19.2",
     "typescript": "^5.9.2"
   }
 }

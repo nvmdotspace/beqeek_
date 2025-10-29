@@ -1,42 +1,41 @@
-// Encryption algorithms
-export { AES256 } from './algorithms/aes-256';
-export { OPE } from './algorithms/ope';
-export { HMAC } from './algorithms/hmac';
+/**
+ * @workspace/encryption-core
+ *
+ * Legacy-compatible encryption library - 1:1 TypeScript port of JavaScript implementation
+ * from active-table-records.blade.php
+ *
+ * This package provides client-side encryption for Active Tables with support for:
+ * - AES-256-CBC encryption for text fields
+ * - Order-Preserving Encryption (OPE) for numbers and dates
+ * - HMAC-SHA256 hashing for select fields
+ * - Vietnamese text tokenization and searchable keyword hashing
+ */
 
-// Key management
-export { KeyManager } from './key-management/key-manager';
-export { KeyDerivation } from './key-management/key-derivation';
-export { E2EE } from './key-management/e2ee';
+// Core encryption orchestrator - Routes field encryption to appropriate algorithms
+export { CommonUtils } from './common-utils.js';
 
-// Storage
-export { SecureStorage } from './storage/secure-storage';
-export { StorageManager } from './storage/storage-manager';
+// Encryption algorithms - Legacy-compatible implementations
+export { AES256 } from './algorithms/aes-256.js';
+export { OPE, OPEncryptor } from './algorithms/ope.js';
+export { HMAC } from './algorithms/hmac.js';
 
-// Field types
-export * from './field-types';
-
-// Search
-export { EncryptedSearch } from './search/encrypted-search';
-
-// Payload
-export {
-  buildEncryptedRecord,
-  buildHashedKeywords,
-  buildRecordHashes,
-  buildEncryptedPayload,
-  buildTotalRecordHash,
-  verifyRecordIntegrity
-} from './payload/payload-builder';
+// Legacy-compatible types for Active Tables
 export type {
-  EncryptedPayload,
+  FieldConfig,
+  FieldOption,
+  TableConfig,
+  TableDetail,
+  FieldType,
+  RecordData,
   HashedKeywords,
   RecordHashes,
-  EncryptedRecord
-} from './payload/payload-builder';
+} from './types.js';
 
-// Types
+// Core encryption types
 export type {
   EncryptionKey,
   EncryptedData,
-  EncryptionType
-} from './types';
+  EncryptionType,
+  KeyDerivationOptions,
+  StorageConfig,
+} from './types.js';

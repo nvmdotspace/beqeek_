@@ -247,7 +247,7 @@ export const ActiveTablesPage = () => {
     if (!selectedWorkspaceId) return;
     navigate({
       to: `${localePrefix}/workspaces/tables/${table.id}/records`,
-      search: { workspaceId: selectedWorkspaceId, panel: 'comments' },
+      search: { workspaceId: selectedWorkspaceId },
     });
   };
 
@@ -255,7 +255,7 @@ export const ActiveTablesPage = () => {
     if (!selectedWorkspaceId) return;
     navigate({
       to: `${localePrefix}/workspaces/tables/${table.id}`,
-      search: { workspaceId: selectedWorkspaceId, section: 'automations' },
+      search: { workspaceId: selectedWorkspaceId },
     });
   };
 
