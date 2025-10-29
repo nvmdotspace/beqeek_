@@ -45,7 +45,7 @@ export const Select: React.FC<SelectProps> = ({ value, onValueChange, disabled, 
 
   return (
     <SelectContext.Provider value={{ value, onValueChange, isOpen, setIsOpen, disabled: disabled ?? false }}>
-      <div className="relative">
+      <div className="relative overflow-visible">
         {children}
       </div>
     </SelectContext.Provider>
@@ -66,10 +66,11 @@ export const SelectTrigger = React.forwardRef<HTMLButtonElement, SelectTriggerPr
           }
         }}
         className={`
-          flex h-10 w-full items-center justify-between rounded-md border border-input
+          flex h-10 w-full items-center justify-between rounded-lg border-2 border-input
           bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground
-          focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2
+          focus:outline-none focus:border-ring focus:ring-2 focus:ring-ring focus:ring-offset-1
           disabled:cursor-not-allowed disabled:opacity-50
+          transition-colors
           ${className}
         `}
         disabled={disabled}

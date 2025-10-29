@@ -66,6 +66,9 @@ export interface DataTableProps {
 
   /** Total number of records (optional) */
   totalRecords?: number;
+
+  /** Hide the built-in toolbar (use when parent has toolbar) */
+  hideToolbar?: boolean;
 }
 
 /**
@@ -112,6 +115,7 @@ export function DataTable({
   onRefresh,
   onCreate,
   totalRecords,
+  hideToolbar = false,
 }: DataTableProps) {
   // Table state
   const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -145,13 +149,15 @@ export function DataTable({
   if (isLoading && records.length === 0) {
     return (
       <div className="space-y-4">
-        <DataTableToolbar
-          table={table}
-          activeTable={activeTable}
-          isLoading={isLoading}
-          onRefresh={onRefresh}
-          onCreate={onCreate}
-        />
+        {!hideToolbar && (
+          <DataTableToolbar
+            table={table}
+            activeTable={activeTable}
+            isLoading={isLoading}
+            onRefresh={onRefresh}
+            onCreate={onCreate}
+          />
+        )}
         <div className="flex h-[400px] items-center justify-center rounded-lg border border-dashed bg-muted/20">
           <div className="flex flex-col items-center gap-3 text-center">
             <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
@@ -166,13 +172,15 @@ export function DataTable({
   if (!isLoading && records.length === 0) {
     return (
       <div className="space-y-4">
-        <DataTableToolbar
-          table={table}
-          activeTable={activeTable}
-          isLoading={isLoading}
-          onRefresh={onRefresh}
-          onCreate={onCreate}
-        />
+        {!hideToolbar && (
+          <DataTableToolbar
+            table={table}
+            activeTable={activeTable}
+            isLoading={isLoading}
+            onRefresh={onRefresh}
+            onCreate={onCreate}
+          />
+        )}
         <div className="flex h-[400px] items-center justify-center rounded-lg border border-dashed bg-muted/20">
           <div className="flex flex-col items-center gap-3 text-center">
             <div className="rounded-full bg-muted p-3">
@@ -215,13 +223,15 @@ export function DataTable({
   return (
     <div className="space-y-4">
       {/* Toolbar with search, filters, and actions */}
-      <DataTableToolbar
-        table={table}
-        activeTable={activeTable}
-        isLoading={isLoading}
-        onRefresh={onRefresh}
-        onCreate={onCreate}
-      />
+      {!hideToolbar && (
+        <DataTableToolbar
+          table={table}
+          activeTable={activeTable}
+          isLoading={isLoading}
+          onRefresh={onRefresh}
+          onCreate={onCreate}
+        />
+      )}
 
       {/* Table */}
       <div className="overflow-hidden rounded-lg border shadow-sm">

@@ -24,6 +24,11 @@ const ActiveTableRecordsPageLazy = lazy(() =>
     default: m.ActiveTableRecordsPage,
   })),
 );
+const ActiveTableSettingsPageLazy = lazy(() =>
+  import('@/features/active-tables/pages/active-table-settings-page').then((m) => ({
+    default: m.ActiveTableSettingsPage,
+  })),
+);
 const EncryptionSettingsPageLazy = lazy(() =>
   import('@/features/encryption/pages/encryption-settings-page').then((m) => ({ default: m.EncryptionSettingsPage })),
 );
@@ -159,6 +164,25 @@ const activeTableRecordsRoute = createRoute({
   component: () => (
     <Suspense fallback={<div className="p-6">Loading...</div>}>
       <ActiveTableRecordsPageLazy />
+    </Suspense>
+  ),
+  beforeLoad: () => {
+    const isAuthenticated = getIsAuthenticated();
+    if (!isAuthenticated) {
+      throw redirect({ to: '/login' });
+    }
+  },
+});
+
+const activeTableSettingsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/workspaces/tables/$tableId/settings',
+  validateSearch: (search: Record<string, unknown>) => ({
+    workspaceId: typeof search.workspaceId === 'string' ? search.workspaceId : undefined,
+  }),
+  component: () => (
+    <Suspense fallback={<div className="p-6">Loading...</div>}>
+      <ActiveTableSettingsPageLazy />
     </Suspense>
   ),
   beforeLoad: () => {
@@ -447,6 +471,26 @@ const localeActiveTableRecordsRoute = createRoute({
   },
 });
 
+const localeActiveTableSettingsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/$locale/workspaces/tables/$tableId/settings',
+  validateSearch: (search: Record<string, unknown>) => ({
+    workspaceId: typeof search.workspaceId === 'string' ? search.workspaceId : undefined,
+  }),
+  component: () => (
+    <Suspense fallback={<div className="p-6">Loading...</div>}>
+      <ActiveTableSettingsPageLazy />
+    </Suspense>
+  ),
+  beforeLoad: ({ params }) => {
+    const locale = normalizeLocale(params.locale);
+    const isAuthenticated = getIsAuthenticated();
+    if (!isAuthenticated) {
+      throw redirect({ to: lp('/login', locale) });
+    }
+  },
+});
+
 const localeEncryptionSettingsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/$locale/settings/encryption',
@@ -647,6 +691,7 @@ const routeTree = rootRoute.addChildren([
   activeTablesRoute,
   activeTableDetailRoute,
   activeTableRecordsRoute,
+  activeTableSettingsRoute,
   workflowsRoute,
   teamRoute,
   rolesRoute,
@@ -664,6 +709,7 @@ const routeTree = rootRoute.addChildren([
   localeActiveTablesRoute,
   localeActiveTableDetailRoute,
   localeActiveTableRecordsRoute,
+  localeActiveTableSettingsRoute,
   localeEncryptionSettingsRoute,
   localeWorkflowsRoute,
   localeTeamRoute,

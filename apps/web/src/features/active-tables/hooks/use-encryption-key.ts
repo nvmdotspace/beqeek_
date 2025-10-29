@@ -157,11 +157,25 @@ export function useEncryptionKey(options: UseEncryptionKeyOptions): UseEncryptio
 
   // Auto-load key on mount
   useEffect(() => {
+    console.log('[useEncryptionKey] Loading encryption key...', {
+      workspaceId,
+      tableId,
+      storageKey,
+      hasAuthKey: !!encryptionAuthKey,
+    });
+
     setIsLoading(true);
     const key = loadKey();
+
+    console.log('[useEncryptionKey] Key loaded:', {
+      hasKey: !!key,
+      keyLength: key?.length,
+      isValid: key ? isValidEncryptionKey(key) : false,
+    });
+
     setEncryptionKey(key);
     setIsLoading(false);
-  }, [loadKey]);
+  }, [loadKey, workspaceId, tableId, storageKey, encryptionAuthKey]);
 
   return {
     encryptionKey,

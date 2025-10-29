@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import type { ActiveTable } from '../types';
 import { useEncryptionKey } from './use-encryption-key';
 
@@ -68,12 +68,27 @@ export function useTableEncryption(options: UseTableEncryptionOptions): UseTable
   const encryptionAuthKey = table?.config?.encryptionAuthKey;
   const tableId = table?.id ?? '';
 
+  // Check if API response includes encryption key (legacy/admin mode)
+  const apiEncryptionKey = table?.config?.encryptionKey;
+
   // Use encryption key hook
   const encryptionKeyHook = useEncryptionKey({
     workspaceId,
     tableId,
     encryptionAuthKey,
   });
+
+  // Auto-save API-provided key to localStorage if not already saved
+  useEffect(() => {
+    if (apiEncryptionKey && !encryptionKeyHook.isKeyLoaded && !encryptionKeyHook.isLoading) {
+      console.log('[useTableEncryption] Auto-saving API-provided encryption key');
+      try {
+        encryptionKeyHook.saveKey(apiEncryptionKey);
+      } catch (error) {
+        console.error('[useTableEncryption] Failed to auto-save API key:', error);
+      }
+    }
+  }, [apiEncryptionKey, encryptionKeyHook.isKeyLoaded, encryptionKeyHook.isLoading]);
 
   // Determine if encryption is required
   const isEncryptionRequired = useMemo(() => {

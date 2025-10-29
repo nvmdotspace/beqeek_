@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { ArrowLeft, ShieldCheck, Shield, Link as LinkIcon, ListTree, Lock, Database } from 'lucide-react';
+import { ArrowLeft, ShieldCheck, Shield, Link as LinkIcon, ListTree, Lock, Database, Settings2 } from 'lucide-react';
 import { useNavigate, useLocation, useParams } from '@tanstack/react-router';
 
 // @ts-ignore
@@ -145,6 +145,14 @@ export const ActiveTableDetailPage = () => {
     });
   };
 
+  const handleViewSettings = () => {
+    if (!tableId) return;
+    navigate({
+      to: `${localePrefix}/workspaces/tables/${tableId}/settings`,
+      search: workspaceId ? { workspaceId } : undefined,
+    });
+  };
+
   const encryptionBadge = table?.config?.e2eeEncryption ? (
     <Badge variant="default" className="flex items-center gap-2">
       <ShieldCheck className="h-4 w-4" />
@@ -216,10 +224,16 @@ export const ActiveTableDetailPage = () => {
             <Lock className="h-3.5 w-3.5" />
             {m.activeTables_detail_fieldCount({ count: table.config?.fields?.length ?? 0 })}
           </Badge>
-          <Button onClick={handleViewRecords}>
-            <Database className="mr-2 h-4 w-4" />
-            {m.activeTables_detail_viewRecords()}
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={handleViewSettings}>
+              <Settings2 className="mr-2 h-4 w-4" />
+              Settings
+            </Button>
+            <Button onClick={handleViewRecords}>
+              <Database className="mr-2 h-4 w-4" />
+              {m.activeTables_detail_viewRecords()}
+            </Button>
+          </div>
         </div>
       </div>
 

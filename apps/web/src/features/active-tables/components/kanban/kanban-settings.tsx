@@ -185,18 +185,22 @@ export function KanbanSettings({
         </DialogHeader>
 
         <ScrollArea className="max-h-[600px] pr-4">
-          <div className="space-y-6">
+          <div className="space-y-6 px-1 -mx-1">
             {/* Status Field Selection */}
             <div className="space-y-2">
               <Label>Status Field *</Label>
               <Select value={statusField} onValueChange={setStatusField}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select status field" />
+                  <span className="block truncate">
+                    {statusField
+                      ? (selectOneFields.find(f => f.name === statusField)?.label || statusField)
+                      : 'Select status field'}
+                  </span>
                 </SelectTrigger>
                 <SelectContent>
                   {selectOneFields.map((field) => (
                     <SelectItem key={field.name} value={field.name}>
-                      {field.label}
+                      {field.label || field.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -211,12 +215,16 @@ export function KanbanSettings({
               <Label>Headline Field *</Label>
               <Select value={headlineField} onValueChange={setHeadlineField}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select headline field" />
+                  <span className="block truncate">
+                    {headlineField
+                      ? (fields.find(f => f.name === headlineField)?.label || headlineField)
+                      : 'Select headline field'}
+                  </span>
                 </SelectTrigger>
                 <SelectContent>
                   {fields.map((field) => (
                     <SelectItem key={field.name} value={field.name}>
-                      {field.label}
+                      {field.label || field.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
