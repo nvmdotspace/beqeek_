@@ -1,3 +1,12 @@
+/**
+ * Import field types and constants from beqeek-shared
+ * Ensures consistency across the entire system
+ */
+import type { FieldType, SortOrder } from '@workspace/beqeek-shared';
+
+// Re-export FieldType for backward compatibility
+export type { FieldType };
+
 export type EncryptionType = 'AES-256-CBC' | 'OPE' | 'HMAC-SHA256' | 'NONE';
 
 export interface EncryptionKey {
@@ -15,8 +24,6 @@ export interface EncryptedData {
   metadata?: Record<string, any>;
 }
 
-// FieldEncryptionConfig is exported from field-types/index.ts
-
 export interface KeyDerivationOptions {
   iterations?: number;
   keyLength?: number;
@@ -29,7 +36,14 @@ export interface StorageConfig {
   compressionEnabled: boolean;
 }
 
-// Legacy types for table encryption
+// ============================================
+// Active Table Types
+// ============================================
+
+/**
+ * Field option for SELECT and CHECKBOX field types
+ * Per spec: Section 2.2.2.d
+ */
 export interface FieldOption {
   value: string;
   text: string;
@@ -37,6 +51,10 @@ export interface FieldOption {
   background_color?: string;
 }
 
+/**
+ * Field configuration
+ * Per spec: Section 2.2
+ */
 export interface FieldConfig {
   name: string;
   type: FieldType;
@@ -44,13 +62,18 @@ export interface FieldConfig {
   placeholder?: string;
   defaultValue?: any;
   required: boolean;
+  // For SELECT and CHECKBOX fields
   options?: FieldOption[];
-  // Reference fields
+  // For reference fields
   referenceTableId?: string;
   referenceLabelField?: string;
   additionalCondition?: string;
 }
 
+/**
+ * Table configuration
+ * Per spec: Section 2.1
+ */
 export interface TableConfig {
   id?: string;
   name?: string;
@@ -60,7 +83,7 @@ export interface TableConfig {
   encryptionKey?: string;
   encryptionAuthKey?: string;
   limit?: number;
-  defaultSort?: 'asc' | 'desc';
+  defaultSort?: SortOrder;
   hashedKeywordFields?: string[];
   fields: FieldConfig[];
   actions?: any[];
@@ -72,6 +95,9 @@ export interface TableConfig {
   permissionsConfig?: any[];
 }
 
+/**
+ * Table detail with metadata
+ */
 export interface TableDetail {
   id: string;
   name: string;
@@ -81,48 +107,23 @@ export interface TableDetail {
   config: TableConfig;
 }
 
-export type FieldType =
-  // Text fields
-  | 'SHORT_TEXT'
-  | 'RICH_TEXT'
-  | 'TEXT'
-  | 'EMAIL'
-  | 'URL'
-  // Time fields
-  | 'DATE'
-  | 'DATETIME'
-  | 'TIME'
-  | 'YEAR'
-  | 'MONTH'
-  | 'DAY'
-  | 'HOUR'
-  | 'MINUTE'
-  | 'SECOND'
-  // Number fields
-  | 'INTEGER'
-  | 'NUMERIC'
-  // Selection fields
-  | 'CHECKBOX_YES_NO'
-  | 'CHECKBOX_ONE'
-  | 'CHECKBOX_LIST'
-  | 'SELECT_ONE'
-  | 'SELECT_LIST'
-  // Reference fields
-  | 'SELECT_ONE_RECORD'
-  | 'SELECT_LIST_RECORD'
-  | 'SELECT_ONE_WORKSPACE_USER'
-  | 'SELECT_LIST_WORKSPACE_USER'
-  // Special fields
-  | 'FIRST_REFERENCE_RECORD';
-
+/**
+ * Record data structure
+ */
 export interface RecordData {
   [fieldName: string]: any;
 }
 
+/**
+ * Hashed keywords for searchable encryption
+ */
 export interface HashedKeywords {
   [fieldName: string]: string[];
 }
 
+/**
+ * Record hashes for field-level encryption
+ */
 export interface RecordHashes {
   [fieldName: string]: string | string[];
 }

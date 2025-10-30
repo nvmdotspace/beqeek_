@@ -1,3 +1,2 @@
-// Encryption utilities
-export * from './encryption-helpers';
-export * from './record-decryptor';
+// Re-export encryption utilities from package
+export * from '@workspace/active-tables-core';

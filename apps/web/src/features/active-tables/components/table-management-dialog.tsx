@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useForm } from '@tanstack/react-form';
-import { Plus, Trash2, GripVertical, Settings } from 'lucide-react';
+import { Plus, Trash2, GripVertical, Settings, Eye, EyeOff } from 'lucide-react';
 
 // @ts-ignore
 import { m } from "@/paraglide/generated/messages.js";
@@ -27,6 +27,9 @@ import {
 import { Switch } from '@workspace/ui/components/switch';
 import { Badge } from '@workspace/ui/components/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@workspace/ui/components/card';
+
+import { TABLE_TYPE_METADATA, type TableType } from '@workspace/beqeek-shared';
+import { generateEncryptionKey } from '@workspace/encryption-core';
 
 import type { ActiveTable, ActiveFieldConfig, ActiveWorkGroup } from '../types';
 
@@ -64,14 +67,6 @@ const FIELD_TYPES = [
   { value: 'URL', label: 'URL' },
 ];
 
-const TABLE_TYPES = [
-  { value: 'standard', label: 'Standard Table' },
-  { value: 'project', label: 'Project Management' },
-  { value: 'crm', label: 'CRM' },
-  { value: 'inventory', label: 'Inventory' },
-  { value: 'custom', label: 'Custom' },
-];
-
 export const TableManagementDialog = ({
   open,
   onOpenChange,
@@ -82,13 +77,14 @@ export const TableManagementDialog = ({
 }: TableManagementDialogProps) => {
   const [fields, setFields] = useState<ActiveFieldConfig[]>([]);
   const [editingField, setEditingField] = useState<number | null>(null);
+  const [showEncryptionKey, setShowEncryptionKey] = useState(false);
 
   // Initialize form with proper default values
   const getDefaultValues = () => ({
     name: table?.name || '',
     description: table?.description || '',
     workGroupId: table?.workGroupId || '',
-    tableType: table?.tableType || 'standard',
+    tableType: table?.tableType || '',
     e2eeEncryption: table?.config?.e2eeEncryption || false,
     encryptionKey: table?.config?.encryptionKey || '',
   });
@@ -102,6 +98,40 @@ export const TableManagementDialog = ({
       });
     },
   });
+
+  // Handle table type change - auto-fill name and description
+  const handleTableTypeChange = (tableType: string) => {
+    // Only auto-fill if creating new table (not editing)
+    if (!table && tableType) {
+      const metadata = TABLE_TYPE_METADATA[tableType as TableType];
+      if (metadata) {
+        // Get localized name and description
+        const name = m[metadata.nameKey as keyof typeof m]?.();
+        const description = m[metadata.descriptionKey as keyof typeof m]?.();
+
+        // Update form fields
+        form.setFieldValue('name', name || '');
+        form.setFieldValue('description', description || '');
+      }
+    }
+
+    // Always update tableType
+    form.setFieldValue('tableType', tableType);
+  };
+
+  // Handle E2EE encryption toggle - auto-generate key when enabled
+  const handleE2EEToggle = (checked: boolean) => {
+    form.setFieldValue('e2eeEncryption', checked);
+
+    if (checked) {
+      // Auto-generate encryption key when E2EE is enabled
+      const newKey = generateEncryptionKey();
+      form.setFieldValue('encryptionKey', newKey);
+    } else {
+      // Clear encryption key when E2EE is disabled
+      form.setFieldValue('encryptionKey', '');
+    }
+  };
 
   // Update form when table changes
   useEffect(() => {
@@ -234,31 +264,38 @@ export const TableManagementDialog = ({
                       !value ? 'Work group is required' : undefined,
                   }}
                 >
-                  {(field) => (
-                    <div className="space-y-2">
-                      <Label htmlFor={field.name}>Work Group *</Label>
-                      <Select
-                        value={field.state.value}
-                        onValueChange={field.handleChange}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select work group" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {workGroups.map((group) => (
-                            <SelectItem key={group.id} value={group.id}>
-                              {group.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      {field.state.meta.errors && (
-                        <p className="text-sm text-destructive">
-                          {field.state.meta.errors[0]}
-                        </p>
-                      )}
-                    </div>
-                  )}
+                  {(field) => {
+                    const selectedGroup = workGroups.find(
+                      (group) => group.id === field.state.value
+                    );
+                    return (
+                      <div className="space-y-2">
+                        <Label htmlFor={field.name}>Work Group *</Label>
+                        <Select
+                          value={field.state.value}
+                          onValueChange={field.handleChange}
+                        >
+                          <SelectTrigger className="w-full">
+                            <span className="truncate">
+                              {selectedGroup?.name || 'Select work group'}
+                            </span>
+                          </SelectTrigger>
+                          <SelectContent>
+                            {workGroups.map((group) => (
+                              <SelectItem key={group.id} value={group.id}>
+                                {group.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {field.state.meta.errors && (
+                          <p className="text-sm text-destructive">
+                            {field.state.meta.errors[0]}
+                          </p>
+                        )}
+                      </div>
+                    );
+                  }}
                 </form.Field>
 
                 <form.Field name="tableType">
@@ -267,19 +304,24 @@ export const TableManagementDialog = ({
                       <Label htmlFor={field.name}>Table Type</Label>
                       <Select
                         value={field.state.value}
-                        onValueChange={field.handleChange}
+                        onValueChange={handleTableTypeChange}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select table type" />
                         </SelectTrigger>
-                        <SelectContent>
-                          {TABLE_TYPES.map((type) => (
-                            <SelectItem key={type.value} value={type.value}>
-                              {type.label}
+                        <SelectContent className="max-h-[400px]">
+                          {Object.values(TABLE_TYPE_METADATA).map((typeMetadata) => (
+                            <SelectItem key={typeMetadata.type} value={typeMetadata.type}>
+                              {m[typeMetadata.nameKey as keyof typeof m]?.() || typeMetadata.type}
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
+                      {field.state.value && (
+                        <p className="text-xs text-muted-foreground">
+                          {m[TABLE_TYPE_METADATA[field.state.value as TableType]?.descriptionKey as keyof typeof m]?.()}
+                        </p>
+                      )}
                     </div>
                   )}
                 </form.Field>
@@ -305,7 +347,7 @@ export const TableManagementDialog = ({
                     <Switch
                       id={field.name}
                       checked={field.state.value}
-                      onCheckedChange={field.handleChange}
+                      onCheckedChange={handleE2EEToggle}
                     />
                   </div>
                 )}
@@ -315,18 +357,33 @@ export const TableManagementDialog = ({
                 {(field) => (
                   <div className="space-y-2">
                     <Label htmlFor={field.name}>Encryption Key</Label>
-                    <Input
-                      id={field.name}
-                      name={field.name}
-                      type="password"
-                      value={field.state.value}
-                      onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      placeholder="Enter encryption key (optional)"
-                      disabled={!form.getFieldValue('e2eeEncryption')}
-                    />
+                    <div className="relative">
+                      <Input
+                        id={field.name}
+                        name={field.name}
+                        type={showEncryptionKey ? "text" : "password"}
+                        value={field.state.value}
+                        readOnly
+                        className="pr-10"
+                        placeholder="Auto-generated when E2EE is enabled"
+                        disabled={!form.getFieldValue('e2eeEncryption')}
+                      />
+                      {form.getFieldValue('e2eeEncryption') && field.state.value && (
+                        <button
+                          type="button"
+                          onClick={() => setShowEncryptionKey(!showEncryptionKey)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          {showEncryptionKey ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </button>
+                      )}
+                    </div>
                     <p className="text-xs text-muted-foreground">
-                      Leave empty to auto-generate. Store this key safely - it cannot be recovered.
+                      Auto-generated when E2EE is enabled. Store this key safely - it cannot be recovered.
                     </p>
                   </div>
                 )}

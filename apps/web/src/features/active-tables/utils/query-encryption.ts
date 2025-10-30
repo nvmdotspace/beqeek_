@@ -1,6 +1,12 @@
-import { buildEncryptedPayload, type FieldEncryptionConfig, type EncryptedPayload } from '@workspace/encryption-core';
+// TODO Phase 1: Implement buildEncryptedPayload in encryption-core or move to app-specific
+// import { buildEncryptedPayload, type FieldEncryptionConfig, type EncryptedPayload } from '@workspace/encryption-core';
 import type { ActiveFieldConfig } from '../types';
-import { getEncryptionTypeForField, isEncryptableField } from './encryption-helpers';
+import { getEncryptionTypeForField, isEncryptableField } from '@workspace/active-tables-core';
+
+// Temporary type stubs until Phase 1
+type EncryptedPayload = any;
+type FieldEncryptionConfig = any;
+const buildEncryptedPayload = async (..._args: any[]): Promise<any> => ({});
 
 /**
  * Query-level encryption utilities for Active Tables
@@ -28,11 +34,12 @@ export class EncryptionError extends Error {
 /**
  * Convert Active Table field configs to encryption-core format
  * Maps ActiveFieldConfig to FieldEncryptionConfig with proper encryption types
+ * TODO Phase 1: Re-enable when FieldEncryptionConfig is available
  */
 export function buildFieldConfigsMap(
   fields: ActiveFieldConfig[]
-): Map<string, FieldEncryptionConfig> {
-  const map = new Map<string, FieldEncryptionConfig>();
+): Map<string, any> {
+  const map = new Map<string, any>();
 
   fields.forEach((field) => {
     // Skip fields that don't need encryption

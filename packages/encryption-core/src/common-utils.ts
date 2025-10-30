@@ -3,6 +3,34 @@
  * Routes field encryption to appropriate algorithms based on field type
  */
 
+import {
+  FIELD_TYPE_SHORT_TEXT,
+  FIELD_TYPE_TEXT,
+  FIELD_TYPE_RICH_TEXT,
+  FIELD_TYPE_EMAIL,
+  FIELD_TYPE_URL,
+  FIELD_TYPE_DATE,
+  FIELD_TYPE_DATETIME,
+  FIELD_TYPE_TIME,
+  FIELD_TYPE_YEAR,
+  FIELD_TYPE_MONTH,
+  FIELD_TYPE_DAY,
+  FIELD_TYPE_HOUR,
+  FIELD_TYPE_MINUTE,
+  FIELD_TYPE_SECOND,
+  FIELD_TYPE_INTEGER,
+  FIELD_TYPE_NUMERIC,
+  FIELD_TYPE_CHECKBOX_YES_NO,
+  FIELD_TYPE_CHECKBOX_ONE,
+  FIELD_TYPE_CHECKBOX_LIST,
+  FIELD_TYPE_SELECT_ONE,
+  FIELD_TYPE_SELECT_LIST,
+  FIELD_TYPE_SELECT_ONE_RECORD,
+  FIELD_TYPE_SELECT_LIST_RECORD,
+  FIELD_TYPE_SELECT_ONE_WORKSPACE_USER,
+  FIELD_TYPE_SELECT_LIST_WORKSPACE_USER,
+} from '@workspace/beqeek-shared';
+
 import { AES256 } from './algorithms/aes-256.js';
 import { OPE } from './algorithms/ope.js';
 import { HMAC } from './algorithms/hmac.js';
@@ -45,43 +73,63 @@ export class CommonUtils {
 
   /**
    * Field type categorization - used to determine encryption method
+   * Using constants from @workspace/beqeek-shared for consistency
+   */
+
+  /**
+   * Text fields encrypted with AES-256-CBC
    */
   static encryptFields(): string[] {
-    return ['SHORT_TEXT', 'RICH_TEXT', 'TEXT', 'EMAIL', 'URL'];
+    return [
+      FIELD_TYPE_SHORT_TEXT,
+      FIELD_TYPE_RICH_TEXT,
+      FIELD_TYPE_TEXT,
+      FIELD_TYPE_EMAIL,
+      FIELD_TYPE_URL,
+    ];
   }
 
+  /**
+   * Time and number fields encrypted with OPE (Order-Preserving Encryption)
+   */
   static opeEncryptFields(): string[] {
     return [
-      'YEAR',
-      'MONTH',
-      'DAY',
-      'HOUR',
-      'MINUTE',
-      'SECOND',
-      'DATE',
-      'DATETIME',
-      'TIME',
-      'INTEGER',
-      'NUMERIC',
+      FIELD_TYPE_YEAR,
+      FIELD_TYPE_MONTH,
+      FIELD_TYPE_DAY,
+      FIELD_TYPE_HOUR,
+      FIELD_TYPE_MINUTE,
+      FIELD_TYPE_SECOND,
+      FIELD_TYPE_DATE,
+      FIELD_TYPE_DATETIME,
+      FIELD_TYPE_TIME,
+      FIELD_TYPE_INTEGER,
+      FIELD_TYPE_NUMERIC,
     ];
   }
 
+  /**
+   * Selection fields hashed with HMAC-SHA256
+   */
   static hashEncryptFields(): string[] {
     return [
-      'CHECKBOX_YES_NO',
-      'CHECKBOX_ONE',
-      'CHECKBOX_LIST',
-      'SELECT_ONE',
-      'SELECT_LIST',
+      FIELD_TYPE_CHECKBOX_YES_NO,
+      FIELD_TYPE_CHECKBOX_ONE,
+      FIELD_TYPE_CHECKBOX_LIST,
+      FIELD_TYPE_SELECT_ONE,
+      FIELD_TYPE_SELECT_LIST,
     ];
   }
 
+  /**
+   * Reference fields (not encrypted)
+   */
   static noneEncryptFields(): string[] {
     return [
-      'SELECT_ONE_RECORD',
-      'SELECT_LIST_RECORD',
-      'SELECT_ONE_WORKSPACE_USER',
-      'SELECT_LIST_WORKSPACE_USER',
+      FIELD_TYPE_SELECT_ONE_RECORD,
+      FIELD_TYPE_SELECT_LIST_RECORD,
+      FIELD_TYPE_SELECT_ONE_WORKSPACE_USER,
+      FIELD_TYPE_SELECT_LIST_WORKSPACE_USER,
     ];
   }
 

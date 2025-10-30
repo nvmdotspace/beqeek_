@@ -24,9 +24,6 @@ const ActiveTableSettingsPageLazy = lazy(() =>
     default: m.ActiveTableSettingsPage,
   })),
 );
-const EncryptionSettingsPageLazy = lazy(() =>
-  import('@/features/encryption/pages/encryption-settings-page').then((m) => ({ default: m.EncryptionSettingsPage })),
-);
 const WorkflowsPageLazy = lazy(() =>
   import('@/features/workflows/pages/workflows-page').then((m) => ({ default: m.WorkflowsPage })),
 );
@@ -72,7 +69,7 @@ const rootRoute = createRootRoute({
   errorComponent: ({ error }) => <RouteError error={error} />,
 });
 
-// Index route: default to vi, redirect to login/workspaces
+// Index route: default to vi, redirect to log in/workspaces
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
@@ -281,22 +278,6 @@ const archivedRoute = createRoute({
   },
 });
 
-const encryptionSettingsRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/settings/encryption',
-  component: () => (
-    <Suspense fallback={<div className="p-6">Loading...</div>}>
-      <EncryptionSettingsPageLazy />
-    </Suspense>
-  ),
-  beforeLoad: () => {
-    const isAuthenticated = getIsAuthenticated();
-    if (!isAuthenticated) {
-      throw redirect({ to: '/login' });
-    }
-  },
-});
-
 const notificationsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/notifications',
@@ -436,23 +417,6 @@ const localeActiveTableSettingsRoute = createRoute({
   component: () => (
     <Suspense fallback={<div className="p-6">Loading...</div>}>
       <ActiveTableSettingsPageLazy />
-    </Suspense>
-  ),
-  beforeLoad: ({ params }) => {
-    const locale = normalizeLocale(params.locale);
-    const isAuthenticated = getIsAuthenticated();
-    if (!isAuthenticated) {
-      throw redirect({ to: lp('/login', locale) });
-    }
-  },
-});
-
-const localeEncryptionSettingsRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/$locale/settings/encryption',
-  component: () => (
-    <Suspense fallback={<div className="p-6">Loading...</div>}>
-      <EncryptionSettingsPageLazy />
     </Suspense>
   ),
   beforeLoad: ({ params }) => {
@@ -654,7 +618,6 @@ const routeTree = rootRoute.addChildren([
   starredRoute,
   recentActivityRoute,
   archivedRoute,
-  encryptionSettingsRoute,
   notificationsRoute,
   searchRoute,
   helpRoute,
@@ -664,7 +627,6 @@ const routeTree = rootRoute.addChildren([
   localeActiveTablesRoute,
   localeActiveTableDetailRoute,
   localeActiveTableSettingsRoute,
-  localeEncryptionSettingsRoute,
   localeWorkflowsRoute,
   localeTeamRoute,
   localeRolesRoute,

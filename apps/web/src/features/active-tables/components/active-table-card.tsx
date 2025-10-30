@@ -27,7 +27,7 @@ import {
 } from '@workspace/ui/components/dropdown-menu';
 // @ts-ignore
 import { m } from "@/paraglide/generated/messages.js";
-import { useEncryption } from '@workspace/active-tables-hooks';
+import { useEncryption } from '../hooks/use-encryption-stub';
 import { cn } from '@workspace/ui/lib/utils';
 import { getModuleIcon, getModuleColors, getModuleTypeLabel } from '../utils/module-icons';
 

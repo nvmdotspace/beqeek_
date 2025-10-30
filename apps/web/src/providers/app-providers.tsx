@@ -6,7 +6,6 @@ import { baseLocale, isLocale } from '@/paraglide/generated/runtime.js';
 
 import { ThemeProvider } from './theme-provider';
 import { ApiErrorBoundary } from '@/components/api-error-boundary';
-import { ApiError } from '@/shared/api/api-error';
 import { queryClient } from '@/shared/query-client';
 import { Toaster } from '@workspace/ui/components/sonner';
 

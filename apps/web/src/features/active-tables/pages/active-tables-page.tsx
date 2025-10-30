@@ -1,6 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import {
-  ChevronDown,
   RefreshCw,
   Search,
   Plus,
@@ -11,7 +10,6 @@ import {
   Filter,
 } from 'lucide-react';
 
-import { useWorkspaces } from '@/features/workspace/hooks/use-workspaces';
 import { ActiveTableCard } from '../components/active-table-card';
 import { useActiveTablesGroupedByWorkGroup } from '../hooks/use-active-tables';
 import { ActiveTablesEmptyState } from '../components/active-tables-empty-state';
@@ -19,23 +17,18 @@ import { TableManagementDialog } from '../components/table-management-dialog';
 import { useTableManagement } from '../hooks/use-table-management';
 // @ts-ignore
 import { m } from "@/paraglide/generated/messages.js";
-import { useLocation, useNavigate } from '@tanstack/react-router';
+import { useNavigate } from '@tanstack/react-router';
+import { useSidebarStore, selectCurrentWorkspace } from '@/stores/sidebar-store';
 
 import { Button } from '@workspace/ui/components/button';
 import { Skeleton } from '@workspace/ui/components/skeleton';
 import { Badge } from '@workspace/ui/components/badge';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@workspace/ui/components/dropdown-menu';
 import { Input } from '@workspace/ui/components/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@workspace/ui/components/card';
 import { Alert, AlertDescription, AlertTitle } from '@workspace/ui/components/alert';
 import { cn } from '@workspace/ui/lib/utils';
 import type { ActiveTable } from '../types';
-import { useEncryption } from '@workspace/active-tables-hooks';
+import { useEncryption } from '../hooks/use-encryption-stub';
 
 const formatStatusLabel = (tableType?: string) => {
   if (!tableType) return 'standard';
@@ -44,13 +37,12 @@ const formatStatusLabel = (tableType?: string) => {
 
 export const ActiveTablesPage = () => {
   const locale = 'en'; // Placeholder for locale
-  const location = useLocation();
-  const { data: workspacesData, isLoading: isWorkspacesLoading } = useWorkspaces();
   const navigate = useNavigate();
-  const workspaceOptions = useMemo(() => workspacesData?.data ?? [], [workspacesData]);
-  const search = (location.search ?? {}) as Record<string, unknown>;
-  const workspaceParam = typeof search.workspaceId === 'string' ? search.workspaceId : undefined;
-  const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string>(workspaceParam || '');
+
+  // Get workspace from Zustand store (single source of truth)
+  const currentWorkspace = useSidebarStore(selectCurrentWorkspace);
+  const selectedWorkspaceId = currentWorkspace?.id || '';
+
   const [selectedWorkGroupId, setSelectedWorkGroupId] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isTableDialogOpen, setIsTableDialogOpen] = useState(false);
@@ -65,18 +57,14 @@ export const ActiveTablesPage = () => {
   // Priority STATUS filters (most common, shown by default)
   const priorityStatusFilters = ['employee profile', 'department', 'work process', 'contract'];
 
-  useEffect(() => {
-    if (!selectedWorkspaceId && workspaceOptions.length > 0) {
-      setSelectedWorkspaceId(workspaceOptions[0]!.id);
-    }
-  }, [selectedWorkspaceId, workspaceOptions]);
-
+  // Reset filters when workspace changes
   useEffect(() => {
     setStatusFilter('all');
     setEncryptionFilter('all');
     setAutomationFilter('all');
     setSearchQuery('');
     setShowAllStatusFilters(false);
+    setSelectedWorkGroupId('all');
   }, [selectedWorkspaceId]);
 
   const {
@@ -189,10 +177,6 @@ export const ActiveTablesPage = () => {
     }
   }, [statusOptions, statusFilter]);
 
-  const workspaceName = useMemo(
-    () => workspaceOptions.find((workspace) => workspace.id === selectedWorkspaceId)?.workspaceName,
-    [workspaceOptions, selectedWorkspaceId],
-  );
   const shouldShowEncryptionReminder = encryptedTables > 0 && !isEncryptionReady;
   const activeFilterCount =
     (statusFilter !== 'all' ? 1 : 0) +
@@ -268,8 +252,8 @@ export const ActiveTablesPage = () => {
           <div className="space-y-1">
             <h1 className="text-3xl font-bold tracking-tight">{m.activeTables_page_title()}</h1>
             <p className="text-sm text-muted-foreground">
-              {workspaceName
-                ? `Workspace • ${workspaceName}`
+              {currentWorkspace?.workspaceName
+                ? `Workspace • ${currentWorkspace.workspaceName}`
                 : m.activeTables_page_subtitle()}
             </p>
           </div>
@@ -285,34 +269,9 @@ export const ActiveTablesPage = () => {
               />
             </div>
             <div className="flex items-center gap-2">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="h-10 min-w-[220px] justify-between rounded-lg">
-                    <span className="truncate text-sm">
-                      {isWorkspacesLoading
-                        ? m.activeTables_page_workspaceLoading()
-                        : workspaceName ?? m.activeTables_page_workspacePlaceholder()}
-                    </span>
-                    <ChevronDown className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-64">
-                  {workspaceOptions.map((workspace) => (
-                    <DropdownMenuItem
-                      key={workspace.id}
-                      onSelect={() => setSelectedWorkspaceId(workspace.id)}
-                      className="flex flex-col items-start gap-1"
-                    >
-                      <span className="font-medium leading-tight">{workspace.workspaceName}</span>
-                      {workspace.namespace ? (
-                        <span className="text-xs uppercase tracking-wide text-muted-foreground">
-                          {workspace.namespace}
-                        </span>
-                      ) : null}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <div className="text-sm text-muted-foreground">
+                Workspace • <span className="font-medium text-foreground">{currentWorkspace?.workspaceName || 'No workspace'}</span>
+              </div>
               <Button variant="outline" size="icon" disabled={isTablesLoading} onClick={() => refetch()}>
                 <RefreshCw className={cn('h-4 w-4', isFetching && 'animate-spin')} />
               </Button>

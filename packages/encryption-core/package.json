@@ -20,6 +20,7 @@
     "test:verify": "tsx src/legacy/__tests__/verify.ts"
   },
   "dependencies": {
+    "@workspace/beqeek-shared": "workspace:*",
     "crypto-js": "^4.2.0"
   },
   "devDependencies": {

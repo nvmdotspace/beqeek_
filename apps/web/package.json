@@ -22,7 +22,7 @@
     "@tanstack/react-table": "^8.21.3",
     "@types/crypto-js": "^4.2.2",
     "@workspace/active-tables-core": "workspace:*",
-    "@workspace/active-tables-hooks": "workspace:*",
+    "@workspace/beqeek-shared": "workspace:*",
     "@workspace/encryption-core": "workspace:*",
     "@workspace/ui": "workspace:*",
     "axios": "^1.12.2",

@@ -8,6 +8,26 @@
     ".": {
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
+    },
+    "./utils": {
+      "import": "./dist/utils/index.js",
+      "types": "./dist/utils/index.d.ts"
+    },
+    "./types": {
+      "import": "./dist/types/index.js",
+      "types": "./dist/types/index.d.ts"
+    },
+    "./hooks": {
+      "import": "./dist/hooks/index.js",
+      "types": "./dist/hooks/index.d.ts"
+    },
+    "./stores": {
+      "import": "./dist/stores/index.js",
+      "types": "./dist/stores/index.d.ts"
+    },
+    "./constants": {
+      "import": "./dist/constants/index.js",
+      "types": "./dist/constants/index.d.ts"
     }
   },
   "files": [
@@ -16,16 +36,27 @@
   "scripts": {
     "build": "tsc",
     "check-types": "tsc --noEmit",
-    "lint": "eslint . --max-warnings 0"
+    "lint": "eslint . --max-warnings 0",
+    "dev": "tsc --watch"
   },
   "dependencies": {
-    "@tanstack/react-table": "^8.21.3",
-    "@workspace/encryption-core": "workspace:*"
+    "@workspace/beqeek-shared": "workspace:*",
+    "@workspace/encryption-core": "workspace:*",
+    "crypto-js": "^4.2.0"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "zustand": "^5.0.0"
   },
   "devDependencies": {
+    "@types/crypto-js": "^4.2.2",
+    "@types/react": "^19.0.6",
+    "@types/react-dom": "^19.0.2",
     "@workspace/eslint-config": "workspace:*",
     "@workspace/typescript-config": "workspace:*",
     "eslint": "^9.36.0",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "zustand": "^5.0.8"
   }
 }

@@ -1,11 +1,10 @@
 import { apiRequest } from './http-client';
-import type { ActiveTablesApiClient } from '@workspace/active-tables-core';
 
 /**
  * Real API client implementation for Active Tables
- * This implements ActiveTablesApiClient interface from @workspace/active-tables-core
+ * TODO Phase 1: Define ActiveTablesApiClient interface in @workspace/active-tables-core
  */
-export class ActiveTablesApiClientImpl implements ActiveTablesApiClient {
+export class ActiveTablesApiClientImpl {
   private workspaceId: string;
 
   constructor(workspaceId: string) {
@@ -61,6 +60,6 @@ export class ActiveTablesApiClientImpl implements ActiveTablesApiClient {
 /**
  * Factory function to create API client for a specific workspace
  */
-export function createActiveTablesApiClient(workspaceId: string): ActiveTablesApiClient {
+export function createActiveTablesApiClient(workspaceId: string): ActiveTablesApiClientImpl {
   return new ActiveTablesApiClientImpl(workspaceId);
 }

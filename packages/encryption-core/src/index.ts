@@ -14,6 +14,13 @@
 // Core encryption orchestrator - Routes field encryption to appropriate algorithms
 export { CommonUtils } from './common-utils.js';
 
+// Key generation utilities
+export {
+  generateEncryptionKey,
+  validateEncryptionKey,
+  KeyGenerator,
+} from './key-generator.js';
+
 // Encryption algorithms - Legacy-compatible implementations
 export { AES256 } from './algorithms/aes-256.js';
 export { OPE, OPEncryptor } from './algorithms/ope.js';

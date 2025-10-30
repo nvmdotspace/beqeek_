@@ -4,7 +4,7 @@ import { useQueryWithAuth } from '@/hooks/use-query-with-auth';
 import { useAuthStore, selectIsAuthenticated } from '@/features/auth';
 
 import { getActiveTables, getActiveWorkGroups } from '../api/active-tables-api';
-import { useEncryption } from '@workspace/active-tables-hooks';
+import { useEncryption } from './use-encryption-stub';
 
 import type { ActiveTable, ActiveWorkGroup } from '../types';
 

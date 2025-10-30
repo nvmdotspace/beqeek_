@@ -65,9 +65,9 @@ importers:
       '@workspace/active-tables-core':
         specifier: workspace:*
         version: link:../../packages/active-tables-core
-      '@workspace/active-tables-hooks':
+      '@workspace/beqeek-shared':
         specifier: workspace:*
-        version: link:../../packages/active-tables-hooks
+        version: link:../../packages/beqeek-shared
       '@workspace/encryption-core':
         specifier: workspace:*
         version: link:../../packages/encryption-core
@@ -132,13 +132,31 @@ importers:
 
   packages/active-tables-core:
     dependencies:
-      '@tanstack/react-table':
-        specifier: ^8.21.3
-        version: 8.21.3(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+      '@workspace/beqeek-shared':
+        specifier: workspace:*
+        version: link:../beqeek-shared
       '@workspace/encryption-core':
         specifier: workspace:*
         version: link:../encryption-core
+      crypto-js:
+        specifier: ^4.2.0
+        version: 4.2.0
+      react:
+        specifier: ^19.0.0
+        version: 19.2.0
+      react-dom:
+        specifier: ^19.0.0
+        version: 19.2.0(react@19.2.0)
     devDependencies:
+      '@types/crypto-js':
+        specifier: ^4.2.2
+        version: 4.2.2
+      '@types/react':
+        specifier: ^19.0.6
+        version: 19.2.2
+      '@types/react-dom':
+        specifier: ^19.0.2
+        version: 19.2.2(@types/react@19.2.2)
       '@workspace/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
@@ -151,31 +169,12 @@ importers:
       typescript:
         specifier: ^5.9.2
         version: 5.9.3
-
-  packages/active-tables-hooks:
-    dependencies:
-      '@tanstack/react-query':
-        specifier: ^5.71.10
-        version: 5.90.5(react@19.2.0)
-      '@tanstack/react-table':
-        specifier: ^8.21.3
-        version: 8.21.3(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
-      '@workspace/active-tables-core':
-        specifier: workspace:*
-        version: link:../active-tables-core
-      '@workspace/encryption-core':
-        specifier: workspace:*
-        version: link:../encryption-core
-      react:
-        specifier: ^19.1.1
-        version: 19.2.0
       zustand:
-        specifier: ^5.0.1
+        specifier: ^5.0.8
         version: 5.0.8(@types/react@19.2.2)(react@19.2.0)(use-sync-external-store@1.6.0(react@19.2.0))
+
+  packages/beqeek-shared:
     devDependencies:
-      '@types/react':
-        specifier: ^19.1.13
-        version: 19.2.2
       '@workspace/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
@@ -191,6 +190,9 @@ importers:
 
   packages/encryption-core:
     dependencies:
+      '@workspace/beqeek-shared':
+        specifier: workspace:*
+        version: link:../beqeek-shared
       crypto-js:
         specifier: ^4.2.0
         version: 4.2.0

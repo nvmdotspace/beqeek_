@@ -11,6 +11,7 @@ import {
   selectCanViewSection,
   selectCanCreateItem,
 } from '@/stores/sidebar-store';
+import React from 'react';
 
 interface MobileBottomNavProps {
   className?: string;
@@ -84,11 +85,9 @@ export const MobileBottomNav = ({ className }: MobileBottomNavProps) => {
     }
 
     // Check permissions
-    if (item.requiresPermission && !canViewSection(item.requiresPermission)) {
-      return false;
-    }
+    return !(item.requiresPermission && !canViewSection(item.requiresPermission));
 
-    return true;
+
   });
 
   return (
