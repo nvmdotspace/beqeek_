@@ -3,13 +3,30 @@ import { useMemo } from 'react';
 import { useQueryWithAuth } from '@/hooks/use-query-with-auth';
 import { useAuthStore, selectIsAuthenticated } from '@/features/auth';
 
-import { getActiveTables, getActiveWorkGroups } from '../api/active-tables-api';
+import {
+  getActiveTables,
+  getActiveWorkGroups,
+  getActiveTable,
+  getActiveTableRecords,
+  type RecordQueryRequest
+} from '../api/active-tables-api';
 import { useEncryption } from './use-encryption-stub';
 
 import type { ActiveTable, ActiveWorkGroup } from '../types';
 
 export const activeWorkGroupsQueryKey = (workspaceId?: string) => ['active-work-groups', workspaceId ?? 'unknown'];
 export const activeTablesQueryKey = (workspaceId?: string) => ['active-tables', workspaceId ?? 'unknown'];
+export const activeTableQueryKey = (workspaceId?: string, tableId?: string) => [
+  'active-table',
+  workspaceId ?? 'unknown',
+  tableId ?? 'unknown',
+];
+export const activeTableRecordsQueryKey = (workspaceId?: string, tableId?: string, params?: RecordQueryRequest) => [
+  'active-table-records',
+  workspaceId ?? 'unknown',
+  tableId ?? 'unknown',
+  params ?? {},
+];
 
 export const useActiveWorkGroups = (workspaceId?: string) => {
   const isAuthenticated = useAuthStore(selectIsAuthenticated);
@@ -28,6 +45,30 @@ export const useActiveTables = (workspaceId?: string) => {
     queryKey: activeTablesQueryKey(workspaceId),
     queryFn: () => getActiveTables(workspaceId!),
     enabled: isAuthenticated && !!workspaceId,
+  });
+};
+
+export const useActiveTable = (workspaceId?: string, tableId?: string) => {
+  const isAuthenticated = useAuthStore(selectIsAuthenticated);
+
+  return useQueryWithAuth({
+    queryKey: activeTableQueryKey(workspaceId, tableId),
+    queryFn: () => getActiveTable(workspaceId!, tableId!),
+    enabled: isAuthenticated && !!workspaceId && !!tableId,
+  });
+};
+
+export const useActiveTableRecords = (
+  workspaceId?: string,
+  tableId?: string,
+  params?: RecordQueryRequest
+) => {
+  const isAuthenticated = useAuthStore(selectIsAuthenticated);
+
+  return useQueryWithAuth({
+    queryKey: activeTableRecordsQueryKey(workspaceId, tableId, params),
+    queryFn: () => getActiveTableRecords(workspaceId!, tableId!, params),
+    enabled: isAuthenticated && !!workspaceId && !!tableId,
   });
 };
 
@@ -80,5 +121,63 @@ export const useActiveTablesGroupedByWorkGroup = (workspaceId?: string) => {
     // Additional hooks integration
     isEncryptionReady,
     initializeEncryption,
+  };
+};
+
+/**
+ * Combined hook that ensures table config is loaded before fetching records
+ * This prevents race conditions where records API returns before table config
+ * is available, which is critical for proper encryption/decryption handling
+ */
+export const useActiveTableRecordsWithConfig = (
+  workspaceId?: string,
+  tableId?: string,
+  params?: RecordQueryRequest
+) => {
+  const isAuthenticated = useAuthStore(selectIsAuthenticated);
+
+  // Step 1: Load table details first
+  const tableQuery = useActiveTable(workspaceId, tableId);
+  const table = tableQuery.data?.data;
+
+  // Step 2: Only enable records query when table config is available
+  const recordsQuery = useQueryWithAuth({
+    queryKey: activeTableRecordsQueryKey(workspaceId, tableId, params),
+    queryFn: () => getActiveTableRecords(workspaceId!, tableId!, params),
+    // Wait for table config to be loaded before fetching records
+    enabled: isAuthenticated && !!workspaceId && !!tableId && !!table?.config,
+  });
+
+  const records = recordsQuery.data?.data ?? [];
+  const nextId = recordsQuery.data?.next_id ?? null;
+  const previousId = recordsQuery.data?.previous_id ?? null;
+  const isReady = !tableQuery.isLoading && !!table?.config && !recordsQuery.isLoading;
+
+  return {
+    // Table data
+    table,
+    tableLoading: tableQuery.isLoading,
+    tableError: tableQuery.error,
+
+    // Records data
+    records,
+    recordsLoading: recordsQuery.isLoading,
+    recordsError: recordsQuery.error,
+
+    // Pagination
+    nextId,
+    previousId,
+
+    // Combined state
+    isReady,
+    isLoading: tableQuery.isLoading || recordsQuery.isLoading,
+    error: tableQuery.error || recordsQuery.error,
+
+    // Refetch functions
+    refetchTable: tableQuery.refetch,
+    refetchRecords: recordsQuery.refetch,
+    refetchAll: async () => {
+      await Promise.all([tableQuery.refetch(), recordsQuery.refetch()]);
+    },
   };
 };

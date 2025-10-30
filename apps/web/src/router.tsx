@@ -24,6 +24,11 @@ const ActiveTableSettingsPageLazy = lazy(() =>
     default: m.ActiveTableSettingsPage,
   })),
 );
+const ActiveTableRecordsPageLazy = lazy(() =>
+  import('@/features/active-tables/pages/active-table-records-page').then((m) => ({
+    default: m.ActiveTableRecordsPage,
+  })),
+);
 const WorkflowsPageLazy = lazy(() =>
   import('@/features/workflows/pages/workflows-page').then((m) => ({ default: m.WorkflowsPage })),
 );
@@ -137,6 +142,25 @@ const activeTableDetailRoute = createRoute({
   component: () => (
     <Suspense fallback={<div className="p-6">Loading...</div>}>
       <ActiveTableDetailPageLazy />
+    </Suspense>
+  ),
+  beforeLoad: () => {
+    const isAuthenticated = getIsAuthenticated();
+    if (!isAuthenticated) {
+      throw redirect({ to: '/login' });
+    }
+  },
+});
+
+const activeTableRecordsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/workspaces/tables/$tableId/records',
+  validateSearch: (search: Record<string, unknown>) => ({
+    workspaceId: typeof search.workspaceId === 'string' ? search.workspaceId : undefined,
+  }),
+  component: () => (
+    <Suspense fallback={<div className="p-6">Loading...</div>}>
+      <ActiveTableRecordsPageLazy />
     </Suspense>
   ),
   beforeLoad: () => {
@@ -408,6 +432,26 @@ const localeActiveTableDetailRoute = createRoute({
   },
 });
 
+const localeActiveTableRecordsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/$locale/workspaces/tables/$tableId/records',
+  validateSearch: (search: Record<string, unknown>) => ({
+    workspaceId: typeof search.workspaceId === 'string' ? search.workspaceId : undefined,
+  }),
+  component: () => (
+    <Suspense fallback={<div className="p-6">Loading...</div>}>
+      <ActiveTableRecordsPageLazy />
+    </Suspense>
+  ),
+  beforeLoad: ({ params }) => {
+    const locale = normalizeLocale(params.locale);
+    const isAuthenticated = getIsAuthenticated();
+    if (!isAuthenticated) {
+      throw redirect({ to: lp('/login', locale) });
+    }
+  },
+});
+
 const localeActiveTableSettingsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/$locale/workspaces/tables/$tableId/settings',
@@ -610,6 +654,7 @@ const routeTree = rootRoute.addChildren([
   workspacesRoute,
   activeTablesRoute,
   activeTableDetailRoute,
+  activeTableRecordsRoute,
   activeTableSettingsRoute,
   workflowsRoute,
   teamRoute,
@@ -626,6 +671,7 @@ const routeTree = rootRoute.addChildren([
   localeWorkspacesRoute,
   localeActiveTablesRoute,
   localeActiveTableDetailRoute,
+  localeActiveTableRecordsRoute,
   localeActiveTableSettingsRoute,
   localeWorkflowsRoute,
   localeTeamRoute,

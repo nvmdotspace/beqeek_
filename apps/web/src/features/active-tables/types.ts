@@ -55,9 +55,12 @@ export interface RecordListConfig {
 export interface RecordDetailConfig {
   layout: string;
   commentsPosition: string;
-  headTitleField: string;
-  headSubLineFields: string[];
-  rowTailFields: string[];
+  titleField: string;
+  subLineFields: string[];
+  tailFields: string[];
+  // Optional fields for two-column layout
+  column1Fields?: string[];
+  column2Fields?: string[];
 }
 
 export interface PermissionAction {

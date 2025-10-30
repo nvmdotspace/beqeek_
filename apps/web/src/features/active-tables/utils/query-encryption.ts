@@ -1,7 +1,11 @@
 // TODO Phase 1: Implement buildEncryptedPayload in encryption-core or move to app-specific
 // import { buildEncryptedPayload, type FieldEncryptionConfig, type EncryptedPayload } from '@workspace/encryption-core';
 import type { ActiveFieldConfig } from '../types';
-import { getEncryptionTypeForField, isEncryptableField } from '@workspace/active-tables-core';
+import {
+  getEncryptionTypeForField,
+  isEncryptableField,
+  isValidEncryptionKey,
+} from '@workspace/active-tables-core';
 
 // Temporary type stubs until Phase 1
 type EncryptedPayload = any;
@@ -186,15 +190,5 @@ export function prepareEncryptedRequest(encryptedPayload: EncryptedPayload): {
   };
 }
 
-/**
- * Validate encryption key format
- * @param key - Encryption key to validate
- * @returns true if key is valid 32-char UTF-8 string
- */
-export function isValidEncryptionKey(key: string | undefined | null): boolean {
-  if (!key || typeof key !== 'string') {
-    return false;
-  }
-  // Key must be 32 characters (matching html-module format)
-  return key.length === 32;
-}
+// NOTE: isValidEncryptionKey is now imported from @workspace/active-tables-core
+// Remove duplicate implementation to maintain single source of truth
