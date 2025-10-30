@@ -35,6 +35,8 @@ export const useActiveWorkGroups = (workspaceId?: string) => {
     queryKey: activeWorkGroupsQueryKey(workspaceId),
     queryFn: () => getActiveWorkGroups(workspaceId!),
     enabled: isAuthenticated && !!workspaceId,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000,   // 10 minutes
   });
 };
 
@@ -45,6 +47,8 @@ export const useActiveTables = (workspaceId?: string) => {
     queryKey: activeTablesQueryKey(workspaceId),
     queryFn: () => getActiveTables(workspaceId!),
     enabled: isAuthenticated && !!workspaceId,
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    gcTime: 5 * 60 * 1000,   // 5 minutes
   });
 };
 
@@ -69,6 +73,8 @@ export const useActiveTableRecords = (
     queryKey: activeTableRecordsQueryKey(workspaceId, tableId, params),
     queryFn: () => getActiveTableRecords(workspaceId!, tableId!, params),
     enabled: isAuthenticated && !!workspaceId && !!tableId,
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    gcTime: 5 * 60 * 1000,   // 5 minutes
   });
 };
 

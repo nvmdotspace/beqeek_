@@ -1,11 +1,10 @@
 import { useMemo, useState, useEffect } from 'react';
 import { ArrowLeft, ShieldCheck, Shield, Link as LinkIcon, ListTree, Lock, Database, Settings2, Hash, AlertTriangle } from 'lucide-react';
-import { useNavigate, useLocation, useParams } from '@tanstack/react-router';
+import { useNavigate, useParams } from '@tanstack/react-router';
 
 // @ts-ignore
 import { m } from "@/paraglide/generated/messages.js";
-import { useWorkspaces } from '@/features/workspace/hooks/use-workspaces';
-import { useActiveTables, useActiveWorkGroups } from '../hooks/use-active-tables';
+import { useActiveTable, useActiveWorkGroups } from '../hooks/use-active-tables';
 import type { ActiveFieldConfig, ActiveTable, ActiveWorkGroup } from '../types';
 import { useTableEncryption } from '../hooks/use-table-encryption';
 import { getEncryptionTypeForField } from '@workspace/active-tables-core';
@@ -117,18 +116,16 @@ const NotFoundState = ({ onBack }: { onBack: () => void }) => {
 };
 
 const useActiveTableDetail = (
-  tables: ActiveTable[] | undefined,
+  table: ActiveTable | undefined,
   workGroups: ActiveWorkGroup[] | undefined,
-  tableId?: string,
 ) => {
   return useMemo(() => {
-    if (!tableId) {
+    if (!table) {
       return { table: undefined, workGroup: undefined };
     }
-    const table = tables?.find((item) => item.id === tableId);
-    const workGroup = table ? workGroups?.find((group) => group.id === table.workGroupId) : undefined;
+    const workGroup = workGroups?.find((group) => group.id === table.workGroupId);
     return { table, workGroup };
-  }, [tables, workGroups, tableId]);
+  }, [table, workGroups]);
 };
 
 export const ActiveTableDetailPage = () => {
@@ -140,10 +137,13 @@ export const ActiveTableDetailPage = () => {
   const tableId = (params as any).tableId as string;
   const workspaceId = (params as any).workspaceId as string;
 
-  const { data: tablesResp, isLoading: tablesLoading, error: tablesError } = useActiveTables(workspaceId);
+  // Fetch only the specific table instead of all tables
+  const { data: tableResp, isLoading: tableLoading, error: tableError } = useActiveTable(workspaceId, tableId);
+
+  // Only fetch workGroups (we need this for the breadcrumb display)
   const { data: workGroupsResp, isLoading: workGroupsLoading } = useActiveWorkGroups(workspaceId);
 
-  const { table, workGroup } = useActiveTableDetail(tablesResp?.data, workGroupsResp?.data, tableId);
+  const { table, workGroup } = useActiveTableDetail(tableResp?.data, workGroupsResp?.data);
 
   // Encryption state and hooks
   const [isEncryptionModalOpen, setIsEncryptionModalOpen] = useState(false);
@@ -212,7 +212,7 @@ export const ActiveTableDetailPage = () => {
     </Badge>
   );
 
-  const isLoading = tablesLoading || workGroupsLoading;
+  const isLoading = tableLoading || workGroupsLoading;
 
   if (isLoading) {
     return (
@@ -226,7 +226,7 @@ export const ActiveTableDetailPage = () => {
     );
   }
 
-  if (!tableId || tablesError || !table) {
+  if (!tableId || tableError || !table) {
     return (
       <div className="space-y-6 p-6">
         <Button variant="ghost" onClick={handleBack} className="flex items-center gap-2">
