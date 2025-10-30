@@ -28,6 +28,10 @@
     "./constants": {
       "import": "./dist/constants/index.js",
       "types": "./dist/constants/index.d.ts"
+    },
+    "./components": {
+      "import": "./dist/components/index.js",
+      "types": "./dist/components/index.d.ts"
     }
   },
   "files": [
@@ -40,9 +44,13 @@
     "dev": "tsc --watch"
   },
   "dependencies": {
+    "@tanstack/react-table": "^8.20.6",
     "@workspace/beqeek-shared": "workspace:*",
     "@workspace/encryption-core": "workspace:*",
-    "crypto-js": "^4.2.0"
+    "crypto-js": "^4.2.0",
+    "date-fns": "^4.1.0",
+    "quill": "^2.0.3",
+    "react-quill": "^2.0.0"
   },
   "peerDependencies": {
     "react": "^19.0.0",

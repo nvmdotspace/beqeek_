@@ -36,6 +36,9 @@ export interface TableRecord {
   /** Record data (field_name -> value mapping) */
   record: Record<string, unknown>;
 
+  /** Alias for record data (for convenience) */
+  data?: Record<string, unknown>;
+
   /** User ID who created the record */
   createdBy?: string;
 
@@ -65,6 +68,30 @@ export interface TableRecord {
 
   /** User permissions for this record */
   permissions?: RecordPermissions;
+}
+
+// ============================================
+// Comments
+// ============================================
+
+/**
+ * Comment on a record
+ */
+export interface RecordComment {
+  /** Unique comment ID */
+  id: string;
+
+  /** Comment content */
+  content: string;
+
+  /** User ID who created the comment */
+  userId: string;
+
+  /** Creation timestamp (ISO 8601) */
+  createdAt: string;
+
+  /** Last update timestamp (ISO 8601) */
+  updatedAt: string;
 }
 
 // ============================================

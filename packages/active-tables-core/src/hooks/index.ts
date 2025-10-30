@@ -8,3 +8,4 @@ export * from './use-encryption.js';
 export * from './use-active-table.js';
 export * from './use-field-value.js';
 export * from './use-permissions.js';
+export * from './use-inline-edit.js';

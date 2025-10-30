@@ -67,6 +67,8 @@ export interface ActiveTablesMessages {
   noSearchResults?: string;
   noDataAvailable?: string;
   createFirstRecord?: string;
+  emptyValue?: string;
+  noRecordsDescription?: string;
 
   // ============================================
   // Errors
@@ -80,6 +82,9 @@ export interface ActiveTablesMessages {
   errorDecryptionFailed?: string;
   errorPermissionDenied?: string;
   errorNetworkError?: string;
+  retry?: string;
+  recordNotFound?: string;
+  recordNotFoundDescription?: string;
 
   // ============================================
   // Confirmations
@@ -152,9 +157,14 @@ export interface ActiveTablesMessages {
   addComment?: string;
   editComment?: string;
   deleteComment?: string;
+  deleteCommentConfirm?: string;
   noComments?: string;
   writeComment?: string;
   postComment?: string;
+  loadingComments?: string;
+  commentsCount?: string;
+  addCommentPlaceholder?: string;
+  edited?: string;
 
   // ============================================
   // Permissions
@@ -217,6 +227,11 @@ export interface ActiveTablesMessages {
   download?: string;
   print?: string;
   share?: string;
+  yes?: string;
+  no?: string;
+  scrollHorizontally?: string;
+  selectPlaceholder?: string;
+  multiSelectHint?: string;
 }
 
 /**

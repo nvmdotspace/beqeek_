@@ -9,6 +9,47 @@ import type { WorkGroup, Table } from './common.js';
 import type { TableRecord } from './record.js';
 
 // ============================================
+// User Types
+// ============================================
+
+/**
+ * Current authenticated user
+ */
+export interface CurrentUser {
+  /** User ID */
+  id: string;
+
+  /** User name */
+  name: string;
+
+  /** User email */
+  email: string;
+
+  /** Optional avatar URL */
+  avatar?: string;
+}
+
+/**
+ * Workspace user (for user field rendering and mentions)
+ */
+export interface WorkspaceUser {
+  /** User ID */
+  id: string;
+
+  /** User name */
+  name: string;
+
+  /** User email */
+  email: string;
+
+  /** Optional avatar URL */
+  avatar?: string;
+
+  /** Optional role */
+  role?: string;
+}
+
+// ============================================
 // Generic Response
 // ============================================
 

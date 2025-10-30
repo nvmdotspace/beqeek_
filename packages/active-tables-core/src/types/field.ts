@@ -5,58 +5,128 @@
  */
 
 // ============================================
-// Field Types Constants
+// Field Types Constants (Re-exported from beqeek-shared)
 // ============================================
 
-/**
- * All supported field types in Active Tables
- */
+import {
+  FIELD_TYPE_SHORT_TEXT,
+  FIELD_TYPE_TEXT,
+  FIELD_TYPE_RICH_TEXT,
+  FIELD_TYPE_EMAIL,
+  FIELD_TYPE_URL,
+  FIELD_TYPE_DATE,
+  FIELD_TYPE_DATETIME,
+  FIELD_TYPE_TIME,
+  FIELD_TYPE_YEAR,
+  FIELD_TYPE_MONTH,
+  FIELD_TYPE_DAY,
+  FIELD_TYPE_HOUR,
+  FIELD_TYPE_MINUTE,
+  FIELD_TYPE_SECOND,
+  FIELD_TYPE_INTEGER,
+  FIELD_TYPE_NUMERIC,
+  FIELD_TYPE_CHECKBOX_YES_NO,
+  FIELD_TYPE_CHECKBOX_ONE,
+  FIELD_TYPE_CHECKBOX_LIST,
+  FIELD_TYPE_SELECT_ONE,
+  FIELD_TYPE_SELECT_LIST,
+  FIELD_TYPE_SELECT_ONE_RECORD,
+  FIELD_TYPE_SELECT_LIST_RECORD,
+  FIELD_TYPE_SELECT_ONE_WORKSPACE_USER,
+  FIELD_TYPE_SELECT_LIST_WORKSPACE_USER,
+  FIELD_TYPE_FIRST_REFERENCE_RECORD,
+} from '@workspace/beqeek-shared/constants';
+
+// Re-export for external use
+export {
+  FIELD_TYPE_SHORT_TEXT,
+  FIELD_TYPE_TEXT,
+  FIELD_TYPE_RICH_TEXT,
+  FIELD_TYPE_EMAIL,
+  FIELD_TYPE_URL,
+  FIELD_TYPE_DATE,
+  FIELD_TYPE_DATETIME,
+  FIELD_TYPE_TIME,
+  FIELD_TYPE_YEAR,
+  FIELD_TYPE_MONTH,
+  FIELD_TYPE_DAY,
+  FIELD_TYPE_HOUR,
+  FIELD_TYPE_MINUTE,
+  FIELD_TYPE_SECOND,
+  FIELD_TYPE_INTEGER,
+  FIELD_TYPE_NUMERIC,
+  FIELD_TYPE_CHECKBOX_YES_NO,
+  FIELD_TYPE_CHECKBOX_ONE,
+  FIELD_TYPE_CHECKBOX_LIST,
+  FIELD_TYPE_SELECT_ONE,
+  FIELD_TYPE_SELECT_LIST,
+  FIELD_TYPE_SELECT_ONE_RECORD,
+  FIELD_TYPE_SELECT_LIST_RECORD,
+  FIELD_TYPE_SELECT_ONE_WORKSPACE_USER,
+  FIELD_TYPE_SELECT_LIST_WORKSPACE_USER,
+  FIELD_TYPE_FIRST_REFERENCE_RECORD,
+};
+
+// Import and re-export groups and types
+import {
+  TEXT_FIELD_TYPES,
+  TIME_FIELD_TYPES,
+  NUMBER_FIELD_TYPES,
+  SELECTION_FIELD_TYPES,
+  REFERENCE_FIELD_TYPES,
+  ALL_FIELD_TYPES,
+  type FieldType,
+  type TextFieldType,
+  type TimeFieldType,
+  type NumberFieldType,
+  type SelectionFieldType,
+  type ReferenceFieldType,
+} from '@workspace/beqeek-shared/constants';
+
+export {
+  TEXT_FIELD_TYPES,
+  TIME_FIELD_TYPES,
+  NUMBER_FIELD_TYPES,
+  SELECTION_FIELD_TYPES,
+  REFERENCE_FIELD_TYPES,
+  ALL_FIELD_TYPES,
+  type FieldType,
+  type TextFieldType,
+  type TimeFieldType,
+  type NumberFieldType,
+  type SelectionFieldType,
+  type ReferenceFieldType,
+};
+
+// Legacy FIELD_TYPES object for backward compatibility
 export const FIELD_TYPES = {
-  // Text fields
-  SHORT_TEXT: 'SHORT_TEXT',
-  TEXT: 'TEXT',
-  RICH_TEXT: 'RICH_TEXT',
-  EMAIL: 'EMAIL',
-  URL: 'URL',
-  PHONE: 'PHONE',
-
-  // Number fields
-  INTEGER: 'INTEGER',
-  NUMERIC: 'NUMERIC',
-  CURRENCY: 'CURRENCY',
-  PERCENTAGE: 'PERCENTAGE',
-  RATING: 'RATING',
-
-  // Date/Time fields
-  DATE: 'DATE',
-  DATETIME: 'DATETIME',
-  TIME: 'TIME',
-  YEAR: 'YEAR',
-  MONTH: 'MONTH',
-  DAY: 'DAY',
-  HOUR: 'HOUR',
-  MINUTE: 'MINUTE',
-  SECOND: 'SECOND',
-
-  // Selection fields
-  SELECT_ONE: 'SELECT_ONE',
-  SELECT_LIST: 'SELECT_LIST',
-  CHECKBOX_YES_NO: 'CHECKBOX_YES_NO',
-  CHECKBOX_ONE: 'CHECKBOX_ONE',
-  CHECKBOX_LIST: 'CHECKBOX_LIST',
-
-  // Reference fields
-  SELECT_ONE_RECORD: 'SELECT_ONE_RECORD',
-  SELECT_LIST_RECORD: 'SELECT_LIST_RECORD',
-
-  // Special fields
-  FILE: 'FILE',
-  IMAGE: 'IMAGE',
-  LOCATION: 'LOCATION',
-  JSON: 'JSON',
+  SHORT_TEXT: FIELD_TYPE_SHORT_TEXT,
+  TEXT: FIELD_TYPE_TEXT,
+  RICH_TEXT: FIELD_TYPE_RICH_TEXT,
+  EMAIL: FIELD_TYPE_EMAIL,
+  URL: FIELD_TYPE_URL,
+  DATE: FIELD_TYPE_DATE,
+  DATETIME: FIELD_TYPE_DATETIME,
+  TIME: FIELD_TYPE_TIME,
+  YEAR: FIELD_TYPE_YEAR,
+  MONTH: FIELD_TYPE_MONTH,
+  DAY: FIELD_TYPE_DAY,
+  HOUR: FIELD_TYPE_HOUR,
+  MINUTE: FIELD_TYPE_MINUTE,
+  SECOND: FIELD_TYPE_SECOND,
+  INTEGER: FIELD_TYPE_INTEGER,
+  NUMERIC: FIELD_TYPE_NUMERIC,
+  CHECKBOX_YES_NO: FIELD_TYPE_CHECKBOX_YES_NO,
+  CHECKBOX_ONE: FIELD_TYPE_CHECKBOX_ONE,
+  CHECKBOX_LIST: FIELD_TYPE_CHECKBOX_LIST,
+  SELECT_ONE: FIELD_TYPE_SELECT_ONE,
+  SELECT_LIST: FIELD_TYPE_SELECT_LIST,
+  SELECT_ONE_RECORD: FIELD_TYPE_SELECT_ONE_RECORD,
+  SELECT_LIST_RECORD: FIELD_TYPE_SELECT_LIST_RECORD,
+  SELECT_ONE_WORKSPACE_USER: FIELD_TYPE_SELECT_ONE_WORKSPACE_USER,
+  SELECT_LIST_WORKSPACE_USER: FIELD_TYPE_SELECT_LIST_WORKSPACE_USER,
+  FIRST_REFERENCE_RECORD: FIELD_TYPE_FIRST_REFERENCE_RECORD,
 } as const;
-
-export type FieldType = typeof FIELD_TYPES[keyof typeof FIELD_TYPES];
 
 // ============================================
 // Field Option
@@ -97,6 +167,12 @@ export interface FieldConfig {
 
   /** Options for selection fields */
   options?: FieldOption[];
+
+  /** Field name to use as label for reference/user fields */
+  referenceLabelField?: string;
+
+  /** Help text to display below field */
+  helpText?: string;
 }
 
 // ============================================
@@ -104,78 +180,36 @@ export interface FieldConfig {
 // ============================================
 
 /**
- * Text field types
+ * Check if field type is a text field
  */
-export const TEXT_FIELD_TYPES = [
-  FIELD_TYPES.SHORT_TEXT,
-  FIELD_TYPES.TEXT,
-  FIELD_TYPES.RICH_TEXT,
-  FIELD_TYPES.EMAIL,
-  FIELD_TYPES.URL,
-  FIELD_TYPES.PHONE,
-] as const;
-
 export function isTextField(type: string): boolean {
   return TEXT_FIELD_TYPES.includes(type as any);
 }
 
 /**
- * Number field types
+ * Check if field type is a number field
  */
-export const NUMBER_FIELD_TYPES = [
-  FIELD_TYPES.INTEGER,
-  FIELD_TYPES.NUMERIC,
-  FIELD_TYPES.CURRENCY,
-  FIELD_TYPES.PERCENTAGE,
-  FIELD_TYPES.RATING,
-] as const;
-
 export function isNumberField(type: string): boolean {
   return NUMBER_FIELD_TYPES.includes(type as any);
 }
 
 /**
- * Date/Time field types
+ * Check if field type is a date/time field
  */
-export const DATE_TIME_FIELD_TYPES = [
-  FIELD_TYPES.DATE,
-  FIELD_TYPES.DATETIME,
-  FIELD_TYPES.TIME,
-  FIELD_TYPES.YEAR,
-  FIELD_TYPES.MONTH,
-  FIELD_TYPES.DAY,
-  FIELD_TYPES.HOUR,
-  FIELD_TYPES.MINUTE,
-  FIELD_TYPES.SECOND,
-] as const;
-
 export function isDateTimeField(type: string): boolean {
-  return DATE_TIME_FIELD_TYPES.includes(type as any);
+  return TIME_FIELD_TYPES.includes(type as any);
 }
 
 /**
- * Selection field types (use options)
+ * Check if field type is a selection field
  */
-export const SELECTION_FIELD_TYPES = [
-  FIELD_TYPES.SELECT_ONE,
-  FIELD_TYPES.SELECT_LIST,
-  FIELD_TYPES.CHECKBOX_YES_NO,
-  FIELD_TYPES.CHECKBOX_ONE,
-  FIELD_TYPES.CHECKBOX_LIST,
-] as const;
-
 export function isSelectionField(type: string): boolean {
   return SELECTION_FIELD_TYPES.includes(type as any);
 }
 
 /**
- * Reference field types (reference other records)
+ * Check if field type is a reference field
  */
-export const REFERENCE_FIELD_TYPES = [
-  FIELD_TYPES.SELECT_ONE_RECORD,
-  FIELD_TYPES.SELECT_LIST_RECORD,
-] as const;
-
 export function isReferenceField(type: string): boolean {
   return REFERENCE_FIELD_TYPES.includes(type as any);
 }

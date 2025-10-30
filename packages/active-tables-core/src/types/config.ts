@@ -90,20 +90,26 @@ export interface RecordListConfig {
  * Configuration for Record Detail view
  */
 export interface RecordDetailConfig {
-  /** Layout type: 'single-column' | 'two-column' */
+  /** Layout type: 'head-detail' | 'single-column' | 'two-column' | 'two-columns' */
   layout: string;
 
-  /** Comments position: 'right' | 'bottom' | 'none' */
+  /** Comments position: 'right-panel' | 'right' | 'bottom' | 'none' */
   commentsPosition: string;
 
-  /** Field name for header title */
-  headTitleField: string;
+  /** Field name for title */
+  titleField: string;
 
-  /** Field names for header subline */
-  headSubLineFields: string[];
+  /** Field names for subline (below title) */
+  subLineFields: string[];
 
-  /** Field names for row tail (right side) */
-  rowTailFields: string[];
+  /** Field names for tail fields (single column layout) */
+  tailFields: string[];
+
+  /** Field names for column 1 (two column layout) */
+  column1Fields?: string[];
+
+  /** Field names for column 2 (two column layout) */
+  column2Fields?: string[];
 }
 
 // ============================================

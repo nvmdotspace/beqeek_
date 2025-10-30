@@ -61,6 +61,8 @@ export const DEFAULT_MESSAGES: Required<ActiveTablesMessages> = {
   noSearchResults: 'No search results',
   noDataAvailable: 'No data available',
   createFirstRecord: 'Create your first record',
+  emptyValue: '—',
+  noRecordsDescription: 'Get started by creating your first record',
 
   // Errors
   errorLoadingRecords: 'Error loading records',
@@ -72,6 +74,9 @@ export const DEFAULT_MESSAGES: Required<ActiveTablesMessages> = {
   errorDecryptionFailed: 'Decryption failed',
   errorPermissionDenied: 'Permission denied',
   errorNetworkError: 'Network error',
+  retry: 'Retry',
+  recordNotFound: 'Record not found',
+  recordNotFoundDescription: 'The record you are looking for does not exist or has been deleted',
 
   // Confirmations
   confirmDelete: 'Are you sure you want to delete?',
@@ -130,9 +135,14 @@ export const DEFAULT_MESSAGES: Required<ActiveTablesMessages> = {
   addComment: 'Add comment',
   editComment: 'Edit comment',
   deleteComment: 'Delete comment',
+  deleteCommentConfirm: 'Are you sure you want to delete this comment?',
   noComments: 'No comments yet',
   writeComment: 'Write a comment...',
   postComment: 'Post comment',
+  loadingComments: 'Loading comments...',
+  commentsCount: 'comments',
+  addCommentPlaceholder: 'Write a comment...',
+  edited: 'edited',
 
   // Permissions
   noPermission: 'No permission',
@@ -183,6 +193,11 @@ export const DEFAULT_MESSAGES: Required<ActiveTablesMessages> = {
   download: 'Download',
   print: 'Print',
   share: 'Share',
+  yes: 'Yes',
+  no: 'No',
+  scrollHorizontally: 'Scroll horizontally to see all columns',
+  selectPlaceholder: 'Select an option',
+  multiSelectHint: 'Hold Ctrl/Cmd to select multiple options',
 };
 
 /**

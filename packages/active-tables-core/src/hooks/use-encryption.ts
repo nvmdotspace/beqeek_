@@ -5,7 +5,7 @@
  * Wraps encryption utilities with React state management
  */
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import {
   decryptFieldValue,
   decryptRecord,
@@ -16,6 +16,7 @@ import {
 } from '../utils/index.js';
 import type { FieldConfig } from '../types/field.js';
 import type { TableRecord } from '../types/record.js';
+import type { Table } from '../types/common.js';
 
 // ============================================
 // Types
@@ -263,5 +264,39 @@ export function useEncryption(options: UseEncryptionOptions = {}): UseEncryption
     decryptField,
     decryptSingleRecord,
     decryptMultipleRecords,
+  };
+}
+
+// ============================================
+// useRecordDecryption Hook (Simplified)
+// ============================================
+
+/**
+ * Simplified hook for decrypting records in components
+ *
+ * @example
+ * ```tsx
+ * const { decryptRecord } = useRecordDecryption(table, encryptionKey);
+ * const displayRecord = decryptRecord(record);
+ * ```
+ */
+export function useRecordDecryption(table: Table, encryptionKey?: string) {
+  const fields = useMemo(() => table.config.fields || [], [table.config.fields]);
+
+  const decryptRecordFunc = useCallback(
+    (record: TableRecord): TableRecord => {
+      // Note: This hook assumes records are already decrypted before being passed to components.
+      // The actual decryption should happen at the API/data layer, not during render.
+      // This function just normalizes the record format to ensure `data` property exists.
+      return {
+        ...record,
+        data: record.data || record.record,
+      };
+    },
+    []
+  );
+
+  return {
+    decryptRecord: decryptRecordFunc,
   };
 }
