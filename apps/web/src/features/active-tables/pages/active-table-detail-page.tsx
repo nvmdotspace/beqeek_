@@ -9,6 +9,7 @@ import { useActiveTables, useActiveWorkGroups } from '../hooks/use-active-tables
 import type { ActiveFieldConfig, ActiveTable, ActiveWorkGroup } from '../types';
 import { useTableEncryption } from '../hooks/use-table-encryption';
 import { getEncryptionTypeForField } from '@workspace/active-tables-core';
+import { useCurrentLocale } from '@/hooks/use-current-locale';
 
 import { Button } from '@workspace/ui/components/button';
 import { Badge } from '@workspace/ui/components/badge';
@@ -132,18 +133,12 @@ const useActiveTableDetail = (
 
 export const ActiveTableDetailPage = () => {
   const params = useParams({ strict: false });
-  const location = useLocation();
   const navigate = useNavigate();
-  const locale = 'en'; // Placeholder for locale
-  const tableId = params.tableId as string;
-  const localeParam = location.pathname.split('/')[1];
-  const searchState = (location.search ?? {}) as Record<string, unknown>;
-  const searchWorkspaceId = typeof searchState.workspaceId === 'string' ? searchState.workspaceId : undefined;
-  const localePrefix = localeParam ? `/${localeParam}` : (locale as string) === 'vi' ? '' : `/${locale}`;
+  const locale = useCurrentLocale();
 
-  const { data: workspacesData } = useWorkspaces();
-  const workspaceOptions = workspacesData?.data ?? [];
-  const workspaceId = searchWorkspaceId ?? workspaceOptions[0]?.id;
+  // Extract params from URL - these are now the source of truth
+  const tableId = (params as any).tableId as string;
+  const workspaceId = (params as any).workspaceId as string;
 
   const { data: tablesResp, isLoading: tablesLoading, error: tablesError } = useActiveTables(workspaceId);
   const { data: workGroupsResp, isLoading: workGroupsLoading } = useActiveWorkGroups(workspaceId);
@@ -170,22 +165,27 @@ export const ActiveTableDetailPage = () => {
   };
 
   const handleBack = () => {
-    navigate({ to: `${localePrefix}/workspaces/tables`, search: workspaceId ? { workspaceId } : undefined });
+    navigate({
+      to: '/$locale/workspaces/$workspaceId/tables',
+      params: { locale: locale || 'vi', workspaceId },
+    });
   };
 
   const handleViewRecords = () => {
-    if (!tableId) return;
+    if (!tableId || !workspaceId) return;
+
     navigate({
-      to: `${localePrefix}/workspaces/tables/${tableId}/records`,
-      search: workspaceId ? { workspaceId } : undefined,
+      to: '/$locale/workspaces/$workspaceId/tables/$tableId/records',
+      params: { locale: locale || 'vi', workspaceId, tableId },
     });
   };
 
   const handleViewSettings = () => {
-    if (!tableId) return;
+    if (!tableId || !workspaceId) return;
+
     navigate({
-      to: `${localePrefix}/workspaces/tables/${tableId}/settings`,
-      search: workspaceId ? { workspaceId } : undefined,
+      to: '/$locale/workspaces/$workspaceId/tables/$tableId/settings',
+      params: { locale: locale || 'vi', workspaceId, tableId },
     });
   };
 

@@ -1,6 +1,7 @@
 import { useEffect, useCallback } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useSidebarStore } from '@/stores/sidebar-store';
+import { useCurrentLocale } from './use-current-locale';
 
 interface KeyboardShortcut {
   key: string;
@@ -48,6 +49,7 @@ export const useKeyboardShortcuts = (shortcuts: KeyboardShortcut[]) => {
 // Predefined shortcuts for the app
 export const useAppKeyboardShortcuts = () => {
   const navigate = useNavigate();
+  const locale = useCurrentLocale();
   const currentWorkspace = useSidebarStore((state) => state.currentWorkspace);
   const toggleSidebar = useSidebarStore((state) => state.toggleSidebar);
   const setActiveSection = useSidebarStore((state) => state.setActiveSection);
@@ -65,7 +67,10 @@ export const useAppKeyboardShortcuts = () => {
       ctrlKey: true,
       action: () => {
         if (currentWorkspace) {
-          navigate({ to: '/workspaces/tables' });
+          navigate({
+            to: '/$locale/workspaces/$workspaceId/tables',
+            params: { locale, workspaceId: currentWorkspace.id }
+          });
           setActiveSection('tables');
         }
       },
@@ -77,7 +82,10 @@ export const useAppKeyboardShortcuts = () => {
       ctrlKey: true,
       action: () => {
         if (currentWorkspace) {
-          navigate({ to: '/workspaces/tables' }); // Placeholder for workflows
+          navigate({
+            to: '/$locale/workspaces/$workspaceId/workflows',
+            params: { locale, workspaceId: currentWorkspace.id }
+          });
           setActiveSection('workflow');
         }
       },
@@ -89,7 +97,10 @@ export const useAppKeyboardShortcuts = () => {
       ctrlKey: true,
       action: () => {
         if (currentWorkspace) {
-          navigate({ to: '/workspaces' }); // Placeholder for team
+          navigate({
+            to: '/$locale/workspaces/$workspaceId/team',
+            params: { locale, workspaceId: currentWorkspace.id }
+          });
           setActiveSection('team');
         }
       },
@@ -99,7 +110,12 @@ export const useAppKeyboardShortcuts = () => {
     {
       key: 's',
       ctrlKey: true,
-      action: () => navigate({ to: '/settings/encryption' }),
+      action: () => {
+        navigate({
+          to: '/$locale/workspaces',
+          params: { locale }
+        });
+      },
       description: 'Go to Settings',
     },
 

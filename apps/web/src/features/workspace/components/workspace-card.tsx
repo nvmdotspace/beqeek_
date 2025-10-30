@@ -12,12 +12,14 @@ import { Button } from '@workspace/ui/components/button';
 import { initialsFromName } from '../utils/initials';
 // @ts-ignore
 import { m } from "@/paraglide/generated/messages.js";
+import { useCurrentLocale } from '@/hooks/use-current-locale';
 
 type WorkspaceCardProps = {
   workspace: Workspace;
 };
 
 export const WorkspaceCard = ({ workspace }: WorkspaceCardProps) => {
+  const locale = useCurrentLocale();
   const { workspaceName, namespace, myWorkspaceUser, logo, thumbnailLogo, createdAt, ownedByUser } = workspace;
 
   return (
@@ -73,13 +75,13 @@ export const WorkspaceCard = ({ workspace }: WorkspaceCardProps) => {
       </CardContent>
       <CardFooter className="flex gap-2 pt-3">
         <Button asChild variant="outline" size="sm" className="flex-1 text-xs">
-          <Link to="/workspaces/tables" search={{ workspaceId: workspace.id }}>
+          <Link to="/$locale/workspaces/$workspaceId/tables" params={{ locale, workspaceId: workspace.id }}>
             <Database className="mr-1.5 h-3.5 w-3.5" />
             {m.workspace_card_activeTables()}
           </Link>
         </Button>
         <Button asChild size="sm" className="flex-1 text-xs">
-          <Link to="/workspaces" search={{ workspaceId: workspace.id }}>
+          <Link to="/$locale/workspaces" params={{ locale }}>
             {m.workspace_card_openWorkspace()}
           </Link>
         </Button>

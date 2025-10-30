@@ -15,7 +15,7 @@ export interface WorkspaceTeam {
   teamRoles?: WorkspaceTeamRole[];
 }
 
-interface WorkspaceTeamsResponse {
+export interface WorkspaceTeamsResponse {
   data?: {
     data?: WorkspaceTeam[];
   };

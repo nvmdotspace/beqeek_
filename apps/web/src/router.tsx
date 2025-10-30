@@ -66,7 +66,6 @@ const isSupportedLocale = (loc?: string): loc is Locale =>
   !!loc && SUPPORTED_LOCALES.includes(loc.toLowerCase() as Locale);
 const normalizeLocale = (loc?: string): Locale =>
   isSupportedLocale(loc) ? (loc!.toLowerCase() as Locale) : DEFAULT_LOCALE;
-const lp = (path: string, locale: Locale) => (locale !== DEFAULT_LOCALE ? `/${locale}${path}` : path);
 
 const rootRoute = createRootRoute({
   component: RootLayout,
@@ -74,293 +73,37 @@ const rootRoute = createRootRoute({
   errorComponent: ({ error }) => <RouteError error={error} />,
 });
 
-// Index route: default to vi, redirect to log in/workspaces
+// ========== Index Route - Always redirect to locale route ==========
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
   beforeLoad: () => {
     const isAuthenticated = getIsAuthenticated();
-    throw redirect({ to: isAuthenticated ? '/workspaces' : '/login' });
-  },
-});
-
-// vi (default) routes
-const loginRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/login',
-  component: () => (
-    <Suspense fallback={<div className="p-6">Loading...</div>}>
-      <LoginPageLazy />
-    </Suspense>
-  ),
-  beforeLoad: () => {
-    const isAuthenticated = getIsAuthenticated();
+    // Always redirect to vi locale route
     if (isAuthenticated) {
-      throw redirect({ to: '/workspaces' });
+      throw redirect({ to: '/$locale/workspaces', params: { locale: 'vi' } });
+    } else {
+      throw redirect({ to: '/$locale/login', params: { locale: 'vi' } });
     }
   },
 });
 
-const workspacesRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/workspaces',
-  component: () => (
-    <Suspense fallback={<div className="p-6">Loading...</div>}>
-      <WorkspaceDashboardPageLazy />
-    </Suspense>
-  ),
-  beforeLoad: () => {
-    const isAuthenticated = getIsAuthenticated();
-    if (!isAuthenticated) {
-      throw redirect({ to: '/login' });
-    }
-  },
-});
-
-const activeTablesRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/workspaces/tables',
-  component: () => (
-    <Suspense fallback={<div className="p-6">Loading...</div>}>
-      <ActiveTablesPageLazy />
-    </Suspense>
-  ),
-  beforeLoad: () => {
-    const isAuthenticated = getIsAuthenticated();
-    if (!isAuthenticated) {
-      throw redirect({ to: '/login' });
-    }
-  },
-});
-
-const activeTableDetailRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/workspaces/tables/$tableId',
-  validateSearch: (search: Record<string, unknown>) => ({
-    workspaceId: typeof search.workspaceId === 'string' ? search.workspaceId : undefined,
-  }),
-  component: () => (
-    <Suspense fallback={<div className="p-6">Loading...</div>}>
-      <ActiveTableDetailPageLazy />
-    </Suspense>
-  ),
-  beforeLoad: () => {
-    const isAuthenticated = getIsAuthenticated();
-    if (!isAuthenticated) {
-      throw redirect({ to: '/login' });
-    }
-  },
-});
-
-const activeTableRecordsRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/workspaces/tables/$tableId/records',
-  validateSearch: (search: Record<string, unknown>) => ({
-    workspaceId: typeof search.workspaceId === 'string' ? search.workspaceId : undefined,
-  }),
-  component: () => (
-    <Suspense fallback={<div className="p-6">Loading...</div>}>
-      <ActiveTableRecordsPageLazy />
-    </Suspense>
-  ),
-  beforeLoad: () => {
-    const isAuthenticated = getIsAuthenticated();
-    if (!isAuthenticated) {
-      throw redirect({ to: '/login' });
-    }
-  },
-});
-
-const activeTableSettingsRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/workspaces/tables/$tableId/settings',
-  validateSearch: (search: Record<string, unknown>) => ({
-    workspaceId: typeof search.workspaceId === 'string' ? search.workspaceId : undefined,
-  }),
-  component: () => (
-    <Suspense fallback={<div className="p-6">Loading...</div>}>
-      <ActiveTableSettingsPageLazy />
-    </Suspense>
-  ),
-  beforeLoad: () => {
-    const isAuthenticated = getIsAuthenticated();
-    if (!isAuthenticated) {
-      throw redirect({ to: '/login' });
-    }
-  },
-});
-
-const workflowsRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/workspaces/workflows',
-  component: () => (
-    <Suspense fallback={<div className="p-6">Loading...</div>}>
-      <WorkflowsPageLazy />
-    </Suspense>
-  ),
-  beforeLoad: () => {
-    const isAuthenticated = getIsAuthenticated();
-    if (!isAuthenticated) {
-      throw redirect({ to: '/login' });
-    }
-  },
-});
-
-const teamRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/workspaces/team',
-  component: () => (
-    <Suspense fallback={<div className="p-6">Loading...</div>}>
-      <TeamPageLazy />
-    </Suspense>
-  ),
-  beforeLoad: () => {
-    const isAuthenticated = getIsAuthenticated();
-    if (!isAuthenticated) {
-      throw redirect({ to: '/login' });
-    }
-  },
-});
-
-const rolesRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/workspaces/roles',
-  component: () => (
-    <Suspense fallback={<div className="p-6">Loading...</div>}>
-      <RolesPermissionsPageLazy />
-    </Suspense>
-  ),
-  beforeLoad: () => {
-    const isAuthenticated = getIsAuthenticated();
-    if (!isAuthenticated) {
-      throw redirect({ to: '/login' });
-    }
-  },
-});
-
-const analyticsRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/workspaces/analytics',
-  component: () => (
-    <Suspense fallback={<div className="p-6">Loading...</div>}>
-      <AnalyticsPageLazy />
-    </Suspense>
-  ),
-  beforeLoad: () => {
-    const isAuthenticated = getIsAuthenticated();
-    if (!isAuthenticated) {
-      throw redirect({ to: '/login' });
-    }
-  },
-});
-
-const starredRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/workspaces/starred',
-  component: () => (
-    <Suspense fallback={<div className="p-6">Loading...</div>}>
-      <StarredPageLazy />
-    </Suspense>
-  ),
-  beforeLoad: () => {
-    const isAuthenticated = getIsAuthenticated();
-    if (!isAuthenticated) {
-      throw redirect({ to: '/login' });
-    }
-  },
-});
-
-const recentActivityRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/workspaces/recent-activity',
-  component: () => (
-    <Suspense fallback={<div className="p-6">Loading...</div>}>
-      <RecentActivityPageLazy />
-    </Suspense>
-  ),
-  beforeLoad: () => {
-    const isAuthenticated = getIsAuthenticated();
-    if (!isAuthenticated) {
-      throw redirect({ to: '/login' });
-    }
-  },
-});
-
-const archivedRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/workspaces/archived',
-  component: () => (
-    <Suspense fallback={<div className="p-6">Loading...</div>}>
-      <ArchivedPageLazy />
-    </Suspense>
-  ),
-  beforeLoad: () => {
-    const isAuthenticated = getIsAuthenticated();
-    if (!isAuthenticated) {
-      throw redirect({ to: '/login' });
-    }
-  },
-});
-
-const notificationsRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/notifications',
-  component: () => (
-    <Suspense fallback={<div className="p-6">Loading...</div>}>
-      <NotificationsPageLazy />
-    </Suspense>
-  ),
-  beforeLoad: () => {
-    const isAuthenticated = getIsAuthenticated();
-    if (!isAuthenticated) {
-      throw redirect({ to: '/login' });
-    }
-  },
-});
-
-const searchRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/search',
-  component: () => (
-    <Suspense fallback={<div className="p-6">Loading...</div>}>
-      <SearchPageLazy />
-    </Suspense>
-  ),
-  beforeLoad: () => {
-    const isAuthenticated = getIsAuthenticated();
-    if (!isAuthenticated) {
-      throw redirect({ to: '/login' });
-    }
-  },
-});
-
-const helpRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/help',
-  component: () => (
-    <Suspense fallback={<div className="p-6">Loading...</div>}>
-      <HelpCenterPageLazy />
-    </Suspense>
-  ),
-  beforeLoad: () => {
-    const isAuthenticated = getIsAuthenticated();
-    if (!isAuthenticated) {
-      throw redirect({ to: '/login' });
-    }
-  },
-});
-
-// Locale-prefixed routes
+// ========== Locale Index Route ==========
 const localeIndexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/$locale',
   beforeLoad: ({ params }) => {
     const locale = normalizeLocale(params.locale);
     const isAuthenticated = getIsAuthenticated();
-    throw redirect({ to: lp(isAuthenticated ? '/workspaces' : '/login', locale) });
+    if (isAuthenticated) {
+      throw redirect({ to: '/$locale/workspaces', params: { locale } });
+    } else {
+      throw redirect({ to: '/$locale/login', params: { locale } });
+    }
   },
 });
 
+// ========== Login Route ==========
 const localeLoginRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/$locale/login',
@@ -373,11 +116,12 @@ const localeLoginRoute = createRoute({
     const locale = normalizeLocale(params.locale);
     const isAuthenticated = getIsAuthenticated();
     if (isAuthenticated) {
-      throw redirect({ to: lp('/workspaces', locale) });
+      throw redirect({ to: '/$locale/workspaces', params: { locale } });
     }
   },
 });
 
+// ========== Workspace Dashboard ==========
 const localeWorkspacesRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/$locale/workspaces',
@@ -390,14 +134,15 @@ const localeWorkspacesRoute = createRoute({
     const locale = normalizeLocale(params.locale);
     const isAuthenticated = getIsAuthenticated();
     if (!isAuthenticated) {
-      throw redirect({ to: lp('/login', locale) });
+      throw redirect({ to: '/$locale/login', params: { locale } });
     }
   },
 });
 
+// ========== Active Tables Routes ==========
 const localeActiveTablesRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/$locale/workspaces/tables',
+  path: '/$locale/workspaces/$workspaceId/tables',
   component: () => (
     <Suspense fallback={<div className="p-6">Loading...</div>}>
       <ActiveTablesPageLazy />
@@ -407,17 +152,14 @@ const localeActiveTablesRoute = createRoute({
     const locale = normalizeLocale(params.locale);
     const isAuthenticated = getIsAuthenticated();
     if (!isAuthenticated) {
-      throw redirect({ to: lp('/login', locale) });
+      throw redirect({ to: '/$locale/login', params: { locale } });
     }
   },
 });
 
 const localeActiveTableDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/$locale/workspaces/tables/$tableId',
-  validateSearch: (search: Record<string, unknown>) => ({
-    workspaceId: typeof search.workspaceId === 'string' ? search.workspaceId : undefined,
-  }),
+  path: '/$locale/workspaces/$workspaceId/tables/$tableId',
   component: () => (
     <Suspense fallback={<div className="p-6">Loading...</div>}>
       <ActiveTableDetailPageLazy />
@@ -427,17 +169,14 @@ const localeActiveTableDetailRoute = createRoute({
     const locale = normalizeLocale(params.locale);
     const isAuthenticated = getIsAuthenticated();
     if (!isAuthenticated) {
-      throw redirect({ to: lp('/login', locale) });
+      throw redirect({ to: '/$locale/login', params: { locale } });
     }
   },
 });
 
 const localeActiveTableRecordsRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/$locale/workspaces/tables/$tableId/records',
-  validateSearch: (search: Record<string, unknown>) => ({
-    workspaceId: typeof search.workspaceId === 'string' ? search.workspaceId : undefined,
-  }),
+  path: '/$locale/workspaces/$workspaceId/tables/$tableId/records',
   component: () => (
     <Suspense fallback={<div className="p-6">Loading...</div>}>
       <ActiveTableRecordsPageLazy />
@@ -447,17 +186,14 @@ const localeActiveTableRecordsRoute = createRoute({
     const locale = normalizeLocale(params.locale);
     const isAuthenticated = getIsAuthenticated();
     if (!isAuthenticated) {
-      throw redirect({ to: lp('/login', locale) });
+      throw redirect({ to: '/$locale/login', params: { locale } });
     }
   },
 });
 
 const localeActiveTableSettingsRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/$locale/workspaces/tables/$tableId/settings',
-  validateSearch: (search: Record<string, unknown>) => ({
-    workspaceId: typeof search.workspaceId === 'string' ? search.workspaceId : undefined,
-  }),
+  path: '/$locale/workspaces/$workspaceId/tables/$tableId/settings',
   component: () => (
     <Suspense fallback={<div className="p-6">Loading...</div>}>
       <ActiveTableSettingsPageLazy />
@@ -467,14 +203,15 @@ const localeActiveTableSettingsRoute = createRoute({
     const locale = normalizeLocale(params.locale);
     const isAuthenticated = getIsAuthenticated();
     if (!isAuthenticated) {
-      throw redirect({ to: lp('/login', locale) });
+      throw redirect({ to: '/$locale/login', params: { locale } });
     }
   },
 });
 
+// ========== Workflows Routes ==========
 const localeWorkflowsRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/$locale/workspaces/workflows',
+  path: '/$locale/workspaces/$workspaceId/workflows',
   component: () => (
     <Suspense fallback={<div className="p-6">Loading...</div>}>
       <WorkflowsPageLazy />
@@ -484,14 +221,15 @@ const localeWorkflowsRoute = createRoute({
     const locale = normalizeLocale(params.locale);
     const isAuthenticated = getIsAuthenticated();
     if (!isAuthenticated) {
-      throw redirect({ to: lp('/login', locale) });
+      throw redirect({ to: '/$locale/login', params: { locale } });
     }
   },
 });
 
+// ========== Team Routes ==========
 const localeTeamRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/$locale/workspaces/team',
+  path: '/$locale/workspaces/$workspaceId/team',
   component: () => (
     <Suspense fallback={<div className="p-6">Loading...</div>}>
       <TeamPageLazy />
@@ -501,14 +239,15 @@ const localeTeamRoute = createRoute({
     const locale = normalizeLocale(params.locale);
     const isAuthenticated = getIsAuthenticated();
     if (!isAuthenticated) {
-      throw redirect({ to: lp('/login', locale) });
+      throw redirect({ to: '/$locale/login', params: { locale } });
     }
   },
 });
 
+// ========== Roles Routes ==========
 const localeRolesRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/$locale/workspaces/roles',
+  path: '/$locale/workspaces/$workspaceId/roles',
   component: () => (
     <Suspense fallback={<div className="p-6">Loading...</div>}>
       <RolesPermissionsPageLazy />
@@ -518,14 +257,15 @@ const localeRolesRoute = createRoute({
     const locale = normalizeLocale(params.locale);
     const isAuthenticated = getIsAuthenticated();
     if (!isAuthenticated) {
-      throw redirect({ to: lp('/login', locale) });
+      throw redirect({ to: '/$locale/login', params: { locale } });
     }
   },
 });
 
+// ========== Analytics Routes ==========
 const localeAnalyticsRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/$locale/workspaces/analytics',
+  path: '/$locale/workspaces/$workspaceId/analytics',
   component: () => (
     <Suspense fallback={<div className="p-6">Loading...</div>}>
       <AnalyticsPageLazy />
@@ -535,14 +275,15 @@ const localeAnalyticsRoute = createRoute({
     const locale = normalizeLocale(params.locale);
     const isAuthenticated = getIsAuthenticated();
     if (!isAuthenticated) {
-      throw redirect({ to: lp('/login', locale) });
+      throw redirect({ to: '/$locale/login', params: { locale } });
     }
   },
 });
 
+// ========== Starred Routes ==========
 const localeStarredRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/$locale/workspaces/starred',
+  path: '/$locale/workspaces/$workspaceId/starred',
   component: () => (
     <Suspense fallback={<div className="p-6">Loading...</div>}>
       <StarredPageLazy />
@@ -552,14 +293,15 @@ const localeStarredRoute = createRoute({
     const locale = normalizeLocale(params.locale);
     const isAuthenticated = getIsAuthenticated();
     if (!isAuthenticated) {
-      throw redirect({ to: lp('/login', locale) });
+      throw redirect({ to: '/$locale/login', params: { locale } });
     }
   },
 });
 
+// ========== Recent Activity Routes ==========
 const localeRecentActivityRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/$locale/workspaces/recent-activity',
+  path: '/$locale/workspaces/$workspaceId/recent-activity',
   component: () => (
     <Suspense fallback={<div className="p-6">Loading...</div>}>
       <RecentActivityPageLazy />
@@ -569,14 +311,15 @@ const localeRecentActivityRoute = createRoute({
     const locale = normalizeLocale(params.locale);
     const isAuthenticated = getIsAuthenticated();
     if (!isAuthenticated) {
-      throw redirect({ to: lp('/login', locale) });
+      throw redirect({ to: '/$locale/login', params: { locale } });
     }
   },
 });
 
+// ========== Archived Routes ==========
 const localeArchivedRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/$locale/workspaces/archived',
+  path: '/$locale/workspaces/$workspaceId/archived',
   component: () => (
     <Suspense fallback={<div className="p-6">Loading...</div>}>
       <ArchivedPageLazy />
@@ -586,11 +329,12 @@ const localeArchivedRoute = createRoute({
     const locale = normalizeLocale(params.locale);
     const isAuthenticated = getIsAuthenticated();
     if (!isAuthenticated) {
-      throw redirect({ to: lp('/login', locale) });
+      throw redirect({ to: '/$locale/login', params: { locale } });
     }
   },
 });
 
+// ========== Notifications Routes (global, not workspace-scoped) ==========
 const localeNotificationsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/$locale/notifications',
@@ -603,11 +347,12 @@ const localeNotificationsRoute = createRoute({
     const locale = normalizeLocale(params.locale);
     const isAuthenticated = getIsAuthenticated();
     if (!isAuthenticated) {
-      throw redirect({ to: lp('/login', locale) });
+      throw redirect({ to: '/$locale/login', params: { locale } });
     }
   },
 });
 
+// ========== Search Routes (global, not workspace-scoped) ==========
 const localeSearchRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/$locale/search',
@@ -620,11 +365,12 @@ const localeSearchRoute = createRoute({
     const locale = normalizeLocale(params.locale);
     const isAuthenticated = getIsAuthenticated();
     if (!isAuthenticated) {
-      throw redirect({ to: lp('/login', locale) });
+      throw redirect({ to: '/$locale/login', params: { locale } });
     }
   },
 });
 
+// ========== Help Routes (global, not workspace-scoped) ==========
 const localeHelpRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/$locale/help',
@@ -637,35 +383,21 @@ const localeHelpRoute = createRoute({
     const locale = normalizeLocale(params.locale);
     const isAuthenticated = getIsAuthenticated();
     if (!isAuthenticated) {
-      throw redirect({ to: lp('/login', locale) });
+      throw redirect({ to: '/$locale/login', params: { locale } });
     }
   },
 });
 
+// ========== Not Found Route ==========
 const notFoundRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '*',
   component: () => <NotFound />,
 });
 
+// ========== Route Tree (ONLY locale routes) ==========
 const routeTree = rootRoute.addChildren([
   indexRoute,
-  loginRoute,
-  workspacesRoute,
-  activeTablesRoute,
-  activeTableDetailRoute,
-  activeTableRecordsRoute,
-  activeTableSettingsRoute,
-  workflowsRoute,
-  teamRoute,
-  rolesRoute,
-  analyticsRoute,
-  starredRoute,
-  recentActivityRoute,
-  archivedRoute,
-  notificationsRoute,
-  searchRoute,
-  helpRoute,
   localeIndexRoute,
   localeLoginRoute,
   localeWorkspacesRoute,

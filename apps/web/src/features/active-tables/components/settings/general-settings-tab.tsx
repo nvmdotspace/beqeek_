@@ -31,10 +31,11 @@ export const GeneralSettingsTab = ({ table, workspaceId }: GeneralSettingsTabPro
   const [showKey, setShowKey] = useState(false);
   const [keyInput, setKeyInput] = useState('');
 
-  const { isE2EEEnabled, encryptionKey, saveKey } = useTableEncryption({
-    table,
+  const { isE2EEEnabled, encryptionKey, saveKey } = useTableEncryption(
     workspaceId,
-  });
+    table.id,
+    table.config
+  );
 
   const displayKey = encryptionKey || table.config.encryptionKey || '';
   const fields = table.config.fields || [];

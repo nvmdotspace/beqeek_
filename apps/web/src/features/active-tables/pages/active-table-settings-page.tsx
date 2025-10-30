@@ -1,4 +1,4 @@
-import { useParams, useSearch } from '@tanstack/react-router';
+import { useParams, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 import { ArrowLeft, Settings2 } from 'lucide-react';
 
@@ -8,10 +8,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@work
 import { Skeleton } from '@workspace/ui/components/skeleton';
 
 import { useActiveTables } from '../hooks/use-active-tables';
-import { useWorkspaces } from '@/features/workspace';
 import { GeneralSettingsTab } from '../components/settings/general-settings-tab';
 import { FieldsSettingsTab } from '../components/settings/fields-settings-tab';
 import { SecuritySettingsTab } from '../components/settings/security-settings-tab';
+import { useCurrentLocale } from '@/hooks/use-current-locale';
 
 /**
  * Active Table Settings Page
@@ -24,13 +24,12 @@ import { SecuritySettingsTab } from '../components/settings/security-settings-ta
  */
 export const ActiveTableSettingsPage = () => {
   const params = useParams({ strict: false });
-  const tableId = params.tableId as string;
-  const searchState = useSearch({ strict: false }) as { workspaceId?: string };
-  const searchWorkspaceId = typeof searchState.workspaceId === 'string' ? searchState.workspaceId : undefined;
+  const navigate = useNavigate();
+  const locale = useCurrentLocale();
 
-  const { data: workspacesData } = useWorkspaces();
-  const workspaceOptions = workspacesData?.data ?? [];
-  const workspaceId = searchWorkspaceId ?? workspaceOptions[0]?.id;
+  // Extract params from URL - these are now the source of truth
+  const tableId = (params as any).tableId as string;
+  const workspaceId = (params as any).workspaceId as string;
 
   const [activeTab, setActiveTab] = useState('general');
 
@@ -67,7 +66,12 @@ export const ActiveTableSettingsPage = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button variant="outline" onClick={() => window.history.back()}>
+            <Button variant="outline" onClick={() => {
+              navigate({
+                to: '/$locale/workspaces/$workspaceId/tables/$tableId',
+                params: { locale: locale || 'vi', workspaceId, tableId },
+              });
+            }}>
               <ArrowLeft className="mr-2 h-4 w-4" />
               Go Back
             </Button>
@@ -86,7 +90,12 @@ export const ActiveTableSettingsPage = () => {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => window.history.back()}
+              onClick={() => {
+                navigate({
+                  to: '/$locale/workspaces/$workspaceId/tables/$tableId',
+                  params: { locale: locale || 'vi', workspaceId, tableId },
+                });
+              }}
               className="shrink-0"
             >
               <ArrowLeft className="h-5 w-5" />

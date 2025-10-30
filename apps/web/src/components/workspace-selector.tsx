@@ -25,6 +25,7 @@ import { useWorkspaces } from '@/features/workspace/hooks/use-workspaces';
 import { useAuthStore, selectIsAuthenticated } from '@/features/auth/stores/auth-store';
 import type { Workspace as ApiWorkspace } from '@/shared/api/types';
 import { initialsFromName } from '@/features/workspace/utils/initials';
+import { useCurrentLocale } from '@/hooks/use-current-locale';
 
 interface WorkspaceSelectorProps {
   isCollapsed?: boolean;
@@ -82,29 +83,43 @@ export const WorkspaceSelector = ({
       workspace.namespace?.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
+  const locale = useCurrentLocale();
+
   const handleWorkspaceSelect = (workspace: Workspace) => {
     setCurrentWorkspace(workspace);
     // Navigate to tables page with workspace context
     navigate({
-      to: '/workspaces/tables',
-      search: { workspaceId: workspace.id },
+      to: '/$locale/workspaces/$workspaceId/tables',
+      params: {
+        locale,
+        workspaceId: workspace.id
+      },
     });
   };
 
   const handleCreateWorkspace = () => {
     // For now, navigate to main workspaces page
-    navigate({ to: '/workspaces' });
+    navigate({
+      to: '/$locale/workspaces',
+      params: { locale }
+    });
   };
 
   const handleJoinWorkspace = () => {
     // For now, navigate to main workspaces page
-    navigate({ to: '/workspaces' });
+    navigate({
+      to: '/$locale/workspaces',
+      params: { locale }
+    });
   };
 
   const handleWorkspaceSettings = () => {
     if (currentWorkspace) {
-      // For now, navigate to encryption settings
-      navigate({ to: '/settings/encryption' });
+      // Navigate to workspace settings (not implemented yet, redirect to workspaces for now)
+      navigate({
+        to: '/$locale/workspaces',
+        params: { locale }
+      });
     }
   };
 

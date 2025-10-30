@@ -17,8 +17,9 @@ import { TableManagementDialog } from '../components/table-management-dialog';
 import { useTableManagement } from '../hooks/use-table-management';
 // @ts-ignore
 import { m } from "@/paraglide/generated/messages.js";
-import { useNavigate } from '@tanstack/react-router';
+import { useNavigate, useParams } from '@tanstack/react-router';
 import { useSidebarStore, selectCurrentWorkspace } from '@/stores/sidebar-store';
+import { useCurrentLocale } from '@/hooks/use-current-locale';
 
 import { Button } from '@workspace/ui/components/button';
 import { Skeleton } from '@workspace/ui/components/skeleton';
@@ -36,12 +37,15 @@ const formatStatusLabel = (tableType?: string) => {
 };
 
 export const ActiveTablesPage = () => {
-  const locale = 'en'; // Placeholder for locale
   const navigate = useNavigate();
+  const params = useParams({ strict: false });
+  const locale = useCurrentLocale();
 
-  // Get workspace from Zustand store (single source of truth)
+  // Extract workspaceId from URL params - this is now the source of truth
+  const workspaceId = (params as any).workspaceId || '';
+
+  // Also sync with Zustand store for backward compatibility
   const currentWorkspace = useSidebarStore(selectCurrentWorkspace);
-  const selectedWorkspaceId = currentWorkspace?.id || '';
 
   const [selectedWorkGroupId, setSelectedWorkGroupId] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -51,7 +55,6 @@ export const ActiveTablesPage = () => {
   const [encryptionFilter, setEncryptionFilter] = useState<'all' | 'encrypted' | 'standard'>('all');
   const [automationFilter, setAutomationFilter] = useState<'all' | 'automated' | 'manual'>('all');
   const [showAllStatusFilters, setShowAllStatusFilters] = useState<boolean>(false);
-  const localePrefix = (locale as string) === 'vi' ? '' : `/${locale}`;
   const { isReady: isEncryptionReady } = useEncryption();
 
   // Priority STATUS filters (most common, shown by default)
@@ -65,7 +68,7 @@ export const ActiveTablesPage = () => {
     setSearchQuery('');
     setShowAllStatusFilters(false);
     setSelectedWorkGroupId('all');
-  }, [selectedWorkspaceId]);
+  }, [workspaceId]);
 
   const {
     grouped,
@@ -75,10 +78,10 @@ export const ActiveTablesPage = () => {
     isFetching,
     error,
     refetch,
-  } = useActiveTablesGroupedByWorkGroup(selectedWorkspaceId || '');
+  } = useActiveTablesGroupedByWorkGroup(workspaceId || '');
 
   const { createTable, updateTable, deleteTable, isCreating, isUpdating, isDeleting } = useTableManagement({
-    workspaceId: selectedWorkspaceId || '',
+    workspaceId: workspaceId || '',
     onSuccess: (message) => {
       console.log(message);
       setIsTableDialogOpen(false);
@@ -92,7 +95,7 @@ export const ActiveTablesPage = () => {
 
   useEffect(() => {
     setSelectedWorkGroupId('all');
-  }, [selectedWorkspaceId]);
+  }, [workspaceId]);
 
   const visibleGroups = useMemo(() => {
     if (selectedWorkGroupId === 'all') {
@@ -185,13 +188,14 @@ export const ActiveTablesPage = () => {
     (selectedWorkGroupId !== 'all' ? 1 : 0);
 
   const handleOpenTable = (table: ActiveTable) => {
-    if (!selectedWorkspaceId) {
+    if (!workspaceId) {
       return;
     }
 
+    // Always use locale in URL
     navigate({
-      to: `${localePrefix}/workspaces/tables/${table.id}`,
-      search: { workspaceId: selectedWorkspaceId },
+      to: '/$locale/workspaces/$workspaceId/tables/$tableId',
+      params: { locale: locale || 'vi', workspaceId, tableId: table.id },
     });
   };
 
@@ -220,26 +224,29 @@ export const ActiveTablesPage = () => {
   };
 
   const handleOpenRecords = (table: ActiveTable) => {
-    if (!selectedWorkspaceId) return;
+    if (!workspaceId) return;
+
     navigate({
-      to: `${localePrefix}/workspaces/tables/${table.id}/records`,
-      search: { workspaceId: selectedWorkspaceId },
+      to: '/$locale/workspaces/$workspaceId/tables/$tableId/records',
+      params: { locale: locale || 'vi', workspaceId, tableId: table.id },
     });
   };
 
   const handleOpenComments = (table: ActiveTable) => {
-    if (!selectedWorkspaceId) return;
+    if (!workspaceId) return;
+
     navigate({
-      to: `${localePrefix}/workspaces/tables/${table.id}/records`,
-      search: { workspaceId: selectedWorkspaceId },
+      to: '/$locale/workspaces/$workspaceId/tables/$tableId/records',
+      params: { locale: locale || 'vi', workspaceId, tableId: table.id },
     });
   };
 
   const handleOpenAutomations = (table: ActiveTable) => {
-    if (!selectedWorkspaceId) return;
+    if (!workspaceId) return;
+
     navigate({
-      to: `${localePrefix}/workspaces/tables/${table.id}`,
-      search: { workspaceId: selectedWorkspaceId },
+      to: '/$locale/workspaces/$workspaceId/tables/$tableId',
+      params: { locale: locale || 'vi', workspaceId, tableId: table.id },
     });
   };
 
@@ -275,7 +282,7 @@ export const ActiveTablesPage = () => {
               <Button variant="outline" size="icon" disabled={isTablesLoading} onClick={() => refetch()}>
                 <RefreshCw className={cn('h-4 w-4', isFetching && 'animate-spin')} />
               </Button>
-              <Button onClick={handleCreateTable} disabled={!selectedWorkspaceId}>
+              <Button onClick={handleCreateTable} disabled={!workspaceId}>
                 <Plus className="mr-2 h-4 w-4" />
                 Create Table
               </Button>

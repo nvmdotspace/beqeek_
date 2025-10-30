@@ -159,10 +159,10 @@ export function extractEncryptedRecord(
   for (const [fieldName, encryptedValue] of Object.entries(encryptedPayload.record)) {
     if (Array.isArray(encryptedValue)) {
       // Handle array values (SELECT_LIST, CHECKBOX_LIST)
-      record[fieldName] = encryptedValue.map((item) => item.data);
+      record[fieldName] = encryptedValue.map((item: any) => item.data);
     } else {
       // Handle single values
-      record[fieldName] = encryptedValue.data;
+      record[fieldName] = (encryptedValue as any).data;
     }
   }
 

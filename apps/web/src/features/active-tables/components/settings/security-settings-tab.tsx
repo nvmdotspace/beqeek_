@@ -30,10 +30,11 @@ export const SecuritySettingsTab = ({ table, workspaceId }: SecuritySettingsTabP
   const [copiedKey, setCopiedKey] = useState(false);
   const [copiedAuthKey, setCopiedAuthKey] = useState(false);
 
-  const { isE2EEEnabled, encryptionKey, encryptionAuthKey, isKeyLoaded } = useTableEncryption({
-    table,
+  const { isE2EEEnabled, encryptionKey, encryptionAuthKey, isKeyLoaded } = useTableEncryption(
     workspaceId,
-  });
+    table.id,
+    table.config
+  );
 
   const handleCopyKey = async (value: string, setCopied: (value: boolean) => void) => {
     try {

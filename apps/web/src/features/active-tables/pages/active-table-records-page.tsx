@@ -8,6 +8,7 @@ import { useWorkspaces } from '@/features/workspace/hooks/use-workspaces';
 import { useActiveTableRecordsWithConfig } from '../hooks/use-active-tables';
 import { useTableEncryption } from '../hooks/use-table-encryption';
 import { decryptRecords, clearDecryptionCache } from '@workspace/active-tables-core';
+import { useCurrentLocale } from '@/hooks/use-current-locale';
 
 import { Button } from '@workspace/ui/components/button';
 import { Badge } from '@workspace/ui/components/badge';
@@ -32,18 +33,12 @@ const LoadingState = () => (
 
 export const ActiveTableRecordsPage = () => {
   const params = useParams({ strict: false });
-  const location = useLocation();
   const navigate = useNavigate();
-  const locale = 'en'; // Placeholder for locale
-  const tableId = params.tableId as string;
-  const localeParam = location.pathname.split('/')[1];
-  const searchState = (location.search ?? {}) as Record<string, unknown>;
-  const searchWorkspaceId = typeof searchState.workspaceId === 'string' ? searchState.workspaceId : undefined;
-  const localePrefix = localeParam ? `/${localeParam}` : (locale as string) === 'vi' ? '' : `/${locale}`;
+  const locale = useCurrentLocale();
 
-  const { data: workspacesData } = useWorkspaces();
-  const workspaceOptions = workspacesData?.data ?? [];
-  const workspaceId = searchWorkspaceId ?? workspaceOptions[0]?.id;
+  // Extract params from URL - these are now the source of truth
+  const tableId = (params as any).tableId as string;
+  const workspaceId = (params as any).workspaceId as string;
 
   // Use combined hook to ensure table config loads before records
   // This prevents race conditions in encryption/decryption logic
@@ -161,8 +156,8 @@ export const ActiveTableRecordsPage = () => {
 
   const handleBack = () => {
     navigate({
-      to: `${localePrefix}/workspaces/tables/${tableId}`,
-      search: workspaceId ? { workspaceId } : undefined,
+      to: '/$locale/workspaces/$workspaceId/tables/$tableId',
+      params: { locale: locale || 'vi', workspaceId, tableId },
     });
   };
 

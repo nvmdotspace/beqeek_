@@ -26,10 +26,7 @@ export const ApiErrorBoundary: React.FC<ApiErrorBoundaryProps> = ({ children }) 
         logout();
 
         // Redirect to login page with current language
-        const to = locale === 'vi' ? '/login' : '/$locale/login'
-        const params = locale === 'vi' ? undefined : { locale }
-        console.log('Redirecting to login path:', to, params)
-        router.navigate({ to, ...(params ? { params } : {}) })
+        router.navigate({ to: '/$locale/login', params: { locale: locale || 'vi' } })
 
         // Reset query error boundary
         reset()
