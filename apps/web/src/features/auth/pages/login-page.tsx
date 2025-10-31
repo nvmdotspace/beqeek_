@@ -9,7 +9,7 @@ import { useLogin } from '../hooks/use-login';
 import { useAuthStore, selectIsAuthenticated } from '../stores/auth-store';
 import { useLanguageStore } from '@/stores/language-store';
 // @ts-ignore
-import { m } from "@/paraglide/generated/messages.js";
+import { m } from '@/paraglide/generated/messages.js';
 
 export const LoginPage = () => {
   const router = useRouter();

@@ -24,23 +24,27 @@ export interface ReferenceFieldProps extends FieldRendererProps {
 }
 
 export function ReferenceField(props: ReferenceFieldProps) {
-  const { field, value, onChange, mode, disabled = false, error, className, referenceRecords = [], loading = false } = props;
+  const {
+    field,
+    value,
+    onChange,
+    mode,
+    disabled = false,
+    error,
+    className,
+    referenceRecords = [],
+    loading = false,
+  } = props;
 
   const isMultiple = field.type === FIELD_TYPES.SELECT_LIST_RECORD;
 
   // Normalize value
-  const normalizedValue = isMultiple
-    ? Array.isArray(value)
-      ? value
-      : value
-        ? [value]
-        : []
-    : value ?? '';
+  const normalizedValue = isMultiple ? (Array.isArray(value) ? value : value ? [value] : []) : (value ?? '');
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
       if (isMultiple) {
-        const selectedIds = Array.from(e.target.selectedOptions).map(option => option.value);
+        const selectedIds = Array.from(e.target.selectedOptions).map((option) => option.value);
         const validationError = validateFieldValue(selectedIds, field);
         if (validationError) {
           console.warn(`Validation error for ${field.name}:`, validationError);
@@ -55,7 +59,7 @@ export function ReferenceField(props: ReferenceFieldProps) {
         onChange?.(newValue);
       }
     },
-    [onChange, field, isMultiple]
+    [onChange, field, isMultiple],
   );
 
   // Get label for a record
@@ -64,7 +68,7 @@ export function ReferenceField(props: ReferenceFieldProps) {
       const labelField = field.referenceLabelField || 'id';
       return String(record[labelField] || record.id);
     },
-    [field.referenceLabelField]
+    [field.referenceLabelField],
   );
 
   // Display mode
@@ -72,15 +76,11 @@ export function ReferenceField(props: ReferenceFieldProps) {
     if (isMultiple) {
       const selectedIds = normalizedValue as string[];
       if (selectedIds.length === 0) {
-        return (
-          <span className="text-gray-400 italic">
-            {props.messages?.emptyValue || '—'}
-          </span>
-        );
+        return <span className="text-gray-400 italic">{props.messages?.emptyValue || '—'}</span>;
       }
 
       const selectedRecords = selectedIds
-        .map(id => referenceRecords.find(r => r.id === id))
+        .map((id) => referenceRecords.find((r) => r.id === id))
         .filter(Boolean) as ReferenceRecord[];
 
       if (selectedRecords.length === 0) {
@@ -89,7 +89,7 @@ export function ReferenceField(props: ReferenceFieldProps) {
 
       return (
         <div className="flex flex-wrap gap-2">
-          {selectedRecords.map(record => (
+          {selectedRecords.map((record) => (
             <span
               key={record.id}
               className="inline-flex items-center px-2 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800"
@@ -104,14 +104,10 @@ export function ReferenceField(props: ReferenceFieldProps) {
     // Single select display
     const selectedId = normalizedValue as string;
     if (!selectedId) {
-      return (
-        <span className="text-gray-400 italic">
-          {props.messages?.emptyValue || '—'}
-        </span>
-      );
+      return <span className="text-gray-400 italic">{props.messages?.emptyValue || '—'}</span>;
     }
 
-    const selectedRecord = referenceRecords.find(r => r.id === selectedId);
+    const selectedRecord = referenceRecords.find((r) => r.id === selectedId);
     if (!selectedRecord) {
       return <span className="text-gray-500">{selectedId}</span>;
     }
@@ -137,26 +133,14 @@ export function ReferenceField(props: ReferenceFieldProps) {
 
   if (loading) {
     return (
-      <FieldWrapper
-        fieldId={fieldId}
-        label={field.label}
-        required={field.required}
-        error={error}
-      >
-        <div className="text-sm text-gray-500 italic">
-          {props.messages?.loading || 'Loading...'}
-        </div>
+      <FieldWrapper fieldId={fieldId} label={field.label} required={field.required} error={error}>
+        <div className="text-sm text-gray-500 italic">{props.messages?.loading || 'Loading...'}</div>
       </FieldWrapper>
     );
   }
 
   return (
-    <FieldWrapper
-      fieldId={fieldId}
-      label={field.label}
-      required={field.required}
-      error={error}
-    >
+    <FieldWrapper fieldId={fieldId} label={field.label} required={field.required} error={error}>
       <select
         id={fieldId}
         name={field.name}
@@ -171,11 +155,9 @@ export function ReferenceField(props: ReferenceFieldProps) {
         aria-describedby={error ? `${fieldId}-error` : undefined}
       >
         {!isMultiple && (
-          <option value="">
-            {field.placeholder || props.messages?.selectPlaceholder || 'Select a record'}
-          </option>
+          <option value="">{field.placeholder || props.messages?.selectPlaceholder || 'Select a record'}</option>
         )}
-        {referenceRecords.map(record => (
+        {referenceRecords.map((record) => (
           <option key={record.id} value={record.id}>
             {getRecordLabel(record)}
           </option>

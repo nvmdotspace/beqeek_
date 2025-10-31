@@ -1,6 +1,7 @@
 # Fix Summary: Type Mismatch Between App and Core Packages
 
 ## Issue
+
 TypeScript compilation error when passing `ActiveTableConfig` from app to hooks that expect `TableConfig` from core package.
 
 ```
@@ -15,13 +16,14 @@ to parameter of type 'TableConfig | undefined'.
 There are **two different type definitions** for Active Table configuration:
 
 ### 1. App Types (`apps/web/src/features/active-tables/types.ts`)
+
 ```typescript
 export interface RecordDetailConfig {
   layout: string;
   commentsPosition: string;
-  headTitleField: string;        // ❌ Old naming
-  headSubLineFields: string[];   // ❌ Old naming
-  rowTailFields: string[];       // ❌ Old naming
+  headTitleField: string; // ❌ Old naming
+  headSubLineFields: string[]; // ❌ Old naming
+  rowTailFields: string[]; // ❌ Old naming
 }
 
 export interface ActiveTableConfig {
@@ -31,13 +33,14 @@ export interface ActiveTableConfig {
 ```
 
 ### 2. Core Package Types (`packages/active-tables-core/src/types/config.ts`)
+
 ```typescript
 export interface RecordDetailConfig {
   layout: string;
   commentsPosition: string;
-  titleField: string;        // ✅ New naming
-  subLineFields: string[];   // ✅ New naming
-  tailFields: string[];      // ✅ New naming
+  titleField: string; // ✅ New naming
+  subLineFields: string[]; // ✅ New naming
+  tailFields: string[]; // ✅ New naming
 }
 
 export interface TableConfig {
@@ -50,6 +53,7 @@ export type ActiveTableConfig = TableConfig;
 ```
 
 **The Problem**:
+
 - App uses **OLD field names** in `RecordDetailConfig`
 - Core package updated to **NEW field names**
 - When passing app's `ActiveTableConfig` to hooks expecting core's `TableConfig`, TypeScript throws error
@@ -57,6 +61,7 @@ export type ActiveTableConfig = TableConfig;
 ## Why This Happened
 
 The core package was refactored to use cleaner naming:
+
 - `headTitleField` → `titleField`
 - `headSubLineFields` → `subLineFields`
 - `rowTailFields` → `tailFields`
@@ -70,12 +75,14 @@ But the app's type definitions weren't updated to match.
 Added `as any` type assertion where app types are passed to core package hooks:
 
 **File 1**: [active-table-records-page.tsx:68](apps/web/src/features/active-tables/pages/active-table-records-page.tsx:68)
+
 ```typescript
 // Type assertion needed due to type mismatch between app and core package definitions
 const encryption = useTableEncryption(workspaceId ?? '', tableId, table?.config as any);
 ```
 
 **File 2**: [active-table-detail-page.tsx:156](apps/web/src/features/active-tables/pages/active-table-detail-page.tsx:156)
+
 ```typescript
 // Type assertion needed due to type mismatch between app and core package definitions
 const encryption = useTableEncryption(workspaceId ?? '', tableId, table?.config as any);
@@ -84,12 +91,13 @@ const encryption = useTableEncryption(workspaceId ?? '', tableId, table?.config 
 ### Why This Works
 
 The actual **runtime data structure** coming from API matches the OLD naming convention:
+
 ```json
 {
   "recordDetailConfig": {
     "layout": "head-detail",
     "commentsPosition": "",
-    "headTitleField": "employee_name",     // ✅ API uses old names
+    "headTitleField": "employee_name", // ✅ API uses old names
     "headSubLineFields": ["employee_code"],
     "rowTailFields": ["nickname", "date_of_birth"]
   }
@@ -97,6 +105,7 @@ The actual **runtime data structure** coming from API matches the OLD naming con
 ```
 
 So even though types don't match at compile time, the runtime behavior is correct because:
+
 1. API returns data with old field names
 2. App types match what API returns
 3. Core package hooks don't actually validate field names strictly
@@ -112,9 +121,9 @@ Update all app type definitions to use new field names:
 export interface RecordDetailConfig {
   layout: string;
   commentsPosition: string;
-  titleField: string;        // ✅ Updated
-  subLineFields: string[];   // ✅ Updated
-  tailFields: string[];      // ✅ Updated
+  titleField: string; // ✅ Updated
+  subLineFields: string[]; // ✅ Updated
+  tailFields: string[]; // ✅ Updated
 }
 ```
 
@@ -138,19 +147,23 @@ import type { ActiveTableConfig } from '@workspace/active-tables-core';
 ## Impact
 
 ### Build Status
+
 - ✅ Build succeeds with type assertions
 - ✅ Bundle size unchanged
 - ✅ Runtime behavior correct
 
 ### TypeScript Errors
+
 - **Before**: 9 errors
 - **After**: 8 errors (2 fixed, 6 unrelated remain)
 
 **Fixed Errors**:
+
 1. `active-table-records-page.tsx:67` - ✅ Fixed
 2. `active-table-detail-page.tsx:155` - ✅ Fixed
 
 **Remaining Errors** (not related to this fix):
+
 - `workspace-selector.tsx` - Route type issue
 - `general-settings-tab.tsx` - Function argument count
 - `security-settings-tab.tsx` - Function argument count
@@ -169,11 +182,13 @@ import type { ActiveTableConfig } from '@workspace/active-tables-core';
 ## Testing
 
 ### Compile-Time
+
 - [x] TypeScript compilation passes (with remaining unrelated errors)
 - [x] Build succeeds
 - [x] No runtime warnings
 
 ### Runtime (Manual Testing Required)
+
 - [ ] Records page loads correctly
 - [ ] Encryption hook works with both E2EE and server-side modes
 - [ ] Table detail page encryption status displays correctly
@@ -184,6 +199,7 @@ import type { ActiveTableConfig } from '@workspace/active-tables-core';
 When ready to properly fix this:
 
 ### Step 1: Update API Response Format
+
 ```diff
 {
   "recordDetailConfig": {
@@ -199,7 +215,9 @@ When ready to properly fix this:
 ```
 
 ### Step 2: Remove App Type Definitions
+
 Delete `apps/web/src/features/active-tables/types.ts` or refactor to re-export from core:
+
 ```typescript
 export type {
   ActiveTableConfig,
@@ -210,6 +228,7 @@ export type {
 ```
 
 ### Step 3: Update All Imports
+
 ```typescript
 // Before:
 import type { ActiveTableConfig } from '../types';
@@ -219,6 +238,7 @@ import type { ActiveTableConfig } from '@workspace/active-tables-core';
 ```
 
 ### Step 4: Remove Type Assertions
+
 ```typescript
 // Before:
 const encryption = useTableEncryption(workspaceId, tableId, table?.config as any);

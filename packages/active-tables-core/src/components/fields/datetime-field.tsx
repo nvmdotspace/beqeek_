@@ -27,17 +27,13 @@ export function DateTimeField(props: FieldRendererProps) {
 
       onChange?.(newValue);
     },
-    [onChange, field]
+    [onChange, field],
   );
 
   // Display mode
   if (mode === 'display') {
     if (!stringValue) {
-      return (
-        <span className="text-gray-400 italic">
-          {props.messages?.emptyValue || '—'}
-        </span>
-      );
+      return <span className="text-gray-400 italic">{props.messages?.emptyValue || '—'}</span>;
     }
 
     try {
@@ -62,12 +58,7 @@ export function DateTimeField(props: FieldRendererProps) {
   `.trim();
 
   return (
-    <FieldWrapper
-      fieldId={fieldId}
-      label={field.label}
-      required={field.required}
-      error={error}
-    >
+    <FieldWrapper fieldId={fieldId} label={field.label} required={field.required} error={error}>
       <input
         type="datetime-local"
         id={fieldId}

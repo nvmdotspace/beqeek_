@@ -28,17 +28,13 @@ export function TextField(props: FieldRendererProps) {
 
       onChange?.(newValue);
     },
-    [onChange, field]
+    [onChange, field],
   );
 
   // Display mode
   if (mode === 'display') {
     if (!stringValue) {
-      return (
-        <span className="text-gray-400 italic">
-          {props.messages?.emptyValue || '—'}
-        </span>
-      );
+      return <span className="text-gray-400 italic">{props.messages?.emptyValue || '—'}</span>;
     }
 
     // Render as link for URL type
@@ -58,10 +54,7 @@ export function TextField(props: FieldRendererProps) {
     // Render as mailto link for EMAIL type
     if (field.type === FIELD_TYPES.EMAIL) {
       return (
-        <a
-          href={`mailto:${stringValue}`}
-          className="text-blue-600 hover:text-blue-800"
-        >
+        <a href={`mailto:${stringValue}`} className="text-blue-600 hover:text-blue-800">
           {stringValue}
         </a>
       );
@@ -84,12 +77,7 @@ export function TextField(props: FieldRendererProps) {
   `.trim();
 
   return (
-    <FieldWrapper
-      fieldId={fieldId}
-      label={field.label}
-      required={field.required}
-      error={error}
-    >
+    <FieldWrapper fieldId={fieldId} label={field.label} required={field.required} error={error}>
       <input
         type={inputType}
         id={fieldId}

@@ -91,18 +91,12 @@ export const COMMENT_ACTION_TYPES = [
 /**
  * System-defined actions (all predefined behaviors)
  */
-export const SYSTEM_ACTION_TYPES = [
-  ...RECORD_ACTION_TYPES,
-  ...COMMENT_ACTION_TYPES,
-] as const;
+export const SYSTEM_ACTION_TYPES = [...RECORD_ACTION_TYPES, ...COMMENT_ACTION_TYPES] as const;
 
 /**
  * All action types
  */
-export const ALL_ACTION_TYPES = [
-  ...SYSTEM_ACTION_TYPES,
-  ACTION_TYPE_CUSTOM,
-] as const;
+export const ALL_ACTION_TYPES = [...SYSTEM_ACTION_TYPES, ACTION_TYPE_CUSTOM] as const;
 
 // ============================================
 // Type Definitions

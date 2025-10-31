@@ -351,9 +351,7 @@ export const getModuleIcon = (moduleType?: string): LucideIcon => {
   if (!moduleType) return MODULE_ICONS.standard;
 
   // Normalize: lowercase, remove spaces/hyphens/underscores
-  const normalized = moduleType
-    .toLowerCase()
-    .replace(/[\s_-]/g, '') as ModuleType;
+  const normalized = moduleType.toLowerCase().replace(/[\s_-]/g, '') as ModuleType;
 
   return MODULE_ICONS[normalized] || MODULE_ICONS.standard;
 };
@@ -365,9 +363,7 @@ export const getModuleColors = (moduleType?: string): ColorScheme => {
   if (!moduleType) return MODULE_COLORS.standard;
 
   // Normalize: lowercase, remove spaces/hyphens/underscores
-  const normalized = moduleType
-    .toLowerCase()
-    .replace(/[\s_-]/g, '') as keyof typeof MODULE_COLORS;
+  const normalized = moduleType.toLowerCase().replace(/[\s_-]/g, '') as keyof typeof MODULE_COLORS;
 
   return MODULE_COLORS[normalized] || MODULE_COLORS.standard;
 };
@@ -381,6 +377,6 @@ export const getModuleTypeLabel = (moduleType?: string): string => {
 
   return moduleType
     .split(/[\s_-]/)
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(' ');
 };

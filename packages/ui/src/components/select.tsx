@@ -45,9 +45,7 @@ export const Select: React.FC<SelectProps> = ({ value, onValueChange, disabled, 
 
   return (
     <SelectContext.Provider value={{ value, onValueChange, isOpen, setIsOpen, disabled: disabled ?? false }}>
-      <div className="relative overflow-visible">
-        {children}
-      </div>
+      <div className="relative overflow-visible">{children}</div>
     </SelectContext.Provider>
   );
 };
@@ -77,28 +75,19 @@ export const SelectTrigger = React.forwardRef<HTMLButtonElement, SelectTriggerPr
         {...props}
       >
         {children}
-        <svg
-          className="h-4 w-4 opacity-50"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
+        <svg className="h-4 w-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>
       </button>
     );
-  }
+  },
 );
 SelectTrigger.displayName = 'SelectTrigger';
 
 export const SelectValue: React.FC<SelectValueProps> = ({ placeholder, className = '' }) => {
   const { value } = React.useContext(SelectContext);
 
-  return (
-    <span className={`block truncate ${className}`}>
-      {value || placeholder}
-    </span>
-  );
+  return <span className={`block truncate ${className}`}>{value || placeholder}</span>;
 };
 
 export const SelectContent: React.FC<SelectContentProps> = ({ children, className = '' }) => {
@@ -132,9 +121,7 @@ export const SelectContent: React.FC<SelectContentProps> = ({ children, classNam
         ${className}
       `}
     >
-      <div className="p-1">
-        {children}
-      </div>
+      <div className="p-1">{children}</div>
     </div>
   );
 };

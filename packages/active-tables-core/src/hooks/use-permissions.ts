@@ -37,25 +37,13 @@ export interface UsePermissionsReturn {
 export function usePermissions(options: UsePermissionsOptions): UsePermissionsReturn {
   const { record } = options;
 
-  const permissions = useMemo(
-    () => record?.permissions ?? null,
-    [record]
-  );
+  const permissions = useMemo(() => record?.permissions ?? null, [record]);
 
-  const canAccess = useMemo(
-    () => (record ? hasPermission(record, 'access') : false),
-    [record]
-  );
+  const canAccess = useMemo(() => (record ? hasPermission(record, 'access') : false), [record]);
 
-  const canUpdate = useMemo(
-    () => (record ? hasPermission(record, 'update') : false),
-    [record]
-  );
+  const canUpdate = useMemo(() => (record ? hasPermission(record, 'update') : false), [record]);
 
-  const canDelete = useMemo(
-    () => (record ? hasPermission(record, 'delete') : false),
-    [record]
-  );
+  const canDelete = useMemo(() => (record ? hasPermission(record, 'delete') : false), [record]);
 
   return {
     canAccess,

@@ -5,21 +5,9 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 // @ts-ignore
 import { m } from '@/paraglide/generated/messages.js';
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@workspace/ui/components/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@workspace/ui/components/card';
 import { Button } from '@workspace/ui/components/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@workspace/ui/components/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@workspace/ui/components/select';
 import { ScrollArea } from '@workspace/ui/components/scroll-area';
 import { Separator } from '@workspace/ui/components/separator';
 import { toast } from '@workspace/ui/components/sonner';
@@ -125,17 +113,15 @@ export const PermissionsMatrix = ({ workspaceId, table }: PermissionsMatrixProps
   const queryClient = useQueryClient();
   const { teams, isLoading, error } = useWorkspaceTeamsWithRoles(workspaceId);
 
-  const totalRoles = useMemo(
-    () => teams.reduce((sum, team) => sum + (team.teamRoles?.length ?? 0), 0),
-    [teams],
-  );
+  const totalRoles = useMemo(() => teams.reduce((sum, team) => sum + (team.teamRoles?.length ?? 0), 0), [teams]);
 
   const commentActions = useMemo(() => {
-    return table.config.actions.filter((action) =>
-      action.type === 'comment_create' ||
-      action.type === 'comment_access' ||
-      action.type === 'comment_update' ||
-      action.type === 'comment_delete',
+    return table.config.actions.filter(
+      (action) =>
+        action.type === 'comment_create' ||
+        action.type === 'comment_access' ||
+        action.type === 'comment_update' ||
+        action.type === 'comment_delete',
     );
   }, [table.config.actions]);
 
@@ -199,7 +185,8 @@ export const PermissionsMatrix = ({ workspaceId, table }: PermissionsMatrixProps
         const existing = table.config.permissionsConfig.find(
           (entry) => entry.teamId === teamId && entry.roleId === roleId,
         );
-        const otherActions = existing?.actions.filter((action) => !Array.from(actionIdByType.values()).includes(action.actionId)) ?? [];
+        const otherActions =
+          existing?.actions.filter((action) => !Array.from(actionIdByType.values()).includes(action.actionId)) ?? [];
         const commentActionsToPersist = Array.from(actionIdByType.entries()).map(([type, actionId]) => ({
           actionId,
           permission: value[type],
@@ -302,7 +289,14 @@ export const PermissionsMatrix = ({ workspaceId, table }: PermissionsMatrixProps
                       <tr key={key} className="hover:bg-muted/20">
                         <td className="px-3 py-3 text-sm font-medium text-foreground">{team.teamName}</td>
                         <td className="px-3 py-3 text-sm text-muted-foreground">{role.roleName}</td>
-                        {(['comment_create', 'comment_access', 'comment_update', 'comment_delete'] as CommentActionType[]).map((action) => {
+                        {(
+                          [
+                            'comment_create',
+                            'comment_access',
+                            'comment_update',
+                            'comment_delete',
+                          ] as CommentActionType[]
+                        ).map((action) => {
                           const options =
                             action === 'comment_create'
                               ? COMMENT_CREATE_OPTIONS
@@ -352,11 +346,7 @@ export const PermissionsMatrix = ({ workspaceId, table }: PermissionsMatrixProps
               </>
             )}
           </Button>
-          <Button
-            variant="outline"
-            onClick={handleReset}
-            disabled={!hasChanges || mutation.isPending}
-          >
+          <Button variant="outline" onClick={handleReset} disabled={!hasChanges || mutation.isPending}>
             <RotateCcw className="mr-2 h-4 w-4" />
             {m.activeTables_permissions_reset()}
           </Button>

@@ -20,23 +20,39 @@ Toàn bộ cấu hình của một Active Table được định nghĩa bởi m�
 
 ```json
 {
-    "id": "string", // Read-only
-    "name": "string",
-    "description": "string",
-    "tableType": "string",
-    "e2eeEncryption": "boolean",
-    "encryptionAuthKey": "string", // Hash của khóa mã hóa
-    "limit": "number",
-    "defaultSort": "'asc' | 'desc'",
-    "hashedKeywordFields": ["field_name_1", "field_name_2"],
-    "fields": [ /* xem 2.2 */ ],
-    "actions": [ /* xem 2.3 */ ],
-    "recordListConfig": { /* xem 2.4 */ },
-    "recordDetailConfig": { /* xem 2.4 */ },
-    "quickFilters": [ /* xem 2.5 */ ],
-    "kanbanConfigs": [ /* xem 2.6 */ ],
-    "ganttCharts": [ /* xem 2.7 */ ],
-    "permissionsConfig": [ /* xem 2.8 */ ]
+  "id": "string", // Read-only
+  "name": "string",
+  "description": "string",
+  "tableType": "string",
+  "e2eeEncryption": "boolean",
+  "encryptionAuthKey": "string", // Hash của khóa mã hóa
+  "limit": "number",
+  "defaultSort": "'asc' | 'desc'",
+  "hashedKeywordFields": ["field_name_1", "field_name_2"],
+  "fields": [
+    /* xem 2.2 */
+  ],
+  "actions": [
+    /* xem 2.3 */
+  ],
+  "recordListConfig": {
+    /* xem 2.4 */
+  },
+  "recordDetailConfig": {
+    /* xem 2.4 */
+  },
+  "quickFilters": [
+    /* xem 2.5 */
+  ],
+  "kanbanConfigs": [
+    /* xem 2.6 */
+  ],
+  "ganttCharts": [
+    /* xem 2.7 */
+  ],
+  "permissionsConfig": [
+    /* xem 2.8 */
+  ]
 }
 ```
 
@@ -277,10 +293,7 @@ Ví dụ:
     ],
     "tableLimit": 5,
     "e2eeEncryption": false,
-    "hashedKeywordFields": [
-      "task_title",
-      "task_description"
-    ],
+    "hashedKeywordFields": ["task_title", "task_description"],
     "defaultSort": "desc",
     "kanbanConfigs": [
       {
@@ -289,13 +302,7 @@ Ví dụ:
         "screenDescription": "",
         "statusField": "matrix_quadrant",
         "kanbanHeadlineField": "task_title",
-        "displayFields": [
-          "start_date",
-          "duo_date",
-          "assignee",
-          "status",
-          "self_evaluation"
-        ]
+        "displayFields": ["start_date", "duo_date", "assignee", "status", "self_evaluation"]
       },
       {
         "kanbanScreenId": "01989c55-b354-c2-79-9f64e56bec5759a0",
@@ -303,13 +310,7 @@ Ví dụ:
         "screenDescription": "",
         "statusField": "status",
         "kanbanHeadlineField": "task_title",
-        "displayFields": [
-          "start_date",
-          "duo_date",
-          "matrix_quadrant",
-          "assignee",
-          "self_evaluation"
-        ]
+        "displayFields": ["start_date", "duo_date", "matrix_quadrant", "assignee", "self_evaluation"]
       },
       {
         "kanbanScreenId": "01989c57-a2b4-c7-88-bbc953a8be37d6f1",
@@ -317,42 +318,21 @@ Ví dụ:
         "screenDescription": "Phân loại theo đánh giá tình trạng",
         "statusField": "self_evaluation",
         "kanbanHeadlineField": "task_title",
-        "displayFields": [
-          "assignee",
-          "matrix_quadrant",
-          "status",
-          "duo_date"
-        ]
+        "displayFields": ["assignee", "matrix_quadrant", "status", "duo_date"]
       }
     ],
     "recordListConfig": {
       "layout": "head-column",
       "titleField": "task_title",
-      "subLineFields": [
-        "matrix_quadrant",
-        "assignee",
-        "status"
-      ],
-      "tailFields": [
-        "start_date",
-        "duo_date"
-      ]
+      "subLineFields": ["matrix_quadrant", "assignee", "status"],
+      "tailFields": ["start_date", "duo_date"]
     },
     "recordDetailConfig": {
       "layout": "head-detail",
       "commentsPosition": "right-panel",
       "headTitleField": "task_title",
-      "headSubLineFields": [
-        "matrix_quadrant",
-        "assignee",
-        "status"
-      ],
-      "rowTailFields": [
-        "task_description",
-        "start_date",
-        "duo_date",
-        "self_evaluation"
-      ]
+      "headSubLineFields": ["matrix_quadrant", "assignee", "status"],
+      "rowTailFields": ["task_description", "start_date", "duo_date", "self_evaluation"]
     },
     "permissionsConfig": [
       {
@@ -429,7 +409,7 @@ Mỗi phần tử trong mảng `fields` định nghĩa một cột trong bảng 
   "name": "string",
   "placeholder": "string",
   "defaultValue": "any",
-  "required": "boolean",
+  "required": "boolean"
   // ... các thuộc tính cho từng loại cụ thể
 }
 ```
@@ -441,6 +421,7 @@ Mỗi phần tử trong mảng `fields` định nghĩa một cột trong bảng 
 #### 2.2.2. Phân loại chi tiết các `type`
 
 ##### a. Nhóm Text
+
 - **`SHORT_TEXT`**, **`EMAIL`**, **`URL`**: Dùng cho chuỗi ngắn.
   - **UI Control**: Input text (`<input type="text">`).
   - **Validation**: `EMAIL` và `URL` cần có validation định dạng.
@@ -450,19 +431,23 @@ Mỗi phần tử trong mảng `fields` định nghĩa một cột trong bảng 
   - **UI Control**: Một trình soạn thảo WYSIWYG (ví dụ: TinyMCE, Quill.js).
 
 ##### b. Nhóm Thời gian
+
 - **`DATE`**, **`DATETIME`**, **`TIME`**: Dùng để chọn ngày/giờ.
   - **UI Control**: Một widget chọn ngày/giờ (Date/Time Picker).
 - **`YEAR`**, **`MONTH`**, **`DAY`**, **`HOUR`**, **`MINUTE`**, **`SECOND`**: Dùng cho các giá trị số nguyên đại diện cho một phần của thời gian.
   - **UI Control**: Input số (`<input type="number">`) hoặc dropdown.
 
 ##### c. Nhóm Số
+
 - **`INTEGER`**, **`NUMERIC`**: Dùng cho giá trị số.
   - **UI Control**: Input số (`<input type="number">`). `NUMERIC` cho phép nhập số thực, `INTEGER` chỉ cho phép số nguyên.
 
 ##### d. Nhóm Lựa chọn (Sử dụng thuộc tính `options`)
+
 Thuộc tính `options` là một mảng các đối tượng, cho phép định nghĩa các lựa chọn có sẵn cho trường. Cấu trúc này rất hữu ích để hiển thị các trạng thái dưới dạng "tag" hoặc "badge" có màu sắc.
 
 **Cấu trúc một item trong `options`:**
+
 ```json
 {
   "value": "string",
@@ -471,6 +456,7 @@ Thuộc tính `options` là một mảng các đối tượng, cho phép định
   "background_color": "string"
 }
 ```
+
 - `value`: Giá trị thực tế sẽ được lưu vào cơ sở dữ liệu (ví dụ: `"pending_approval"`).
 - `text`: Nhãn hiển thị cho người dùng (ví dụ: `"Chờ phê duyệt"`).
 - `text_color`: Mã màu HEX hoặc tên màu cho chữ của tag/badge (ví dụ: `"#ffffff"`).
@@ -486,6 +472,7 @@ Thuộc tính `options` là một mảng các đối tượng, cho phép định
   - **UI Control**: Nhóm checkbox hoặc dropdown/tag input chọn nhiều. Các lựa chọn được điền từ mảng `options`.
 
 ##### e. Nhóm Tham chiếu (Sử dụng các thuộc tính `reference_*`)
+
 - **`SELECT_ONE_RECORD`**, **`SELECT_LIST_RECORD`**: Dùng để tạo liên kết tới một hoặc nhiều bản ghi ở một Active Table khác.
   - **UI Control**: Một dropdown có chức năng tìm kiếm (autocomplete) hoặc một nút mở ra popup để tìm và chọn bản ghi từ bảng khác.
   - **Thuộc tính liên quan**:
@@ -495,6 +482,7 @@ Thuộc tính `options` là một mảng các đối tượng, cho phép định
 - **`FIRST_REFERENCE_RECORD`**: Một trường đặc biệt, read-only, dùng để hiển thị dữ liệu từ bản ghi tham chiếu đầu tiên.
 
 ##### f. Nhóm Người dùng
+
 - **`SELECT_ONE_WORKSPACE_USER`**, **`SELECT_LIST_WORKSPACE_USER`**: Dùng để chọn một hoặc nhiều người dùng trong workspace.
   - **UI Control**: Một dropdown có chức năng tìm kiếm (autocomplete) để tìm và chọn người dùng.
 
@@ -544,6 +532,7 @@ Có hai nhóm `type` chính: hành động hệ thống và hành động tùy c
 Đối tượng này quy định cách hiển thị một danh sách các bản ghi.
 
 #### 2.4.1. Cấu trúc
+
 ```json
 {
   "layout": "'generic-table' | 'head-column'",
@@ -559,6 +548,7 @@ Có hai nhóm `type` chính: hành động hệ thống và hành động tùy c
 ```
 
 #### 2.4.2. Giải thích Layouts
+
 - **`generic-table`**: Bố cục bảng tiêu chuẩn.
   - **Mô tả**: Mỗi bản ghi là một hàng, mỗi trường là một cột.
   - **Thuộc tính**: `displayFields` là một mảng các `name` của trường, quy định những cột nào sẽ được hiển thị và theo thứ tự nào.
@@ -575,6 +565,7 @@ Có hai nhóm `type` chính: hành động hệ thống và hành động tùy c
 Đối tượng này quy định cách hiển thị chi tiết của một bản ghi duy nhất.
 
 #### 2.5.1. Cấu trúc
+
 ```json
 {
   "layout": "'head-detail' | 'two-column-detail'",
@@ -594,6 +585,7 @@ Có hai nhóm `type` chính: hành động hệ thống và hành động tùy c
 ```
 
 #### 2.5.2. Giải thích Layouts
+
 - **`head-detail`**: Bố cục một cột.
   - **Mô tả**: Tương tự `head-column` của màn hình danh sách, nhưng các trường được xếp dọc từ trên xuống, phù hợp cho màn hình hẹp.
   - **Thuộc tính**: `titleField`, `subLineFields`, `tailFields`.
@@ -606,6 +598,7 @@ Có hai nhóm `type` chính: hành động hệ thống và hành động tùy c
     - `column2Fields`: Mảng các tên trường sẽ hiển thị ở cột bên phải.
 
 #### 2.5.3. Thuộc tính khác
+
 - **`commentsPosition`**: Quy định cách hiển thị của khu vực bình luận/lịch sử hoạt động.
   - `right-panel`: Hiển thị ở một cột riêng bên phải.
   - `hidden`: Ẩn khu vực bình luận.
@@ -633,6 +626,7 @@ Mỗi phần tử trong mảng `quickFilters` là một đối tượng có cấ
 #### 2.6.3. Các loại trường hợp lệ
 
 Chỉ các trường có kiểu lựa chọn (choice-based) mới có thể được dùng làm Quick Filter. Dựa trên mã nguồn, các loại trường hợp lệ là:
+
 - `CHECKBOX_YES_NO`
 - `SELECT_ONE`
 - `SELECT_LIST`
@@ -759,10 +753,10 @@ Cung cấp một cơ chế kiểm soát chi tiết, cho phép người quản tr
         {
           "actionId": "string",
           "permission": "string"
-        },
+        }
         // ... more action permissions
       ]
-    },
+    }
     // ... more team/role permissions
   ]
 }
@@ -779,12 +773,16 @@ Cung cấp một cơ chế kiểm soát chi tiết, cho phép người quản tr
 Dựa trên logic của hàm `populatePermissionsTable` trong mã nguồn, các tùy chọn cho `permission` được phân loại như sau:
 
 ##### a. Action có `type = 'create'`
+
 Chỉ có hai tùy chọn, quyết định việc có được tạo bản ghi mới hay không.
+
 - `not_allowed`: Không được phép.
 - `allowed`: Được phép.
 
 ##### b. Action có `type` là `'access'`, `'update'`, `'delete'`, hoặc `'custom'`
+
 Đây là nhóm quyền đa dạng nhất, cho phép kiểm soát hành động dựa trên quyền sở hữu hoặc liên quan đến bản ghi.
+
 - `not_allowed`: Không được phép.
 - `all`: Áp dụng trên tất cả bản ghi.
 - `self_created`: Chỉ trên các bản ghi do chính người dùng tạo.
@@ -807,10 +805,13 @@ Chỉ có hai tùy chọn, quyết định việc có được tạo bản ghi m
 - `created_or_related_team_member`: Trên các bản ghi được tạo bởi HOẶC liên quan đến bất kỳ thành viên nào trong team.
 
 ##### c. Action có `type = 'comment_create'`
+
 (Bao gồm các quyền tương tự nhóm b, nhưng áp dụng cho ngữ cảnh "trên bản ghi nào thì được tạo bình luận").
 
 ##### d. Action có `type = 'comment_access'`
+
 Kiểm soát việc xem các bình luận.
+
 - `not_allowed`: Không được xem.
 - `all`: Xem tất cả bình luận.
 - `comment_self_created`: Chỉ xem các bình luận do chính mình tạo.
@@ -819,7 +820,9 @@ Kiểm soát việc xem các bình luận.
 - `comment_created_or_tagged_team_member`: Xem các bình luận được tạo bởi người trong team hoặc có tag thành viên trong team.
 
 ##### e. Action có `type` là `'comment_update'` hoặc `'comment_delete'`
+
 Kiểm soát việc sửa/xóa bình luận, thường giới hạn theo thời gian.
+
 - `not_allowed`: Không được phép.
 - `all`: Sửa/xóa tất cả bình luận (quyền admin).
 - `comment_self_created`: Chỉ sửa/xóa bình luận do mình tạo.
@@ -832,6 +835,7 @@ Kiểm soát việc sửa/xóa bình luận, thường giới hạn theo thời 
 - `comment_created_by_team_24h`: ... trong 24 giờ đầu.
 
 #### 2.9.4. Tương tác trên UI
+
 - Giao diện Phân quyền (`id="pane-permissions"`) gọi hàm `populatePermissionsTable` để vẽ giao diện.
 - Với mỗi cặp Team-Role, một danh sách các `Action` của bảng sẽ được hiển thị.
 - Mỗi `Action` đi kèm một danh sách thả xuống (dropdown `<select>`) chứa các giá trị `permission` tương ứng với `Action Type` như đã mô tả ở trên.
@@ -847,35 +851,35 @@ Giao diện được chia theo các tab ở sidebar bên trái.
 
 - **Mục đích**: Cấu hình các thiết lập cơ bản cho bảng.
 - **UI Components**:
-    - `ID Bảng`: Text input, read-only. Có nút "Copy" bên cạnh.
-    - `Khóa mã hóa`: Text input.
-    - `Giới hạn bản ghi`: Number input (1-1000).
-    - `Chiều sắp xếp mặc định`: Dropdown (`Cũ nhất`/`Mới nhất`).
-    - `Trường dữ liệu tìm kiếm`: Multi-select dropdown, danh sách các trường có trong bảng.
+  - `ID Bảng`: Text input, read-only. Có nút "Copy" bên cạnh.
+  - `Khóa mã hóa`: Text input.
+  - `Giới hạn bản ghi`: Number input (1-1000).
+  - `Chiều sắp xếp mặc định`: Dropdown (`Cũ nhất`/`Mới nhất`).
+  - `Trường dữ liệu tìm kiếm`: Multi-select dropdown, danh sách các trường có trong bảng.
 
 ### 3.2. Tab: Danh sách trường (Fields)
 
 - **Mục đích**: Quản lý tất cả các trường dữ liệu của bảng.
 - **UI Components**:
-    - Một danh sách các "thẻ" (card), mỗi thẻ đại diện cho một trường đã tạo.
-    - Mỗi thẻ hiển thị tên trường và có nút "Sửa", "Xóa".
-    - Nút "Thêm trường" ở cuối danh sách.
+  - Một danh sách các "thẻ" (card), mỗi thẻ đại diện cho một trường đã tạo.
+  - Mỗi thẻ hiển thị tên trường và có nút "Sửa", "Xóa".
+  - Nút "Thêm trường" ở cuối danh sách.
 - **Tương tác**:
-    - Click "Thêm trường" hoặc "Sửa" sẽ mở ra **Popup Cấu hình Trường**.
+  - Click "Thêm trường" hoặc "Sửa" sẽ mở ra **Popup Cấu hình Trường**.
 
 ### 3.3. Popup: Cấu hình Trường
 
 - **Mục đích**: Form để tạo hoặc sửa một trường dữ liệu.
 - **UI Components**:
-    - `Loại trường`: Dropdown với danh sách tất cả các `type` ở mục 2.2.
-    - `Tên trường` (Label): Text input.
-    - `Tên biến` (Name): Text input, nên được tự động sinh ra từ Tên trường và không cho phép sửa.
-    - `Placeholder`: Text input.
-    - `Giá trị mặc định`: Text input.
-    - `Bắt buộc`: Checkbox/Switch.
+  - `Loại trường`: Dropdown với danh sách tất cả các `type` ở mục 2.2.
+  - `Tên trường` (Label): Text input.
+  - `Tên biến` (Name): Text input, nên được tự động sinh ra từ Tên trường và không cho phép sửa.
+  - `Placeholder`: Text input.
+  - `Giá trị mặc định`: Text input.
+  - `Bắt buộc`: Checkbox/Switch.
 - **UI Điều kiện**:
-    - Nếu `Loại trường` là `SELECT...` hoặc `CHECKBOX...`, một khu vực "Tùy chọn" sẽ hiện ra, cho phép người dùng thêm/xóa các cặp key-value.
-    - Nếu `Loại trường` là `..._RECORD`, một khu vực "Tham chiếu" sẽ hiện ra, cho phép chọn Bảng tham chiếu và các trường liên quan.
+  - Nếu `Loại trường` là `SELECT...` hoặc `CHECKBOX...`, một khu vực "Tùy chọn" sẽ hiện ra, cho phép người dùng thêm/xóa các cặp key-value.
+  - Nếu `Loại trường` là `..._RECORD`, một khu vực "Tham chiếu" sẽ hiện ra, cho phép chọn Bảng tham chiếu và các trường liên quan.
 - **Hành vi**: Khi "Xác nhận", dữ liệu trường được cập nhật vào state của client. Dữ liệu chỉ được gửi lên server khi người dùng bấm nút "Lưu" chính.
 
 ### 3.4. Tab: Danh sách hành động (Actions)
@@ -888,8 +892,8 @@ Giao diện được chia theo các tab ở sidebar bên trái.
 
 - **Mục đích**: Tùy chỉnh giao diện khi hiển thị nhiều bản ghi.
 - **UI Components**:
-    - `Loại bố cục`: Dropdown (`Bố cục bảng`, `Bố cục nhiều dòng`).
-    - Dựa vào lựa chọn trên, các multi-select dropdown khác sẽ hiện ra để người dùng chọn các trường sẽ hiển thị ở các vị trí khác nhau (ví dụ: `Các trường hiển thị` cho layout bảng; `Trường tiêu đề`, `Các dòng đầu`, `Các dòng cuối` cho layout nhiều dòng).
+  - `Loại bố cục`: Dropdown (`Bố cục bảng`, `Bố cục nhiều dòng`).
+  - Dựa vào lựa chọn trên, các multi-select dropdown khác sẽ hiện ra để người dùng chọn các trường sẽ hiển thị ở các vị trí khác nhau (ví dụ: `Các trường hiển thị` cho layout bảng; `Trường tiêu đề`, `Các dòng đầu`, `Các dòng cuối` cho layout nhiều dòng).
 
 ### 3.6. Tab: Cấu hình chi tiết (Detail View)
 

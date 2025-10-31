@@ -11,6 +11,7 @@
 ### 1.1 API Documentation Analysis
 
 #### Endpoint: Get Active Table Definition
+
 - **URL**: `/api/workspace/{workspaceId}/workflow/get/active_tables/{tableId}`
 - **Method**: POST
 - **Authentication**: Bearer token required
@@ -23,6 +24,7 @@
   ```
 
 #### ActiveTable Schema
+
 ```typescript
 interface ActiveTable {
   id: string;
@@ -37,14 +39,15 @@ interface ActiveTable {
 ```
 
 #### ActiveTableConfig Schema (Encryption-relevant fields)
+
 ```typescript
 interface ActiveTableConfig {
   title: string;
   fields: ActiveTableField[];
-  e2eeEncryption: boolean;           // Whether E2EE is enabled
-  encryptionKey: string;              // NEVER stored on server, client-only
-  encryptionAuthKey: string;          // SHA-256 hash for validation
-  hashedKeywordFields: string[];      // Fields with searchable hashes
+  e2eeEncryption: boolean; // Whether E2EE is enabled
+  encryptionKey: string; // NEVER stored on server, client-only
+  encryptionAuthKey: string; // SHA-256 hash for validation
+  hashedKeywordFields: string[]; // Fields with searchable hashes
   // ... other config fields
 }
 ```
@@ -54,23 +57,27 @@ interface ActiveTableConfig {
 #### Key Encryption Flow Patterns Found:
 
 1. **Encryption Key Storage**:
+
    ```javascript
    // Line 2393-2397
    localStorage.setItem(`e2ee_key_${WORKSPACE_ID}_${tableId}`, key);
    localStorage.getItem(`e2ee_key_${WORKSPACE_ID}_${tableId}`);
    ```
+
    - Keys are stored per workspace+table combination
    - Format: `e2ee_key_{workspaceId}_{tableId}`
 
 2. **Encryption Key Prompt UI** (Lines 1991-2006):
+
    ```html
    <div id="encryption-key-form">
-     <input type="hidden" id="input-encryption-key-auth"/>
+     <input type="hidden" id="input-encryption-key-auth" />
      <input type="text" id="form-table-id" readonly />
      <input type="text" id="input-encryption-key" placeholder="Nhập khóa mã hóa (32 ký tự)" required />
      <p>Khóa phải có đúng 32 ký tự để đảm bảo mã hóa an toàn.</p>
    </div>
    ```
+
    - Users are prompted for encryption key if not in localStorage
    - Key must be exactly 32 characters
    - Shows table ID for reference
@@ -78,7 +85,7 @@ interface ActiveTableConfig {
 3. **Field-Type Encryption Mapping** (Lines 2481-2510):
    - **AES-256-CBC**: SHORT_TEXT, RICH_TEXT, TEXT, EMAIL, URL, PHONE
    - **OPE (Order-Preserving)**: INTEGER, NUMERIC, DATE, DATETIME, CURRENCY
-   - **HMAC-SHA256**: SELECT_ONE, SELECT_LIST, CHECKBOX_*
+   - **HMAC-SHA256**: SELECT*ONE, SELECT_LIST, CHECKBOX*\*
 
 4. **Key Validation**:
    - Server stores `encryptionAuthKey` = SHA-256(encryptionKey)
@@ -87,6 +94,7 @@ interface ActiveTableConfig {
 ### 1.3 Existing Codebase Patterns
 
 #### Current Active Tables Feature Structure
+
 ```
 apps/web/src/features/active-tables/
 ├── api/
@@ -114,6 +122,7 @@ apps/web/src/features/active-tables/
 ```
 
 #### Current Table Detail Page (active-table-detail-page.tsx)
+
 - **Exists**: Yes (10KB, 274 lines)
 - **Current Features**:
   - Table metadata display (name, description, workGroup)
@@ -127,6 +136,7 @@ apps/web/src/features/active-tables/
   - ❌ No encrypted field indicators
 
 #### API Client Status
+
 - ✅ `getActiveTable()` exists in `active-tables-api.ts`
 - ✅ Returns `{ data: ActiveTable }`
 - ✅ Already used in existing hooks
@@ -134,7 +144,9 @@ apps/web/src/features/active-tables/
 ### 1.4 Available Package Utilities
 
 #### @workspace/active-tables-core
+
 Provides:
+
 - ✅ `getEncryptionTypeForField()` - Determine encryption type
 - ✅ `decryptFieldValue()` - Decrypt single field
 - ✅ `isValidEncryptionKey()` - Validate 32-char format
@@ -143,7 +155,9 @@ Provides:
 - ✅ `isEncryptableField()` - Check if field needs encryption
 
 #### @workspace/encryption-core
+
 Provides:
+
 - ✅ `AES256` - AES-256-CBC encryption/decryption
 - ✅ `OPE` - Order-Preserving Encryption
 - ✅ `HMAC` - HMAC-SHA256 hashing
@@ -153,15 +167,16 @@ Provides:
 ### 1.5 Routing Structure
 
 Current Routes (from router.tsx):
+
 ```typescript
 // Line 17: List page
-to: '/workspaces/tables'
+to: '/workspaces/tables';
 
 // Line 20: Detail page ← TARGET
-to: '/workspaces/tables/$tableId'
+to: '/workspaces/tables/$tableId';
 
 // Line 23: Settings page
-to: '/workspaces/tables/$tableId/settings'
+to: '/workspaces/tables/$tableId/settings';
 ```
 
 Route is already configured! Just need to enhance the page.
@@ -281,17 +296,19 @@ sequenceDiagram
 ### 2.3 State Management Strategy
 
 **State Layer 1: Server State (React Query)**
+
 ```typescript
 // Managed by useActiveTableDetail hook
 const {
-  data: tableData,           // ActiveTable from API
+  data: tableData, // ActiveTable from API
   isLoading,
   error,
-  refetch
+  refetch,
 } = useActiveTableDetail(workspaceId, tableId);
 ```
 
 **State Layer 2: Local State (useState)**
+
 ```typescript
 // Page-level state for encryption modal
 const [isEncryptionModalOpen, setIsEncryptionModalOpen] = useState(false);
@@ -300,20 +317,22 @@ const [keyValidationError, setKeyValidationError] = useState<string | null>(null
 ```
 
 **State Layer 3: Encryption Key Management (Custom Hook)**
+
 ```typescript
 // New hook: useTableEncryption
 const {
-  encryptionKey,              // Current key from localStorage
-  isKeyLoaded,                // Boolean: key exists
-  isKeyValid,                 // Boolean: key matches authKey
-  keyValidationStatus,        // 'valid' | 'invalid' | 'unknown'
-  saveKey,                    // (key: string) => Promise<boolean>
-  clearKey,                   // () => void
-  validateKey,                // (key: string) => boolean
+  encryptionKey, // Current key from localStorage
+  isKeyLoaded, // Boolean: key exists
+  isKeyValid, // Boolean: key matches authKey
+  keyValidationStatus, // 'valid' | 'invalid' | 'unknown'
+  saveKey, // (key: string) => Promise<boolean>
+  clearKey, // () => void
+  validateKey, // (key: string) => boolean
 } = useTableEncryption(workspaceId, tableId, table?.config);
 ```
 
 **Why This Approach?**
+
 - ✅ Server data in React Query (single source of truth)
 - ✅ UI state local to page (no global pollution)
 - ✅ Encryption key in custom hook (reusable logic)
@@ -355,6 +374,7 @@ stateDiagram-v2
 ### 3.2 Encryption Flow UI States
 
 #### State 1: E2EE Disabled (Server-side encryption)
+
 ```tsx
 <Card>
   <Badge variant="secondary">
@@ -365,6 +385,7 @@ stateDiagram-v2
 ```
 
 #### State 2: E2EE Enabled, Key Not Loaded
+
 ```tsx
 <Card className="border-warning">
   <Badge variant="warning">
@@ -378,6 +399,7 @@ stateDiagram-v2
 ```
 
 #### State 3: E2EE Enabled, Key Loaded & Valid
+
 ```tsx
 <Card className="border-success">
   <Badge variant="success">
@@ -396,6 +418,7 @@ stateDiagram-v2
 ```
 
 #### State 4: E2EE Enabled, Key Invalid
+
 ```tsx
 <Card className="border-destructive">
   <Badge variant="destructive">
@@ -459,12 +482,8 @@ interface EncryptionKeyModalProps {
           onChange={(e) => setKeyInput(e.target.value)}
           className={keyValidationError ? 'border-destructive' : ''}
         />
-        <p className="text-xs text-muted-foreground mt-1">
-          {keyInput.length}/32 characters
-        </p>
-        {keyValidationError && (
-          <p className="text-xs text-destructive mt-1">{keyValidationError}</p>
-        )}
+        <p className="text-xs text-muted-foreground mt-1">{keyInput.length}/32 characters</p>
+        {keyValidationError && <p className="text-xs text-destructive mt-1">{keyValidationError}</p>}
       </div>
 
       {/* Security Warning */}
@@ -483,17 +502,16 @@ interface EncryptionKeyModalProps {
     </div>
 
     <DialogFooter>
-      <Button variant="outline" onClick={onClose}>Cancel</Button>
-      <Button
-        onClick={handleSaveKey}
-        disabled={keyInput.length !== 32}
-      >
+      <Button variant="outline" onClick={onClose}>
+        Cancel
+      </Button>
+      <Button onClick={handleSaveKey} disabled={keyInput.length !== 32}>
         <Check className="mr-2 h-4 w-4" />
         Validate & Save Key
       </Button>
     </DialogFooter>
   </DialogContent>
-</Dialog>
+</Dialog>;
 ```
 
 ### 3.4 Encryption Type Breakdown Section
@@ -532,7 +550,7 @@ interface EncryptionKeyModalProps {
             Text fields encrypted with AES-256-CBC. Full confidentiality, no server-side search.
           </p>
           <div className="flex flex-wrap gap-2">
-            {aesFields.map(field => (
+            {aesFields.map((field) => (
               <Badge key={field.name} variant="outline">
                 {field.label}
               </Badge>
@@ -580,14 +598,17 @@ apps/web/src/features/active-tables/
 ### 4.3 Detailed File Breakdown
 
 #### NEW: `components/encryption-key-modal.tsx`
+
 **Purpose**: Modal for entering/validating encryption key
 **Size**: ~200 lines
 **Dependencies**:
+
 - `@workspace/ui` components (Dialog, Input, Button, Alert)
 - `@workspace/active-tables-core` (validateEncryptionKey)
 - Local state for key input and validation
 
 **Props**:
+
 ```typescript
 interface EncryptionKeyModalProps {
   isOpen: boolean;
@@ -599,6 +620,7 @@ interface EncryptionKeyModalProps {
 ```
 
 **Key Functions**:
+
 - `handleKeyInput()` - Validate length as user types
 - `handleSaveKey()` - Validate against authKey and save
 - `showValidationError()` - Display error messages
@@ -606,13 +628,16 @@ interface EncryptionKeyModalProps {
 ---
 
 #### NEW: `components/encryption-status-card.tsx`
+
 **Purpose**: Display encryption status and key management
 **Size**: ~150 lines
 **Dependencies**:
+
 - `useTableEncryption` hook
 - `@workspace/ui` components (Card, Badge, Button)
 
 **Props**:
+
 ```typescript
 interface EncryptionStatusCardProps {
   table: ActiveTable;
@@ -622,6 +647,7 @@ interface EncryptionStatusCardProps {
 ```
 
 **States to Display**:
+
 1. Server-side only (e2eeEncryption = false)
 2. E2EE enabled, no key
 3. E2EE enabled, key valid
@@ -630,13 +656,16 @@ interface EncryptionStatusCardProps {
 ---
 
 #### NEW: `components/encryption-type-breakdown.tsx`
+
 **Purpose**: Show which fields use which encryption type
 **Size**: ~180 lines
 **Dependencies**:
+
 - `@workspace/active-tables-core` (getEncryptionTypeForField)
 - `@workspace/ui` components (Card, Tabs, Badge)
 
 **Props**:
+
 ```typescript
 interface EncryptionTypeBreakdownProps {
   fields: ActiveFieldConfig[];
@@ -645,6 +674,7 @@ interface EncryptionTypeBreakdownProps {
 ```
 
 **Displays**:
+
 - AES-256-CBC fields (text fields)
 - OPE fields (numbers, dates)
 - HMAC-SHA256 fields (selects)
@@ -654,11 +684,13 @@ interface EncryptionTypeBreakdownProps {
 ---
 
 #### REPLACE: `hooks/use-table-encryption.ts`
+
 **Purpose**: Manage encryption key lifecycle
 **Size**: ~150 lines
 **Current Status**: Stub (22 lines)
 
 **Hook Interface**:
+
 ```typescript
 export function useTableEncryption(
   workspaceId: string,
@@ -685,6 +717,7 @@ export function useTableEncryption(
 ```
 
 **Implementation Details**:
+
 1. Use `useEffect` to load key from localStorage on mount
 2. Use `useMemo` to validate key against authKey
 3. Provide save/clear functions with localStorage management
@@ -693,31 +726,20 @@ export function useTableEncryption(
 ---
 
 #### NEW: `utils/encryption-key-storage.ts`
+
 **Purpose**: Centralize localStorage operations
 **Size**: ~80 lines
 
 **Functions**:
+
 ```typescript
-export function saveEncryptionKey(
-  workspaceId: string,
-  tableId: string,
-  key: string
-): void;
+export function saveEncryptionKey(workspaceId: string, tableId: string, key: string): void;
 
-export function getEncryptionKey(
-  workspaceId: string,
-  tableId: string
-): string | null;
+export function getEncryptionKey(workspaceId: string, tableId: string): string | null;
 
-export function clearEncryptionKey(
-  workspaceId: string,
-  tableId: string
-): void;
+export function clearEncryptionKey(workspaceId: string, tableId: string): void;
 
-export function hasEncryptionKey(
-  workspaceId: string,
-  tableId: string
-): boolean;
+export function hasEncryptionKey(workspaceId: string, tableId: string): boolean;
 ```
 
 **Uses**: `getEncryptionKeyStorageKey()` from `@workspace/active-tables-core`
@@ -725,11 +747,13 @@ export function hasEncryptionKey(
 ---
 
 #### ENHANCE: `pages/active-table-detail-page.tsx`
+
 **Current Size**: 274 lines
 **Target Size**: ~450 lines
 **Changes**:
 
 **New Imports**:
+
 ```typescript
 import { EncryptionKeyModal } from '../components/encryption-key-modal';
 import { EncryptionStatusCard } from '../components/encryption-status-card';
@@ -738,21 +762,16 @@ import { useTableEncryption } from '../hooks/use-table-encryption';
 ```
 
 **New State**:
+
 ```typescript
 const [isEncryptionModalOpen, setIsEncryptionModalOpen] = useState(false);
 
-const {
-  encryptionKey,
-  isKeyLoaded,
-  isKeyValid,
-  keyValidationStatus,
-  saveKey,
-  clearKey,
-  isE2EEEnabled,
-} = useTableEncryption(workspaceId, tableId, table?.config);
+const { encryptionKey, isKeyLoaded, isKeyValid, keyValidationStatus, saveKey, clearKey, isE2EEEnabled } =
+  useTableEncryption(workspaceId, tableId, table?.config);
 ```
 
 **New Effects**:
+
 ```typescript
 // Auto-open modal if E2EE enabled but no key
 useEffect(() => {
@@ -763,6 +782,7 @@ useEffect(() => {
 ```
 
 **New Sections in JSX**:
+
 1. Replace basic encryption badge with `<EncryptionStatusCard />`
 2. Add `<EncryptionKeyModal />` before closing div
 3. Add `<EncryptionTypeBreakdown />` after encryption card
@@ -771,7 +791,9 @@ useEffect(() => {
 ---
 
 #### UPDATE: `types.ts`
+
 **Add**:
+
 ```typescript
 export interface EncryptionKeyValidationResult {
   isValid: boolean;
@@ -788,6 +810,7 @@ export type EncryptionKeyStatus = 'valid' | 'invalid' | 'unknown' | 'not-require
 ### Phase 1: Encryption Utilities (Day 1, 3-4 hours)
 
 #### Step 1.1: Create encryption-key-storage.ts
+
 **File**: `apps/web/src/features/active-tables/utils/encryption-key-storage.ts`
 
 ```typescript
@@ -797,11 +820,7 @@ import { getEncryptionKeyStorageKey } from '@workspace/active-tables-core';
  * Save encryption key to localStorage
  * @throws Error if key is invalid format (not 32 chars)
  */
-export function saveEncryptionKey(
-  workspaceId: string,
-  tableId: string,
-  key: string
-): void {
+export function saveEncryptionKey(workspaceId: string, tableId: string, key: string): void {
   if (!key || key.length !== 32) {
     throw new Error('Encryption key must be exactly 32 characters');
   }
@@ -814,10 +833,7 @@ export function saveEncryptionKey(
  * Get encryption key from localStorage
  * @returns Encryption key or null if not found
  */
-export function getEncryptionKey(
-  workspaceId: string,
-  tableId: string
-): string | null {
+export function getEncryptionKey(workspaceId: string, tableId: string): string | null {
   const storageKey = getEncryptionKeyStorageKey(workspaceId, tableId);
   return localStorage.getItem(storageKey);
 }
@@ -825,10 +841,7 @@ export function getEncryptionKey(
 /**
  * Clear encryption key from localStorage
  */
-export function clearEncryptionKey(
-  workspaceId: string,
-  tableId: string
-): void {
+export function clearEncryptionKey(workspaceId: string, tableId: string): void {
   const storageKey = getEncryptionKeyStorageKey(workspaceId, tableId);
   localStorage.removeItem(storageKey);
 }
@@ -836,15 +849,13 @@ export function clearEncryptionKey(
 /**
  * Check if encryption key exists in localStorage
  */
-export function hasEncryptionKey(
-  workspaceId: string,
-  tableId: string
-): boolean {
+export function hasEncryptionKey(workspaceId: string, tableId: string): boolean {
   return getEncryptionKey(workspaceId, tableId) !== null;
 }
 ```
 
 **Test Manually**:
+
 ```typescript
 // In browser console
 saveEncryptionKey('123', '456', 'a'.repeat(32));
@@ -856,6 +867,7 @@ console.log(hasEncryptionKey('123', '456')); // Should return false
 ---
 
 #### Step 1.2: Replace use-table-encryption.ts Stub
+
 **File**: `apps/web/src/features/active-tables/hooks/use-table-encryption.ts`
 
 ```typescript
@@ -888,7 +900,7 @@ export interface UseTableEncryptionReturn {
 export function useTableEncryption(
   workspaceId: string,
   tableId: string,
-  config?: ActiveTableConfig
+  config?: ActiveTableConfig,
 ): UseTableEncryptionReturn {
   const [encryptionKey, setEncryptionKey] = useState<string | null>(null);
   const [isKeyLoaded, setIsKeyLoaded] = useState(false);
@@ -950,7 +962,7 @@ export function useTableEncryption(
         return false;
       }
     },
-    [workspaceId, tableId, encryptionAuthKey]
+    [workspaceId, tableId, encryptionAuthKey],
   );
 
   // Clear key from localStorage
@@ -966,7 +978,7 @@ export function useTableEncryption(
       if (!encryptionAuthKey) return false;
       return validateEncryptionKey(key, encryptionAuthKey);
     },
-    [encryptionAuthKey]
+    [encryptionAuthKey],
   );
 
   return {
@@ -984,6 +996,7 @@ export function useTableEncryption(
 ```
 
 **Test in Dev**:
+
 ```tsx
 // Add to ActiveTableDetailPage temporarily
 const encryption = useTableEncryption(workspaceId, tableId, table?.config);
@@ -995,6 +1008,7 @@ console.log('Encryption hook:', encryption);
 ### Phase 2: Encryption Key Modal (Day 1-2, 4 hours)
 
 #### Step 2.1: Create EncryptionKeyModal Component
+
 **File**: `apps/web/src/features/active-tables/components/encryption-key-modal.tsx`
 
 ```typescript
@@ -1162,6 +1176,7 @@ export function EncryptionKeyModal({
 ```
 
 **Test**:
+
 1. Add modal to detail page
 2. Click "Enter Key" button
 3. Try invalid key (< 32 chars)
@@ -1173,6 +1188,7 @@ export function EncryptionKeyModal({
 ### Phase 3: Encryption Status Card (Day 2, 3 hours)
 
 #### Step 3.1: Create EncryptionStatusCard Component
+
 **File**: `apps/web/src/features/active-tables/components/encryption-status-card.tsx`
 
 ```typescript
@@ -1317,6 +1333,7 @@ export function EncryptionStatusCard({
 ### Phase 4: Encryption Type Breakdown (Day 2, 2-3 hours)
 
 #### Step 4.1: Create EncryptionTypeBreakdown Component
+
 **File**: `apps/web/src/features/active-tables/components/encryption-type-breakdown.tsx`
 
 ```typescript
@@ -1531,11 +1548,13 @@ export function EncryptionTypeBreakdown({
 ### Phase 5: Enhance Table Detail Page (Day 3, 4-5 hours)
 
 #### Step 5.1: Update active-table-detail-page.tsx
+
 **File**: `apps/web/src/features/active-tables/pages/active-table-detail-page.tsx`
 
 **Changes**:
 
 1. **Add imports**:
+
 ```typescript
 import { useState, useEffect } from 'react'; // Add useState, useEffect
 import { EncryptionKeyModal } from '../components/encryption-key-modal';
@@ -1546,6 +1565,7 @@ import { getEncryptionTypeForField } from '@workspace/active-tables-core';
 ```
 
 2. **Add state and hooks** (after existing hooks):
+
 ```typescript
 // Encryption modal state
 const [isEncryptionModalOpen, setIsEncryptionModalOpen] = useState(false);
@@ -1571,6 +1591,7 @@ const handleKeySaved = async (key: string) => {
 ```
 
 3. **Replace encryption badge section** (around line 156-166):
+
 ```typescript
 // OLD CODE - REMOVE THIS:
 const encryptionBadge = table?.config?.e2eeEncryption ? (
@@ -1607,6 +1628,7 @@ const encryptionBadge = encryption.isE2EEEnabled ? (
 ```
 
 4. **Replace old encryption card** (around line 240-254):
+
 ```typescript
 // OLD CODE - REMOVE THIS:
 <Card>
@@ -1634,6 +1656,7 @@ const encryptionBadge = encryption.isE2EEEnabled ? (
 ```
 
 5. **Add encryption type breakdown** (after EncryptionStatusCard):
+
 ```typescript
 <EncryptionTypeBreakdown
   fields={table.config.fields}
@@ -1643,6 +1666,7 @@ const encryptionBadge = encryption.isE2EEEnabled ? (
 ```
 
 6. **Update field cards to show encryption badges** (around line 264):
+
 ```typescript
 // In FieldSummary component, add encryption type badge:
 const FieldSummary = ({ field, isE2EEEnabled }: FieldSummaryProps & { isE2EEEnabled: boolean }) => {
@@ -1686,6 +1710,7 @@ const FieldSummary = ({ field, isE2EEEnabled }: FieldSummaryProps & { isE2EEEnab
 ```
 
 7. **Add encryption modal** (before closing </div>):
+
 ```typescript
 {/* Encryption Key Modal */}
 {table && (
@@ -1706,6 +1731,7 @@ const FieldSummary = ({ field, isE2EEEnabled }: FieldSummaryProps & { isE2EEEnab
 #### Step 6.1: Manual Testing Checklist
 
 **Test Case 1: Table with E2EE Disabled**
+
 - [ ] Navigate to table detail page
 - [ ] Verify "Server-side Encryption" badge shows
 - [ ] Verify EncryptionStatusCard shows server-side encryption
@@ -1713,6 +1739,7 @@ const FieldSummary = ({ field, isE2EEEnabled }: FieldSummaryProps & { isE2EEEnab
 - [ ] Verify no encryption key modal appears
 
 **Test Case 2: Table with E2EE Enabled, No Key Stored**
+
 - [ ] Navigate to E2EE table detail page
 - [ ] Verify encryption modal auto-opens
 - [ ] Verify "Key Required" badge shows
@@ -1722,6 +1749,7 @@ const FieldSummary = ({ field, isE2EEEnabled }: FieldSummaryProps & { isE2EEEnab
 - [ ] Verify status updates to "Key Loaded ✅"
 
 **Test Case 3: Table with E2EE Enabled, Key Already Stored (Valid)**
+
 - [ ] Navigate to table (key already in localStorage)
 - [ ] Verify "E2EE Active" badge shows
 - [ ] Verify EncryptionStatusCard shows "Key Loaded & Valid"
@@ -1730,6 +1758,7 @@ const FieldSummary = ({ field, isE2EEEnabled }: FieldSummaryProps & { isE2EEEnab
 - [ ] Click "Clear Key" → key removed, status updates
 
 **Test Case 4: Table with E2EE Enabled, Invalid Key Stored**
+
 - [ ] Manually corrupt key in localStorage
 - [ ] Navigate to table detail page
 - [ ] Verify "Invalid Key ❌" warning shows
@@ -1737,6 +1766,7 @@ const FieldSummary = ({ field, isE2EEEnabled }: FieldSummaryProps & { isE2EEEnab
 - [ ] Enter correct key → status updates
 
 **Test Case 5: Field Encryption Type Display**
+
 - [ ] Verify AES-256-CBC fields show Shield icon
 - [ ] Verify OPE fields show Lock icon
 - [ ] Verify HMAC fields show Hash icon
@@ -1768,11 +1798,13 @@ const FieldSummary = ({ field, isE2EEEnabled }: FieldSummaryProps & { isE2EEEnab
 
 **Decision**: Store encryption keys in browser's localStorage
 **Alternatives Considered**:
+
 - sessionStorage (cleared on tab close)
 - IndexedDB (more complex API)
 - Memory only (lost on page reload)
 
 **Rationale**:
+
 - ✅ Persists across page reloads (better UX)
 - ✅ Per-origin isolation (security)
 - ✅ Simple synchronous API
@@ -1780,6 +1812,7 @@ const FieldSummary = ({ field, isE2EEEnabled }: FieldSummaryProps & { isE2EEEnab
 - ⚠️ Trade-off: Keys accessible to XSS attacks (acceptable given E2EE threat model)
 
 **Security Considerations**:
+
 - Keys are scoped per workspace+table (principle of least privilege)
 - Users can clear keys manually
 - Keys never transmitted to server
@@ -1791,16 +1824,19 @@ const FieldSummary = ({ field, isE2EEEnabled }: FieldSummaryProps & { isE2EEEnab
 
 **Decision**: Automatically open modal when E2EE table has no key
 **Alternatives Considered**:
+
 - Show warning banner only (passive)
 - Require user to click button (extra friction)
 
 **Rationale**:
+
 - ✅ Prevents users from viewing empty data without understanding why
 - ✅ Clear call-to-action immediately visible
 - ✅ Matches user expectation (can't proceed without key)
 - ✅ Reduces confusion and support requests
 
 **UX Considerations**:
+
 - Modal is dismissible (user can close and explore page)
 - Modal doesn't block back navigation
 - Clear explanation of why key is needed
@@ -1811,10 +1847,12 @@ const FieldSummary = ({ field, isE2EEEnabled }: FieldSummaryProps & { isE2EEEnab
 
 **Decision**: Use custom hook + localStorage, not React Query
 **Alternatives Considered**:
+
 - React Query with custom queryFn (fetching from localStorage)
 - Global Zustand store for keys
 
 **Rationale**:
+
 - ❌ React Query is for server state, not local state (architecture violation)
 - ❌ Keys don't need caching/stale-while-revalidate logic
 - ❌ No need for loading/error states (localStorage is synchronous)
@@ -1827,16 +1865,19 @@ const FieldSummary = ({ field, isE2EEEnabled }: FieldSummaryProps & { isE2EEEnab
 
 **Decision**: Validate stored key against authKey on every page load
 **Alternatives Considered**:
+
 - Trust stored key without validation (security risk)
 - Validate only on user action (delayed feedback)
 
 **Rationale**:
+
 - ✅ Detects corrupted/wrong keys immediately
 - ✅ Prevents users from attempting to decrypt with bad key
 - ✅ Provides clear feedback (valid/invalid/unknown)
 - ✅ Minimal performance impact (SHA-256 is fast)
 
 **Implementation**:
+
 - Validation happens in useTableEncryption useMemo
 - No additional API calls required
 - Results cached until dependencies change
@@ -1847,16 +1888,19 @@ const FieldSummary = ({ field, isE2EEEnabled }: FieldSummaryProps & { isE2EEEnab
 
 **Decision**: Show which fields use which encryption algorithm
 **Alternatives Considered**:
+
 - Hide implementation details (simpler UI)
 - Show only encrypted vs unencrypted (less detail)
 
 **Rationale**:
+
 - ✅ Educational for users (understand security model)
 - ✅ Helps debug encryption issues (support can see config)
 - ✅ Transparency builds trust (no "security through obscurity")
 - ✅ Matches "focus on encryption flow" requirement
 
 **Design**:
+
 - Tabs for easy navigation (AES/OPE/HMAC/None)
 - Brief explanations of each encryption type
 - Visual badges for quick scanning
@@ -1873,12 +1917,14 @@ const FieldSummary = ({ field, isE2EEEnabled }: FieldSummaryProps & { isE2EEEnab
 **Impact**: High (data loss)
 
 **Mitigation Strategies**:
+
 1. **Warning Messages**: Prominent warnings in modal and docs
 2. **Key Backup**: Future feature to export/import keys
 3. **Key Recovery**: Consider optional server-side key escrow (future)
 4. **User Education**: Clear documentation on key management
 
 **Monitoring**:
+
 - Track how often users clear keys (analytics)
 - Monitor support requests about key loss
 - Add telemetry for failed decryption attempts
@@ -1893,12 +1939,14 @@ const FieldSummary = ({ field, isE2EEEnabled }: FieldSummaryProps & { isE2EEEnab
 **Impact**: Medium (validation broken)
 
 **Mitigation Strategies**:
+
 1. **Defensive Checks**: Handle missing authKey gracefully
 2. **Show "Unknown" Status**: Don't block user, just warn
 3. **Server-Side Validation**: Ensure authKey always returned
 4. **Error Logging**: Log when authKey is missing
 
 **Implementation**:
+
 ```typescript
 // In useTableEncryption
 if (!encryptionAuthKey) {
@@ -1917,11 +1965,13 @@ if (!encryptionAuthKey) {
 **Impact**: Low (minor UI lag)
 
 **Mitigation Strategies**:
+
 1. **useMemo**: Already used in EncryptionTypeBreakdown
 2. **Lazy Loading**: Only render visible tab content
 3. **Virtualization**: Future optimization if needed
 
 **Benchmarks**:
+
 - 50 fields: ~1ms (negligible)
 - 100 fields: ~3ms (acceptable)
 - 500+ fields: Consider optimization
@@ -1936,12 +1986,14 @@ if (!encryptionAuthKey) {
 **Impact**: Critical (data breach)
 
 **Mitigation Strategies**:
+
 1. **Content Security Policy**: Strict CSP to prevent XSS
 2. **Input Sanitization**: Sanitize all user inputs
 3. **Regular Security Audits**: Pen testing and code review
 4. **User Education**: Explain key storage in docs
 
 **Inherent Limitation**:
+
 - Client-side E2EE fundamentally requires client-side key storage
 - XSS is a general web security concern, not specific to this feature
 - Server-side encryption alternative available (e2eeEncryption = false)
@@ -1956,15 +2008,18 @@ if (!encryptionAuthKey) {
 **Impact**: Medium (poor UX)
 
 **Current Behavior**:
+
 - Keys stored per-device in localStorage
 - User must enter key on each device
 
 **Future Solutions** (out of scope for Phase 1):
+
 1. **Key Export/Import**: Allow manual key transfer
 2. **Optional Cloud Sync**: User-controlled key backup (with master password)
 3. **QR Code Transfer**: Scan QR code to transfer key between devices
 
 **Documentation**:
+
 - Clearly document that keys are per-device
 - Provide instructions for key backup
 
@@ -1978,11 +2033,13 @@ if (!encryptionAuthKey) {
 **Impact**: Medium (migration issues)
 
 **Mitigation**:
+
 - Use same localStorage key format: `e2ee_key_{workspaceId}_{tableId}`
 - Validate key format on read (32 chars UTF-8)
 - Provide migration script if format differs
 
 **Testing**:
+
 - Test with keys stored by old HTML module
 - Verify encryption/decryption compatibility
 
@@ -2029,6 +2086,7 @@ if (!encryptionAuthKey) {
 ## 9. Future Enhancements (Out of Scope)
 
 ### 9.1 Phase 2: Key Management Features
+
 - Export encryption keys to file
 - Import keys from file
 - Generate new keys with secure randomness
@@ -2036,18 +2094,21 @@ if (!encryptionAuthKey) {
 - Master password for key protection
 
 ### 9.2 Phase 3: Multi-Device Support
+
 - QR code key transfer
 - Optional cloud key backup (encrypted with master password)
 - Browser extension for key management
 - Mobile app integration
 
 ### 9.3 Phase 4: Advanced Encryption
+
 - Field-level encryption configuration
 - Custom encryption algorithms
 - Hardware security module (HSM) integration
 - Audit logs for key access
 
 ### 9.4 Phase 5: Records View Integration
+
 - Decrypt records inline in table view
 - Show decryption status per record
 - Bulk decrypt/encrypt operations
@@ -2090,6 +2151,7 @@ if (!encryptionAuthKey) {
 ### 10.3 Code Review Checklist
 
 **Before Submitting PR**:
+
 - [ ] All TypeScript errors resolved
 - [ ] ESLint warnings fixed
 - [ ] Prettier formatting applied
@@ -2105,6 +2167,7 @@ if (!encryptionAuthKey) {
 - [ ] No hardcoded strings (use constants or i18n)
 
 **Security Review**:
+
 - [ ] No sensitive data logged to console
 - [ ] Input validation on encryption key
 - [ ] XSS prevention (no dangerouslySetInnerHTML)
@@ -2118,22 +2181,27 @@ if (!encryptionAuthKey) {
 **Total Estimated Time**: 3-4 days (18-24 hours)
 
 **Day 1** (6-7 hours):
+
 - Phase 1: Encryption Utilities (3-4 hours)
 - Phase 2: Encryption Key Modal (3 hours)
 
 **Day 2** (6-7 hours):
+
 - Phase 3: Encryption Status Card (3 hours)
 - Phase 4: Encryption Type Breakdown (3-4 hours)
 
 **Day 3** (4-6 hours):
+
 - Phase 5: Enhance Table Detail Page (4-5 hours)
 - Phase 6: Testing & Refinement (1 hour)
 
 **Day 4** (2-4 hours):
+
 - Phase 6: Testing & Refinement continued (2-3 hours)
 - Documentation and PR preparation (1 hour)
 
 **Milestones**:
+
 - ✅ Day 1 End: Encryption modal working
 - ✅ Day 2 End: All components built
 - ✅ Day 3 End: Page fully integrated

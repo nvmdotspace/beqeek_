@@ -102,13 +102,7 @@ export interface RecordComment {
  * Check if object is a valid record
  */
 export function isValidRecord(obj: any): obj is TableRecord {
-  return (
-    obj &&
-    typeof obj === 'object' &&
-    typeof obj.id === 'string' &&
-    obj.record &&
-    typeof obj.record === 'object'
-  );
+  return obj && typeof obj === 'object' && typeof obj.id === 'string' && obj.record && typeof obj.record === 'object';
 }
 
 /**
@@ -121,10 +115,7 @@ export function isEncryptedRecord(record: TableRecord): boolean {
 /**
  * Check if user has permission to perform action on record
  */
-export function hasPermission(
-  record: TableRecord,
-  action: 'access' | 'update' | 'delete'
-): boolean {
+export function hasPermission(record: TableRecord, action: 'access' | 'update' | 'delete'): boolean {
   if (!record.permissions) {
     return false; // No permissions = deny by default
   }

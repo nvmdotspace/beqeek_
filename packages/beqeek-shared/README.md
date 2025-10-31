@@ -166,13 +166,7 @@ All validation functions follow the pattern:
 Full TypeScript support with strict typing:
 
 ```typescript
-import type {
-  FieldType,
-  ActionType,
-  Permission,
-  RecordListLayout,
-  RecordDetailLayout,
-} from '@workspace/beqeek-shared';
+import type { FieldType, ActionType, Permission, RecordListLayout, RecordDetailLayout } from '@workspace/beqeek-shared';
 
 const fieldType: FieldType = 'SHORT_TEXT';
 const actionType: ActionType = 'create';
@@ -228,8 +222,8 @@ function TableTypeSelector() {
 
 ```typescript
 // For table type: TABLE_TYPE_DEPARTMENT
-nameKey: 'tableType_department_name'
-descriptionKey: 'tableType_department_description'
+nameKey: 'tableType_department_name';
+descriptionKey: 'tableType_department_description';
 
 // Usage with Paraglide
 const metadata = TABLE_TYPE_METADATA.DEPARTMENT;
@@ -238,6 +232,7 @@ const description = m[metadata.descriptionKey]();
 ```
 
 All table type translations are stored in:
+
 - `messages/vi.json` (Vietnamese - default)
 - `messages/en.json` (English)
 

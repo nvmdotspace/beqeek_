@@ -12,7 +12,7 @@ import { Button } from '@workspace/ui/components/button';
 
 import { initialsFromName } from '../utils/initials';
 // @ts-ignore
-import { m } from "@/paraglide/generated/messages.js";
+import { m } from '@/paraglide/generated/messages.js';
 import { useCurrentLocale } from '@/hooks/use-current-locale';
 
 type WorkspaceCardProps = {
@@ -27,13 +27,7 @@ export const WorkspaceCard = ({ workspace }: WorkspaceCardProps) => {
     <Card className="h-full transition hover:-translate-y-0.5 hover:shadow-lg">
       <CardHeader className="flex flex-row items-start gap-3 pb-3">
         <Avatar className="h-10 w-10">
-          <AvatarImage
-            src={
-              namespace
-                ? `https://api.dicebear.com/7.x/initials/svg?seed=${namespace}`
-                : undefined
-            }
-          />
+          <AvatarImage src={namespace ? `https://api.dicebear.com/7.x/initials/svg?seed=${namespace}` : undefined} />
           <AvatarFallback className="text-sm bg-primary text-primary-foreground">
             {initialsFromName(workspaceName)}
           </AvatarFallback>
@@ -60,7 +54,7 @@ export const WorkspaceCard = ({ workspace }: WorkspaceCardProps) => {
           <div className="space-y-0.5">
             <p className="text-[10px] uppercase tracking-wide text-foreground/70">{m.workspace_card_managerLabel()}</p>
             <p className="text-xs font-medium text-foreground">
-              {myWorkspaceUser?.fullName ?? (m.workspace_card_noInfo())}
+              {myWorkspaceUser?.fullName ?? m.workspace_card_noInfo()}
             </p>
           </div>
         </div>

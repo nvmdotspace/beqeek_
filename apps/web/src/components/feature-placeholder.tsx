@@ -35,9 +35,7 @@ export const FeaturePlaceholder = ({
         <CardContent className="space-y-6 text-center text-muted-foreground">
           <p>{description}</p>
           <div className="flex flex-wrap items-center justify-center gap-3">
-            {primaryActionLabel && onPrimaryAction && (
-              <Button onClick={onPrimaryAction}>{primaryActionLabel}</Button>
-            )}
+            {primaryActionLabel && onPrimaryAction && <Button onClick={onPrimaryAction}>{primaryActionLabel}</Button>}
             {secondaryAction}
           </div>
         </CardContent>

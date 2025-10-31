@@ -1,6 +1,7 @@
 # System Architecture: Active Tables React Implementation
 
 ## Table of Contents
+
 1. [Architecture Overview](#architecture-overview)
 2. [Technology Stack](#technology-stack)
 3. [Component Architecture](#component-architecture)
@@ -78,21 +79,25 @@ graph TB
 ### Frontend Technologies
 
 #### Core Framework
+
 - **React 18+**: Modern React with concurrent features
 - **TypeScript**: Type safety and enhanced developer experience
 - **Vite**: Fast build tool and development server
 
 #### State Management
+
 - **Zustand**: Lightweight state management with TypeScript support
 - **React Query (TanStack Query)**: Server state management and caching
 - **React Hook Form**: Form state management and validation
 
 #### UI Components
+
 - **Material-UI (MUI)**: Component library with consistent design
 - **Emotion**: CSS-in-JS styling solution
 - **React Virtualized**: Large dataset rendering optimization
 
 #### Utility Libraries
+
 - **CryptoJS**: Client-side encryption implementation
 - **Axios**: HTTP client with interceptors
 - **React Router**: Client-side routing
@@ -102,16 +107,19 @@ graph TB
 ### Backend Technologies
 
 #### Core Framework
+
 - **Laravel 9+**: PHP framework with comprehensive features
 - **MySQL 8+**: Primary database with JSON support
 - **Redis**: Caching and session storage
 
 #### Security & Encryption
+
 - **OpenSSL**: Server-side encryption operations
 - **JWT**: Authentication token management
 - **Laravel Sanctum**: API authentication
 
 #### Development Tools
+
 - **PHPUnit**: Unit and integration testing
 - **Laravel Telescope**: Application debugging
 - **Laravel Horizon**: Queue monitoring
@@ -119,16 +127,19 @@ graph TB
 ### Infrastructure & DevOps
 
 #### Containerization & Orchestration
+
 - **Docker**: Containerization of services
 - **Kubernetes**: Container orchestration and scaling
 - **Docker Compose**: Local development environment
 
 #### CI/CD Pipeline
+
 - **GitHub Actions**: Continuous integration and deployment
 - **Laravel Dusk**: End-to-end testing
 - **Codeception**: Comprehensive testing framework
 
 #### Monitoring & Logging
+
 - **Laravel Telescope**: Application monitoring
 - **ELK Stack**: Log aggregation and analysis
 - **Prometheus & Grafana**: Metrics and monitoring
@@ -379,6 +390,7 @@ src/
 ### Key Component Patterns
 
 #### 1. Dynamic Field Rendering
+
 ```jsx
 // components/ActiveTable/Records/RecordForm/DynamicField.jsx
 const DynamicField = ({ field, value, onChange, error, mode = 'edit' }) => {
@@ -422,6 +434,7 @@ const DynamicField = ({ field, value, onChange, error, mode = 'edit' }) => {
 ```
 
 #### 2. Encryption-Aware Data Grid
+
 ```jsx
 // components/ActiveTable/Records/RecordsTable/EncryptedDataGrid.jsx
 const EncryptedDataGrid = ({ tableId, fields, records, onRecordUpdate }) => {
@@ -430,9 +443,7 @@ const EncryptedDataGrid = ({ tableId, fields, records, onRecordUpdate }) => {
 
   useEffect(() => {
     const decryptRecords = async () => {
-      const decrypted = await Promise.all(
-        records.map(record => decryptRecord(record, fields))
-      );
+      const decrypted = await Promise.all(records.map((record) => decryptRecord(record, fields)));
       setDecryptedRecords(decrypted);
     };
 
@@ -441,26 +452,26 @@ const EncryptedDataGrid = ({ tableId, fields, records, onRecordUpdate }) => {
     }
   }, [records, fields, decryptRecord]);
 
-  const columns = useMemo(() =>
-    fields.map(field => ({
-      field: field.name,
-      headerName: field.label,
-      width: field.width || 150,
-      renderCell: (params) => {
-        const value = params.row[field.name];
-        const isEncrypted = shouldFieldBeEncrypted(field.type);
+  const columns = useMemo(
+    () =>
+      fields.map((field) => ({
+        field: field.name,
+        headerName: field.label,
+        width: field.width || 150,
+        renderCell: (params) => {
+          const value = params.row[field.name];
+          const isEncrypted = shouldFieldBeEncrypted(field.type);
 
-        return (
-          <Box className="cell-container">
-            {isEncrypted && <LockIcon className="encryption-indicator" />}
-            <span className="cell-value">
-              {formatCellValue(value, field)}
-            </span>
-          </Box>
-        );
-      }
-    }))
-  , [fields]);
+          return (
+            <Box className="cell-container">
+              {isEncrypted && <LockIcon className="encryption-indicator" />}
+              <span className="cell-value">{formatCellValue(value, field)}</span>
+            </Box>
+          );
+        },
+      })),
+    [fields],
+  );
 
   return (
     <DataGrid
@@ -578,62 +589,61 @@ export const useActiveTableStore = create<ActiveTableState>()(
       // Table actions
       setCurrentTable: (table) => set({ currentTable: table }),
       setTables: (tables) => set({ tables }),
-      addTable: (table) => set((state) => ({
-        tables: [...state.tables, table]
-      })),
-      updateTable: (id, updates) => set((state) => ({
-        tables: state.tables.map(table =>
-          table.id === id ? { ...table, ...updates } : table
-        ),
-        currentTable: state.currentTable?.id === id
-          ? { ...state.currentTable, ...updates }
-          : state.currentTable
-      })),
-      deleteTable: (id) => set((state) => ({
-        tables: state.tables.filter(table => table.id !== id),
-        currentTable: state.currentTable?.id === id ? null : state.currentTable
-      })),
+      addTable: (table) =>
+        set((state) => ({
+          tables: [...state.tables, table],
+        })),
+      updateTable: (id, updates) =>
+        set((state) => ({
+          tables: state.tables.map((table) => (table.id === id ? { ...table, ...updates } : table)),
+          currentTable: state.currentTable?.id === id ? { ...state.currentTable, ...updates } : state.currentTable,
+        })),
+      deleteTable: (id) =>
+        set((state) => ({
+          tables: state.tables.filter((table) => table.id !== id),
+          currentTable: state.currentTable?.id === id ? null : state.currentTable,
+        })),
 
       // Field actions
       setFields: (fields) => set({ fields }),
-      addField: (field) => set((state) => ({
-        fields: [...state.fields, field]
-      })),
-      updateField: (id, updates) => set((state) => ({
-        fields: state.fields.map(field =>
-          field.id === id ? { ...field, ...updates } : field
-        )
-      })),
-      deleteField: (id) => set((state) => ({
-        fields: state.fields.filter(field => field.id !== id)
-      })),
+      addField: (field) =>
+        set((state) => ({
+          fields: [...state.fields, field],
+        })),
+      updateField: (id, updates) =>
+        set((state) => ({
+          fields: state.fields.map((field) => (field.id === id ? { ...field, ...updates } : field)),
+        })),
+      deleteField: (id) =>
+        set((state) => ({
+          fields: state.fields.filter((field) => field.id !== id),
+        })),
 
       // Record actions
       setRecords: (records) => set({ records }),
-      addRecord: (record) => set((state) => ({
-        records: [...state.records, record],
-        pagination: {
-          ...state.pagination,
-          total: state.pagination.total + 1
-        }
-      })),
-      updateRecord: (id, updates) => set((state) => ({
-        records: state.records.map(record =>
-          record.id === id ? { ...record, ...updates } : record
-        ),
-        currentRecord: state.currentRecord?.id === id
-          ? { ...state.currentRecord, ...updates }
-          : state.currentRecord
-      })),
-      deleteRecord: (id) => set((state) => ({
-        records: state.records.filter(record => record.id !== id),
-        selectedRecords: state.selectedRecords.filter(selectedId => selectedId !== id),
-        currentRecord: state.currentRecord?.id === id ? null : state.currentRecord,
-        pagination: {
-          ...state.pagination,
-          total: Math.max(0, state.pagination.total - 1)
-        }
-      })),
+      addRecord: (record) =>
+        set((state) => ({
+          records: [...state.records, record],
+          pagination: {
+            ...state.pagination,
+            total: state.pagination.total + 1,
+          },
+        })),
+      updateRecord: (id, updates) =>
+        set((state) => ({
+          records: state.records.map((record) => (record.id === id ? { ...record, ...updates } : record)),
+          currentRecord: state.currentRecord?.id === id ? { ...state.currentRecord, ...updates } : state.currentRecord,
+        })),
+      deleteRecord: (id) =>
+        set((state) => ({
+          records: state.records.filter((record) => record.id !== id),
+          selectedRecords: state.selectedRecords.filter((selectedId) => selectedId !== id),
+          currentRecord: state.currentRecord?.id === id ? null : state.currentRecord,
+          pagination: {
+            ...state.pagination,
+            total: Math.max(0, state.pagination.total - 1),
+          },
+        })),
 
       setSelectedRecords: (ids) => set({ selectedRecords: ids }),
       setCurrentRecord: (record) => set({ currentRecord: record }),
@@ -645,9 +655,10 @@ export const useActiveTableStore = create<ActiveTableState>()(
       // UI actions
       setSearchTerm: (term) => set({ searchTerm: term }),
       setFilters: (filters) => set({ filters }),
-      setPagination: (pagination) => set((state) => ({
-        pagination: { ...state.pagination, ...pagination }
-      })),
+      setPagination: (pagination) =>
+        set((state) => ({
+          pagination: { ...state.pagination, ...pagination },
+        })),
 
       setLoading: (loading) => set({ isLoading: loading }),
       setError: (error) => set({ error }),
@@ -662,12 +673,12 @@ export const useActiveTableStore = create<ActiveTableState>()(
             fields: response.data.fields,
             actions: response.data.actions,
             permissions: response.data.permissions,
-            isLoading: false
+            isLoading: false,
           });
         } catch (error) {
           set({
             error: error.message,
-            isLoading: false
+            isLoading: false,
           });
         }
       },
@@ -683,7 +694,7 @@ export const useActiveTableStore = create<ActiveTableState>()(
             pageSize: get().pagination.pageSize,
             search: get().searchTerm,
             filters: get().filters,
-            ...params
+            ...params,
           });
 
           set({
@@ -691,14 +702,14 @@ export const useActiveTableStore = create<ActiveTableState>()(
             pagination: {
               page: response.data.current_page,
               pageSize: response.data.per_page,
-              total: response.data.total
+              total: response.data.total,
             },
-            isLoading: false
+            isLoading: false,
           });
         } catch (error) {
           set({
             error: error.message,
-            isLoading: false
+            isLoading: false,
           });
         }
       },
@@ -715,7 +726,7 @@ export const useActiveTableStore = create<ActiveTableState>()(
         } catch (error) {
           set({
             error: error.message,
-            isLoading: false
+            isLoading: false,
           });
         }
       },
@@ -732,7 +743,7 @@ export const useActiveTableStore = create<ActiveTableState>()(
         } catch (error) {
           set({
             error: error.message,
-            isLoading: false
+            isLoading: false,
           });
         }
       },
@@ -749,13 +760,13 @@ export const useActiveTableStore = create<ActiveTableState>()(
         } catch (error) {
           set({
             error: error.message,
-            isLoading: false
+            isLoading: false,
           });
         }
-      }
+      },
     })),
-    { name: 'activeTableStore' }
-  )
+    { name: 'activeTableStore' },
+  ),
 );
 ```
 
@@ -791,27 +802,29 @@ export const useEncryptionStore = create<EncryptionState>()(
     keyValidationStatus: null,
     tableKeys: {},
 
-    setEncryptionKey: (key) => set({
-      encryptionKey: key,
-      isKeyLoaded: true,
-      keyValidationStatus: 'valid'
-    }),
+    setEncryptionKey: (key) =>
+      set({
+        encryptionKey: key,
+        isKeyLoaded: true,
+        keyValidationStatus: 'valid',
+      }),
 
-    clearEncryptionKey: () => set({
-      encryptionKey: null,
-      isKeyLoaded: false,
-      keyValidationStatus: null
-    }),
+    clearEncryptionKey: () =>
+      set({
+        encryptionKey: null,
+        isKeyLoaded: false,
+        keyValidationStatus: null,
+      }),
 
     loadTableKey: async (tableId: string, password: string) => {
       try {
         const key = await encryptionService.getTableKey(password, tableId);
         if (key) {
-          set(state => ({
+          set((state) => ({
             encryptionKey: key,
             isKeyLoaded: true,
             keyValidationStatus: 'valid',
-            tableKeys: { ...state.tableKeys, [tableId]: key }
+            tableKeys: { ...state.tableKeys, [tableId]: key },
           }));
           return true;
         }
@@ -825,11 +838,11 @@ export const useEncryptionStore = create<EncryptionState>()(
     generateTableKey: async (tableId: string, password: string) => {
       try {
         const key = await encryptionService.generateTableKey(password, tableId);
-        set(state => ({
+        set((state) => ({
           tableKeys: { ...state.tableKeys, [tableId]: key },
           encryptionKey: key,
           isKeyLoaded: true,
-          keyValidationStatus: 'valid'
+          keyValidationStatus: 'valid',
         }));
         return key;
       } catch (error) {
@@ -871,20 +884,20 @@ export const useEncryptionStore = create<EncryptionState>()(
 
     storeTableKey: (workspaceId: string, tableId: string, key: string) => {
       encryptionService.storeTableKey(workspaceId, tableId, key);
-      set(state => ({
-        tableKeys: { ...state.tableKeys, [tableId]: key }
+      set((state) => ({
+        tableKeys: { ...state.tableKeys, [tableId]: key },
       }));
     },
 
     removeTableKey: (workspaceId: string, tableId: string) => {
       encryptionService.removeTableKey(workspaceId, tableId);
-      set(state => {
+      set((state) => {
         const newTableKeys = { ...state.tableKeys };
         delete newTableKeys[tableId];
         return { tableKeys: newTableKeys };
       });
-    }
-  }))
+    },
+  })),
 );
 ```
 
@@ -947,6 +960,7 @@ sequenceDiagram
 ### Client-Side Security
 
 #### Encryption Service Implementation
+
 ```typescript
 // services/encryptionService.ts
 import CryptoJS from 'crypto-js';
@@ -972,7 +986,7 @@ export class EncryptionService {
     const encrypted = CryptoJS.AES.encrypt(text, key, {
       iv: iv,
       mode: CryptoJS.mode.CBC,
-      padding: CryptoJS.pad.Pkcs7
+      padding: CryptoJS.pad.Pkcs7,
     });
 
     return CryptoJS.enc.Base64.stringify(iv.concat(encrypted.ciphertext));
@@ -988,7 +1002,7 @@ export class EncryptionService {
     const decrypted = CryptoJS.AES.decrypt({ ciphertext: ciphertext }, key, {
       iv: iv,
       mode: CryptoJS.mode.CBC,
-      padding: CryptoJS.pad.Pkcs7
+      padding: CryptoJS.pad.Pkcs7,
     });
 
     return decrypted.toString(CryptoJS.enc.Utf8);
@@ -999,9 +1013,7 @@ export class EncryptionService {
     if (!data || !key) return data;
 
     const values = Array.isArray(data) ? data : [data];
-    const hashedValues = values.map(value =>
-      CryptoJS.HmacSHA256(String(value), key).toString()
-    );
+    const hashedValues = values.map((value) => CryptoJS.HmacSHA256(String(value), key).toString());
 
     return values.length === 1 ? hashedValues[0] : hashedValues;
   }
@@ -1023,13 +1035,12 @@ export class EncryptionService {
     const stopWords = ['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for'];
 
     return tokens
-      .filter(token => token && !stopWords.includes(token.toLowerCase()))
-      .map(token => CryptoJS.HmacSHA256(token, key).toString());
+      .filter((token) => token && !stopWords.includes(token.toLowerCase()))
+      .map((token) => CryptoJS.HmacSHA256(token, key).toString());
   }
 
   private tokenizeText(text: string): string[] {
-    return text.split(/[\s,.;:!?\(\)\[\]{}"\'\/\\]+/)
-               .filter(token => token.trim().length > 0);
+    return text.split(/[\s,.;:!?\(\)\[\]{}"\'\/\\]+/).filter((token) => token.trim().length > 0);
   }
 
   private implementOPE(value: number, key: string): string {
@@ -1050,6 +1061,7 @@ export class EncryptionService {
 ```
 
 #### Secure Storage Implementation
+
 ```typescript
 // services/secureStorageService.ts
 export class SecureStorageService {
@@ -1085,7 +1097,7 @@ export class SecureStorageService {
   static clearAllKeys(): void {
     if (typeof window !== 'undefined' && window.sessionStorage) {
       const keys = Object.keys(sessionStorage);
-      keys.forEach(key => {
+      keys.forEach((key) => {
         if (key.startsWith(this.STORAGE_PREFIX)) {
           sessionStorage.removeItem(key);
         }
@@ -1127,7 +1139,7 @@ class ApiService {
   async authenticate(credentials: LoginCredentials): Promise<AuthResponse> {
     const response = await this.fetch('/auth/login', {
       method: 'POST',
-      body: JSON.stringify(credentials)
+      body: JSON.stringify(credentials),
     });
 
     const data = await response.json();
@@ -1148,14 +1160,14 @@ class ApiService {
   async createTable(tableData: CreateTableData): Promise<ActiveTable> {
     return this.fetch('/tables', {
       method: 'POST',
-      body: JSON.stringify(tableData)
+      body: JSON.stringify(tableData),
     });
   }
 
   async updateTable(tableId: string, updates: Partial<ActiveTable>): Promise<ActiveTable> {
     return this.fetch(`/tables/${tableId}`, {
       method: 'PUT',
-      body: JSON.stringify(updates)
+      body: JSON.stringify(updates),
     });
   }
 
@@ -1168,20 +1180,20 @@ class ApiService {
   async createRecord(tableId: string, recordData: CreateRecordData): Promise<Record> {
     return this.fetch(`/tables/${tableId}/records`, {
       method: 'POST',
-      body: JSON.stringify(recordData)
+      body: JSON.stringify(recordData),
     });
   }
 
   async updateRecord(tableId: string, recordId: string, recordData: UpdateRecordData): Promise<Record> {
     return this.fetch(`/tables/${tableId}/records/${recordId}`, {
       method: 'PUT',
-      body: JSON.stringify(recordData)
+      body: JSON.stringify(recordData),
     });
   }
 
   async deleteRecord(tableId: string, recordId: string): Promise<void> {
     return this.fetch(`/tables/${tableId}/records/${recordId}`, {
-      method: 'DELETE'
+      method: 'DELETE',
     });
   }
 
@@ -1189,7 +1201,7 @@ class ApiService {
   async searchRecords(tableId: string, searchData: SearchData): Promise<RecordsResponse> {
     return this.fetch(`/tables/${tableId}/search`, {
       method: 'POST',
-      body: JSON.stringify(searchData)
+      body: JSON.stringify(searchData),
     });
   }
 
@@ -1203,7 +1215,7 @@ class ApiService {
     return this.fetch('/files/upload', {
       method: 'POST',
       body: formData,
-      headers: {} // Let browser set Content-Type for FormData
+      headers: {}, // Let browser set Content-Type for FormData
     });
   }
 
@@ -1212,7 +1224,7 @@ class ApiService {
 
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      ...options.headers as Record<string, string>
+      ...(options.headers as Record<string, string>),
     };
 
     if (this.authToken) {
@@ -1221,7 +1233,7 @@ class ApiService {
 
     const response = await fetch(url, {
       ...options,
-      headers
+      headers,
     });
 
     if (!response.ok) {
@@ -1276,7 +1288,7 @@ export class ApiInterceptor {
 
       return {
         ...init,
-        body: JSON.stringify(processedBody)
+        body: JSON.stringify(processedBody),
       };
     } catch (error) {
       // If parsing fails, return original request
@@ -1298,7 +1310,7 @@ export class ApiInterceptor {
         return new Response(JSON.stringify(processedData), {
           status: response.status,
           statusText: response.statusText,
-          headers: response.headers
+          headers: response.headers,
         });
       } catch (error) {
         // If decryption fails, return original response
@@ -1313,7 +1325,7 @@ export class ApiInterceptor {
     const url = typeof input === 'string' ? input : input.toString();
     const skipEndpoints = ['/auth/', '/public/', '/static/'];
 
-    return skipEndpoints.some(endpoint => url.includes(endpoint));
+    return skipEndpoints.some((endpoint) => url.includes(endpoint));
   }
 
   private async encryptSensitiveData(data: any): Promise<any> {
@@ -1368,7 +1380,7 @@ export const useActiveTableQuery = (tableId: string) => {
     },
     onError: (error) => {
       console.error('Failed to create record:', error);
-    }
+    },
   });
 
   // Update record mutation
@@ -1381,7 +1393,7 @@ export const useActiveTableQuery = (tableId: string) => {
     },
     onError: (error) => {
       console.error('Failed to update record:', error);
-    }
+    },
   });
 
   // Delete record mutation
@@ -1393,7 +1405,7 @@ export const useActiveTableQuery = (tableId: string) => {
     },
     onError: (error) => {
       console.error('Failed to delete record:', error);
-    }
+    },
   });
 
   return {
@@ -1452,7 +1464,7 @@ export const useRealtimeUpdates = (tableId: string) => {
           return {
             ...oldData,
             data: [...oldData.data, data],
-            total: oldData.total + 1
+            total: oldData.total + 1,
           };
         });
         break;
@@ -1462,9 +1474,7 @@ export const useRealtimeUpdates = (tableId: string) => {
           if (!oldData) return oldData;
           return {
             ...oldData,
-            data: oldData.data.map((record: any) =>
-              record.id === recordId ? { ...record, ...data } : record
-            )
+            data: oldData.data.map((record: any) => (record.id === recordId ? { ...record, ...data } : record)),
           };
         });
 
@@ -1477,7 +1487,7 @@ export const useRealtimeUpdates = (tableId: string) => {
           return {
             ...oldData,
             data: oldData.data.filter((record: any) => record.id !== recordId),
-            total: oldData.total - 1
+            total: oldData.total - 1,
           };
         });
 
@@ -1563,7 +1573,7 @@ class CacheService {
     const entry: CacheEntry = {
       value,
       timestamp: Date.now(),
-      ttl
+      ttl,
     };
 
     this.cache.set(key, entry);
@@ -1650,9 +1660,7 @@ class LoadBalancer {
 
   // Round-robin load balancing
   getNextEndpoint(): string {
-    const healthyEndpoints = this.apiEndpoints.filter(
-      endpoint => this.healthStatus.get(endpoint) !== false
-    );
+    const healthyEndpoints = this.apiEndpoints.filter((endpoint) => this.healthStatus.get(endpoint) !== false);
 
     if (healthyEndpoints.length === 0) {
       throw new Error('No healthy endpoints available');
@@ -1666,7 +1674,7 @@ class LoadBalancer {
 
   // Health check implementation
   private initializeHealthChecks(): void {
-    this.apiEndpoints.forEach(endpoint => {
+    this.apiEndpoints.forEach((endpoint) => {
       this.healthStatus.set(endpoint, true);
 
       // Periodic health checks
@@ -1674,7 +1682,7 @@ class LoadBalancer {
         try {
           const response = await fetch(`${endpoint}/health`, {
             method: 'GET',
-            timeout: 5000
+            timeout: 5000,
           });
 
           this.healthStatus.set(endpoint, response.ok);
@@ -1780,7 +1788,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
-      - "3000:80"
+      - '3000:80'
     environment:
       - REACT_APP_API_URL=http://api:8000
       - REACT_APP_WS_URL=ws://api:8000
@@ -1794,7 +1802,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     ports:
-      - "8000:8000"
+      - '8000:8000'
     environment:
       - DB_HOST=mysql
       - DB_PORT=3306
@@ -1817,7 +1825,7 @@ services:
       - MYSQL_USER=app
       - MYSQL_PASSWORD=password
     ports:
-      - "3306:3306"
+      - '3306:3306'
     volumes:
       - mysql_data:/var/lib/mysql
       - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
@@ -1827,7 +1835,7 @@ services:
   redis:
     image: redis:7-alpine
     ports:
-      - "6379:6379"
+      - '6379:6379'
     volumes:
       - redis_data:/data
     networks:
@@ -1836,8 +1844,8 @@ services:
   nginx:
     image: nginx:alpine
     ports:
-      - "80:80"
-      - "443:443"
+      - '80:80'
+      - '443:443'
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./nginx/ssl:/etc/nginx/ssl
@@ -1877,20 +1885,20 @@ spec:
         app: active-tables-frontend
     spec:
       containers:
-      - name: frontend
-        image: active-tables/frontend:latest
-        ports:
-        - containerPort: 80
-        env:
-        - name: REACT_APP_API_URL
-          value: "https://api.active-tables.com"
-        resources:
-          requests:
-            memory: "128Mi"
-            cpu: "100m"
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
+        - name: frontend
+          image: active-tables/frontend:latest
+          ports:
+            - containerPort: 80
+          env:
+            - name: REACT_APP_API_URL
+              value: 'https://api.active-tables.com'
+          resources:
+            requests:
+              memory: '128Mi'
+              cpu: '100m'
+            limits:
+              memory: '512Mi'
+              cpu: '500m'
 ---
 apiVersion: v1
 kind: Service

@@ -3,7 +3,7 @@ import { cn } from '@workspace/ui/lib/utils';
 import { Badge } from '@workspace/ui/components/badge';
 import { Home, Database, Bell, Menu, Plus, Search } from 'lucide-react';
 // @ts-ignore
-import { m } from "@/paraglide/generated/messages.js";
+import { m } from '@/paraglide/generated/messages.js';
 import {
   useSidebarStore,
   selectCurrentWorkspace,
@@ -86,8 +86,6 @@ export const MobileBottomNav = ({ className }: MobileBottomNavProps) => {
 
     // Check permissions
     return !(item.requiresPermission && !canViewSection(item.requiresPermission));
-
-
   });
 
   return (
@@ -164,7 +162,7 @@ export const MobileBottomNav = ({ className }: MobileBottomNavProps) => {
 
 // Floating Action Button for quick actions on mobile
 export const MobileFloatingAction = () => {
-    const currentWorkspace = useSidebarStore(selectCurrentWorkspace);
+  const currentWorkspace = useSidebarStore(selectCurrentWorkspace);
   const canCreateItem = useSidebarStore(selectCanCreateItem);
 
   // Only show if user can create something in current workspace

@@ -30,6 +30,7 @@ Package này **hoàn toàn độc lập với API** và chỉ tập trung vào U
 ### Kiến Trúc 2 Ứng Dụng
 
 #### **apps/web (Nền Tảng Low-code)** - Giao Diện Cấu Hình
+
 - **Người dùng**: Chủ doanh nghiệp
 - **Mục đích**: Xây dựng hệ thống CRM/HRM thông qua cấu hình
 - **Chức năng**:
@@ -40,6 +41,7 @@ Package này **hoàn toàn độc lập với API** và chỉ tập trung vào U
 - **Sử dụng**: UI cấu hình bảng + Preview dùng active-tables-core
 
 #### **apps/admin (Portal Người Dùng Cuối)** - Giao Diện Vận Hành
+
 - **Người dùng**: Nhân viên (end users)
 - **Mục đích**: Sử dụng hàng ngày các hệ thống đã được cấu hình
 - **Chức năng**:
@@ -67,6 +69,7 @@ Package này **hoàn toàn độc lập với API** và chỉ tập trung vào U
 #### ❌ KHÔNG CÓ TRONG PACKAGE (Config Components)
 
 Các component này **CHỈ thuộc apps/web**:
+
 - Form tạo bảng mới
 - Form cấu hình fields
 - Form cấu hình Kanban/Gantt
@@ -123,6 +126,7 @@ function RecordList({ records, messages = {} }) {
 ### Cách Sử Dụng
 
 **apps/web (dùng Paraglide):**
+
 ```typescript
 import * as m from '@/paraglide/messages';
 
@@ -138,6 +142,7 @@ import * as m from '@/paraglide/messages';
 ```
 
 **apps/admin (dùng react-i18next):**
+
 ```typescript
 import { useTranslation } from 'react-i18next';
 
@@ -159,6 +164,7 @@ function MyComponent() {
 ```
 
 **apps/mobile (dùng i18n khác):**
+
 ```typescript
 // Có thể dùng bất kỳ thư viện nào
 <RecordList
@@ -241,15 +247,15 @@ packages/active-tables-core/
 ```json
 {
   "dependencies": {
-    "@workspace/beqeek-shared": "workspace:*",      // Constants, validators
-    "@workspace/encryption-core": "workspace:*",    // E2EE utilities
-    "@workspace/ui": "workspace:*",                 // Base UI components
-    "@tanstack/react-table": "^8.20.5",            // Table utilities
-    "@dnd-kit/core": "^6.3.1",                     // Drag and drop core
-    "@dnd-kit/sortable": "^9.0.0",                 // Sortable lists
-    "@dnd-kit/utilities": "^3.2.2",                // DnD utilities
-    "date-fns": "^4.1.0",                          // Date manipulation
-    "zustand": "^5.0.2"                            // State management
+    "@workspace/beqeek-shared": "workspace:*", // Constants, validators
+    "@workspace/encryption-core": "workspace:*", // E2EE utilities
+    "@workspace/ui": "workspace:*", // Base UI components
+    "@tanstack/react-table": "^8.20.5", // Table utilities
+    "@dnd-kit/core": "^6.3.1", // Drag and drop core
+    "@dnd-kit/sortable": "^9.0.0", // Sortable lists
+    "@dnd-kit/utilities": "^3.2.2", // DnD utilities
+    "date-fns": "^4.1.0", // Date manipulation
+    "zustand": "^5.0.2" // State management
   },
   "peerDependencies": {
     "react": "^19.0.0",
@@ -261,24 +267,28 @@ packages/active-tables-core/
 ### Lý Do Chọn Dependencies
 
 **@tanstack/react-table**:
+
 - Headless table library
 - Chỉ logic, không UI
 - TypeScript support tốt
 - Sorting, filtering, pagination built-in
 
 **@dnd-kit**:
+
 - Modern, maintained
 - Accessibility built-in
 - Nhẹ hơn react-dnd
 - TypeScript support tốt
 
 **date-fns**:
+
 - Tree-shakeable
 - Functional API
 - Nhẹ hơn moment.js
 - TypeScript support tốt
 
 **zustand**:
+
 - Rất nhẹ (3KB)
 - API đơn giản
 - Không conflict với React Query
@@ -291,6 +301,7 @@ packages/active-tables-core/
 ### 3 Loại State
 
 #### 1. **Server State** (KHÔNG có trong package)
+
 ```typescript
 // ❌ KHÔNG làm trong active-tables-core
 const { data } = useQuery(['records'], fetchRecords);
@@ -304,6 +315,7 @@ const { data: records } = useQuery(['records'], fetchRecords);
 ```
 
 #### 2. **Global UI State** (Zustand)
+
 ```typescript
 // ✅ Dùng Zustand cho UI state được share giữa nhiều component
 
@@ -334,6 +346,7 @@ interface SelectionState {
 ```
 
 #### 3. **Local Component State** (useState)
+
 ```typescript
 // ✅ Dùng useState cho state cục bộ
 
@@ -401,21 +414,25 @@ function FieldRenderer({ field, value, onChange }) {
 ### Loại Mã Hóa Theo Field Type
 
 **AES-256-CBC** (Text fields):
+
 - SHORT_TEXT, TEXT, RICH_TEXT, EMAIL, URL
 - Random IV mỗi lần encrypt
 - Cho phép lưu trữ an toàn
 
 **OPE** (Order-Preserving Encryption) (Numbers, Dates):
+
 - INTEGER, NUMERIC
 - DATE, DATETIME, TIME, YEAR, MONTH, DAY, etc.
 - Cho phép so sánh, sắp xếp, range queries
 
 **HMAC-SHA256** (Selection fields):
+
 - SELECT_ONE, SELECT_LIST
 - CHECKBOX_YES_NO, CHECKBOX_ONE, CHECKBOX_LIST
 - Cho phép so sánh bằng
 
 **NONE** (Reference fields):
+
 - SELECT_ONE_RECORD, SELECT_LIST_RECORD
 - SELECT_ONE_WORKSPACE_USER, SELECT_LIST_WORKSPACE_USER
 - ID tham chiếu không mã hóa
@@ -423,23 +440,25 @@ function FieldRenderer({ field, value, onChange }) {
 ### Quản Lý Encryption Key
 
 **Lưu Trữ**:
+
 ```typescript
 // ✅ Lưu ở localStorage (client-only)
 const key = localStorage.getItem(`encryption_key_${tableId}`);
 
 // ❌ KHÔNG BAO GIỜ gửi lên server
 fetch('/api/records', {
-  body: JSON.stringify({ encryptionKey: key }) // NGUY HIỂM!
+  body: JSON.stringify({ encryptionKey: key }), // NGUY HIỂM!
 });
 
 // ✅ Chỉ gửi hash để verify
 const authKey = sha256(key);
 fetch('/api/records', {
-  headers: { 'X-Encryption-Auth': authKey } // OK
+  headers: { 'X-Encryption-Auth': authKey }, // OK
 });
 ```
 
 **Quy Tắc Vàng**:
+
 - ❌ KHÔNG log key ra console
 - ❌ KHÔNG lưu key trong cookies
 - ❌ KHÔNG gửi key trong API request
@@ -456,9 +475,9 @@ fetch('/api/records', {
 ```typescript
 // Field Configuration
 interface FieldConfig {
-  type: FieldType;           // SHORT_TEXT, INTEGER, SELECT_ONE, etc.
-  label: string;             // "Tên khách hàng"
-  name: string;              // "customer_name"
+  type: FieldType; // SHORT_TEXT, INTEGER, SELECT_ONE, etc.
+  label: string; // "Tên khách hàng"
+  name: string; // "customer_name"
   placeholder?: string;
   defaultValue?: unknown;
   required: boolean;
@@ -473,18 +492,18 @@ interface FieldConfig {
 
 // Field Option (cho SELECT, CHECKBOX)
 interface FieldOption {
-  value: string;             // "pending"
-  text: string;              // "Chờ xử lý"
-  text_color?: string;       // "#ffffff"
+  value: string; // "pending"
+  text: string; // "Chờ xử lý"
+  text_color?: string; // "#ffffff"
   background_color?: string; // "#ff9800"
 }
 
 // Action Configuration
 interface ActionConfig {
-  actionId: string;          // UUID
-  name: string;              // "Gửi phê duyệt"
-  type: ActionType;          // create, update, delete, custom
-  icon?: string;             // "send", "check"
+  actionId: string; // UUID
+  name: string; // "Gửi phê duyệt"
+  type: ActionType; // create, update, delete, custom
+  icon?: string; // "send", "check"
 }
 
 // Record với Metadata
@@ -498,7 +517,7 @@ interface Record {
     relatedUserIds?: string[];
     assignedUserIds?: string[];
   };
-  data: RecordData;          // { field_name: value }
+  data: RecordData; // { field_name: value }
 }
 
 // Record với Permissions
@@ -677,12 +696,12 @@ Sau khi phân tích `apps/web/src/features/active-tables/`, phát hiện **~700 
 
 ### 📦 Code Có Sẵn
 
-| Utility | Lines | Quality | Status |
-|---------|-------|---------|--------|
-| encryption-helpers.ts | 305 | ⭐⭐⭐⭐⭐ | ✅ Copy 100% |
-| record-decryptor.ts | 216 | ⭐⭐⭐⭐⭐ | ✅ Copy 100% |
-| decryption-cache.ts | 186 | ⭐⭐⭐⭐⭐ | ✅ Copy 100% |
-| types.ts | 154 | ⭐⭐⭐⭐ | ✅ Align 90% |
+| Utility               | Lines | Quality    | Status       |
+| --------------------- | ----- | ---------- | ------------ |
+| encryption-helpers.ts | 305   | ⭐⭐⭐⭐⭐ | ✅ Copy 100% |
+| record-decryptor.ts   | 216   | ⭐⭐⭐⭐⭐ | ✅ Copy 100% |
+| decryption-cache.ts   | 186   | ⭐⭐⭐⭐⭐ | ✅ Copy 100% |
+| types.ts              | 154   | ⭐⭐⭐⭐   | ✅ Align 90% |
 
 **Total**: 861 dòng code đã test trong production!
 
@@ -704,6 +723,7 @@ Sau khi phân tích `apps/web/src/features/active-tables/`, phát hiện **~700 
 **Mục tiêu**: Fix broken imports, apps/web cần dùng ngay
 
 #### Tasks:
+
 - [x] Create package structure (packages/active-tables-core/)
 - [x] **Copy encryption utilities từ apps/web** (QUAN TRỌNG!)
   - [x] encryption-helpers.ts (305 dòng) → src/utils/
@@ -730,12 +750,14 @@ Sau khi phân tích `apps/web/src/features/active-tables/`, phát hiện **~700 
 ✅ Có thể deploy apps/web ngay
 
 **Deliverables**:
+
 - ✅ Package active-tables-core builds successfully
 - ✅ Encryption utilities available
 - ✅ Apps/web hoạt động bình thường
 - ✅ Có foundation để build tiếp
 
 **📊 Phase 0 Status**: ✅ **COMPLETED** (2025-10-30)
+
 - Build time: 3.10s (apps/web)
 - Code migrated: 861 lines production-tested
 - TypeScript errors: 26 → 6 (unrelated issues)
@@ -748,6 +770,7 @@ Sau khi phân tích `apps/web/src/features/active-tables/`, phát hiện **~700 
 **Mục tiêu**: Hoàn thiện type system và core infrastructure
 
 #### Tasks:
+
 - [ ] **Align existing types với plan format**
   - [ ] Đọc existing-types.ts (đã copy từ apps/web)
   - [ ] field.ts - Tách ra + thêm type guards
@@ -776,6 +799,7 @@ Sau khi phân tích `apps/web/src/features/active-tables/`, phát hiện **~700 
   - [ ] ✅ decryption-cache.ts - ĐÃ CÓ từ Phase 0
 
 **Deliverables**:
+
 - ✅ Complete type system
 - ✅ Package scaffolding
 - ✅ Context provider
@@ -788,6 +812,7 @@ Sau khi phân tích `apps/web/src/features/active-tables/`, phát hiện **~700 
 **Mục tiêu**: Implement 25+ field type renderers
 
 #### Tasks:
+
 - [ ] Tạo FieldRenderer router component
 - [ ] **Text Fields**:
   - [ ] TextField (SHORT_TEXT, EMAIL, URL)
@@ -818,6 +843,7 @@ Sau khi phân tích `apps/web/src/features/active-tables/`, phát hiện **~700 
 - [ ] Support display/edit modes
 
 **Deliverables**:
+
 - ✅ 25+ field type renderers
 - ✅ Display và edit modes
 - ✅ Field validation
@@ -830,6 +856,7 @@ Sau khi phân tích `apps/web/src/features/active-tables/`, phát hiện **~700 
 **Mục tiêu**: Implement record list layouts
 
 #### Tasks:
+
 - [ ] Tạo RecordList main component
 - [ ] **GenericTableLayout**:
   - [ ] Integrate @tanstack/react-table
@@ -852,6 +879,7 @@ Sau khi phân tích `apps/web/src/features/active-tables/`, phát hiện **~700 
 - [ ] Bulk selection support
 
 **Deliverables**:
+
 - ✅ Hai list layouts (table, card)
 - ✅ Filtering và sorting
 - ✅ Responsive design
@@ -864,6 +892,7 @@ Sau khi phân tích `apps/web/src/features/active-tables/`, phát hiện **~700 
 **Mục tiêu**: Implement record detail layouts
 
 #### Tasks:
+
 - [ ] Tạo RecordDetail main component
 - [ ] **HeadDetailLayout**:
   - [ ] Single column layout
@@ -890,6 +919,7 @@ Sau khi phân tích `apps/web/src/features/active-tables/`, phát hiện **~700 
 - [ ] Layout helpers
 
 **Deliverables**:
+
 - ✅ Hai detail layouts
 - ✅ Inline editing
 - ✅ Comments panel
@@ -902,6 +932,7 @@ Sau khi phân tích `apps/web/src/features/active-tables/`, phát hiện **~700 
 **Mục tiêu**: Implement Kanban view
 
 #### Tasks:
+
 - [ ] Tạo KanbanBoard main component
 - [ ] **KanbanColumn**:
   - [ ] Status header với count
@@ -926,6 +957,7 @@ Sau khi phân tích `apps/web/src/features/active-tables/`, phát hiện **~700 
 - [ ] Multi-screen support
 
 **Deliverables**:
+
 - ✅ Kanban board component
 - ✅ Drag-and-drop support
 - ✅ Multi-screen support
@@ -938,6 +970,7 @@ Sau khi phân tích `apps/web/src/features/active-tables/`, phát hiện **~700 
 **Mục tiêu**: Implement Gantt view
 
 #### Tasks:
+
 - [ ] Tạo GanttChart main component
 - [ ] **GanttTimeline**:
   - [ ] Date headers (days, weeks, months)
@@ -964,6 +997,7 @@ Sau khi phân tích `apps/web/src/features/active-tables/`, phát hiện **~700 
 - [ ] useGanttZoom hook
 
 **Deliverables**:
+
 - ✅ Gantt chart component
 - ✅ Interactive timeline
 - ✅ Task editing
@@ -976,6 +1010,7 @@ Sau khi phân tích `apps/web/src/features/active-tables/`, phát hiện **~700 
 **Mục tiêu**: Implement filtering và actions
 
 #### Tasks:
+
 - [ ] **QuickFilters**:
   - [ ] QuickFilters main component
   - [ ] Filter chips display
@@ -998,6 +1033,7 @@ Sau khi phân tích `apps/web/src/features/active-tables/`, phát hiện **~700 
 - [ ] Action state feedback (loading, success, error)
 
 **Deliverables**:
+
 - ✅ Quick filters UI
 - ✅ Action buttons/menus
 - ✅ Permission checking
@@ -1010,6 +1046,7 @@ Sau khi phân tích `apps/web/src/features/active-tables/`, phát hiện **~700 
 **Mục tiêu**: Test, document, và polish
 
 #### Tasks:
+
 - [ ] **Testing**:
   - [ ] Unit tests cho utilities
   - [ ] Component tests (Vitest + Testing Library)
@@ -1037,6 +1074,7 @@ Sau khi phân tích `apps/web/src/features/active-tables/`, phát hiện **~700 
   - [ ] Loading states improvement
 
 **Deliverables**:
+
 - ✅ Test coverage
 - ✅ Documentation hoàn chỉnh
 - ✅ Performance benchmarks
@@ -1047,6 +1085,7 @@ Sau khi phân tích `apps/web/src/features/active-tables/`, phát hiện **~700 
 ## ✅ Checklist Tổng Hợp
 
 ### Phase 0: Immediate Utilities Migration (NGAY HÔM NAY!)
+
 - [ ] Package structure created
 - [ ] **Copy encryption utilities từ apps/web** ⭐
   - [ ] encryption-helpers.ts (305 dòng)
@@ -1066,6 +1105,7 @@ Sau khi phân tích `apps/web/src/features/active-tables/`, phát hiện **~700 
 - [ ] **Test apps/web hoạt động**
 
 ### Phase 1: Nền Tảng
+
 - [ ] Align types với plan format
   - [ ] field.ts + type guards
   - [ ] action.ts + type guards
@@ -1085,6 +1125,7 @@ Sau khi phân tích `apps/web/src/features/active-tables/`, phát hiện **~700 
   - [ ] ✅ encryption utilities (ĐÃ CÓ từ Phase 0)
 
 ### Phase 2: Field Renderers
+
 - [ ] TextField
 - [ ] TextareaField
 - [ ] RichTextField
@@ -1101,6 +1142,7 @@ Sau khi phân tích `apps/web/src/features/active-tables/`, phát hiện **~700 
 - [ ] FieldLabel/FieldError
 
 ### Phase 3: List Views
+
 - [ ] RecordList
 - [ ] GenericTableLayout
 - [ ] HeadColumnLayout
@@ -1111,6 +1153,7 @@ Sau khi phân tích `apps/web/src/features/active-tables/`, phát hiện **~700 
 - [ ] Bulk selection
 
 ### Phase 4: Detail Views
+
 - [ ] RecordDetail
 - [ ] HeadDetailLayout
 - [ ] TwoColumnDetailLayout
@@ -1119,6 +1162,7 @@ Sau khi phân tích `apps/web/src/features/active-tables/`, phát hiện **~700 
 - [ ] Form validation
 
 ### Phase 5: Kanban Board
+
 - [ ] KanbanBoard
 - [ ] KanbanColumn
 - [ ] KanbanCard
@@ -1127,6 +1171,7 @@ Sau khi phân tích `apps/web/src/features/active-tables/`, phát hiện **~700 
 - [ ] Mobile responsive
 
 ### Phase 6: Gantt Chart
+
 - [ ] GanttChart
 - [ ] GanttTimeline
 - [ ] GanttTask
@@ -1135,6 +1180,7 @@ Sau khi phân tích `apps/web/src/features/active-tables/`, phát hiện **~700 
 - [ ] Dependencies
 
 ### Phase 7: Filters & Actions
+
 - [ ] QuickFilters
 - [ ] FilterDropdown
 - [ ] ActionButton
@@ -1143,6 +1189,7 @@ Sau khi phân tích `apps/web/src/features/active-tables/`, phát hiện **~700 
 - [ ] Permission checking
 
 ### Phase 8: Testing & Docs
+
 - [ ] Unit tests
 - [ ] Component tests
 - [ ] Integration tests
@@ -1157,6 +1204,7 @@ Sau khi phân tích `apps/web/src/features/active-tables/`, phát hiện **~700 
 ## 🎯 Success Criteria
 
 ### Phase 0
+
 - [ ] Package builds successfully (`pnpm build` không lỗi)
 - [ ] Encryption utilities export correctly
 - [ ] Không còn broken imports trong apps/web
@@ -1165,6 +1213,7 @@ Sau khi phân tích `apps/web/src/features/active-tables/`, phát hiện **~700 
 - [ ] **Có thể deploy apps/web lên production**
 
 ### Phase 1
+
 - [ ] Types compile không lỗi
 - [ ] Type guards hoạt động đúng
 - [ ] Zustand stores functional
@@ -1172,12 +1221,14 @@ Sau khi phân tích `apps/web/src/features/active-tables/`, phát hiện **~700 
 - [ ] Context provider hoạt động
 
 ### Phase 2
+
 - [ ] 25+ field types render đúng
 - [ ] Display và edit modes hoạt động
 - [ ] Validation functional
 - [ ] Encryption/decryption hoạt động
 
 ### Phase 3
+
 - [ ] GenericTableLayout render data
 - [ ] HeadColumnLayout render cards
 - [ ] Filtering hoạt động
@@ -1185,30 +1236,35 @@ Sau khi phân tích `apps/web/src/features/active-tables/`, phát hiện **~700 
 - [ ] Mobile responsive
 
 ### Phase 4
+
 - [ ] HeadDetailLayout render
 - [ ] TwoColumnDetailLayout render
 - [ ] Inline editing hoạt động
 - [ ] Comments panel hiển thị
 
 ### Phase 5
+
 - [ ] Kanban board render
 - [ ] Drag-and-drop functional
 - [ ] Multi-screen support hoạt động
 - [ ] Mobile responsive
 
 ### Phase 6
+
 - [ ] Gantt chart render
 - [ ] Timeline interactive
 - [ ] Task editing hoạt động
 - [ ] Dependencies hiển thị
 
 ### Phase 7
+
 - [ ] Quick filters hoạt động
 - [ ] Actions render
 - [ ] Permissions enforced
 - [ ] Bulk actions functional
 
 ### Phase 8
+
 - [ ] Unit tests pass
 - [ ] Component tests pass
 - [ ] Accessibility audit pass
@@ -1394,4 +1450,4 @@ function EncryptedTablePage() {
 
 **Kết Thúc Kế Hoạch**
 
-*Document này sẽ được cập nhật liên tục trong quá trình implement*
+_Document này sẽ được cập nhật liên tục trong quá trình implement_

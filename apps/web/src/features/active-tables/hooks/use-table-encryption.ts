@@ -8,11 +8,7 @@
  */
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import {
-  validateEncryptionKey,
-  isValidEncryptionKey,
-  clearDecryptionCache,
-} from '@workspace/active-tables-core';
+import { validateEncryptionKey, isValidEncryptionKey, clearDecryptionCache } from '@workspace/active-tables-core';
 import {
   getEncryptionKey,
   saveEncryptionKey as saveEncryptionKeyToStorage,
@@ -40,7 +36,7 @@ export interface UseTableEncryptionReturn {
 export function useTableEncryption(
   workspaceId: string,
   tableId: string,
-  config?: ActiveTableConfig
+  config?: ActiveTableConfig,
 ): UseTableEncryptionReturn {
   const [encryptionKey, setEncryptionKey] = useState<string | null>(null);
   const [isKeyLoaded, setIsKeyLoaded] = useState(false);
@@ -102,7 +98,7 @@ export function useTableEncryption(
         return false;
       }
     },
-    [workspaceId, tableId, encryptionAuthKey]
+    [workspaceId, tableId, encryptionAuthKey],
   );
 
   // Clear key from localStorage and decryption cache
@@ -120,7 +116,7 @@ export function useTableEncryption(
       if (!encryptionAuthKey) return false;
       return validateEncryptionKey(key, encryptionAuthKey);
     },
-    [encryptionAuthKey]
+    [encryptionAuthKey],
   );
 
   return {

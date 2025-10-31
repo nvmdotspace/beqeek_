@@ -1,14 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
-import {
-  RefreshCw,
-  Search,
-  Plus,
-  ShieldCheck,
-  Database,
-  Workflow,
-  KeyRound,
-  Filter,
-} from 'lucide-react';
+import { RefreshCw, Search, Plus, ShieldCheck, Database, Workflow, KeyRound, Filter } from 'lucide-react';
 
 import { ActiveTableCard } from '../components/active-table-card';
 import { useActiveTablesGroupedByWorkGroup } from '../hooks/use-active-tables';
@@ -16,7 +7,7 @@ import { ActiveTablesEmptyState } from '../components/active-tables-empty-state'
 import { TableManagementDialog } from '../components/table-management-dialog';
 import { useTableManagement } from '../hooks/use-table-management';
 // @ts-ignore
-import { m } from "@/paraglide/generated/messages.js";
+import { m } from '@/paraglide/generated/messages.js';
 import { getRouteApi } from '@tanstack/react-router';
 import { useSidebarStore, selectCurrentWorkspace } from '@/stores/sidebar-store';
 import { ROUTES } from '@/shared/route-paths';
@@ -107,21 +98,19 @@ export const ActiveTablesPage = () => {
   const allTables = useMemo(() => visibleGroups.flatMap((entry) => entry.tables), [visibleGroups]);
   const totalTables = useMemo(() => grouped.reduce((count, entry) => count + entry.tables.length, 0), [grouped]);
   const encryptedTables = useMemo(
-    () => grouped.reduce((count, entry) => count + entry.tables.filter((table) => table.config?.e2eeEncryption).length, 0),
+    () =>
+      grouped.reduce((count, entry) => count + entry.tables.filter((table) => table.config?.e2eeEncryption).length, 0),
     [grouped],
   );
   const automationEnabledTables = useMemo(
     () =>
       grouped.reduce(
-        (count, entry) =>
-          count + entry.tables.filter((table) => (table.config?.actions?.length ?? 0) > 0).length,
+        (count, entry) => count + entry.tables.filter((table) => (table.config?.actions?.length ?? 0) > 0).length,
         0,
       ),
     [grouped],
   );
-  const encryptedPercentage = totalTables
-    ? Math.round((encryptedTables / totalTables) * 100)
-    : 0;
+  const encryptedPercentage = totalTables ? Math.round((encryptedTables / totalTables) * 100) : 0;
 
   const filteredGroups = useMemo(() => {
     if (!searchQuery) {
@@ -129,8 +118,7 @@ export const ActiveTablesPage = () => {
         .map((groupEntry) => ({
           ...groupEntry,
           tables: groupEntry.tables.filter((table) => {
-            const statusMatches =
-              statusFilter === 'all' || formatStatusLabel(table.tableType) === statusFilter;
+            const statusMatches = statusFilter === 'all' || formatStatusLabel(table.tableType) === statusFilter;
             const encryptionMatches =
               encryptionFilter === 'all' ||
               (encryptionFilter === 'encrypted' ? table.config?.e2eeEncryption : !table.config?.e2eeEncryption);
@@ -145,21 +133,23 @@ export const ActiveTablesPage = () => {
         .filter((entry) => entry.tables.length > 0);
     }
     const lowerCaseQuery = searchQuery.toLowerCase();
-    return visibleGroups.map((groupEntry) => ({
-      ...groupEntry,
-      tables: groupEntry.tables.filter(
-        (table) =>
-          (table.name.toLowerCase().includes(lowerCaseQuery) ||
-            table.description?.toLowerCase().includes(lowerCaseQuery)) &&
-          (statusFilter === 'all' || formatStatusLabel(table.tableType) === statusFilter) &&
-          (encryptionFilter === 'all' ||
-            (encryptionFilter === 'encrypted' ? table.config?.e2eeEncryption : !table.config?.e2eeEncryption)) &&
-          (automationFilter === 'all' ||
-            (automationFilter === 'automated'
-              ? (table.config?.actions?.length ?? 0) > 0
-              : (table.config?.actions?.length ?? 0) === 0)),
-      ),
-    })).filter(groupEntry => groupEntry.tables.length > 0);
+    return visibleGroups
+      .map((groupEntry) => ({
+        ...groupEntry,
+        tables: groupEntry.tables.filter(
+          (table) =>
+            (table.name.toLowerCase().includes(lowerCaseQuery) ||
+              table.description?.toLowerCase().includes(lowerCaseQuery)) &&
+            (statusFilter === 'all' || formatStatusLabel(table.tableType) === statusFilter) &&
+            (encryptionFilter === 'all' ||
+              (encryptionFilter === 'encrypted' ? table.config?.e2eeEncryption : !table.config?.e2eeEncryption)) &&
+            (automationFilter === 'all' ||
+              (automationFilter === 'automated'
+                ? (table.config?.actions?.length ?? 0) > 0
+                : (table.config?.actions?.length ?? 0) === 0)),
+        ),
+      }))
+      .filter((groupEntry) => groupEntry.tables.length > 0);
   }, [visibleGroups, searchQuery, statusFilter, encryptionFilter, automationFilter]);
 
   const statusOptions = useMemo(() => {
@@ -276,7 +266,8 @@ export const ActiveTablesPage = () => {
             </div>
             <div className="flex items-center gap-2">
               <div className="text-sm text-muted-foreground">
-                Workspace • <span className="font-medium text-foreground">{currentWorkspace?.workspaceName || 'No workspace'}</span>
+                Workspace •{' '}
+                <span className="font-medium text-foreground">{currentWorkspace?.workspaceName || 'No workspace'}</span>
               </div>
               <Button variant="outline" size="icon" disabled={isTablesLoading} onClick={() => refetch()}>
                 <RefreshCw className={cn('h-4 w-4', isFetching && 'animate-spin')} />
@@ -335,9 +326,7 @@ export const ActiveTablesPage = () => {
             </CardHeader>
             <CardContent>
               <p className="text-3xl font-bold tracking-tight text-foreground">{automationEnabledTables}</p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Trigger workflows from records
-              </p>
+              <p className="mt-1 text-xs text-muted-foreground">Trigger workflows from records</p>
             </CardContent>
           </Card>
         </div>
@@ -364,30 +353,32 @@ export const ActiveTablesPage = () => {
           </Badge>
           <div className="flex items-center gap-2 rounded-full border border-border/60 px-3 py-1 text-xs text-foreground">
             <Filter className="h-3.5 w-3.5 text-muted-foreground" />
-            {activeFilterCount ? `${activeFilterCount} filter${activeFilterCount > 1 ? 's' : ''} active` : 'No filters applied'}
+            {activeFilterCount
+              ? `${activeFilterCount} filter${activeFilterCount > 1 ? 's' : ''} active`
+              : 'No filters applied'}
           </div>
         </div>
 
         <div className="flex flex-col gap-3 rounded-xl border border-border/60 bg-muted/20 p-4">
           <div className="flex flex-wrap items-center gap-2">
-          <Button
-            variant={selectedWorkGroupId === 'all' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setSelectedWorkGroupId('all')}
-          >
-            {m.activeTables_page_workGroupAll()}
-          </Button>
-          {workGroups.map((group) => (
             <Button
-              key={group.id}
-              variant={selectedWorkGroupId === group.id ? 'default' : 'outline'}
+              variant={selectedWorkGroupId === 'all' ? 'default' : 'outline'}
               size="sm"
-              onClick={() => setSelectedWorkGroupId(group.id)}
+              onClick={() => setSelectedWorkGroupId('all')}
             >
-              {group.name}
+              {m.activeTables_page_workGroupAll()}
             </Button>
-          ))}
-        </div>
+            {workGroups.map((group) => (
+              <Button
+                key={group.id}
+                variant={selectedWorkGroupId === group.id ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setSelectedWorkGroupId(group.id)}
+              >
+                {group.name}
+              </Button>
+            ))}
+          </div>
 
           {statusOptions.length ? (
             <div className="space-y-2">

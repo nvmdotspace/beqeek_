@@ -85,12 +85,7 @@ export interface UseEncryptionReturn {
  * ```
  */
 export function useEncryption(options: UseEncryptionOptions = {}): UseEncryptionReturn {
-  const {
-    workspaceId,
-    tableId,
-    encryptionAuthKey,
-    autoLoad = false,
-  } = options;
+  const { workspaceId, tableId, encryptionAuthKey, autoLoad = false } = options;
 
   // State
   const [encryptionKey, setEncryptionKeyState] = useState<string | null>(null);
@@ -101,9 +96,7 @@ export function useEncryption(options: UseEncryptionOptions = {}): UseEncryption
   const isReady = !!encryptionKey && isValid;
 
   // Get localStorage key
-  const storageKey = workspaceId && tableId
-    ? getEncryptionKeyStorageKey(workspaceId, tableId)
-    : null;
+  const storageKey = workspaceId && tableId ? getEncryptionKeyStorageKey(workspaceId, tableId) : null;
 
   // Load key from localStorage
   const loadEncryptionKey = useCallback(() => {
@@ -158,7 +151,7 @@ export function useEncryption(options: UseEncryptionOptions = {}): UseEncryption
         console.error('Failed to save encryption key:', err);
       }
     },
-    [storageKey, encryptionAuthKey]
+    [storageKey, encryptionAuthKey],
   );
 
   // Set encryption key (in-memory only)
@@ -180,7 +173,7 @@ export function useEncryption(options: UseEncryptionOptions = {}): UseEncryption
         setError(null);
       }
     },
-    [encryptionAuthKey]
+    [encryptionAuthKey],
   );
 
   // Clear encryption key
@@ -205,7 +198,7 @@ export function useEncryption(options: UseEncryptionOptions = {}): UseEncryption
       }
       return isValidEncryptionKey(key);
     },
-    [encryptionAuthKey]
+    [encryptionAuthKey],
   );
 
   // Decryption operations (only if key is ready)
@@ -216,7 +209,7 @@ export function useEncryption(options: UseEncryptionOptions = {}): UseEncryption
       }
       return decryptFieldValue(value, field, encryptionKey);
     },
-    [encryptionKey]
+    [encryptionKey],
   );
 
   const decryptSingleRecord = useCallback(
@@ -226,7 +219,7 @@ export function useEncryption(options: UseEncryptionOptions = {}): UseEncryption
       }
       return decryptRecord(record, fields, encryptionKey);
     },
-    [encryptionKey]
+    [encryptionKey],
   );
 
   const decryptMultipleRecords = useCallback(
@@ -236,7 +229,7 @@ export function useEncryption(options: UseEncryptionOptions = {}): UseEncryption
       }
       return decryptRecords(records, fields, encryptionKey);
     },
-    [encryptionKey]
+    [encryptionKey],
   );
 
   // Auto-load on mount
@@ -283,18 +276,15 @@ export function useEncryption(options: UseEncryptionOptions = {}): UseEncryption
 export function useRecordDecryption(table: Table, encryptionKey?: string) {
   const fields = useMemo(() => table.config.fields || [], [table.config.fields]);
 
-  const decryptRecordFunc = useCallback(
-    (record: TableRecord): TableRecord => {
-      // Note: This hook assumes records are already decrypted before being passed to components.
-      // The actual decryption should happen at the API/data layer, not during render.
-      // This function just normalizes the record format to ensure `data` property exists.
-      return {
-        ...record,
-        data: record.data || record.record,
-      };
-    },
-    []
-  );
+  const decryptRecordFunc = useCallback((record: TableRecord): TableRecord => {
+    // Note: This hook assumes records are already decrypted before being passed to components.
+    // The actual decryption should happen at the API/data layer, not during render.
+    // This function just normalizes the record format to ensure `data` property exists.
+    return {
+      ...record,
+      data: record.data || record.record,
+    };
+  }, []);
 
   return {
     decryptRecord: decryptRecordFunc,

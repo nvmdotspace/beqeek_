@@ -24,8 +24,7 @@
  */
 export function generateEncryptionKey(length: number = 32): string {
   // Character set: alphanumeric + safe special characters
-  const chars =
-    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
 
   let key = '';
   const array = new Uint8Array(length);
@@ -53,10 +52,7 @@ export function generateEncryptionKey(length: number = 32): string {
  * const isInvalid = validateEncryptionKey('short'); // false
  * ```
  */
-export function validateEncryptionKey(
-  key: string,
-  minLength: number = 32
-): boolean {
+export function validateEncryptionKey(key: string, minLength: number = 32): boolean {
   if (!key || typeof key !== 'string') {
     return false;
   }

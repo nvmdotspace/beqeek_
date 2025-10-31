@@ -11,6 +11,7 @@ Module này là một công cụ xây dựng biểu mẫu (Form Builder) trực 
 Module bao gồm 3 màn hình chính: **Màn hình Chọn loại Form** (`Select View`), **Màn hình Danh sách** (`List View`), và **Màn hình Chi tiết/Xây dựng Form** (`Detail View`).
 
 ### F1: Luồng tạo Form mới
+
 1.  Từ **Màn hình Danh sách**, người dùng nhấn nút "Tạo Form mới".
 2.  Hệ thống chuyển đến **Màn hình Chọn loại Form**. Tại đây, người dùng thấy một danh mục các mẫu form có sẵn (ví dụ: "Form Cơ bản", "Form Đăng ký") và có thể tìm kiếm.
 3.  Người dùng chọn một mẫu form.
@@ -20,41 +21,45 @@ Module bao gồm 3 màn hình chính: **Màn hình Chọn loại Form** (`Select
     - Tự động chuyển người dùng đến **Màn hình Chi tiết** để bắt đầu tùy chỉnh form.
 
 ### F2: Màn hình Danh sách Form (`List View`)
+
 - **Hiển thị danh sách:** Liệt kê tất cả các form đã được tạo. Mỗi mục trong danh sách hiển thị `Tên` và `Mô tả` của form.
 - **Điều hướng:**
-    - Nhấn vào một form sẽ đưa đến **Màn hình Chi tiết** (F3).
-    - Nhấn nút "Tạo Form mới" sẽ bắt đầu luồng F1.
+  - Nhấn vào một form sẽ đưa đến **Màn hình Chi tiết** (F3).
+  - Nhấn nút "Tạo Form mới" sẽ bắt đầu luồng F1.
 
 ### F3: Màn hình Chi tiết / Xây dựng Form (`Detail View`)
+
 Đây là giao diện chính của Form Builder, được chia làm 2 phần:
 
 - **Phần Cấu hình (Bên trái):**
-    - Cho phép chỉnh sửa `ID Form` (chỉ đọc, có thể sao chép) và `Văn bản của nút Gửi` (Submit Button Text).
-    - Hiển thị danh sách các trường (field) hiện có trong form.
-    - Cho phép **Thêm trường mới** (mở popup cấu hình trường).
-    - Cho phép **Sắp xếp lại** các trường bằng cách kéo-thả.
+  - Cho phép chỉnh sửa `ID Form` (chỉ đọc, có thể sao chép) và `Văn bản của nút Gửi` (Submit Button Text).
+  - Hiển thị danh sách các trường (field) hiện có trong form.
+  - Cho phép **Thêm trường mới** (mở popup cấu hình trường).
+  - Cho phép **Sắp xếp lại** các trường bằng cách kéo-thả.
 
 - **Phần Xem trước (Bên phải):**
-    - Hiển thị một bản xem trước (preview) của form trong thời gian thực. Mọi thay đổi ở phần cấu hình sẽ được cập nhật ngay lập tức ở đây.
+  - Hiển thị một bản xem trước (preview) của form trong thời gian thực. Mọi thay đổi ở phần cấu hình sẽ được cập nhật ngay lập tức ở đây.
 
 - **Các hành động khác trên màn hình này:**
-    - **Nút "Lưu":** Lưu lại toàn bộ cấu trúc của form (bao gồm danh sách các trường và các cài đặt chung) vào backend.
-    - **Nút "Xóa":** Xóa vĩnh viễn form (có yêu cầu xác nhận).
-    - **Nút "Cài đặt" (biểu tượng bánh răng):** Mở popup để chỉnh sửa thông tin cơ bản như `Tên Form` và `Mô tả` (xem F5).
+  - **Nút "Lưu":** Lưu lại toàn bộ cấu trúc của form (bao gồm danh sách các trường và các cài đặt chung) vào backend.
+  - **Nút "Xóa":** Xóa vĩnh viễn form (có yêu cầu xác nhận).
+  - **Nút "Cài đặt" (biểu tượng bánh răng):** Mở popup để chỉnh sửa thông tin cơ bản như `Tên Form` và `Mô tả` (xem F5).
 
 ### F4: Quản lý Trường trong Form
+
 - **Thêm/Sửa trường:**
-    - Khi thêm mới hoặc chỉnh sửa một trường, một popup sẽ hiện ra cho phép cấu hình các thuộc tính:
-        - `Loại trường`: Text, Email, Number, Textarea, Select, Checkbox, Date, Datetime.
-        - `Tên trường (Label)`: Nhãn hiển thị cho người dùng.
-        - `Tên biến (Name)`: Tên biến của trường khi gửi dữ liệu, tự động tạo nếu bỏ trống.
-        - `Placeholder`: Văn bản gợi ý.
-        - `Giá trị mặc định`.
-        - `Bắt buộc (Required)`: Bật/tắt.
-        - `Tùy chọn (Options)`: Dành riêng cho trường `Select`, cho phép thêm/xóa các cặp giá trị (value) và văn bản hiển thị (text).
+  - Khi thêm mới hoặc chỉnh sửa một trường, một popup sẽ hiện ra cho phép cấu hình các thuộc tính:
+    - `Loại trường`: Text, Email, Number, Textarea, Select, Checkbox, Date, Datetime.
+    - `Tên trường (Label)`: Nhãn hiển thị cho người dùng.
+    - `Tên biến (Name)`: Tên biến của trường khi gửi dữ liệu, tự động tạo nếu bỏ trống.
+    - `Placeholder`: Văn bản gợi ý.
+    - `Giá trị mặc định`.
+    - `Bắt buộc (Required)`: Bật/tắt.
+    - `Tùy chọn (Options)`: Dành riêng cho trường `Select`, cho phép thêm/xóa các cặp giá trị (value) và văn bản hiển thị (text).
 - **Xóa trường:** Người dùng có thể xóa một trường ra khỏi form.
 
 ### F5: Chỉnh sửa thông tin cơ bản (Tên & Mô tả)
+
 - Tính năng này được kích hoạt từ **Màn hình Chi tiết** (F3) qua nút "Cài đặt".
 - Một popup sẽ hiện ra, cho phép người dùng thay đổi `Tên Form`, `Mô tả`, và `Văn bản nút Gửi`.
 

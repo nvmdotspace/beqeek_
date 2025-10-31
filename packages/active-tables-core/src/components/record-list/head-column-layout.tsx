@@ -33,7 +33,7 @@ export function HeadColumnLayout(props: LayoutProps) {
     (fieldName: string) => {
       return table.config.fields.find((f) => f.name === fieldName);
     },
-    [table.config.fields]
+    [table.config.fields],
   );
 
   // Handle card click
@@ -43,7 +43,7 @@ export function HeadColumnLayout(props: LayoutProps) {
         onRecordClick(record);
       }
     },
-    [onRecordClick]
+    [onRecordClick],
   );
 
   // Handle selection toggle
@@ -54,13 +54,11 @@ export function HeadColumnLayout(props: LayoutProps) {
       if (!onSelectionChange) return;
 
       const isSelected = selectedIds.includes(recordId);
-      const newSelection = isSelected
-        ? selectedIds.filter((id) => id !== recordId)
-        : [...selectedIds, recordId];
+      const newSelection = isSelected ? selectedIds.filter((id) => id !== recordId) : [...selectedIds, recordId];
 
       onSelectionChange(newSelection);
     },
-    [selectedIds, onSelectionChange]
+    [selectedIds, onSelectionChange],
   );
 
   return (

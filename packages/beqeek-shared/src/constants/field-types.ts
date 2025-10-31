@@ -86,10 +86,7 @@ export const TIME_FIELD_TYPES = [
 /**
  * Number field types group
  */
-export const NUMBER_FIELD_TYPES = [
-  FIELD_TYPE_INTEGER,
-  FIELD_TYPE_NUMERIC,
-] as const;
+export const NUMBER_FIELD_TYPES = [FIELD_TYPE_INTEGER, FIELD_TYPE_NUMERIC] as const;
 
 /**
  * Selection field types group
@@ -185,25 +182,17 @@ export const KANBAN_STATUS_VALID_FIELD_TYPES = [
 /**
  * Field types valid for Gantt date fields (start/end)
  */
-export const GANTT_DATE_VALID_FIELD_TYPES = [
-  FIELD_TYPE_DATE,
-  FIELD_TYPE_DATETIME,
-] as const;
+export const GANTT_DATE_VALID_FIELD_TYPES = [FIELD_TYPE_DATE, FIELD_TYPE_DATETIME] as const;
 
 /**
  * Field types valid for Gantt progress field
  */
-export const GANTT_PROGRESS_VALID_FIELD_TYPES = [
-  FIELD_TYPE_INTEGER,
-  FIELD_TYPE_NUMERIC,
-] as const;
+export const GANTT_PROGRESS_VALID_FIELD_TYPES = [FIELD_TYPE_INTEGER, FIELD_TYPE_NUMERIC] as const;
 
 /**
  * Field types valid for Gantt dependency field
  */
-export const GANTT_DEPENDENCY_VALID_FIELD_TYPES = [
-  FIELD_TYPE_SELECT_LIST_RECORD,
-] as const;
+export const GANTT_DEPENDENCY_VALID_FIELD_TYPES = [FIELD_TYPE_SELECT_LIST_RECORD] as const;
 
 export type QuickFilterValidFieldType = (typeof QUICK_FILTER_VALID_FIELD_TYPES)[number];
 export type KanbanStatusValidFieldType = (typeof KANBAN_STATUS_VALID_FIELD_TYPES)[number];

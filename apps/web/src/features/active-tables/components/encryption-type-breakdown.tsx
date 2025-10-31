@@ -24,11 +24,7 @@ export interface EncryptionTypeBreakdownProps {
   isE2EEEnabled: boolean;
 }
 
-export function EncryptionTypeBreakdown({
-  fields,
-  hashedKeywordFields,
-  isE2EEEnabled,
-}: EncryptionTypeBreakdownProps) {
+export function EncryptionTypeBreakdown({ fields, hashedKeywordFields, isE2EEEnabled }: EncryptionTypeBreakdownProps) {
   // Categorize fields by encryption type
   const fieldsByType = useMemo(() => {
     if (!isE2EEEnabled) {

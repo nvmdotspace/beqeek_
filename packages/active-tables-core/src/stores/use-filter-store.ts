@@ -81,9 +81,7 @@ export const useFilterStore = create<FilterState>((set) => ({
   addFilter: (filter) =>
     set((state) => {
       // Remove existing filter for same field
-      const filtered = state.filters.filter(
-        (f) => f.fieldName !== filter.fieldName
-      );
+      const filtered = state.filters.filter((f) => f.fieldName !== filter.fieldName);
       return { filters: [...filtered, filter] };
     }),
 

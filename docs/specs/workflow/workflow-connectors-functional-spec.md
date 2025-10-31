@@ -8,9 +8,10 @@ Module này cho phép người dùng quản lý các "connector" - là các kế
 
 ## 2. Các Tính năng chính (Core Features) - Dựa trên triển khai thực tế
 
-Module này có 3 màn hình chính: **Màn hình Chọn loại Connector** (`Select View`), **Màn hình Danh sách** (`List View`), và **Màn hình Chi tiết** (`Detail View`). 
+Module này có 3 màn hình chính: **Màn hình Chọn loại Connector** (`Select View`), **Màn hình Danh sách** (`List View`), và **Màn hình Chi tiết** (`Detail View`).
 
 ### F1: Luồng tạo Connector mới
+
 1.  Từ **Màn hình Danh sách**, người dùng nhấn nút "Tạo Connector mới".
 2.  Hệ thống chuyển đến **Màn hình Chọn loại Connector**. Tại đây, người dùng thấy một danh mục các loại connector được hỗ trợ và có thể tìm kiếm.
 3.  Người dùng chọn một loại connector (ví dụ: "SMTP").
@@ -20,26 +21,30 @@ Module này có 3 màn hình chính: **Màn hình Chọn loại Connector** (`Se
     b. Tự động chuyển người dùng đến **Màn hình Chi tiết** cho connector vừa tạo.
 
 ### F2: Màn hình Danh sách Connector (`List View`)
+
 - **Hiển thị danh sách:** Hiển thị tất cả `ConnectorInstance` đã được tạo, mỗi mục gồm có Tên và Mô tả.
 - **Lọc theo loại:** Cung cấp các tab để lọc danh sách theo `connectorType` (Tất cả, SMTP, Zalo...). Mỗi tab hiển thị số lượng connector tương ứng.
 - **Điều hướng:**
-    - Nhấn vào một connector sẽ đưa đến **Màn hình Chi tiết** (F3).
-    - Nhấn nút "Tạo Connector mới" sẽ bắt đầu luồng F1.
+  - Nhấn vào một connector sẽ đưa đến **Màn hình Chi tiết** (F3).
+  - Nhấn nút "Tạo Connector mới" sẽ bắt đầu luồng F1.
 
 ### F3: Màn hình Chi tiết Connector (`Detail View`)
+
 Đây là màn hình trung tâm để quản lý một connector cụ thể.
+
 - **Hiển thị thông tin:** Hiển thị tên của connector.
 - **Quản lý Cấu hình Kỹ thuật:**
-    - Giao diện render động các trường cấu hình kỹ thuật (`config`) dựa trên `connectorType`.
-    - Đối với connector dùng OAuth2, giao diện hiển thị nút để bắt đầu luồng xác thực.
-    - Nút **"Lưu"** trên màn hình này chỉ dùng để lưu các thay đổi trong phần cấu hình kỹ thuật này.
+  - Giao diện render động các trường cấu hình kỹ thuật (`config`) dựa trên `connectorType`.
+  - Đối với connector dùng OAuth2, giao diện hiển thị nút để bắt đầu luồng xác thực.
+  - Nút **"Lưu"** trên màn hình này chỉ dùng để lưu các thay đổi trong phần cấu hình kỹ thuật này.
 - **Xem tài liệu:** Hiển thị tài liệu hướng dẫn (Markdown) cho loại connector đang xem.
 - **Các hành động khác:**
-    - **Nút "Xóa":** Cho phép xóa connector (có yêu cầu xác nhận).
-    - **Nút "Cài đặt" (biểu tượng bánh răng):** Mở một popup để chỉnh sửa thông tin cơ bản (Tên và Mô tả) của connector (xem F4).
-    - **Nút "Quay lại":** Đưa người dùng về **Màn hình Danh sách** (F2).
+  - **Nút "Xóa":** Cho phép xóa connector (có yêu cầu xác nhận).
+  - **Nút "Cài đặt" (biểu tượng bánh răng):** Mở một popup để chỉnh sửa thông tin cơ bản (Tên và Mô tả) của connector (xem F4).
+  - **Nút "Quay lại":** Đưa người dùng về **Màn hình Danh sách** (F2).
 
 ### F4: Chỉnh sửa thông tin cơ bản (Tên & Mô tả)
+
 - Tính năng này được kích hoạt từ **Màn hình Chi tiết** (F3) thông qua nút "Cài đặt".
 - Một popup sẽ hiện ra, cho phép người dùng thay đổi `Tên` và `Mô tả` của connector.
 - Nút "Xác nhận" trong popup sẽ gọi API để cập nhật các thông tin này.
@@ -49,6 +54,7 @@ Module này có 3 màn hình chính: **Màn hình Chọn loại Connector** (`Se
 **Lưu ý:** Trong triển khai hiện tại, dữ liệu định nghĩa về các loại connector và cấu hình của chúng được **hardcode** dưới dạng các biến JavaScript ở phía client. Dưới đây là cấu trúc chính xác của các dữ liệu tĩnh này.
 
 ### 3.1. `connectorTypes` (Dữ liệu tĩnh phía Client)
+
 Đây là mảng các đối tượng định nghĩa mỗi loại connector có sẵn trong hệ thống.
 
 ```json
@@ -87,6 +93,7 @@ Module này có 3 màn hình chính: **Màn hình Chọn loại Connector** (`Se
 ```
 
 ### 3.2. `ConnectorConfigDefinition` (Dữ liệu tĩnh phía Client)
+
 Đây là mảng các đối tượng định nghĩa các trường cấu hình và loại xác thực cho mỗi `connectorType`.
 
 ```json
@@ -101,7 +108,13 @@ Module này có 3 màn hình chính: **Màn hình Chọn loại Connector** (`Se
       { "name": "password", "type": "password", "label": "Password", "required": true, "secret": true },
       { "name": "from_email", "type": "text", "label": "From Email", "required": true, "secret": false },
       { "name": "from_name", "type": "text", "label": "From Name", "required": false, "secret": false },
-      { "name": "checkDailyUnique", "type": "checkbox", "label": "Check Daily Unique", "required": false, "secret": false },
+      {
+        "name": "checkDailyUnique",
+        "type": "checkbox",
+        "label": "Check Daily Unique",
+        "required": false,
+        "secret": false
+      },
       { "name": "trackingEmail", "type": "checkbox", "label": "Tracking Email", "required": false, "secret": false }
     ]
   },
@@ -109,11 +122,39 @@ Module này có 3 màn hình chính: **Màn hình Chọn loại Connector** (`Se
     "connectorType": "GOOGLE_SHEETS",
     "oauth": true,
     "configFields": [
-      { "name": "access_token", "type": "text", "label": "access_token", "required": false, "readonly": true, "secret": false },
-      { "name": "expires_in", "type": "text", "label": "expires_in", "required": false, "readonly": true, "secret": false },
-      { "name": "refresh_token", "type": "text", "label": "refresh_token", "required": false, "readonly": true, "secret": false },
+      {
+        "name": "access_token",
+        "type": "text",
+        "label": "access_token",
+        "required": false,
+        "readonly": true,
+        "secret": false
+      },
+      {
+        "name": "expires_in",
+        "type": "text",
+        "label": "expires_in",
+        "required": false,
+        "readonly": true,
+        "secret": false
+      },
+      {
+        "name": "refresh_token",
+        "type": "text",
+        "label": "refresh_token",
+        "required": false,
+        "readonly": true,
+        "secret": false
+      },
       { "name": "scope", "type": "text", "label": "scope", "required": false, "readonly": true, "secret": false },
-      { "name": "token_type", "type": "text", "label": "token_type", "required": false, "readonly": true, "secret": false },
+      {
+        "name": "token_type",
+        "type": "text",
+        "label": "token_type",
+        "required": false,
+        "readonly": true,
+        "secret": false
+      },
       { "name": "created", "type": "text", "label": "created", "required": false, "readonly": true, "secret": false }
     ]
   },
@@ -121,8 +162,22 @@ Module này có 3 màn hình chính: **Màn hình Chọn loại Connector** (`Se
     "connectorType": "ZALO_OA",
     "oauth": true,
     "configFields": [
-      { "name": "accessToken", "type": "text", "label": "Access Token", "required": false, "readonly": true, "secret": true },
-      { "name": "refreshToken", "type": "text", "label": "Refresh Token", "required": false, "readonly": true, "secret": true }
+      {
+        "name": "accessToken",
+        "type": "text",
+        "label": "Access Token",
+        "required": false,
+        "readonly": true,
+        "secret": true
+      },
+      {
+        "name": "refreshToken",
+        "type": "text",
+        "label": "Refresh Token",
+        "required": false,
+        "readonly": true,
+        "secret": true
+      }
     ]
   },
   {
@@ -132,7 +187,13 @@ Module này có 3 màn hình chính: **Màn hình Chọn loại Connector** (`Se
       { "name": "clientId", "type": "text", "label": "Client ID", "required": true, "secret": false },
       { "name": "clientSecret", "type": "password", "label": "Client Secret", "required": true, "secret": true },
       { "name": "retailerCode", "type": "text", "label": "Retailer Code", "required": true, "secret": false },
-      { "name": "accessToken", "type": "text", "label": "Mã truy cập API (access token)", "required": false, "secret": true }
+      {
+        "name": "accessToken",
+        "type": "text",
+        "label": "Mã truy cập API (access token)",
+        "required": false,
+        "secret": true
+      }
     ]
   },
   {
@@ -147,6 +208,7 @@ Module này có 3 màn hình chính: **Màn hình Chọn loại Connector** (`Se
 ```
 
 ### 3.3. `ConnectorInstance` (Dữ liệu động từ API)
+
 Đại diện cho một connector cụ thể đã được người dùng tạo và cấu hình. Đây là đối tượng được trao đổi với API.
 
 ```json
@@ -155,7 +217,8 @@ Module này có 3 màn hình chính: **Màn hình Chọn loại Connector** (`Se
   "name": "Email Marketing của tôi", // String, người dùng tự đặt
   "description": "Dùng để gửi email cho chiến dịch X", // String
   "connectorType": "SMTP", // String, Foreign Key tới ConnectorType.type
-  "config": { // Object, chứa các giá trị cấu hình
+  "config": {
+    // Object, chứa các giá trị cấu hình
     "host": "smtp.example.com",
     "port": 587,
     "username": "user@example.com",
@@ -171,6 +234,7 @@ Module này có 3 màn hình chính: **Màn hình Chọn loại Connector** (`Se
 **Lưu ý quan trọng:** Triển khai JavaScript hiện tại (`workflow-connectors.blade.php`) sử dụng phương thức `POST` cho hầu hết các yêu cầu API, kể cả các hành động đọc hay xóa dữ liệu. Đường dẫn API cũng tuân theo một cấu trúc cụ thể: `/api/workspace/{WORKSPACE_ID}/workflow/{action_type}/{resource}`.
 
 **Dữ liệu cấu hình tĩnh:**
+
 - Dữ liệu về `ConnectorType` (các loại connector) và `ConnectorConfigDefinition` (cấu hình cho từng loại) hiện đang được **hardcode** trong file JavaScript phía client. Không có API endpoint để lấy dữ liệu này.
 
 **Các Endpoint động:**

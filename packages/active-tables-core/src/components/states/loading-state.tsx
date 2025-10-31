@@ -62,9 +62,7 @@ export function LoadingState({
         role="status"
         aria-label={message}
       />
-      {message && (
-        <p className="mt-4 text-sm text-gray-600">{message}</p>
-      )}
+      {message && <p className="mt-4 text-sm text-gray-600">{message}</p>}
     </div>
   );
 }

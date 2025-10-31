@@ -146,9 +146,9 @@ export const DEFAULT_MESSAGES: Required<ActiveTablesMessages> = {
 
   // Permissions
   noPermission: 'No permission',
-  noAccessPermission: 'You don\'t have permission to access this',
-  noUpdatePermission: 'You don\'t have permission to edit this',
-  noDeletePermission: 'You don\'t have permission to delete this',
+  noAccessPermission: "You don't have permission to access this",
+  noUpdatePermission: "You don't have permission to edit this",
+  noDeletePermission: "You don't have permission to delete this",
 
   // Encryption
   encryptionEnabled: 'Encryption enabled',
@@ -203,19 +203,14 @@ export const DEFAULT_MESSAGES: Required<ActiveTablesMessages> = {
 /**
  * Get message with fallback
  */
-export function getMessage(
-  key: keyof ActiveTablesMessages,
-  messages?: Partial<ActiveTablesMessages>
-): string {
+export function getMessage(key: keyof ActiveTablesMessages, messages?: Partial<ActiveTablesMessages>): string {
   return messages?.[key] ?? DEFAULT_MESSAGES[key];
 }
 
 /**
  * Merge custom messages with defaults
  */
-export function mergeMessages(
-  custom?: Partial<ActiveTablesMessages>
-): Required<ActiveTablesMessages> {
+export function mergeMessages(custom?: Partial<ActiveTablesMessages>): Required<ActiveTablesMessages> {
   return {
     ...DEFAULT_MESSAGES,
     ...custom,

@@ -1,17 +1,17 @@
-import type { ReactNode } from "react"
+import type { ReactNode } from 'react';
 
-import { Building2, Sparkles } from "lucide-react"
+import { Building2, Sparkles } from 'lucide-react';
 
-import { Button } from "@workspace/ui/components/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card"
+import { Button } from '@workspace/ui/components/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@workspace/ui/components/card';
 // @ts-ignore
-import { m } from "@/paraglide/generated/messages.js";
+import { m } from '@/paraglide/generated/messages.js';
 
 export type WorkspaceEmptyStateProps = {
-  onCreateClick: () => void
-  createForm: ReactNode
-  showForm: boolean
-}
+  onCreateClick: () => void;
+  createForm: ReactNode;
+  showForm: boolean;
+};
 
 export const WorkspaceEmptyState = ({ onCreateClick, createForm, showForm }: WorkspaceEmptyStateProps) => {
   return (
@@ -22,9 +22,7 @@ export const WorkspaceEmptyState = ({ onCreateClick, createForm, showForm }: Wor
         </div>
         <div className="space-y-2">
           <CardTitle className="text-2xl text-foreground">{m.workspace_emptyState()}</CardTitle>
-          <CardDescription className="text-base">
-            {m.workspace_empty_description()}
-          </CardDescription>
+          <CardDescription className="text-base">{m.workspace_empty_description()}</CardDescription>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -34,5 +32,5 @@ export const WorkspaceEmptyState = ({ onCreateClick, createForm, showForm }: Wor
         {showForm ? <div className="rounded-lg border border-border/70 bg-card p-4 text-left">{createForm}</div> : null}
       </CardContent>
     </Card>
-  )
-}
+  );
+};

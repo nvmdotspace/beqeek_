@@ -1,9 +1,11 @@
 # Fix Summary: Records Page Race Condition
 
 ## Issue Fixed
+
 Records not displaying properly in Active Table Records Page when using server-side encryption mode due to race condition between API calls.
 
 ## Root Cause
+
 - `useActiveTable` (get table config) and `useActiveTableRecords` (get records) were called in parallel
 - Records API could return before table config was loaded
 - Decryption logic ran without knowing the encryption mode
@@ -19,7 +21,7 @@ Records not displaying properly in Active Table Records Page when using server-s
 export const useActiveTableRecordsWithConfig = (
   workspaceId?: string,
   tableId?: string,
-  params?: RecordQueryRequest
+  params?: RecordQueryRequest,
 ) => {
   // Step 1: Load table details first
   const tableQuery = useActiveTable(workspaceId, tableId);
@@ -51,6 +53,7 @@ export const useActiveTableRecordsWithConfig = (
 **File**: [apps/web/src/features/active-tables/pages/active-table-records-page.tsx:49-65](apps/web/src/features/active-tables/pages/active-table-records-page.tsx:49-65)
 
 **Changes**:
+
 - Replaced separate `useActiveTable` + `useActiveTableRecords` with `useActiveTableRecordsWithConfig`
 - Simplified state management (single hook provides both table and records)
 - Added pagination data (`nextId`, `previousId`)
@@ -60,6 +63,7 @@ export const useActiveTableRecordsWithConfig = (
 **File**: [apps/web/src/features/active-tables/pages/active-table-records-page.tsx:72-127](apps/web/src/features/active-tables/pages/active-table-records-page.tsx:72-127)
 
 **Before**:
+
 ```typescript
 useEffect(() => {
   if (!encryption.isE2EEEnabled || ...) {
@@ -71,6 +75,7 @@ useEffect(() => {
 ```
 
 **After**:
+
 ```typescript
 useEffect(() => {
   // ✅ Guard: Wait for table config to be loaded
@@ -86,17 +91,18 @@ useEffect(() => {
 
   // E2EE mode: decrypt with key...
 }, [
-  isReady,        // ✅ Wait for both table and records
+  isReady, // ✅ Wait for both table and records
   records,
   encryption.isE2EEEnabled,
   encryption.isKeyValid,
   encryption.encryptionKey,
-  table?.config,  // ✅ Added as dependency
+  table?.config, // ✅ Added as dependency
   table?.id,
 ]);
 ```
 
 **Key Improvements**:
+
 1. **`isReady` guard**: Ensures both table config and records are loaded
 2. **`table?.config` dependency**: Re-runs effect when config becomes available
 3. **Clear encryption mode handling**: Explicit check for server-side vs E2EE mode
@@ -104,6 +110,7 @@ useEffect(() => {
 ## Execution Flow Comparison
 
 ### Before (❌ Broken)
+
 ```
 1. Component mount
    ├─ useActiveTable() → pending
@@ -122,6 +129,7 @@ useEffect(() => {
 ```
 
 ### After (✅ Fixed)
+
 ```
 1. Component mount
    ├─ useActiveTable() → pending
@@ -185,6 +193,7 @@ No database migrations or environment changes required. This is a pure frontend 
 ## Performance Impact
 
 **Slight improvement**:
+
 - Records API only fires after table config loads (fewer wasted requests on error)
 - No unnecessary re-renders from race condition
 - Decryption cache still active for performance

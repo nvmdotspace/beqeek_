@@ -33,10 +33,7 @@ export const PERMISSION_ALL = 'all' as const;
  * Permissions for action type = 'create'
  * Only two options: can create or cannot create
  */
-export const CREATE_PERMISSIONS = [
-  PERMISSION_NOT_ALLOWED,
-  PERMISSION_ALLOWED,
-] as const;
+export const CREATE_PERMISSIONS = [PERMISSION_NOT_ALLOWED, PERMISSION_ALLOWED] as const;
 
 export type CreatePermission = (typeof CREATE_PERMISSIONS)[number];
 

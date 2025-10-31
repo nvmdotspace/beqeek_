@@ -10,6 +10,7 @@
 ## 🎯 Mission Accomplished
 
 Phase 0 đã hoàn thành thành công với mục tiêu:
+
 1. ✅ Tạo package structure
 2. ✅ Migrate 861 dòng production-tested code
 3. ✅ Fix broken imports trong apps/web
@@ -46,6 +47,7 @@ packages/active-tables-core/
 **File**: `src/utils/encryption-helpers.ts`
 
 **Functions**:
+
 - `getEncryptionTypeForField()` - Determine encryption type by field type
 - `decryptFieldValue()` - Decrypt any field value
 - `decryptTextValue()` - AES-256-CBC decryption
@@ -55,12 +57,14 @@ packages/active-tables-core/
 - `validateEncryptionKey()` - Auth key validation
 
 **Features**:
+
 - ✅ Support 3 encryption types: AES-256-CBC, OPE, HMAC-SHA256
 - ✅ Compatible với backend implementation
 - ✅ Full error handling
 - ✅ Production-tested
 
 **Issues Fixed**:
+
 - Added `.js` extension to imports (TypeScript ESM requirement)
 - Changed `decryptOPEValue()` to async function to handle Promise from `decryptTextValue()`
 
@@ -71,6 +75,7 @@ packages/active-tables-core/
 **File**: `src/utils/record-decryptor.ts`
 
 **Functions**:
+
 - `decryptRecord()` - Decrypt single record with caching
 - `decryptRecords()` - Batch decrypt with parallel processing
 - `decryptFieldAcrossRecords()` - Decrypt specific field across records
@@ -78,6 +83,7 @@ packages/active-tables-core/
 - `getEncryptionStats()` - Statistics tracking
 
 **Features**:
+
 - ✅ Batch processing (default: 50 records/batch)
 - ✅ Parallel execution with Promise.all()
 - ✅ LRU cache integration
@@ -92,6 +98,7 @@ packages/active-tables-core/
 **File**: `src/utils/decryption-cache.ts`
 
 **Features**:
+
 - ✅ LRU eviction policy
 - ✅ TTL-based expiration (default: 5 minutes)
 - ✅ Configurable max size (default: 1000 entries)
@@ -100,6 +107,7 @@ packages/active-tables-core/
 - ✅ Cache statistics
 
 **Global Instance**:
+
 ```typescript
 export const globalDecryptionCache = new DecryptionCache(1000, 5 * 60 * 1000);
 ```
@@ -111,6 +119,7 @@ export const globalDecryptionCache = new DecryptionCache(1000, 5 * 60 * 1000);
 **File**: `src/types/existing-types.ts`
 
 **Types Included**:
+
 - `ActiveFieldConfig` - Field configuration
 - `ActiveTableConfig` - Table configuration with E2EE support
 - `ActiveTableRecord` - Record with encryption metadata
@@ -132,6 +141,7 @@ export const globalDecryptionCache = new DecryptionCache(1000, 5 * 60 * 1000);
 ### TypeScript Issues Resolved
 
 1. **ESM Import Extensions**
+
    ```typescript
    // ❌ Before
    import type { ActiveFieldConfig } from '../types';
@@ -141,6 +151,7 @@ export const globalDecryptionCache = new DecryptionCache(1000, 5 * 60 * 1000);
    ```
 
 2. **Async/Await in OPE Decryption**
+
    ```typescript
    // ❌ Before
    function decryptOPEValue(): string {
@@ -162,12 +173,14 @@ export const globalDecryptionCache = new DecryptionCache(1000, 5 * 60 * 1000);
 ### Broken Imports Fixed (3 files)
 
 1. **`use-active-tables.ts`** - Line 7
+
    ```typescript
    // ❌ Old: import { useEncryption } from '@workspace/active-tables-core';
    // ✅ New: import { useEncryption } from './use-encryption-stub';
    ```
 
 2. **`active-tables-page.tsx`** - Line 38
+
    ```typescript
    // ❌ Old: import { useEncryption } from '@workspace/active-tables-hooks';
    // ✅ New: import { useEncryption } from '../hooks/use-encryption-stub';
@@ -182,6 +195,7 @@ export const globalDecryptionCache = new DecryptionCache(1000, 5 * 60 * 1000);
 ### Stub Hooks Created
 
 **`use-encryption-stub.ts`**:
+
 ```typescript
 export function useEncryption() {
   return {
@@ -192,6 +206,7 @@ export function useEncryption() {
 ```
 
 **`use-table-encryption.ts`**:
+
 ```typescript
 export function useTableEncryption(params?: any) {
   return {
@@ -209,6 +224,7 @@ export function useTableEncryption(params?: any) {
 ```
 
 **`use-active-records.ts`**:
+
 ```typescript
 export function useActiveRecords(tableId?: string, workspaceId?: string) {
   return {
@@ -231,6 +247,7 @@ export function useActiveRecords(tableId?: string, workspaceId?: string) {
 ### Import Updates
 
 **`apps/web/src/features/active-tables/utils/index.ts`**:
+
 ```typescript
 // ❌ Old
 export * from './encryption-helpers';
@@ -254,6 +271,7 @@ export * from '@workspace/active-tables-core';
 ```
 
 **Output**:
+
 - 21 files in `dist/`
 - JavaScript (.js) + TypeScript declarations (.d.ts) + Source maps (.d.ts.map)
 
@@ -267,6 +285,7 @@ export * from '@workspace/active-tables-core';
 ```
 
 **Bundle Size**:
+
 - Total: ~800KB (gzipped: ~200KB)
 - Largest chunk: react (347KB)
 
@@ -274,15 +293,16 @@ export * from '@workspace/active-tables-core';
 
 ## 📈 Metrics
 
-| Metric | Before | After | Change |
-|--------|--------|-------|--------|
-| **TypeScript Errors** | 26 | 6 | -77% ✅ |
-| **Build Time (web)** | N/A | 3.10s | ✅ |
-| **Code Migrated** | 0 | 861 lines | +861 ✅ |
-| **Package Size** | N/A | ~50KB | ✅ |
-| **Broken Imports** | 3 | 0 | -100% ✅ |
+| Metric                | Before | After     | Change   |
+| --------------------- | ------ | --------- | -------- |
+| **TypeScript Errors** | 26     | 6         | -77% ✅  |
+| **Build Time (web)**  | N/A    | 3.10s     | ✅       |
+| **Code Migrated**     | 0      | 861 lines | +861 ✅  |
+| **Package Size**      | N/A    | ~50KB     | ✅       |
+| **Broken Imports**    | 3      | 0         | -100% ✅ |
 
 **Remaining 6 errors** (unrelated to migration):
+
 - 2 errors: `/settings/encryption` route not defined (router config issue)
 - 3 errors: `string | undefined` type issues in settings page
 - 1 error: `encryptedValue` unknown type (temporary stub)
@@ -295,11 +315,7 @@ The package can now be imported in multiple ways:
 
 ```typescript
 // Default export (everything)
-import {
-  decryptFieldValue,
-  decryptRecords,
-  globalDecryptionCache
-} from '@workspace/active-tables-core';
+import { decryptFieldValue, decryptRecords, globalDecryptionCache } from '@workspace/active-tables-core';
 
 // Specific subpath exports
 import { decryptFieldValue } from '@workspace/active-tables-core/utils';
@@ -392,6 +408,7 @@ Files updated with completion status:
 Phase 0 của `@workspace/active-tables-core` đã hoàn thành thành công!
 
 **Achievements**:
+
 - ✅ Package functional và có thể import
 - ✅ Apps/web hoạt động bình thường
 - ✅ 861 dòng production-tested code migrated
@@ -399,6 +416,7 @@ Phase 0 của `@workspace/active-tables-core` đã hoàn thành thành công!
 - ✅ Foundation vững chắc cho Phase 1
 
 **Ready for**:
+
 - ✅ Deployment apps/web
 - ✅ Phase 1 development
 - ✅ Type system refactoring

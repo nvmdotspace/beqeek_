@@ -24,7 +24,7 @@ export async function decryptRecord(
   record: ActiveTableRecord,
   fields: ActiveFieldConfig[],
   encryptionKey: string,
-  useCache = true
+  useCache = true,
 ): Promise<ActiveTableRecord> {
   if (!encryptionKey || !record.record || typeof record.record !== 'object') {
     return record;
@@ -94,7 +94,7 @@ export async function decryptRecords(
   fields: ActiveFieldConfig[],
   encryptionKey: string,
   useCache = true,
-  batchSize = 50
+  batchSize = 50,
 ): Promise<ActiveTableRecord[]> {
   if (!records || !Array.isArray(records) || records.length === 0) {
     return records;
@@ -114,7 +114,7 @@ export async function decryptRecords(
 
       // Decrypt batch in parallel
       const decryptedBatch = await Promise.all(
-        batch.map((record) => decryptRecord(record, fields, encryptionKey, useCache))
+        batch.map((record) => decryptRecord(record, fields, encryptionKey, useCache)),
       );
 
       decryptedRecords.push(...decryptedBatch);
@@ -143,7 +143,7 @@ export async function decryptRecords(
 export async function decryptFieldAcrossRecords(
   records: ActiveTableRecord[],
   field: ActiveFieldConfig,
-  encryptionKey: string
+  encryptionKey: string,
 ): Promise<unknown[]> {
   if (!records || !Array.isArray(records) || !encryptionKey) {
     return records.map((r) => r.record[field.name]);
@@ -157,7 +157,7 @@ export async function decryptFieldAcrossRecords(
           return value;
         }
         return await decryptFieldValue(value, field, encryptionKey);
-      })
+      }),
     );
 
     return decryptedValues;
@@ -190,8 +190,7 @@ export function getEncryptionStats(records: ActiveTableRecord[], fields: ActiveF
       return value !== undefined && value !== null;
     }).length;
 
-    stats.encryptedFieldsByType[field.type] =
-      (stats.encryptedFieldsByType[field.type] || 0) + encryptedCount;
+    stats.encryptedFieldsByType[field.type] = (stats.encryptedFieldsByType[field.type] || 0) + encryptedCount;
     stats.totalEncryptedValues += encryptedCount;
   }
 

@@ -69,7 +69,7 @@ export function CommentsPanel(props: CommentsPanelProps) {
         setSubmitting(false);
       }
     },
-    [editContent, onCommentUpdate]
+    [editContent, onCommentUpdate],
   );
 
   // Handle delete comment
@@ -91,7 +91,7 @@ export function CommentsPanel(props: CommentsPanelProps) {
         setSubmitting(false);
       }
     },
-    [onCommentDelete, messages]
+    [onCommentDelete, messages],
   );
 
   // Start editing
@@ -112,7 +112,7 @@ export function CommentsPanel(props: CommentsPanelProps) {
       const user = workspaceUsers.find((u) => u.id === userId);
       return user?.name || user?.email || 'Unknown User';
     },
-    [workspaceUsers]
+    [workspaceUsers],
   );
 
   // Format timestamp
@@ -128,11 +128,7 @@ export function CommentsPanel(props: CommentsPanelProps) {
   if (loading) {
     return (
       <div className={className}>
-        <LoadingState
-          message={messages?.loadingComments || 'Loading comments...'}
-          type="spinner"
-          size="sm"
-        />
+        <LoadingState message={messages?.loadingComments || 'Loading comments...'} type="spinner" size="sm" />
       </div>
     );
   }
@@ -141,9 +137,7 @@ export function CommentsPanel(props: CommentsPanelProps) {
     <div className={`space-y-4 ${className}`}>
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-gray-900">
-          {messages?.comments || 'Comments'}
-        </h3>
+        <h3 className="text-lg font-semibold text-gray-900">{messages?.comments || 'Comments'}</h3>
         <span className="text-sm text-gray-500">
           {comments.length} {messages?.commentsCount || 'comments'}
         </span>
@@ -172,9 +166,7 @@ export function CommentsPanel(props: CommentsPanelProps) {
               disabled={!newComment.trim() || submitting}
               className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {submitting
-                ? messages?.saving || 'Saving...'
-                : messages?.addComment || 'Add Comment'}
+              {submitting ? messages?.saving || 'Saving...' : messages?.addComment || 'Add Comment'}
             </button>
           </div>
         </div>
@@ -183,31 +175,22 @@ export function CommentsPanel(props: CommentsPanelProps) {
       {/* Comments List */}
       <div className="space-y-4">
         {comments.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
-            {messages?.noComments || 'No comments yet'}
-          </div>
+          <div className="text-center py-8 text-gray-500">{messages?.noComments || 'No comments yet'}</div>
         ) : (
           comments.map((comment) => {
             const isEditing = editingId === comment.id;
             const isOwnComment = currentUser && comment.userId === currentUser.id;
 
             return (
-              <div
-                key={comment.id}
-                className="bg-white rounded-lg p-4 border border-gray-200"
-              >
+              <div key={comment.id} className="bg-white rounded-lg p-4 border border-gray-200">
                 {/* Comment Header */}
                 <div className="flex items-start justify-between mb-2">
                   <div>
-                    <div className="font-medium text-gray-900">
-                      {getUserName(comment.userId)}
-                    </div>
+                    <div className="font-medium text-gray-900">{getUserName(comment.userId)}</div>
                     <div className="text-xs text-gray-500">
                       {formatTimestamp(comment.createdAt)}
                       {comment.updatedAt !== comment.createdAt && (
-                        <span className="ml-2">
-                          ({messages?.edited || 'edited'})
-                        </span>
+                        <span className="ml-2">({messages?.edited || 'edited'})</span>
                       )}
                     </div>
                   </div>
@@ -258,16 +241,12 @@ export function CommentsPanel(props: CommentsPanelProps) {
                         disabled={!editContent.trim() || submitting}
                         className="px-3 py-1 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
                       >
-                        {submitting
-                          ? messages?.saving || 'Saving...'
-                          : messages?.save || 'Save'}
+                        {submitting ? messages?.saving || 'Saving...' : messages?.save || 'Save'}
                       </button>
                     </div>
                   </div>
                 ) : (
-                  <div className="text-gray-700 whitespace-pre-wrap">
-                    {comment.content}
-                  </div>
+                  <div className="text-gray-700 whitespace-pre-wrap">{comment.content}</div>
                 )}
               </div>
             );

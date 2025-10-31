@@ -196,21 +196,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '22'
-          
+
       - name: Install pnpm
         run: npm install -g pnpm
-        
+
       - name: Install dependencies
         run: pnpm install
-        
+
       - name: Build
         run: pnpm build
-        
+
       - name: Deploy to server
         run: |
           rsync -avz --delete apps/web/dist/ user@server:/var/www/beqeek/

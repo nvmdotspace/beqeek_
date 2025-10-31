@@ -34,9 +34,7 @@ export function TwoColumnDetailLayout(props: DetailLayoutProps) {
   // Decrypt record if E2EE enabled
   const { decryptRecord } = useRecordDecryption(table, encryptionKey);
   const displayRecord = useMemo(() => {
-    const decrypted = table.config.e2eeEncryption && encryptionKey
-      ? decryptRecord(record)
-      : record;
+    const decrypted = table.config.e2eeEncryption && encryptionKey ? decryptRecord(record) : record;
 
     // Normalize to have data property
     return {
@@ -72,9 +70,7 @@ export function TwoColumnDetailLayout(props: DetailLayoutProps) {
 
     return (
       <div className="mb-6">
-        <div className="text-sm font-medium text-gray-600 mb-2">
-          {titleField.label}
-        </div>
+        <div className="text-sm font-medium text-gray-600 mb-2">{titleField.label}</div>
         <div className="text-2xl font-bold text-gray-900">
           <FieldRenderer
             field={titleField}
@@ -82,9 +78,7 @@ export function TwoColumnDetailLayout(props: DetailLayoutProps) {
             mode="display"
             table={table}
             onChange={
-              enableEditing && onUpdate
-                ? (value) => onUpdate(record.id, { [titleField.name]: value })
-                : undefined
+              enableEditing && onUpdate ? (value) => onUpdate(record.id, { [titleField.name]: value }) : undefined
             }
             currentUser={currentUser}
             workspaceUsers={workspaceUsers}
@@ -103,19 +97,13 @@ export function TwoColumnDetailLayout(props: DetailLayoutProps) {
       <div className="flex flex-wrap gap-3 mb-6 pb-6 border-b border-gray-200">
         {subLineFields.map((field) => (
           <div key={field.name} className="flex items-center gap-2">
-            <span className="text-sm font-medium text-gray-500">
-              {field.label}:
-            </span>
+            <span className="text-sm font-medium text-gray-500">{field.label}:</span>
             <FieldRenderer
               field={field}
               value={displayRecord.data[field.name]}
               mode="display"
               table={table}
-              onChange={
-                enableEditing && onUpdate
-                  ? (value) => onUpdate(record.id, { [field.name]: value })
-                  : undefined
-              }
+              onChange={enableEditing && onUpdate ? (value) => onUpdate(record.id, { [field.name]: value }) : undefined}
               currentUser={currentUser}
               workspaceUsers={workspaceUsers}
               encryptionKey={encryptionKey}
@@ -134,9 +122,7 @@ export function TwoColumnDetailLayout(props: DetailLayoutProps) {
       <div className="space-y-6">
         {columnFields.map((field) => (
           <div key={field.name} className="border-b border-gray-100 pb-4">
-            <div className="text-sm font-medium text-gray-600 mb-2">
-              {field.label}
-            </div>
+            <div className="text-sm font-medium text-gray-600 mb-2">{field.label}</div>
             <div className="text-gray-900">
               <FieldRenderer
                 field={field}
@@ -144,9 +130,7 @@ export function TwoColumnDetailLayout(props: DetailLayoutProps) {
                 mode="display"
                 table={table}
                 onChange={
-                  enableEditing && onUpdate
-                    ? (value) => onUpdate(record.id, { [field.name]: value })
-                    : undefined
+                  enableEditing && onUpdate ? (value) => onUpdate(record.id, { [field.name]: value }) : undefined
                 }
                 currentUser={currentUser}
                 workspaceUsers={workspaceUsers}
@@ -178,9 +162,7 @@ export function TwoColumnDetailLayout(props: DetailLayoutProps) {
 
       {/* Comments Panel (bottom position) */}
       {config.commentsPosition === 'bottom' && commentsPanel && (
-        <div className="mt-6 pt-6 border-t border-gray-200">
-          {commentsPanel}
-        </div>
+        <div className="mt-6 pt-6 border-t border-gray-200">{commentsPanel}</div>
       )}
     </div>
   );

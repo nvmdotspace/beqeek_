@@ -26,25 +26,17 @@ export function TextareaField(props: FieldRendererProps) {
 
       onChange?.(newValue);
     },
-    [onChange, field]
+    [onChange, field],
   );
 
   // Display mode
   if (mode === 'display') {
     if (!stringValue) {
-      return (
-        <span className="text-gray-400 italic">
-          {props.messages?.emptyValue || '—'}
-        </span>
-      );
+      return <span className="text-gray-400 italic">{props.messages?.emptyValue || '—'}</span>;
     }
 
     // Preserve line breaks in display mode
-    return (
-      <div className="whitespace-pre-wrap">
-        {stringValue}
-      </div>
-    );
+    return <div className="whitespace-pre-wrap">{stringValue}</div>;
   }
 
   // Edit mode
@@ -61,12 +53,7 @@ export function TextareaField(props: FieldRendererProps) {
   `.trim();
 
   return (
-    <FieldWrapper
-      fieldId={fieldId}
-      label={field.label}
-      required={field.required}
-      error={error}
-    >
+    <FieldWrapper fieldId={fieldId} label={field.label} required={field.required} error={error}>
       <textarea
         id={fieldId}
         name={field.name}

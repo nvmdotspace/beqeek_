@@ -33,13 +33,7 @@ export interface EncryptionKeyModalProps {
   onKeySaved: (key: string) => void;
 }
 
-export function EncryptionKeyModal({
-  isOpen,
-  onClose,
-  table,
-  workspaceId,
-  onKeySaved,
-}: EncryptionKeyModalProps) {
+export function EncryptionKeyModal({ isOpen, onClose, table, workspaceId, onKeySaved }: EncryptionKeyModalProps) {
   const [keyInput, setKeyInput] = useState('');
   const [validationError, setValidationError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -132,9 +126,7 @@ export function EncryptionKeyModal({
               <span className={keyInput.length === 32 ? 'text-success' : 'text-muted-foreground'}>
                 {keyInput.length}/32 characters
               </span>
-              {validationError && (
-                <span className="text-destructive">{validationError}</span>
-              )}
+              {validationError && <span className="text-destructive">{validationError}</span>}
             </div>
           </div>
 
@@ -157,10 +149,7 @@ export function EncryptionKeyModal({
           <Button variant="outline" onClick={handleCancel} disabled={isSaving}>
             Cancel
           </Button>
-          <Button
-            onClick={handleSaveKey}
-            disabled={keyInput.length !== 32 || isSaving}
-          >
+          <Button onClick={handleSaveKey} disabled={keyInput.length !== 32 || isSaving}>
             <Check className="mr-2 h-4 w-4" />
             {isSaving ? 'Validating...' : 'Validate & Save Key'}
           </Button>

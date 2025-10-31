@@ -8,7 +8,7 @@ import {
   getActiveWorkGroups,
   getActiveTable,
   getActiveTableRecords,
-  type RecordQueryRequest
+  type RecordQueryRequest,
 } from '../api/active-tables-api';
 import { useEncryption } from './use-encryption-stub';
 
@@ -36,7 +36,7 @@ export const useActiveWorkGroups = (workspaceId?: string) => {
     queryFn: () => getActiveWorkGroups(workspaceId!),
     enabled: isAuthenticated && !!workspaceId,
     staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000,   // 10 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
   });
 };
 
@@ -48,7 +48,7 @@ export const useActiveTables = (workspaceId?: string) => {
     queryFn: () => getActiveTables(workspaceId!),
     enabled: isAuthenticated && !!workspaceId,
     staleTime: 2 * 60 * 1000, // 2 minutes
-    gcTime: 5 * 60 * 1000,   // 5 minutes
+    gcTime: 5 * 60 * 1000, // 5 minutes
   });
 };
 
@@ -62,11 +62,7 @@ export const useActiveTable = (workspaceId?: string, tableId?: string) => {
   });
 };
 
-export const useActiveTableRecords = (
-  workspaceId?: string,
-  tableId?: string,
-  params?: RecordQueryRequest
-) => {
+export const useActiveTableRecords = (workspaceId?: string, tableId?: string, params?: RecordQueryRequest) => {
   const isAuthenticated = useAuthStore(selectIsAuthenticated);
 
   return useQueryWithAuth({
@@ -74,7 +70,7 @@ export const useActiveTableRecords = (
     queryFn: () => getActiveTableRecords(workspaceId!, tableId!, params),
     enabled: isAuthenticated && !!workspaceId && !!tableId,
     staleTime: 2 * 60 * 1000, // 2 minutes
-    gcTime: 5 * 60 * 1000,   // 5 minutes
+    gcTime: 5 * 60 * 1000, // 5 minutes
   });
 };
 
@@ -138,7 +134,7 @@ export const useActiveTablesGroupedByWorkGroup = (workspaceId?: string) => {
 export const useActiveTableRecordsWithConfig = (
   workspaceId?: string,
   tableId?: string,
-  params?: RecordQueryRequest
+  params?: RecordQueryRequest,
 ) => {
   const isAuthenticated = useAuthStore(selectIsAuthenticated);
 

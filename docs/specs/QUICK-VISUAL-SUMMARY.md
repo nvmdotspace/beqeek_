@@ -144,13 +144,13 @@ SHORT_TEXT, EMAIL, PHONE
     AES-256-CBC Encryption
     ↓
     Stored as: enc_[IV + ciphertext]
-    
+
 INTEGER, DECIMAL, DATE, CURRENCY
     ↓
     OPE (Order-Preserving Encryption)
     ↓
     Allows range queries: salary > 3000
-    
+
 SELECT_ONE, CHECKBOX
     ↓
     HMAC-SHA256 Hashing
@@ -382,18 +382,18 @@ Timeline:
 
 ## ✅ KEY FEATURES AT A GLANCE
 
-| Feature | Status | Details |
-|---------|--------|---------|
-| **Multi-View** | ✓ | Table, Kanban, Gantt, Analytics |
-| **E2EE** | ✓ | AES-256-CBC + OPE + HMAC |
-| **Comments** | ✓ | Threaded, @mentions, attachments |
-| **Automations** | ✓ | Event, scheduled, webhook-based |
-| **Permissions** | ✓ | Team/Role/Record-level access |
-| **Search** | ✓ | Works on encrypted data |
-| **Pagination** | ✓ | Cursor-based, efficient |
-| **Mobile** | ✓ | Responsive design |
-| **Export** | ✓ | PDF, CSV, Excel |
-| **API** | ✓ | RESTful, POST-based RPC |
+| Feature         | Status | Details                          |
+| --------------- | ------ | -------------------------------- |
+| **Multi-View**  | ✓      | Table, Kanban, Gantt, Analytics  |
+| **E2EE**        | ✓      | AES-256-CBC + OPE + HMAC         |
+| **Comments**    | ✓      | Threaded, @mentions, attachments |
+| **Automations** | ✓      | Event, scheduled, webhook-based  |
+| **Permissions** | ✓      | Team/Role/Record-level access    |
+| **Search**      | ✓      | Works on encrypted data          |
+| **Pagination**  | ✓      | Cursor-based, efficient          |
+| **Mobile**      | ✓      | Responsive design                |
+| **Export**      | ✓      | PDF, CSV, Excel                  |
+| **API**         | ✓      | RESTful, POST-based RPC          |
 
 ---
 
@@ -405,7 +405,7 @@ API Base:
 
 Auth:
   POST /auth/post/authenticate → get token
-  
+
 Tables:
   GET  /workspace/{ws}/workflow/get/active_tables
   POST /workspace/{ws}/workflow/post/active_tables

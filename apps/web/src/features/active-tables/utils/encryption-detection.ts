@@ -66,8 +66,7 @@ export function analyzeRecordEncryption(record: ActiveTableRecord): EncryptionAn
     }
   }
 
-  const encryptionPercentage =
-    totalStringFields > 0 ? (encryptedFieldCount / totalStringFields) * 100 : 0;
+  const encryptionPercentage = totalStringFields > 0 ? (encryptedFieldCount / totalStringFields) * 100 : 0;
 
   // Consider encrypted if >50% of string fields look encrypted
   const looksEncrypted = encryptionPercentage >= 50;
@@ -86,10 +85,7 @@ export function analyzeRecordEncryption(record: ActiveTableRecord): EncryptionAn
  * @param sampleSize - Number of records to sample (default: all or max 5)
  * @returns Aggregate encryption analysis
  */
-export function analyzeRecordsEncryption(
-  records: ActiveTableRecord[],
-  sampleSize = 5
-): EncryptionAnalysis {
+export function analyzeRecordsEncryption(records: ActiveTableRecord[], sampleSize = 5): EncryptionAnalysis {
   if (records.length === 0) {
     return {
       looksEncrypted: false,
@@ -116,14 +112,12 @@ export function analyzeRecordsEncryption(
     }
   }
 
-  const encryptionPercentage =
-    totalStringFields > 0 ? (totalEncryptedFields / totalStringFields) * 100 : 0;
+  const encryptionPercentage = totalStringFields > 0 ? (totalEncryptedFields / totalStringFields) * 100 : 0;
 
   // Consider the dataset encrypted if:
   // 1. More than 50% of records look encrypted, OR
   // 2. More than 60% of all string fields look encrypted
-  const looksEncrypted =
-    recordsLookingEncrypted / sampled.length >= 0.5 || encryptionPercentage >= 60;
+  const looksEncrypted = recordsLookingEncrypted / sampled.length >= 0.5 || encryptionPercentage >= 60;
 
   return {
     looksEncrypted,

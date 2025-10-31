@@ -1,11 +1,13 @@
 # Fix Summary: Server-Side Encryption Decryption
 
 ## Issue Discovered
+
 Records page was still showing encrypted data even after fixing the race condition, because of a fundamental misunderstanding of how server-side encryption works.
 
 ## Root Cause
 
 ### ❌ Original Incorrect Assumption
+
 ```typescript
 // WRONG LOGIC
 if (!encryption.isE2EEEnabled) {
@@ -18,6 +20,7 @@ if (!encryption.isE2EEEnabled) {
 **Misunderstanding**: Thought that `e2eeEncryption: false` meant server decrypts data before sending to client.
 
 **Reality**: Server **ALWAYS** sends encrypted data. The difference is WHERE the encryption key is stored:
+
 - `e2eeEncryption: false` → Key stored on server, sent to client in API response
 - `e2eeEncryption: true` → Key stored in client localStorage, never sent to server
 
@@ -25,17 +28,20 @@ if (!encryption.isE2EEEnabled) {
 
 ### Both Modes Require Client-Side Decryption
 
-| Mode | Key Source | Key Location | Server Access | Client Decryption |
-|------|-----------|--------------|---------------|-------------------|
-| **Server-Side** | `table.config.encryptionKey` | Server DB | ✅ Yes | ✅ Required |
-| **E2EE** | `localStorage` | Client only | ❌ No | ✅ Required |
+| Mode            | Key Source                   | Key Location | Server Access | Client Decryption |
+| --------------- | ---------------------------- | ------------ | ------------- | ----------------- |
+| **Server-Side** | `table.config.encryptionKey` | Server DB    | ✅ Yes        | ✅ Required       |
+| **E2EE**        | `localStorage`               | Client only  | ❌ No         | ✅ Required       |
 
 ### Key Insight
+
 The term "server-side encryption" is **misleading**. Better terms:
+
 - **Server-Managed Encryption** (server stores key)
 - **Client-Managed Encryption (E2EE)** (client stores key)
 
 In BOTH cases:
+
 1. Data is encrypted in database
 2. Server sends encrypted data to client
 3. Client must decrypt with encryption key
@@ -46,6 +52,7 @@ In BOTH cases:
 ### File: [active-table-records-page.tsx:74-138](apps/web/src/features/active-tables/pages/active-table-records-page.tsx:74-138)
 
 **Before (Broken)**:
+
 ```typescript
 useEffect(() => {
   const decryptAllRecords = async () => {
@@ -73,6 +80,7 @@ useEffect(() => {
 ```
 
 **After (Fixed)**:
+
 ```typescript
 useEffect(() => {
   const decryptAllRecords = async () => {
@@ -116,6 +124,7 @@ useEffect(() => {
 ### API Response Analysis
 
 **Table Config API** (`GET /tables/818040940370329601`):
+
 ```json
 {
   "config": {
@@ -127,22 +136,26 @@ useEffect(() => {
 ```
 
 **Records API** (`GET /tables/818040940370329601/records`):
+
 ```json
 {
-  "data": [{
-    "id": "818047935265636353",
-    "record": {
-      "employee_name": "kIykQvCE2NSR0W83kihpXTpPTHsGoPFNkiQMGuUhPQE=",  // ❌ ENCRYPTED
-      "employee_code": "4j/Vqm5wMZ6wNd0mdNVEJG6W03kApaWGbTfwbcJyXuA=",   // ❌ ENCRYPTED
-      "gender": "fcd299b0b6e4a8fca388d546ae305f9ff3babe142637a4c6a165a57847a4a125"  // ❌ ENCRYPTED
+  "data": [
+    {
+      "id": "818047935265636353",
+      "record": {
+        "employee_name": "kIykQvCE2NSR0W83kihpXTpPTHsGoPFNkiQMGuUhPQE=", // ❌ ENCRYPTED
+        "employee_code": "4j/Vqm5wMZ6wNd0mdNVEJG6W03kApaWGbTfwbcJyXuA=", // ❌ ENCRYPTED
+        "gender": "fcd299b0b6e4a8fca388d546ae305f9ff3babe142637a4c6a165a57847a4a125" // ❌ ENCRYPTED
+      }
     }
-  }]
+  ]
 }
 ```
 
 ### After Client-Side Decryption
 
 **Displayed Data**:
+
 - `employee_name`: "Lưu Thanh Sang" ✅
 - `employee_code`: "E0001" ✅
 - `gender`: "Nam" ✅
@@ -150,11 +163,13 @@ useEffect(() => {
 ## Before/After Screenshots
 
 ### Before Fix
+
 - **employee_name**: `kIykQvCE2NSR0W83kihpXTpPTHsGoPFNkiQMGuUhPQE=`
 - **employee_code**: `4j/Vqm5wMZ6wNd0mdNVEJG6W03kApaWGbTfwbcJyXuA=`
 - **gender**: `fcd299b0b6e4a8fca388d546ae305f9ff3babe142637a4c6a165a57847a4a125`
 
 ### After Fix
+
 - **employee_name**: `Lưu Thanh Sang`
 - **employee_code**: `E0001`
 - **gender**: `Nam`
@@ -180,6 +195,7 @@ From [analysis-encryption-flow.md](docs/technical/analysis-encryption-flow.md:1)
 ## Flow Comparison
 
 ### Before Fix (Broken)
+
 ```
 1. Table API returns → config.encryptionKey = "mRX..."
 2. Records API returns → encrypted data
@@ -190,6 +206,7 @@ From [analysis-encryption-flow.md](docs/technical/analysis-encryption-flow.md:1)
 ```
 
 ### After Fix (Working)
+
 ```
 1. Table API returns → config.encryptionKey = "mRX..."
 2. Records API returns → encrypted data
@@ -219,10 +236,12 @@ From [analysis-encryption-flow.md](docs/technical/analysis-encryption-flow.md:1)
 ## Testing Results
 
 ✅ **Server-Side Encryption Mode**:
+
 - Records decrypt correctly using `table.config.encryptionKey`
 - Plaintext displayed: "Lưu Thanh Sang", "E0001", "Nam"
 
 ⏳ **E2EE Mode** (Not tested yet):
+
 - Should prompt for encryption key
 - Should decrypt with localStorage key after validation
 
@@ -242,6 +261,7 @@ From [analysis-encryption-flow.md](docs/technical/analysis-encryption-flow.md:1)
 ## Acknowledgment
 
 This fix was discovered through:
+
 1. User reporting incorrect behavior
 2. User correcting the misconception about server-side encryption
 3. Chrome DevTools MCP investigation of actual API responses

@@ -15,11 +15,7 @@
 export { CommonUtils } from './common-utils.js';
 
 // Key generation utilities
-export {
-  generateEncryptionKey,
-  validateEncryptionKey,
-  KeyGenerator,
-} from './key-generator.js';
+export { generateEncryptionKey, validateEncryptionKey, KeyGenerator } from './key-generator.js';
 
 // Encryption algorithms - Legacy-compatible implementations
 export { AES256 } from './algorithms/aes-256.js';
@@ -39,10 +35,4 @@ export type {
 } from './types.js';
 
 // Core encryption types
-export type {
-  EncryptionKey,
-  EncryptedData,
-  EncryptionType,
-  KeyDerivationOptions,
-  StorageConfig,
-} from './types.js';
+export type { EncryptionKey, EncryptedData, EncryptionType, KeyDerivationOptions, StorageConfig } from './types.js';

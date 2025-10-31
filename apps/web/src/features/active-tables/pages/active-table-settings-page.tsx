@@ -64,12 +64,15 @@ export const ActiveTableSettingsPage = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button variant="outline" onClick={() => {
-              navigate({
-                to: ROUTES.ACTIVE_TABLES.TABLE_DETAIL,
-                params: { locale, workspaceId, tableId },
-              });
-            }}>
+            <Button
+              variant="outline"
+              onClick={() => {
+                navigate({
+                  to: ROUTES.ACTIVE_TABLES.TABLE_DETAIL,
+                  params: { locale, workspaceId, tableId },
+                });
+              }}
+            >
               <ArrowLeft className="mr-2 h-4 w-4" />
               Go Back
             </Button>
@@ -103,9 +106,7 @@ export const ActiveTableSettingsPage = () => {
               <h1 className="text-3xl font-bold tracking-tight">{table.name}</h1>
             </div>
           </div>
-          <p className="ml-14 text-muted-foreground">
-            Configure table settings, fields, and security options
-          </p>
+          <p className="ml-14 text-muted-foreground">Configure table settings, fields, and security options</p>
         </div>
       </div>
 

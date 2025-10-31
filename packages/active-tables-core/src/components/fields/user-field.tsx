@@ -16,18 +16,12 @@ export function UserField(props: FieldRendererProps) {
   const isMultiple = field.type === FIELD_TYPES.SELECT_LIST_WORKSPACE_USER;
 
   // Normalize value
-  const normalizedValue = isMultiple
-    ? Array.isArray(value)
-      ? value
-      : value
-        ? [value]
-        : []
-    : value ?? '';
+  const normalizedValue = isMultiple ? (Array.isArray(value) ? value : value ? [value] : []) : (value ?? '');
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
       if (isMultiple) {
-        const selectedIds = Array.from(e.target.selectedOptions).map(option => option.value);
+        const selectedIds = Array.from(e.target.selectedOptions).map((option) => option.value);
         const validationError = validateFieldValue(selectedIds, field);
         if (validationError) {
           console.warn(`Validation error for ${field.name}:`, validationError);
@@ -42,7 +36,7 @@ export function UserField(props: FieldRendererProps) {
         onChange?.(newValue);
       }
     },
-    [onChange, field, isMultiple]
+    [onChange, field, isMultiple],
   );
 
   // Get user label
@@ -54,7 +48,7 @@ export function UserField(props: FieldRendererProps) {
       const labelField = field.referenceLabelField || 'name';
       return String(user[labelField as keyof typeof user] || user.name || user.email || user.id);
     },
-    [workspaceUsers, field.referenceLabelField]
+    [workspaceUsers, field.referenceLabelField],
   );
 
   // Display mode
@@ -62,16 +56,12 @@ export function UserField(props: FieldRendererProps) {
     if (isMultiple) {
       const selectedIds = normalizedValue as string[];
       if (selectedIds.length === 0) {
-        return (
-          <span className="text-gray-400 italic">
-            {props.messages?.emptyValue || '—'}
-          </span>
-        );
+        return <span className="text-gray-400 italic">{props.messages?.emptyValue || '—'}</span>;
       }
 
       return (
         <div className="flex flex-wrap gap-2">
-          {selectedIds.map(userId => (
+          {selectedIds.map((userId) => (
             <span
               key={userId}
               className="inline-flex items-center px-2 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800"
@@ -86,11 +76,7 @@ export function UserField(props: FieldRendererProps) {
     // Single select display
     const selectedId = normalizedValue as string;
     if (!selectedId) {
-      return (
-        <span className="text-gray-400 italic">
-          {props.messages?.emptyValue || '—'}
-        </span>
-      );
+      return <span className="text-gray-400 italic">{props.messages?.emptyValue || '—'}</span>;
     }
 
     return (
@@ -113,12 +99,7 @@ export function UserField(props: FieldRendererProps) {
   `.trim();
 
   return (
-    <FieldWrapper
-      fieldId={fieldId}
-      label={field.label}
-      required={field.required}
-      error={error}
-    >
+    <FieldWrapper fieldId={fieldId} label={field.label} required={field.required} error={error}>
       <select
         id={fieldId}
         name={field.name}
@@ -133,9 +114,7 @@ export function UserField(props: FieldRendererProps) {
         aria-describedby={error ? `${fieldId}-error` : undefined}
       >
         {!isMultiple && (
-          <option value="">
-            {field.placeholder || props.messages?.selectPlaceholder || 'Select a user'}
-          </option>
+          <option value="">{field.placeholder || props.messages?.selectPlaceholder || 'Select a user'}</option>
         )}
         {workspaceUsers.map((user: { id: string; fullName?: string; email?: string }) => (
           <option key={user.id} value={user.id}>

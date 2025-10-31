@@ -1,6 +1,7 @@
 # Technical Documentation: Active Tables Encryption System
 
 ## Table of Contents
+
 1. [System Overview](#system-overview)
 2. [Encryption Classification](#encryption-classification)
 3. [Detailed Encryption Algorithms](#detailed-encryption-algorithms)
@@ -15,6 +16,7 @@
 The Active Tables system implements a sophisticated multi-layered encryption architecture designed to balance security with functional requirements like searching, sorting, and filtering. The system supports both End-to-End Encryption (E2EE) and server-side encryption models.
 
 ### Core Principles
+
 - **Data Confidentiality**: Sensitive data is encrypted at rest and in transit
 - **Functional Security**: Encryption methods preserve necessary database operations
 - **Key Security**: Multiple key management approaches for different security requirements
@@ -34,17 +36,17 @@ The Active Tables system implements a sophisticated multi-layered encryption arc
 
 ### Encryption Types Matrix
 
-| Field Type | Encryption Method | Purpose | Search Support | Use Cases |
-|------------|------------------|---------|----------------|-----------|
-| **SHORT_TEXT, TEXT, RICH_TEXT** | AES-256-CBC | Maximum confidentiality | Yes (hashed keywords) | Names, descriptions, notes |
-| **EMAIL, URL** | AES-256-CBC | Maximum confidentiality | Yes (hashed keywords) | Contact information |
-| **INTEGER, NUMERIC** | Order Preserving Encryption | Range queries & sorting | Yes (numeric comparison) | Age, salary, quantity |
-| **DATE, DATETIME, TIME** | Order Preserving Encryption | Range queries & sorting | Yes (temporal comparison) | Birth dates, deadlines |
-| **CHECKBOX_YES_NO** | HMAC-SHA256 | Exact match lookup | Yes (exact match) | Yes/No flags |
-| **CHECKBOX_ONE, CHECKBOX_LIST** | HMAC-SHA256 | Exact match lookup | Yes (exact match) | Multi-select options |
-| **SELECT_ONE, SELECT_LIST** | HMAC-SHA256 | Exact match lookup | Yes (exact match) | Dropdown selections |
-| **SELECT_*_RECORD** | None | Referential integrity | Direct | Foreign keys |
-| **SELECT_*_WORKSPACE_USER** | None | System functionality | Direct | User references |
+| Field Type                      | Encryption Method           | Purpose                 | Search Support            | Use Cases                  |
+| ------------------------------- | --------------------------- | ----------------------- | ------------------------- | -------------------------- |
+| **SHORT_TEXT, TEXT, RICH_TEXT** | AES-256-CBC                 | Maximum confidentiality | Yes (hashed keywords)     | Names, descriptions, notes |
+| **EMAIL, URL**                  | AES-256-CBC                 | Maximum confidentiality | Yes (hashed keywords)     | Contact information        |
+| **INTEGER, NUMERIC**            | Order Preserving Encryption | Range queries & sorting | Yes (numeric comparison)  | Age, salary, quantity      |
+| **DATE, DATETIME, TIME**        | Order Preserving Encryption | Range queries & sorting | Yes (temporal comparison) | Birth dates, deadlines     |
+| **CHECKBOX_YES_NO**             | HMAC-SHA256                 | Exact match lookup      | Yes (exact match)         | Yes/No flags               |
+| **CHECKBOX_ONE, CHECKBOX_LIST** | HMAC-SHA256                 | Exact match lookup      | Yes (exact match)         | Multi-select options       |
+| **SELECT_ONE, SELECT_LIST**     | HMAC-SHA256                 | Exact match lookup      | Yes (exact match)         | Dropdown selections        |
+| **SELECT\_\*\_RECORD**          | None                        | Referential integrity   | Direct                    | Foreign keys               |
+| **SELECT\_\*\_WORKSPACE_USER**  | None                        | System functionality    | Direct                    | User references            |
 
 ## Detailed Encryption Algorithms
 
@@ -53,6 +55,7 @@ The Active Tables system implements a sophisticated multi-layered encryption arc
 **Purpose**: Maximum security for textual data with search capability
 
 #### Encryption Process
+
 ```php
 public static function encryptFieldData($string, $encryptionKey)
 {
@@ -78,6 +81,7 @@ public static function encryptFieldData($string, $encryptionKey)
 ```
 
 #### Decryption Process
+
 ```php
 public static function decryptFieldData($encryptedString, $encryptionKey)
 {
@@ -102,6 +106,7 @@ public static function decryptFieldData($encryptedString, $encryptionKey)
 ```
 
 #### Technical Specifications
+
 - **Algorithm**: AES-256-CBC
 - **Key Size**: 256 bits (32 bytes)
 - **Block Size**: 128 bits (16 bytes)
@@ -110,6 +115,7 @@ public static function decryptFieldData($encryptedString, $encryptionKey)
 - **Security Level**: High
 
 #### Keyword Hashing for Search
+
 ```php
 protected static function hashKeywords($keywords, $encryptionKey)
 {
@@ -139,6 +145,7 @@ Hashed Output: `["a1b2c3...", "d4e5f6...", "g7h8i9..."]`
 **Purpose**: Enable range queries and sorting on encrypted numerical/date data
 
 #### OPE Algorithm (Conceptual)
+
 ```php
 public static function opeEncryptFieldData($value, $encryptionKey)
 {
@@ -156,6 +163,7 @@ public static function opeEncryptFieldData($value, $encryptionKey)
 ```
 
 #### Key Properties
+
 - **Order Preservation**: `encrypt(a) < encrypt(b)` if `a < b`
 - **Range Queries**: Supports `BETWEEN`, `>`, `<`, `>=`, `<=`
 - **Indexable**: Database indexes work on encrypted values
@@ -163,6 +171,7 @@ public static function opeEncryptFieldData($value, $encryptionKey)
 - **Security Trade-off**: Less secure than AES but more functional
 
 #### Database Query Example
+
 ```sql
 -- Range query on encrypted age field
 SELECT * FROM active_records
@@ -175,6 +184,7 @@ ORDER BY JSON_UNQUOTE(JSON_EXTRACT(record, '$.birth_date')) DESC;
 ```
 
 #### Practical Example
+
 ```php
 // Age values with OPE encryption
 $ages = [18, 25, 30, 45, 60];
@@ -194,6 +204,7 @@ foreach ($ages as $age) {
 **Purpose**: One-way encryption for exact match lookups
 
 #### Hashing Algorithm
+
 ```php
 public static function hashFieldData($value, $encryptionKey, $single = false)
 {
@@ -214,6 +225,7 @@ public static function hashFieldData($value, $encryptionKey, $single = false)
 ```
 
 #### Technical Specifications
+
 - **Algorithm**: HMAC-SHA256
 - **Output Size**: 64 characters (256 bits)
 - **Output Format**: Hexadecimal string
@@ -224,6 +236,7 @@ public static function hashFieldData($value, $encryptionKey, $single = false)
   - Keyed (requires secret key)
 
 #### Single vs Multi-Select Fields
+
 ```php
 // Single select field (e.g., gender)
 $gender = 'Male';
@@ -241,12 +254,14 @@ $hashedSkills = self::hashFieldData($skills, $encryptionKey, false);
 **Purpose**: System functionality and referential integrity
 
 #### Unencrypted Field Types
+
 - **SELECT_ONE_RECORD**: Foreign key references to other records
 - **SELECT_LIST_RECORD**: Multiple foreign key references
 - **SELECT_ONE_WORKSPACE_USER**: User ID references
 - **SELECT_LIST_WORKSPACE_USER**: Multiple user ID references
 
 #### Rationale for No Encryption
+
 1. **Referential Integrity**: Database constraints require clear values
 2. **Index Performance**: Optimal query performance on indexes
 3. **System Functionality**: User management, permissions, workflows
@@ -257,6 +272,7 @@ $hashedSkills = self::hashFieldData($skills, $encryptionKey, false);
 ### Complete Record Processing Flow
 
 #### Step 1: Input Data Classification
+
 ```php
 // Example user input
 $recordData = [
@@ -272,6 +288,7 @@ $recordData = [
 ```
 
 #### Step 2: Encryption Processing
+
 ```php
 public static function processRecordData($recordData, $fields, $encryptionKey)
 {
@@ -327,6 +344,7 @@ public static function processRecordData($recordData, $fields, $encryptionKey)
 ```
 
 #### Step 3: Database Storage Structure
+
 ```sql
 CREATE TABLE active_records (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
@@ -346,6 +364,7 @@ CREATE TABLE active_records (
 ```
 
 #### Example Storage Format
+
 ```json
 {
   "id": 12345,
@@ -377,9 +396,11 @@ CREATE TABLE active_records (
 ### Dual Encryption Modes
 
 #### 1. End-to-End Encryption (E2EE)
+
 **Configuration**: `e2eeEncryption: true`
 
 **Key Management Flow**:
+
 ```php
 class E2EEKeyManager
 {
@@ -476,30 +497,33 @@ class E2EEKeyManager
 ```
 
 **Client-Side Storage Pattern**:
+
 ```javascript
 // Browser localStorage implementation
 class ClientKeyManager {
-    storeTableKey(workspaceId, tableId, encryptedKey) {
-        const key = `e2ee_key_${workspaceId}_${tableId}`;
-        localStorage.setItem(key, encryptedKey);
-    }
+  storeTableKey(workspaceId, tableId, encryptedKey) {
+    const key = `e2ee_key_${workspaceId}_${tableId}`;
+    localStorage.setItem(key, encryptedKey);
+  }
 
-    getTableKey(workspaceId, tableId) {
-        const key = `e2ee_key_${workspaceId}_${tableId}`;
-        return localStorage.getItem(key);
-    }
+  getTableKey(workspaceId, tableId) {
+    const key = `e2ee_key_${workspaceId}_${tableId}`;
+    return localStorage.getItem(key);
+  }
 
-    clearTableKey(workspaceId, tableId) {
-        const key = `e2ee_key_${workspaceId}_${tableId}`;
-        localStorage.removeItem(key);
-    }
+  clearTableKey(workspaceId, tableId) {
+    const key = `e2ee_key_${workspaceId}_${tableId}`;
+    localStorage.removeItem(key);
+  }
 }
 ```
 
 #### 2. Server-Side Encryption
+
 **Configuration**: `e2eeEncryption: false`
 
 **Key Storage**:
+
 ```sql
 CREATE TABLE workspace_table_keys (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
@@ -515,6 +539,7 @@ CREATE TABLE workspace_table_keys (
 ```
 
 **Key Management**:
+
 ```php
 class ServerKeyManager
 {
@@ -575,6 +600,7 @@ class ServerKeyManager
 ### Multi-Modal Search Architecture
 
 #### 1. Text Search on Encrypted Fields
+
 ```php
 class EncryptedTextSearch
 {
@@ -634,6 +660,7 @@ class EncryptedTextSearch
 ```
 
 #### 2. Range Queries on OPE Fields
+
 ```php
 class OPEFieldSearch
 {
@@ -699,6 +726,7 @@ class OPEFieldSearch
 ```
 
 #### 3. Exact Match on Hashed Fields
+
 ```php
 class HashedFieldSearch
 {
@@ -749,6 +777,7 @@ class HashedFieldSearch
 ```
 
 #### 4. Direct Search on Unencrypted Fields
+
 ```php
 class PlainFieldSearch
 {
@@ -792,6 +821,7 @@ class PlainFieldSearch
 ```
 
 ### Unified Search Interface
+
 ```php
 class UnifiedSearch
 {
@@ -881,6 +911,7 @@ class UnifiedSearch
 ### 1. Key Security
 
 #### Key Storage Protection
+
 ```php
 class SecurityManager
 {
@@ -937,6 +968,7 @@ class SecurityManager
 ### 2. Data Integrity
 
 #### Record Hashing
+
 ```php
 class DataIntegrity
 {
@@ -991,6 +1023,7 @@ class DataIntegrity
 ### 3. Access Control
 
 #### Field-Level Permissions
+
 ```php
 class FieldAccessControl
 {
@@ -1039,231 +1072,238 @@ class FieldAccessControl
 ### 1. React Implementation Considerations
 
 #### JavaScript Encryption Service
+
 ```javascript
 // services/encryptionService.js
 import CryptoJS from 'crypto-js';
 
 export class EncryptionService {
-    constructor() {
-        this.encryptionKey = null;
-        this.fieldTypes = {
-            encryptFields: ['SHORT_TEXT', 'TEXT', 'RICH_TEXT', 'EMAIL', 'URL'],
-            opeEncryptFields: ['INTEGER', 'NUMERIC', 'DATE', 'DATETIME', 'TIME'],
-            hashEncryptFields: ['CHECKBOX_YES_NO', 'CHECKBOX_ONE', 'CHECKBOX_LIST', 'SELECT_ONE', 'SELECT_LIST'],
-            noneEncryptFields: ['SELECT_ONE_RECORD', 'SELECT_LIST_RECORD', 'SELECT_ONE_WORKSPACE_USER', 'SELECT_LIST_WORKSPACE_USER']
-        };
-    }
+  constructor() {
+    this.encryptionKey = null;
+    this.fieldTypes = {
+      encryptFields: ['SHORT_TEXT', 'TEXT', 'RICH_TEXT', 'EMAIL', 'URL'],
+      opeEncryptFields: ['INTEGER', 'NUMERIC', 'DATE', 'DATETIME', 'TIME'],
+      hashEncryptFields: ['CHECKBOX_YES_NO', 'CHECKBOX_ONE', 'CHECKBOX_LIST', 'SELECT_ONE', 'SELECT_LIST'],
+      noneEncryptFields: [
+        'SELECT_ONE_RECORD',
+        'SELECT_LIST_RECORD',
+        'SELECT_ONE_WORKSPACE_USER',
+        'SELECT_LIST_WORKSPACE_USER',
+      ],
+    };
+  }
 
-    /**
-     * AES-256-CBC encryption (matching PHP implementation)
-     */
-    encryptFieldData(data, key) {
-        if (!data || !key) return data;
+  /**
+   * AES-256-CBC encryption (matching PHP implementation)
+   */
+  encryptFieldData(data, key) {
+    if (!data || !key) return data;
 
-        const iv = CryptoJS.lib.WordArray.random(16);
-        const encrypted = CryptoJS.AES.encrypt(data, key, {
-            iv: iv,
-            mode: CryptoJS.mode.CBC,
-            padding: CryptoJS.pad.Pkcs7
-        });
+    const iv = CryptoJS.lib.WordArray.random(16);
+    const encrypted = CryptoJS.AES.encrypt(data, key, {
+      iv: iv,
+      mode: CryptoJS.mode.CBC,
+      padding: CryptoJS.pad.Pkcs7,
+    });
 
-        // Prepend IV to encrypted data and base64 encode
-        return CryptoJS.enc.Base64.stringify(
-            iv.concat(encrypted.ciphertext)
-        );
-    }
+    // Prepend IV to encrypted data and base64 encode
+    return CryptoJS.enc.Base64.stringify(iv.concat(encrypted.ciphertext));
+  }
 
-    /**
-     * AES-256-CBC decryption
-     */
-    decryptFieldData(encryptedData, key) {
-        if (!encryptedData || !key) return encryptedData;
+  /**
+   * AES-256-CBC decryption
+   */
+  decryptFieldData(encryptedData, key) {
+    if (!encryptedData || !key) return encryptedData;
 
-        const combined = CryptoJS.enc.Base64.parse(encryptedData);
-        const iv = CryptoJS.lib.WordArray.create(combined.words.slice(0, 4));
-        const ciphertext = CryptoJS.lib.WordArray.create(combined.words.slice(4));
+    const combined = CryptoJS.enc.Base64.parse(encryptedData);
+    const iv = CryptoJS.lib.WordArray.create(combined.words.slice(0, 4));
+    const ciphertext = CryptoJS.lib.WordArray.create(combined.words.slice(4));
 
-        const decrypted = CryptoJS.AES.decrypt({ ciphertext: ciphertext }, key, {
-            iv: iv,
-            mode: CryptoJS.mode.CBC,
-            padding: CryptoJS.pad.Pkcs7
-        });
+    const decrypted = CryptoJS.AES.decrypt({ ciphertext: ciphertext }, key, {
+      iv: iv,
+      mode: CryptoJS.mode.CBC,
+      padding: CryptoJS.pad.Pkcs7,
+    });
 
-        return decrypted.toString(CryptoJS.enc.Utf8);
-    }
+    return decrypted.toString(CryptoJS.enc.Utf8);
+  }
 
-    /**
-     * HMAC-SHA256 hashing
-     */
-    hashFieldData(data, key) {
-        if (!data || !key) return data;
+  /**
+   * HMAC-SHA256 hashing
+   */
+  hashFieldData(data, key) {
+    if (!data || !key) return data;
 
-        const values = Array.isArray(data) ? data : [data];
-        const hashedValues = values.map(value =>
-            CryptoJS.HmacSHA256(value, key).toString()
-        );
+    const values = Array.isArray(data) ? data : [data];
+    const hashedValues = values.map((value) => CryptoJS.HmacSHA256(value, key).toString());
 
-        return values.length === 1 ? hashedValues[0] : JSON.stringify(hashedValues);
-    }
+    return values.length === 1 ? hashedValues[0] : JSON.stringify(hashedValues);
+  }
 
-    /**
-     * Order Preserving Encryption (simplified)
-     */
-    opeEncryptFieldData(value, key) {
-        // This needs to match the PHP OPE implementation exactly
-        // Implementation details depend on the specific OPE algorithm used
-        return this.implementOPE(value, key);
-    }
+  /**
+   * Order Preserving Encryption (simplified)
+   */
+  opeEncryptFieldData(value, key) {
+    // This needs to match the PHP OPE implementation exactly
+    // Implementation details depend on the specific OPE algorithm used
+    return this.implementOPE(value, key);
+  }
 
-    /**
-     * Generate searchable keyword hashes
-     */
-    hashKeywords(text, key) {
-        const tokens = this.tokenizeText(text);
-        const stopWords = ['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for'];
+  /**
+   * Generate searchable keyword hashes
+   */
+  hashKeywords(text, key) {
+    const tokens = this.tokenizeText(text);
+    const stopWords = ['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for'];
 
-        return tokens
-            .filter(token => token && !stopWords.includes(token.toLowerCase()))
-            .map(token => CryptoJS.HmacSHA256(token, key).toString());
-    }
+    return tokens
+      .filter((token) => token && !stopWords.includes(token.toLowerCase()))
+      .map((token) => CryptoJS.HmacSHA256(token, key).toString());
+  }
 
-    /**
-     * Tokenize text for search
-     */
-    tokenizeText(text) {
-        return text.split(/[\s,.;:!?\(\)\[\]{}"\'\/\\]+/)
-                   .filter(token => token.trim().length > 0);
-    }
+  /**
+   * Tokenize text for search
+   */
+  tokenizeText(text) {
+    return text.split(/[\s,.;:!?\(\)\[\]{}"\'\/\\]+/).filter((token) => token.trim().length > 0);
+  }
 }
 ```
 
 #### React Hook for Encryption
+
 ```javascript
 // hooks/useEncryption.js
 import { useState, useCallback } from 'react';
 import { EncryptionService } from '../services/encryptionService';
 
 export const useEncryption = (tableId) => {
-    const [encryptionService] = useState(() => new EncryptionService());
-    const [isKeyLoaded, setIsKeyLoaded] = useState(false);
-    const [encryptionKey, setEncryptionKey] = useState(null);
+  const [encryptionService] = useState(() => new EncryptionService());
+  const [isKeyLoaded, setIsKeyLoaded] = useState(false);
+  const [encryptionKey, setEncryptionKey] = useState(null);
 
-    /**
-     * Setup encryption for table
-     */
-    const setupEncryption = useCallback(async (userPassword, workspaceId) => {
-        try {
-            // Try to get stored key
-            const storedKey = await getStoredTableKey(workspaceId, tableId);
+  /**
+   * Setup encryption for table
+   */
+  const setupEncryption = useCallback(
+    async (userPassword, workspaceId) => {
+      try {
+        // Try to get stored key
+        const storedKey = await getStoredTableKey(workspaceId, tableId);
 
-            if (storedKey) {
-                // Validate and decrypt stored key
-                const authKey = sha256(sha256(sha256(userPassword)));
-                const isValid = await validateStoredKey(storedKey, authKey);
+        if (storedKey) {
+          // Validate and decrypt stored key
+          const authKey = sha256(sha256(sha256(userPassword)));
+          const isValid = await validateStoredKey(storedKey, authKey);
 
-                if (isValid) {
-                    const key = await decryptStoredKey(storedKey, authKey);
-                    setEncryptionKey(key);
-                    encryptionService.encryptionKey = key;
-                    setIsKeyLoaded(true);
-                    return true;
-                }
-            }
-
-            return false;
-        } catch (error) {
-            console.error('Encryption setup failed:', error);
-            return false;
+          if (isValid) {
+            const key = await decryptStoredKey(storedKey, authKey);
+            setEncryptionKey(key);
+            encryptionService.encryptionKey = key;
+            setIsKeyLoaded(true);
+            return true;
+          }
         }
-    }, [tableId, encryptionService]);
 
-    /**
-     * Encrypt complete record
-     */
-    const encryptRecord = useCallback((recordData, fields) => {
-        if (!encryptionKey) throw new Error('Encryption key not loaded');
+        return false;
+      } catch (error) {
+        console.error('Encryption setup failed:', error);
+        return false;
+      }
+    },
+    [tableId, encryptionService],
+  );
 
-        const encryptedRecord = { record: {} };
-        const hashedKeywords = {};
+  /**
+   * Encrypt complete record
+   */
+  const encryptRecord = useCallback(
+    (recordData, fields) => {
+      if (!encryptionKey) throw new Error('Encryption key not loaded');
 
-        fields.forEach(field => {
-            const rawValue = recordData[field.name];
-            if (rawValue !== undefined && rawValue !== null) {
-                const fieldType = getFieldTypeEncryptionType(field.type);
+      const encryptedRecord = { record: {} };
+      const hashedKeywords = {};
 
-                switch (fieldType) {
-                    case 'encrypt':
-                        encryptedRecord.record[field.name] =
-                            encryptionService.encryptFieldData(rawValue, encryptionKey);
-                        hashedKeywords[field.name] =
-                            encryptionService.hashKeywords(String(rawValue), encryptionKey);
-                        break;
+      fields.forEach((field) => {
+        const rawValue = recordData[field.name];
+        if (rawValue !== undefined && rawValue !== null) {
+          const fieldType = getFieldTypeEncryptionType(field.type);
 
-                    case 'ope':
-                        encryptedRecord.record[field.name] =
-                            encryptionService.opeEncryptFieldData(rawValue, encryptionKey);
-                        break;
+          switch (fieldType) {
+            case 'encrypt':
+              encryptedRecord.record[field.name] = encryptionService.encryptFieldData(rawValue, encryptionKey);
+              hashedKeywords[field.name] = encryptionService.hashKeywords(String(rawValue), encryptionKey);
+              break;
 
-                    case 'hash':
-                        encryptedRecord.record[field.name] =
-                            encryptionService.hashFieldData(rawValue, encryptionKey);
-                        break;
+            case 'ope':
+              encryptedRecord.record[field.name] = encryptionService.opeEncryptFieldData(rawValue, encryptionKey);
+              break;
 
-                    case 'none':
-                        encryptedRecord.record[field.name] = rawValue;
-                        break;
-                }
-            }
-        });
+            case 'hash':
+              encryptedRecord.record[field.name] = encryptionService.hashFieldData(rawValue, encryptionKey);
+              break;
 
-        // Generate record hashes
-        const recordHashes = generateRecordHashes(encryptedRecord.record, fields, encryptionKey);
+            case 'none':
+              encryptedRecord.record[field.name] = rawValue;
+              break;
+          }
+        }
+      });
 
-        return {
-            encryptedRecord,
-            hashedKeywords,
-            recordHashes
-        };
-    }, [encryptionKey, encryptionService]);
+      // Generate record hashes
+      const recordHashes = generateRecordHashes(encryptedRecord.record, fields, encryptionKey);
 
-    /**
-     * Decrypt record for display
-     */
-    const decryptRecord = useCallback((encryptedRecord, fields) => {
-        if (!encryptionKey) throw new Error('Encryption key not loaded');
+      return {
+        encryptedRecord,
+        hashedKeywords,
+        recordHashes,
+      };
+    },
+    [encryptionKey, encryptionService],
+  );
 
-        const decryptedRecord = { ...encryptedRecord };
-        decryptedRecord.record = { ...encryptedRecord.record };
+  /**
+   * Decrypt record for display
+   */
+  const decryptRecord = useCallback(
+    (encryptedRecord, fields) => {
+      if (!encryptionKey) throw new Error('Encryption key not loaded');
 
-        fields.forEach(field => {
-            const encryptedValue = encryptedRecord.record[field.name];
-            if (encryptedValue !== undefined && encryptedValue !== null) {
-                const fieldType = getFieldTypeEncryptionType(field.type);
+      const decryptedRecord = { ...encryptedRecord };
+      decryptedRecord.record = { ...encryptedRecord.record };
 
-                if (fieldType === 'encrypt') {
-                    decryptedRecord.record[field.name] =
-                        encryptionService.decryptFieldData(encryptedValue, encryptionKey);
-                }
-                // Hash and OPE fields remain encrypted in display
-                // Reference fields are already plain
-            }
-        });
+      fields.forEach((field) => {
+        const encryptedValue = encryptedRecord.record[field.name];
+        if (encryptedValue !== undefined && encryptedValue !== null) {
+          const fieldType = getFieldTypeEncryptionType(field.type);
 
-        return decryptedRecord;
-    }, [encryptionKey, encryptionService]);
+          if (fieldType === 'encrypt') {
+            decryptedRecord.record[field.name] = encryptionService.decryptFieldData(encryptedValue, encryptionKey);
+          }
+          // Hash and OPE fields remain encrypted in display
+          // Reference fields are already plain
+        }
+      });
 
-    return {
-        isKeyLoaded,
-        setupEncryption,
-        encryptRecord,
-        decryptRecord
-    };
+      return decryptedRecord;
+    },
+    [encryptionKey, encryptionService],
+  );
+
+  return {
+    isKeyLoaded,
+    setupEncryption,
+    encryptRecord,
+    decryptRecord,
+  };
 };
 ```
 
 ### 2. Migration Strategy
 
 #### Data Validation Checklist
+
 ```php
 class MigrationValidator
 {

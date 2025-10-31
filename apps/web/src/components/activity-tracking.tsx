@@ -3,7 +3,7 @@ import { Button } from '@workspace/ui/components/button';
 import { Badge } from '@workspace/ui/components/badge';
 import { Clock, Database, Workflow, FileText, X, TrendingUp, Activity } from 'lucide-react';
 // @ts-ignore
-import { m } from "@/paraglide/generated/messages.js";
+import { m } from '@/paraglide/generated/messages.js';
 import { useSidebarStore, selectRecentItems, selectCurrentWorkspace } from '@/stores/sidebar-store';
 import type { RecentItem } from '@/stores/sidebar-store';
 

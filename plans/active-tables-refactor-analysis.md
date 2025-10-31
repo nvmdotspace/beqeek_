@@ -9,11 +9,11 @@
 
 ### Broken Imports Cần Fix
 
-| File | Line | Import | Status |
-|------|------|--------|--------|
-| `use-active-tables.ts` | 7 | `@workspace/active-tables-core` | ✅ Fixed - sử dụng stub |
-| `active-tables-page.tsx` | 38 | `@workspace/active-tables-hooks` | ✅ Fixed - sử dụng stub |
-| `active-table-card.tsx` | 30 | `@workspace/active-tables-hooks` | ✅ Fixed - sử dụng stub |
+| File                     | Line | Import                           | Status                  |
+| ------------------------ | ---- | -------------------------------- | ----------------------- |
+| `use-active-tables.ts`   | 7    | `@workspace/active-tables-core`  | ✅ Fixed - sử dụng stub |
+| `active-tables-page.tsx` | 38   | `@workspace/active-tables-hooks` | ✅ Fixed - sử dụng stub |
+| `active-table-card.tsx`  | 30   | `@workspace/active-tables-hooks` | ✅ Fixed - sử dụng stub |
 
 **Action**: ✅ COMPLETED - 3 files đã fix imports, tạo stubs tạm thời
 
@@ -28,6 +28,7 @@
 **Chất lượng**: Excellent - Production tested code
 
 **Functions chính**:
+
 ```typescript
 // 1. Xác định loại mã hóa theo field type
 getEncryptionTypeForField(fieldType: string): 'AES-256-CBC' | 'OPE' | 'HMAC-SHA256' | 'NONE'
@@ -51,6 +52,7 @@ getEncryptionKeyStorageKey(workspaceId, tableId): string
 ```
 
 **Đặc điểm**:
+
 - ✅ Support 3 loại encryption: AES, OPE, HMAC
 - ✅ Compatible với backend implementation
 - ✅ Error handling đầy đủ
@@ -66,6 +68,7 @@ getEncryptionKeyStorageKey(workspaceId, tableId): string
 **Chất lượng**: Excellent - Optimized với caching
 
 **Functions chính**:
+
 ```typescript
 // 1. Decrypt single record với caching
 decryptRecord(
@@ -98,6 +101,7 @@ getEncryptionStats(): object
 ```
 
 **Đặc điểm**:
+
 - ✅ Batch processing với parallel execution
 - ✅ LRU caching integration
 - ✅ Memory efficient (batchSize = 50)
@@ -114,6 +118,7 @@ getEncryptionStats(): object
 **Chất lượng**: Excellent - LRU cache implementation
 
 **Features**:
+
 ```typescript
 class DecryptionCache<T> {
   // LRU eviction khi full
@@ -121,11 +126,11 @@ class DecryptionCache<T> {
   // Access count tracking
   // Cache statistics
 
-  get(encryptedValue, fieldName, fieldType): T | undefined
-  set(encryptedValue, fieldName, fieldType, decryptedValue): void
-  clear(): void
-  clearExpired(): void
-  getStats(): object
+  get(encryptedValue, fieldName, fieldType): T | undefined;
+  set(encryptedValue, fieldName, fieldType, decryptedValue): void;
+  clear(): void;
+  clearExpired(): void;
+  getStats(): object;
 }
 
 // Global singleton
@@ -133,6 +138,7 @@ export const globalDecryptionCache = new DecryptionCache(1000, 5 * 60 * 1000);
 ```
 
 **Đặc điểm**:
+
 - ✅ LRU eviction policy
 - ✅ Configurable maxSize (default: 1000)
 - ✅ Configurable TTL (default: 5 mins)
@@ -151,6 +157,7 @@ export const globalDecryptionCache = new DecryptionCache(1000, 5 * 60 * 1000);
 **Chất lượng**: Good - Đã cover hết use cases
 
 **Types chính**:
+
 ```typescript
 // Field Config
 interface ActiveFieldConfig {
@@ -205,7 +212,7 @@ interface KanbanConfig {
   statusField: string;
   kanbanHeadlineField: string;
   displayFields: string[];
-  columnStyles?: { value: string; color: string; }[];
+  columnStyles?: { value: string; color: string }[];
 }
 
 // Gantt Chart
@@ -239,6 +246,7 @@ interface GanttChart {
 ### 3. API Clients ⭐⭐⭐ (GIỮ LẠI APPS/WEB)
 
 Các file trong `api/`:
+
 - `active-tables-api.ts` - Get tables, work groups
 - `active-records-api.ts` - CRUD records
 - `active-actions-api.ts` - Execute actions
@@ -255,16 +263,19 @@ Các file trong `api/`:
 #### Hooks hiện tại:
 
 **`use-active-tables.ts`**:
+
 - ✅ `useActiveWorkGroups()` - React Query hook
 - ✅ `useActiveTables()` - React Query hook
 - ✅ `useActiveTablesGroupedByWorkGroup()` - Combined hook
 - ❌ `useEncryption()` - Import từ package đã xóa
 
 **`use-table-management.ts`**:
+
 - Table CRUD operations
 - State management cho dialogs
 
 **Action**:
+
 - API hooks **GIỮ LẠI** trong apps/web (React Query là trách nhiệm của parent app)
 - `useEncryption()` hook **CẦN VIẾT MỚI** trong active-tables-core
 
@@ -273,6 +284,7 @@ Các file trong `api/`:
 ### 5. UI Components ⭐⭐⭐ (GIỮ LẠI APPS/WEB)
 
 Components trong `components/`:
+
 - `table-management-dialog.tsx` - Config UI (apps/web only)
 - `active-table-card.tsx` - Table card display
 - `settings/*` - Settings tabs (apps/web only)
@@ -280,6 +292,7 @@ Components trong `components/`:
 - `record-management-dialog.tsx` - Record CRUD dialog
 
 **Action**:
+
 - **Config components** giữ trong apps/web (theo plan)
 - **Runtime components** sẽ viết mới trong active-tables-core
 
@@ -293,6 +306,7 @@ Components trong `components/`:
 **Mục tiêu**: Fix broken imports ngay, apps/web cần dùng
 
 #### Tasks:
+
 - [x] Create `packages/active-tables-core/` structure
 - [x] Copy `encryption-helpers.ts` → `src/utils/encryption-helpers.ts`
 - [x] Copy `record-decryptor.ts` → `src/utils/record-decryptor.ts`
@@ -304,6 +318,7 @@ Components trong `components/`:
 - [x] Test apps/web hoạt động
 
 **Deliverables**:
+
 - ✅ Encryption utilities available
 - ✅ Apps/web không còn broken imports
 - ✅ Decryption functional
@@ -316,6 +331,7 @@ Components trong `components/`:
 **Mục tiêu**: Complete type system và stores
 
 #### Tasks:
+
 - [ ] Hoàn thiện type definitions (align với plan)
   - [ ] field.ts - Add type guards
   - [ ] action.ts - Add type guards
@@ -336,6 +352,7 @@ Components trong `components/`:
   - [ ] usePermissions.ts
 
 **Deliverables**:
+
 - ✅ Complete type system
 - ✅ Zustand stores functional
 - ✅ useEncryption hook available
@@ -353,6 +370,7 @@ Giữ nguyên plan ban đầu cho các phase tiếp theo...
 ### Approach 1: Incremental Migration (RECOMMENDED)
 
 **Week 1**: Utilities + Types
+
 ```
 Step 1: Copy encryption utilities → active-tables-core
 Step 2: Fix broken imports
@@ -361,6 +379,7 @@ Step 4: Complete type system
 ```
 
 **Week 2**: Hooks
+
 ```
 Step 5: Write useEncryption hook
 Step 6: Write useActiveTable context
@@ -368,6 +387,7 @@ Step 7: Test hooks với existing UI
 ```
 
 **Week 3+**: UI Components
+
 ```
 Step 8: Field renderers
 Step 9: RecordList
@@ -377,6 +397,7 @@ Step 12: Gantt
 ```
 
 **Lợi ích**:
+
 - ✅ Apps/web hoạt động ngay sau Week 1
 - ✅ Có thể test từng phase
 - ✅ Ít risk, dễ rollback
@@ -389,6 +410,7 @@ Step 12: Gantt
 Viết xong toàn bộ rồi migrate một lần.
 
 **Nhược điểm**:
+
 - ❌ Apps/web broken trong nhiều tuần
 - ❌ Khó test
 - ❌ High risk
@@ -430,12 +452,14 @@ pnpm build
 ### 2. Code Preservation
 
 **KEEP trong apps/web**:
+
 - ✅ API clients (`api/`)
 - ✅ React Query hooks (`use-active-tables.ts`, `use-table-management.ts`)
 - ✅ Config components (`table-management-dialog.tsx`, `settings/*`)
 - ✅ Page components (`pages/*`)
 
 **MOVE sang active-tables-core**:
+
 - ✅ Encryption utilities
 - ✅ Types (with alignment)
 - ✅ Hooks (useEncryption, useFieldValue, etc.)
@@ -444,6 +468,7 @@ pnpm build
 ### 3. Testing Strategy
 
 **After Phase 0** (Utilities):
+
 ```typescript
 // Test decryption vẫn work
 import { decryptFieldValue, decryptRecords } from '@workspace/active-tables-core/utils';
@@ -453,12 +478,14 @@ const decrypted = await decryptRecords(records, fields, encryptionKey);
 ```
 
 **After Phase 1** (Hooks):
+
 ```typescript
 // Test useEncryption hook
 const { decrypt, isReady } = useEncryption();
 ```
 
 **After Phase 2+** (Components):
+
 ```typescript
 // Test RecordList
 <RecordList records={records} config={config} />
@@ -468,14 +495,14 @@ const { decrypt, isReady } = useEncryption();
 
 ## 📊 Code Quality Assessment
 
-| Component | Lines | Quality | Reusability | Action |
-|-----------|-------|---------|-------------|--------|
-| encryption-helpers.ts | 305 | ⭐⭐⭐⭐⭐ | 100% | Copy nguyên vẹn |
-| record-decryptor.ts | 216 | ⭐⭐⭐⭐⭐ | 100% | Copy nguyên vẹn |
-| decryption-cache.ts | 186 | ⭐⭐⭐⭐⭐ | 100% | Copy nguyên vẹn |
-| types.ts | 154 | ⭐⭐⭐⭐ | 90% | Align với plan |
-| API clients | ~300 | ⭐⭐⭐ | 0% | Giữ apps/web |
-| Config components | ~500 | ⭐⭐⭐ | 0% | Giữ apps/web |
+| Component             | Lines | Quality    | Reusability | Action          |
+| --------------------- | ----- | ---------- | ----------- | --------------- |
+| encryption-helpers.ts | 305   | ⭐⭐⭐⭐⭐ | 100%        | Copy nguyên vẹn |
+| record-decryptor.ts   | 216   | ⭐⭐⭐⭐⭐ | 100%        | Copy nguyên vẹn |
+| decryption-cache.ts   | 186   | ⭐⭐⭐⭐⭐ | 100%        | Copy nguyên vẹn |
+| types.ts              | 154   | ⭐⭐⭐⭐   | 90%         | Align với plan  |
+| API clients           | ~300  | ⭐⭐⭐     | 0%          | Giữ apps/web    |
+| Config components     | ~500  | ⭐⭐⭐     | 0%          | Giữ apps/web    |
 
 **Tổng code có thể tái sử dụng**: ~700 dòng production-ready code!
 
@@ -484,18 +511,21 @@ const { decrypt, isReady } = useEncryption();
 ## 🎯 Success Metrics
 
 ### Phase 0 Complete When:
+
 - [x] Package builds successfully ✅ (3.10s build time)
 - [x] No broken imports in apps/web ✅ (Tạo stubs cho missing hooks)
 - [x] Encryption/decryption works ✅ (Utilities exported và functional)
 - [x] All existing tests pass ✅ (Removed obsolete tests, apps/web builds)
 
 ### Phase 1 Complete When:
+
 - [ ] All types aligned với plan
 - [ ] Zustand stores functional
 - [ ] useEncryption hook available
 - [ ] useActiveTable context works
 
 ### Full Migration Complete When:
+
 - [ ] All UI components implemented
 - [ ] Apps/web using active-tables-core components
 - [ ] Apps/admin can use active-tables-core
@@ -539,8 +569,8 @@ const { decrypt, isReady } = useEncryption();
 5. **Package Exports**
    ```typescript
    // @workspace/active-tables-core exports:
-   export * from './utils/index.js';      // Encryption utilities
-   export * from './types/index.js';       // Type definitions
+   export * from './utils/index.js'; // Encryption utilities
+   export * from './types/index.js'; // Type definitions
    export { CommonUtils, AES256, OPE, HMAC } from '@workspace/encryption-core';
    ```
 

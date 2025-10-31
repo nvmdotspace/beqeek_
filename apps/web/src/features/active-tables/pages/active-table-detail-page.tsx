@@ -1,9 +1,20 @@
 import { useMemo, useState, useEffect } from 'react';
-import { ArrowLeft, ShieldCheck, Shield, Link as LinkIcon, ListTree, Lock, Database, Settings2, Hash, AlertTriangle } from 'lucide-react';
+import {
+  ArrowLeft,
+  ShieldCheck,
+  Shield,
+  Link as LinkIcon,
+  ListTree,
+  Lock,
+  Database,
+  Settings2,
+  Hash,
+  AlertTriangle,
+} from 'lucide-react';
 import { getRouteApi } from '@tanstack/react-router';
 
 // @ts-ignore
-import { m } from "@/paraglide/generated/messages.js";
+import { m } from '@/paraglide/generated/messages.js';
 import { useActiveTable, useActiveWorkGroups } from '../hooks/use-active-tables';
 import type { ActiveFieldConfig, ActiveTable, ActiveWorkGroup } from '../types';
 import { useTableEncryption } from '../hooks/use-table-encryption';
@@ -99,7 +110,7 @@ const LoadingState = () => (
 );
 
 const NotFoundState = ({ onBack }: { onBack: () => void }) => {
-    return (
+  return (
     <Card className="border-destructive/40 bg-destructive/10">
       <CardHeader>
         <CardTitle className="text-destructive">{m.activeTables_detail_notFoundTitle()}</CardTitle>
@@ -115,10 +126,7 @@ const NotFoundState = ({ onBack }: { onBack: () => void }) => {
   );
 };
 
-const useActiveTableDetail = (
-  table: ActiveTable | undefined,
-  workGroups: ActiveWorkGroup[] | undefined,
-) => {
+const useActiveTableDetail = (table: ActiveTable | undefined, workGroups: ActiveWorkGroup[] | undefined) => {
   return useMemo(() => {
     if (!table) {
       return { table: undefined, workGroup: undefined };
@@ -282,11 +290,7 @@ export const ActiveTableDetailPage = () => {
         </div>
       </div>
 
-      <EncryptionStatusCard
-        table={table}
-        encryption={encryption}
-        onEnterKey={() => setIsEncryptionModalOpen(true)}
-      />
+      <EncryptionStatusCard table={table} encryption={encryption} onEnterKey={() => setIsEncryptionModalOpen(true)} />
 
       <EncryptionTypeBreakdown
         fields={table.config?.fields ?? []}
@@ -303,11 +307,7 @@ export const ActiveTableDetailPage = () => {
         </div>
         <div className="grid gap-4 md:grid-cols-2">
           {table.config?.fields?.map((field) => (
-            <FieldSummary
-              key={field.name}
-              field={field}
-              isE2EEEnabled={encryption.isE2EEEnabled}
-            />
+            <FieldSummary key={field.name} field={field} isE2EEEnabled={encryption.isE2EEEnabled} />
           ))}
         </div>
       </section>

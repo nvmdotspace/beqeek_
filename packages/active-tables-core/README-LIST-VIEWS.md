@@ -33,12 +33,13 @@ import { RecordList } from '@workspace/active-tables-core';
     noRecordsFound: 'Không tìm thấy bản ghi',
     error: 'Lỗi tải dữ liệu',
   }}
-/>
+/>;
 ```
 
 ### 2. HeadColumnLayout (Card View)
 
 Mobile-optimized card-based layout with:
+
 - Title field (prominent display)
 - Subline fields (status badges, metadata)
 - Tail fields (additional info at bottom)
@@ -46,11 +47,13 @@ Mobile-optimized card-based layout with:
 - Click handlers
 
 **Best for:**
+
 - Mobile applications
 - Kanban-style views
 - Quick scanning of records
 
 **Features:**
+
 - ✅ Responsive design
 - ✅ Touch-friendly
 - ✅ Visual hierarchy
@@ -60,17 +63,20 @@ Mobile-optimized card-based layout with:
 ### 3. GenericTableLayout (Table View)
 
 Powerful table layout using TanStack Table with:
+
 - Sortable columns
 - Row selection
 - Column visibility
 - Responsive scrolling
 
 **Best for:**
+
 - Desktop applications
 - Data-heavy views
 - Analysis and reporting
 
 **Features:**
+
 - ✅ TanStack Table v8
 - ✅ Sortable columns (click header)
 - ✅ Bulk selection
@@ -81,15 +87,13 @@ Powerful table layout using TanStack Table with:
 ### 4. State Components
 
 #### EmptyState
+
 ```tsx
-<EmptyState
-  message="No records found"
-  description="Try adjusting your filters"
-  action={<button>Create New</button>}
-/>
+<EmptyState message="No records found" description="Try adjusting your filters" action={<button>Create New</button>} />
 ```
 
 #### LoadingState
+
 ```tsx
 <LoadingState
   message="Loading..."
@@ -99,13 +103,9 @@ Powerful table layout using TanStack Table with:
 ```
 
 #### ErrorState
+
 ```tsx
-<ErrorState
-  message="Failed to load"
-  details={error.message}
-  onRetry={refetch}
-  retryText="Try again"
-/>
+<ErrorState message="Failed to load" details={error.message} onRetry={refetch} retryText="Try again" />
 ```
 
 ## Configuration
@@ -143,24 +143,24 @@ interface RecordListConfig {
 
 ### RecordListProps
 
-| Prop | Type | Required | Description |
-|------|------|----------|-------------|
-| `table` | `Table` | ✅ | Table metadata and configuration |
-| `records` | `TableRecord[]` | ✅ | Array of records to display |
-| `config` | `RecordListConfig` | ✅ | Layout configuration |
-| `loading` | `boolean` | ❌ | Loading state |
-| `error` | `Error \| string` | ❌ | Error state |
-| `currentUser` | `CurrentUser` | ❌ | Current user for permissions |
-| `workspaceUsers` | `WorkspaceUser[]` | ❌ | Users for user fields |
-| `messages` | `Partial<ActiveTablesMessages>` | ❌ | i18n messages |
-| `encryptionKey` | `string` | ❌ | E2EE key for encrypted tables |
-| `onRecordClick` | `(record) => void` | ❌ | Record click handler |
-| `onSelectionChange` | `(ids) => void` | ❌ | Selection change handler |
-| `enableSelection` | `boolean` | ❌ | Enable bulk selection |
-| `selectedIds` | `string[]` | ❌ | Selected record IDs |
-| `enableSorting` | `boolean` | ❌ | Enable sorting |
-| `enableFiltering` | `boolean` | ❌ | Enable filtering |
-| `className` | `string` | ❌ | Additional CSS classes |
+| Prop                | Type                            | Required | Description                      |
+| ------------------- | ------------------------------- | -------- | -------------------------------- |
+| `table`             | `Table`                         | ✅       | Table metadata and configuration |
+| `records`           | `TableRecord[]`                 | ✅       | Array of records to display      |
+| `config`            | `RecordListConfig`              | ✅       | Layout configuration             |
+| `loading`           | `boolean`                       | ❌       | Loading state                    |
+| `error`             | `Error \| string`               | ❌       | Error state                      |
+| `currentUser`       | `CurrentUser`                   | ❌       | Current user for permissions     |
+| `workspaceUsers`    | `WorkspaceUser[]`               | ❌       | Users for user fields            |
+| `messages`          | `Partial<ActiveTablesMessages>` | ❌       | i18n messages                    |
+| `encryptionKey`     | `string`                        | ❌       | E2EE key for encrypted tables    |
+| `onRecordClick`     | `(record) => void`              | ❌       | Record click handler             |
+| `onSelectionChange` | `(ids) => void`                 | ❌       | Selection change handler         |
+| `enableSelection`   | `boolean`                       | ❌       | Enable bulk selection            |
+| `selectedIds`       | `string[]`                      | ❌       | Selected record IDs              |
+| `enableSorting`     | `boolean`                       | ❌       | Enable sorting                   |
+| `enableFiltering`   | `boolean`                       | ❌       | Enable filtering                 |
+| `className`         | `string`                        | ❌       | Additional CSS classes           |
 
 ## Usage Examples
 
@@ -212,9 +212,7 @@ function DataTable() {
 
       {selectedIds.length > 0 && (
         <div className="fixed bottom-4 left-4">
-          <button onClick={() => bulkDelete(selectedIds)}>
-            Delete {selectedIds.length} selected
-          </button>
+          <button onClick={() => bulkDelete(selectedIds)}>Delete {selectedIds.length} selected</button>
         </div>
       )}
     </div>
@@ -268,12 +266,12 @@ function VietnameseList() {
 
 The RecordList component automatically selects the layout based on `config.layout`:
 
-| Config Value | Component | Best For |
-|--------------|-----------|----------|
-| `'head-column'` | HeadColumnLayout | Mobile, cards, visual scanning |
-| `'card'` | HeadColumnLayout | Same as above |
-| `'table'` | GenericTableLayout | Desktop, data analysis |
-| `'generic-table'` | GenericTableLayout | Same as above |
+| Config Value      | Component          | Best For                       |
+| ----------------- | ------------------ | ------------------------------ |
+| `'head-column'`   | HeadColumnLayout   | Mobile, cards, visual scanning |
+| `'card'`          | HeadColumnLayout   | Same as above                  |
+| `'table'`         | GenericTableLayout | Desktop, data analysis         |
+| `'generic-table'` | GenericTableLayout | Same as above                  |
 
 ## Styling
 
@@ -307,30 +305,36 @@ All components use TailwindCSS classes and follow the design system:
 ### Optimization Tips
 
 1. **Memoize handlers**:
+
 ```tsx
-const handleClick = useCallback((record) => {
-  navigate(`/records/${record.id}`);
-}, [navigate]);
+const handleClick = useCallback(
+  (record) => {
+    navigate(`/records/${record.id}`);
+  },
+  [navigate],
+);
 ```
 
 2. **Lazy load large lists**:
+
 ```tsx
 import { Suspense } from 'react';
 
 <Suspense fallback={<LoadingState />}>
   <RecordList {...props} />
-</Suspense>
+</Suspense>;
 ```
 
 3. **Virtual scrolling** (for 1000+ records):
-Consider using `@tanstack/react-virtual` with GenericTableLayout
+   Consider using `@tanstack/react-virtual` with GenericTableLayout
 
 4. **Pagination**:
-Implement server-side pagination for very large datasets
+   Implement server-side pagination for very large datasets
 
 ## Accessibility
 
 All components include:
+
 - ✅ Proper ARIA labels
 - ✅ Keyboard navigation
 - ✅ Focus management
@@ -362,6 +366,7 @@ All components include:
 ### Records not displaying
 
 **Check:**
+
 1. `config.titleField` matches an existing field
 2. Records array is not empty
 3. Field configs exist in `table.config.fields`
@@ -369,12 +374,14 @@ All components include:
 ### Sorting not working
 
 **Ensure:**
+
 - Columns have `enableSorting: true`
 - Click on table headers (not just the text)
 
 ### Selection not working
 
 **Verify:**
+
 - `enableSelection={true}` is set
 - `onSelectionChange` callback is provided
 - `selectedIds` state is managed properly
@@ -382,6 +389,7 @@ All components include:
 ### Decryption failing
 
 **Check:**
+
 - `encryptionKey` is provided
 - Table has `e2eeEncryption: true`
 - Key is 32 characters
