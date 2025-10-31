@@ -38,11 +38,11 @@ const formatStatusLabel = (tableType?: string) => {
 
 export const ActiveTablesPage = () => {
   const navigate = useNavigate();
-  const params = useParams({ strict: false });
+  const params = useParams({ from: '/$locale/workspaces/$workspaceId/tables' });
   const locale = useCurrentLocale();
 
   // Extract workspaceId from URL params - this is now the source of truth
-  const workspaceId = (params as any).workspaceId || '';
+  const workspaceId = params.workspaceId;
 
   // Also sync with Zustand store for backward compatibility
   const currentWorkspace = useSidebarStore(selectCurrentWorkspace);

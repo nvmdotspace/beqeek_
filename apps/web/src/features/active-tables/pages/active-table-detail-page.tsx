@@ -129,13 +129,13 @@ const useActiveTableDetail = (
 };
 
 export const ActiveTableDetailPage = () => {
-  const params = useParams({ strict: false });
+  const params = useParams({ from: '/$locale/workspaces/$workspaceId/tables/$tableId' });
   const navigate = useNavigate();
   const locale = useCurrentLocale();
 
   // Extract params from URL - these are now the source of truth
-  const tableId = (params as any).tableId as string;
-  const workspaceId = (params as any).workspaceId as string;
+  const tableId = params.tableId;
+  const workspaceId = params.workspaceId;
 
   // Fetch only the specific table instead of all tables
   const { data: tableResp, isLoading: tableLoading, error: tableError } = useActiveTable(workspaceId, tableId);

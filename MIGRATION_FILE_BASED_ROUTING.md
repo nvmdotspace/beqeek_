@@ -144,6 +144,60 @@ The `workspaces.tsx` route was rendering `WorkspaceDashboardPage` directly inste
 - ✅ `/vi/workspaces/732878538910205329/tables` → Shows Active Tables page
 - ✅ API calls: `get/active_work_groups` and `get/active_tables` are called correctly
 
+## Post-Migration Fix #2: Navigation Buttons in Table Cards
+
+### Issue Found
+After migration, navigation buttons in Active Table cards ("Open Records", "Xem chi tiết", "Comments", "Automations") were not working when clicked.
+
+### Root Cause
+In `active-tables-page.tsx`, the `workspaceId` was being extracted incorrectly:
+
+**Before (BROKEN)**:
+```typescript
+const params = useParams({ strict: false });
+const workspaceId = (params as any).workspaceId || '';
+```
+
+Problems:
+- `useParams({ strict: false })` doesn't guarantee correct params in file-based routing
+- Type assertion `(params as any)` bypasses type safety
+- Fallback to empty string `''` causes handlers to check `if (!workspaceId) return;` and exit early
+- Navigation buttons appeared to do nothing
+
+### Solution
+Use route-specific params with `from` option for type-safe extraction:
+
+**After (FIXED)**:
+```typescript
+const params = useParams({ from: '/$locale/workspaces/$workspaceId/tables' });
+const workspaceId = params.workspaceId;
+```
+
+Benefits:
+- ✅ Type-safe: TypeScript knows exact params structure
+- ✅ Guaranteed: `workspaceId` always has value (or route doesn't match)
+- ✅ Explicit: Clear which route provides params
+- ✅ No fallbacks needed: Route matching ensures params exist
+
+### Files Changed
+- `apps/web/src/features/active-tables/pages/active-tables-page.tsx` (line 41-45)
+- `apps/web/src/features/active-tables/pages/active-table-detail-page.tsx` (line 132-138)
+- `apps/web/src/features/active-tables/pages/active-table-records-page.tsx` (line 35-41)
+- `apps/web/src/features/active-tables/pages/active-table-settings-page.tsx` (line 26-32)
+
+### Verification
+1. Navigate to `/vi/workspaces/732878538910205329/tables`
+2. Click "Open Records" → Should navigate to `/tables/{tableId}/records`
+3. Click "Xem chi tiết" → Should navigate to `/tables/{tableId}`
+4. Click "Comments" → Should navigate to `/tables/{tableId}/records`
+5. Click "Automations" → Should navigate to `/tables/{tableId}`
+6. On table detail page, click "Open Records" → Should navigate to `/tables/{tableId}/records`
+7. On table detail page, click "Settings" → Should navigate to `/tables/{tableId}/settings`
+
+All navigation buttons now work correctly across all pages! ✅
+
+See [NAVIGATION_TEST_PLAN.md](NAVIGATION_TEST_PLAN.md) for comprehensive testing guide.
+
 ## Breaking Changes
 ⚠️ **KHÔNG CÓ breaking changes đối với user-facing functionality**
 - Tất cả routes giữ nguyên URL pattern

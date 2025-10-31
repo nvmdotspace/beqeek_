@@ -23,13 +23,13 @@ import { useCurrentLocale } from '@/hooks/use-current-locale';
  * - Security: Encryption and access settings
  */
 export const ActiveTableSettingsPage = () => {
-  const params = useParams({ strict: false });
+  const params = useParams({ from: '/$locale/workspaces/$workspaceId/tables/$tableId/settings' });
   const navigate = useNavigate();
   const locale = useCurrentLocale();
 
   // Extract params from URL - these are now the source of truth
-  const tableId = (params as any).tableId as string;
-  const workspaceId = (params as any).workspaceId as string;
+  const tableId = params.tableId;
+  const workspaceId = params.workspaceId;
 
   const [activeTab, setActiveTab] = useState('general');
 

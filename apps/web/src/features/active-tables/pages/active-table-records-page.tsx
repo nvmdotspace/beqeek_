@@ -32,13 +32,13 @@ const LoadingState = () => (
 );
 
 export const ActiveTableRecordsPage = () => {
-  const params = useParams({ strict: false });
+  const params = useParams({ from: '/$locale/workspaces/$workspaceId/tables/$tableId/records' });
   const navigate = useNavigate();
   const locale = useCurrentLocale();
 
   // Extract params from URL - these are now the source of truth
-  const tableId = (params as any).tableId as string;
-  const workspaceId = (params as any).workspaceId as string;
+  const tableId = params.tableId;
+  const workspaceId = params.workspaceId;
 
   // Use combined hook to ensure table config loads before records
   // This prevents race conditions in encryption/decryption logic
