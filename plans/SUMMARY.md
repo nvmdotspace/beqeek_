@@ -12,17 +12,18 @@ Sau khi phân tích `apps/web/src/features/active-tables/`, phát hiện **code 
 
 ## 📊 Code Production-Ready Có Sẵn
 
-| File | Dòng Code | Chất Lượng | Tái Sử Dụng | Mô Tả |
-|------|-----------|------------|-------------|-------|
-| **encryption-helpers.ts** | 305 | ⭐⭐⭐⭐⭐ | 100% | AES, OPE, HMAC encryption/decryption |
-| **record-decryptor.ts** | 216 | ⭐⭐⭐⭐⭐ | 100% | Batch decrypt với caching |
-| **decryption-cache.ts** | 186 | ⭐⭐⭐⭐⭐ | 100% | LRU cache với TTL |
-| **types.ts** | 154 | ⭐⭐⭐⭐ | 90% | Types (cần align format) |
-| **TỔNG** | **861** | | | **Production-tested!** |
+| File                      | Dòng Code | Chất Lượng | Tái Sử Dụng | Mô Tả                                |
+| ------------------------- | --------- | ---------- | ----------- | ------------------------------------ |
+| **encryption-helpers.ts** | 305       | ⭐⭐⭐⭐⭐ | 100%        | AES, OPE, HMAC encryption/decryption |
+| **record-decryptor.ts**   | 216       | ⭐⭐⭐⭐⭐ | 100%        | Batch decrypt với caching            |
+| **decryption-cache.ts**   | 186       | ⭐⭐⭐⭐⭐ | 100%        | LRU cache với TTL                    |
+| **types.ts**              | 154       | ⭐⭐⭐⭐   | 90%         | Types (cần align format)             |
+| **TỔNG**                  | **861**   |            |             | **Production-tested!**               |
 
 ### Chi Tiết Utilities
 
 #### 1. encryption-helpers.ts (305 dòng)
+
 ```typescript
 ✅ getEncryptionTypeForField() - Xác định loại mã hóa
 ✅ decryptFieldValue() - Giải mã 1 field
@@ -34,6 +35,7 @@ Sau khi phân tích `apps/web/src/features/active-tables/`, phát hiện **code 
 ```
 
 #### 2. record-decryptor.ts (216 dòng)
+
 ```typescript
 ✅ decryptRecord() - Decrypt 1 record với caching
 ✅ decryptRecords() - Batch decrypt parallel
@@ -43,6 +45,7 @@ Sau khi phân tích `apps/web/src/features/active-tables/`, phát hiện **code 
 ```
 
 #### 3. decryption-cache.ts (186 dòng)
+
 ```typescript
 ✅ LRU Cache implementation
 ✅ Auto eviction khi full (maxSize: 1000)
@@ -57,11 +60,11 @@ Sau khi phân tích `apps/web/src/features/active-tables/`, phát hiện **code 
 
 ### Broken Imports (3 files)
 
-| File | Line | Import | Issue |
-|------|------|--------|-------|
-| use-active-tables.ts | 7 | `@workspace/active-tables-core` | Package đã xóa |
-| active-tables-page.tsx | 38 | `@workspace/active-tables-hooks` | Package đã xóa |
-| active-table-card.tsx | 30 | `@workspace/active-tables-hooks` | Package đã xóa |
+| File                   | Line | Import                           | Issue          |
+| ---------------------- | ---- | -------------------------------- | -------------- |
+| use-active-tables.ts   | 7    | `@workspace/active-tables-core`  | Package đã xóa |
+| active-tables-page.tsx | 38   | `@workspace/active-tables-hooks` | Package đã xóa |
+| active-table-card.tsx  | 30   | `@workspace/active-tables-hooks` | Package đã xóa |
 
 **Hậu quả**: Apps/web KHÔNG thể build/run được!
 
@@ -72,9 +75,11 @@ Sau khi phân tích `apps/web/src/features/active-tables/`, phát hiện **code 
 ## 📚 Documents Đã Tạo
 
 ### 1. `/plans/active-tables-core-implementation-plan-vi.md`
+
 **Plan chính** - 1285 dòng tiếng Việt
 
 **Nội dung**:
+
 - ✅ Tầm nhìn hệ thống (2 apps architecture)
 - ✅ Chiến lược i18n linh hoạt (string props)
 - ✅ **Phase 0 MỚI**: Immediate Utilities Migration (PRIORITY 1)
@@ -85,14 +90,17 @@ Sau khi phân tích `apps/web/src/features/active-tables/`, phát hiện **code 
 - ✅ Usage examples
 
 **Thay đổi quan trọng**:
+
 - Thêm **Phase 0** (1 ngày) để fix broken imports NGAY
 - Ưu tiên utilities trước UI components
 - Tận dụng 861 dòng code có sẵn
 
 ### 2. `/plans/active-tables-refactor-analysis.md`
+
 **Báo cáo phân tích chi tiết**
 
 **Nội dung**:
+
 - ✅ Broken imports analysis
 - ✅ Code reusability assessment
 - ✅ Quality metrics cho từng file
@@ -112,6 +120,7 @@ Sau khi phân tích `apps/web/src/features/active-tables/`, phát hiện **code 
 **Mục tiêu**: Fix broken imports, apps/web hoạt động ngay
 
 **Tasks**:
+
 ```bash
 # 1. Create structure
 mkdir -p packages/active-tables-core/src/{types,utils,hooks,stores,components,constants}
@@ -147,6 +156,7 @@ pnpm dev
 ```
 
 **Deliverables**:
+
 - ✅ ~700 dòng code available
 - ✅ Apps/web chạy được
 - ✅ Có thể deploy production
@@ -161,6 +171,7 @@ pnpm dev
 **Mục tiêu**: Complete type system, stores, hooks
 
 **Tasks**:
+
 - Align types với plan format
 - Tạo messages.ts (i18n interface)
 - Setup Zustand stores (3 stores)
@@ -174,6 +185,7 @@ pnpm dev
 **Thời gian**: Tuần 2-8
 
 Giữ nguyên plan ban đầu:
+
 - Phase 2: Field Renderers (25+ types)
 - Phase 3: RecordList
 - Phase 4: RecordDetail + Comments
@@ -187,6 +199,7 @@ Giữ nguyên plan ban đầu:
 ## 🎯 Success Criteria
 
 ### Phase 0 Complete When:
+
 - [ ] Package builds: `pnpm build` không lỗi
 - [ ] Exports correct: `import { decryptFieldValue } from '@workspace/active-tables-core/utils'`
 - [ ] No broken imports trong apps/web
@@ -195,6 +208,7 @@ Giữ nguyên plan ban đầu:
 - [ ] **CÓ THỂ DEPLOY PRODUCTION**
 
 ### Phase 1 Complete When:
+
 - [ ] Types aligned với plan
 - [ ] Zustand stores functional
 - [ ] useEncryption hook available
@@ -208,23 +222,27 @@ Giữ nguyên plan ban đầu:
 ### ✅ KEEP (Apps/Web Only)
 
 **API Clients** (`api/`):
+
 - active-tables-api.ts
 - active-records-api.ts
 - active-actions-api.ts
 - active-comments-api.ts
 
 **React Query Hooks**:
+
 - useActiveTables() - Fetch tables
 - useActiveWorkGroups() - Fetch groups
 - useTableManagement() - CRUD operations
 
 **Config Components**:
+
 - table-management-dialog.tsx
-- settings/* (general, security, fields tabs)
+- settings/\* (general, security, fields tabs)
 - permissions-matrix.tsx
 - record-management-dialog.tsx
 
 **Page Components**:
+
 - active-tables-page.tsx
 - active-table-detail-page.tsx
 - active-table-settings-page.tsx
@@ -236,20 +254,24 @@ Giữ nguyên plan ban đầu:
 ### 🚀 MOVE to Active-Tables-Core
 
 **Encryption Utilities**:
+
 - ✅ encryption-helpers.ts (305 lines)
 - ✅ record-decryptor.ts (216 lines)
 - ✅ decryption-cache.ts (186 lines)
 
 **Types** (with alignment):
+
 - ✅ types.ts → split into field.ts, action.ts, record.ts, config.ts
 
 **Hooks** (NEW):
+
 - useEncryption() - Wrapper around utilities
 - useActiveTable() - Context
 - useFieldValue()
 - usePermissions()
 
 **UI Components** (FUTURE):
+
 - Field Renderers (25+ types)
 - RecordList, RecordDetail
 - KanbanBoard, GanttChart
@@ -263,22 +285,26 @@ Giữ nguyên plan ban đầu:
 ## 💡 Key Insights
 
 ### 1. Production-Ready Code
+
 - 861 dòng code đã test kỹ trong production
 - Không cần viết lại từ đầu
 - Chỉ cần organize lại structure
 
 ### 2. Incremental Migration
+
 - Phase 0 fix apps/web ngay (1 ngày)
 - Không block development
 - Deploy được trong khi refactor
 - Low risk approach
 
 ### 3. Clear Separation
+
 - Apps/web: Config UI + API calls
 - Active-tables-core: Runtime UI + Logic
 - Apps/admin: Sẽ dùng active-tables-core
 
 ### 4. I18n Strategy
+
 - String props thay vì lock-in Paraglide
 - Hỗ trợ unlimited languages
 - Parent app control translations
@@ -288,6 +314,7 @@ Giữ nguyên plan ban đầu:
 ## 📋 Next Steps
 
 ### Immediate (Today):
+
 1. ✅ Đọc 2 plans đã tạo
 2. [ ] Execute Phase 0 (copy utilities)
 3. [ ] Fix 3 broken imports
@@ -295,11 +322,13 @@ Giữ nguyên plan ban đầu:
 5. [ ] Deploy nếu cần
 
 ### This Week:
+
 6. [ ] Execute Phase 1 (types, stores, hooks)
 7. [ ] Write useEncryption hook
 8. [ ] Test thoroughly
 
 ### Next 7 Weeks:
+
 9. [ ] Execute Phase 2-8 theo plan
 10. [ ] UI components từng phase
 11. [ ] Test và document

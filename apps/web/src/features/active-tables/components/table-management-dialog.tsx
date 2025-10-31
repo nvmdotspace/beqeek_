@@ -3,7 +3,7 @@ import { useForm } from '@tanstack/react-form';
 import { Plus, Trash2, GripVertical, Settings, Eye, EyeOff } from 'lucide-react';
 
 // @ts-ignore
-import { m } from "@/paraglide/generated/messages.js";
+import { m } from '@/paraglide/generated/messages.js';
 
 import { Button } from '@workspace/ui/components/button';
 import { Input } from '@workspace/ui/components/input';
@@ -17,13 +17,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@workspace/ui/components/dialog';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@workspace/ui/components/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@workspace/ui/components/select';
 import { Switch } from '@workspace/ui/components/switch';
 import { Badge } from '@workspace/ui/components/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@workspace/ui/components/card';
@@ -187,14 +181,9 @@ export const TableManagementDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>
-            {table ? m.modules_dialog_editTitle() : m.modules_dialog_createTitle()}
-          </DialogTitle>
+          <DialogTitle>{table ? m.modules_dialog_editTitle() : m.modules_dialog_createTitle()}</DialogTitle>
           <DialogDescription>
-            {table
-              ? m.modules_dialog_editDescription()
-              : m.modules_dialog_createDescription()
-            }
+            {table ? m.modules_dialog_editDescription() : m.modules_dialog_createDescription()}
           </DialogDescription>
         </DialogHeader>
 
@@ -215,8 +204,7 @@ export const TableManagementDialog = ({
               <form.Field
                 name="name"
                 validators={{
-                  onChange: ({ value }) =>
-                    !value ? 'Table name is required' : undefined,
+                  onChange: ({ value }) => (!value ? 'Table name is required' : undefined),
                 }}
               >
                 {(field) => (
@@ -231,9 +219,7 @@ export const TableManagementDialog = ({
                       placeholder="Enter table name"
                     />
                     {field.state.meta.errors && (
-                      <p className="text-sm text-destructive">
-                        {field.state.meta.errors[0]}
-                      </p>
+                      <p className="text-sm text-destructive">{field.state.meta.errors[0]}</p>
                     )}
                   </div>
                 )}
@@ -260,25 +246,17 @@ export const TableManagementDialog = ({
                 <form.Field
                   name="workGroupId"
                   validators={{
-                    onChange: ({ value }) =>
-                      !value ? 'Work group is required' : undefined,
+                    onChange: ({ value }) => (!value ? 'Work group is required' : undefined),
                   }}
                 >
                   {(field) => {
-                    const selectedGroup = workGroups.find(
-                      (group) => group.id === field.state.value
-                    );
+                    const selectedGroup = workGroups.find((group) => group.id === field.state.value);
                     return (
                       <div className="space-y-2">
                         <Label htmlFor={field.name}>Work Group *</Label>
-                        <Select
-                          value={field.state.value}
-                          onValueChange={field.handleChange}
-                        >
+                        <Select value={field.state.value} onValueChange={field.handleChange}>
                           <SelectTrigger className="w-full">
-                            <span className="truncate">
-                              {selectedGroup?.name || 'Select work group'}
-                            </span>
+                            <span className="truncate">{selectedGroup?.name || 'Select work group'}</span>
                           </SelectTrigger>
                           <SelectContent>
                             {workGroups.map((group) => (
@@ -289,9 +267,7 @@ export const TableManagementDialog = ({
                           </SelectContent>
                         </Select>
                         {field.state.meta.errors && (
-                          <p className="text-sm text-destructive">
-                            {field.state.meta.errors[0]}
-                          </p>
+                          <p className="text-sm text-destructive">{field.state.meta.errors[0]}</p>
                         )}
                       </div>
                     );
@@ -302,10 +278,7 @@ export const TableManagementDialog = ({
                   {(field) => (
                     <div className="space-y-2">
                       <Label htmlFor={field.name}>Table Type</Label>
-                      <Select
-                        value={field.state.value}
-                        onValueChange={handleTableTypeChange}
-                      >
+                      <Select value={field.state.value} onValueChange={handleTableTypeChange}>
                         <SelectTrigger>
                           <SelectValue placeholder="Select table type" />
                         </SelectTrigger>
@@ -340,15 +313,9 @@ export const TableManagementDialog = ({
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
                       <Label htmlFor={field.name}>End-to-End Encryption</Label>
-                      <p className="text-sm text-muted-foreground">
-                        Enable client-side encryption for sensitive data
-                      </p>
+                      <p className="text-sm text-muted-foreground">Enable client-side encryption for sensitive data</p>
                     </div>
-                    <Switch
-                      id={field.name}
-                      checked={field.state.value}
-                      onCheckedChange={handleE2EEToggle}
-                    />
+                    <Switch id={field.name} checked={field.state.value} onCheckedChange={handleE2EEToggle} />
                   </div>
                 )}
               </form.Field>
@@ -361,7 +328,7 @@ export const TableManagementDialog = ({
                       <Input
                         id={field.name}
                         name={field.name}
-                        type={showEncryptionKey ? "text" : "password"}
+                        type={showEncryptionKey ? 'text' : 'password'}
                         value={field.state.value}
                         readOnly
                         className="pr-10"
@@ -374,11 +341,7 @@ export const TableManagementDialog = ({
                           onClick={() => setShowEncryptionKey(!showEncryptionKey)}
                           className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                         >
-                          {showEncryptionKey ? (
-                            <EyeOff className="h-4 w-4" />
-                          ) : (
-                            <Eye className="h-4 w-4" />
-                          )}
+                          {showEncryptionKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                         </button>
                       )}
                     </div>
@@ -433,12 +396,7 @@ export const TableManagementDialog = ({
           </Card>
 
           <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={isLoading}
-            >
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading}>
               Cancel
             </Button>
             <Button type="submit" disabled={isLoading}>
@@ -490,8 +448,12 @@ const FieldEditor = ({
           <div>
             <div className="font-medium">{field.label || 'Untitled Field'}</div>
             <div className="text-sm text-muted-foreground">
-              {field.name} • {FIELD_TYPES.find(t => t.value === field.type)?.label}
-              {field.required && <Badge variant="secondary" className="ml-2">Required</Badge>}
+              {field.name} • {FIELD_TYPES.find((t) => t.value === field.type)?.label}
+              {field.required && (
+                <Badge variant="secondary" className="ml-2">
+                  Required
+                </Badge>
+              )}
             </div>
           </div>
         </div>
@@ -514,20 +476,10 @@ const FieldEditor = ({
           >
             ↓
           </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={onEdit}
-          >
+          <Button type="button" variant="ghost" size="sm" onClick={onEdit}>
             <Settings className="h-4 w-4" />
           </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={onRemove}
-          >
+          <Button type="button" variant="ghost" size="sm" onClick={onRemove}>
             <Trash2 className="h-4 w-4" />
           </Button>
         </div>
@@ -551,10 +503,12 @@ const FieldEditor = ({
             <Label>Field Name *</Label>
             <Input
               value={editField.name}
-              onChange={(e) => setEditField({
-                ...editField,
-                name: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '_')
-              })}
+              onChange={(e) =>
+                setEditField({
+                  ...editField,
+                  name: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '_'),
+                })
+              }
               placeholder="field_name"
             />
           </div>
@@ -564,9 +518,9 @@ const FieldEditor = ({
           <div className="space-y-2">
             <Label>Field Type</Label>
             <Select
-                        value={editField.type}
-                        onValueChange={(value: string) => setEditField({ ...editField, type: value })}
-                      >
+              value={editField.type}
+              onValueChange={(value: string) => setEditField({ ...editField, type: value })}
+            >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -602,11 +556,7 @@ const FieldEditor = ({
           <Button type="button" variant="outline" onClick={onCancel}>
             Cancel
           </Button>
-          <Button
-            type="button"
-            onClick={() => onSave(editField)}
-            disabled={!editField.label || !editField.name}
-          >
+          <Button type="button" onClick={() => onSave(editField)} disabled={!editField.label || !editField.name}>
             Save Field
           </Button>
         </div>

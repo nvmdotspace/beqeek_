@@ -3,6 +3,7 @@
 ## Tổng Quan
 
 Hệ thống Active Tables sử dụng **hai cơ chế mã hóa song song**:
+
 1. **E2EE (End-to-End Encryption)**: Key lưu ở client, không bao giờ gửi lên server
 2. **Server-Side Encryption**: Key lưu và quản lý bởi server
 
@@ -26,6 +27,7 @@ Hệ thống Active Tables sử dụng **hai cơ chế mã hóa song song**:
 Hệ thống phân chia fields thành 4 nhóm dựa trên phương thức mã hóa:
 
 #### **A. AES-256-CBC Encryption** (encryptFields)
+
 - **Field Types**: `SHORT_TEXT`, `RICH_TEXT`, `TEXT`, `EMAIL`, `URL`
 - **Thuật toán**: AES-256-CBC với IV ngẫu nhiên 16 bytes
 - **Đặc điểm**:
@@ -47,6 +49,7 @@ static encryptData(data, key) {
 ```
 
 #### **B. OPE (Order-Preserving Encryption)** (opeEncryptFields)
+
 - **Field Types**: `YEAR`, `MONTH`, `DAY`, `HOUR`, `MINUTE`, `SECOND`, `DATE`, `DATETIME`, `TIME`, `INTEGER`, `NUMERIC`
 - **Mục đích**: Cho phép so sánh thứ tự trên dữ liệu mã hóa
 - **Đặc điểm**:
@@ -56,17 +59,18 @@ static encryptData(data, key) {
 
 ```javascript
 if (['DATE'].includes(field.type)) {
-    return OPEncryptor.ope.encryptStringDate(value);
+  return OPEncryptor.ope.encryptStringDate(value);
 } else if (['DATETIME'].includes(field.type)) {
-    return OPEncryptor.ope.encryptStringDatetime(value);
+  return OPEncryptor.ope.encryptStringDatetime(value);
 } else if (field.type === 'NUMERIC') {
-    return OPEncryptor.ope.encryptDecimal(value);
+  return OPEncryptor.ope.encryptDecimal(value);
 } else {
-    return OPEncryptor.ope.encryptInt(value);
+  return OPEncryptor.ope.encryptInt(value);
 }
 ```
 
 #### **C. HMAC-SHA256 Hashing** (hashEncryptFields)
+
 - **Field Types**: `CHECKBOX_YES_NO`, `CHECKBOX_ONE`, `CHECKBOX_LIST`, `SELECT_ONE`, `SELECT_LIST`
 - **Thuật toán**: HMAC-SHA256
 - **Đặc điểm**:
@@ -79,10 +83,11 @@ if (['DATE'].includes(field.type)) {
 return CryptoJS.HmacSHA256(value, encryptionKey).toString(CryptoJS.enc.Hex);
 
 // List values
-return value.map(v => CryptoJS.HmacSHA256(v, encryptionKey).toString(CryptoJS.enc.Hex));
+return value.map((v) => CryptoJS.HmacSHA256(v, encryptionKey).toString(CryptoJS.enc.Hex));
 ```
 
 #### **D. No Encryption** (noneEncryptFields)
+
 - **Field Types**: `SELECT_ONE_RECORD`, `SELECT_LIST_RECORD`, `SELECT_ONE_WORKSPACE_USER`, `SELECT_LIST_WORKSPACE_USER`
 - **Lý do**: References đến các entities khác, không cần mã hóa
 
@@ -101,6 +106,7 @@ POST /api/workspace/{workspaceId}/workflow/get/active_tables/{tableId}/records
 ### 2.2. Chi Tiết Request Flow
 
 #### **Bước 1: Load Table Details**
+
 ```javascript
 // Line 3360-3394
 static async fetchTableDetails(tableId) {
@@ -133,11 +139,13 @@ static async fetchTableDetails(tableId) {
 ```
 
 **Key Security Points**:
+
 - `encryptionKey` (32 chars) được load từ localStorage
 - Server chỉ lưu `encryptionAuthKey` (SHA256 hash để verify)
 - Key KHÔNG BAO GIỜ được gửi qua network
 
 #### **Bước 2: Verify Encryption Key** (nếu user nhập key mới)
+
 ```javascript
 // Line 2592-2598
 static hashKeyForAuth(key) {
@@ -150,36 +158,38 @@ static hashKeyForAuth(key) {
 ```
 
 **Process**:
+
 1. User nhập 32-character key
 2. Hash 3 lần bằng SHA256: `SHA256(SHA256(SHA256(key)))`
 3. So sánh với `encryptionAuthKey` từ server
 4. Nếu match → lưu vào localStorage và memory
 
 #### **Bước 3: Prepare Filter Parameters (Client-Side Encryption)**
+
 ```javascript
 // Line 3437-3456
-const filtering = Object.entries(filters || {})
-    .reduce((acc, [fieldName, value]) => {
-        if (value !== '') {
-            if (fieldName === 'record' && typeof value === 'object') {
-                // Mã hóa TỪNG FIELD trong filter TRƯỚC KHI GỬI
-                acc.record = Object.entries(value).reduce((recAcc, [k, v]) => {
-                    if (v !== '') {
-                        const [fieldName, operator] = k.split(':');
-                        // MÃ HÓA VALUE THEO FIELD TYPE
-                        recAcc[k] = CommonUtils.encryptTableData(table, fieldName, v);
-                    }
-                    return recAcc;
-                }, {});
-            } else {
-                acc[fieldName] = value;
-            }
+const filtering = Object.entries(filters || {}).reduce((acc, [fieldName, value]) => {
+  if (value !== '') {
+    if (fieldName === 'record' && typeof value === 'object') {
+      // Mã hóa TỪNG FIELD trong filter TRƯỚC KHI GỬI
+      acc.record = Object.entries(value).reduce((recAcc, [k, v]) => {
+        if (v !== '') {
+          const [fieldName, operator] = k.split(':');
+          // MÃ HÓA VALUE THEO FIELD TYPE
+          recAcc[k] = CommonUtils.encryptTableData(table, fieldName, v);
         }
-        return acc;
-    }, {});
+        return recAcc;
+      }, {});
+    } else {
+      acc[fieldName] = value;
+    }
+  }
+  return acc;
+}, {});
 ```
 
 **Example Filter Transformation**:
+
 ```javascript
 // Input Filter (plaintext)
 {
@@ -201,47 +211,47 @@ const filtering = Object.entries(filters || {})
 ```
 
 #### **Bước 4: Send Request to Server**
+
 ```javascript
 // Line 3459-3469
 const response = await CommonUtils.apiCall(
-    `${API_PREFIX}/get/active_tables/${table.id}/records`,
-    {
-        paging: 'cursor',
-        filtering: filtering,          // ENCRYPTED FILTERS
-        next_id: nextId,
-        direction: direction,
-        limit: limit
-    },
-    true
+  `${API_PREFIX}/get/active_tables/${table.id}/records`,
+  {
+    paging: 'cursor',
+    filtering: filtering, // ENCRYPTED FILTERS
+    next_id: nextId,
+    direction: direction,
+    limit: limit,
+  },
+  true,
 );
 ```
 
 **Server Processing**:
+
 - Server nhận ENCRYPTED values trong filters
 - Server so sánh encrypted values với encrypted data trong DB
 - Server KHÔNG BAO GIỜ biết plaintext values
 
 #### **Bước 5: Decrypt Response (Client-Side)**
+
 ```javascript
 // Line 3474-3482
-const decryptedRecords = response.data.map(record => {
-    const decryptedRecord = { ...record };
-    decryptedRecord.record = { ...record.record };
+const decryptedRecords = response.data.map((record) => {
+  const decryptedRecord = { ...record };
+  decryptedRecord.record = { ...record.record };
 
-    // Giải mã TỪNG FIELD theo type
-    fields.forEach(field => {
-        decryptedRecord.record[field.name] = CommonUtils.decryptTableData(
-            table,
-            field.name,
-            record.record[field.name]
-        );
-    });
+  // Giải mã TỪNG FIELD theo type
+  fields.forEach((field) => {
+    decryptedRecord.record[field.name] = CommonUtils.decryptTableData(table, field.name, record.record[field.name]);
+  });
 
-    return decryptedRecord;
+  return decryptedRecord;
 });
 ```
 
 **Decryption Logic per Field Type**:
+
 ```javascript
 // Line 2512-2554
 static decryptTableData(tableDetail, fieldName, value) {
@@ -299,6 +309,7 @@ static decryptTableData(tableDetail, fieldName, value) {
 Thực tế có **3 trường hợp**:
 
 **Case A: E2EE Mode** (`e2eeEncryption = true`)
+
 ```
 - encryptionKey (32 chars) → LƯU Ở CLIENT (localStorage)
 - encryptionAuthKey (SHA256 hash) → LƯU Ở SERVER (để verify)
@@ -306,6 +317,7 @@ Thực tế có **3 trường hợp**:
 ```
 
 **Case B: Server-Side Encryption Mode** (`e2eeEncryption = false`)
+
 ```
 - Server tự generate và lưu encryption key
 - Server mã hóa/giải mã dữ liệu
@@ -313,6 +325,7 @@ Thực tế có **3 trường hợp**:
 ```
 
 **Case C: No Encryption**
+
 ```
 - Không có encryption config
 - Data lưu plaintext
@@ -322,7 +335,7 @@ Thực tế có **3 trường hợp**:
 
 ```javascript
 // Client-side verification
-const userInputKey = "my32characterencryptionkey12345";
+const userInputKey = 'my32characterencryptionkey12345';
 
 // Hash 3 lần
 let authHash = CryptoJS.SHA256(userInputKey).toString();
@@ -331,14 +344,15 @@ authHash = CryptoJS.SHA256(authHash).toString();
 
 // So sánh với server's encryptionAuthKey
 if (authHash === table.config.encryptionAuthKey) {
-    // Key đúng → lưu localStorage
-    localStorage.setItem(`encryption_key_${tableId}`, userInputKey);
+  // Key đúng → lưu localStorage
+  localStorage.setItem(`encryption_key_${tableId}`, userInputKey);
 } else {
-    // Key sai → reject
+  // Key sai → reject
 }
 ```
 
 **Security Rationale**:
+
 - Server lưu triple-hashed key → không thể reverse để lấy original key
 - Client phải có original key để decrypt data
 - Nếu key bị mất → data mất vĩnh viễn (true E2EE)
@@ -369,6 +383,7 @@ static tokenize(text) {
 ```
 
 **Process**:
+
 1. Text được tokenize thành từ riêng lẻ
 2. Mỗi token được hash bằng HMAC-SHA256
 3. Hashed tokens được lưu trong `hashed_keywords` array
@@ -380,22 +395,24 @@ static tokenize(text) {
 
 ### **Threat Model**
 
-| Scenario | E2EE Protection | Server-Side Protection |
-|----------|----------------|------------------------|
-| Database breach | ✅ Data vẫn encrypted | ❌ Keys có thể bị lộ |
-| Server compromise | ✅ Server không có key | ⚠️ Keys trong memory |
-| Man-in-the-middle | ✅ TLS + E2EE | ✅ TLS encryption |
-| Client-side malware | ❌ Key trong localStorage | ❌ Plaintext visible |
-| User forgets key | ❌ Data mất vĩnh viễn | ✅ Server có key |
+| Scenario            | E2EE Protection           | Server-Side Protection |
+| ------------------- | ------------------------- | ---------------------- |
+| Database breach     | ✅ Data vẫn encrypted     | ❌ Keys có thể bị lộ   |
+| Server compromise   | ✅ Server không có key    | ⚠️ Keys trong memory   |
+| Man-in-the-middle   | ✅ TLS + E2EE             | ✅ TLS encryption      |
+| Client-side malware | ❌ Key trong localStorage | ❌ Plaintext visible   |
+| User forgets key    | ❌ Data mất vĩnh viễn     | ✅ Server có key       |
 
 ### **Key Recovery Implications**
 
 **E2EE Mode**:
+
 - ❌ Không có key recovery mechanism
 - ❌ Nếu mất key → data không thể decrypt
 - ✅ True end-to-end security
 
 **Server-Side Mode**:
+
 - ✅ Server có thể rotate keys
 - ✅ Admin có thể recover data
 - ⚠️ Server compromise = full data exposure
@@ -500,11 +517,13 @@ static tokenize(text) {
 ### **Về Hiểu Biết Của Bạn**
 
 **✅ Chính xác**:
+
 - Có 2 modes: E2EE và server-side
 - E2EE key lưu client, không gửi server
 - Filters và data đều được mã hóa client-side
 
 **🔄 Cần điều chỉnh**:
+
 - "Mã hóa lưu key ở server" → Chính xác hơn: "Server-side encryption mode" hoặc "Non-E2EE mode"
 - Server KHÔNG BAO GIỜ có plaintext key trong E2EE mode
 - Server chỉ lưu `encryptionAuthKey` (triple-hashed) để verify
@@ -512,12 +531,14 @@ static tokenize(text) {
 ### **Về Implementation**
 
 **Strengths**:
+
 - ✅ True E2EE với client-side encryption
 - ✅ Multiple encryption schemes phù hợp với field types
 - ✅ Order-preserving cho range queries
 - ✅ Searchable encryption cho selects
 
 **Weaknesses**:
+
 - ⚠️ Không có key recovery mechanism
 - ⚠️ Keys trong localStorage dễ bị XSS
 - ⚠️ Không có key rotation

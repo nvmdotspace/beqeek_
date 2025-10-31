@@ -12,12 +12,7 @@ export interface ActionResponse {
 }
 
 // Endpoints
-const triggerActionEndpoint = (
-  workspaceId: string,
-  tableId: string,
-  recordId: string,
-  actionId: string
-) =>
+const triggerActionEndpoint = (workspaceId: string, tableId: string, recordId: string, actionId: string) =>
   `/api/workspace/${workspaceId}/workflow/post/active_tables/${tableId}/records/${recordId}/action/${actionId}`;
 
 // Action operations
@@ -26,7 +21,7 @@ export const triggerRecordAction = (
   tableId: string,
   recordId: string,
   actionId: string,
-  request: ActionTriggerRequest
+  request: ActionTriggerRequest,
 ) =>
   apiRequest<ActionResponse>({
     url: triggerActionEndpoint(workspaceId, tableId, recordId, actionId),

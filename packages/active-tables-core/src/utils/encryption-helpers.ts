@@ -1,4 +1,3 @@
-import { AES256 } from '@workspace/encryption-core';
 import type { ActiveFieldConfig } from '../types/index.js';
 import CryptoJS from 'crypto-js';
 
@@ -63,7 +62,7 @@ export function getEncryptionTypeForField(fieldType: string): 'AES-256-CBC' | 'O
 export async function decryptFieldValue(
   value: unknown,
   field: ActiveFieldConfig,
-  encryptionKey: string
+  encryptionKey: string,
 ): Promise<unknown> {
   if (!value || !encryptionKey) {
     return value;
@@ -120,30 +119,26 @@ async function decryptTextValue(encryptedValue: unknown, encryptionKey: string):
     // Extract IV from first 16 bytes (4 words)
     const iv = CryptoJS.lib.WordArray.create(
       encryptedWordArray.words.slice(0, 4),
-      16  // IV is always 16 bytes for AES-256-CBC
+      16, // IV is always 16 bytes for AES-256-CBC
     );
 
     // Extract ciphertext from remaining bytes
     const ciphertext = CryptoJS.lib.WordArray.create(
       encryptedWordArray.words.slice(4),
-      encryptedWordArray.sigBytes - 16
+      encryptedWordArray.sigBytes - 16,
     );
 
     // Decrypt using CryptoJS directly (matches old implementation)
     // Create CipherParams object with ciphertext
     const cipherParams = CryptoJS.lib.CipherParams.create({
-      ciphertext: ciphertext
+      ciphertext: ciphertext,
     });
 
-    const decrypted = CryptoJS.AES.decrypt(
-      cipherParams,
-      keyBytes,
-      {
-        iv: iv,
-        mode: CryptoJS.mode.CBC,
-        padding: CryptoJS.pad.Pkcs7
-      }
-    );
+    const decrypted = CryptoJS.AES.decrypt(cipherParams, keyBytes, {
+      iv: iv,
+      mode: CryptoJS.mode.CBC,
+      padding: CryptoJS.pad.Pkcs7,
+    });
 
     // Convert decrypted WordArray to UTF-8 string
     const result = decrypted.toString(CryptoJS.enc.Utf8);
@@ -203,7 +198,7 @@ async function decryptOPEValue(value: unknown, encryptionKey: string): Promise<s
 async function decryptSelectValue(
   hashedValue: unknown,
   field: ActiveFieldConfig,
-  encryptionKey: string
+  encryptionKey: string,
 ): Promise<string | string[]> {
   if (!hashedValue || !field.options) {
     return typeof hashedValue === 'string' || Array.isArray(hashedValue) ? hashedValue : String(hashedValue);
@@ -215,9 +210,7 @@ async function decryptSelectValue(
 
   // Handle array values (SELECT_LIST, CHECKBOX_LIST)
   if (Array.isArray(hashedValue)) {
-    return await Promise.all(
-      hashedValue.map((hash) => matchHashToOption(hash, field.options!, encryptionKey))
-    );
+    return await Promise.all(hashedValue.map((hash) => matchHashToOption(hash, field.options!, encryptionKey)));
   }
 
   // Handle single value (SELECT_ONE, CHECKBOX_ONE)
@@ -230,7 +223,7 @@ async function decryptSelectValue(
 async function matchHashToOption(
   hash: string,
   options: ActiveFieldConfig['options'],
-  encryptionKey: string
+  encryptionKey: string,
 ): Promise<string> {
   if (!options || !Array.isArray(options)) {
     return hash;

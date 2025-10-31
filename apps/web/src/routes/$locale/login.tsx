@@ -4,9 +4,7 @@ import { lazy, Suspense } from 'react';
 import { getIsAuthenticated } from '@/features/auth';
 import { normalizeLocale } from '../$locale';
 
-const LoginPageLazy = lazy(() =>
-  import('@/features/auth/pages/login-page').then((m) => ({ default: m.LoginPage })),
-);
+const LoginPageLazy = lazy(() => import('@/features/auth/pages/login-page').then((m) => ({ default: m.LoginPage })));
 
 export const Route = createFileRoute('/$locale/login')({
   component: LoginComponent,

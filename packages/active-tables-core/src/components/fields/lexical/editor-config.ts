@@ -20,22 +20,12 @@ function onError(error: Error) {
 /**
  * Creates initial editor configuration
  */
-export function createEditorConfig(
-  namespace: string,
-  editable = true
-): InitialConfigType {
+export function createEditorConfig(namespace: string, editable = true): InitialConfigType {
   return {
     namespace,
     theme: lexicalTheme,
     onError,
     editable,
-    nodes: [
-      HeadingNode,
-      QuoteNode,
-      ListNode,
-      ListItemNode,
-      LinkNode,
-      CodeNode,
-    ],
+    nodes: [HeadingNode, QuoteNode, ListNode, ListItemNode, LinkNode, CodeNode],
   };
 }

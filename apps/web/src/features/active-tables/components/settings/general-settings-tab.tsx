@@ -31,11 +31,7 @@ export const GeneralSettingsTab = ({ table, workspaceId }: GeneralSettingsTabPro
   const [showKey, setShowKey] = useState(false);
   const [keyInput, setKeyInput] = useState('');
 
-  const { isE2EEEnabled, encryptionKey, saveKey } = useTableEncryption(
-    workspaceId,
-    table.id,
-    table.config
-  );
+  const { isE2EEEnabled, encryptionKey, saveKey } = useTableEncryption(workspaceId, table.id, table.config);
 
   const displayKey = encryptionKey || table.config.encryptionKey || '';
   const fields = table.config.fields || [];
@@ -75,10 +71,7 @@ export const GeneralSettingsTab = ({ table, workspaceId }: GeneralSettingsTabPro
       alert('Encryption key saved successfully!');
     } catch (error) {
       console.error('Failed to save key:', error);
-      alert(
-        'Failed to save encryption key: ' +
-          (error instanceof Error ? error.message : 'Unknown error')
-      );
+      alert('Failed to save encryption key: ' + (error instanceof Error ? error.message : 'Unknown error'));
     }
   };
 
@@ -95,23 +88,9 @@ export const GeneralSettingsTab = ({ table, workspaceId }: GeneralSettingsTabPro
           <div className="space-y-2">
             <Label htmlFor="table-id">ID Bảng</Label>
             <div className="flex gap-2">
-              <Input
-                id="table-id"
-                value={table.id}
-                readOnly
-                className="flex-1 bg-muted font-mono text-sm"
-              />
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={handleCopyId}
-                className="shrink-0"
-              >
-                {copiedId ? (
-                  <Check className="h-4 w-4 text-green-600" />
-                ) : (
-                  <Copy className="h-4 w-4" />
-                )}
+              <Input id="table-id" value={table.id} readOnly className="flex-1 bg-muted font-mono text-sm" />
+              <Button variant="outline" size="icon" onClick={handleCopyId} className="shrink-0">
+                {copiedId ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
               </Button>
             </div>
           </div>
@@ -136,25 +115,11 @@ export const GeneralSettingsTab = ({ table, workspaceId }: GeneralSettingsTabPro
                   className="absolute right-0 top-0 h-full"
                   disabled={!displayKey}
                 >
-                  {showKey ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
+                  {showKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </Button>
               </div>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={handleCopyKey}
-                disabled={!displayKey}
-                className="shrink-0"
-              >
-                {copiedKey ? (
-                  <Check className="h-4 w-4 text-green-600" />
-                ) : (
-                  <Copy className="h-4 w-4" />
-                )}
+              <Button variant="outline" size="icon" onClick={handleCopyKey} disabled={!displayKey} className="shrink-0">
+                {copiedKey ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
               </Button>
             </div>
 
@@ -174,9 +139,7 @@ export const GeneralSettingsTab = ({ table, workspaceId }: GeneralSettingsTabPro
                     Lưu
                   </Button>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  Enter encryption key to enable data decryption
-                </p>
+                <p className="text-xs text-muted-foreground">Enter encryption key to enable data decryption</p>
               </div>
             )}
           </div>
@@ -196,12 +159,7 @@ export const GeneralSettingsTab = ({ table, workspaceId }: GeneralSettingsTabPro
           {/* Default Sort */}
           <div className="space-y-2">
             <Label htmlFor="default-sort">Chiều sắp xếp mặc định *</Label>
-            <Input
-              id="default-sort"
-              value={table.config.defaultSort || 'Cũ nhất'}
-              readOnly
-              className="bg-muted"
-            />
+            <Input id="default-sort" value={table.config.defaultSort || 'Cũ nhất'} readOnly className="bg-muted" />
           </div>
 
           {/* Searchable Fields */}
@@ -214,11 +172,7 @@ export const GeneralSettingsTab = ({ table, workspaceId }: GeneralSettingsTabPro
                 {hashedKeywordFields.map((fieldName) => {
                   const field = fields.find((f) => f.name === fieldName);
                   return (
-                    <Badge
-                      key={fieldName}
-                      variant="outline"
-                      className="px-3 py-1.5 text-sm"
-                    >
+                    <Badge key={fieldName} variant="outline" className="px-3 py-1.5 text-sm">
                       × {field?.label || fieldName} ({field?.type || 'SHORT_TEXT'})
                     </Badge>
                   );
@@ -240,18 +194,14 @@ export const GeneralSettingsTab = ({ table, workspaceId }: GeneralSettingsTabPro
             {table.createdAt && (
               <div className="space-y-2">
                 <Label>Created At</Label>
-                <div className="text-sm text-muted-foreground">
-                  {new Date(table.createdAt).toLocaleString('vi-VN')}
-                </div>
+                <div className="text-sm text-muted-foreground">{new Date(table.createdAt).toLocaleString('vi-VN')}</div>
               </div>
             )}
 
             {table.updatedAt && (
               <div className="space-y-2">
                 <Label>Last Updated</Label>
-                <div className="text-sm text-muted-foreground">
-                  {new Date(table.updatedAt).toLocaleString('vi-VN')}
-                </div>
+                <div className="text-sm text-muted-foreground">{new Date(table.updatedAt).toLocaleString('vi-VN')}</div>
               </div>
             )}
           </CardContent>

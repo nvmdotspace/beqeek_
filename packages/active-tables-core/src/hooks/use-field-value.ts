@@ -56,7 +56,7 @@ export function useFieldValue(options: UseFieldValueOptions): UseFieldValueRetur
       onChange?.(newValue);
       setError(null);
     },
-    [onChange]
+    [onChange],
   );
 
   const reset = useCallback(() => {

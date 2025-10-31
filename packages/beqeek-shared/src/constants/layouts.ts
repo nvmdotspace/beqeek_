@@ -24,10 +24,7 @@ export const RECORD_LIST_LAYOUT_GENERIC_TABLE = 'generic-table' as const;
  */
 export const RECORD_LIST_LAYOUT_HEAD_COLUMN = 'head-column' as const;
 
-export const RECORD_LIST_LAYOUTS = [
-  RECORD_LIST_LAYOUT_GENERIC_TABLE,
-  RECORD_LIST_LAYOUT_HEAD_COLUMN,
-] as const;
+export const RECORD_LIST_LAYOUTS = [RECORD_LIST_LAYOUT_GENERIC_TABLE, RECORD_LIST_LAYOUT_HEAD_COLUMN] as const;
 
 export type RecordListLayout = (typeof RECORD_LIST_LAYOUTS)[number];
 
@@ -52,10 +49,7 @@ export const RECORD_DETAIL_LAYOUT_HEAD_DETAIL = 'head-detail' as const;
  */
 export const RECORD_DETAIL_LAYOUT_TWO_COLUMN = 'two-column-detail' as const;
 
-export const RECORD_DETAIL_LAYOUTS = [
-  RECORD_DETAIL_LAYOUT_HEAD_DETAIL,
-  RECORD_DETAIL_LAYOUT_TWO_COLUMN,
-] as const;
+export const RECORD_DETAIL_LAYOUTS = [RECORD_DETAIL_LAYOUT_HEAD_DETAIL, RECORD_DETAIL_LAYOUT_TWO_COLUMN] as const;
 
 export type RecordDetailLayout = (typeof RECORD_DETAIL_LAYOUTS)[number];
 
@@ -73,10 +67,7 @@ export const COMMENTS_POSITION_RIGHT_PANEL = 'right-panel' as const;
  */
 export const COMMENTS_POSITION_HIDDEN = 'hidden' as const;
 
-export const COMMENTS_POSITIONS = [
-  COMMENTS_POSITION_RIGHT_PANEL,
-  COMMENTS_POSITION_HIDDEN,
-] as const;
+export const COMMENTS_POSITIONS = [COMMENTS_POSITION_RIGHT_PANEL, COMMENTS_POSITION_HIDDEN] as const;
 
 export type CommentsPosition = (typeof COMMENTS_POSITIONS)[number];
 
@@ -94,9 +85,6 @@ export const SORT_ORDER_ASC = 'asc' as const;
  */
 export const SORT_ORDER_DESC = 'desc' as const;
 
-export const SORT_ORDERS = [
-  SORT_ORDER_ASC,
-  SORT_ORDER_DESC,
-] as const;
+export const SORT_ORDERS = [SORT_ORDER_ASC, SORT_ORDER_DESC] as const;
 
 export type SortOrder = (typeof SORT_ORDERS)[number];

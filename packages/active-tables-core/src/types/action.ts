@@ -32,7 +32,7 @@ export const ACTION_TYPES = {
   API_CALL: 'API_CALL',
 } as const;
 
-export type ActionType = typeof ACTION_TYPES[keyof typeof ACTION_TYPES];
+export type ActionType = (typeof ACTION_TYPES)[keyof typeof ACTION_TYPES];
 
 // ============================================
 // Action Configuration

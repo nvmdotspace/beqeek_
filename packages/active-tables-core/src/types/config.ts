@@ -209,35 +209,22 @@ export function isE2EEEnabled(config: TableConfig): boolean {
 /**
  * Check if field should be hashed for keyword search
  */
-export function isKeywordField(
-  config: TableConfig,
-  fieldName: string
-): boolean {
+export function isKeywordField(config: TableConfig, fieldName: string): boolean {
   return config.hashedKeywordFields?.includes(fieldName) ?? false;
 }
 
 /**
  * Get kanban config by screen ID
  */
-export function getKanbanConfig(
-  config: TableConfig,
-  screenId: string
-): KanbanConfig | undefined {
-  return config.kanbanConfigs?.find(
-    (k) => k.kanbanScreenId === screenId
-  );
+export function getKanbanConfig(config: TableConfig, screenId: string): KanbanConfig | undefined {
+  return config.kanbanConfigs?.find((k) => k.kanbanScreenId === screenId);
 }
 
 /**
  * Get gantt config by screen ID
  */
-export function getGanttConfig(
-  config: TableConfig,
-  screenId: string
-): GanttConfig | undefined {
-  return config.ganttCharts?.find(
-    (g) => g.ganttScreenId === screenId
-  );
+export function getGanttConfig(config: TableConfig, screenId: string): GanttConfig | undefined {
+  return config.ganttCharts?.find((g) => g.ganttScreenId === screenId);
 }
 
 // ============================================

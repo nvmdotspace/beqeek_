@@ -63,7 +63,7 @@ export const fetchComments = (
   workspaceId: string,
   tableId: string,
   recordId: string,
-  params: CommentQueryParams = {}
+  params: CommentQueryParams = {},
 ) =>
   apiRequest<CommentsResponse>({
     url: commentsEndpoint(workspaceId, tableId, recordId),
@@ -71,12 +71,7 @@ export const fetchComments = (
     data: params,
   });
 
-export const fetchComment = (
-  workspaceId: string,
-  tableId: string,
-  recordId: string,
-  commentId: string
-) =>
+export const fetchComment = (workspaceId: string, tableId: string, recordId: string, commentId: string) =>
   apiRequest<{ data: Comment }>({
     url: commentDetailEndpoint(workspaceId, tableId, recordId, commentId),
     method: 'POST',
@@ -84,12 +79,7 @@ export const fetchComment = (
   });
 
 // Create operations
-export const createComment = (
-  workspaceId: string,
-  tableId: string,
-  recordId: string,
-  request: CreateCommentRequest
-) =>
+export const createComment = (workspaceId: string, tableId: string, recordId: string, request: CreateCommentRequest) =>
   apiRequest<{ data: { id: string } }>({
     url: createCommentEndpoint(workspaceId, tableId, recordId),
     method: 'POST',
@@ -102,7 +92,7 @@ export const updateComment = (
   tableId: string,
   recordId: string,
   commentId: string,
-  request: UpdateCommentRequest
+  request: UpdateCommentRequest,
 ) =>
   apiRequest<{ message: string }>({
     url: updateCommentEndpoint(workspaceId, tableId, recordId, commentId),
@@ -111,12 +101,7 @@ export const updateComment = (
   });
 
 // Delete operations
-export const deleteComment = (
-  workspaceId: string,
-  tableId: string,
-  recordId: string,
-  commentId: string
-) =>
+export const deleteComment = (workspaceId: string, tableId: string, recordId: string, commentId: string) =>
   apiRequest<{ message: string }>({
     url: deleteCommentEndpoint(workspaceId, tableId, recordId, commentId),
     method: 'POST',

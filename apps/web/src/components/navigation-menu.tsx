@@ -14,7 +14,6 @@ import {
   HelpCircle,
   Home,
   LayoutGrid,
-  Plus,
   Search as SearchIcon,
   Settings,
   Shield,
@@ -24,7 +23,7 @@ import {
   Zap,
 } from 'lucide-react';
 // @ts-ignore
-import { m } from "@/paraglide/generated/messages.js";
+import { m } from '@/paraglide/generated/messages.js';
 import {
   useSidebarStore,
   selectCurrentWorkspace,
@@ -61,176 +60,173 @@ export const NavigationMenu = ({ isCollapsed = false, className }: NavigationMen
   const setActiveSection = useSidebarStore((state) => state.setActiveSection);
 
   // Navigation structure based on UX analysis
-  const navigationStructure: NavigationItem[] = useMemo(
-    () => {
-      const workspaceId = currentWorkspace?.id;
+  const navigationStructure: NavigationItem[] = useMemo(() => {
+    const workspaceId = currentWorkspace?.id;
 
-      return [
-        // Global Navigation (always visible)
-        {
-          id: 'dashboard',
-          label: m.navigation_dashboard(),
-          href: `/${locale}/workspaces`,
-          icon: Home,
-        },
-        {
-          id: 'search',
-          label: m.navigation_search(),
-          href: `/${locale}/search`,
-          icon: SearchIcon,
-        },
-        {
-          id: 'notifications',
-          label: m.navigation_notifications(),
-          href: `/${locale}/notifications`,
-          icon: Bell,
-          badge: 'notifications',
-        },
+    return [
+      // Global Navigation (always visible)
+      {
+        id: 'dashboard',
+        label: m.navigation_dashboard(),
+        href: `/${locale}/workspaces`,
+        icon: Home,
+      },
+      {
+        id: 'search',
+        label: m.navigation_search(),
+        href: `/${locale}/search`,
+        icon: SearchIcon,
+      },
+      {
+        id: 'notifications',
+        label: m.navigation_notifications(),
+        href: `/${locale}/notifications`,
+        icon: Bell,
+        badge: 'notifications',
+      },
 
-        // Quick Actions (require workspace selection)
-        ...(currentWorkspace && workspaceId
-          ? [
-              {
-                id: 'quick-actions',
-                label: m.navigation_quickActions(),
-                icon: Zap,
-                isSection: true,
-                children: [
-                  {
-                    id: 'new-table',
-                    label: m.navigation_newTable(),
-                    href: `/${locale}/workspaces/${workspaceId}/tables/new`,
-                    icon: Database,
-                    requiresPermission: 'tables',
-                  },
-                  {
-                    id: 'new-workflow',
-                    label: m.navigation_newWorkflow(),
-                    href: `/${locale}/workspaces/${workspaceId}/workflows/new`,
-                    icon: Workflow,
-                    requiresPermission: 'workflow',
-                  },
-                  {
-                    id: 'new-form',
-                    label: m.navigation_newForm(),
-                    href: `/${locale}/workspaces/${workspaceId}/forms/new`,
-                    icon: FileText,
-                    requiresPermission: 'forms',
-                  },
-                ],
-              },
-            ]
-          : []),
-
-        // Workspace Features (require workspace selection)
-        ...(currentWorkspace && workspaceId
-          ? [
-              {
-                id: 'workspace-features',
-                label: m.navigation_workspaceFeatures(),
-                icon: ChevronDown,
-                isSection: true,
-                children: [
-                  {
-                    id: 'tables',
-                    label: m.navigation_tables(),
-                    href: `/${locale}/workspaces/${workspaceId}/tables`,
-                    icon: LayoutGrid,
-                    badge: 'tables' as keyof ReturnType<typeof selectBadgeCounts>,
-                    requiresPermission: 'tables',
-                  },
-                  {
-                    id: 'workflow',
-                    label: m.navigation_workflow(),
-                    href: `/${locale}/workspaces/${workspaceId}/workflows`,
-                    icon: Workflow,
-                    badge: 'workflows' as keyof ReturnType<typeof selectBadgeCounts>,
-                    requiresPermission: 'workflow',
-                  },
-                  {
-                    id: 'team',
-                    label: m.navigation_team(),
-                    href: `/${locale}/workspaces/${workspaceId}/team`,
-                    icon: Users,
-                    badge: 'teamMembers' as keyof ReturnType<typeof selectBadgeCounts>,
-                    requiresPermission: 'team',
-                  },
-                  {
-                    id: 'roles',
-                    label: m.navigation_roles(),
-                    href: `/${locale}/workspaces/${workspaceId}/roles`,
-                    icon: Shield,
-                    requiresPermission: 'roles',
-                  },
-                  {
-                    id: 'analytics',
-                    label: m.navigation_analytics(),
-                    href: `/${locale}/workspaces/${workspaceId}/analytics`,
-                    icon: Activity,
-                    requiresPermission: 'analytics',
-                  },
-                ],
-              },
-            ]
-          : []),
-
-        // Organization (require workspace selection)
-        ...(currentWorkspace && workspaceId
-          ? [
-              {
-                id: 'organization',
-                label: m.navigation_organization(),
-                icon: ChevronDown,
-                isSection: true,
-                children: [
-                  {
-                    id: 'starred',
-                    label: m.navigation_starred(),
-                    href: `/${locale}/workspaces/${workspaceId}/starred`,
-                    icon: Star,
-                  },
-                  {
-                    id: 'recent-activity',
-                    label: m.navigation_recentActivity(),
-                    href: `/${locale}/workspaces/${workspaceId}/recent-activity`,
-                    icon: Clock,
-                  },
-                  {
-                    id: 'archived',
-                    label: m.navigation_archived(),
-                    href: `/${locale}/workspaces/${workspaceId}/archived`,
-                    icon: Archive,
-                  },
-                ],
-              },
-            ]
-          : []),
-
-        // System Navigation (always visible)
-        {
-          id: 'system',
-          label: m.navigation_system(),
-          icon: ChevronDown,
-          isSection: true,
-          children: [
+      // Quick Actions (require workspace selection)
+      ...(currentWorkspace && workspaceId
+        ? [
             {
-              id: 'settings',
-              label: m.navigation_settings(),
-              href: `/${locale}/workspaces`,
-              icon: Settings,
+              id: 'quick-actions',
+              label: m.navigation_quickActions(),
+              icon: Zap,
+              isSection: true,
+              children: [
+                {
+                  id: 'new-table',
+                  label: m.navigation_newTable(),
+                  href: `/${locale}/workspaces/${workspaceId}/tables/new`,
+                  icon: Database,
+                  requiresPermission: 'tables',
+                },
+                {
+                  id: 'new-workflow',
+                  label: m.navigation_newWorkflow(),
+                  href: `/${locale}/workspaces/${workspaceId}/workflows/new`,
+                  icon: Workflow,
+                  requiresPermission: 'workflow',
+                },
+                {
+                  id: 'new-form',
+                  label: m.navigation_newForm(),
+                  href: `/${locale}/workspaces/${workspaceId}/forms/new`,
+                  icon: FileText,
+                  requiresPermission: 'forms',
+                },
+              ],
             },
+          ]
+        : []),
+
+      // Workspace Features (require workspace selection)
+      ...(currentWorkspace && workspaceId
+        ? [
             {
-              id: 'help',
-              label: m.navigation_help(),
-              href: `/${locale}/help`,
-              icon: HelpCircle,
+              id: 'workspace-features',
+              label: m.navigation_workspaceFeatures(),
+              icon: ChevronDown,
+              isSection: true,
+              children: [
+                {
+                  id: 'tables',
+                  label: m.navigation_tables(),
+                  href: `/${locale}/workspaces/${workspaceId}/tables`,
+                  icon: LayoutGrid,
+                  badge: 'tables' as keyof ReturnType<typeof selectBadgeCounts>,
+                  requiresPermission: 'tables',
+                },
+                {
+                  id: 'workflow',
+                  label: m.navigation_workflow(),
+                  href: `/${locale}/workspaces/${workspaceId}/workflows`,
+                  icon: Workflow,
+                  badge: 'workflows' as keyof ReturnType<typeof selectBadgeCounts>,
+                  requiresPermission: 'workflow',
+                },
+                {
+                  id: 'team',
+                  label: m.navigation_team(),
+                  href: `/${locale}/workspaces/${workspaceId}/team`,
+                  icon: Users,
+                  badge: 'teamMembers' as keyof ReturnType<typeof selectBadgeCounts>,
+                  requiresPermission: 'team',
+                },
+                {
+                  id: 'roles',
+                  label: m.navigation_roles(),
+                  href: `/${locale}/workspaces/${workspaceId}/roles`,
+                  icon: Shield,
+                  requiresPermission: 'roles',
+                },
+                {
+                  id: 'analytics',
+                  label: m.navigation_analytics(),
+                  href: `/${locale}/workspaces/${workspaceId}/analytics`,
+                  icon: Activity,
+                  requiresPermission: 'analytics',
+                },
+              ],
             },
-          ],
-        },
-      ];
-    },
-    [badgeCounts, currentWorkspace, locale],
-  );
+          ]
+        : []),
+
+      // Organization (require workspace selection)
+      ...(currentWorkspace && workspaceId
+        ? [
+            {
+              id: 'organization',
+              label: m.navigation_organization(),
+              icon: ChevronDown,
+              isSection: true,
+              children: [
+                {
+                  id: 'starred',
+                  label: m.navigation_starred(),
+                  href: `/${locale}/workspaces/${workspaceId}/starred`,
+                  icon: Star,
+                },
+                {
+                  id: 'recent-activity',
+                  label: m.navigation_recentActivity(),
+                  href: `/${locale}/workspaces/${workspaceId}/recent-activity`,
+                  icon: Clock,
+                },
+                {
+                  id: 'archived',
+                  label: m.navigation_archived(),
+                  href: `/${locale}/workspaces/${workspaceId}/archived`,
+                  icon: Archive,
+                },
+              ],
+            },
+          ]
+        : []),
+
+      // System Navigation (always visible)
+      {
+        id: 'system',
+        label: m.navigation_system(),
+        icon: ChevronDown,
+        isSection: true,
+        children: [
+          {
+            id: 'settings',
+            label: m.navigation_settings(),
+            href: `/${locale}/workspaces`,
+            icon: Settings,
+          },
+          {
+            id: 'help',
+            label: m.navigation_help(),
+            href: `/${locale}/help`,
+            icon: HelpCircle,
+          },
+        ],
+      },
+    ];
+  }, [badgeCounts, currentWorkspace, locale]);
 
   const isActive = (href?: string) => {
     if (!href) return false;

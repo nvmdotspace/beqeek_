@@ -5,6 +5,7 @@
 ## Why `getRouteApi()` + Route Constants?
 
 This pattern provides:
+
 - ✅ **Type Safety**: Full TypeScript inference from route definitions
 - ✅ **Single Source of Truth**: Centralized route paths in `route-paths.ts`
 - ✅ **Zero Maintenance**: Change routes without updating components
@@ -25,6 +26,7 @@ const workspaceId = (params as any).workspaceId as string;
 ```
 
 **Problems:**
+
 - Hardcoded route paths throughout codebase
 - When routes change → must update all components
 - Type assertions with `as any` lose type safety
@@ -189,14 +191,14 @@ When migrating from old pattern to `getRouteApi()`:
 
 ## Benefits Summary
 
-| Feature | Old Pattern | New Pattern (`getRouteApi`) |
-|---------|-------------|----------------------------|
-| Type Safety | ❌ Lost with `as any` | ✅ Full inference |
-| Maintenance | ❌ High (update all files) | ✅ Zero (routes are SSoT) |
-| Refactoring | ❌ Error-prone | ✅ Compile-time safe |
-| Auto-completion | ❌ None | ✅ Full IDE support |
-| Code Splitting | ⚠️ Works but unsafe | ✅ Fully compatible |
-| Developer Experience | ❌ Manual typing | ✅ Automatic |
+| Feature              | Old Pattern                | New Pattern (`getRouteApi`) |
+| -------------------- | -------------------------- | --------------------------- |
+| Type Safety          | ❌ Lost with `as any`      | ✅ Full inference           |
+| Maintenance          | ❌ High (update all files) | ✅ Zero (routes are SSoT)   |
+| Refactoring          | ❌ Error-prone             | ✅ Compile-time safe        |
+| Auto-completion      | ❌ None                    | ✅ Full IDE support         |
+| Code Splitting       | ⚠️ Works but unsafe        | ✅ Fully compatible         |
+| Developer Experience | ❌ Manual typing           | ✅ Automatic                |
 
 ## Resources
 

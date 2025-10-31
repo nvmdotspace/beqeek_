@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react';
-import { Link } from '@tanstack/react-router';
 
 import { PlusCircle, Folder, Zap, Users } from 'lucide-react';
 
@@ -13,7 +12,7 @@ import { WorkspaceCreateForm } from '../components/workspace-create-form';
 import { WorkspaceEmptyState } from '../components/workspace-empty-state';
 import { WorkspaceGrid } from '../components/workspace-grid';
 // @ts-ignore
-import { m } from "@/paraglide/generated/messages.js";
+import { m } from '@/paraglide/generated/messages.js';
 
 export const WorkspaceDashboardPage = () => {
   const { data, isLoading, error } = useWorkspaces();
@@ -52,9 +51,7 @@ export const WorkspaceDashboardPage = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">
-                    {m.workspace_dashboard_totalWorkspaces()}
-                  </p>
+                  <p className="text-sm font-medium text-muted-foreground">{m.workspace_dashboard_totalWorkspaces()}</p>
                   <p className="text-2xl font-bold">{totalWorkspaces}</p>
                 </div>
                 <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">

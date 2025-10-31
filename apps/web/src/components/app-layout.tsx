@@ -19,7 +19,7 @@ import { useAuthStore } from '@/features/auth';
 import { useLogout } from '@/features/auth/hooks/use-logout';
 
 // @ts-ignore
-import { m } from "@/paraglide/generated/messages.js";
+import { m } from '@/paraglide/generated/messages.js';
 import {
   useAppKeyboardShortcuts,
   useAccessibilityEnhancements,
@@ -38,7 +38,7 @@ export const AppLayout = ({ children, showSidebar = true }: AppLayoutProps) => {
 
   const userId = useAuthStore((state) => state.userId);
   const logout = useLogout();
-    const setSidebarOpen = useSidebarStore((state) => state.setSidebarOpen);
+  const setSidebarOpen = useSidebarStore((state) => state.setSidebarOpen);
 
   // Initialize keyboard shortcuts and accessibility
   useAppKeyboardShortcuts();
@@ -110,7 +110,9 @@ export const AppLayout = ({ children, showSidebar = true }: AppLayoutProps) => {
             {/* Notifications */}
             <Button variant="ghost" size="icon" className="relative h-9 w-9 sm:h-10 sm:w-10">
               <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
-              <Badge className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full p-0 text-[10px] font-semibold flex items-center justify-center">3</Badge>
+              <Badge className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full p-0 text-[10px] font-semibold flex items-center justify-center">
+                3
+              </Badge>
             </Button>
 
             {/* Quick Actions */}
@@ -183,16 +185,10 @@ export const AppLayout = ({ children, showSidebar = true }: AppLayoutProps) => {
             </div>
             <div className="p-4">
               <div className="space-y-2">
-                <div className="text-sm font-medium text-muted-foreground">
-                  Quick Actions
-                </div>
+                <div className="text-sm font-medium text-muted-foreground">Quick Actions</div>
                 <div className="space-y-1">
-                  <div className="p-2 rounded-lg hover:bg-accent cursor-pointer">
-                    Create new table
-                  </div>
-                  <div className="p-2 rounded-lg hover:bg-accent cursor-pointer">
-                    Workflow settings
-                  </div>
+                  <div className="p-2 rounded-lg hover:bg-accent cursor-pointer">Create new table</div>
+                  <div className="p-2 rounded-lg hover:bg-accent cursor-pointer">Workflow settings</div>
                 </div>
               </div>
             </div>

@@ -29,10 +29,10 @@ export const ApiErrorBoundary: React.FC<ApiErrorBoundaryProps> = ({ children }) 
         window.location.href = `/${currentLocale}/login`;
 
         // Reset query error boundary
-        reset()
+        reset();
 
         // Prevent the error from showing in console
-        event.preventDefault()
+        event.preventDefault();
       }
     };
 

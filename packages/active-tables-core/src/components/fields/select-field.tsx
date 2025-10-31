@@ -16,18 +16,12 @@ export function SelectField(props: FieldRendererProps) {
   const isMultiple = [FIELD_TYPE_SELECT_LIST, FIELD_TYPE_CHECKBOX_LIST].includes(field.type as any);
 
   // Normalize value to array for multiple select
-  const normalizedValue = isMultiple
-    ? Array.isArray(value)
-      ? value
-      : value
-        ? [value]
-        : []
-    : value ?? '';
+  const normalizedValue = isMultiple ? (Array.isArray(value) ? value : value ? [value] : []) : (value ?? '');
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
       if (isMultiple) {
-        const selectedOptions = Array.from(e.target.selectedOptions).map(option => option.value);
+        const selectedOptions = Array.from(e.target.selectedOptions).map((option) => option.value);
         const validationError = validateFieldValue(selectedOptions, field);
         if (validationError) {
           console.warn(`Validation error for ${field.name}:`, validationError);
@@ -42,7 +36,7 @@ export function SelectField(props: FieldRendererProps) {
         onChange?.(newValue);
       }
     },
-    [onChange, field, isMultiple]
+    [onChange, field, isMultiple],
   );
 
   // Display mode
@@ -50,16 +44,12 @@ export function SelectField(props: FieldRendererProps) {
     if (isMultiple) {
       const selectedValues = normalizedValue as string[];
       if (selectedValues.length === 0) {
-        return (
-          <span className="text-gray-400 italic">
-            {props.messages?.emptyValue || '—'}
-          </span>
-        );
+        return <span className="text-gray-400 italic">{props.messages?.emptyValue || '—'}</span>;
       }
 
       return (
         <div className="flex flex-wrap gap-2">
-          {selectedValues.map(val => {
+          {selectedValues.map((val) => {
             const option = field.options?.find((opt: { value: string }) => opt.value === val);
             if (!option) return null;
 
@@ -83,11 +73,7 @@ export function SelectField(props: FieldRendererProps) {
     // Single select display
     const selectedValue = normalizedValue as string;
     if (!selectedValue) {
-      return (
-        <span className="text-gray-400 italic">
-          {props.messages?.emptyValue || '—'}
-        </span>
-      );
+      return <span className="text-gray-400 italic">{props.messages?.emptyValue || '—'}</span>;
     }
 
     const option = field.options?.find((opt: { value: string }) => opt.value === selectedValue);
@@ -119,12 +105,7 @@ export function SelectField(props: FieldRendererProps) {
   `.trim();
 
   return (
-    <FieldWrapper
-      fieldId={fieldId}
-      label={field.label}
-      required={field.required}
-      error={error}
-    >
+    <FieldWrapper fieldId={fieldId} label={field.label} required={field.required} error={error}>
       <select
         id={fieldId}
         name={field.name}
@@ -139,9 +120,7 @@ export function SelectField(props: FieldRendererProps) {
         aria-describedby={error ? `${fieldId}-error` : undefined}
       >
         {!isMultiple && (
-          <option value="">
-            {field.placeholder || props.messages?.selectPlaceholder || 'Select an option'}
-          </option>
+          <option value="">{field.placeholder || props.messages?.selectPlaceholder || 'Select an option'}</option>
         )}
         {field.options?.map((option: { value: string; text: string }) => (
           <option key={option.value} value={option.value}>

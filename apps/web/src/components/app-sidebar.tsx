@@ -4,7 +4,7 @@ import { Button } from '@workspace/ui/components/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@workspace/ui/components/avatar';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 // @ts-ignore
-import { m } from "@/paraglide/generated/messages.js";
+import { m } from '@/paraglide/generated/messages.js';
 import { useBadgeCounts } from '@/hooks/use-badge-counts';
 import {
   useSidebarStore,
@@ -138,15 +138,10 @@ const SidebarContent = ({
   onCloseMobile,
   showCloseButton = true,
 }: SidebarContentProps) => {
-    return (
+  return (
     <>
       {/* Sidebar Header - Logo Only */}
-      <div
-        className={cn(
-          'flex items-center justify-between p-4',
-          isCollapsed && 'justify-center px-2 py-3',
-        )}
-      >
+      <div className={cn('flex items-center justify-between p-4', isCollapsed && 'justify-center px-2 py-3')}>
         {/* Logo */}
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-foreground text-background">

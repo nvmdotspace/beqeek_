@@ -13,6 +13,7 @@
 ### Mode 1: Server-Side Encryption (`e2eeEncryption: false`)
 
 **Characteristics**:
+
 - Encryption key is **GENERATED AND STORED by server**
 - Server **SENDS KEY to client** in table config API response
 - Data is **ENCRYPTED in database**
@@ -20,6 +21,7 @@
 - Client **DECRYPTS** using key from server
 
 **API Response Example**:
+
 ```json
 {
   "config": {
@@ -31,6 +33,7 @@
 ```
 
 **Flow**:
+
 ```
 1. Client: GET /tables/{tableId}
 2. Server: Returns config with encryptionKey
@@ -41,6 +44,7 @@
 ```
 
 **Security Characteristics**:
+
 - ✅ Data encrypted at rest in database
 - ✅ Data encrypted in transit (HTTPS)
 - ⚠️ Server has plaintext access (can decrypt anytime)
@@ -52,6 +56,7 @@
 ### Mode 2: End-to-End Encryption (E2EE) (`e2eeEncryption: true`)
 
 **Characteristics**:
+
 - Encryption key is **GENERATED AND STORED by client** (localStorage)
 - Key **NEVER sent to server**
 - Server only stores `encryptionAuthKey` (SHA256³ hash for verification)
@@ -60,17 +65,19 @@
 - Client **DECRYPTS** using key from localStorage
 
 **API Response Example**:
+
 ```json
 {
   "config": {
     "e2eeEncryption": true,
-    "encryptionKey": null,  // ❌ Server does NOT send key
+    "encryptionKey": null, // ❌ Server does NOT send key
     "encryptionAuthKey": "d4ea0cb2cf5a6bc85ee3f163f9b66b7948d8ac3906fc6945e4fdbc1ba3918c79"
   }
 }
 ```
 
 **Flow**:
+
 ```
 1. Client: GET /tables/{tableId}
 2. Server: Returns config with e2eeEncryption=true, encryptionAuthKey
@@ -85,6 +92,7 @@
 ```
 
 **Security Characteristics**:
+
 - ✅ Data encrypted at rest in database
 - ✅ Data encrypted in transit (HTTPS)
 - ✅ Server has NO plaintext access (zero-knowledge)
@@ -97,19 +105,19 @@
 
 ## Comparison Table
 
-| Aspect | Server-Side Encryption | E2EE |
-|--------|------------------------|------|
-| **Key Storage** | Server database | Client localStorage |
-| **Key in API Response** | ✅ Yes (`encryptionKey`) | ❌ No (only `encryptionAuthKey`) |
-| **Data in Database** | Encrypted | Encrypted |
-| **Data in API Response** | Encrypted | Encrypted |
-| **Client Decryption** | ✅ Required | ✅ Required |
-| **Decryption Key Source** | `table.config.encryptionKey` | `localStorage` |
-| **Server Can Decrypt** | ✅ Yes | ❌ No |
-| **Key Recovery** | ✅ Possible | ❌ Impossible |
-| **Zero-Knowledge** | ❌ No | ✅ Yes |
-| **User Convenience** | ✅ High (no key management) | ⚠️ Low (must manage key) |
-| **Security Level** | ⚠️ Medium | ✅ High |
+| Aspect                    | Server-Side Encryption       | E2EE                             |
+| ------------------------- | ---------------------------- | -------------------------------- |
+| **Key Storage**           | Server database              | Client localStorage              |
+| **Key in API Response**   | ✅ Yes (`encryptionKey`)     | ❌ No (only `encryptionAuthKey`) |
+| **Data in Database**      | Encrypted                    | Encrypted                        |
+| **Data in API Response**  | Encrypted                    | Encrypted                        |
+| **Client Decryption**     | ✅ Required                  | ✅ Required                      |
+| **Decryption Key Source** | `table.config.encryptionKey` | `localStorage`                   |
+| **Server Can Decrypt**    | ✅ Yes                       | ❌ No                            |
+| **Key Recovery**          | ✅ Possible                  | ❌ Impossible                    |
+| **Zero-Knowledge**        | ❌ No                        | ✅ Yes                           |
+| **User Convenience**      | ✅ High (no key management)  | ⚠️ Low (must manage key)         |
+| **Security Level**        | ⚠️ Medium                    | ✅ High                          |
 
 ---
 
@@ -143,9 +151,7 @@ useEffect(() => {
 
     // Decrypt records with available key
     const decrypted = await Promise.all(
-      records.map(record =>
-        decryptRecord(record, table.config.fields, decryptionKey)
-      )
+      records.map((record) => decryptRecord(record, table.config.fields, decryptionKey)),
     );
     setDecryptedRecords(decrypted);
   };
@@ -169,6 +175,7 @@ useEffect(() => {
 ### When to Use Server-Side Encryption
 
 ✅ **Good for**:
+
 - Internal business applications
 - Trusted environment (users trust server admin)
 - Need for data recovery
@@ -176,6 +183,7 @@ useEffect(() => {
 - Users shouldn't manage keys
 
 ❌ **Not suitable for**:
+
 - Highly sensitive data (medical, financial)
 - Zero-trust requirements
 - User-controlled privacy
@@ -184,6 +192,7 @@ useEffect(() => {
 ### When to Use E2EE
 
 ✅ **Good for**:
+
 - Maximum privacy requirements
 - Zero-trust architecture
 - User-controlled encryption
@@ -191,6 +200,7 @@ useEffect(() => {
 - Compliance requires zero-knowledge
 
 ❌ **Not suitable for**:
+
 - Need for data recovery
 - Users forget keys frequently
 - Server needs to index/search data
@@ -216,6 +226,7 @@ If you need to migrate from server-side to E2EE:
 ## Security Recommendations
 
 ### For Server-Side Encryption:
+
 1. Use HSM (Hardware Security Module) for key storage
 2. Implement key rotation policy
 3. Audit key access logs
@@ -223,6 +234,7 @@ If you need to migrate from server-side to E2EE:
 5. Use separate database for keys
 
 ### For E2EE:
+
 1. Implement key backup/export feature
 2. Show key on first setup (print/download)
 3. Warn users about key loss

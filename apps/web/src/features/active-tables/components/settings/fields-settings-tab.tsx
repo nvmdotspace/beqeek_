@@ -27,15 +27,11 @@ export const FieldsSettingsTab = ({ table }: FieldsSettingsTabProps) => {
       <Card>
         <CardHeader>
           <CardTitle>Trường dữ liệu (Table Fields)</CardTitle>
-          <CardDescription>
-            All fields configured for this table ({fields.length} fields)
-          </CardDescription>
+          <CardDescription>All fields configured for this table ({fields.length} fields)</CardDescription>
         </CardHeader>
         <CardContent>
           {fields.length === 0 ? (
-            <p className="text-center text-sm text-muted-foreground py-8">
-              No fields configured
-            </p>
+            <p className="text-center text-sm text-muted-foreground py-8">No fields configured</p>
           ) : (
             <div className="space-y-3">
               {fields.map((field, index) => (
@@ -56,9 +52,7 @@ export const FieldsSettingsTab = ({ table }: FieldsSettingsTabProps) => {
                       Field name: <code className="text-xs bg-muted px-1 py-0.5 rounded">{field.name}</code>
                     </p>
                     {field.placeholder && (
-                      <p className="text-xs text-muted-foreground">
-                        Placeholder: {field.placeholder}
-                      </p>
+                      <p className="text-xs text-muted-foreground">Placeholder: {field.placeholder}</p>
                     )}
                   </div>
                   <Badge variant="secondary" className="ml-4 shrink-0">
@@ -74,32 +68,20 @@ export const FieldsSettingsTab = ({ table }: FieldsSettingsTabProps) => {
       {/* Searchable Fields */}
       <Card>
         <CardHeader>
-          <CardTitle>
-            Trường dữ liệu tìm kiếm (Searchable Fields)
-          </CardTitle>
-          <CardDescription>
-            Fields that are indexed for search functionality
-          </CardDescription>
+          <CardTitle>Trường dữ liệu tìm kiếm (Searchable Fields)</CardTitle>
+          <CardDescription>Fields that are indexed for search functionality</CardDescription>
         </CardHeader>
         <CardContent>
           {hashedKeywordFields.length === 0 ? (
-            <p className="text-center text-sm text-muted-foreground py-8">
-              No searchable fields configured
-            </p>
+            <p className="text-center text-sm text-muted-foreground py-8">No searchable fields configured</p>
           ) : (
             <div className="flex flex-wrap gap-2">
               {hashedKeywordFields.map((fieldName) => {
                 const field = fields.find((f) => f.name === fieldName);
                 return (
-                  <Badge
-                    key={fieldName}
-                    variant="outline"
-                    className="px-3 py-1.5 text-sm"
-                  >
+                  <Badge key={fieldName} variant="outline" className="px-3 py-1.5 text-sm">
                     {field?.label || fieldName}
-                    <span className="ml-2 text-xs text-muted-foreground">
-                      ({field?.type || 'unknown'})
-                    </span>
+                    <span className="ml-2 text-xs text-muted-foreground">({field?.type || 'unknown'})</span>
                   </Badge>
                 );
               })}
@@ -113,20 +95,14 @@ export const FieldsSettingsTab = ({ table }: FieldsSettingsTabProps) => {
         <Card>
           <CardHeader>
             <CardTitle>Quick Filters</CardTitle>
-            <CardDescription>
-              Fields available for quick filtering
-            </CardDescription>
+            <CardDescription>Fields available for quick filtering</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-2">
               {table.config.quickFilters.map((filter, index) => {
                 const field = fields.find((f) => f.name === filter.fieldName);
                 return (
-                  <Badge
-                    key={`${filter.fieldName}-${index}`}
-                    variant="secondary"
-                    className="px-3 py-1.5"
-                  >
+                  <Badge key={`${filter.fieldName}-${index}`} variant="secondary" className="px-3 py-1.5">
                     {field?.label || filter.fieldName}
                   </Badge>
                 );

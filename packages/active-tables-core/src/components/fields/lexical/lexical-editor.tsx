@@ -87,9 +87,7 @@ export function LexicalEditor({
   return (
     <LexicalComposer initialConfig={config}>
       <div
-        className={`relative border border-gray-300 rounded-lg bg-white ${
-          disabled ? 'opacity-50' : ''
-        } ${className}`}
+        className={`relative border border-gray-300 rounded-lg bg-white ${disabled ? 'opacity-50' : ''} ${className}`}
       >
         <ToolbarPlugin disabled={disabled} />
 
@@ -103,11 +101,7 @@ export function LexicalEditor({
                 }}
               />
             }
-            placeholder={
-              <div className="absolute top-3 left-3 text-gray-400 pointer-events-none">
-                {placeholder}
-              </div>
-            }
+            placeholder={<div className="absolute top-3 left-3 text-gray-400 pointer-events-none">{placeholder}</div>}
             ErrorBoundary={LexicalErrorBoundary}
           />
           <HistoryPlugin />

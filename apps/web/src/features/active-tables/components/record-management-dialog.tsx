@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useForm } from '@tanstack/react-form';
 
 // @ts-ignore
-import { m } from "@/paraglide/generated/messages.js";
 
 import { Button } from '@workspace/ui/components/button';
 import { Input } from '@workspace/ui/components/input';
@@ -16,13 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@workspace/ui/components/dialog';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@workspace/ui/components/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@workspace/ui/components/select';
 import { Switch } from '@workspace/ui/components/switch';
 import { Card, CardContent, CardHeader, CardTitle } from '@workspace/ui/components/card';
 
@@ -58,18 +51,18 @@ export const RecordManagementDialog = ({
     if (record) {
       setFieldValues(record.record || {});
       // Update form values
-      Object.keys(record.record || {}).forEach(key => {
+      Object.keys(record.record || {}).forEach((key) => {
         form.setFieldValue(key, record.record[key]);
       });
     } else {
       // Initialize with empty values
       const initialValues: Record<string, any> = {};
-      table.config.fields.forEach(field => {
+      table.config.fields.forEach((field) => {
         initialValues[field.name] = getDefaultValueForField(field);
       });
       setFieldValues(initialValues);
       // Update form values
-      Object.keys(initialValues).forEach(key => {
+      Object.keys(initialValues).forEach((key) => {
         form.setFieldValue(key, initialValues[key]);
       });
     }
@@ -126,14 +119,12 @@ export const RecordManagementDialog = ({
                   onBlur={formField.handleBlur}
                   onChange={(e) => {
                     formField.handleChange(e.target.value);
-                    setFieldValues(prev => ({ ...prev, [fieldName]: e.target.value }));
+                    setFieldValues((prev) => ({ ...prev, [fieldName]: e.target.value }));
                   }}
                   placeholder={field.placeholder}
                 />
                 {formField.state.meta.errors && (
-                  <p className="text-sm text-destructive">
-                    {formField.state.meta.errors[0]}
-                  </p>
+                  <p className="text-sm text-destructive">{formField.state.meta.errors[0]}</p>
                 )}
               </div>
             )}
@@ -165,15 +156,13 @@ export const RecordManagementDialog = ({
                   onBlur={formField.handleBlur}
                   onChange={(e) => {
                     formField.handleChange(e.target.value);
-                    setFieldValues(prev => ({ ...prev, [fieldName]: e.target.value }));
+                    setFieldValues((prev) => ({ ...prev, [fieldName]: e.target.value }));
                   }}
                   placeholder={field.placeholder}
                   rows={4}
                 />
                 {formField.state.meta.errors && (
-                  <p className="text-sm text-destructive">
-                    {formField.state.meta.errors[0]}
-                  </p>
+                  <p className="text-sm text-destructive">{formField.state.meta.errors[0]}</p>
                 )}
               </div>
             )}
@@ -207,18 +196,15 @@ export const RecordManagementDialog = ({
                   value={formField.state.value || ''}
                   onBlur={formField.handleBlur}
                   onChange={(e) => {
-                    const value = field.type === 'INTEGER' ?
-                      parseInt(e.target.value) || 0 :
-                      parseFloat(e.target.value) || 0;
+                    const value =
+                      field.type === 'INTEGER' ? parseInt(e.target.value) || 0 : parseFloat(e.target.value) || 0;
                     formField.handleChange(value);
-                    setFieldValues(prev => ({ ...prev, [fieldName]: value }));
+                    setFieldValues((prev) => ({ ...prev, [fieldName]: value }));
                   }}
                   placeholder={field.placeholder}
                 />
                 {formField.state.meta.errors && (
-                  <p className="text-sm text-destructive">
-                    {formField.state.meta.errors[0]}
-                  </p>
+                  <p className="text-sm text-destructive">{formField.state.meta.errors[0]}</p>
                 )}
               </div>
             )}
@@ -252,13 +238,11 @@ export const RecordManagementDialog = ({
                   onBlur={formField.handleBlur}
                   onChange={(e) => {
                     formField.handleChange(e.target.value);
-                    setFieldValues(prev => ({ ...prev, [fieldName]: e.target.value }));
+                    setFieldValues((prev) => ({ ...prev, [fieldName]: e.target.value }));
                   }}
                 />
                 {formField.state.meta.errors && (
-                  <p className="text-sm text-destructive">
-                    {formField.state.meta.errors[0]}
-                  </p>
+                  <p className="text-sm text-destructive">{formField.state.meta.errors[0]}</p>
                 )}
               </div>
             )}
@@ -275,7 +259,7 @@ export const RecordManagementDialog = ({
                   checked={formField.state.value || false}
                   onCheckedChange={(checked: boolean) => {
                     formField.handleChange(checked);
-                    setFieldValues(prev => ({ ...prev, [fieldName]: checked }));
+                    setFieldValues((prev) => ({ ...prev, [fieldName]: checked }));
                   }}
                 />
                 <Label htmlFor={formField.name}>
@@ -308,7 +292,7 @@ export const RecordManagementDialog = ({
                   value={formField.state.value || ''}
                   onValueChange={(value: string) => {
                     formField.handleChange(value);
-                    setFieldValues(prev => ({ ...prev, [fieldName]: value }));
+                    setFieldValues((prev) => ({ ...prev, [fieldName]: value }));
                   }}
                 >
                   <SelectTrigger>
@@ -323,9 +307,7 @@ export const RecordManagementDialog = ({
                   </SelectContent>
                 </Select>
                 {formField.state.meta.errors && (
-                  <p className="text-sm text-destructive">
-                    {formField.state.meta.errors[0]}
-                  </p>
+                  <p className="text-sm text-destructive">{formField.state.meta.errors[0]}</p>
                 )}
               </div>
             )}
@@ -347,7 +329,7 @@ export const RecordManagementDialog = ({
                   onBlur={formField.handleBlur}
                   onChange={(e) => {
                     formField.handleChange(e.target.value);
-                    setFieldValues(prev => ({ ...prev, [fieldName]: e.target.value }));
+                    setFieldValues((prev) => ({ ...prev, [fieldName]: e.target.value }));
                   }}
                   placeholder={field.placeholder}
                 />
@@ -362,9 +344,7 @@ export const RecordManagementDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>
-            {record ? `Edit Record` : `Create New Record`}
-          </DialogTitle>
+          <DialogTitle>{record ? `Edit Record` : `Create New Record`}</DialogTitle>
           <DialogDescription>
             {record ? `Update the record in "${table.name}"` : `Add a new record to "${table.name}"`}
           </DialogDescription>
@@ -384,20 +364,13 @@ export const RecordManagementDialog = ({
             </CardHeader>
             <CardContent className="space-y-4">
               {table.config.fields.map((field) => (
-                <div key={field.name}>
-                  {renderFieldInput(field)}
-                </div>
+                <div key={field.name}>{renderFieldInput(field)}</div>
               ))}
             </CardContent>
           </Card>
 
           <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={isLoading}
-            >
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading}>
               Cancel
             </Button>
             <Button type="submit" disabled={isLoading}>

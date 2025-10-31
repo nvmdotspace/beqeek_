@@ -1,11 +1,7 @@
 // TODO Phase 1: Implement buildEncryptedPayload in encryption-core or move to app-specific
 // import { buildEncryptedPayload, type FieldEncryptionConfig, type EncryptedPayload } from '@workspace/encryption-core';
 import type { ActiveFieldConfig } from '../types';
-import {
-  getEncryptionTypeForField,
-  isEncryptableField,
-  isValidEncryptionKey,
-} from '@workspace/active-tables-core';
+import { getEncryptionTypeForField, isEncryptableField } from '@workspace/active-tables-core';
 
 // Temporary type stubs until Phase 1
 type EncryptedPayload = any;
@@ -28,7 +24,7 @@ export class EncryptionError extends Error {
   constructor(
     message: string,
     public readonly field?: string,
-    public readonly cause?: Error
+    public readonly cause?: Error,
   ) {
     super(message);
     this.name = 'EncryptionError';
@@ -40,9 +36,7 @@ export class EncryptionError extends Error {
  * Maps ActiveFieldConfig to FieldEncryptionConfig with proper encryption types
  * TODO Phase 1: Re-enable when FieldEncryptionConfig is available
  */
-export function buildFieldConfigsMap(
-  fields: ActiveFieldConfig[]
-): Map<string, any> {
+export function buildFieldConfigsMap(fields: ActiveFieldConfig[]): Map<string, any> {
   const map = new Map<string, any>();
 
   fields.forEach((field) => {
@@ -55,8 +49,7 @@ export function buildFieldConfigsMap(
 
     // Determine if field should be searchable
     // Following html-module pattern: text fields and numbers are searchable
-    const searchable =
-      encType === 'AES-256-CBC' || encType === 'OPE' || encType === 'HMAC-SHA256';
+    const searchable = encType === 'AES-256-CBC' || encType === 'OPE' || encType === 'HMAC-SHA256';
 
     // OPE fields preserve order for range queries
     const orderPreserving = encType === 'OPE';
@@ -79,10 +72,7 @@ export function buildFieldConfigsMap(
  * Currently using same key for all fields (from table's encryptionKey)
  * Future: Support per-field key rotation
  */
-export function buildEncryptionKeysMap(
-  fields: ActiveFieldConfig[],
-  encryptionKey: string
-): Map<string, string> {
+export function buildEncryptionKeysMap(fields: ActiveFieldConfig[], encryptionKey: string): Map<string, string> {
   const map = new Map<string, string>();
 
   fields.forEach((field) => {
@@ -111,7 +101,7 @@ export function buildEncryptionKeysMap(
 export async function encryptRecordForMutation(
   rawData: Record<string, any>,
   fields: ActiveFieldConfig[],
-  encryptionKey: string
+  encryptionKey: string,
 ): Promise<EncryptedPayload> {
   if (!encryptionKey) {
     throw new EncryptionError('Encryption key not provided');
@@ -128,21 +118,14 @@ export async function encryptRecordForMutation(
 
     // Use encryption-core's buildEncryptedPayload
     // packAesInRecord: true matches html-module format (IV prepended to ciphertext)
-    const encryptedPayload = await buildEncryptedPayload(
-      rawData,
-      fieldConfigsMap,
-      encryptionKeysMap,
-      { packAesInRecord: true }
-    );
+    const encryptedPayload = await buildEncryptedPayload(rawData, fieldConfigsMap, encryptionKeysMap, {
+      packAesInRecord: true,
+    });
 
     return encryptedPayload;
   } catch (error) {
     console.error('Record encryption failed:', error);
-    throw new EncryptionError(
-      'Failed to encrypt record data',
-      undefined,
-      error instanceof Error ? error : undefined
-    );
+    throw new EncryptionError('Failed to encrypt record data', undefined, error instanceof Error ? error : undefined);
   }
 }
 
@@ -151,9 +134,7 @@ export async function encryptRecordForMutation(
  * Converts EncryptedData objects to format expected by API
  * (base64 strings for AES, hex strings for HMAC, special format for OPE)
  */
-export function extractEncryptedRecord(
-  encryptedPayload: EncryptedPayload
-): Record<string, any> {
+export function extractEncryptedRecord(encryptedPayload: EncryptedPayload): Record<string, any> {
   const record: Record<string, any> = {};
 
   for (const [fieldName, encryptedValue] of Object.entries(encryptedPayload.record)) {

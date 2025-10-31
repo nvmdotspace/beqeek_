@@ -17,19 +17,18 @@ export interface FieldLabelProps {
   className?: string;
 }
 
-export function FieldLabel({
-  htmlFor,
-  children,
-  required = false,
-  className = '',
-}: FieldLabelProps) {
+export function FieldLabel({ htmlFor, children, required = false, className = '' }: FieldLabelProps) {
   const baseClasses = 'block text-sm font-medium text-gray-700';
   const combinedClasses = className ? `${baseClasses} ${className}` : baseClasses;
 
   return (
     <label htmlFor={htmlFor} className={combinedClasses}>
       {children}
-      {required && <span className="text-red-500 ml-1" aria-label="required">*</span>}
+      {required && (
+        <span className="text-red-500 ml-1" aria-label="required">
+          *
+        </span>
+      )}
     </label>
   );
 }

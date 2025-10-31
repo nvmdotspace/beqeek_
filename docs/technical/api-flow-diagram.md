@@ -137,21 +137,22 @@
 
 ## Key Differences
 
-| Aspect | Before (❌) | After (✅) |
-|--------|------------|-----------|
-| **API Call Order** | Parallel (race condition) | Sequential (guaranteed order) |
-| **Records Query Enabled** | Always (on mount) | Only when `table.config` exists |
-| **Encryption Detection** | May run with `undefined` config | Always has valid config |
-| **useEffect Guard** | No config check | `if (!isReady \|\| !table?.config) return;` |
-| **Dependencies** | Missing `table?.config` | Includes `isReady` + `table?.config` |
-| **Server-Side Mode** | Shows encrypted (wrong) | Shows plaintext (correct) |
-| **E2EE Mode** | May attempt decrypt without config | Waits for config first |
+| Aspect                    | Before (❌)                        | After (✅)                                  |
+| ------------------------- | ---------------------------------- | ------------------------------------------- |
+| **API Call Order**        | Parallel (race condition)          | Sequential (guaranteed order)               |
+| **Records Query Enabled** | Always (on mount)                  | Only when `table.config` exists             |
+| **Encryption Detection**  | May run with `undefined` config    | Always has valid config                     |
+| **useEffect Guard**       | No config check                    | `if (!isReady \|\| !table?.config) return;` |
+| **Dependencies**          | Missing `table?.config`            | Includes `isReady` + `table?.config`        |
+| **Server-Side Mode**      | Shows encrypted (wrong)            | Shows plaintext (correct)                   |
+| **E2EE Mode**             | May attempt decrypt without config | Waits for config first                      |
 
 ---
 
 ## React Query Dependency Pattern
 
 ### Before: Independent Queries
+
 ```typescript
 const tableQuery = useActiveTable(workspaceId, tableId);
 const recordsQuery = useActiveTableRecords(workspaceId, tableId, params);
@@ -159,6 +160,7 @@ const recordsQuery = useActiveTableRecords(workspaceId, tableId, params);
 ```
 
 ### After: Dependent Queries
+
 ```typescript
 const tableQuery = useActiveTable(workspaceId, tableId);
 const table = tableQuery.data?.data;
@@ -178,6 +180,7 @@ This is the standard **dependent queries** pattern in React Query, ensuring prop
 ## Encryption Mode Handling
 
 ### Server-Side Encryption Mode
+
 ```
 Table Config: { e2eeEncryption: false }
          │
@@ -197,6 +200,7 @@ UI displays plaintext ✅
 ```
 
 ### E2EE Mode (End-to-End Encryption)
+
 ```
 Table Config: { e2eeEncryption: true, encryptionAuthKey: "..." }
          │
@@ -222,6 +226,7 @@ Client checks localStorage for encryption key
 ## Timeline Comparison
 
 ### Before Fix (Race Condition)
+
 ```
 0ms   ├─ Component Mount
       ├─ API 1: GET /tables/{tableId} (starts)
@@ -237,6 +242,7 @@ Result: UI shows encrypted data ❌
 ```
 
 ### After Fix (Sequential)
+
 ```
 0ms   ├─ Component Mount
       └─ API 1: GET /tables/{tableId} (starts)

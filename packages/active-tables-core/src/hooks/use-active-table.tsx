@@ -40,13 +40,7 @@ export interface ActiveTableProviderProps {
   children: ReactNode;
 }
 
-export function ActiveTableProvider({
-  config,
-  tableId,
-  workspaceId,
-  messages,
-  children,
-}: ActiveTableProviderProps) {
+export function ActiveTableProvider({ config, tableId, workspaceId, messages, children }: ActiveTableProviderProps) {
   return (
     <ActiveTableContext.Provider value={{ config, tableId, workspaceId, messages }}>
       {children}

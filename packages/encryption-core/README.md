@@ -25,27 +25,27 @@ pnpm add @workspace/encryption-core
 
 This library uses different encryption methods based on field types, following the [Active Table specification](../../docs/specs/active-table-config-functional-spec.md):
 
-| Field Type | Algorithm | Purpose | Supports |
-|------------|-----------|---------|----------|
-| **Text Fields** | AES-256-CBC | Strong encryption | - |
-| **Numbers/Dates** | OPE | Order-preserving | Range queries, sorting |
-| **Select Fields** | HMAC-SHA256 | Deterministic hashing | Equality checks, filtering |
-| **Reference Fields** | None | Not encrypted | - |
+| Field Type           | Algorithm   | Purpose               | Supports                   |
+| -------------------- | ----------- | --------------------- | -------------------------- |
+| **Text Fields**      | AES-256-CBC | Strong encryption     | -                          |
+| **Numbers/Dates**    | OPE         | Order-preserving      | Range queries, sorting     |
+| **Select Fields**    | HMAC-SHA256 | Deterministic hashing | Equality checks, filtering |
+| **Reference Fields** | None        | Not encrypted         | -                          |
 
 ### Encryption Methods by Field Type
 
 ```typescript
 // Text fields → AES-256-CBC
-SHORT_TEXT, TEXT, RICH_TEXT, EMAIL, URL
+(SHORT_TEXT, TEXT, RICH_TEXT, EMAIL, URL);
 
 // Time/Number fields → OPE (Order-Preserving Encryption)
-DATE, DATETIME, TIME, YEAR, MONTH, DAY, HOUR, MINUTE, SECOND, INTEGER, NUMERIC
+(DATE, DATETIME, TIME, YEAR, MONTH, DAY, HOUR, MINUTE, SECOND, INTEGER, NUMERIC);
 
 // Selection fields → HMAC-SHA256
-CHECKBOX_YES_NO, CHECKBOX_ONE, CHECKBOX_LIST, SELECT_ONE, SELECT_LIST
+(CHECKBOX_YES_NO, CHECKBOX_ONE, CHECKBOX_LIST, SELECT_ONE, SELECT_LIST);
 
 // Reference fields → No encryption
-SELECT_ONE_RECORD, SELECT_LIST_RECORD, SELECT_ONE_WORKSPACE_USER, SELECT_LIST_WORKSPACE_USER
+(SELECT_ONE_RECORD, SELECT_LIST_RECORD, SELECT_ONE_WORKSPACE_USER, SELECT_LIST_WORKSPACE_USER);
 ```
 
 ## Usage
@@ -142,39 +142,51 @@ Main encryption orchestrator that routes field encryption to appropriate algorit
 #### Static Methods
 
 ##### `tokenize(text: string): string[]`
+
 Tokenizes text for Vietnamese full-text search (NFD normalization, diacritic removal).
 
 ##### `hashKeyword(text: string, tableToken?: string): string[]`
+
 Hashes keywords using HMAC-SHA256 for searchable encryption.
 
 ##### `encryptFields(): string[]`
+
 Returns array of field types encrypted with AES-256-CBC.
 
 ##### `opeEncryptFields(): string[]`
+
 Returns array of field types encrypted with OPE.
 
 ##### `hashEncryptFields(): string[]`
+
 Returns array of field types hashed with HMAC-SHA256.
 
 ##### `noneEncryptFields(): string[]`
+
 Returns array of field types not encrypted (reference fields).
 
 ##### `encryptData(data: any, key: string): string`
+
 Alias for `AES256.encrypt()`.
 
 ##### `decryptData(encryptedData: string, key: string): string`
+
 Alias for `AES256.decrypt()`.
 
 ##### `hashKeyForAuth(key: string): string`
+
 Alias for `AES256.hashKeyForAuth()`.
 
 ##### `encryptTableData(table: TableDetail, fieldName: string, value: any): any`
+
 Encrypts field data based on field type configuration.
 
 ##### `decryptTableData(table: TableDetail, fieldName: string, value: any): any`
+
 Decrypts field data based on field type configuration.
 
 ##### `hashRecordData(fields: FieldConfig[], record: RecordData, tableKey: string): RecordHashes`
+
 Hashes record data for searchable encryption.
 
 ---
@@ -186,27 +198,33 @@ AES-256-CBC encryption with UTF8 key parsing and IV-prepended format.
 #### Static Methods
 
 ##### `encrypt(data: any, key: string): string`
+
 Encrypts data using AES-256-CBC. Returns Base64-encoded string with IV prepended.
 
 **Parameters:**
+
 - `data` - Data to encrypt (converted to string)
 - `key` - Encryption key (UTF8 string, any length)
 
 **Returns:** Base64 string with format: `[IV (16 bytes)][Ciphertext]`
 
 ##### `decrypt(encryptedData: string, key: string): string`
+
 Decrypts AES-256-CBC encrypted data.
 
 **Parameters:**
+
 - `encryptedData` - Base64 string with IV prepended
 - `key` - Encryption key (same as used for encryption)
 
 **Returns:** Decrypted plaintext string
 
 ##### `hashKeyForAuth(key: string): string`
+
 Generates authentication key using triple SHA256 hashing.
 
 **Parameters:**
+
 - `key` - Encryption key
 
 **Returns:** SHA256 hash (hex string)
@@ -226,18 +244,23 @@ const ope = new OPE(secretKey: string)
 #### Instance Methods
 
 ##### `encryptInt(value: string): string`
+
 Encrypts integer value (preserves order).
 
 ##### `encryptDecimal(value: string, fracLength?: number): string`
+
 Encrypts decimal number (preserves order).
 
 ##### `encryptStringDate(value: string): string`
+
 Encrypts date string in format `YYYY-MM-DD`.
 
 ##### `encryptStringDatetime(value: string): string`
+
 Encrypts datetime string in format `YYYY-MM-DD HH:MM:SS`.
 
 ##### `decrypt(encryptedData: string): string`
+
 Decrypts OPE-encrypted data back to original value.
 
 **Note:** OPE output format is `[OPE_CIPHERTEXT]|[AES_ENCRYPTED_PLAINTEXT]` to enable both range queries and exact value retrieval.
@@ -251,23 +274,29 @@ HMAC-SHA256 hashing for deterministic encryption of select field values.
 #### Static Methods
 
 ##### `hash(value: string, key: string): string`
+
 Creates HMAC-SHA256 hash of value.
 
 **Returns:** Hex string
 
 ##### `hashArray(values: string[], key: string): string[]`
+
 Hashes array of values (for SELECT_LIST, CHECKBOX_LIST).
 
 ##### `hashSelectOne(value: string, key: string): string`
+
 Alias for `hash()` - for single select fields.
 
 ##### `hashSelectList(values: string[], key: string): string[]`
+
 Alias for `hashArray()` - for multi-select fields.
 
 ##### `hashCheckbox(value: string, key: string): string`
+
 Alias for `hash()` - for checkbox fields.
 
 ##### `hashCheckboxList(values: string[], key: string): string[]`
+
 Alias for `hashArray()` - for checkbox list fields.
 
 ## Type Definitions
@@ -306,7 +335,7 @@ import type {
 ```typescript
 // Client-side
 const encryptionKey = 'my-secret-key-exactly-32-chars!'; // User provides
-const authKey = AES256.hashKeyForAuth(encryptionKey);   // Triple SHA256
+const authKey = AES256.hashKeyForAuth(encryptionKey); // Triple SHA256
 
 // Send authKey to server (NOT encryptionKey!)
 await api.verifyKey(tableId, authKey);
@@ -318,6 +347,7 @@ await api.verifyKey(tableId, authKey);
 ### OPE Security Considerations
 
 Order-Preserving Encryption (OPE) provides weaker security than AES-256 because:
+
 - Order information leaks (encrypted values maintain sort order)
 - Suitable for **low-sensitivity numeric data** where range queries are needed
 - Not recommended for highly sensitive data (SSN, credit cards, etc.)
@@ -356,11 +386,7 @@ This enables accent-insensitive search for Vietnamese text.
 ### Complete E2EE Workflow
 
 ```typescript
-import {
-  CommonUtils,
-  AES256,
-  type TableDetail,
-} from '@workspace/encryption-core';
+import { CommonUtils, AES256, type TableDetail } from '@workspace/encryption-core';
 
 // 1. User provides encryption key (client-side only)
 const encryptionKey = prompt('Enter your encryption key (32 chars):');
@@ -374,14 +400,18 @@ const table: TableDetail = {
   name: 'Private Tasks',
   config: {
     e2eeEncryption: true,
-    encryptionKey: encryptionKey,      // Client-side only
-    encryptionAuthKey: authKey,        // Send to server
+    encryptionKey: encryptionKey, // Client-side only
+    encryptionAuthKey: authKey, // Send to server
     hashedKeywordFields: ['title', 'description'],
     fields: [
       { name: 'title', type: 'SHORT_TEXT', label: 'Title', required: true },
       { name: 'description', type: 'TEXT', label: 'Description', required: false },
       { name: 'priority', type: 'INTEGER', label: 'Priority', required: false },
-      { name: 'status', type: 'SELECT_ONE', label: 'Status', required: false,
+      {
+        name: 'status',
+        type: 'SELECT_ONE',
+        label: 'Status',
+        required: false,
         options: [
           { value: 'todo', text: 'To Do' },
           { value: 'done', text: 'Done' },
@@ -436,6 +466,7 @@ const decryptedRecord = {
 - **HMAC-SHA256**: Very fast (~0.5ms per field)
 
 For large datasets, consider:
+
 - Encrypting/decrypting in batches
 - Using Web Workers for heavy operations
 - Caching decrypted data in memory
@@ -475,6 +506,7 @@ MIT
 ## Support
 
 For issues or questions:
+
 - 📖 [Active Table Specification](../../docs/specs/active-table-config-functional-spec.md)
 - 🐛 [Report Issues](https://github.com/anthropics/beqeek/issues)
 - 💬 Contact: support@beqeek.com

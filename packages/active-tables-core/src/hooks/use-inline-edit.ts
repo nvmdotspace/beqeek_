@@ -59,47 +59,53 @@ export function useInlineEdit(options: UseInlineEditOptions): UseInlineEditRetur
   });
 
   // Start editing a field
-  const startEditing = useCallback((fieldName: string) => {
-    const recordData = record.data || record.record;
-    setState((prev) => ({
-      ...prev,
-      isEditing: true,
-      editingField: fieldName,
-      editedValues: {
-        ...prev.editedValues,
-        [fieldName]: recordData[fieldName],
-      },
-      errors: {
-        ...prev.errors,
-        [fieldName]: '',
-      },
-    }));
-  }, [record]);
+  const startEditing = useCallback(
+    (fieldName: string) => {
+      const recordData = record.data || record.record;
+      setState((prev) => ({
+        ...prev,
+        isEditing: true,
+        editingField: fieldName,
+        editedValues: {
+          ...prev.editedValues,
+          [fieldName]: recordData[fieldName],
+        },
+        errors: {
+          ...prev.errors,
+          [fieldName]: '',
+        },
+      }));
+    },
+    [record],
+  );
 
   // Update a field value
-  const updateField = useCallback((fieldName: string, value: unknown) => {
-    // Find field config for validation
-    const fieldConfig = fields.find((f) => f.name === fieldName);
+  const updateField = useCallback(
+    (fieldName: string, value: unknown) => {
+      // Find field config for validation
+      const fieldConfig = fields.find((f) => f.name === fieldName);
 
-    // Validate the value
-    let error = '';
-    if (fieldConfig) {
-      const validationResult = validateFieldValue(value, fieldConfig);
-      error = validationResult.valid ? '' : (validationResult.error || '');
-    }
+      // Validate the value
+      let error = '';
+      if (fieldConfig) {
+        const validationResult = validateFieldValue(value, fieldConfig);
+        error = validationResult.valid ? '' : validationResult.error || '';
+      }
 
-    setState((prev) => ({
-      ...prev,
-      editedValues: {
-        ...prev.editedValues,
-        [fieldName]: value,
-      },
-      errors: {
-        ...prev.errors,
-        [fieldName]: error,
-      },
-    }));
-  }, [fields]);
+      setState((prev) => ({
+        ...prev,
+        editedValues: {
+          ...prev.editedValues,
+          [fieldName]: value,
+        },
+        errors: {
+          ...prev.errors,
+          [fieldName]: error,
+        },
+      }));
+    },
+    [fields],
+  );
 
   // Save changes
   const save = useCallback(async () => {
@@ -160,7 +166,7 @@ export function useInlineEdit(options: UseInlineEditOptions): UseInlineEditRetur
     (fieldName: string) => {
       return state.isEditing && state.editingField === fieldName;
     },
-    [state.isEditing, state.editingField]
+    [state.isEditing, state.editingField],
   );
 
   // Get current value for a field (edited or original)
@@ -172,7 +178,7 @@ export function useInlineEdit(options: UseInlineEditOptions): UseInlineEditRetur
       const recordData = record.data || record.record;
       return recordData[fieldName];
     },
-    [state.editedValues, record]
+    [state.editedValues, record],
   );
 
   // Get error for a field
@@ -180,7 +186,7 @@ export function useInlineEdit(options: UseInlineEditOptions): UseInlineEditRetur
     (fieldName: string) => {
       return state.errors[fieldName];
     },
-    [state.errors]
+    [state.errors],
   );
 
   return {

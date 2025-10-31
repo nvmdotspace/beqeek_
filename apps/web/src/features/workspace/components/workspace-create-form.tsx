@@ -1,49 +1,52 @@
-import { FormEvent, useEffect, useMemo, useState } from "react"
-import { Loader2, Sparkles } from "lucide-react"
+import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { Loader2, Sparkles } from 'lucide-react';
 
-import { useCreateWorkspace } from "../hooks/use-create-workspace"
+import { useCreateWorkspace } from '../hooks/use-create-workspace';
 
-import { Button } from "@workspace/ui/components/button"
-import { Input } from "@workspace/ui/components/input"
-import { Label } from "@workspace/ui/components/label"
-import { Textarea } from "@workspace/ui/components/textarea"
+import { Button } from '@workspace/ui/components/button';
+import { Input } from '@workspace/ui/components/input';
+import { Label } from '@workspace/ui/components/label';
+import { Textarea } from '@workspace/ui/components/textarea';
 
 // @ts-ignore
-import { m } from "@/paraglide/generated/messages.js";
+import { m } from '@/paraglide/generated/messages.js';
 
 type WorkspaceCreateFormProps = {
-  onSuccess?: () => void
-}
+  onSuccess?: () => void;
+};
 
 const slugify = (value: string) =>
   value
     .trim()
     .toLowerCase()
-    .normalize("NFD")
-    .replace(/[^\w\s-]/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-")
+    .normalize('NFD')
+    .replace(/[^\w\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-');
 
 export const WorkspaceCreateForm = ({ onSuccess }: WorkspaceCreateFormProps) => {
-  const [workspaceName, setWorkspaceName] = useState("")
-  const [namespace, setNamespace] = useState("")
-  const [namespaceDirty, setNamespaceDirty] = useState(false)
-  const [description, setDescription] = useState("")
+  const [workspaceName, setWorkspaceName] = useState('');
+  const [namespace, setNamespace] = useState('');
+  const [namespaceDirty, setNamespaceDirty] = useState(false);
+  const [description, setDescription] = useState('');
 
-  const createWorkspaceMutation = useCreateWorkspace()
+  const createWorkspaceMutation = useCreateWorkspace();
 
-  const canSubmit = useMemo(() => workspaceName.trim().length > 2 && namespace.trim().length > 2, [workspaceName, namespace])
+  const canSubmit = useMemo(
+    () => workspaceName.trim().length > 2 && namespace.trim().length > 2,
+    [workspaceName, namespace],
+  );
 
   useEffect(() => {
     if (!namespaceDirty) {
-      setNamespace(slugify(workspaceName))
+      setNamespace(slugify(workspaceName));
     }
-  }, [workspaceName, namespaceDirty])
+  }, [workspaceName, namespaceDirty]);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
+    event.preventDefault();
 
-    if (!canSubmit) return
+    if (!canSubmit) return;
 
     await createWorkspaceMutation.mutateAsync(
       {
@@ -53,15 +56,15 @@ export const WorkspaceCreateForm = ({ onSuccess }: WorkspaceCreateFormProps) => 
       },
       {
         onSuccess: () => {
-          setWorkspaceName("")
-          setNamespaceDirty(false)
-          setNamespace("")
-          setDescription("")
-          onSuccess?.()
+          setWorkspaceName('');
+          setNamespaceDirty(false);
+          setNamespace('');
+          setDescription('');
+          onSuccess?.();
         },
       },
-    )
-  }
+    );
+  };
 
   return (
     <form className="space-y-4" onSubmit={handleSubmit}>
@@ -84,8 +87,8 @@ export const WorkspaceCreateForm = ({ onSuccess }: WorkspaceCreateFormProps) => 
           id="namespace"
           value={namespace}
           onChange={(event) => {
-            setNamespace(event.target.value)
-            setNamespaceDirty(true)
+            setNamespace(event.target.value);
+            setNamespaceDirty(true);
           }}
           placeholder={m.workspace_form_namespacePlaceholder()}
         />
@@ -119,7 +122,7 @@ export const WorkspaceCreateForm = ({ onSuccess }: WorkspaceCreateFormProps) => 
         )}
       </Button>
     </form>
-  )
-}
+  );
+};
 
-export type { WorkspaceCreateFormProps }
+export type { WorkspaceCreateFormProps };

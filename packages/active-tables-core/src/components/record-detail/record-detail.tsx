@@ -38,10 +38,7 @@ export function RecordDetail(props: RecordDetailProps) {
   if (loading) {
     return (
       <div className={className}>
-        <LoadingState
-          message={messages?.loading || 'Loading record...'}
-          type="skeleton"
-        />
+        <LoadingState message={messages?.loading || 'Loading record...'} type="skeleton" />
       </div>
     );
   }
@@ -139,9 +136,7 @@ export function RecordDetail(props: RecordDetailProps) {
   return (
     <div className={className}>
       {detailContent}
-      {config.commentsPosition === 'bottom' && commentsPanel && (
-        <div className="mt-6">{commentsPanel}</div>
-      )}
+      {config.commentsPosition === 'bottom' && commentsPanel && <div className="mt-6">{commentsPanel}</div>}
     </div>
   );
 }

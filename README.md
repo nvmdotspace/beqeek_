@@ -26,6 +26,7 @@ pnpm dev
 ```
 
 Lệnh này sẽ:
+
 - Compile i18n messages (Paraglide)
 - Chạy development server cho tất cả apps
 - Tự động reload khi có thay đổi
@@ -33,6 +34,7 @@ Lệnh này sẽ:
 #### Chạy từng app riêng lẻ
 
 **App Web chính:**
+
 ```bash
 # Từ thư mục gốc
 pnpm --filter web dev
@@ -45,11 +47,13 @@ pnpm --filter web dev -- --host 127.0.0.1
 ```
 
 **App Admin (khi có):**
+
 ```bash
 pnpm --filter admin dev
 ```
 
 **Product Page App (khi có):**
+
 ```bash
 pnpm --filter product-page dev
 ```
@@ -63,6 +67,7 @@ pnpm build
 ```
 
 Lệnh này sẽ:
+
 1. Compile i18n messages
 2. Build tất cả packages theo thứ tự dependency
 3. Build tất cả applications
@@ -70,6 +75,7 @@ Lệnh này sẽ:
 #### Build từng app riêng lẻ
 
 **App Web:**
+
 ```bash
 # Build app web và dependencies
 pnpm --filter web build
@@ -79,6 +85,7 @@ cd apps/web && pnpm build
 ```
 
 **Build packages riêng:**
+
 ```bash
 # Build UI package
 pnpm --filter @workspace/ui build
@@ -91,6 +98,7 @@ pnpm --filter @workspace/encryption-core build
 #### Preview sau khi build
 
 **Preview app web:**
+
 ```bash
 # Từ thư mục gốc
 pnpm --filter web preview
@@ -102,6 +110,7 @@ cd apps/web && pnpm preview
 #### Deployment Production
 
 **Build optimized cho production:**
+
 ```bash
 # Set NODE_ENV và build
 NODE_ENV=production pnpm build
@@ -111,6 +120,7 @@ NODE_ENV=production pnpm --filter web build
 ```
 
 **Kiểm tra build output:**
+
 ```bash
 # Kiểm tra kích thước bundle
 ls -la apps/web/dist/
@@ -144,6 +154,7 @@ docker-compose down
 ```
 
 **Cấu trúc Docker files:**
+
 - `Dockerfile.web` - Multi-stage build cho production
 - `compose.yml` - Container orchestration
 - `.dockerignore` - Loại trừ files không cần thiết
@@ -167,6 +178,7 @@ chmod +x deploy.sh
 ```
 
 **Tính năng của script:**
+
 - ✅ Kiểm tra prerequisites tự động
 - ✅ Install dependencies
 - ✅ Build application
@@ -176,6 +188,7 @@ chmod +x deploy.sh
 - ✅ Colored output cho dễ đọc
 
 **Files deployment đã tạo:**
+
 - `Dockerfile.web` - Multi-stage production build
 - `compose.yml` - Container orchestration
 - `.dockerignore` - Optimize Docker build
@@ -255,13 +268,13 @@ beqeek/
 - Import styles toàn cục:
 
 ```ts
-import "@workspace/ui/globals.css"
+import '@workspace/ui/globals.css';
 ```
 
 - Import component ví dụ:
 
 ```tsx
-import { Button } from "@workspace/ui/components/button"
+import { Button } from '@workspace/ui/components/button';
 ```
 
 - Thêm component từ shadcn/ui vào app web:
@@ -287,13 +300,13 @@ Thành phần sẽ được đồng bộ hoá sang `packages/ui/src/components` 
 - Export `router` từ `apps/web/src/router.tsx`:
 
 ```ts
-import { createRouter } from '@tanstack/react-router'
+import { createRouter } from '@tanstack/react-router';
 // ...
-export const router = createRouter({ routeTree })
+export const router = createRouter({ routeTree });
 
 declare module '@tanstack/react-router' {
   interface Register {
-    router: typeof router
+    router: typeof router;
   }
 }
 ```
@@ -301,34 +314,38 @@ declare module '@tanstack/react-router' {
 - Sử dụng `RouterProvider` trong `apps/web/src/main.tsx`:
 
 ```tsx
-import { RouterProvider } from '@tanstack/react-router'
-import { router } from './router'
+import { RouterProvider } from '@tanstack/react-router';
+import { router } from './router';
 
 // ...
-<RouterProvider router={router} />
+<RouterProvider router={router} />;
 ```
 
 ## Scripts hữu ích
 
 ### Development
+
 - `pnpm dev` — chạy dev pipeline toàn repo (Turbo)
 - `pnpm --filter web dev` — chạy dev riêng app web
 - `pnpm --filter admin dev` — chạy dev app admin
 - `pnpm --filter product-page dev` — chạy dev product page
 
 ### Build & Preview
+
 - `pnpm build` — build toàn repo
 - `pnpm --filter web build` — build riêng app web
 - `pnpm --filter web preview` — preview app web sau build
 - `NODE_ENV=production pnpm build` — build optimized cho production
 
 ### Code Quality
+
 - `pnpm lint` — lint toàn repo
 - `pnpm --filter web lint` — lint riêng app web
 - `pnpm --filter web check-types` — type check app web
 - `pnpm format` — format `ts/tsx/md`
 
 ### i18n
+
 - `pnpm machine-translate` — dịch tự động các message
 
 ## Hướng dẫn đóng góp

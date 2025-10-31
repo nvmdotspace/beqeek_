@@ -30,9 +30,7 @@ export class AES256 {
       });
 
       // Prepend IV to ciphertext (Base64 encoded)
-      const encryptedBase64 = CryptoJS.enc.Base64.stringify(
-        iv.concat(encrypted.ciphertext)
-      );
+      const encryptedBase64 = CryptoJS.enc.Base64.stringify(iv.concat(encrypted.ciphertext));
       return encryptedBase64;
     } catch (error) {
       console.error('Encryption error:', error);
@@ -54,24 +52,17 @@ export class AES256 {
       const keyBytes = CryptoJS.enc.Utf8.parse(key);
       const encryptedWordArray = CryptoJS.enc.Base64.parse(encryptedData);
 
-      const iv = CryptoJS.lib.WordArray.create(
-        encryptedWordArray.words.slice(0, 4),
-        16
-      ); // IV is first 16 bytes
+      const iv = CryptoJS.lib.WordArray.create(encryptedWordArray.words.slice(0, 4), 16); // IV is first 16 bytes
       const ciphertext = CryptoJS.lib.WordArray.create(
         encryptedWordArray.words.slice(4),
-        encryptedWordArray.sigBytes - 16
+        encryptedWordArray.sigBytes - 16,
       );
 
-      const decrypted = CryptoJS.AES.decrypt(
-        { ciphertext: ciphertext } as any,
-        keyBytes,
-        {
-          iv: iv,
-          mode: CryptoJS.mode.CBC,
-          padding: CryptoJS.pad.Pkcs7,
-        }
-      );
+      const decrypted = CryptoJS.AES.decrypt({ ciphertext: ciphertext } as any, keyBytes, {
+        iv: iv,
+        mode: CryptoJS.mode.CBC,
+        padding: CryptoJS.pad.Pkcs7,
+      });
 
       return decrypted.toString(CryptoJS.enc.Utf8);
     } catch (error) {

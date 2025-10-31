@@ -69,14 +69,11 @@ export function FieldRenderer(props: FieldRendererProps) {
   }
 
   // Time component fields (simple number inputs)
-  if ([
-    FIELD_TYPE_YEAR,
-    FIELD_TYPE_MONTH,
-    FIELD_TYPE_DAY,
-    FIELD_TYPE_HOUR,
-    FIELD_TYPE_MINUTE,
-    FIELD_TYPE_SECOND,
-  ].includes(field.type as any)) {
+  if (
+    [FIELD_TYPE_YEAR, FIELD_TYPE_MONTH, FIELD_TYPE_DAY, FIELD_TYPE_HOUR, FIELD_TYPE_MINUTE, FIELD_TYPE_SECOND].includes(
+      field.type as any,
+    )
+  ) {
     return <NumberField {...props} />;
   }
 
@@ -94,12 +91,11 @@ export function FieldRenderer(props: FieldRendererProps) {
   }
 
   // Selection fields
-  if ([
-    FIELD_TYPE_SELECT_ONE,
-    FIELD_TYPE_SELECT_LIST,
-    FIELD_TYPE_CHECKBOX_ONE,
-    FIELD_TYPE_CHECKBOX_LIST,
-  ].includes(field.type as any)) {
+  if (
+    [FIELD_TYPE_SELECT_ONE, FIELD_TYPE_SELECT_LIST, FIELD_TYPE_CHECKBOX_ONE, FIELD_TYPE_CHECKBOX_LIST].includes(
+      field.type as any,
+    )
+  ) {
     return <SelectField {...props} />;
   }
 
@@ -108,25 +104,15 @@ export function FieldRenderer(props: FieldRendererProps) {
   }
 
   // Reference fields
-  if ([
-    FIELD_TYPE_SELECT_ONE_RECORD,
-    FIELD_TYPE_SELECT_LIST_RECORD,
-  ].includes(field.type as any)) {
+  if ([FIELD_TYPE_SELECT_ONE_RECORD, FIELD_TYPE_SELECT_LIST_RECORD].includes(field.type as any)) {
     return <ReferenceField {...props} />;
   }
 
   // User fields
-  if ([
-    FIELD_TYPE_SELECT_ONE_WORKSPACE_USER,
-    FIELD_TYPE_SELECT_LIST_WORKSPACE_USER,
-  ].includes(field.type as any)) {
+  if ([FIELD_TYPE_SELECT_ONE_WORKSPACE_USER, FIELD_TYPE_SELECT_LIST_WORKSPACE_USER].includes(field.type as any)) {
     return <UserField {...props} />;
   }
 
   // Fallback for unknown types
-  return (
-    <div className="text-gray-500 italic">
-      Unsupported field type: {field.type}
-    </div>
-  );
+  return <div className="text-gray-500 italic">Unsupported field type: {field.type}</div>;
 }

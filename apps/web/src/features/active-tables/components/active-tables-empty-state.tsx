@@ -3,7 +3,7 @@ import { Database, ArrowRight, Users, Workflow, Lock, Plus } from 'lucide-react'
 import { Card, CardContent } from '@workspace/ui/components/card';
 import { Button } from '@workspace/ui/components/button';
 // @ts-ignore
-import { m } from "@/paraglide/generated/messages.js";
+import { m } from '@/paraglide/generated/messages.js';
 
 interface ActiveTablesEmptyStateProps {
   onCreate?: () => void;
@@ -18,9 +18,7 @@ export const ActiveTablesEmptyState = ({ onCreate }: ActiveTablesEmptyStateProps
 
       <div className="space-y-4 max-w-2xl">
         <h3 className="text-3xl font-bold tracking-tight">{m.activeTables_empty_title()}</h3>
-        <p className="text-lg text-muted-foreground leading-relaxed">
-          {m.activeTables_empty_description()}
-        </p>
+        <p className="text-lg text-muted-foreground leading-relaxed">{m.activeTables_empty_description()}</p>
       </div>
 
       {/* Use Cases */}

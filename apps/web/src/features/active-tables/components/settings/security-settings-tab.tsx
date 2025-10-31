@@ -33,7 +33,7 @@ export const SecuritySettingsTab = ({ table, workspaceId }: SecuritySettingsTabP
   const { isE2EEEnabled, encryptionKey, encryptionAuthKey, isKeyLoaded } = useTableEncryption(
     workspaceId,
     table.id,
-    table.config
+    table.config,
   );
 
   const handleCopyKey = async (value: string, setCopied: (value: boolean) => void) => {
@@ -90,9 +90,7 @@ export const SecuritySettingsTab = ({ table, workspaceId }: SecuritySettingsTabP
           <Card>
             <CardHeader>
               <CardTitle>Khóa mã hóa (Encryption Key)</CardTitle>
-              <CardDescription>
-                32-character encryption key used for client-side encryption
-              </CardDescription>
+              <CardDescription>32-character encryption key used for client-side encryption</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -112,44 +110,27 @@ export const SecuritySettingsTab = ({ table, workspaceId }: SecuritySettingsTabP
                       onClick={() => setShowKey(!showKey)}
                       className="absolute right-0 top-0 h-full"
                     >
-                      {showKey ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
+                      {showKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </Button>
                   </div>
                   <Button
                     variant="outline"
                     size="icon"
-                    onClick={() =>
-                      handleCopyKey(
-                        encryptionKey || table.config.encryptionKey || '',
-                        setCopiedKey
-                      )
-                    }
+                    onClick={() => handleCopyKey(encryptionKey || table.config.encryptionKey || '', setCopiedKey)}
                     disabled={!encryptionKey && !table.config.encryptionKey}
                     className="shrink-0"
                   >
-                    {copiedKey ? (
-                      <Check className="h-4 w-4 text-green-600" />
-                    ) : (
-                      <Copy className="h-4 w-4" />
-                    )}
+                    {copiedKey ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
                   </Button>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {isKeyLoaded
-                    ? 'Key loaded from local storage'
-                    : 'Key not loaded - enter key to decrypt data'}
+                  {isKeyLoaded ? 'Key loaded from local storage' : 'Key not loaded - enter key to decrypt data'}
                 </p>
               </div>
 
               {/* Encryption Auth Key */}
               <div className="space-y-2">
-                <Label htmlFor="encryption-auth-key">
-                  Encryption Auth Key (SHA-256 Hash)
-                </Label>
+                <Label htmlFor="encryption-auth-key">Encryption Auth Key (SHA-256 Hash)</Label>
                 <div className="flex gap-2">
                   <Input
                     id="encryption-auth-key"
@@ -164,11 +145,7 @@ export const SecuritySettingsTab = ({ table, workspaceId }: SecuritySettingsTabP
                     disabled={!encryptionAuthKey}
                     className="shrink-0"
                   >
-                    {copiedAuthKey ? (
-                      <Check className="h-4 w-4 text-green-600" />
-                    ) : (
-                      <Copy className="h-4 w-4" />
-                    )}
+                    {copiedAuthKey ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
                   </Button>
                 </div>
                 <p className="text-xs text-muted-foreground">
@@ -183,9 +160,7 @@ export const SecuritySettingsTab = ({ table, workspaceId }: SecuritySettingsTabP
             <AlertTriangle className="h-4 w-4" />
             <AlertTitle>Important Security Information</AlertTitle>
             <AlertDescription className="space-y-2 text-sm">
-              <p className="font-semibold">
-                Keep your encryption key safe and backed up!
-              </p>
+              <p className="font-semibold">Keep your encryption key safe and backed up!</p>
               <ul className="list-disc list-inside space-y-1 ml-2">
                 <li>
                   Your encryption key is <strong>never sent to the server</strong>
@@ -196,12 +171,8 @@ export const SecuritySettingsTab = ({ table, workspaceId }: SecuritySettingsTabP
                 <li>
                   If you lose this key, you will <strong>permanently lose access</strong> to your encrypted data
                 </li>
-                <li>
-                  Store this key in a secure password manager
-                </li>
-                <li>
-                  Do not share this key with anyone you don't trust
-                </li>
+                <li>Store this key in a secure password manager</li>
+                <li>Do not share this key with anyone you don't trust</li>
               </ul>
             </AlertDescription>
           </Alert>
@@ -213,9 +184,8 @@ export const SecuritySettingsTab = ({ table, workspaceId }: SecuritySettingsTabP
         <Alert>
           <AlertTitle>No Encryption Configured</AlertTitle>
           <AlertDescription className="text-sm">
-            This table does not use end-to-end encryption. Data is stored in plain text on the
-            server. To enable encryption, you need to update the table configuration through the
-            table management interface.
+            This table does not use end-to-end encryption. Data is stored in plain text on the server. To enable
+            encryption, you need to update the table configuration through the table management interface.
           </AlertDescription>
         </Alert>
       )}

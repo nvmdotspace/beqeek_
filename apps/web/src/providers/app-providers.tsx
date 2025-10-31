@@ -21,7 +21,7 @@ function LanguageDetector({ children }: { children: React.ReactNode }) {
     setLanguage(detected);
   }, [setLanguage]);
 
-  return <>{children}</>; 
+  return <>{children}</>;
 }
 
 export const AppProviders = ({ children }: { children: React.ReactNode }) => {

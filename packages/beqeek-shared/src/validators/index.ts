@@ -4,6 +4,8 @@
  * Validation helpers for Active Table configurations
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type {
   FieldType,
   QuickFilterValidFieldType,
@@ -217,10 +219,7 @@ export function getValidPermissionsForActionType(actionType: ActionType): readon
 /**
  * Check if a permission is valid for a given action type
  */
-export function isValidPermissionForActionType(
-  permission: string,
-  actionType: ActionType
-): boolean {
+export function isValidPermissionForActionType(permission: string, actionType: ActionType): boolean {
   const validPermissions = getValidPermissionsForActionType(actionType);
   return validPermissions.includes(permission);
 }

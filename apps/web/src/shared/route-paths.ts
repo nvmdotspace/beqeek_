@@ -139,10 +139,5 @@ export const ROUTE_GROUPS = {
   ],
 
   /** All public routes (no auth required) */
-  PUBLIC: [
-    ROUTES.ROOT,
-    ROUTES.LOCALE,
-    ROUTES.LOGIN,
-    ROUTES.HELP,
-  ],
+  PUBLIC: [ROUTES.ROOT, ROUTES.LOCALE, ROUTES.LOGIN, ROUTES.HELP],
 } as const;

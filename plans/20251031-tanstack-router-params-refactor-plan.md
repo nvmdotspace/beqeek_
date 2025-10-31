@@ -14,6 +14,7 @@ This plan addresses the maintenance issues caused by hardcoded route paths in `u
 4. **No Type Inference**: Parameters aren't automatically typed based on the route definition
 
 ### Current Anti-Pattern Example
+
 ```typescript
 // Current problematic pattern in active-table-detail-page.tsx
 const params = useParams({ from: '/$locale/workspaces/$workspaceId/tables/$tableId' });
@@ -150,6 +151,7 @@ Based on the current codebase analysis:
 ## Code Examples
 
 ### Before (Current Anti-Pattern)
+
 ```typescript
 import { useParams } from '@tanstack/react-router';
 
@@ -162,6 +164,7 @@ export const ActiveTableDetailPage = () => {
 ```
 
 ### After (Best Practice)
+
 ```typescript
 import { getRouteApi } from '@tanstack/react-router';
 
@@ -185,14 +188,17 @@ export const ActiveTableDetailPage = () => {
 ## Risks and Mitigation
 
 ### Risk 1: Breaking Changes During Migration
+
 - **Mitigation**: Update components one at a time, test thoroughly
 - **Rollback Plan**: Git commits for each component update
 
 ### Risk 2: Learning Curve
+
 - **Mitigation**: Start with simple components first
 - **Documentation**: This plan serves as internal documentation
 
 ### Risk 3: Bundle Size Impact
+
 - **Mitigation**: Already using `autoCodeSplitting: true` in Vite config
 - **Monitoring**: Check bundle sizes before/after migration
 

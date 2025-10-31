@@ -6,7 +6,7 @@ import {
   updateActiveTable,
   deleteActiveTable,
   type CreateTableRequest,
-  type UpdateTableRequest
+  type UpdateTableRequest,
 } from '../api/active-tables-api';
 import type { TableFormData } from '../components/table-management-dialog';
 
@@ -67,10 +67,10 @@ export function useTableManagement({
             },
             permissionsConfig: [],
             ganttCharts: [],
-            encryptionAuthKey: data.encryptionKey ?
-              // Simple hash for demo - in production use proper crypto
-              btoa(data.encryptionKey.repeat(3)).substring(0, 64) :
-              '',
+            encryptionAuthKey: data.encryptionKey
+              ? // Simple hash for demo - in production use proper crypto
+                btoa(data.encryptionKey.repeat(3)).substring(0, 64)
+              : '',
           },
         },
       };
@@ -123,9 +123,7 @@ export function useTableManagement({
             },
             permissionsConfig: [],
             ganttCharts: [],
-            encryptionAuthKey: data.encryptionKey ?
-              btoa(data.encryptionKey.repeat(3)).substring(0, 64) :
-              '',
+            encryptionAuthKey: data.encryptionKey ? btoa(data.encryptionKey.repeat(3)).substring(0, 64) : '',
           },
         },
       };
@@ -160,17 +158,26 @@ export function useTableManagement({
   });
 
   // Action methods
-  const createTable = useCallback(async (data: TableFormData) => {
-    await createTableMutation.mutateAsync(data);
-  }, [createTableMutation]);
+  const createTable = useCallback(
+    async (data: TableFormData) => {
+      await createTableMutation.mutateAsync(data);
+    },
+    [createTableMutation],
+  );
 
-  const updateTable = useCallback(async (tableId: string, data: TableFormData) => {
-    await updateTableMutation.mutateAsync({ tableId, data });
-  }, [updateTableMutation]);
+  const updateTable = useCallback(
+    async (tableId: string, data: TableFormData) => {
+      await updateTableMutation.mutateAsync({ tableId, data });
+    },
+    [updateTableMutation],
+  );
 
-  const deleteTable = useCallback(async (tableId: string) => {
-    await deleteTableMutation.mutateAsync(tableId);
-  }, [deleteTableMutation]);
+  const deleteTable = useCallback(
+    async (tableId: string) => {
+      await deleteTableMutation.mutateAsync(tableId);
+    },
+    [deleteTableMutation],
+  );
 
   return {
     createTable,

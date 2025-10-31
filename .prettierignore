@@ -1,0 +1,41 @@
+# Dependencies
+node_modules
+.pnpm-store
+
+# Build outputs
+dist
+.turbo
+.next
+out
+build
+
+# Generated files
+*.gen.ts
+routeTree.gen.ts
+src/paraglide/generated
+apps/web/src/paraglide/generated
+
+# Lock files
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+
+# Coverage
+coverage
+.nyc_output
+
+# IDE
+.vscode
+.idea
+
+# OS
+.DS_Store
+Thumbs.db

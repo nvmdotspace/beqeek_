@@ -34,12 +34,7 @@ import {
 import { AES256 } from './algorithms/aes-256.js';
 import { OPE } from './algorithms/ope.js';
 import { HMAC } from './algorithms/hmac.js';
-import type {
-  FieldConfig,
-  TableDetail,
-  RecordData,
-  RecordHashes,
-} from './types.js';
+import type { FieldConfig, TableDetail, RecordData, RecordHashes } from './types.js';
 
 export class CommonUtils {
   /**
@@ -80,13 +75,7 @@ export class CommonUtils {
    * Text fields encrypted with AES-256-CBC
    */
   static encryptFields(): string[] {
-    return [
-      FIELD_TYPE_SHORT_TEXT,
-      FIELD_TYPE_RICH_TEXT,
-      FIELD_TYPE_TEXT,
-      FIELD_TYPE_EMAIL,
-      FIELD_TYPE_URL,
-    ];
+    return [FIELD_TYPE_SHORT_TEXT, FIELD_TYPE_RICH_TEXT, FIELD_TYPE_TEXT, FIELD_TYPE_EMAIL, FIELD_TYPE_URL];
   }
 
   /**
@@ -193,11 +182,7 @@ export class CommonUtils {
    * Decrypt table field data based on field type
    * Routes to appropriate decryption method
    */
-  static decryptTableData(
-    tableDetail: TableDetail,
-    fieldName: string,
-    value: any
-  ): any {
+  static decryptTableData(tableDetail: TableDetail, fieldName: string, value: any): any {
     const field = tableDetail.config.fields.find((f) => f.name === fieldName);
     const encryptionKey = tableDetail.config.encryptionKey;
     if (!tableDetail || !tableDetail.config) {
@@ -222,15 +207,11 @@ export class CommonUtils {
       } else if (CommonUtils.hashEncryptFields().includes(field.type) && value) {
         if (['CHECKBOX_LIST', 'SELECT_LIST'].includes(field.type)) {
           return value.map((v: string) => {
-            const option = field.options?.find(
-              (opt) => HMAC.hash(opt.value, encryptionKey) === v
-            );
+            const option = field.options?.find((opt) => HMAC.hash(opt.value, encryptionKey) === v);
             return option ? option.value : v;
           });
         } else {
-          const option = field.options?.find(
-            (opt) => HMAC.hash(opt.value, encryptionKey) === value
-          );
+          const option = field.options?.find((opt) => HMAC.hash(opt.value, encryptionKey) === value);
 
           if (option) {
             return option.value;
@@ -250,11 +231,7 @@ export class CommonUtils {
   /**
    * Hash record data using HMAC-SHA256.
    */
-  static hashRecordData(
-    fields: FieldConfig[],
-    record: RecordData,
-    tableKey: string
-  ): RecordHashes {
+  static hashRecordData(fields: FieldConfig[], record: RecordData, tableKey: string): RecordHashes {
     if (!fields || !record || !tableKey) {
       return {};
     }
@@ -265,13 +242,10 @@ export class CommonUtils {
       const fieldName = field.name;
       const fieldType = field.type;
 
-      if (record.hasOwnProperty(fieldName)) {
+      if (Object.prototype.hasOwnProperty.call(record, fieldName)) {
         const fieldValue = record[fieldName];
 
-        if (
-          Array.isArray(fieldValue) &&
-          ['CHECKBOX_LIST', 'SELECT_LIST'].includes(fieldType)
-        ) {
+        if (Array.isArray(fieldValue) && ['CHECKBOX_LIST', 'SELECT_LIST'].includes(fieldType)) {
           // Hash each item in the list
           hashedData[fieldName] = HMAC.hashArray(fieldValue, tableKey);
         } else {

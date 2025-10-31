@@ -6,20 +6,34 @@
     "build": "paraglide-js compile --project ./project.inlang --outdir ./src/paraglide && turbo build",
     "dev": "turbo dev",
     "lint": "turbo lint",
+    "lint:fix": "turbo lint -- --fix",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "machine-translate": "inlang machine translate --project project.inlang"
+    "machine-translate": "inlang machine translate --project project.inlang",
+    "prepare": "husky"
   },
   "devDependencies": {
+    "@inlang/paraglide-js": "2.4.0",
     "@workspace/eslint-config": "workspace:*",
     "@workspace/typescript-config": "workspace:*",
     "eslint": "^9.36.0",
+    "eslint-plugin-unused-imports": "^4.3.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.6",
     "prettier": "^3.6.2",
     "turbo": "^2.5.8",
-    "typescript": "^5.9.2",
-    "@inlang/paraglide-js": "2.4.0"
+    "typescript": "^5.9.2"
   },
   "packageManager": "pnpm@10.17.1",
   "engines": {
     "node": ">=22"
+  },
+  "lint-staged": {
+    "{apps,packages}/**/*.{ts,tsx,js,jsx}": [
+      "bash scripts/lint-staged-helper.sh",
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml,css}": [
+      "prettier --write"
+    ]
   }
 }

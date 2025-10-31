@@ -66,12 +66,7 @@ export interface Table {
  * Check if object is a valid work group
  */
 export function isValidWorkGroup(obj: any): obj is WorkGroup {
-  return (
-    obj &&
-    typeof obj === 'object' &&
-    typeof obj.id === 'string' &&
-    typeof obj.name === 'string'
-  );
+  return obj && typeof obj === 'object' && typeof obj.id === 'string' && typeof obj.name === 'string';
 }
 
 /**

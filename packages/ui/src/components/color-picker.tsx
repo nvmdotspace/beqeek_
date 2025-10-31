@@ -99,12 +99,7 @@ const ColorPicker = React.forwardRef<React.ElementRef<typeof PopoverTrigger>, Co
                 style={{ backgroundColor: color }}
               />
             </div>
-            <HexColorPicker
-              color={color}
-              onChange={onChange}
-              className={cn('h-40 w-40', className)}
-              {...props}
-            />
+            <HexColorPicker color={color} onChange={onChange} className={cn('h-40 w-40', className)} {...props} />
           </div>
         </PopoverContent>
       </Popover>

@@ -96,10 +96,7 @@ export class DecryptionCache<T = unknown> {
 
     // Find entry with the oldest timestamp and lowest access count
     for (const [key, entry] of this.cache.entries()) {
-      if (
-        entry.timestamp < lruTimestamp ||
-        (entry.timestamp === lruTimestamp && entry.accessCount < lruAccessCount)
-      ) {
+      if (entry.timestamp < lruTimestamp || (entry.timestamp === lruTimestamp && entry.accessCount < lruAccessCount)) {
         lruKey = key;
         lruTimestamp = entry.timestamp;
         lruAccessCount = entry.accessCount;

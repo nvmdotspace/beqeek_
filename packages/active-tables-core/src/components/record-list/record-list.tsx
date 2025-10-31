@@ -15,25 +15,13 @@ import { GenericTableLayout } from './generic-table-layout.js';
  * RecordList - Main list component with layout routing
  */
 export function RecordList(props: RecordListProps) {
-  const {
-    table,
-    records,
-    config,
-    loading = false,
-    error = null,
-    messages,
-    onRetry,
-    className = '',
-  } = props;
+  const { table, records, config, loading = false, error = null, messages, onRetry, className = '' } = props;
 
   // Loading state
   if (loading) {
     return (
       <div className={className}>
-        <LoadingState
-          message={messages?.loading || 'Loading records...'}
-          type="skeleton"
-        />
+        <LoadingState message={messages?.loading || 'Loading records...'} type="skeleton" />
       </div>
     );
   }

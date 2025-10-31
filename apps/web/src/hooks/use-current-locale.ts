@@ -1,7 +1,7 @@
 import { useRouter } from '@tanstack/react-router';
 import { useEffect } from 'react';
 import { useLanguageStore } from '@/stores/language-store';
-import { getLocaleFromPathname, normalizeLocale, type Locale } from '@/shared/locales';
+import { getLocaleFromPathname, type Locale } from '@/shared/locales';
 
 /**
  * Custom hook that provides the current locale from URL and syncs with language store.

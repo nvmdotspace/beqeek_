@@ -5,20 +5,17 @@ import type {
   ActiveWorkGroupsResponse,
   ActiveTable,
   ActiveTableConfig,
-  ActiveTableRecord
+  ActiveTableRecord,
 } from '../types';
 
 // Endpoints
-const workGroupsEndpoint = (workspaceId: string) =>
-  `/api/workspace/${workspaceId}/workflow/get/active_work_groups`;
-const tablesEndpoint = (workspaceId: string) =>
-  `/api/workspace/${workspaceId}/workflow/get/active_tables`;
+const workGroupsEndpoint = (workspaceId: string) => `/api/workspace/${workspaceId}/workflow/get/active_work_groups`;
+const tablesEndpoint = (workspaceId: string) => `/api/workspace/${workspaceId}/workflow/get/active_tables`;
 const tableDetailEndpoint = (workspaceId: string, tableId: string) =>
   `/api/workspace/${workspaceId}/workflow/get/active_tables/${tableId}`;
 const tableRecordsEndpoint = (workspaceId: string, tableId: string) =>
   `/api/workspace/${workspaceId}/workflow/get/active_tables/${tableId}/records`;
-const createTableEndpoint = (workspaceId: string) =>
-  `/api/workspace/${workspaceId}/workflow/post/active_tables`;
+const createTableEndpoint = (workspaceId: string) => `/api/workspace/${workspaceId}/workflow/post/active_tables`;
 const updateTableEndpoint = (workspaceId: string, tableId: string) =>
   `/api/workspace/${workspaceId}/workflow/patch/active_tables/${tableId}`;
 const deleteTableEndpoint = (workspaceId: string, tableId: string) =>
@@ -104,11 +101,7 @@ export interface ActiveTableRecordsResponse {
   previous_id?: string | null;
 }
 
-export const getActiveTableRecords = (
-  workspaceId: string,
-  tableId: string,
-  request: RecordQueryRequest = {}
-) =>
+export const getActiveTableRecords = (workspaceId: string, tableId: string, request: RecordQueryRequest = {}) =>
   apiRequest<ActiveTableRecordsResponse>({
     url: tableRecordsEndpoint(workspaceId, tableId),
     method: 'POST',

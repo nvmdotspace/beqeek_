@@ -1,10 +1,10 @@
-import type { Workspace } from "@/shared/api/types"
+import type { Workspace } from '@/shared/api/types';
 
-import { WorkspaceCard } from "./workspace-card"
+import { WorkspaceCard } from './workspace-card';
 
 type WorkspaceGridProps = {
-  workspaces: Workspace[]
-}
+  workspaces: Workspace[];
+};
 
 export const WorkspaceGrid = ({ workspaces }: WorkspaceGridProps) => {
   return (
@@ -13,5 +13,5 @@ export const WorkspaceGrid = ({ workspaces }: WorkspaceGridProps) => {
         <WorkspaceCard key={workspace.id} workspace={workspace} />
       ))}
     </div>
-  )
-}
+  );
+};
