@@ -100,8 +100,8 @@ packages/
 │   ├── src/components/         shadcn/ui components
 │   ├── src/styles/globals.css  TailwindCSS v4 styles
 │   └── postcss.config.mjs
-├── active-tables-core/         Core Active Tables logic (TypeScript only)
-├── active-tables-hooks/        React hooks for Active Tables
+├── active-tables-core/         Core Active Tables logic with React components & Zustand stores
+├── beqeek-shared/              Shared types, constants, and validators (TypeScript only)
 ├── encryption-core/            E2EE utilities (AES-256, OPE, HMAC-SHA256)
 ├── eslint-config/             Shared ESLint rules
 └── typescript-config/         Shared TypeScript configs
@@ -252,12 +252,9 @@ Exports via `package.json` exports field:
 - `@workspace/ui/hooks/*` → hooks
 
 ### @workspace/active-tables-core
-TypeScript-only package (no React) for table models, types, validators.
-Depends on `@workspace/encryption-core`.
-
-### @workspace/active-tables-hooks
-React Query hooks and Zustand stores for Active Tables.
-Depends on `active-tables-core` and `encryption-core`.
+Package containing Active Tables models, types, validators, React components (Quill editor), and Zustand stores.
+Depends on `@workspace/encryption-core` and `@workspace/beqeek-shared`.
+Peer dependencies: `react`, `react-dom`, `@tanstack/react-table` (must be provided by consumer).
 
 ### @workspace/encryption-core
 Client-side E2EE implementation using crypto-js.

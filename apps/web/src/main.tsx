@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { RouterProvider, createRouter } from '@tanstack/react-router';
 
 import '@workspace/ui/globals.css';
+import '@workspace/active-tables-core/lexical-styles.css';
 
 import { routeTree } from './routeTree.gen';
 import { AppProviders } from '@/providers/app-providers';

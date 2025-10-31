@@ -32,10 +32,12 @@
     "./components": {
       "import": "./dist/components/index.js",
       "types": "./dist/components/index.d.ts"
-    }
+    },
+    "./lexical-styles.css": "./src/components/fields/lexical/styles.css"
   },
   "files": [
-    "dist"
+    "dist",
+    "src/components/fields/lexical/styles.css"
   ],
   "scripts": {
     "build": "tsc",
@@ -44,27 +46,33 @@
     "dev": "tsc --watch"
   },
   "dependencies": {
-    "@tanstack/react-table": "^8.20.6",
+    "@lexical/code": "^0.22.0",
+    "@lexical/html": "^0.22.0",
+    "@lexical/link": "^0.22.0",
+    "@lexical/list": "^0.22.0",
+    "@lexical/react": "^0.22.0",
+    "@lexical/rich-text": "^0.22.0",
+    "@lexical/utils": "^0.22.0",
     "@workspace/beqeek-shared": "workspace:*",
     "@workspace/encryption-core": "workspace:*",
     "crypto-js": "^4.2.0",
     "date-fns": "^4.1.0",
-    "quill": "^2.0.3",
-    "react-quill": "^2.0.0"
+    "lexical": "^0.22.0",
+    "zustand": "^5.0.8"
   },
   "peerDependencies": {
+    "@tanstack/react-table": "^8.0.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "zustand": "^5.0.0"
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
+    "@tanstack/react-table": "^8.20.6",
     "@types/crypto-js": "^4.2.2",
     "@types/react": "^19.0.6",
     "@types/react-dom": "^19.0.2",
     "@workspace/eslint-config": "workspace:*",
     "@workspace/typescript-config": "workspace:*",
     "eslint": "^9.36.0",
-    "typescript": "^5.9.2",
-    "zustand": "^5.0.8"
+    "typescript": "^5.9.2"
   }
 }
