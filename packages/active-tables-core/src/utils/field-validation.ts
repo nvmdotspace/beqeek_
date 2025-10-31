@@ -5,7 +5,7 @@
  */
 
 import type { FieldConfig } from '../types/field.js';
-import { isTextField, isNumberField, isDateTimeField, isSelectionField } from '../types/field.js';
+import { isNumberField, isDateTimeField } from '../types/field.js';
 
 // ============================================
 // Types
@@ -166,7 +166,7 @@ export function validateFieldValue(value: unknown, field: FieldConfig): Validati
  */
 export function validateRecord(
   record: Record<string, unknown>,
-  fields: FieldConfig[]
+  fields: FieldConfig[],
 ): Record<string, ValidationResult> {
   const results: Record<string, ValidationResult> = {};
 
@@ -181,8 +181,6 @@ export function validateRecord(
 /**
  * Check if record has any validation errors
  */
-export function hasValidationErrors(
-  results: Record<string, ValidationResult>
-): boolean {
+export function hasValidationErrors(results: Record<string, ValidationResult>): boolean {
   return Object.values(results).some((r) => !r.valid);
 }

@@ -6,7 +6,7 @@
 
 import type { TableRecord } from '../types/record.js';
 import type { ActionConfig } from '../types/action.js';
-import type { PermissionsConfig, PermissionAction } from '../types/config.js';
+import type { PermissionsConfig } from '../types/config.js';
 
 // ============================================
 // Record Permissions
@@ -49,12 +49,10 @@ export function canPerformAction(
   actionId: string,
   teamId: string,
   roleId: string,
-  permissionsConfig: PermissionsConfig[]
+  permissionsConfig: PermissionsConfig[],
 ): boolean {
   // Find matching permission config
-  const config = permissionsConfig.find(
-    (c) => c.teamId === teamId && c.roleId === roleId
-  );
+  const config = permissionsConfig.find((c) => c.teamId === teamId && c.roleId === roleId);
 
   if (!config) {
     return false; // No config = deny by default
@@ -83,11 +81,9 @@ export function filterAllowedActions(
   actions: ActionConfig[],
   teamId: string,
   roleId: string,
-  permissionsConfig: PermissionsConfig[]
+  permissionsConfig: PermissionsConfig[],
 ): ActionConfig[] {
-  return actions.filter((action) =>
-    canPerformAction(action.actionId, teamId, roleId, permissionsConfig)
-  );
+  return actions.filter((action) => canPerformAction(action.actionId, teamId, roleId, permissionsConfig));
 }
 
 // ============================================
@@ -101,10 +97,7 @@ export function filterAllowedActions(
  * @param operation - Operation type
  * @returns True if user can perform operation on ALL records
  */
-export function canPerformBulkOperation(
-  records: TableRecord[],
-  operation: 'update' | 'delete'
-): boolean {
+export function canPerformBulkOperation(records: TableRecord[], operation: 'update' | 'delete'): boolean {
   return records.every((record) => {
     if (operation === 'update') {
       return canUpdateRecord(record);
@@ -125,7 +118,7 @@ export function canPerformBulkOperation(
  */
 export function filterRecordsByPermission(
   records: TableRecord[],
-  operation: 'access' | 'update' | 'delete'
+  operation: 'access' | 'update' | 'delete',
 ): TableRecord[] {
   return records.filter((record) => {
     if (operation === 'access') {

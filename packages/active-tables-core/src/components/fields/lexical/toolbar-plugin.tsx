@@ -5,15 +5,9 @@
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { useCallback, useEffect, useState } from 'react';
-import {
-  $getSelection,
-  $isRangeSelection,
-  FORMAT_TEXT_COMMAND,
-  REDO_COMMAND,
-  UNDO_COMMAND,
-} from 'lexical';
+import { $getSelection, $isRangeSelection, FORMAT_TEXT_COMMAND, REDO_COMMAND, UNDO_COMMAND } from 'lexical';
 import { $isHeadingNode } from '@lexical/rich-text';
-import { $isListNode, ListNode, INSERT_ORDERED_LIST_COMMAND, INSERT_UNORDERED_LIST_COMMAND, REMOVE_LIST_COMMAND } from '@lexical/list';
+import { $isListNode, ListNode, INSERT_ORDERED_LIST_COMMAND, INSERT_UNORDERED_LIST_COMMAND } from '@lexical/list';
 import { $getNearestNodeOfType } from '@lexical/utils';
 import { $isLinkNode, TOGGLE_LINK_COMMAND } from '@lexical/link';
 
@@ -48,10 +42,7 @@ export function ToolbarPlugin({ disabled = false }: ToolbarPluginProps) {
 
       // Update block type
       const anchorNode = selection.anchor.getNode();
-      const element =
-        anchorNode.getKey() === 'root'
-          ? anchorNode
-          : anchorNode.getTopLevelElementOrThrow();
+      const element = anchorNode.getKey() === 'root' ? anchorNode : anchorNode.getTopLevelElementOrThrow();
 
       const elementKey = element.getKey();
       const elementDOM = editor.getElementByKey(elementKey);

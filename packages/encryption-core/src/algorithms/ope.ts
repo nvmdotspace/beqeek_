@@ -27,10 +27,7 @@ export class OPE {
     // Tạo HMAC SHA256, output là WordArray
     const prf = CryptoJS.HmacSHA256(`secret|${secretKey}`, secretKey);
     const prfBytes = this.wordArrayToByteString(prf);
-    this.multiplier = Math.max(
-      1,
-      this.getUIntFromHash(prfBytes, 0, 5) % 2147483647
-    );
+    this.multiplier = Math.max(1, this.getUIntFromHash(prfBytes, 0, 5) % 2147483647);
   }
 
   encryptString(str: string): string {
@@ -64,17 +61,17 @@ export class OPE {
     }
     const length = this.length ?? 64;
     str = str.padStart(length, '\0');
-    let numStr = this.stringToAsciiNumber(str);
+    const numStr = this.stringToAsciiNumber(str);
 
     const preChunks: string[] = [];
     for (let i = 0; i < numStr.length; i += this.chunkSize * 3) {
       preChunks.push(numStr.slice(i, i + this.chunkSize * 3));
     }
 
-    let chunks = preChunks;
+    const chunks = preChunks;
 
     for (let i = 0; i < chunks.length; i++) {
-      let p_num = parseInt(chunks[i] ?? '100'); // 100..355
+      const p_num = parseInt(chunks[i] ?? '100'); // 100..355
 
       const F = this.monotoneF(p_num); // S + m*CUM[p]
       const no = this.boundedNoise(p_num, F); // nhiễu phụ thuộc p (dưới)
@@ -85,13 +82,10 @@ export class OPE {
 
     let ciphertext = chunks.join('');
 
-    ciphertext = this.toBaseSecure(
-      ciphertext,
-      this.generateSecretAlphabet(length + (this.offsets[30] ?? 0), 48)
-    );
+    ciphertext = this.toBaseSecure(ciphertext, this.generateSecretAlphabet(length + (this.offsets[30] ?? 0), 48));
     ciphertext = this.toBaseSecure(
       this.stringToAsciiNumber(ciphertext),
-      this.generateSecretAlphabet(length + (this.offsets[31] ?? 0), 48)
+      this.generateSecretAlphabet(length + (this.offsets[31] ?? 0), 48),
     );
 
     const strong_enc = this.encryptData(origStr, this.secretKey);
@@ -139,16 +133,12 @@ export class OPE {
     return encode(offset, lettersUpper, length);
   }
 
-  private generateArrayFromKey(
-    secretKey: string,
-    length: number,
-    reductionCount: number
-  ): number[] {
-    let pool = Array.from({ length: length }, (_, i) => i);
+  private generateArrayFromKey(secretKey: string, length: number, reductionCount: number): number[] {
+    const pool = Array.from({ length: length }, (_, i) => i);
 
     // Dùng SHA-512 để có đủ byte
     const hashHex = CryptoJS.SHA512(secretKey).toString(CryptoJS.enc.Hex);
-    let bytes: number[] = [];
+    const bytes: number[] = [];
     for (let i = 0; i < hashHex.length; i += 2) {
       bytes.push(parseInt(hashHex.substring(i, i + 2), 16));
     }
@@ -176,14 +166,12 @@ export class OPE {
 
   private generateSecretAlphabet(noise: number, minBase: number): string[] {
     // Bảng ký tự an toàn: từ '!' (33) tới '~' (126), loại bỏ '|'
-    let alphabet = Array.from({ length: 94 }, (_, i) =>
-      String.fromCharCode(33 + i)
-    ).filter((c) => c !== '|');
+    const alphabet = Array.from({ length: 94 }, (_, i) => String.fromCharCode(33 + i)).filter((c) => c !== '|');
     const alphabetLength = alphabet.length;
     const pickedPullOffsets = this.generateArrayFromKey(
       `${this.secretKey}|${noise}`,
       alphabetLength,
-      alphabetLength - minBase
+      alphabetLength - minBase,
     );
 
     pickedPullOffsets.sort((a, b) => b - a); // Xóa từ cuối để tránh chỉ số thay đổi
@@ -231,7 +219,7 @@ export class OPE {
       value = Math.floor(value);
       let str = '';
       do {
-        let remainder = ((value % base) + base) % base; // luôn >= 0
+        const remainder = ((value % base) + base) % base; // luôn >= 0
         str = alphabet[remainder] + str;
         value = Math.floor(value / base);
       } while (value > 0);
@@ -245,7 +233,7 @@ export class OPE {
 
     // phần nguyên
     const intPart = Math.floor(absNum);
-    let fracPart = absNum - intPart;
+    const fracPart = absNum - intPart;
 
     // chọn alphabet
     const alphabet = isNegative ? lettersUpper : lettersLower;
@@ -298,12 +286,10 @@ export class OPE {
   }
 
   private generateChaoticOffsets(key: string, numOffsets: number = 32): number[] {
-    const hash = CryptoJS.HmacSHA256(key, this.secretKey).toString(
-      CryptoJS.enc.Hex
-    );
-    let x0 = parseInt(hash.substring(0, 8), 16) / 2 ** 32; // Initial from key, 0 < x0 < 1
+    const hash = CryptoJS.HmacSHA256(key, this.secretKey).toString(CryptoJS.enc.Hex);
+    const x0 = parseInt(hash.substring(0, 8), 16) / 2 ** 32; // Initial from key, 0 < x0 < 1
     const r = 3.999; // Chaotic regime
-    let offsets: number[] = [];
+    const offsets: number[] = [];
     let x = x0;
     let cumulative = 0;
     for (let i = 0; i < numOffsets; i++) {
