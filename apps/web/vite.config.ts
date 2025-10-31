@@ -2,9 +2,15 @@ import path from "node:path"
 import { defineConfig } from "vite"
 import react from "@vitejs/plugin-react"
 import { paraglideVitePlugin } from "@inlang/paraglide-js"
+import { tanstackRouter } from "@tanstack/router-plugin/vite"
 
 export default defineConfig({
   plugins: [
+    tanstackRouter({
+      routesDirectory: path.resolve(__dirname, "src/routes"),
+      generatedRouteTree: path.resolve(__dirname, "src/routeTree.gen.ts"),
+      autoCodeSplitting: true,
+    }),
     react(),
     paraglideVitePlugin({
       project: path.resolve(__dirname, "../../project.inlang"),
