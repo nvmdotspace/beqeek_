@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect } from 'react';
 import { ArrowLeft, Plus, Search, Filter } from 'lucide-react';
-import { useNavigate, useLocation, useParams } from '@tanstack/react-router';
+import { getRouteApi } from '@tanstack/react-router';
 
 // @ts-ignore
 import { m } from "@/paraglide/generated/messages.js";
@@ -8,7 +8,7 @@ import { useWorkspaces } from '@/features/workspace/hooks/use-workspaces';
 import { useActiveTableRecordsWithConfig } from '../hooks/use-active-tables';
 import { useTableEncryption } from '../hooks/use-table-encryption';
 import { decryptRecords, clearDecryptionCache } from '@workspace/active-tables-core';
-import { useCurrentLocale } from '@/hooks/use-current-locale';
+import { ROUTES } from '@/shared/route-paths';
 
 import { Button } from '@workspace/ui/components/button';
 import { Badge } from '@workspace/ui/components/badge';
@@ -31,14 +31,12 @@ const LoadingState = () => (
   </div>
 );
 
-export const ActiveTableRecordsPage = () => {
-  const params = useParams({ from: '/$locale/workspaces/$workspaceId/tables/$tableId/records' });
-  const navigate = useNavigate();
-  const locale = useCurrentLocale();
+// Type-safe route API for records route
+const route = getRouteApi(ROUTES.ACTIVE_TABLES.TABLE_RECORDS);
 
-  // Extract params from URL - these are now the source of truth
-  const tableId = params.tableId;
-  const workspaceId = params.workspaceId;
+export const ActiveTableRecordsPage = () => {
+  const navigate = route.useNavigate();
+  const { tableId, workspaceId, locale } = route.useParams();
 
   // Use combined hook to ensure table config loads before records
   // This prevents race conditions in encryption/decryption logic
@@ -156,8 +154,8 @@ export const ActiveTableRecordsPage = () => {
 
   const handleBack = () => {
     navigate({
-      to: '/$locale/workspaces/$workspaceId/tables/$tableId',
-      params: { locale: locale || 'vi', workspaceId, tableId },
+      to: ROUTES.ACTIVE_TABLES.TABLE_DETAIL,
+      params: { locale, workspaceId, tableId },
     });
   };
 
