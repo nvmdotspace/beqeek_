@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import { devtools, persist, createJSONStorage } from 'zustand/middleware';
-import type { Workspace as ApiWorkspace } from '@/shared/api/types';
 
 // Types for sidebar state management
 export interface Workspace {

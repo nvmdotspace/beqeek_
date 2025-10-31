@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@workspace/ui/components/dialog';
 import { Button } from '@workspace/ui/components/button';
 import { Badge } from '@workspace/ui/components/badge';
-import { Keyboard, X } from 'lucide-react';
+import { Keyboard } from 'lucide-react';
 import { useAppKeyboardShortcuts } from '@/hooks/use-keyboard-shortcuts';
 
 interface KeyboardShortcutsHelpProps {

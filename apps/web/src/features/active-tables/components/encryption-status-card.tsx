@@ -9,7 +9,7 @@
  * 4. E2EE enabled, key invalid
  */
 
-import { Shield, ShieldCheck, ShieldX, AlertTriangle, Key, Check, X } from 'lucide-react';
+import { Shield, ShieldCheck, ShieldX, AlertTriangle, Key, X } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@workspace/ui/components/card';
 import { Badge } from '@workspace/ui/components/badge';
 import { Button } from '@workspace/ui/components/button';
@@ -22,11 +22,7 @@ export interface EncryptionStatusCardProps {
   onEnterKey: () => void;
 }
 
-export function EncryptionStatusCard({
-  table,
-  encryption,
-  onEnterKey,
-}: EncryptionStatusCardProps) {
+export function EncryptionStatusCard({ table, encryption, onEnterKey }: EncryptionStatusCardProps) {
   const { isE2EEEnabled, keyValidationStatus, clearKey } = encryption;
 
   // Server-side encryption only
@@ -68,7 +64,8 @@ export function EncryptionStatusCard({
             No Key Loaded
           </Badge>
           <p className="text-sm text-muted-foreground">
-            This table uses end-to-end encryption. You need to enter your encryption key to view and manage encrypted records.
+            This table uses end-to-end encryption. You need to enter your encryption key to view and manage encrypted
+            records.
           </p>
           <Button onClick={onEnterKey} className="w-full sm:w-auto">
             <Key className="mr-2 h-4 w-4" />

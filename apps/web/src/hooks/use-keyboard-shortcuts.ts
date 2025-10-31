@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useSidebarStore } from '@/stores/sidebar-store';
 import { useCurrentLocale } from './use-current-locale';
@@ -69,7 +69,7 @@ export const useAppKeyboardShortcuts = () => {
         if (currentWorkspace) {
           navigate({
             to: '/$locale/workspaces/$workspaceId/tables',
-            params: { locale, workspaceId: currentWorkspace.id }
+            params: { locale, workspaceId: currentWorkspace.id },
           });
           setActiveSection('tables');
         }
@@ -84,7 +84,7 @@ export const useAppKeyboardShortcuts = () => {
         if (currentWorkspace) {
           navigate({
             to: '/$locale/workspaces/$workspaceId/workflows',
-            params: { locale, workspaceId: currentWorkspace.id }
+            params: { locale, workspaceId: currentWorkspace.id },
           });
           setActiveSection('workflow');
         }
@@ -99,7 +99,7 @@ export const useAppKeyboardShortcuts = () => {
         if (currentWorkspace) {
           navigate({
             to: '/$locale/workspaces/$workspaceId/team',
-            params: { locale, workspaceId: currentWorkspace.id }
+            params: { locale, workspaceId: currentWorkspace.id },
           });
           setActiveSection('team');
         }
@@ -113,7 +113,7 @@ export const useAppKeyboardShortcuts = () => {
       action: () => {
         navigate({
           to: '/$locale/workspaces',
-          params: { locale }
+          params: { locale },
         });
       },
       description: 'Go to Settings',

@@ -1,6 +1,6 @@
 import { apiRequest } from '@/shared/api/http-client';
 
-import type { ActiveRecordsResponse, ActiveTableRecord } from '../types';
+import type { ActiveRecordsResponse } from '../types';
 
 export interface FetchActiveRecordsParams {
   workspaceId: string;
@@ -61,11 +61,7 @@ export interface CreateRecordRequest {
   record_hashes?: Record<string, any>;
 }
 
-export const createActiveTableRecord = (
-  workspaceId: string,
-  tableId: string,
-  request: CreateRecordRequest
-) =>
+export const createActiveTableRecord = (workspaceId: string, tableId: string, request: CreateRecordRequest) =>
   apiRequest<{ data: { id: string } }>({
     url: createRecordEndpoint(workspaceId, tableId),
     method: 'POST',
@@ -83,7 +79,7 @@ export const updateActiveTableRecord = (
   workspaceId: string,
   tableId: string,
   recordId: string,
-  request: UpdateRecordRequest
+  request: UpdateRecordRequest,
 ) =>
   apiRequest<{ message: string }>({
     url: updateRecordEndpoint(workspaceId, tableId, recordId),

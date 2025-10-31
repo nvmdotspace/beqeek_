@@ -10,7 +10,6 @@ import {
   Database,
   MessageSquare,
   Workflow,
-  Settings2,
   AlertTriangle,
   FolderOpen,
 } from 'lucide-react';
@@ -26,7 +25,7 @@ import {
   DropdownMenuTrigger,
 } from '@workspace/ui/components/dropdown-menu';
 // @ts-ignore
-import { m } from "@/paraglide/generated/messages.js";
+import { m } from '@/paraglide/generated/messages.js';
 import { useEncryption } from '../hooks/use-encryption-stub';
 import { cn } from '@workspace/ui/lib/utils';
 import { getModuleIcon, getModuleColors, getModuleTypeLabel } from '../utils/module-icons';
@@ -58,19 +57,19 @@ export const ActiveTableCard = memo(
     onOpenAutomations,
     onDelete,
   }: ActiveTableCardProps) => {
-  const locale = 'en'; // Placeholder for locale
-  const { isReady: isEncryptionReady } = useEncryption();
-  const fieldCount = table.config?.fields?.length ?? 0;
-  const isE2EE = Boolean(table.config?.e2eeEncryption);
+    const locale = 'en'; // Placeholder for locale
+    const { isReady: isEncryptionReady } = useEncryption();
+    const fieldCount = table.config?.fields?.length ?? 0;
+    const isE2EE = Boolean(table.config?.e2eeEncryption);
     const actionsCount = table.config?.actions?.length ?? 0;
     const quickFilterCount = table.config?.quickFilters?.length ?? 0;
-  const updatedAtLabel =
-    table.updatedAt && !Number.isNaN(Date.parse(table.updatedAt))
-      ? new Intl.DateTimeFormat(locale, {
-          dateStyle: 'medium',
-          timeStyle: 'short',
-        }).format(new Date(table.updatedAt))
-      : null;
+    const updatedAtLabel =
+      table.updatedAt && !Number.isNaN(Date.parse(table.updatedAt))
+        ? new Intl.DateTimeFormat(locale, {
+            dateStyle: 'medium',
+            timeStyle: 'short',
+          }).format(new Date(table.updatedAt))
+        : null;
 
     const statusLabel = useMemo(() => formatTableStatus(table.tableType), [table.tableType]);
     const fieldPreview = useMemo(() => table.config?.fields?.slice(0, 3) ?? [], [table.config?.fields]);
@@ -84,7 +83,12 @@ export const ActiveTableCard = memo(
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-start gap-3 flex-1 min-w-0">
               {/* Module Icon */}
-              <div className={cn('flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors', moduleColors.bg)}>
+              <div
+                className={cn(
+                  'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors',
+                  moduleColors.bg,
+                )}
+              >
                 <ModuleIcon className={cn('h-4.5 w-4.5', moduleColors.text)} />
               </div>
 
@@ -152,12 +156,18 @@ export const ActiveTableCard = memo(
             <div className="rounded-lg border border-border/50 bg-muted/30 p-2.5 transition-colors hover:bg-muted/40">
               <div className="flex items-center gap-1.5 font-medium text-foreground mb-1.5">
                 <Table className="h-3 w-3 text-blue-500" />
-                <span className="text-[11px]">{fieldCount} {fieldCount === 1 ? 'field' : 'fields'}</span>
+                <span className="text-[11px]">
+                  {fieldCount} {fieldCount === 1 ? 'field' : 'fields'}
+                </span>
               </div>
               {fieldPreview.length ? (
                 <div className="flex flex-wrap gap-1">
                   {fieldPreview.map((field) => (
-                    <Badge key={field.name} variant="secondary" className="max-w-[120px] truncate text-[10px] font-medium h-4 px-1">
+                    <Badge
+                      key={field.name}
+                      variant="secondary"
+                      className="max-w-[120px] truncate text-[10px] font-medium h-4 px-1"
+                    >
                       {field.label}
                     </Badge>
                   ))}
@@ -172,23 +182,23 @@ export const ActiveTableCard = memo(
             <div className="rounded-lg border border-border/50 bg-muted/30 p-2.5 transition-colors hover:bg-muted/40">
               <div className="flex items-center gap-1.5 font-medium text-foreground mb-1.5">
                 <Workflow className="h-3 w-3 text-purple-500" />
-                <span className="text-[11px]">{actionsCount} {actionsCount === 1 ? 'automation' : 'automations'}</span>
+                <span className="text-[11px]">
+                  {actionsCount} {actionsCount === 1 ? 'automation' : 'automations'}
+                </span>
               </div>
               <p className="text-[11px] text-muted-foreground leading-relaxed">
-                {actionsCount
-                  ? 'Workflows trigger on events'
-                  : 'No automations yet'}
+                {actionsCount ? 'Workflows trigger on events' : 'No automations yet'}
               </p>
             </div>
             <div className="rounded-lg border border-border/50 bg-muted/30 p-2.5 transition-colors hover:bg-muted/40">
               <div className="flex items-center gap-1.5 font-medium text-foreground mb-1.5">
                 <Database className="h-3 w-3 text-emerald-500" />
-                <span className="text-[11px]">{quickFilterCount} {quickFilterCount === 1 ? 'filter' : 'filters'}</span>
+                <span className="text-[11px]">
+                  {quickFilterCount} {quickFilterCount === 1 ? 'filter' : 'filters'}
+                </span>
               </div>
               <p className="text-[11px] text-muted-foreground leading-relaxed">
-                {quickFilterCount
-                  ? 'Saved quick filters'
-                  : 'No filters defined'}
+                {quickFilterCount ? 'Saved quick filters' : 'No filters defined'}
               </p>
             </div>
           </div>

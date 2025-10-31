@@ -12,9 +12,9 @@ import {
   DropdownMenuLabel,
   DropdownMenuGroup,
 } from '@workspace/ui/components/dropdown-menu';
-import { ChevronDown, Plus, Settings, Users, Zap, Search, LogOut, User, Crown, Shield } from 'lucide-react';
+import { ChevronDown, Plus, Settings, Users, Zap, Search } from 'lucide-react';
 // @ts-ignore
-import { m } from "@/paraglide/generated/messages.js";
+import { m } from '@/paraglide/generated/messages.js';
 import {
   useSidebarStore,
   selectCurrentWorkspace,
@@ -40,7 +40,7 @@ export const WorkspaceSelector = ({
   disablePadding = false,
   showAvatar = true,
 }: WorkspaceSelectorProps) => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
   const { data: workspacesData, isLoading } = useWorkspaces();
   const isAuthenticated = useAuthStore(selectIsAuthenticated);
 
@@ -92,7 +92,7 @@ export const WorkspaceSelector = ({
       to: '/$locale/workspaces/$workspaceId/tables',
       params: {
         locale,
-        workspaceId: workspace.id
+        workspaceId: workspace.id,
       },
     });
   };
@@ -101,7 +101,7 @@ export const WorkspaceSelector = ({
     // For now, navigate to main workspaces page
     navigate({
       to: '/$locale/workspaces',
-      params: { locale }
+      params: { locale },
     });
   };
 
@@ -109,7 +109,7 @@ export const WorkspaceSelector = ({
     // For now, navigate to main workspaces page
     navigate({
       to: '/$locale/workspaces',
-      params: { locale }
+      params: { locale },
     });
   };
 
@@ -118,12 +118,10 @@ export const WorkspaceSelector = ({
       // Navigate to workspace settings (not implemented yet, redirect to workspaces for now)
       navigate({
         to: '/$locale/workspaces',
-        params: { locale }
+        params: { locale },
       });
     }
   };
-
-
 
   if (!isAuthenticated) {
     return null;
@@ -307,8 +305,8 @@ const WorkspaceDropdownContent = ({
                 key={workspace.id}
                 onClick={() => handleWorkspaceSelect(workspace)}
                 className={cn(
-                  "flex items-center gap-3 p-3 cursor-pointer",
-                  isSelected && "bg-accent text-accent-foreground"
+                  'flex items-center gap-3 p-3 cursor-pointer',
+                  isSelected && 'bg-accent text-accent-foreground',
                 )}
               >
                 <Avatar className="h-8 w-8">
@@ -327,9 +325,7 @@ const WorkspaceDropdownContent = ({
                     <span className="text-xs text-muted-foreground truncate">{workspace.namespace}</span>
                   )}
                 </div>
-                {isSelected && (
-                  <div className="h-2 w-2 rounded-full bg-primary flex-shrink-0" />
-                )}
+                {isSelected && <div className="h-2 w-2 rounded-full bg-primary flex-shrink-0" />}
               </DropdownMenuItem>
             );
           })

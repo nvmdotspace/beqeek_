@@ -3,8 +3,6 @@ import { ArrowLeft, Plus, Search, Filter } from 'lucide-react';
 import { getRouteApi } from '@tanstack/react-router';
 
 // @ts-ignore
-import { m } from "@/paraglide/generated/messages.js";
-import { useWorkspaces } from '@/features/workspace/hooks/use-workspaces';
 import { useActiveTableRecordsWithConfig } from '../hooks/use-active-tables';
 import { useTableEncryption } from '../hooks/use-table-encryption';
 import { decryptRecords, clearDecryptionCache } from '@workspace/active-tables-core';
@@ -15,14 +13,7 @@ import { Badge } from '@workspace/ui/components/badge';
 import { Input } from '@workspace/ui/components/input';
 import { Skeleton } from '@workspace/ui/components/skeleton';
 import { Card, CardContent } from '@workspace/ui/components/card';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@workspace/ui/components/table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@workspace/ui/components/table';
 
 const LoadingState = () => (
   <div className="space-y-4">
@@ -40,21 +31,12 @@ export const ActiveTableRecordsPage = () => {
 
   // Use combined hook to ensure table config loads before records
   // This prevents race conditions in encryption/decryption logic
-  const {
-    table,
-    tableLoading,
-    tableError,
-    records,
-    recordsLoading,
-    recordsError,
-    isReady,
-    nextId,
-    previousId,
-  } = useActiveTableRecordsWithConfig(workspaceId, tableId, {
-    paging: 'cursor',
-    limit: 50,
-    direction: 'desc',
-  });
+  const { table, tableLoading, tableError, records, recordsLoading, recordsError, isReady, nextId, previousId } =
+    useActiveTableRecordsWithConfig(workspaceId, tableId, {
+      paging: 'cursor',
+      limit: 50,
+      direction: 'desc',
+    });
 
   // Initialize encryption hook (now guaranteed to have table.config when records load)
   const encryption = useTableEncryption(workspaceId ?? '', tableId, table?.config);
@@ -101,7 +83,7 @@ export const ActiveTableRecordsPage = () => {
           table.config.fields ?? [],
           decryptionKey!,
           true, // useCache - enable LRU caching for performance
-          50    // batchSize - process 50 records at a time
+          50, // batchSize - process 50 records at a time
         );
         setDecryptedRecords(decrypted);
       } catch (error) {
