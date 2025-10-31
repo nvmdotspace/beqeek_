@@ -1,0 +1,181 @@
+/**
+ * Lexical Editor Styles
+ * Base styles for the Lexical rich text editor
+ */
+
+/* Content Editable */
+.lexical-content-editable {
+  font-family: inherit;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: #1f2937;
+}
+
+.lexical-content-editable:focus {
+  outline: none;
+}
+
+/* Paragraphs */
+.editor-paragraph {
+  margin: 0;
+  margin-bottom: 0.5rem;
+}
+
+/* Headings */
+.editor-heading-h1 {
+  font-size: 1.875rem;
+  font-weight: 700;
+  margin: 0.75rem 0;
+}
+
+.editor-heading-h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0.75rem 0;
+}
+
+.editor-heading-h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0.5rem 0;
+}
+
+/* Text Formatting */
+.editor-text-bold {
+  font-weight: 700;
+}
+
+.editor-text-italic {
+  font-style: italic;
+}
+
+.editor-text-underline {
+  text-decoration: underline;
+}
+
+.editor-text-strikethrough {
+  text-decoration: line-through;
+}
+
+.editor-text-code {
+  background-color: #f3f4f6;
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-family: 'Courier New', monospace;
+  font-size: 0.875em;
+}
+
+/* Lists */
+.editor-list-ol {
+  padding-left: 1.5rem;
+  margin: 0.5rem 0;
+  list-style-type: decimal;
+}
+
+.editor-list-ul {
+  padding-left: 1.5rem;
+  margin: 0.5rem 0;
+  list-style-type: disc;
+}
+
+.editor-listitem {
+  margin: 0.25rem 0;
+}
+
+.editor-nested-listitem {
+  list-style-type: none;
+}
+
+/* Links */
+.editor-link {
+  color: #3b82f6;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.editor-link:hover {
+  color: #2563eb;
+}
+
+/* Code blocks */
+.editor-code {
+  background-color: #1f2937;
+  color: #f3f4f6;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  font-family: 'Courier New', monospace;
+  font-size: 0.875rem;
+  margin: 0.5rem 0;
+  overflow-x: auto;
+}
+
+/* Quotes */
+.editor-quote {
+  border-left: 4px solid #d1d5db;
+  padding-left: 1rem;
+  margin: 0.5rem 0;
+  font-style: italic;
+  color: #6b7280;
+}
+
+/* Display mode (read-only HTML rendering) */
+.lexical-display-content {
+  font-family: inherit;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: #1f2937;
+}
+
+.lexical-display-content p {
+  margin-bottom: 0.5rem;
+}
+
+.lexical-display-content h1,
+.lexical-display-content h2,
+.lexical-display-content h3 {
+  font-weight: 600;
+  margin: 0.75rem 0;
+}
+
+.lexical-display-content h1 {
+  font-size: 1.875rem;
+}
+
+.lexical-display-content h2 {
+  font-size: 1.5rem;
+}
+
+.lexical-display-content h3 {
+  font-size: 1.25rem;
+}
+
+.lexical-display-content ul,
+.lexical-display-content ol {
+  padding-left: 1.5rem;
+  margin: 0.5rem 0;
+}
+
+.lexical-display-content li {
+  margin: 0.25rem 0;
+}
+
+.lexical-display-content a {
+  color: #3b82f6;
+  text-decoration: underline;
+}
+
+.lexical-display-content strong {
+  font-weight: 700;
+}
+
+.lexical-display-content em {
+  font-style: italic;
+}
+
+.lexical-display-content code {
+  background-color: #f3f4f6;
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-family: 'Courier New', monospace;
+  font-size: 0.875em;
+}

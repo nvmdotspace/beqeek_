@@ -85,13 +85,14 @@ apps/
 ├── web/           Main React application (Vite + React 19)
 │   ├── src/
 │   │   ├── features/      Feature modules (auth, workspace, active-tables, workflows, etc.)
-│   │   ├── routes/        Route layouts (RootLayout with sidebar)
+│   │   ├── routes/        File-based routes (TanStack Router)
 │   │   ├── components/    Shared components (error boundaries, loading states)
 │   │   ├── stores/        Zustand stores (sidebar, language, auth)
 │   │   ├── shared/        API clients, query client, utilities
 │   │   ├── hooks/         Custom React hooks
 │   │   ├── providers/     React context providers
-│   │   └── router.tsx     TanStack Router configuration
+│   │   ├── main.tsx       App entry point with router setup
+│   │   └── routeTree.gen.ts  Auto-generated route tree (DO NOT EDIT)
 │   └── vite.config.ts
 
 packages/
@@ -99,8 +100,8 @@ packages/
 │   ├── src/components/         shadcn/ui components
 │   ├── src/styles/globals.css  TailwindCSS v4 styles
 │   └── postcss.config.mjs
-├── active-tables-core/         Core Active Tables logic (TypeScript only)
-├── active-tables-hooks/        React hooks for Active Tables
+├── active-tables-core/         Core Active Tables logic with React components & Zustand stores
+├── beqeek-shared/              Shared types, constants, and validators (TypeScript only)
 ├── encryption-core/            E2EE utilities (AES-256, OPE, HMAC-SHA256)
 ├── eslint-config/             Shared ESLint rules
 └── typescript-config/         Shared TypeScript configs
@@ -110,10 +111,126 @@ packages/
 
 **Entry**: `src/main.tsx` → `AppProviders` → `RouterProvider` with lazy-loaded routes
 
-**Routing**: TanStack Router with auth guards, lazy loading, and locale support
-- Routes: `src/router.tsx` (programmatic) - NOT file-based routing
-- Locale patterns: `/` (vi default) and `/$locale` prefix for other languages
-- Auth guards in `beforeLoad` using `getIsAuthenticated()` from `src/features/auth`
+**Routing**: TanStack Router v1.133+ with **FILE-BASED routing**
+- **Route Files**: `src/routes/**/*.tsx` - File structure defines URL structure
+- **Generated Tree**: `src/routeTree.gen.ts` - Auto-generated (DO NOT EDIT, in `.gitignore`)
+- **Plugin**: `@tanstack/router-plugin/vite` in `vite.config.ts` generates routes on save
+- **Locale patterns**: `/` (vi default) and `/$locale` prefix for other languages
+- **Auth guards**: `beforeLoad` hook using `getIsAuthenticated()` from `src/features/auth`
+- **Lazy loading**: Automatic code-splitting with `autoCodeSplitting: true`
+
+**Route Structure**:
+```
+src/routes/
+├── __root.tsx                              # Root layout with RootLayout component
+├── index.tsx                               # / - Redirect to locale
+├── $.tsx                                   # 404 catch-all route
+├── $locale.tsx                             # Layout for /$locale routes
+├── $locale/
+│   ├── index.tsx                           # /$locale - Redirect based on auth
+│   ├── login.tsx                           # /$locale/login
+│   ├── workspaces.tsx                      # /$locale/workspaces
+│   ├── workspaces/
+│   │   └── $workspaceId/
+│   │       ├── tables.tsx                  # Tables list
+│   │       ├── tables/
+│   │       │   └── $tableId/
+│   │       │       ├── index.tsx           # Table detail
+│   │       │       ├── records.tsx         # Records page
+│   │       │       └── settings.tsx        # Settings page
+│   │       ├── workflows.tsx
+│   │       ├── team.tsx
+│   │       ├── roles.tsx
+│   │       ├── analytics.tsx
+│   │       ├── starred.tsx
+│   │       ├── recent-activity.tsx
+│   │       └── archived.tsx
+│   ├── notifications.tsx                   # Global routes
+│   ├── search.tsx
+│   └── help.tsx
+```
+
+**Creating New Routes**:
+1. Create file in `src/routes/` following naming convention
+2. Use `createFileRoute()` from `@tanstack/react-router`
+3. Export `Route` constant with component and options
+4. Plugin auto-generates `routeTree.gen.ts` on save
+5. Use `useRouter()` hook to access router instance (NOT a global import)
+
+**Example Route File**:
+```tsx
+import { createFileRoute } from '@tanstack/react-router';
+import { lazy, Suspense } from 'react';
+
+const MyPageLazy = lazy(() => import('@/features/my-feature/pages/my-page'));
+
+export const Route = createFileRoute('/$locale/my-route')({
+  component: MyComponent,
+  beforeLoad: ({ params }) => {
+    // Auth guards, redirects, etc.
+  },
+});
+
+function MyComponent() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <MyPageLazy />
+    </Suspense>
+  );
+}
+```
+
+**Accessing Route Params (REQUIRED PATTERN)**:
+
+Use `getRouteApi()` with centralized route constants for type-safe param extraction:
+
+```tsx
+// ✅ CORRECT: Type-safe constants + getRouteApi()
+import { getRouteApi } from '@tanstack/react-router';
+import { ROUTES } from '@/shared/route-paths';
+
+const route = getRouteApi(ROUTES.ACTIVE_TABLES.TABLE_DETAIL);
+
+export function MyPage() {
+  const { tableId, workspaceId, locale } = route.useParams();
+  const navigate = route.useNavigate();
+
+  // Navigate using constants - prevents typos!
+  navigate({
+    to: ROUTES.ACTIVE_TABLES.TABLE_RECORDS,
+    params: { locale, workspaceId, tableId },
+  });
+}
+```
+
+```tsx
+// ❌ WRONG: Hardcoded paths + type assertions
+import { useParams } from '@tanstack/react-router';
+
+const route = getRouteApi('/$locale/workspaces/$workspaceId/tables/$tableId'); // Typo-prone!
+const params = useParams({ from: '...' });
+const tableId = (params as any).tableId as string; // Loses type safety!
+```
+
+**Route Constants** ([route-paths.ts](apps/web/src/shared/route-paths.ts)):
+```tsx
+ROUTES.ACTIVE_TABLES.LIST          // /$locale/workspaces/$workspaceId/tables
+ROUTES.ACTIVE_TABLES.TABLE_DETAIL  // /$locale/workspaces/$workspaceId/tables/$tableId
+ROUTES.ACTIVE_TABLES.TABLE_RECORDS // /$locale/workspaces/$workspaceId/tables/$tableId/records
+ROUTES.ACTIVE_TABLES.TABLE_SETTINGS// /$locale/workspaces/$workspaceId/tables/$tableId/settings
+ROUTES.WORKSPACE.*                 // Workspace feature routes
+ROUTES.LOGIN, ROUTES.WORKSPACES    // Auth routes
+```
+
+**Benefits:**
+- ✅ Full TypeScript inference from route definitions
+- ✅ Single source of truth for all routes
+- ✅ Zero maintenance when routes change
+- ✅ Auto-completion prevents typos
+- ✅ Compile-time route path validation
+- ✅ Works perfectly with code splitting
+
+See [route-helpers.md](apps/web/src/shared/route-helpers.md) for detailed patterns.
 
 **i18n**: Paraglide plugin in Vite config
 - Messages in `messages/` directory → compiled to `src/paraglide/generated`
@@ -187,12 +304,9 @@ Exports via `package.json` exports field:
 - `@workspace/ui/hooks/*` → hooks
 
 ### @workspace/active-tables-core
-TypeScript-only package (no React) for table models, types, validators.
-Depends on `@workspace/encryption-core`.
-
-### @workspace/active-tables-hooks
-React Query hooks and Zustand stores for Active Tables.
-Depends on `active-tables-core` and `encryption-core`.
+Package containing Active Tables models, types, validators, React components (Quill editor), and Zustand stores.
+Depends on `@workspace/encryption-core` and `@workspace/beqeek-shared`.
+Peer dependencies: `react`, `react-dom`, `@tanstack/react-table` (must be provided by consumer).
 
 ### @workspace/encryption-core
 Client-side E2EE implementation using crypto-js.
@@ -287,7 +401,11 @@ For E2EE Active Tables:
 5. **Encryption key exposure**: Never log or transmit encryption keys
 6. **Design violations**: Check `docs/design-system.md` before UI changes
 7. **Locale fallback**: Unsupported locales fallback to `vi`
-8. **Router is programmatic**: Routes defined in `src/router.tsx`, NOT file-based in `src/routes/`
+8. **File-based routing**: Routes are files in `src/routes/`, NOT `src/router.tsx` (deleted)
+9. **Generated files**: NEVER edit `routeTree.gen.ts` - auto-generated by TanStack Router plugin
+10. **Router instance**: Use `useRouter()` hook, NOT a global `router` import
+11. **Route naming**: `$` for params, `_` prefix for pathless layouts, `$.tsx` for catch-all/404
+12. **Route params**: ALWAYS use `getRouteApi()` for type-safe params, NEVER use `useParams({ from: '...' })` with type assertions
 
 ## Code Quality Standards
 

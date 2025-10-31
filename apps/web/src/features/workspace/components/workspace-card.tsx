@@ -3,6 +3,7 @@ import { Globe, ShieldCheck, Users, Database } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
 
 import type { Workspace } from '@/shared/api/types';
+import { ROUTES } from '@/shared/route-paths';
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@workspace/ui/components/card';
 import { Badge } from '@workspace/ui/components/badge';
@@ -75,13 +76,13 @@ export const WorkspaceCard = ({ workspace }: WorkspaceCardProps) => {
       </CardContent>
       <CardFooter className="flex gap-2 pt-3">
         <Button asChild variant="outline" size="sm" className="flex-1 text-xs">
-          <Link to="/$locale/workspaces/$workspaceId/tables" params={{ locale, workspaceId: workspace.id }}>
+          <Link to={ROUTES.ACTIVE_TABLES.LIST} params={{ locale, workspaceId: workspace.id }}>
             <Database className="mr-1.5 h-3.5 w-3.5" />
             {m.workspace_card_activeTables()}
           </Link>
         </Button>
         <Button asChild size="sm" className="flex-1 text-xs">
-          <Link to="/$locale/workspaces" params={{ locale }}>
+          <Link to={ROUTES.WORKSPACES} params={{ locale }}>
             {m.workspace_card_openWorkspace()}
           </Link>
         </Button>

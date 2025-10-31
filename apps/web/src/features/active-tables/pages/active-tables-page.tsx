@@ -17,9 +17,9 @@ import { TableManagementDialog } from '../components/table-management-dialog';
 import { useTableManagement } from '../hooks/use-table-management';
 // @ts-ignore
 import { m } from "@/paraglide/generated/messages.js";
-import { useNavigate, useParams } from '@tanstack/react-router';
+import { getRouteApi } from '@tanstack/react-router';
 import { useSidebarStore, selectCurrentWorkspace } from '@/stores/sidebar-store';
-import { useCurrentLocale } from '@/hooks/use-current-locale';
+import { ROUTES } from '@/shared/route-paths';
 
 import { Button } from '@workspace/ui/components/button';
 import { Skeleton } from '@workspace/ui/components/skeleton';
@@ -36,13 +36,12 @@ const formatStatusLabel = (tableType?: string) => {
   return tableType.replace(/[_-]/g, ' ').toLowerCase();
 };
 
-export const ActiveTablesPage = () => {
-  const navigate = useNavigate();
-  const params = useParams({ strict: false });
-  const locale = useCurrentLocale();
+// Type-safe route API for this route
+const route = getRouteApi(ROUTES.ACTIVE_TABLES.LIST);
 
-  // Extract workspaceId from URL params - this is now the source of truth
-  const workspaceId = (params as any).workspaceId || '';
+export const ActiveTablesPage = () => {
+  const navigate = route.useNavigate();
+  const { workspaceId, locale } = route.useParams();
 
   // Also sync with Zustand store for backward compatibility
   const currentWorkspace = useSidebarStore(selectCurrentWorkspace);
@@ -192,10 +191,10 @@ export const ActiveTablesPage = () => {
       return;
     }
 
-    // Always use locale in URL
+    // Navigate to table detail - params are fully typed
     navigate({
-      to: '/$locale/workspaces/$workspaceId/tables/$tableId',
-      params: { locale: locale || 'vi', workspaceId, tableId: table.id },
+      to: ROUTES.ACTIVE_TABLES.TABLE_DETAIL,
+      params: { locale, workspaceId, tableId: table.id },
     });
   };
 
@@ -227,8 +226,8 @@ export const ActiveTablesPage = () => {
     if (!workspaceId) return;
 
     navigate({
-      to: '/$locale/workspaces/$workspaceId/tables/$tableId/records',
-      params: { locale: locale || 'vi', workspaceId, tableId: table.id },
+      to: ROUTES.ACTIVE_TABLES.TABLE_RECORDS,
+      params: { locale, workspaceId, tableId: table.id },
     });
   };
 
@@ -236,8 +235,8 @@ export const ActiveTablesPage = () => {
     if (!workspaceId) return;
 
     navigate({
-      to: '/$locale/workspaces/$workspaceId/tables/$tableId/records',
-      params: { locale: locale || 'vi', workspaceId, tableId: table.id },
+      to: ROUTES.ACTIVE_TABLES.TABLE_RECORDS,
+      params: { locale, workspaceId, tableId: table.id },
     });
   };
 
@@ -245,8 +244,8 @@ export const ActiveTablesPage = () => {
     if (!workspaceId) return;
 
     navigate({
-      to: '/$locale/workspaces/$workspaceId/tables/$tableId',
-      params: { locale: locale || 'vi', workspaceId, tableId: table.id },
+      to: ROUTES.ACTIVE_TABLES.TABLE_DETAIL,
+      params: { locale, workspaceId, tableId: table.id },
     });
   };
 

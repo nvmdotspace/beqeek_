@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import { useQueryErrorResetBoundary } from '@tanstack/react-query';
 import { useLanguageStore } from '@/stores/language-store';
 import { useAuthStore } from '@/features/auth/stores/auth-store';
-import { router } from '@/router';
 import { ApiError } from '@/shared/api/api-error';
 
 interface ApiErrorBoundaryProps {
@@ -26,7 +25,8 @@ export const ApiErrorBoundary: React.FC<ApiErrorBoundaryProps> = ({ children }) 
         logout();
 
         // Redirect to login page with current language
-        router.navigate({ to: '/$locale/login', params: { locale: locale || 'vi' } })
+        const currentLocale = locale || 'vi';
+        window.location.href = `/${currentLocale}/login`;
 
         // Reset query error boundary
         reset()

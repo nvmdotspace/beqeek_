@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect } from 'react';
 import { ArrowLeft, ShieldCheck, Shield, Link as LinkIcon, ListTree, Lock, Database, Settings2, Hash, AlertTriangle } from 'lucide-react';
-import { useNavigate, useParams } from '@tanstack/react-router';
+import { getRouteApi } from '@tanstack/react-router';
 
 // @ts-ignore
 import { m } from "@/paraglide/generated/messages.js";
@@ -8,7 +8,7 @@ import { useActiveTable, useActiveWorkGroups } from '../hooks/use-active-tables'
 import type { ActiveFieldConfig, ActiveTable, ActiveWorkGroup } from '../types';
 import { useTableEncryption } from '../hooks/use-table-encryption';
 import { getEncryptionTypeForField } from '@workspace/active-tables-core';
-import { useCurrentLocale } from '@/hooks/use-current-locale';
+import { ROUTES } from '@/shared/route-paths';
 
 import { Button } from '@workspace/ui/components/button';
 import { Badge } from '@workspace/ui/components/badge';
@@ -128,14 +128,12 @@ const useActiveTableDetail = (
   }, [table, workGroups]);
 };
 
-export const ActiveTableDetailPage = () => {
-  const params = useParams({ strict: false });
-  const navigate = useNavigate();
-  const locale = useCurrentLocale();
+// Type-safe route API for table detail route
+const route = getRouteApi(ROUTES.ACTIVE_TABLES.TABLE_DETAIL);
 
-  // Extract params from URL - these are now the source of truth
-  const tableId = (params as any).tableId as string;
-  const workspaceId = (params as any).workspaceId as string;
+export const ActiveTableDetailPage = () => {
+  const navigate = route.useNavigate();
+  const { tableId, workspaceId, locale } = route.useParams();
 
   // Fetch only the specific table instead of all tables
   const { data: tableResp, isLoading: tableLoading, error: tableError } = useActiveTable(workspaceId, tableId);
@@ -166,8 +164,8 @@ export const ActiveTableDetailPage = () => {
 
   const handleBack = () => {
     navigate({
-      to: '/$locale/workspaces/$workspaceId/tables',
-      params: { locale: locale || 'vi', workspaceId },
+      to: ROUTES.ACTIVE_TABLES.LIST,
+      params: { locale, workspaceId },
     });
   };
 
@@ -175,8 +173,8 @@ export const ActiveTableDetailPage = () => {
     if (!tableId || !workspaceId) return;
 
     navigate({
-      to: '/$locale/workspaces/$workspaceId/tables/$tableId/records',
-      params: { locale: locale || 'vi', workspaceId, tableId },
+      to: ROUTES.ACTIVE_TABLES.TABLE_RECORDS,
+      params: { locale, workspaceId, tableId },
     });
   };
 
@@ -184,8 +182,8 @@ export const ActiveTableDetailPage = () => {
     if (!tableId || !workspaceId) return;
 
     navigate({
-      to: '/$locale/workspaces/$workspaceId/tables/$tableId/settings',
-      params: { locale: locale || 'vi', workspaceId, tableId },
+      to: ROUTES.ACTIVE_TABLES.TABLE_SETTINGS,
+      params: { locale, workspaceId, tableId },
     });
   };
 

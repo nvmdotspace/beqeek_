@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from '@tanstack/react-router';
+import { getRouteApi } from '@tanstack/react-router';
 import { useState } from 'react';
 import { ArrowLeft, Settings2 } from 'lucide-react';
 
@@ -11,7 +11,10 @@ import { useActiveTables } from '../hooks/use-active-tables';
 import { GeneralSettingsTab } from '../components/settings/general-settings-tab';
 import { FieldsSettingsTab } from '../components/settings/fields-settings-tab';
 import { SecuritySettingsTab } from '../components/settings/security-settings-tab';
-import { useCurrentLocale } from '@/hooks/use-current-locale';
+import { ROUTES } from '@/shared/route-paths';
+
+// Type-safe route API for settings route
+const route = getRouteApi(ROUTES.ACTIVE_TABLES.TABLE_SETTINGS);
 
 /**
  * Active Table Settings Page
@@ -23,13 +26,8 @@ import { useCurrentLocale } from '@/hooks/use-current-locale';
  * - Security: Encryption and access settings
  */
 export const ActiveTableSettingsPage = () => {
-  const params = useParams({ strict: false });
-  const navigate = useNavigate();
-  const locale = useCurrentLocale();
-
-  // Extract params from URL - these are now the source of truth
-  const tableId = (params as any).tableId as string;
-  const workspaceId = (params as any).workspaceId as string;
+  const navigate = route.useNavigate();
+  const { tableId, workspaceId, locale } = route.useParams();
 
   const [activeTab, setActiveTab] = useState('general');
 
@@ -68,8 +66,8 @@ export const ActiveTableSettingsPage = () => {
           <CardContent>
             <Button variant="outline" onClick={() => {
               navigate({
-                to: '/$locale/workspaces/$workspaceId/tables/$tableId',
-                params: { locale: locale || 'vi', workspaceId, tableId },
+                to: ROUTES.ACTIVE_TABLES.TABLE_DETAIL,
+                params: { locale, workspaceId, tableId },
               });
             }}>
               <ArrowLeft className="mr-2 h-4 w-4" />
@@ -92,8 +90,8 @@ export const ActiveTableSettingsPage = () => {
               size="icon"
               onClick={() => {
                 navigate({
-                  to: '/$locale/workspaces/$workspaceId/tables/$tableId',
-                  params: { locale: locale || 'vi', workspaceId, tableId },
+                  to: ROUTES.ACTIVE_TABLES.TABLE_DETAIL,
+                  params: { locale, workspaceId, tableId },
                 });
               }}
               className="shrink-0"

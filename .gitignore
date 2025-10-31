@@ -27,6 +27,9 @@ out/
 build
 dist
 
+# TanStack Router generated files
+apps/web/src/routeTree.gen.ts
+
 docs/technical/html-module
 .vscode
 .idea
