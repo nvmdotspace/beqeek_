@@ -5,9 +5,11 @@ import {
   Table,
   ArrowRight,
   MoreVertical,
+  MoreHorizontal,
   Edit,
   Trash2,
   Database,
+  LayoutList,
   MessageSquare,
   Workflow,
   AlertTriangle,
@@ -22,6 +24,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@workspace/ui/components/dropdown-menu';
 // @ts-ignore
@@ -78,7 +81,32 @@ export const ActiveTableCard = memo(
     const moduleTypeLabel = useMemo(() => getModuleTypeLabel(table.tableType), [table.tableType]);
 
     return (
-      <Card className="group relative flex h-full flex-col overflow-hidden border-border/70 bg-background/50 shadow-sm transition-all duration-200 hover:border-border hover:shadow-lg hover:bg-background">
+      <Card
+        className={cn(
+          'group relative flex h-full flex-col overflow-hidden',
+          'border-border/70 bg-background/50 shadow-sm',
+          'transition-all duration-200',
+          'hover:border-border hover:shadow-lg hover:bg-background',
+          'cursor-pointer',
+          'focus-visible:outline-none focus-visible:ring-2',
+          'focus-visible:ring-blue-500 focus-visible:ring-offset-2',
+        )}
+        role="button"
+        tabIndex={0}
+        aria-label={`${table.name} module, ${fieldCount} fields, ${actionsCount} automations, ${isE2EE ? 'encrypted with E2EE' : 'server-side encryption'}, last updated ${updatedAtLabel || 'unknown'}`}
+        onClick={(e) => {
+          const target = e.target as HTMLElement;
+          if (!target.closest('button') && !target.closest('[role="button"]')) {
+            onOpen?.(table);
+          }
+        }}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onOpen?.(table);
+          }
+        }}
+      >
         <CardHeader className="pb-3 px-4 pt-4">
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-start gap-3 flex-1 min-w-0">
@@ -211,59 +239,103 @@ export const ActiveTableCard = memo(
           ) : null}
         </CardContent>
 
-        <CardFooter className="mt-auto flex flex-col gap-2 border-t border-border/60 bg-muted/20 py-3 px-4">
-          <div className="flex items-center justify-between gap-3">
-            {/* Primary action */}
+        <CardFooter className="mt-auto border-t border-border/60 bg-muted/20 py-2.5 px-4">
+          <div className="flex items-center justify-between gap-3 w-full">
+            {/* PRIMARY ACTION */}
             <Button
               size="sm"
               variant="default"
-              onClick={() => onOpenRecords?.(table)}
-              disabled={!onOpenRecords}
-              className="h-8 px-3 text-xs font-medium shadow-sm bg-primary hover:bg-primary/90"
+              onClick={(e) => {
+                e.stopPropagation();
+                onOpen?.(table);
+              }}
+              disabled={!onOpen}
+              className="h-8 px-3 text-xs font-medium"
+              aria-label={`View details for ${table.name}`}
             >
-              <FolderOpen className="mr-1.5 h-3.5 w-3.5" />
-              Open Records
+              {m.activeTables_card_viewDetails()}
+              <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
             </Button>
 
-            {/* Secondary & Tertiary actions group */}
-            <div className="flex items-center gap-1">
-              {/* View Details - Link style */}
+            {/* SECONDARY ACTIONS */}
+            <div className="flex items-center gap-1.5">
+              {/* Records Button */}
               <Button
                 size="sm"
-                variant="ghost"
-                onClick={() => onOpen?.(table)}
-                className="h-7 px-2 text-xs font-normal text-muted-foreground hover:text-foreground"
+                variant="outline"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onOpenRecords?.(table);
+                }}
+                disabled={!onOpenRecords}
+                className="h-8 px-2.5 text-xs"
+                aria-label={`Xem danh sách ${table.name}`}
               >
-                {m.activeTables_card_viewDetails()}
-                <ArrowRight className="ml-1 h-3 w-3" />
+                <LayoutList className="h-3.5 w-3.5" />
+                <span className="ml-1.5 hidden sm:inline">Danh sách</span>
               </Button>
 
-              {/* Icon-only actions */}
-              <Button
-                size="icon"
-                variant="ghost"
-                onClick={() => onOpenComments?.(table)}
-                disabled={!onOpenComments}
-                className="h-7 w-7"
-                title="Comments"
-              >
-                <MessageSquare className="h-3.5 w-3.5" />
-              </Button>
-              <Button
-                size="icon"
-                variant="ghost"
-                onClick={() => onOpenAutomations?.(table)}
-                disabled={!onOpenAutomations}
-                className="h-7 w-7"
-                title="Automations"
-              >
-                <Workflow className="h-3.5 w-3.5" />
-              </Button>
+              {/* Overflow Menu */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8"
+                    aria-label="More actions"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <MoreHorizontal className="h-3.5 w-3.5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {onOpenComments ? (
+                    <DropdownMenuItem
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onOpenComments(table);
+                      }}
+                    >
+                      <MessageSquare className="mr-2 h-4 w-4" />
+                      Comments
+                    </DropdownMenuItem>
+                  ) : null}
+                  {onOpenAutomations ? (
+                    <DropdownMenuItem
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onOpenAutomations(table);
+                      }}
+                    >
+                      <Workflow className="mr-2 h-4 w-4" />
+                      Automations
+                    </DropdownMenuItem>
+                  ) : null}
+                  {onConfigure ? (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onConfigure(table);
+                        }}
+                      >
+                        <Edit className="mr-2 h-4 w-4" />
+                        {m.activeTables_card_edit()}
+                      </DropdownMenuItem>
+                    </>
+                  ) : null}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
-          <div className="text-[11px] text-muted-foreground/80">
-            {updatedAtLabel ? m.activeTables_card_updatedAt({ when: updatedAtLabel }) : '\u00A0'}
-          </div>
+
+          {/* Timestamp (optional second row) */}
+          {updatedAtLabel ? (
+            <div className="text-[11px] text-muted-foreground/70 text-center mt-2">
+              {m.activeTables_card_updatedAt({ when: updatedAtLabel })}
+            </div>
+          ) : null}
         </CardFooter>
       </Card>
     );
