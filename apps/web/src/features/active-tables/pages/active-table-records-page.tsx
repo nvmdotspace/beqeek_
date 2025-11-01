@@ -10,6 +10,7 @@ import {
   clearDecryptionCache,
   KanbanBoard,
   GanttChartView,
+  RecordList,
   type TableRecord,
 } from '@workspace/active-tables-core';
 import { ROUTES } from '@/shared/route-paths';
@@ -372,68 +373,20 @@ export const ActiveTableRecordsPage = () => {
 
         {/* List View */}
         <TabsContent value="list" className="mt-6">
-          <Card>
-            <CardContent className="p-0">
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[80px]">ID</TableHead>
-                      {displayFields.map((field) => (
-                        <TableHead key={field.name}>{field.label}</TableHead>
-                      ))}
-                      <TableHead className="w-[100px] text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredRecords.length === 0 ? (
-                      <TableRow>
-                        <TableCell
-                          colSpan={displayFields.length + 2}
-                          className="text-center py-8 text-muted-foreground"
-                        >
-                          No records found
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      filteredRecords.map((record) => (
-                        <TableRow
-                          key={record.id}
-                          className="cursor-pointer hover:bg-muted/50"
-                          onClick={() => handleViewRecord(record.id)}
-                        >
-                          <TableCell className="font-mono text-xs">{record.id.slice(-8)}</TableCell>
-                          {displayFields.map((field) => {
-                            const value = record.record[field.name];
-                            let displayValue = value;
-
-                            if (value === null || value === undefined) {
-                              displayValue = '-';
-                            } else if (typeof value === 'object') {
-                              displayValue = JSON.stringify(value);
-                            } else if (typeof value === 'boolean') {
-                              displayValue = value ? 'Yes' : 'No';
-                            }
-
-                            return (
-                              <TableCell key={field.name} className="max-w-[200px] truncate">
-                                {String(displayValue)}
-                              </TableCell>
-                            );
-                          })}
-                          <TableCell className="text-right">
-                            <Button variant="ghost" size="sm">
-                              View
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
-            </CardContent>
-          </Card>
+          <RecordList
+            table={displayTable}
+            records={filteredRecords}
+            config={displayTable.config.recordListConfig}
+            loading={false}
+            error={null}
+            onRecordClick={handleViewRecord}
+            messages={{
+              loading: 'Loading records...',
+              error: 'Failed to load records',
+              noRecordsFound: 'No records found',
+              noRecordsDescription: 'Try adjusting your filters or create a new record',
+            }}
+          />
 
           {/* Pagination (TODO) */}
           {nextId && !useMockData && (

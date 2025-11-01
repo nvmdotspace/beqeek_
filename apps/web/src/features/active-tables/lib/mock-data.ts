@@ -39,10 +39,10 @@ export function generateMockTableConfig(): TableConfig {
     kanbanConfigs: [generateMockKanbanConfig()],
     ganttCharts: [generateMockGanttConfig()],
     recordListConfig: {
-      layout: 'table',
+      layout: 'head-column',
       titleField: 'task_title',
-      subLineFields: ['assignee', 'status'],
-      tailFields: ['duo_date'],
+      subLineFields: ['matrix_quadrant', 'assignee', 'status'],
+      tailFields: ['start_date', 'duo_date'],
     },
     recordDetailConfig: generateMockRecordDetailConfig('two-column-detail'),
     permissionsConfig: [],
