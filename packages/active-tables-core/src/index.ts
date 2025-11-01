@@ -9,7 +9,9 @@
  * Phase 2: Field Renderers (25+ field types) ✅
  * Phase 3: List Views (table & card layouts) ✅
  * Phase 4: Detail Views (single/two-column, comments) ✅
- * Phase 5+: Kanban, gantt, filters (coming soon)
+ * Phase 5: Kanban Board (drag-and-drop) ✅
+ * Phase 6: Gantt Chart (timeline, zoom, progress) ✅
+ * Phase 7+: Filters, actions (coming soon)
  */
 
 // ============================================

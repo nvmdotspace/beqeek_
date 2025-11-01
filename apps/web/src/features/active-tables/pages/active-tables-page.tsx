@@ -272,9 +272,9 @@ export const ActiveTablesPage = () => {
               <Button variant="outline" size="icon" disabled={isTablesLoading} onClick={() => refetch()}>
                 <RefreshCw className={cn('h-4 w-4', isFetching && 'animate-spin')} />
               </Button>
-              <Button onClick={handleCreateTable} disabled={!workspaceId}>
-                <Plus className="mr-2 h-4 w-4" />
-                Create Table
+              <Button variant="outline" size="sm" onClick={handleCreateTable} disabled={!workspaceId}>
+                <Plus className="mr-1.5 h-3.5 w-3.5" />
+                Create
               </Button>
             </div>
           </div>

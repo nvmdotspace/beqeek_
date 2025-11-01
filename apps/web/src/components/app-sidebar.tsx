@@ -169,19 +169,6 @@ const SidebarContent = ({
                 <X className="h-4 w-4" />
               </Button>
             )}
-
-            {/* Collapse toggle for desktop/tablet */}
-            {onToggle && !showCloseButton && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onToggle}
-                className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-            )}
           </div>
         )}
       </div>

@@ -2,10 +2,11 @@
  * HeadColumnLayout Component
  *
  * Card-based list layout with title, subline, and tail fields
- * Mobile-optimized design
+ * Mobile-optimized design with Kanban-inspired visual consistency
  */
 
 import { useCallback } from 'react';
+import { format, isToday, isTomorrow, isYesterday, parseISO } from 'date-fns';
 import type { LayoutProps } from './record-list-props.js';
 import type { TableRecord } from '../../types/record.js';
 import { FieldRenderer } from '../fields/field-renderer.js';
@@ -74,11 +75,27 @@ export function HeadColumnLayout(props: LayoutProps) {
         return (
           <div
             key={record.id}
+            role="button"
+            tabIndex={0}
+            aria-label={`${titleValue || 'Record'}, ID: ${record.id}`}
             onClick={() => handleCardClick(record)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleCardClick(record);
+              }
+            }}
             className={`
-              bg-white border rounded-lg p-4 shadow-sm
-              hover:shadow-md transition-all cursor-pointer
-              ${isSelected ? 'ring-2 ring-blue-500 border-blue-500' : 'border-gray-200'}
+              relative
+              bg-white dark:bg-gray-800
+              border border-gray-200 dark:border-gray-700
+              rounded-lg p-4 mb-3
+              cursor-pointer
+              shadow-md hover:shadow-xl
+              transform hover:-translate-y-1 hover:scale-[1.02]
+              transition-all duration-200
+              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2
+              ${isSelected ? 'ring-2 ring-blue-500 border-blue-500' : ''}
             `}
           >
             {/* Selection checkbox (if selection enabled) */}
@@ -153,10 +170,110 @@ function CardContent({
   workspaceUsers,
   messages,
 }: CardContentProps) {
+  // Smart date formatting utility
+  const formatDateValue = (value: unknown, fieldType?: string): string => {
+    if (fieldType === 'DATE' || fieldType === 'DATETIME') {
+      try {
+        const dateStr = String(value);
+        const date = dateStr.includes('T') ? parseISO(dateStr) : new Date(dateStr);
+
+        if (isToday(date)) return '📅 Today';
+        if (isTomorrow(date)) return '📅 Tomorrow';
+        if (isYesterday(date)) return '📅 Yesterday';
+
+        return `📅 ${format(date, 'MMM d, yyyy')}`;
+      } catch {
+        return String(value);
+      }
+    }
+    return String(value);
+  };
+
+  // Get priority field for color coding
+  const priorityField = config.subLineFields?.find(
+    (fieldName: string) => fieldName.toLowerCase().includes('priority') || fieldName.toLowerCase().includes('quadrant'),
+  );
+  const priorityValue = priorityField ? (record.data || record.record)?.[priorityField] : null;
+
+  // Priority configuration
+  const getPriorityConfig = (priority: string | null) => {
+    const priorityStr = String(priority || '').toLowerCase();
+
+    // Matrix quadrant values (from spec example)
+    if (priorityStr.includes('q1') || (priorityStr.includes('important') && priorityStr.includes('urgent'))) {
+      return {
+        badge: 'bg-red-50 text-red-700 ring-1 ring-red-200 dark:bg-red-950 dark:text-red-300 dark:ring-red-800',
+        border: 'border-l-red-400 dark:border-l-red-600',
+        icon: '⚠️',
+        label: 'Urgent & Important',
+      };
+    }
+    if (priorityStr.includes('q2') || priorityStr.includes('growth')) {
+      return {
+        badge:
+          'bg-green-50 text-green-700 ring-1 ring-green-200 dark:bg-green-950 dark:text-green-300 dark:ring-green-800',
+        border: 'border-l-green-400 dark:border-l-green-600',
+        icon: '🌱',
+        label: 'Important',
+      };
+    }
+    if (priorityStr.includes('q3')) {
+      return {
+        badge:
+          'bg-orange-50 text-orange-700 ring-1 ring-orange-200 dark:bg-orange-950 dark:text-orange-300 dark:ring-orange-800',
+        border: 'border-l-orange-400 dark:border-l-orange-600',
+        icon: '⏰',
+        label: 'Urgent',
+      };
+    }
+    if (priorityStr.includes('q4') || priorityStr.includes('idea')) {
+      return {
+        badge: 'bg-gray-50 text-gray-700 ring-1 ring-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-700',
+        border: 'border-l-gray-300 dark:border-l-gray-600',
+        icon: '💡',
+        label: 'Idea',
+      };
+    }
+
+    // Standard priority values
+    if (priorityStr === 'high') {
+      return {
+        badge: 'bg-red-50 text-red-700 ring-1 ring-red-200 dark:bg-red-950 dark:text-red-300 dark:ring-red-800',
+        border: 'border-l-red-400 dark:border-l-red-600',
+        icon: '⚠️',
+        label: 'High',
+      };
+    }
+    if (priorityStr === 'medium') {
+      return {
+        badge:
+          'bg-amber-50 text-amber-700 ring-1 ring-amber-200 dark:bg-amber-950 dark:text-amber-300 dark:ring-amber-800',
+        border: 'border-l-amber-400 dark:border-l-amber-600',
+        icon: '●',
+        label: 'Medium',
+      };
+    }
+    if (priorityStr === 'low') {
+      return {
+        badge: 'bg-blue-50 text-blue-700 ring-1 ring-blue-200 dark:bg-blue-950 dark:text-blue-300 dark:ring-blue-800',
+        border: 'border-l-blue-400 dark:border-l-blue-600',
+        icon: '○',
+        label: 'Low',
+      };
+    }
+
+    return null;
+  };
+
+  const priorityConfig = priorityValue ? getPriorityConfig(String(priorityValue)) : null;
+
   return (
     <>
+      {/* Priority border indicator */}
+      {priorityConfig && <div className={`absolute left-0 top-0 bottom-0 w-1 rounded-l-lg ${priorityConfig.border}`} />}
+
       {/* Title */}
-      <div className="font-semibold text-gray-900 text-lg mb-2">
+      <div className="font-semibold text-gray-900 dark:text-gray-100 text-base mb-3 line-clamp-2 leading-snug">
         {titleField ? (
           <FieldRenderer
             field={titleField}
@@ -168,9 +285,21 @@ function CardContent({
             messages={messages}
           />
         ) : (
-          <span>{titleValue || record.id}</span>
+          <span>{titleValue || <span className="text-gray-400 dark:text-gray-500 italic">(No title)</span>}</span>
         )}
       </div>
+
+      {/* Priority badge and metadata */}
+      {priorityConfig && (
+        <div className="flex items-center gap-2 mb-3 flex-wrap">
+          <span
+            className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full ${priorityConfig.badge}`}
+          >
+            <span aria-hidden="true">{priorityConfig.icon}</span>
+            <span>{priorityConfig.label}</span>
+          </span>
+        </div>
+      )}
 
       {/* Subline Fields */}
       {config.subLineFields && config.subLineFields.length > 0 && (
@@ -179,8 +308,13 @@ function CardContent({
             const field = getFieldConfig(fieldName);
             if (!field) return null;
 
+            // Skip priority field if already shown in badge
+            if (fieldName === priorityField) return null;
+
             const value = (record.data || record.record)[fieldName];
-            if (value === null || value === undefined || value === '') return null;
+            if (value === null || value === undefined || value === '') {
+              return null;
+            }
 
             return (
               <div key={fieldName} className="inline-flex items-center">
@@ -201,17 +335,20 @@ function CardContent({
 
       {/* Tail Fields */}
       {config.tailFields && config.tailFields.length > 0 && (
-        <div className="flex flex-wrap gap-4 text-sm text-gray-600 border-t pt-3">
+        <div className="flex flex-wrap gap-2 text-sm text-gray-600 dark:text-gray-400 border-t border-gray-200 dark:border-gray-700 pt-3">
           {config.tailFields.map((fieldName: string) => {
             const field = getFieldConfig(fieldName);
             if (!field) return null;
 
             const value = (record.data || record.record)[fieldName];
-            if (value === null || value === undefined || value === '') return null;
 
-            return (
-              <div key={fieldName} className="flex items-center gap-2">
-                <span className="text-gray-500 font-medium">{field.label}:</span>
+            // Enhanced empty state handling
+            const displayValue =
+              value === null || value === undefined || value === '' ? (
+                <span className="text-gray-400 dark:text-gray-500">—</span>
+              ) : field.type === 'DATE' || field.type === 'DATETIME' ? (
+                formatDateValue(value, field.type)
+              ) : (
                 <FieldRenderer
                   field={field}
                   value={value}
@@ -221,6 +358,12 @@ function CardContent({
                   workspaceUsers={workspaceUsers}
                   messages={messages}
                 />
+              );
+
+            return (
+              <div key={fieldName} className="flex items-center gap-2">
+                <span className="text-gray-500 dark:text-gray-400 font-medium">{field.label}:</span>
+                {displayValue}
               </div>
             );
           })}

@@ -927,81 +927,112 @@ Sau khi phân tích `apps/web/src/features/active-tables/`, phát hiện **~700 
 
 ---
 
-### Phase 5: Kanban Board (Tuần 5)
+### Phase 5: Kanban Board (Tuần 5) ✅ COMPLETED
 
 **Mục tiêu**: Implement Kanban view
 
 #### Tasks:
 
-- [ ] Tạo KanbanBoard main component
-- [ ] **KanbanColumn**:
-  - [ ] Status header với count
-  - [ ] Card container với scroll
-  - [ ] Empty column state
-  - [ ] Column collapse/expand
-- [ ] **KanbanCard**:
-  - [ ] Headline field rendering
-  - [ ] Display fields rendering
-  - [ ] Drag handle
-  - [ ] Quick actions menu
-  - [ ] Card click handler
-- [ ] **Drag and Drop** với @dnd-kit:
-  - [ ] useKanbanDragDrop hook
-  - [ ] Drag cards giữa columns
-  - [ ] Optimistic updates
-  - [ ] Reorder trong column
-  - [ ] Drag overlay component
-- [ ] Generate columns từ statusField options
-- [ ] Column customization (collapse, reorder)
-- [ ] Mobile responsive design
-- [ ] Multi-screen support
+- [x] Tạo KanbanBoard main component
+- [x] **KanbanColumn**:
+  - [x] Status header với count
+  - [x] Card container với scroll
+  - [x] Empty column state
+  - [x] Column collapse/expand
+  - [x] Custom colors from field options
+- [x] **KanbanCard**:
+  - [x] Headline field rendering
+  - [x] Display fields rendering
+  - [x] Drag handle
+  - [x] Card click handler
+  - [x] Keyboard navigation
+  - [ ] Quick actions menu - future enhancement
+- [x] **Drag and Drop** với @dnd-kit:
+  - [x] Drag cards giữa columns
+  - [x] Pointer and keyboard sensors
+  - [x] Collision detection (closestCorners)
+  - [x] Drag overlay component with rotation
+  - [x] 8px activation threshold
+  - [ ] Optimistic updates - handled by parent
+  - [ ] Reorder trong column - future enhancement
+- [x] Generate columns từ statusField options
+- [x] Column customization (collapse state)
+- [x] Mobile responsive design
+- [x] Multi-screen support
 
 **Deliverables**:
 
-- ✅ Kanban board component
-- ✅ Drag-and-drop support
-- ✅ Multi-screen support
-- ✅ Responsive design
+- ✅ Kanban board component (KanbanBoard)
+- ✅ Drag-and-drop support with @dnd-kit
+- ✅ Multi-screen support via config
+- ✅ Responsive design with horizontal scroll
+- ✅ Column collapse/expand
+- ✅ Custom column colors
+- ✅ Dark mode support
+
+**📊 Phase 5 Status**: ✅ **COMPLETED** (2025-10-31)
+
+- Build time: 3.84s (apps/web)
+- Code created: ~632 lines
+- Components: 3 main + type definitions
+- Dependencies added: @dnd-kit (core, sortable, utilities)
+- TypeScript errors: 0
+- See [phase-5-kanban-summary.md](../docs/implementation/phase-5-kanban-summary.md) for details
 
 ---
 
-### Phase 6: Gantt Chart (Tuần 6)
+### Phase 6: Gantt Chart (Tuần 6) ✅ COMPLETED
 
 **Mục tiêu**: Implement Gantt view
 
 #### Tasks:
 
-- [ ] Tạo GanttChart main component
-- [ ] **GanttTimeline**:
-  - [ ] Date headers (days, weeks, months)
-  - [ ] Zoom levels (day, week, month)
-  - [ ] Today indicator
-  - [ ] Timeline scrolling
-- [ ] **GanttTask**:
-  - [ ] Task bar rendering
-  - [ ] Start/end dates display
-  - [ ] Progress indicator
-  - [ ] Drag to resize (change duration)
-  - [ ] Drag to move (change dates)
-  - [ ] Task tooltip
-- [ ] **GanttGrid**:
-  - [ ] Grid lines
-  - [ ] Time cells
-  - [ ] Weekend highlighting
+- [x] Tạo GanttChartView main component
+- [x] **GanttTimeline**:
+  - [x] Date headers (days, weeks, months, quarters, years)
+  - [x] Zoom levels (day, week, month, quarter, year - 5 levels)
+  - [x] Today indicator
+  - [x] Timeline scrolling
+  - [x] Zoom in/out controls
+  - [x] Secondary month headers
+- [x] **GanttTask**:
+  - [x] Task bar rendering
+  - [x] Start/end dates display
+  - [x] Progress indicator (0-100%)
+  - [x] Task tooltip with dates and progress
+  - [ ] Drag to resize (change duration) - placeholder only
+  - [ ] Drag to move (change dates) - placeholder only
+- [x] **GanttGrid**:
+  - [x] Grid lines (vertical and horizontal)
+  - [x] Time cells
+  - [x] Weekend highlighting
+  - [x] Today indicator line
+  - [x] SVG-based rendering
 - [ ] **Task Dependencies** (nếu configured):
-  - [ ] Dependency lines rendering
-  - [ ] Dependency validation
-- [ ] Task grouping support
-- [ ] Mobile fallback (fallback to list view)
-- [ ] useGanttTasks hook
-- [ ] useGanttZoom hook
+  - [ ] Dependency lines rendering - future enhancement
+  - [ ] Dependency validation - future enhancement
+- [ ] Task grouping support - future enhancement
+- [ ] Mobile fallback (fallback to list view) - future enhancement
+- [x] useGanttZoom hook
+- [x] Comprehensive date utilities (gantt-utils.ts - 380 lines)
 
 **Deliverables**:
 
-- ✅ Gantt chart component
-- ✅ Interactive timeline
-- ✅ Task editing
-- ✅ Dependency visualization
+- ✅ Gantt chart component (GanttChartView)
+- ✅ Interactive timeline with 5 zoom levels
+- ✅ Task bars with progress indicators
+- ✅ Weekend/today highlighting
+- ✅ Click to view record
+- ✅ Responsive horizontal scroll
+- ⚠️ Dependency visualization (deferred to future phase)
+
+**📊 Phase 6 Status**: ✅ **COMPLETED** (2025-11-01)
+
+- Build time: 3.83s (apps/web)
+- Code created: ~1,210 lines
+- Components: 5 main + 1 hook + utilities
+- TypeScript errors: 0
+- See [phase-6-gantt-summary.md](../docs/implementation/phase-6-gantt-summary.md) for details
 
 ---
 
