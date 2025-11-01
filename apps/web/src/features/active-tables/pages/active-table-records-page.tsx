@@ -63,8 +63,8 @@ export const ActiveTableRecordsPage = () => {
   const [decryptedRecords, setDecryptedRecords] = useState(records);
   const [isDecrypting, setIsDecrypting] = useState(false);
 
-  // MOCK DATA: Use mock data for preview purposes
-  const useMockData = true; // Toggle this to use real data
+  // REAL API: Use real data from backend
+  const useMockData = false; // Changed to use real API data
   const mockTableConfig = useMemo(() => generateMockTableConfig(), []);
   const mockRecords = useMemo(() => generateMockRecords(12), []);
 
