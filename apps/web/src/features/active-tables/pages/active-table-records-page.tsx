@@ -1,11 +1,17 @@
 import { useMemo, useState, useEffect } from 'react';
-import { ArrowLeft, Plus, Search, Filter } from 'lucide-react';
+import { ArrowLeft, Plus, Search, Filter, List, Columns, KanbanSquare, GanttChart } from 'lucide-react';
 import { getRouteApi } from '@tanstack/react-router';
 
 // @ts-ignore
 import { useActiveTableRecordsWithConfig } from '../hooks/use-active-tables';
 import { useTableEncryption } from '../hooks/use-table-encryption';
-import { decryptRecords, clearDecryptionCache } from '@workspace/active-tables-core';
+import {
+  decryptRecords,
+  clearDecryptionCache,
+  KanbanBoard,
+  GanttChartView,
+  type TableRecord,
+} from '@workspace/active-tables-core';
 import { ROUTES } from '@/shared/route-paths';
 
 import { Button } from '@workspace/ui/components/button';
@@ -14,6 +20,11 @@ import { Input } from '@workspace/ui/components/input';
 import { Skeleton } from '@workspace/ui/components/skeleton';
 import { Card, CardContent } from '@workspace/ui/components/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@workspace/ui/components/table';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@workspace/ui/components/tabs';
+
+// New components
+import { RecordDetailView } from '../components/record-detail-view';
+import { generateMockTableConfig, generateMockRecords } from '../lib/mock-data';
 
 const LoadingState = () => (
   <div className="space-y-4">
@@ -22,12 +33,18 @@ const LoadingState = () => (
   </div>
 );
 
+type ViewMode = 'list' | 'detail' | 'kanban' | 'gantt';
+
 // Type-safe route API for records route
 const route = getRouteApi(ROUTES.ACTIVE_TABLES.TABLE_RECORDS);
 
 export const ActiveTableRecordsPage = () => {
   const navigate = route.useNavigate();
   const { tableId, workspaceId, locale } = route.useParams();
+
+  // View mode state
+  const [viewMode, setViewMode] = useState<ViewMode>('list');
+  const [selectedRecordId, setSelectedRecordId] = useState<string | null>(null);
 
   // Use combined hook to ensure table config loads before records
   // This prevents race conditions in encryption/decryption logic
@@ -44,6 +61,26 @@ export const ActiveTableRecordsPage = () => {
   // Decrypt records if E2EE enabled and key is valid
   const [decryptedRecords, setDecryptedRecords] = useState(records);
   const [isDecrypting, setIsDecrypting] = useState(false);
+
+  // MOCK DATA: Use mock data for preview purposes
+  const useMockData = true; // Toggle this to use real data
+  const mockTableConfig = useMemo(() => generateMockTableConfig(), []);
+  const mockRecords = useMemo(() => generateMockRecords(12), []);
+
+  // Use mock data or real data
+  const displayTable = useMockData
+    ? {
+        id: table?.id || 'mock-table-id',
+        name: table?.name || 'Project Tasks - BEQEEK',
+        workGroupId: table?.workGroupId || 'mock-workgroup-id',
+        tableType: table?.tableType || 'TASK_EISENHOWER',
+        description: table?.description,
+        config: mockTableConfig,
+        createdAt: table?.createdAt,
+        updatedAt: table?.updatedAt,
+      }
+    : table;
+  const displayRecords = useMockData ? mockRecords : decryptedRecords;
 
   useEffect(() => {
     const decryptAllRecords = async () => {
@@ -94,7 +131,9 @@ export const ActiveTableRecordsPage = () => {
       }
     };
 
-    decryptAllRecords();
+    if (!useMockData) {
+      decryptAllRecords();
+    }
 
     // Cleanup: Clear decryption cache when table changes
     return () => {
@@ -111,6 +150,7 @@ export const ActiveTableRecordsPage = () => {
     encryption.encryptionKey,
     table?.config,
     table?.id,
+    useMockData,
   ]);
 
   // Search state
@@ -118,10 +158,10 @@ export const ActiveTableRecordsPage = () => {
 
   // Filtered records
   const filteredRecords = useMemo(() => {
-    if (!searchQuery.trim()) return decryptedRecords;
+    if (!searchQuery.trim()) return displayRecords;
 
     const query = searchQuery.toLowerCase();
-    return decryptedRecords.filter((record) => {
+    return displayRecords.filter((record) => {
       return Object.values(record.record).some((value) => {
         if (typeof value === 'string') {
           return value.toLowerCase().includes(query);
@@ -132,7 +172,7 @@ export const ActiveTableRecordsPage = () => {
         return false;
       });
     });
-  }, [decryptedRecords, searchQuery]);
+  }, [displayRecords, searchQuery]);
 
   const handleBack = () => {
     navigate({
@@ -146,14 +186,26 @@ export const ActiveTableRecordsPage = () => {
     console.log('Create record');
   };
 
-  const handleViewRecord = (recordId: string) => {
-    // TODO: Navigate to record detail page
-    console.log('View record:', recordId);
+  const handleViewRecord = (recordOrId: TableRecord | string) => {
+    const id = typeof recordOrId === 'string' ? recordOrId : recordOrId.id;
+    setSelectedRecordId(id);
+    setViewMode('detail');
+  };
+
+  const handleRecordMove = (recordId: string, newStatus: string) => {
+    console.log('Move record', recordId, 'to', newStatus);
+    // TODO: Implement record update mutation
+  };
+
+  const handleCommentAdd = (content: string) => {
+    console.log('Add comment:', content);
+    // TODO: Implement comment creation mutation
+    return Promise.resolve();
   };
 
   const isLoading = tableLoading || recordsLoading;
 
-  if (isLoading) {
+  if (isLoading && !useMockData) {
     return (
       <div className="space-y-6 p-6">
         <Button variant="ghost" onClick={handleBack} className="flex items-center gap-2">
@@ -165,7 +217,7 @@ export const ActiveTableRecordsPage = () => {
     );
   }
 
-  if (!table) {
+  if (!displayTable) {
     return (
       <div className="space-y-6 p-6">
         <Button variant="ghost" onClick={handleBack} className="flex items-center gap-2">
@@ -181,7 +233,7 @@ export const ActiveTableRecordsPage = () => {
     );
   }
 
-  if (recordsError) {
+  if (recordsError && !useMockData) {
     return (
       <div className="space-y-6 p-6">
         <Button variant="ghost" onClick={handleBack} className="flex items-center gap-2">
@@ -198,44 +250,61 @@ export const ActiveTableRecordsPage = () => {
   }
 
   // Display fields (first 5 fields)
-  const displayFields = table.config?.fields?.slice(0, 5) ?? [];
+  const displayFields = displayTable.config?.fields?.slice(0, 5) ?? [];
+
+  // Selected record for detail view
+  const selectedRecord = selectedRecordId ? displayRecords.find((r) => r.id === selectedRecordId) : displayRecords[0];
+
+  // Kanban and Gantt configs
+  const kanbanConfig = displayTable.config?.kanbanConfigs?.[0];
+  const ganttConfig = displayTable.config?.ganttCharts?.[0];
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-4 p-3 sm:p-6">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div className="space-y-2">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <Button variant="ghost" size="sm" className="h-8 px-2" onClick={handleBack}>
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Table
+              <span className="hidden sm:inline">Back to Table</span>
+              <span className="sm:hidden">Back</span>
             </Button>
+            {useMockData && (
+              <Badge variant="outline" className="border-blue-500 text-blue-700 text-xs">
+                Mock Data (Preview)
+              </Badge>
+            )}
           </div>
-          <h1 className="text-3xl font-bold tracking-tight">{table.name}</h1>
-          {table.description && (
-            <p className="max-w-2xl text-sm text-muted-foreground leading-relaxed">{table.description}</p>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{displayTable.name || 'Records'}</h1>
+          {displayTable.description && (
+            <p className="max-w-2xl text-xs sm:text-sm text-muted-foreground leading-relaxed">
+              {displayTable.description}
+            </p>
           )}
         </div>
 
-        <div className="flex items-center gap-2">
-          {encryption.isE2EEEnabled && (
+        <div className="flex items-center gap-2 flex-wrap">
+          {encryption.isE2EEEnabled && !useMockData && (
             <Badge
               variant="outline"
               className={
                 encryption.keyValidationStatus === 'valid'
-                  ? 'border-green-500 text-green-700'
-                  : 'border-yellow-500 text-yellow-700'
+                  ? 'border-green-500 text-green-700 text-xs'
+                  : 'border-yellow-500 text-yellow-700 text-xs'
               }
             >
               {encryption.keyValidationStatus === 'valid' ? 'E2EE Active' : 'E2EE (Key Required)'}
             </Badge>
           )}
-          <Badge variant="outline">{filteredRecords.length} records</Badge>
+          <Badge variant="outline" className="text-xs">
+            {filteredRecords.length} records
+          </Badge>
         </div>
       </div>
 
       {/* Encryption Warning */}
-      {encryption.isE2EEEnabled && encryption.keyValidationStatus !== 'valid' && (
+      {encryption.isE2EEEnabled && encryption.keyValidationStatus !== 'valid' && !useMockData && (
         <Card className="border-yellow-500 bg-yellow-50">
           <CardContent className="p-4">
             <p className="text-sm text-yellow-800">
@@ -246,100 +315,192 @@ export const ActiveTableRecordsPage = () => {
         </Card>
       )}
 
-      {/* Actions Bar */}
-      <div className="flex flex-wrap items-center gap-4">
-        <div className="flex-1 max-w-md">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              type="text"
-              placeholder="Search records..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
+      {/* View Mode Tabs */}
+      <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as ViewMode)}>
+        <div className="flex flex-col gap-3 sm:gap-4">
+          <div className="flex items-center justify-between gap-2 overflow-x-auto">
+            <TabsList className="w-full sm:w-auto">
+              <TabsTrigger value="list" className="flex-1 sm:flex-initial text-xs sm:text-sm">
+                <List className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+                <span className="hidden sm:inline">List</span>
+              </TabsTrigger>
+              <TabsTrigger value="detail" className="flex-1 sm:flex-initial text-xs sm:text-sm">
+                <Columns className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Record Detail</span>
+              </TabsTrigger>
+              {kanbanConfig && (
+                <TabsTrigger value="kanban" className="flex-1 sm:flex-initial text-xs sm:text-sm">
+                  <KanbanSquare className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Kanban</span>
+                </TabsTrigger>
+              )}
+              {ganttConfig && (
+                <TabsTrigger value="gantt" className="flex-1 sm:flex-initial text-xs sm:text-sm">
+                  <GanttChart className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Gantt</span>
+                </TabsTrigger>
+              )}
+            </TabsList>
           </div>
+
+          {/* Actions (only show on list view) */}
+          {viewMode === 'list' && (
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+              <div className="relative flex-1 sm:max-w-md">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder="Search records..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 text-sm"
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" className="flex-1 sm:flex-initial text-xs sm:text-sm">
+                  <Filter className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">Filter</span>
+                </Button>
+                <Button onClick={handleCreateRecord} size="sm" className="flex-1 sm:flex-initial text-xs sm:text-sm">
+                  <Plus className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                  <span>New Record</span>
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
 
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm">
-            <Filter className="mr-2 h-4 w-4" />
-            Filter
-          </Button>
-          <Button onClick={handleCreateRecord}>
-            <Plus className="mr-2 h-4 w-4" />
-            New Record
-          </Button>
-        </div>
-      </div>
-
-      {/* Records Table */}
-      <Card>
-        <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[80px]">ID</TableHead>
-                  {displayFields.map((field) => (
-                    <TableHead key={field.name}>{field.label}</TableHead>
-                  ))}
-                  <TableHead className="w-[100px] text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredRecords.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={displayFields.length + 2} className="text-center py-8 text-muted-foreground">
-                      No records found
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  filteredRecords.map((record) => (
-                    <TableRow
-                      key={record.id}
-                      className="cursor-pointer hover:bg-muted/50"
-                      onClick={() => handleViewRecord(record.id)}
-                    >
-                      <TableCell className="font-mono text-xs">{record.id.slice(-8)}</TableCell>
-                      {displayFields.map((field) => {
-                        const value = record.record[field.name];
-                        let displayValue = value;
-
-                        if (value === null || value === undefined) {
-                          displayValue = '-';
-                        } else if (typeof value === 'object') {
-                          displayValue = JSON.stringify(value);
-                        } else if (typeof value === 'boolean') {
-                          displayValue = value ? 'Yes' : 'No';
-                        }
-
-                        return (
-                          <TableCell key={field.name} className="max-w-[200px] truncate">
-                            {String(displayValue)}
-                          </TableCell>
-                        );
-                      })}
-                      <TableCell className="text-right">
-                        <Button variant="ghost" size="sm">
-                          View
-                        </Button>
-                      </TableCell>
+        {/* List View */}
+        <TabsContent value="list" className="mt-6">
+          <Card>
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[80px]">ID</TableHead>
+                      {displayFields.map((field) => (
+                        <TableHead key={field.name}>{field.label}</TableHead>
+                      ))}
+                      <TableHead className="w-[100px] text-right">Actions</TableHead>
                     </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredRecords.length === 0 ? (
+                      <TableRow>
+                        <TableCell
+                          colSpan={displayFields.length + 2}
+                          className="text-center py-8 text-muted-foreground"
+                        >
+                          No records found
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      filteredRecords.map((record) => (
+                        <TableRow
+                          key={record.id}
+                          className="cursor-pointer hover:bg-muted/50"
+                          onClick={() => handleViewRecord(record.id)}
+                        >
+                          <TableCell className="font-mono text-xs">{record.id.slice(-8)}</TableCell>
+                          {displayFields.map((field) => {
+                            const value = record.record[field.name];
+                            let displayValue = value;
 
-      {/* Pagination (TODO) */}
-      {nextId && (
-        <div className="flex justify-center">
-          <Button variant="outline">Load More</Button>
-        </div>
-      )}
+                            if (value === null || value === undefined) {
+                              displayValue = '-';
+                            } else if (typeof value === 'object') {
+                              displayValue = JSON.stringify(value);
+                            } else if (typeof value === 'boolean') {
+                              displayValue = value ? 'Yes' : 'No';
+                            }
+
+                            return (
+                              <TableCell key={field.name} className="max-w-[200px] truncate">
+                                {String(displayValue)}
+                              </TableCell>
+                            );
+                          })}
+                          <TableCell className="text-right">
+                            <Button variant="ghost" size="sm">
+                              View
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Pagination (TODO) */}
+          {nextId && !useMockData && (
+            <div className="flex justify-center mt-4">
+              <Button variant="outline">Load More</Button>
+            </div>
+          )}
+        </TabsContent>
+
+        {/* Record Detail View */}
+        <TabsContent value="detail" className="mt-6">
+          {selectedRecord && displayTable.config && (
+            <RecordDetailView
+              record={selectedRecord}
+              tableConfig={displayTable.config}
+              onCommentAdd={handleCommentAdd}
+            />
+          )}
+        </TabsContent>
+
+        {/* Kanban View */}
+        <TabsContent value="kanban" className="mt-3 sm:mt-6 -mx-3 sm:mx-0">
+          {kanbanConfig && displayTable.config && (
+            <div className="kanban-mobile-wrapper">
+              <KanbanBoard
+                table={displayTable}
+                records={displayRecords}
+                config={kanbanConfig}
+                onRecordMove={handleRecordMove}
+                onRecordClick={handleViewRecord}
+                className="px-2 sm:px-4 gap-2 sm:gap-4 pb-4"
+                messages={{
+                  loading: 'Loading...',
+                  dropHere: 'Drop cards here',
+                  error: 'Error',
+                  records: 'records',
+                }}
+              />
+            </div>
+          )}
+        </TabsContent>
+
+        {/* Gantt View */}
+        <TabsContent value="gantt" className="mt-3 sm:mt-6 -mx-3 sm:mx-0">
+          {ganttConfig && displayTable.config && (
+            <Card className="border-0 sm:border">
+              <CardContent className="p-0 sm:p-4">
+                <div className="gantt-mobile-wrapper overflow-x-auto">
+                  <GanttChartView
+                    table={displayTable}
+                    records={displayRecords}
+                    config={ganttConfig}
+                    onTaskClick={handleViewRecord}
+                    showProgress={true}
+                    showToday={true}
+                    className="min-h-[400px] sm:min-h-[500px]"
+                    messages={{
+                      loading: 'Loading timeline...',
+                      noRecordsFound: 'No tasks to display',
+                    }}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

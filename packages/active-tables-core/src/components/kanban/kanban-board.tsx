@@ -197,26 +197,28 @@ export function KanbanBoard({
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <div className={`flex gap-4 overflow-x-auto p-4 min-h-[400px] ${className}`}>
-        {columns.map((column) => (
-          <KanbanColumn
-            key={column.id}
-            columnId={column.id}
-            title={column.title}
-            color={column.color}
-            textColor={column.textColor}
-            records={recordsByColumn.get(column.id) || []}
-            config={config}
-            headlineField={headlineField}
-            displayFields={displayFields}
-            onRecordClick={onRecordClick}
-            collapsed={collapsedColumns.has(column.id)}
-            onToggleCollapse={() => toggleColumnCollapse(column.id)}
-            readOnly={readOnly}
-            table={table}
-            messages={messages}
-          />
-        ))}
+      <div className={`overflow-x-auto overflow-y-hidden ${className}`}>
+        <div className="flex gap-4 p-4 min-h-[400px] min-w-max">
+          {columns.map((column) => (
+            <KanbanColumn
+              key={column.id}
+              columnId={column.id}
+              title={column.title}
+              color={column.color}
+              textColor={column.textColor}
+              records={recordsByColumn.get(column.id) || []}
+              config={config}
+              headlineField={headlineField}
+              displayFields={displayFields}
+              onRecordClick={onRecordClick}
+              collapsed={collapsedColumns.has(column.id)}
+              onToggleCollapse={() => toggleColumnCollapse(column.id)}
+              readOnly={readOnly}
+              table={table}
+              messages={messages}
+            />
+          ))}
+        </div>
 
         {/* Drag overlay - shows card being dragged */}
         <DragOverlay>

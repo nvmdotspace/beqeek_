@@ -49,18 +49,23 @@ export function GanttTimeline({
 
   return (
     <div className={`bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 ${className}`}>
-      {/* Zoom controls */}
+      {/* Zoom controls - Compact design */}
       {onZoomChange && (
-        <div className="flex items-center justify-end gap-2 px-4 py-2 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-end gap-2 px-3 py-1.5 border-b border-gray-200 dark:border-gray-700">
           <button
             type="button"
             onClick={handleZoomIn}
             disabled={!canZoomIn}
-            className="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
             aria-label="Zoom in"
             title="Zoom in"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg
+              className="w-4 h-4 text-gray-500 dark:text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -70,7 +75,7 @@ export function GanttTimeline({
             </svg>
           </button>
 
-          <span className="text-xs text-gray-600 dark:text-gray-400 min-w-[60px] text-center">
+          <span className="text-xs text-gray-600 dark:text-gray-400 min-w-[50px] text-center font-semibold">
             {zoomLevel === 'day' && 'Day'}
             {zoomLevel === 'week' && 'Week'}
             {zoomLevel === 'month' && 'Month'}
@@ -82,11 +87,16 @@ export function GanttTimeline({
             type="button"
             onClick={handleZoomOut}
             disabled={!canZoomOut}
-            className="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
             aria-label="Zoom out"
             title="Zoom out"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg
+              className="w-4 h-4 text-gray-500 dark:text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -98,7 +108,7 @@ export function GanttTimeline({
         </div>
       )}
 
-      {/* Date headers */}
+      {/* Date headers - Simplified design */}
       <div className="flex" style={{ width }}>
         {timeUnits.map((unit, index) => {
           const isToday = unit.isToday;
@@ -108,9 +118,9 @@ export function GanttTimeline({
             <div
               key={index}
               className={`
-                flex items-center justify-center py-2 border-r border-gray-200 dark:border-gray-700 text-xs font-medium
-                ${isToday ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : ''}
-                ${isWeekend && !isToday ? 'bg-gray-100 dark:bg-gray-800 text-gray-500' : 'text-gray-700 dark:text-gray-300'}
+                flex items-center justify-center py-1.5 border-r border-gray-200 dark:border-gray-700 text-[11px] font-medium
+                ${isToday ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 font-semibold' : ''}
+                ${isWeekend && !isToday ? 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400' : 'text-gray-700 dark:text-gray-300'}
               `}
               style={{ width: columnWidth, minWidth: columnWidth }}
             >
@@ -120,7 +130,7 @@ export function GanttTimeline({
         })}
       </div>
 
-      {/* Secondary header (month names for week/day view) */}
+      {/* Secondary header (month names for week/day view) - Cleaner design */}
       {(zoomLevel === 'day' || zoomLevel === 'week') && (
         <div className="flex border-t border-gray-200 dark:border-gray-700">
           {timeUnits.reduce((acc, unit, index) => {
@@ -143,7 +153,7 @@ export function GanttTimeline({
               acc.push(
                 <div
                   key={`month-${index}`}
-                  className="flex items-center justify-center py-1.5 border-r border-gray-200 dark:border-gray-700 text-xs font-semibold text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800"
+                  className="flex items-center justify-center py-1.5 border-r border-gray-200 dark:border-gray-700 text-[11px] font-semibold text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-900"
                   style={{ width: columnWidth * count, minWidth: columnWidth * count }}
                 >
                   {monthLabel}

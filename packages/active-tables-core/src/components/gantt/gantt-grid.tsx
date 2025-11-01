@@ -40,6 +40,16 @@ export function GanttGrid({
       height={totalHeight}
       style={{ zIndex: 0 }}
     >
+      {/* Simple solid background - cleaner than gradient */}
+      <rect
+        x={0}
+        y={0}
+        width={width}
+        height={totalHeight}
+        fill="currentColor"
+        className="text-white dark:text-gray-950"
+      />
+
       {/* Grid columns */}
       {timeUnits.map((unit, index) => {
         const x = index * columnWidth;
@@ -48,7 +58,7 @@ export function GanttGrid({
 
         return (
           <g key={index}>
-            {/* Weekend highlighting */}
+            {/* Weekend highlighting - subtle */}
             {isWeekendColumn && (
               <rect
                 x={x}
@@ -56,12 +66,12 @@ export function GanttGrid({
                 width={columnWidth}
                 height={totalHeight}
                 fill="currentColor"
-                className="text-gray-100 dark:text-gray-800"
+                className="text-gray-50 dark:text-gray-900"
                 opacity={0.5}
               />
             )}
 
-            {/* Today highlighting */}
+            {/* Today highlighting - subtle blue tint */}
             {isTodayColumn && (
               <rect
                 x={x}
@@ -69,26 +79,27 @@ export function GanttGrid({
                 width={columnWidth}
                 height={totalHeight}
                 fill="currentColor"
-                className="text-blue-50 dark:text-blue-900"
+                className="text-blue-50 dark:text-blue-900/20"
                 opacity={0.3}
               />
             )}
 
-            {/* Vertical grid line */}
+            {/* Vertical grid line - lighter for cleaner look */}
             <line
               x1={x}
               y1={0}
               x2={x}
               y2={totalHeight}
               stroke="currentColor"
-              className="text-gray-200 dark:text-gray-700"
-              strokeWidth={1}
+              className={isTodayColumn ? 'text-blue-300 dark:text-blue-700' : 'text-gray-200 dark:text-gray-800'}
+              strokeWidth={isTodayColumn ? 2 : 1}
+              opacity={isTodayColumn ? 0.5 : 0.2}
             />
           </g>
         );
       })}
 
-      {/* Horizontal grid lines (row separators) */}
+      {/* Horizontal grid lines (row separators) - lighter */}
       {Array.from({ length: rowCount + 1 }).map((_, index) => {
         const y = index * rowHeight;
         return (
@@ -99,24 +110,35 @@ export function GanttGrid({
             x2={width}
             y2={y}
             stroke="currentColor"
-            className="text-gray-200 dark:text-gray-700"
+            className="text-gray-200 dark:text-gray-800"
             strokeWidth={1}
+            opacity={0.3}
           />
         );
       })}
 
-      {/* Today indicator line */}
+      {/* Today indicator line - simplified */}
       {showToday && timeUnits.some((unit) => isToday(unit.start)) && (
-        <line
-          x1={timeUnits.findIndex((unit) => isToday(unit.start)) * columnWidth}
-          y1={0}
-          x2={timeUnits.findIndex((unit) => isToday(unit.start)) * columnWidth}
-          y2={totalHeight}
-          stroke="currentColor"
-          className="text-red-500"
-          strokeWidth={2}
-          strokeDasharray="4 4"
-        />
+        <>
+          <line
+            x1={timeUnits.findIndex((unit) => isToday(unit.start)) * columnWidth}
+            y1={0}
+            x2={timeUnits.findIndex((unit) => isToday(unit.start)) * columnWidth}
+            y2={totalHeight}
+            stroke="currentColor"
+            className="text-blue-400 dark:text-blue-600"
+            strokeWidth={2}
+            opacity={0.4}
+          />
+          {/* Today marker dot at top */}
+          <circle
+            cx={timeUnits.findIndex((unit) => isToday(unit.start)) * columnWidth}
+            cy={8}
+            r={3}
+            fill="currentColor"
+            className="text-blue-400 dark:text-blue-600"
+          />
+        </>
       )}
     </svg>
   );

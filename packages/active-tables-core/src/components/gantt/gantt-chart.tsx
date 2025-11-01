@@ -85,9 +85,9 @@ export function GanttChartView({
     return () => window.removeEventListener('resize', updateWidth);
   }, []);
 
-  // Constants
-  const ROW_HEIGHT = 44;
-  const LABEL_WIDTH = 200;
+  // Constants - compact sizing for friendly appearance
+  const ROW_HEIGHT = 36; // Compact height like Kanban cards
+  const LABEL_WIDTH = containerWidth < 640 ? 120 : containerWidth < 768 ? 140 : 180; // Narrower label width
 
   // Validation
   if (!config.taskNameField || !config.startDateField || !config.endDateField) {
@@ -121,16 +121,18 @@ export function GanttChartView({
     <div ref={containerRef} className={`flex flex-col h-full bg-white dark:bg-gray-950 ${className}`}>
       {/* Timeline header */}
       <div className="flex border-b border-gray-200 dark:border-gray-700">
-        {/* Task names column header */}
+        {/* Task names column header - Compact */}
         <div
-          className="flex-shrink-0 bg-gray-50 dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 px-4 py-3"
+          className="flex-shrink-0 bg-gray-50 dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 px-3 py-1.5"
           style={{ width: LABEL_WIDTH }}
         >
-          <div className="text-xs font-semibold text-gray-600 dark:text-gray-400">{messages?.records || 'Tasks'}</div>
+          <div className="text-[11px] font-semibold text-gray-700 dark:text-gray-300 truncate">
+            {messages?.records || 'Tasks'}
+          </div>
         </div>
 
-        {/* Timeline */}
-        <div className="flex-1 overflow-x-auto">
+        {/* Timeline - Fixed for proper scrolling */}
+        <div className="flex-1 min-w-0 overflow-x-auto">
           <GanttTimeline
             startDate={dateRange.start}
             endDate={dateRange.end}
@@ -145,8 +147,8 @@ export function GanttChartView({
       </div>
 
       {/* Chart body */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Task names column */}
+      <div className="flex-1 flex min-h-0">
+        {/* Task names column - Compact design */}
         <div
           className="flex-shrink-0 border-r border-gray-200 dark:border-gray-700 overflow-y-auto"
           style={{ width: LABEL_WIDTH }}
@@ -154,17 +156,18 @@ export function GanttChartView({
           {tasks.map((task, index) => (
             <div
               key={task.id}
-              className="px-4 flex items-center border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-900 cursor-pointer"
+              className="px-3 flex items-center border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-900 cursor-pointer transition-colors"
               style={{ height: ROW_HEIGHT }}
               onClick={() => onTaskClick?.(task.record)}
+              title={task.name} // Show full name on hover
             >
-              <div className="text-sm text-gray-900 dark:text-gray-100 truncate">{task.name}</div>
+              <div className="text-xs text-gray-900 dark:text-gray-100 truncate font-medium">{task.name}</div>
             </div>
           ))}
         </div>
 
-        {/* Chart area */}
-        <div className="flex-1 relative overflow-x-auto overflow-y-auto">
+        {/* Chart area - Fixed for proper scrolling */}
+        <div className="flex-1 min-w-0 relative overflow-x-auto overflow-y-auto">
           <div className="relative" style={{ width: timelineWidth, minWidth: '100%' }}>
             {/* Grid background */}
             <GanttGrid
