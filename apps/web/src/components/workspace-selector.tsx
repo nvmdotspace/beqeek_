@@ -130,15 +130,33 @@ export const WorkspaceSelector = ({
   const containerClass = disablePadding ? '' : 'p-3';
 
   if (isCollapsed) {
-    // Collapsed state - show only icon button
+    // Collapsed state - show only icon button with workspace avatar
     return (
       <div className={cn(containerClass, className, 'flex items-center justify-center')}>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-lg bg-primary text-primary-foreground">
-              <Zap className="h-5 w-5" />
-              <span className="sr-only">{m.workspace_selector_ariaLabel()}</span>
-            </Button>
+            {currentWorkspace ? (
+              <Button variant="ghost" size="icon" className="h-9 w-9 rounded-lg p-0">
+                <Avatar className="h-9 w-9 flex-shrink-0">
+                  <AvatarImage
+                    src={
+                      currentWorkspace.namespace
+                        ? `https://api.dicebear.com/7.x/initials/svg?seed=${currentWorkspace.namespace}`
+                        : undefined
+                    }
+                  />
+                  <AvatarFallback className="text-xs bg-primary text-primary-foreground">
+                    {initialsFromName(currentWorkspace.workspaceName)}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="sr-only">{m.workspace_selector_ariaLabel()}</span>
+              </Button>
+            ) : (
+              <Button variant="ghost" size="icon" className="h-9 w-9 rounded-lg bg-primary text-primary-foreground">
+                <Zap className="h-5 w-5" />
+                <span className="sr-only">{m.workspace_selector_ariaLabel()}</span>
+              </Button>
+            )}
           </DropdownMenuTrigger>
           <WorkspaceDropdownContent
             searchQuery={searchQuery}
