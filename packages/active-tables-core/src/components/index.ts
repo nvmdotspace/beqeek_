@@ -19,8 +19,12 @@ export * from './record-list/index.js';
 // Record detail views (Phase 4)
 export * from './record-detail/index.js';
 
-// TODO Phase 5+: Export kanban, gantt, etc.
-// export * from './kanban';
-// export * from './gantt';
+// Kanban board (Phase 5)
+export * from './kanban/index.js';
+
+// Gantt chart (Phase 6)
+export * from './gantt/index.js';
+
+// TODO Phase 7+: Export filters, actions
 // export * from './filters';
 // export * from './actions';
