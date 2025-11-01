@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useForm } from '@tanstack/react-form';
-import { Plus, Trash2, GripVertical, Settings, Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 
 // @ts-ignore
 import { m } from '@/paraglide/generated/messages.js';
@@ -19,7 +19,6 @@ import {
 } from '@workspace/ui/components/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@workspace/ui/components/select';
 import { Switch } from '@workspace/ui/components/switch';
-import { Badge } from '@workspace/ui/components/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@workspace/ui/components/card';
 
 import { TABLE_TYPE_METADATA, type TableType } from '@workspace/beqeek-shared';
@@ -46,21 +45,6 @@ export interface TableFormData {
   encryptionKey?: string;
 }
 
-const FIELD_TYPES = [
-  { value: 'SHORT_TEXT', label: 'Short Text' },
-  { value: 'RICH_TEXT', label: 'Rich Text' },
-  { value: 'INTEGER', label: 'Number' },
-  { value: 'NUMERIC', label: 'Decimal' },
-  { value: 'DATE', label: 'Date' },
-  { value: 'DATETIME', label: 'Date & Time' },
-  { value: 'SELECT_ONE', label: 'Single Select' },
-  { value: 'SELECT_LIST', label: 'Multi Select' },
-  { value: 'BOOLEAN', label: 'Checkbox' },
-  { value: 'EMAIL', label: 'Email' },
-  { value: 'PHONE', label: 'Phone' },
-  { value: 'URL', label: 'URL' },
-];
-
 export const TableManagementDialog = ({
   open,
   onOpenChange,
@@ -69,8 +53,6 @@ export const TableManagementDialog = ({
   onSave,
   isLoading = false,
 }: TableManagementDialogProps) => {
-  const [fields, setFields] = useState<ActiveFieldConfig[]>([]);
-  const [editingField, setEditingField] = useState<number | null>(null);
   const [showEncryptionKey, setShowEncryptionKey] = useState(false);
 
   // Initialize form with proper default values
@@ -88,7 +70,7 @@ export const TableManagementDialog = ({
     onSubmit: async ({ value }) => {
       await onSave({
         ...value,
-        fields,
+        fields: [], // Fields will be configured in a separate dialog
       });
     },
   });
@@ -130,52 +112,15 @@ export const TableManagementDialog = ({
   // Update form when table changes
   useEffect(() => {
     if (table) {
-      setFields(table.config?.fields || []);
       // Reset form with new values
       form.reset();
       form.update({
         defaultValues: getDefaultValues(),
       });
     } else {
-      setFields([]);
       form.reset();
     }
   }, [table]);
-
-  const addField = () => {
-    const newField: ActiveFieldConfig = {
-      type: 'SHORT_TEXT',
-      label: '',
-      name: '',
-      placeholder: '',
-      required: false,
-      options: [],
-    };
-    setFields([...fields, newField]);
-    setEditingField(fields.length);
-  };
-
-  const updateField = (index: number, field: ActiveFieldConfig) => {
-    const updatedFields = [...fields];
-    if (updatedFields[index]) {
-      updatedFields[index] = field;
-      setFields(updatedFields);
-    }
-  };
-
-  const removeField = (index: number) => {
-    setFields(fields.filter((_, i) => i !== index));
-    setEditingField(null);
-  };
-
-  const moveField = (fromIndex: number, toIndex: number) => {
-    const updatedFields = [...fields];
-    const [movedField] = updatedFields.splice(fromIndex, 1);
-    if (movedField) {
-      updatedFields.splice(toIndex, 0, movedField);
-      setFields(updatedFields);
-    }
-  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -354,47 +299,6 @@ export const TableManagementDialog = ({
             </CardContent>
           </Card>
 
-          {/* Fields Configuration */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center justify-between">
-                Fields Configuration
-                <Button type="button" onClick={addField} size="sm">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Field
-                </Button>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {fields.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  No fields configured. Click "Add Field" to get started.
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {fields.map((field, index) => (
-                    <FieldEditor
-                      key={index}
-                      field={field}
-                      index={index}
-                      isEditing={editingField === index}
-                      onEdit={() => setEditingField(index)}
-                      onSave={(updatedField) => {
-                        updateField(index, updatedField);
-                        setEditingField(null);
-                      }}
-                      onCancel={() => setEditingField(null)}
-                      onRemove={() => removeField(index)}
-                      onMove={moveField}
-                      canMoveUp={index > 0}
-                      canMoveDown={index < fields.length - 1}
-                    />
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading}>
               Cancel
@@ -406,161 +310,5 @@ export const TableManagementDialog = ({
         </form>
       </DialogContent>
     </Dialog>
-  );
-};
-
-interface FieldEditorProps {
-  field: ActiveFieldConfig;
-  index: number;
-  isEditing: boolean;
-  onEdit: () => void;
-  onSave: (field: ActiveFieldConfig) => void;
-  onCancel: () => void;
-  onRemove: () => void;
-  onMove: (fromIndex: number, toIndex: number) => void;
-  canMoveUp: boolean;
-  canMoveDown: boolean;
-}
-
-const FieldEditor = ({
-  field,
-  index,
-  isEditing,
-  onEdit,
-  onSave,
-  onCancel,
-  onRemove,
-  onMove,
-  canMoveUp,
-  canMoveDown,
-}: FieldEditorProps) => {
-  const [editField, setEditField] = useState<ActiveFieldConfig>(field);
-
-  useEffect(() => {
-    setEditField(field);
-  }, [field]);
-
-  if (!isEditing) {
-    return (
-      <div className="flex items-center justify-between p-3 border rounded-lg bg-muted/30">
-        <div className="flex items-center gap-3">
-          <GripVertical className="h-4 w-4 text-muted-foreground" />
-          <div>
-            <div className="font-medium">{field.label || 'Untitled Field'}</div>
-            <div className="text-sm text-muted-foreground">
-              {field.name} • {FIELD_TYPES.find((t) => t.value === field.type)?.label}
-              {field.required && (
-                <Badge variant="secondary" className="ml-2">
-                  Required
-                </Badge>
-              )}
-            </div>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => onMove(index, index - 1)}
-            disabled={!canMoveUp}
-          >
-            ↑
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => onMove(index, index + 1)}
-            disabled={!canMoveDown}
-          >
-            ↓
-          </Button>
-          <Button type="button" variant="ghost" size="sm" onClick={onEdit}>
-            <Settings className="h-4 w-4" />
-          </Button>
-          <Button type="button" variant="ghost" size="sm" onClick={onRemove}>
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <Card>
-      <CardContent className="p-4 space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label>Field Label *</Label>
-            <Input
-              value={editField.label}
-              onChange={(e) => setEditField({ ...editField, label: e.target.value })}
-              placeholder="Enter field label"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label>Field Name *</Label>
-            <Input
-              value={editField.name}
-              onChange={(e) =>
-                setEditField({
-                  ...editField,
-                  name: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '_'),
-                })
-              }
-              placeholder="field_name"
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label>Field Type</Label>
-            <Select
-              value={editField.type}
-              onValueChange={(value: string) => setEditField({ ...editField, type: value })}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {FIELD_TYPES.map((type) => (
-                  <SelectItem key={type.value} value={type.value}>
-                    {type.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label>Placeholder</Label>
-            <Input
-              value={editField.placeholder || ''}
-              onChange={(e) => setEditField({ ...editField, placeholder: e.target.value })}
-              placeholder="Enter placeholder text"
-            />
-          </div>
-        </div>
-
-        <div className="flex items-center space-x-2">
-          <Switch
-            id={`required-${index}`}
-            checked={editField.required || false}
-            onCheckedChange={(checked: boolean) => setEditField({ ...editField, required: checked })}
-          />
-          <Label htmlFor={`required-${index}`}>Required field</Label>
-        </div>
-
-        <div className="flex justify-end gap-2">
-          <Button type="button" variant="outline" onClick={onCancel}>
-            Cancel
-          </Button>
-          <Button type="button" onClick={() => onSave(editField)} disabled={!editField.label || !editField.name}>
-            Save Field
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
   );
 };

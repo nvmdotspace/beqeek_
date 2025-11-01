@@ -195,41 +195,6 @@ const SidebarContent = ({
           {!isCollapsed && <ActivityTracking />}
         </div>
       </div>
-
-      {/* Sidebar Footer */}
-      <div className={cn('border-t border-border p-4', isCollapsed && 'px-2')}>
-        {/* User Profile */}
-        <div
-          className={cn(
-            'flex items-center gap-3 rounded-lg p-2 hover:bg-accent transition-colors cursor-pointer',
-            isCollapsed && 'justify-center',
-          )}
-        >
-          <Avatar className="h-8 w-8 shrink-0">
-            <AvatarImage src="/placeholder-avatar.jpg" alt="User" />
-            <AvatarFallback className="text-xs">JD</AvatarFallback>
-          </Avatar>
-          {!isCollapsed && (
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">John Doe</p>
-              <p className="text-xs text-muted-foreground truncate">john@example.com</p>
-            </div>
-          )}
-        </div>
-
-        {/* Expand button for collapsed state */}
-        {isCollapsed && (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onToggle}
-            className="w-full mt-2 h-8 text-muted-foreground hover:text-foreground"
-            aria-label="Expand sidebar"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        )}
-      </div>
     </>
   );
 };

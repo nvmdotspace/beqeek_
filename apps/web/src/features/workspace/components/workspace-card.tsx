@@ -1,5 +1,5 @@
 import { format } from 'date-fns';
-import { Globe, ShieldCheck, Users, Database } from 'lucide-react';
+import { Globe, ShieldCheck, Users, Grid3x3 } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
 
 import type { Workspace } from '@/shared/api/types';
@@ -27,7 +27,7 @@ export const WorkspaceCard = ({ workspace }: WorkspaceCardProps) => {
     <Card className="h-full transition hover:-translate-y-0.5 hover:shadow-lg">
       <CardHeader className="flex flex-row items-start gap-3 pb-3">
         <Avatar className="h-10 w-10">
-          <AvatarImage src={namespace ? `https://api.dicebear.com/7.x/initials/svg?seed=${namespace}` : undefined} />
+          <AvatarImage src={thumbnailLogo || logo || `https://api.dicebear.com/7.x/initials/svg?seed=${namespace}`} />
           <AvatarFallback className="text-sm bg-primary text-primary-foreground">
             {initialsFromName(workspaceName)}
           </AvatarFallback>
@@ -62,16 +62,12 @@ export const WorkspaceCard = ({ workspace }: WorkspaceCardProps) => {
           <p>
             {m.workspace_card_createdAt()} {createdAt ? format(new Date(createdAt), 'dd/MM/yyyy') : '—'}
           </p>
-          <p>
-            {m.workspace_card_e2eeLabel()}{' '}
-            <span className="font-medium text-emerald-400">{m.workspace_card_e2eeEnabled()}</span>
-          </p>
         </div>
       </CardContent>
       <CardFooter className="flex gap-2 pt-3">
         <Button asChild variant="outline" size="sm" className="flex-1 text-xs">
           <Link to={ROUTES.ACTIVE_TABLES.LIST} params={{ locale, workspaceId: workspace.id }}>
-            <Database className="mr-1.5 h-3.5 w-3.5" />
+            <Grid3x3 className="mr-1.5 h-3.5 w-3.5" />
             {m.workspace_card_activeTables()}
           </Link>
         </Button>

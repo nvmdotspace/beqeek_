@@ -6,7 +6,7 @@ import {
   Link as LinkIcon,
   ListTree,
   Lock,
-  Database,
+  LayoutList,
   Settings2,
   Hash,
   AlertTriangle,
@@ -46,7 +46,7 @@ const FieldSummary = ({ field, isE2EEEnabled }: FieldSummaryProps) => {
           <p className="text-xs text-muted-foreground">{field.name}</p>
         </div>
         <div className="flex flex-col items-end gap-1">
-          <Badge variant="secondary" className="uppercase">
+          <Badge variant="info" className="uppercase">
             {field.type}
           </Badge>
           {encryptionType !== 'NONE' && (
@@ -61,7 +61,7 @@ const FieldSummary = ({ field, isE2EEEnabled }: FieldSummaryProps) => {
       </div>
 
       <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-        <Badge variant={field.required ? 'default' : 'outline'}>
+        <Badge variant={field.required ? 'success' : 'warning'}>
           {field.required ? m.activeTables_detail_fieldRequired() : m.activeTables_detail_fieldOptional()}
         </Badge>
         {optionCount > 0 ? (
@@ -278,12 +278,12 @@ export const ActiveTableDetailPage = () => {
             {m.activeTables_detail_fieldCount({ count: table.config?.fields?.length ?? 0 })}
           </Badge>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={handleViewSettings}>
+            <Button variant="outline" size="sm" onClick={handleViewSettings}>
               <Settings2 className="mr-2 h-4 w-4" />
               Settings
             </Button>
-            <Button onClick={handleViewRecords}>
-              <Database className="mr-2 h-4 w-4" />
+            <Button size="sm" onClick={handleViewRecords}>
+              <LayoutList className="mr-2 h-4 w-4" />
               {m.activeTables_detail_viewRecords()}
             </Button>
           </div>

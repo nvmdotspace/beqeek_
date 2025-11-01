@@ -34,6 +34,16 @@ interface WorkspaceSelectorProps {
   showAvatar?: boolean;
 }
 
+// Helper to get workspace avatar src with fallback
+const getWorkspaceAvatarSrc = (workspace: Workspace | null): string | undefined => {
+  if (!workspace) return undefined;
+  return (
+    workspace.thumbnailLogo ||
+    workspace.logo ||
+    (workspace.namespace ? `https://api.dicebear.com/7.x/initials/svg?seed=${workspace.namespace}` : undefined)
+  );
+};
+
 export const WorkspaceSelector = ({
   isCollapsed = false,
   className,
@@ -60,6 +70,8 @@ export const WorkspaceSelector = ({
         workspaceName: ws.workspaceName,
         namespace: ws.namespace,
         description: ws.description,
+        logo: ws.logo,
+        thumbnailLogo: ws.thumbnailLogo,
         // API doesn't provide these counts yet, set to 0 for now
         memberCount: 0,
         tableCount: 0,
@@ -138,13 +150,7 @@ export const WorkspaceSelector = ({
             {currentWorkspace ? (
               <Button variant="ghost" size="icon" className="h-9 w-9 rounded-lg p-0">
                 <Avatar className="h-9 w-9 flex-shrink-0">
-                  <AvatarImage
-                    src={
-                      currentWorkspace.namespace
-                        ? `https://api.dicebear.com/7.x/initials/svg?seed=${currentWorkspace.namespace}`
-                        : undefined
-                    }
-                  />
+                  <AvatarImage src={getWorkspaceAvatarSrc(currentWorkspace)} />
                   <AvatarFallback className="text-xs bg-primary text-primary-foreground">
                     {initialsFromName(currentWorkspace.workspaceName)}
                   </AvatarFallback>
@@ -187,13 +193,7 @@ export const WorkspaceSelector = ({
             <div className="flex items-center gap-2 min-w-0 flex-1">
               {showAvatar && currentWorkspace && (
                 <Avatar className="h-7 w-7 flex-shrink-0">
-                  <AvatarImage
-                    src={
-                      currentWorkspace.namespace
-                        ? `https://api.dicebear.com/7.x/initials/svg?seed=${currentWorkspace.namespace}`
-                        : undefined
-                    }
-                  />
+                  <AvatarImage src={getWorkspaceAvatarSrc(currentWorkspace)} />
                   <AvatarFallback className="text-xs bg-primary text-primary-foreground">
                     {initialsFromName(currentWorkspace.workspaceName)}
                   </AvatarFallback>
@@ -266,13 +266,7 @@ const WorkspaceDropdownContent = ({
           <DropdownMenuLabel className="font-normal">
             <div className="flex items-center gap-3">
               <Avatar className="h-8 w-8">
-                <AvatarImage
-                  src={
-                    currentWorkspace.namespace
-                      ? `https://api.dicebear.com/7.x/initials/svg?seed=${currentWorkspace.namespace}`
-                      : undefined
-                  }
-                />
+                <AvatarImage src={getWorkspaceAvatarSrc(currentWorkspace)} />
                 <AvatarFallback className="text-xs">{initialsFromName(currentWorkspace.workspaceName)}</AvatarFallback>
               </Avatar>
               <div className="flex flex-col">
@@ -328,13 +322,7 @@ const WorkspaceDropdownContent = ({
                 )}
               >
                 <Avatar className="h-8 w-8">
-                  <AvatarImage
-                    src={
-                      workspace.namespace
-                        ? `https://api.dicebear.com/7.x/initials/svg?seed=${workspace.namespace}`
-                        : undefined
-                    }
-                  />
+                  <AvatarImage src={getWorkspaceAvatarSrc(workspace)} />
                   <AvatarFallback className="text-xs">{initialsFromName(workspace.workspaceName)}</AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col min-w-0 flex-1">

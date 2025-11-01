@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useRef } from 'react';
 import { ArrowLeft, Plus, Search, Filter, List, Columns, KanbanSquare, GanttChart } from 'lucide-react';
 import { getRouteApi } from '@tanstack/react-router';
 
@@ -63,6 +63,9 @@ export const ActiveTableRecordsPage = () => {
   const [decryptedRecords, setDecryptedRecords] = useState(records);
   const [isDecrypting, setIsDecrypting] = useState(false);
 
+  // Track last processed state to prevent infinite loops
+  const lastProcessedRef = useRef<string>('');
+
   // REAL API: Use real data from backend
   const useMockData = false; // Changed to use real API data
   const mockTableConfig = useMemo(() => generateMockTableConfig(), []);
@@ -84,9 +87,25 @@ export const ActiveTableRecordsPage = () => {
   const displayRecords = useMockData ? mockRecords : decryptedRecords;
 
   useEffect(() => {
+    // Create a unique key representing the current state
+    const stateKey = JSON.stringify({
+      isReady,
+      recordIds: records.map((r) => r.id),
+      isE2EE: encryption.isE2EEEnabled,
+      hasKey: !!encryption.encryptionKey,
+      tableId: table?.id,
+      fieldsCount: table?.config?.fields?.length,
+    });
+
+    // Skip if we've already processed this exact state
+    if (lastProcessedRef.current === stateKey) {
+      return;
+    }
+
     const decryptAllRecords = async () => {
       // Guard: Wait for table config to be loaded
       if (!isReady || !table?.config) {
+        setDecryptedRecords([]);
         return;
       }
 
@@ -98,6 +117,7 @@ export const ActiveTableRecordsPage = () => {
         if (!encryption.isKeyValid || !encryption.encryptionKey) {
           // No valid key - show encrypted data
           setDecryptedRecords(records);
+          lastProcessedRef.current = stateKey;
           return;
         }
         decryptionKey = encryption.encryptionKey;
@@ -109,6 +129,7 @@ export const ActiveTableRecordsPage = () => {
       // If no encryption key available, show raw records
       if (!decryptionKey) {
         setDecryptedRecords(records);
+        lastProcessedRef.current = stateKey;
         return;
       }
 
@@ -124,9 +145,11 @@ export const ActiveTableRecordsPage = () => {
           50, // batchSize - process 50 records at a time
         );
         setDecryptedRecords(decrypted);
+        lastProcessedRef.current = stateKey;
       } catch (error) {
         console.error('Failed to decrypt records:', error);
         setDecryptedRecords(records);
+        lastProcessedRef.current = stateKey;
       } finally {
         setIsDecrypting(false);
       }
@@ -135,21 +158,13 @@ export const ActiveTableRecordsPage = () => {
     if (!useMockData) {
       decryptAllRecords();
     }
-
-    // Cleanup: Clear decryption cache when table changes
-    return () => {
-      // Only clear cache when actually switching tables, not on every re-render
-      if (table?.id) {
-        clearDecryptionCache();
-      }
-    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    isReady, // Wait for both table and records to be ready
+    isReady,
     records,
     encryption.isE2EEEnabled,
     encryption.isKeyValid,
     encryption.encryptionKey,
-    table?.config,
     table?.id,
     useMockData,
   ]);
