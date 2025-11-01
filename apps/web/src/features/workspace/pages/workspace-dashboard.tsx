@@ -36,12 +36,12 @@ export const WorkspaceDashboardPage = () => {
           <h1 className="text-3xl font-bold tracking-tight">{m.workspace_dashboard_title()}</h1>
           <p className="text-muted-foreground">{subtitle}</p>
         </div>
-        <div className="flex items-center gap-2">
+        {/* <div className="flex items-center gap-2">
           <Button onClick={() => setShowCreateForm((prev) => !prev)}>
             <PlusCircle className="mr-2 h-4 w-4" />
             {m.workspace_dashboard_newWorkspace()}
           </Button>
-        </div>
+        </div> */}
       </div>
 
       {/* Stats Cards */}

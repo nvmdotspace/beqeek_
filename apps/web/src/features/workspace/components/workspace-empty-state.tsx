@@ -25,12 +25,12 @@ export const WorkspaceEmptyState = ({ onCreateClick, createForm, showForm }: Wor
           <CardDescription className="text-base">{m.workspace_empty_description()}</CardDescription>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
+      {/* <CardContent className="space-y-4">
         <Button onClick={onCreateClick} className="w-full" variant="secondary">
           <Sparkles className="mr-2 size-4" /> {m.workspace_empty_createNew()}
         </Button>
         {showForm ? <div className="rounded-lg border border-border/70 bg-card p-4 text-left">{createForm}</div> : null}
-      </CardContent>
+      </CardContent> */}
     </Card>
   );
 };
