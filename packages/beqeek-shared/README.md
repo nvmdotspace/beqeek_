@@ -202,7 +202,7 @@ function TableTypeSelector() {
 }
 ```
 
-### Available Table Types (37 templates)
+### Available Table Types (35 templates)
 
 - **General**: BLANK (custom setup)
 - **Business Operations**: CONTRACT, VENDOR_MANAGEMENT, ASSET_MANAGEMENT
@@ -217,6 +217,215 @@ function TableTypeSelector() {
 - **Project Management**: TASK_EISENHOWER, PROTOTYPE
 - **Analysis & Planning**: SWOT_EVALUATION, SCAMPER, HERZBERG_FACTOR
 - **Workflow**: APPROVAL_REQUEST
+
+## Table Configurations (NEW!)
+
+The package now includes **complete table configurations** for all 35 table types! Each configuration includes predefined fields, kanban views, gantt charts, and more.
+
+### Import and Use Table Configs
+
+```typescript
+// Import from configs module
+import { TABLE_CONFIGS, getTableConfig, getTableFields } from '@workspace/beqeek-shared/configs';
+import type { TableConfig, TableFieldConfig } from '@workspace/beqeek-shared/types';
+
+// Get complete configuration for a table type
+const jobTitleConfig = getTableConfig('JOB_TITLE');
+console.log(jobTitleConfig);
+// {
+//   type: 'JOB_TITLE',
+//   title: 'tableType_jobTitle_name', // i18n key
+//   fields: [...], // 4 predefined fields
+//   kanbanConfigs: [...], // 1 kanban view
+//   tableLimit: 30,
+//   defaultSort: 'asc',
+//   hashedKeywordFields: ['job_title_name', 'job_title_code'],
+//   ...
+// }
+
+// Get just the fields
+const fields = getTableFields('EMPLOYEE_PROFILE');
+console.log(fields.length); // 12 fields
+
+// Get a specific field
+import { getTableField } from '@workspace/beqeek-shared/configs';
+const statusField = getTableField('JOB_TITLE', 'status');
+console.log(statusField?.type); // 'SELECT_ONE'
+```
+
+### Helper Functions
+
+```typescript
+import {
+  getRequiredFields,
+  getOptionalFields,
+  hasKanbanConfigs,
+  hasGanttConfigs,
+  getSearchableFields,
+  validateRequiredFields,
+  getTableStats,
+  getReferenceFields,
+  getSelectFields,
+} from '@workspace/beqeek-shared/configs';
+
+// Filter fields
+const required = getRequiredFields('JOB_TITLE');
+const optional = getOptionalFields('JOB_TITLE');
+const references = getReferenceFields('WORK_PROCESS');
+const selects = getSelectFields('TASK_EISENHOWER');
+
+// Check features
+hasKanbanConfigs('TASK_EISENHOWER'); // true
+hasGanttConfigs('TRAINING_PROGRAM'); // true
+
+// Get searchable fields
+getSearchableFields('EMPLOYEE_PROFILE'); // ['employee_name', 'employee_code', 'nickname']
+
+// Validate required fields
+const result = validateRequiredFields('JOB_TITLE', {
+  job_title_name: 'Manager',
+  // missing required fields
+});
+console.log(result.valid); // false
+console.log(result.missingFields); // ['job_title_code', 'status']
+
+// Get comprehensive stats
+const stats = getTableStats('TASK_EISENHOWER');
+console.log(stats);
+// {
+//   fieldCount: 8,
+//   requiredFieldCount: 2,
+//   optionalFieldCount: 6,
+//   hasKanban: true,
+//   kanbanViewCount: 3,
+//   hasGantt: true,
+//   ganttViewCount: 1,
+//   searchableFieldCount: 2,
+//   referenceFieldCount: 1,
+//   tableLimit: 100,
+//   defaultSort: 'desc'
+// }
+```
+
+### Reference Resolution
+
+Some tables have placeholder references like `{EMPLOYEE_PROFILE}` that need to be resolved:
+
+```typescript
+import {
+  hasPlaceholderReferences,
+  getPlaceholderReferences,
+  resolvePlaceholderReferences,
+} from '@workspace/beqeek-shared/configs';
+
+// Check for placeholders
+hasPlaceholderReferences('WORK_PROCESS'); // true
+hasPlaceholderReferences('JOB_TITLE'); // false
+
+// Get list of placeholders
+const placeholders = getPlaceholderReferences('WORK_PROCESS');
+console.log(placeholders);
+// ['EMPLOYEE_PROFILE', 'DEPARTMENT', 'JOB_TITLE', 'SALARY_SETUP']
+
+// Resolve with actual table IDs
+const resolved = resolvePlaceholderReferences('WORK_PROCESS', {
+  EMPLOYEE_PROFILE: '123456789',
+  DEPARTMENT: '987654321',
+  JOB_TITLE: '555666777',
+  SALARY_SETUP: '111222333',
+});
+// Returns config with actual IDs instead of {EMPLOYEE_PROFILE}
+```
+
+### Type Definitions
+
+```typescript
+import type {
+  TableConfig,
+  TableFieldConfig,
+  FieldOption,
+  KanbanConfig,
+  GanttConfig,
+  RecordListConfig,
+  RecordDetailConfig,
+  FieldConfigWithOptions,
+  FieldConfigWithReference,
+} from '@workspace/beqeek-shared/types';
+
+// Type guards
+import { hasOptions, hasReference, isGenericTableLayout, isHeadColumnLayout } from '@workspace/beqeek-shared/types';
+
+// Use type guards
+fields.forEach((field) => {
+  if (hasOptions(field)) {
+    console.log(field.options); // TypeScript knows this exists
+  }
+  if (hasReference(field)) {
+    console.log(field.referenceTableId); // TypeScript knows this exists
+  }
+});
+```
+
+### Config Structure Example
+
+Each table config follows this structure:
+
+```typescript
+{
+  type: 'JOB_TITLE',
+  title: 'tableType_jobTitle_name', // i18n key
+  fields: [
+    {
+      type: 'SHORT_TEXT',
+      label: 'field_jobTitle_name', // i18n key
+      name: 'job_title_name',
+      placeholder: 'field_jobTitle_name_placeholder', // i18n key
+      required: true
+    },
+    {
+      type: 'SELECT_ONE',
+      label: 'field_status',
+      name: 'status',
+      required: true,
+      options: [
+        {
+          text: 'option_active', // i18n key
+          value: 'active',
+          text_color: '#000000',
+          background_color: '#d4edda'
+        }
+      ]
+    }
+  ],
+  tableLimit: 30,
+  defaultSort: 'asc',
+  hashedKeywordFields: ['job_title_name', 'job_title_code'],
+  quickFilters: [{ fieldName: 'status' }],
+  kanbanConfigs: [...],
+  ganttCharts: [],
+  recordListConfig: {
+    layout: 'head-column',
+    titleField: 'job_title_name',
+    subLineFields: ['job_title_code', 'status']
+  },
+  recordDetailConfig: null
+}
+```
+
+### All Available Configs
+
+All 35 table types have complete configurations:
+
+```typescript
+import { TABLE_CONFIGS } from '@workspace/beqeek-shared/configs';
+
+Object.keys(TABLE_CONFIGS);
+// ['BLANK', 'JOB_TITLE', 'DEPARTMENT', 'EMPLOYEE_PROFILE',
+//  'WORK_PROCESS', 'EMPLOYEE_MONTHLY_METRICS', 'PENALTY',
+//  'SALARY_SETUP', 'SALARY_POLICY', 'TASK_EISENHOWER', ...]
+```
+
+See [docs/table-type-templates-reference.md](../../docs/table-type-templates-reference.md) for complete documentation of all templates.
 
 ### i18n Key Pattern
 
