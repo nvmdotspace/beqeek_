@@ -400,5 +400,13 @@
   "tableType_salaryPolicy_name": "Salary Policy",
   "tableType_salaryPolicy_description": "Manage salary policy, allowances, bonuses, and regulations applicable to employees.",
   "tableType_salarySetup_name": "Salary Configuration",
-  "tableType_salarySetup_description": "Manage salary configuration, including salary rates, allowances, insurance, and applicable policies."
+  "tableType_salarySetup_description": "Manage salary configuration, including salary rates, allowances, insurance, and applicable policies.",
+  "actions_record_create": "Create record",
+  "actions_record_access": "Access record",
+  "actions_record_update": "Update record",
+  "actions_record_delete": "Delete record",
+  "actions_comment_create": "Add comment",
+  "actions_comment_access": "Access comment",
+  "actions_comment_update": "Update comment",
+  "actions_comment_delete": "Delete comment"
 }

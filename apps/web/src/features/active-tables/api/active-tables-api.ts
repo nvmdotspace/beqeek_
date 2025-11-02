@@ -55,7 +55,7 @@ export const createActiveTable = (workspaceId: string, request: CreateTableReque
   apiRequest<{ data: { id: string } }>({
     url: createTableEndpoint(workspaceId),
     method: 'POST',
-    data: request,
+    data: request.data, // Unwrap data to match API expectation
   });
 
 // Update operations
@@ -73,7 +73,7 @@ export const updateActiveTable = (workspaceId: string, tableId: string, request:
   apiRequest<{ message: string }>({
     url: updateTableEndpoint(workspaceId, tableId),
     method: 'POST',
-    data: request,
+    data: request.data, // Unwrap data to match API expectation
   });
 
 // Delete operations

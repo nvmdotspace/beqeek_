@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useForm } from '@tanstack/react-form';
-import { Plus, Trash2, GripVertical, Settings, Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, ChevronDown, ChevronUp } from 'lucide-react';
 
 // @ts-ignore
 import { m } from '@/paraglide/generated/messages.js';
@@ -23,6 +23,7 @@ import { Badge } from '@workspace/ui/components/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@workspace/ui/components/card';
 
 import { TABLE_TYPE_METADATA, type TableType } from '@workspace/beqeek-shared';
+import { getTableConfig } from '@workspace/beqeek-shared/configs';
 import { generateEncryptionKey } from '@workspace/encryption-core';
 
 import type { ActiveTable, ActiveFieldConfig, ActiveWorkGroup } from '../types';
@@ -70,8 +71,8 @@ export const TableManagementDialog = ({
   isLoading = false,
 }: TableManagementDialogProps) => {
   const [fields, setFields] = useState<ActiveFieldConfig[]>([]);
-  const [editingField, setEditingField] = useState<number | null>(null);
   const [showEncryptionKey, setShowEncryptionKey] = useState(false);
+  const [showFieldsConfig, setShowFieldsConfig] = useState(true);
 
   // Initialize form with proper default values
   const getDefaultValues = () => ({
@@ -93,7 +94,7 @@ export const TableManagementDialog = ({
     },
   });
 
-  // Handle table type change - auto-fill name and description
+  // Handle table type change - auto-fill name, description, and fields
   const handleTableTypeChange = (tableType: string) => {
     // Only auto-fill if creating new table (not editing)
     if (!table && tableType) {
@@ -106,6 +107,32 @@ export const TableManagementDialog = ({
         // Update form fields
         form.setFieldValue('name', name || '');
         form.setFieldValue('description', description || '');
+      }
+
+      // Load fields from TABLE_CONFIGS
+      const tableConfig = getTableConfig(tableType as TableType);
+      if (tableConfig && tableConfig.fields) {
+        // Convert TableFieldConfig to ActiveFieldConfig format
+        const activeFields: ActiveFieldConfig[] = tableConfig.fields.map((field) => ({
+          type: field.type,
+          label: field.label,
+          name: field.name,
+          placeholder: field.placeholder || '',
+          required: field.required,
+          defaultValue: field.defaultValue,
+          // Copy options if they exist
+          ...('options' in field ? { options: field.options } : {}),
+          // Copy reference fields if they exist
+          ...('referenceTableId' in field
+            ? {
+                referenceTableId: field.referenceTableId,
+                referenceField: field.referenceField,
+                referenceLabelField: field.referenceLabelField,
+                additionalCondition: field.additionalCondition,
+              }
+            : {}),
+        }));
+        setFields(activeFields);
       }
     }
 
@@ -141,41 +168,6 @@ export const TableManagementDialog = ({
       form.reset();
     }
   }, [table]);
-
-  const addField = () => {
-    const newField: ActiveFieldConfig = {
-      type: 'SHORT_TEXT',
-      label: '',
-      name: '',
-      placeholder: '',
-      required: false,
-      options: [],
-    };
-    setFields([...fields, newField]);
-    setEditingField(fields.length);
-  };
-
-  const updateField = (index: number, field: ActiveFieldConfig) => {
-    const updatedFields = [...fields];
-    if (updatedFields[index]) {
-      updatedFields[index] = field;
-      setFields(updatedFields);
-    }
-  };
-
-  const removeField = (index: number) => {
-    setFields(fields.filter((_, i) => i !== index));
-    setEditingField(null);
-  };
-
-  const moveField = (fromIndex: number, toIndex: number) => {
-    const updatedFields = [...fields];
-    const [movedField] = updatedFields.splice(fromIndex, 1);
-    if (movedField) {
-      updatedFields.splice(toIndex, 0, movedField);
-      setFields(updatedFields);
-    }
-  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -243,17 +235,12 @@ export const TableManagementDialog = ({
               </form.Field>
 
               <div className="grid grid-cols-2 gap-4">
-                <form.Field
-                  name="workGroupId"
-                  validators={{
-                    onChange: ({ value }) => (!value ? 'Work group is required' : undefined),
-                  }}
-                >
+                <form.Field name="workGroupId">
                   {(field) => {
                     const selectedGroup = workGroups.find((group) => group.id === field.state.value);
                     return (
                       <div className="space-y-2">
-                        <Label htmlFor={field.name}>Work Group *</Label>
+                        <Label htmlFor={field.name}>Work Group</Label>
                         <Select value={field.state.value} onValueChange={field.handleChange}>
                           <SelectTrigger className="w-full">
                             <span className="truncate">{selectedGroup?.name || 'Select work group'}</span>
@@ -266,9 +253,6 @@ export const TableManagementDialog = ({
                             ))}
                           </SelectContent>
                         </Select>
-                        {field.state.meta.errors && (
-                          <p className="text-sm text-destructive">{field.state.meta.errors[0]}</p>
-                        )}
                       </div>
                     );
                   }}
@@ -354,45 +338,99 @@ export const TableManagementDialog = ({
             </CardContent>
           </Card>
 
-          {/* Fields Configuration */}
+          {/* Fields Configuration - View Only */}
           <Card>
             <CardHeader>
               <CardTitle className="text-lg flex items-center justify-between">
                 Fields Configuration
-                <Button type="button" onClick={addField} size="sm">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Field
+                <Button type="button" variant="ghost" size="sm" onClick={() => setShowFieldsConfig(!showFieldsConfig)}>
+                  {showFieldsConfig ? (
+                    <>
+                      <ChevronUp className="h-4 w-4 mr-2" />
+                      Hide Fields
+                    </>
+                  ) : (
+                    <>
+                      <ChevronDown className="h-4 w-4 mr-2" />
+                      Show Fields
+                    </>
+                  )}
                 </Button>
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              {fields.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  No fields configured. Click "Add Field" to get started.
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {fields.map((field, index) => (
-                    <FieldEditor
-                      key={index}
-                      field={field}
-                      index={index}
-                      isEditing={editingField === index}
-                      onEdit={() => setEditingField(index)}
-                      onSave={(updatedField) => {
-                        updateField(index, updatedField);
-                        setEditingField(null);
-                      }}
-                      onCancel={() => setEditingField(null)}
-                      onRemove={() => removeField(index)}
-                      onMove={moveField}
-                      canMoveUp={index > 0}
-                      canMoveDown={index < fields.length - 1}
-                    />
-                  ))}
-                </div>
-              )}
-            </CardContent>
+            {showFieldsConfig && (
+              <CardContent className="space-y-4">
+                {fields.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    No fields configured. Select a table type to auto-load fields.
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {fields.map((field, index) => (
+                      <div key={index} className="flex items-start justify-between p-4 border rounded-lg bg-muted/30">
+                        <div className="flex-1 space-y-2">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium text-base">
+                              {m[field.label as keyof typeof m]?.() || field.label}
+                            </span>
+                            {field.required && (
+                              <Badge variant="secondary" className="text-xs">
+                                Required
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="text-sm text-muted-foreground space-y-1">
+                            <div>
+                              <span className="font-medium">Field Name:</span> {field.name}
+                            </div>
+                            <div>
+                              <span className="font-medium">Type:</span>{' '}
+                              {FIELD_TYPES.find((t) => t.value === field.type)?.label || field.type}
+                            </div>
+                            {field.placeholder && (
+                              <div>
+                                <span className="font-medium">Placeholder:</span>{' '}
+                                {m[field.placeholder as keyof typeof m]?.() || field.placeholder}
+                              </div>
+                            )}
+                            {field.defaultValue !== undefined && (
+                              <div>
+                                <span className="font-medium">Default:</span> {String(field.defaultValue)}
+                              </div>
+                            )}
+                            {'options' in field && field.options && field.options.length > 0 && (
+                              <div>
+                                <span className="font-medium">Options:</span>
+                                <div className="flex flex-wrap gap-1 mt-1">
+                                  {field.options.map((option, optIdx) => (
+                                    <Badge
+                                      key={optIdx}
+                                      style={{
+                                        backgroundColor: option.background_color,
+                                        color: option.text_color,
+                                      }}
+                                      className="text-xs"
+                                    >
+                                      {m[option.text as keyof typeof m]?.() || option.text}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                            {'referenceTableId' in field && field.referenceTableId && (
+                              <div>
+                                <span className="font-medium">References:</span> {field.referenceTableId}
+                                {field.referenceLabelField && ` (${field.referenceLabelField})`}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            )}
           </Card>
 
           <DialogFooter>
@@ -406,161 +444,5 @@ export const TableManagementDialog = ({
         </form>
       </DialogContent>
     </Dialog>
-  );
-};
-
-interface FieldEditorProps {
-  field: ActiveFieldConfig;
-  index: number;
-  isEditing: boolean;
-  onEdit: () => void;
-  onSave: (field: ActiveFieldConfig) => void;
-  onCancel: () => void;
-  onRemove: () => void;
-  onMove: (fromIndex: number, toIndex: number) => void;
-  canMoveUp: boolean;
-  canMoveDown: boolean;
-}
-
-const FieldEditor = ({
-  field,
-  index,
-  isEditing,
-  onEdit,
-  onSave,
-  onCancel,
-  onRemove,
-  onMove,
-  canMoveUp,
-  canMoveDown,
-}: FieldEditorProps) => {
-  const [editField, setEditField] = useState<ActiveFieldConfig>(field);
-
-  useEffect(() => {
-    setEditField(field);
-  }, [field]);
-
-  if (!isEditing) {
-    return (
-      <div className="flex items-center justify-between p-3 border rounded-lg bg-muted/30">
-        <div className="flex items-center gap-3">
-          <GripVertical className="h-4 w-4 text-muted-foreground" />
-          <div>
-            <div className="font-medium">{field.label || 'Untitled Field'}</div>
-            <div className="text-sm text-muted-foreground">
-              {field.name} • {FIELD_TYPES.find((t) => t.value === field.type)?.label}
-              {field.required && (
-                <Badge variant="secondary" className="ml-2">
-                  Required
-                </Badge>
-              )}
-            </div>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => onMove(index, index - 1)}
-            disabled={!canMoveUp}
-          >
-            ↑
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => onMove(index, index + 1)}
-            disabled={!canMoveDown}
-          >
-            ↓
-          </Button>
-          <Button type="button" variant="ghost" size="sm" onClick={onEdit}>
-            <Settings className="h-4 w-4" />
-          </Button>
-          <Button type="button" variant="ghost" size="sm" onClick={onRemove}>
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <Card>
-      <CardContent className="p-4 space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label>Field Label *</Label>
-            <Input
-              value={editField.label}
-              onChange={(e) => setEditField({ ...editField, label: e.target.value })}
-              placeholder="Enter field label"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label>Field Name *</Label>
-            <Input
-              value={editField.name}
-              onChange={(e) =>
-                setEditField({
-                  ...editField,
-                  name: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '_'),
-                })
-              }
-              placeholder="field_name"
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label>Field Type</Label>
-            <Select
-              value={editField.type}
-              onValueChange={(value: string) => setEditField({ ...editField, type: value })}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {FIELD_TYPES.map((type) => (
-                  <SelectItem key={type.value} value={type.value}>
-                    {type.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label>Placeholder</Label>
-            <Input
-              value={editField.placeholder || ''}
-              onChange={(e) => setEditField({ ...editField, placeholder: e.target.value })}
-              placeholder="Enter placeholder text"
-            />
-          </div>
-        </div>
-
-        <div className="flex items-center space-x-2">
-          <Switch
-            id={`required-${index}`}
-            checked={editField.required || false}
-            onCheckedChange={(checked: boolean) => setEditField({ ...editField, required: checked })}
-          />
-          <Label htmlFor={`required-${index}`}>Required field</Label>
-        </div>
-
-        <div className="flex justify-end gap-2">
-          <Button type="button" variant="outline" onClick={onCancel}>
-            Cancel
-          </Button>
-          <Button type="button" onClick={() => onSave(editField)} disabled={!editField.label || !editField.name}>
-            Save Field
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
   );
 };

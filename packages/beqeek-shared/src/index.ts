@@ -36,3 +36,7 @@ export * from './configs/index.js';
 
 // Export all types (can also be imported from '@workspace/beqeek-shared/types')
 export * from './types/index.js';
+
+// Export utilities
+export * from './utils/uuid-generator.js';
+export * from './utils/default-actions.js';
