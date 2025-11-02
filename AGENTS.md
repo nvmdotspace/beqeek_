@@ -1,255 +1,463 @@
-<!-- OPENSPEC:START -->
+# CLAUDE.md
 
-# OpenSpec Instructions
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-These instructions are for AI assistants working in this project.
+## Essential Commands
 
-- Mentions planning or proposals (words like proposal, spec, change, plan)
-- Introduces new capabilities, breaking changes, architecture shifts, or big performance/security work
-- Sounds ambiguous and you need the authoritative spec before coding
-- **UI/UX Changes**: Any frontend development, component creation, or styling work
-- **Design Work**: Layout changes, responsive design, or visual improvements
-- Spec format and conventions
-- Project structure and guidelines
-- **Design System Requirements**: Mandatory UI/UX development standards
-- **Component Development**: Workflow and best practices for frontend development
-
-# Repository Guidelines
-
-## Project Structure & Module Organization
-
-- `apps/web` is a Vite + React SPA that uses the TanStack suite (Router, Query, Form) and Tailwind CSS utilities from `@workspace/ui`. Route components live in `src/routes`, shared providers in `src/providers`, global state in `src/stores`, and feature code should colocate with routes when practical.
-- `packages/ui` exposes reusable React components (`src/components/**`) and Tailwind styles. Update the barrel exports in `packages/ui/src/index.ts` when adding new primitives.
-- `packages/eslint-config` and `packages/typescript-config` provide shared lint/TS baselines; extend these rather than duplicating rules per app.
-- `turbo.json` and `pnpm-workspace.yaml` define task pipelines and workspace membership; update both when adding a new package or app.
-
-## Build, Test, and Development Commands
-
-- `pnpm install` hydrates all workspace dependencies using the Node 22 toolchain declared in `package.json`.
-- `pnpm dev` runs `turbo dev`, which triggers `pnpm --filter web dev` (Vite dev server). Prefer `pnpm --filter web dev -- --host 127.0.0.1` when binding needs to be explicit.
-- `pnpm build` runs `turbo build`, which calls `vite build` in `apps/web` and any package-level build scripts.
-- `pnpm lint` executes `turbo lint`; each package should expose a local `lint` script using the shared ESLint config.
-- Type-checks run via `pnpm --filter web run check-types` until a unified `check-types` pipeline is in place.
-
-## Coding Style & Naming Conventions
-
-- TypeScript is required; keep strict options aligned with `packages/typescript-config`.
-- Prettier (root `format` script) enforces two-space indentation and double-quoted JSX props; run `pnpm format` for bulk updates.
-- Follow React conventions: components in PascalCase (`Button.tsx`), hooks in camelCase starting with `use`, and directories in lowercase-hyphen (`form-fields`).
-- Re-export UI primitives from `packages/ui/src/index.ts` so consumers keep a single import surface.
-- Use TanStack libraries for routing/data/forms;
-
-## Design System Requirements (MANDATORY)
-
-- **Design System Compliance**: All UI changes MUST follow `docs/design-system.md`
-- **Component Reuse**: Always check `@workspace/ui` before creating new components
-- **Styling Standards**: Use CSS custom properties defined in design system
-- **Responsive Design**: Mobile-first approach with defined breakpoints
-- **Accessibility**: WCAG 2.1 AA compliance required for all new features
-- **TypeScript**: Strict typing required for all components and props
-- **Vietnamese Support**: Typography and spacing optimized for Vietnamese content
-
-### Component Development Workflow
-
-1. **Check Existing**: Search `packages/ui/` for similar components first
-2. **Follow Patterns**: Use existing component structure and naming
-3. **Design Tokens**: Use CSS custom properties from design system
-4. **Responsive**: Implement mobile-first with defined breakpoints
-5. **Accessibility**: Include ARIA labels, keyboard navigation, screen reader support
-
-### Styling Requirements
-
-- **Colors**: Use semantic color variables from design system
-- **Spacing**: Follow 8px base unit spacing scale
-- **Typography**: Use defined font stacks and type scale
-- **Animations**: Use defined transition presets and easing functions
-- **Dark Mode**: Support both light and dark themes
-
-### Design System Validation
+### Development
 
 ```bash
-# Check design system compliance
-rg -n "bg-|text-|border-" src/ --type tsx  # Verify using design tokens
-rg -n "className=" src/ --type tsx        # Check Tailwind usage
-rg -n "interface.*Props" src/ --type tsx   # Verify TypeScript interfaces
+# Install dependencies (required first)
+pnpm install
+
+# Run entire monorepo (recommended - includes i18n compilation)
+pnpm dev
+
+# Run specific app with custom host
+pnpm --filter web dev
+pnpm --filter web dev -- --host 127.0.0.1
+
+# Dev server runs on localhost:4173
 ```
 
-## State Management Rules (MANDATORY)
+### Building
 
-### State Design First Principle
+```bash
+# Build entire monorepo (compiles i18n + packages + apps)
+pnpm build
 
-**ALWAYS design state architecture before coding**. Every feature must include state design decisions in implementation plan.
+# Build specific app and its dependencies
+pnpm --filter web build
 
-### State Type Decision Tree
+# Build specific packages
+pnpm --filter @workspace/ui build
+pnpm --filter @workspace/active-tables-core build
 
-#### 1. Local State (useState)
+# Production build
+NODE_ENV=production pnpm build
 
-**Use when:**
-
-- UI-only state that affects single component
-- Form inputs, toggles, modals, dropdown states
-- Temporary state that resets on component unmount
-- Component-specific animations or visual states
-
-**Examples:**
-
-```typescript
-// ✅ Correct: Form input
-const [email, setEmail] = useState('');
-
-// ✅ Correct: Modal visibility
-const [isOpen, setIsOpen] = useState(false);
-
-// ✅ Correct: Loading spinner
-const [isLoading, setIsLoading] = useState(false);
+# Preview production build
+pnpm --filter web preview
 ```
 
-#### 2. Server State (React Query/TanStack Query)
+### Code Quality
 
-**Use when:**
+```bash
+# Lint entire monorepo
+pnpm lint
 
-- Data fetched from API endpoints
-- Data that needs caching, background updates, invalidation
-- Shared across multiple components
-- Requires optimistic updates, pagination, infinite scroll
+# Lint specific app
+pnpm --filter web lint
 
-**Examples:**
+# Type check
+pnpm --filter web check-types
 
-```typescript
-// ✅ Correct: API data
-const { data: users, isLoading } = useQuery({
-  queryKey: ['users'],
-  queryFn: fetchUsers,
+# Format code (Prettier)
+pnpm format
+```
+
+### UI Components
+
+```bash
+# Add shadcn/ui component (auto-syncs to packages/ui)
+pnpm dlx shadcn@latest add button -c apps/web
+```
+
+### Internationalization
+
+```bash
+# Machine translate i18n messages
+pnpm machine-translate
+```
+
+## Architecture Overview
+
+**Beqeek** is a workflow automation platform built as a Turborepo monorepo with PNPM workspaces.
+
+### Tech Stack
+
+- **Frontend**: React 19 + Vite 6 + TanStack (Router, Query, Form, Table)
+- **Styling**: TailwindCSS v4 + shadcn/ui + Radix UI
+- **State**: Zustand (global) + React Query (server) + useState (local)
+- **i18n**: Paraglide.js with Vietnamese (default) and English
+- **Type Safety**: TypeScript 5.9 strict mode
+- **API**: Axios with centralized error handling
+- **Build**: Turborepo with dependency-aware task pipelines
+
+### Monorepo Structure
+
+```
+apps/
+├── web/           Main React application (Vite + React 19)
+│   ├── src/
+│   │   ├── features/      Feature modules (auth, workspace, active-tables, workflows, etc.)
+│   │   ├── routes/        File-based routes (TanStack Router)
+│   │   ├── components/    Shared components (error boundaries, loading states)
+│   │   ├── stores/        Zustand stores (sidebar, language, auth)
+│   │   ├── shared/        API clients, query client, utilities
+│   │   ├── hooks/         Custom React hooks
+│   │   ├── providers/     React context providers
+│   │   ├── main.tsx       App entry point with router setup
+│   │   └── routeTree.gen.ts  Auto-generated route tree (DO NOT EDIT)
+│   └── vite.config.ts
+
+packages/
+├── ui/                         Component library
+│   ├── src/components/         shadcn/ui components
+│   ├── src/styles/globals.css  TailwindCSS v4 styles
+│   └── postcss.config.mjs
+├── active-tables-core/         Core Active Tables logic with React components & Zustand stores
+├── beqeek-shared/              Shared types, constants, and validators (TypeScript only)
+├── encryption-core/            E2EE utilities (AES-256, OPE, HMAC-SHA256)
+├── eslint-config/             Shared ESLint rules
+└── typescript-config/         Shared TypeScript configs
+```
+
+### Web App Architecture
+
+**Entry**: `src/main.tsx` → `AppProviders` → `RouterProvider` with lazy-loaded routes
+
+**Routing**: TanStack Router v1.133+ with **FILE-BASED routing**
+
+- **Route Files**: `src/routes/**/*.tsx` - File structure defines URL structure
+- **Generated Tree**: `src/routeTree.gen.ts` - Auto-generated (DO NOT EDIT, in `.gitignore`)
+- **Plugin**: `@tanstack/router-plugin/vite` in `vite.config.ts` generates routes on save
+- **Locale patterns**: `/` (vi default) and `/$locale` prefix for other languages
+- **Auth guards**: `beforeLoad` hook using `getIsAuthenticated()` from `src/features/auth`
+- **Lazy loading**: Automatic code-splitting with `autoCodeSplitting: true`
+
+**Route Structure**:
+
+```
+src/routes/
+├── __root.tsx                              # Root layout with RootLayout component
+├── index.tsx                               # / - Redirect to locale
+├── $.tsx                                   # 404 catch-all route
+├── $locale.tsx                             # Layout for /$locale routes
+├── $locale/
+│   ├── index.tsx                           # /$locale - Redirect based on auth
+│   ├── login.tsx                           # /$locale/login
+│   ├── workspaces.tsx                      # /$locale/workspaces
+│   ├── workspaces/
+│   │   └── $workspaceId/
+│   │       ├── tables.tsx                  # Tables list
+│   │       ├── tables/
+│   │       │   └── $tableId/
+│   │       │       ├── index.tsx           # Table detail
+│   │       │       ├── records.tsx         # Records page
+│   │       │       └── settings.tsx        # Settings page
+│   │       ├── workflows.tsx
+│   │       ├── team.tsx
+│   │       ├── roles.tsx
+│   │       ├── analytics.tsx
+│   │       ├── starred.tsx
+│   │       ├── recent-activity.tsx
+│   │       └── archived.tsx
+│   ├── notifications.tsx                   # Global routes
+│   ├── search.tsx
+│   └── help.tsx
+```
+
+**Creating New Routes**:
+
+1. Create file in `src/routes/` following naming convention
+2. Use `createFileRoute()` from `@tanstack/react-router`
+3. Export `Route` constant with component and options
+4. Plugin auto-generates `routeTree.gen.ts` on save
+5. Use `useRouter()` hook to access router instance (NOT a global import)
+
+**Example Route File**:
+
+```tsx
+import { createFileRoute } from '@tanstack/react-router';
+import { lazy, Suspense } from 'react';
+
+const MyPageLazy = lazy(() => import('@/features/my-feature/pages/my-page'));
+
+export const Route = createFileRoute('/$locale/my-route')({
+  component: MyComponent,
+  beforeLoad: ({ params }) => {
+    // Auth guards, redirects, etc.
+  },
 });
 
-// ✅ Correct: Mutations with invalidation
-const createUserMutation = useMutation({
-  mutationFn: createUser,
-  onSuccess: () => queryClient.invalidateQueries({ queryKey: ['users'] }),
-});
-```
-
-#### 3. Global State (Zustand)
-
-**Use when:**
-
-- State shared across many unrelated components
-- Complex state logic with multiple actions
-- User preferences, authentication status, theme
-- State that persists across route navigation
-- When React Query is overkill for non-server state
-
-**Examples:**
-
-```typescript
-// ✅ Correct: Auth state
-interface AuthStore {
-  user: User | null;
-  isAuthenticated: boolean;
-  login: (credentials: Credentials) => Promise<void>;
-  logout: () => void;
-}
-
-// ✅ Correct: UI preferences
-interface UIStore {
-  sidebarCollapsed: boolean;
-  theme: 'light' | 'dark';
-  language: string;
-  setSidebarCollapsed: (collapsed: boolean) => void;
+function MyComponent() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <MyPageLazy />
+    </Suspense>
+  );
 }
 ```
 
-### State Design Checklist
+**Accessing Route Params (REQUIRED PATTERN)**:
 
-Before implementing any feature, answer:
+Use `getRouteApi()` with centralized route constants for type-safe param extraction:
 
-1. **Data Source**: Where does this data come from?
-   - API → React Query
-   - User input → Local State
-   - App configuration → Global State
+```tsx
+// ✅ CORRECT: Type-safe constants + getRouteApi()
+import { getRouteApi } from '@tanstack/react-router';
+import { ROUTES } from '@/shared/route-paths';
 
-2. **Scope**: Who needs this data?
-   - Single component → Local State
-   - Few related components → Lift state up
-   - Many unrelated components → Global State
+const route = getRouteApi(ROUTES.ACTIVE_TABLES.TABLE_DETAIL);
 
-3. **Persistence**: Should this survive navigation?
-   - No → Local State
-   - Yes → Global State or React Query (if from server)
+export function MyPage() {
+  const { tableId, workspaceId, locale } = route.useParams();
+  const navigate = route.useNavigate();
 
-4. **Complexity**: How complex is the state logic?
-   - Simple values → Local State
-   - Multiple related values → Global State
-   - Server synchronization → React Query
+  // Navigate using constants - prevents typos!
+  navigate({
+    to: ROUTES.ACTIVE_TABLES.TABLE_RECORDS,
+    params: { locale, workspaceId, tableId },
+  });
+}
+```
 
-### Anti-Patterns to Avoid
+```tsx
+// ❌ WRONG: Hardcoded paths + type assertions
+import { useParams } from '@tanstack/react-router';
 
-❌ **NEVER use Zustand for server data** - Use React Query instead
-❌ **NEVER use useState for global preferences** - Use Zustand
-❌ **NEVER duplicate state** - Single source of truth
-❌ **NEVER use local state for data fetched from API** - Use React Query
+const route = getRouteApi('/$locale/workspaces/$workspaceId/tables/$tableId'); // Typo-prone!
+const params = useParams({ from: '...' });
+const tableId = (params as any).tableId as string; // Loses type safety!
+```
 
-### Implementation Requirements
+**Route Constants** ([route-paths.ts](apps/web/src/shared/route-paths.ts)):
 
-1. **State Documentation**: Every store must include:
+```tsx
+ROUTES.ACTIVE_TABLES.LIST          // /$locale/workspaces/$workspaceId/tables
+ROUTES.ACTIVE_TABLES.TABLE_DETAIL  // /$locale/workspaces/$workspaceId/tables/$tableId
+ROUTES.ACTIVE_TABLES.TABLE_RECORDS // /$locale/workspaces/$workspaceId/tables/$tableId/records
+ROUTES.ACTIVE_TABLES.TABLE_SETTINGS// /$locale/workspaces/$workspaceId/tables/$tableId/settings
+ROUTES.WORKSPACE.*                 // Workspace feature routes
+ROUTES.LOGIN, ROUTES.WORKSPACES    // Auth routes
+```
 
-   ```typescript
-   /**
-    * Auth Store - Manages user authentication state
-    *
-    * State:
-    * - user: Current authenticated user or null
-    * - isAuthenticated: Boolean flag for auth status
-    *
-    * Usage:
-    * - Use in components that need auth status
-    * - Persist across navigation
-    * - Don't use for server data (use React Query)
-    */
-   ```
+**Benefits:**
 
-2. **Type Safety**: All state must be fully typed with TypeScript interfaces
+- ✅ Full TypeScript inference from route definitions
+- ✅ Single source of truth for all routes
+- ✅ Zero maintenance when routes change
+- ✅ Auto-completion prevents typos
+- ✅ Compile-time route path validation
+- ✅ Works perfectly with code splitting
 
-3. **Selector Pattern**: Components must use selectors to prevent unnecessary re-renders:
+See [route-helpers.md](apps/web/src/shared/route-helpers.md) for detailed patterns.
 
-   ```typescript
-   // ✅ Good: Selective subscription
-   const user = useAuthStore((state) => state.user);
+**i18n**: Paraglide plugin in Vite config
 
-   // ❌ Bad: Subscribes to entire store
-   const authState = useAuthStore();
-   ```
+- Messages in `messages/` directory → compiled to `src/paraglide/generated`
+- Supports: `vi` (default), `en`
+- Strategy: URL → cookie → preferredLanguage → localStorage → baseLocale
 
-4. **State Validation**: New state implementations must pass:
-   ```bash
-   # Check for proper state patterns
-   rg -n "useState.*\[\]" src/ --type tsx  # Review useState usage
-   rg -n "useQuery\|useMutation" src/ --type tsx  # Verify React Query usage
-   rg -n "use.*Store" src/ --type tsx  # Check Zustand patterns
-   ```
+**State Management Philosophy** (CRITICAL):
 
-### Migration Path
+1. **Local State (useState)** - UI-only state, form inputs, modals, toggles
+2. **Server State (React Query)** - API data, caching, mutations, invalidation
+3. **Global State (Zustand)** - User preferences, auth, theme, sidebar, language
 
-When refactoring existing state:
+**Anti-patterns:**
 
-1. Identify current state type and usage
-2. Apply decision tree to determine correct type
-3. Create migration plan with minimal breaking changes
-4. Update all consuming components
-5. Remove old state implementation
+- ❌ Never use Zustand for server data (use React Query)
+- ❌ Never use useState for global preferences (use Zustand)
+- ❌ Never use local state for API data (use React Query)
 
-**All new features MUST include state design decisions in their implementation plan.**
+## Core Features
 
-## Testing Guidelines
+### Active Tables
 
-- A dedicated test runner is not yet configured; when introducing one (Vitest + Testing Library recommended), add a `test` script per package and register it in `turbo.json`.
-- Co-locate tests as `*.test.tsx` or group them under `__tests__/` to leverage Vite module resolution.
-- Until automated tests exist, rely on `pnpm lint` plus manual verification in `pnpm --filter web dev`; document any new coverage expectations in PR descriptions.
+**Purpose**: Configurable workflow data tables with schemas, E2EE, and record management
 
-## Commit & Pull Request Guidelines
+**Key Concepts**:
 
-- Follow the existing Git history: short, imperative commit subjects with a scoped prefix when helpful (`chore:`, `fix:`, etc.); emojis are optional but used sparingly.
-- Each PR should describe the change, note affected packages, and link issues or tasks. Screenshots/GIFs are expected for UI tweaks in `apps/web`.
-- Ensure lint/build pipelines succeed locally (`pnpm lint`, `pnpm build`) before opening a PR, and mention any skipped checks with justification.
-- **Design System Review**: All UI changes must be validated against `docs/design-system.md` before PR submission
-- **Component Verification**: Ensure new components follow established patterns and TypeScript interfaces
+- Tables have metadata, schema (fields with types/constraints), and optional E2EE
+- Field types: SHORT_TEXT, RICH_TEXT, INTEGER, NUMERIC, DATE, DATETIME, SELECT_ONE, SELECT_LIST, etc.
+- **E2EE**: 32-char encryption key stored locally (never sent to server), encryptionAuthKey (SHA256) stored on server
+- Encryption types:
+  - AES-256-CBC for text fields (random IV prepended)
+  - OPE (Order-Preserving Encryption) for numbers/dates (enables range queries)
+  - HMAC-SHA256 for selects (enables equality checks)
+
+**API Pattern**: POST-based RPC (`/api/workspace/{workspaceId}/workflow/{verb}/active_tables`)
+
+- Full spec in `docs/swagger.yaml`
+- Client in `apps/web/src/shared/api/active-tables-client.ts`
+
+**Pages**:
+
+- `/workspaces/tables` - List all tables
+- `/workspaces/tables/$tableId` - Table configuration/schema editor
+- `/workspaces/tables/$tableId/records` - Record management with kanban, comments, inline editing
+
+### Feature Organization
+
+Each feature in `apps/web/src/features/{feature}/` contains:
+
+- `pages/` - Page components
+- `components/` - Feature-specific components
+- `hooks/` - Feature-specific hooks
+- `stores/` - Feature-specific Zustand stores (if needed)
+- `types.ts` - Feature types
+- `api.ts` - Feature API client (if needed)
+
+**Existing features**: auth, workspace, active-tables, workflows, team, roles, analytics, encryption, organization, notifications, search, support
+
+## Package Details
+
+### @workspace/ui
+
+Component library with TailwindCSS v4 and Radix UI primitives.
+
+```tsx
+// Import global styles (in main.tsx)
+import '@workspace/ui/globals.css';
+
+// Import components
+import { Button } from '@workspace/ui/components/button';
+import { cn } from '@workspace/ui/lib/utils'; // Tailwind class merger
+```
+
+Exports via `package.json` exports field:
+
+- `@workspace/ui/globals.css` → styles
+- `@workspace/ui/components/*` → individual components
+- `@workspace/ui/lib/*` → utilities
+- `@workspace/ui/hooks/*` → hooks
+
+### @workspace/active-tables-core
+
+Package containing Active Tables models, types, validators, React components (Quill editor), and Zustand stores.
+Depends on `@workspace/encryption-core` and `@workspace/beqeek-shared`.
+Peer dependencies: `react`, `react-dom`, `@tanstack/react-table` (must be provided by consumer).
+
+### @workspace/encryption-core
+
+Client-side E2EE implementation using crypto-js.
+
+- Keys stored locally, NEVER transmitted to server
+- Handles AES-256, OPE, HMAC-SHA256 encryption
+
+## Development Guidelines
+
+### State Management Checklist
+
+Before implementing features, answer:
+
+1. **Data source?** API → React Query | User input → Local | Config → Global
+2. **Scope?** Single component → Local | Many components → Global
+3. **Persist?** No → Local | Yes → Global/React Query
+4. **Complexity?** Simple → Local | Multiple related → Global | Server sync → React Query
+
+Use selectors to prevent re-renders:
+
+```tsx
+// ✅ Good
+const user = useAuthStore((state) => state.user);
+
+// ❌ Bad
+const authState = useAuthStore(); // Subscribes to entire store
+```
+
+### Design System Compliance (MANDATORY)
+
+All UI changes MUST follow `docs/design-system.md`:
+
+- Use CSS custom properties for colors, spacing, typography
+- Mobile-first responsive design with defined breakpoints
+- WCAG 2.1 AA accessibility (ARIA, keyboard nav, screen readers)
+- TypeScript strict typing for all components
+- Vietnamese typography optimization
+- Dark mode support
+
+**Workflow**:
+
+1. Check `packages/ui/` for existing components
+2. Follow existing patterns and naming conventions
+3. Use design tokens (CSS variables) not hardcoded values
+4. Implement mobile-first with defined breakpoints
+5. Include accessibility features
+
+### Component Development
+
+- **Naming**: PascalCase for components, camelCase for hooks (prefix `use`)
+- **Co-location**: Feature-specific components in `apps/web/src/features/{feature}/`
+- **TypeScript**: Full type coverage, interfaces for props with JSDoc
+- **Styling**: TailwindCSS utilities + `cn()` for conditional classes
+- **Reusability**: Export shared components from `packages/ui`
+
+### API Integration
+
+**Base client**: `apps/web/src/shared/api/http-client.ts` (Axios)
+
+- Centralized error handling in `api-error.ts`
+- React Query setup in `shared/query-client.ts`
+- Feature-specific clients in feature directories
+
+**Authentication**:
+
+- Managed via `getIsAuthenticated()` helper
+- Router guards check auth in `beforeLoad` hooks
+- Workspace context required for most routes
+
+### Encryption Handling
+
+For E2EE Active Tables:
+
+- Encryption key stored in localStorage (32 chars)
+- **NEVER** send `encryptionKey` to server in mutations
+- Encrypt client-side before API calls
+- Decrypt after retrieval
+- Use `@workspace/encryption-core` utilities
+- Warn users about key backup/loss
+
+### Build Configuration
+
+**Vite** (`apps/web/vite.config.ts`):
+
+- Manual chunk splitting: react, radix, tanstack, icons, vendor
+- Paraglide i18n plugin
+- Path alias: `@` → `src`
+- Dev server: localhost:4173
+
+**Turbo** (`turbo.json`):
+
+- `build` depends on `^build` (builds dependencies first)
+- `dev` is persistent and uncached
+- `lint`, `check-types` depend on upstream tasks
+
+## Common Pitfalls
+
+1. **Packages not updating**: Run `pnpm build` from root to rebuild packages
+2. **Import paths**: Use `@workspace/` for packages, `@/` for app src
+3. **State duplication**: Single source of truth (don't mix React Query + Zustand for same data)
+4. **Missing auth guards**: All authenticated routes need `getIsAuthenticated()` in `beforeLoad`
+5. **Encryption key exposure**: Never log or transmit encryption keys
+6. **Design violations**: Check `docs/design-system.md` before UI changes
+7. **Locale fallback**: Unsupported locales fallback to `vi`
+8. **File-based routing**: Routes are files in `src/routes/`, NOT `src/router.tsx` (deleted)
+9. **Generated files**: NEVER edit `routeTree.gen.ts` - auto-generated by TanStack Router plugin
+10. **Router instance**: Use `useRouter()` hook, NOT a global `router` import
+11. **Route naming**: `$` for params, `_` prefix for pathless layouts, `$.tsx` for catch-all/404
+12. **Route params**: ALWAYS use `getRouteApi()` for type-safe params, NEVER use `useParams({ from: '...' })` with type assertions
+
+## Code Quality Standards
+
+- **Prettier**: 2-space indent, double-quoted JSX props
+- **ESLint**: Shared config from `@workspace/eslint-config`
+- **TypeScript**: Strict mode, no implicit any
+- **Pre-PR**: Run `pnpm lint` and `pnpm build` locally
+- **Commits**: Imperative mood, optional scope prefix (`feat:`, `fix:`, `chore:`)
+
+## Documentation
+
+- **API Spec**: `docs/swagger.yaml` (OpenAPI 3.0.3)
+- **Design System**: `docs/design-system.md`
+- **Feature Specs**: `docs/feature-*.md` (auth, workspaces, active-tables, workflows)
+- **Guidelines**: `AGENTS.md` (comprehensive dev guidelines)
+- **Deployment**: `DEPLOYMENT.md`
+
+## Environment
+
+- **Node.js**: >=22
+- **PNPM**: 10.x
+- **Platform**: macOS, Linux, Windows (WSL recommended)

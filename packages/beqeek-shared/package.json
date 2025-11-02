@@ -20,6 +20,14 @@
     "./validators": {
       "import": "./dist/validators/index.js",
       "types": "./dist/validators/index.d.ts"
+    },
+    "./configs": {
+      "import": "./dist/configs/index.js",
+      "types": "./dist/configs/index.d.ts"
+    },
+    "./types": {
+      "import": "./dist/types/index.js",
+      "types": "./dist/types/index.d.ts"
     }
   },
   "files": [

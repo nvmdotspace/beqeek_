@@ -18,7 +18,13 @@ export interface ActiveFieldConfig {
   name: string;
   placeholder?: string;
   required?: boolean;
+  defaultValue?: any;
   options?: ActiveTableOption[];
+  // Reference field properties
+  referenceTableId?: string;
+  referenceField?: string;
+  referenceLabelField?: string;
+  additionalCondition?: string;
 }
 
 export interface ActiveTableAction {

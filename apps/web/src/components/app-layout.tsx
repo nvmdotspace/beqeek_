@@ -134,7 +134,7 @@ export const AppLayout = ({ children, showSidebar = true }: AppLayoutProps) => {
             {/* User Menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                <Button variant="ghost" className="relative h-8 w-8 rounded-full cursor-pointer">
                   <Avatar className="h-8 w-8">
                     <AvatarImage src="/avatars/01.png" alt={userId || ''} />
                     <AvatarFallback>{userId?.[0]?.toUpperCase() || 'U'}</AvatarFallback>
@@ -144,8 +144,7 @@ export const AppLayout = ({ children, showSidebar = true }: AppLayoutProps) => {
               <DropdownMenuContent className="w-56" align="end" forceMount>
                 <div className="flex items-center justify-start gap-2 p-2">
                   <div className="flex flex-col space-y-1 leading-none">
-                    <p className="font-medium">{userId || 'User'}</p>
-                    <p className="w-[200px] truncate text-sm text-muted-foreground">{userId}@beqeek.com</p>
+                    <p className="font-medium">{'User'}</p>
                   </div>
                 </div>
                 <DropdownMenuSeparator />

@@ -7,6 +7,8 @@ export interface Workspace {
   workspaceName: string;
   namespace?: string;
   description?: string | null;
+  logo?: string | null;
+  thumbnailLogo?: string | null;
   memberCount?: number;
   tableCount?: number;
   workflowCount?: number;

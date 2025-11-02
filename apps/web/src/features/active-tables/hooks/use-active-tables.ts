@@ -150,7 +150,9 @@ export const useActiveTableRecordsWithConfig = (
     enabled: isAuthenticated && !!workspaceId && !!tableId && !!table?.config,
   });
 
-  const records = recordsQuery.data?.data ?? [];
+  // Memoize records array to prevent unnecessary re-renders
+  // The empty array fallback should be stable across renders
+  const records = useMemo(() => recordsQuery.data?.data ?? [], [recordsQuery.data?.data]);
   const nextId = recordsQuery.data?.next_id ?? null;
   const previousId = recordsQuery.data?.previous_id ?? null;
   const isReady = !tableQuery.isLoading && !!table?.config && !recordsQuery.isLoading;

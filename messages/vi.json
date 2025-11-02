@@ -402,5 +402,13 @@
   "tableType_salaryPolicy_name": "Chính sách lương",
   "tableType_salaryPolicy_description": "Quản lý chính sách lương, phụ cấp, thưởng và các quy định áp dụng cho nhân sự.",
   "tableType_salarySetup_name": "Cấu hình bảng lương",
-  "tableType_salarySetup_description": "Quản lý cấu hình bảng lương, bao gồm tỉ lệ lương, phụ cấp, bảo hiểm, và các chính sách áp dụng."
+  "tableType_salarySetup_description": "Quản lý cấu hình bảng lương, bao gồm tỉ lệ lương, phụ cấp, bảo hiểm, và các chính sách áp dụng.",
+  "actions_record_create": "Tạo mới bản ghi",
+  "actions_record_access": "Truy cập bản ghi",
+  "actions_record_update": "Cập nhật bản ghi",
+  "actions_record_delete": "Xoá bản ghi",
+  "actions_comment_create": "Thêm bình luận",
+  "actions_comment_access": "Truy cập bình luận",
+  "actions_comment_update": "Cập nhật bình luận",
+  "actions_comment_delete": "Xoá bình luận"
 }

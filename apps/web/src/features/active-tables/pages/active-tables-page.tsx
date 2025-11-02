@@ -46,6 +46,7 @@ export const ActiveTablesPage = () => {
   const [automationFilter, setAutomationFilter] = useState<'all' | 'automated' | 'manual'>('all');
   const [showAllStatusFilters, setShowAllStatusFilters] = useState<boolean>(false);
   const { isReady: isEncryptionReady } = useEncryption();
+  const [apiError, setApiError] = useState<string | null>(null);
 
   // Priority STATUS filters (most common, shown by default)
   const priorityStatusFilters = ['employee profile', 'department', 'work process', 'contract'];
@@ -74,12 +75,14 @@ export const ActiveTablesPage = () => {
     workspaceId: workspaceId || '',
     onSuccess: (message) => {
       console.log(message);
+      setApiError(null);
       setIsTableDialogOpen(false);
       setEditingTable(null);
       refetch();
     },
     onError: (error) => {
       console.error(error);
+      setApiError(error);
     },
   });
 
@@ -243,6 +246,14 @@ export const ActiveTablesPage = () => {
 
   return (
     <div className="space-y-6 p-6">
+      {/* API Error Alert */}
+      {apiError && (
+        <Alert variant="destructive">
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{apiError}</AlertDescription>
+        </Alert>
+      )}
+
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div className="space-y-1">

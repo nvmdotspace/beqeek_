@@ -1,6 +1,6 @@
 import { createRootRoute, Outlet } from '@tanstack/react-router';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
+// import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 
 import { RootLayout } from '@/components/root-layout';
 import { RoutePending } from '@/components/route-pending';
@@ -21,7 +21,7 @@ function RootComponent() {
       {import.meta.env.DEV ? (
         <>
           <ReactQueryDevtools buttonPosition="bottom-right" />
-          <TanStackRouterDevtools position="bottom-left" />
+          {/* <TanStackRouterDevtools position="bottom-left" /> */}
         </>
       ) : null}
     </>
