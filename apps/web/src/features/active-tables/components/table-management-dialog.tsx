@@ -238,21 +238,32 @@ export const TableManagementDialog = ({
                 <form.Field name="workGroupId">
                   {(field) => {
                     const selectedGroup = workGroups.find((group) => group.id === field.state.value);
+                    const displayValue =
+                      field.state.value === '' ? 'None (Ungrouped)' : selectedGroup?.name || 'Select work group';
+
                     return (
                       <div className="space-y-2">
                         <Label htmlFor={field.name}>Work Group</Label>
                         <Select value={field.state.value} onValueChange={field.handleChange}>
                           <SelectTrigger className="w-full">
-                            <span className="truncate">{selectedGroup?.name || 'Select work group'}</span>
+                            <span className="truncate">{displayValue}</span>
                           </SelectTrigger>
                           <SelectContent>
-                            {workGroups.map((group) => (
-                              <SelectItem key={group.id} value={group.id}>
-                                {group.name}
-                              </SelectItem>
-                            ))}
+                            <SelectItem value="">None (Ungrouped)</SelectItem>
+                            {workGroups.length > 0 ? (
+                              workGroups.map((group) => (
+                                <SelectItem key={group.id} value={group.id}>
+                                  {group.name}
+                                </SelectItem>
+                              ))
+                            ) : (
+                              <div className="px-2 py-1.5 text-sm text-muted-foreground">No work groups available</div>
+                            )}
                           </SelectContent>
                         </Select>
+                        {workGroups.length === 0 && (
+                          <p className="text-xs text-muted-foreground">Table will be created without a work group</p>
+                        )}
                       </div>
                     );
                   }}
