@@ -9,13 +9,17 @@ import React, { useState, useMemo } from 'react';
 import {
   DndContext,
   DragOverlay,
-  closestCorners,
+  closestCenter,
+  pointerWithin,
+  getFirstCollision,
   KeyboardSensor,
   PointerSensor,
   useSensor,
   useSensors,
   type DragEndEvent,
   type DragStartEvent,
+  type DragOverEvent,
+  type CollisionDetection,
 } from '@dnd-kit/core';
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { KanbanColumn } from './kanban-column.js';
@@ -43,6 +47,70 @@ export function KanbanBoard({
 }: KanbanBoardProps) {
   const [activeRecordId, setActiveRecordId] = useState<string | null>(null);
   const [collapsedColumns, setCollapsedColumns] = useState<Set<string>>(new Set());
+  const [overId, setOverId] = useState<string | null>(null);
+
+  // Custom collision detection that prioritizes droppable containers (columns)
+  const customCollisionDetection: CollisionDetection = (args) => {
+    // First, try pointer within detection for columns
+    const pointerCollisions = pointerWithin(args);
+
+    // Find collisions with columns specifically (check data.type)
+    const columnCollisions = pointerCollisions.filter((collision) => {
+      // Check if this is a column by looking at droppable data
+      const isColumn = columns.some((col) => col.id === collision.id);
+      return isColumn && collision.id !== args.active.id;
+    });
+
+    // If pointer is over a column, use that
+    if (columnCollisions.length > 0) {
+      return columnCollisions;
+    }
+
+    // Fall back to closest center for better accuracy
+    const centerCollisions = closestCenter(args);
+
+    // Filter valid collisions (not the active item)
+    const validCollisions = centerCollisions.filter((collision) => {
+      return collision && collision.id !== args.active.id;
+    });
+
+    // Find column collisions
+    const closestColumnCollisions = validCollisions.filter(
+      (collision) => collision && columns.some((col) => col.id === collision.id),
+    );
+
+    if (closestColumnCollisions.length > 0) {
+      return closestColumnCollisions;
+    }
+
+    // If no column collision, check if we're over a record and find its column
+    const recordCollisions = validCollisions.filter(
+      (collision) => collision && records.some((r) => r.id === collision.id),
+    );
+
+    if (recordCollisions.length > 0) {
+      const firstCollision = recordCollisions[0];
+      if (firstCollision) {
+        const overRecord = records.find((r) => r.id === firstCollision.id);
+        if (overRecord) {
+          const recordStatus = overRecord.record?.[config.statusField] ?? overRecord.data?.[config.statusField];
+          const targetColumn = columns.find((col) => col.id === recordStatus);
+          if (targetColumn) {
+            // Return a collision for the column instead of the record
+            return [
+              {
+                id: targetColumn.id,
+                data: firstCollision.data,
+              },
+            ];
+          }
+        }
+      }
+      return recordCollisions;
+    }
+
+    return [];
+  };
 
   // Setup drag sensors
   const sensors = useSensors(
@@ -118,35 +186,99 @@ export function KanbanBoard({
     setActiveRecordId(String(event.active.id));
   };
 
+  // Handle drag over - track which droppable we're over
+  const handleDragOver = (event: DragOverEvent) => {
+    const { over, active } = event;
+
+    if (!over) {
+      setOverId(null);
+      return;
+    }
+
+    const overId = String(over.id);
+    const activeId = String(active.id);
+
+    // If we're over a column directly, use that
+    if (columns.some((col) => col.id === overId)) {
+      setOverId(overId);
+      return;
+    }
+
+    // If we're over a record, find its column
+    const overRecord = records.find((r) => r.id === overId);
+    if (overRecord) {
+      const recordStatus = overRecord.record?.[config.statusField] ?? overRecord.data?.[config.statusField];
+      setOverId(String(recordStatus));
+      return;
+    }
+
+    setOverId(overId);
+  };
+
   // Handle drag end
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
-    if (!over) {
+    console.log('🎯 DND handleDragEnd called', {
+      activeId: active.id,
+      overId: over?.id,
+      trackedOverId: overId,
+      overData: over?.data?.current,
+    });
+
+    // Prioritize the tracked overId from onDragOver which has better detection
+    let finalOverId = overId;
+
+    // Fall back to the over.id if we don't have a tracked ID
+    if (!finalOverId && over) {
+      finalOverId = String(over.id);
+
+      // If this is a record ID, convert it to the column ID
+      const overRecord = records.find((r) => r.id === finalOverId);
+      if (overRecord) {
+        const recordStatus = overRecord.record?.[config.statusField] ?? overRecord.data?.[config.statusField];
+        finalOverId = String(recordStatus);
+      }
+    }
+
+    if (!finalOverId) {
       setActiveRecordId(null);
+      setOverId(null);
       return;
     }
 
     const activeId = String(active.id);
-    const overId = String(over.id);
+
+    // Get the active record first
+    const activeRecord = records.find((r) => r.id === activeId);
+    if (!activeRecord) {
+      console.log('❌ Active record not found:', activeId);
+      setActiveRecordId(null);
+      setOverId(null);
+      return;
+    }
+
+    const currentStatus = activeRecord.record?.[config.statusField] ?? activeRecord.data?.[config.statusField];
 
     // Find which column the card was dropped into
-    const destinationColumn = columns.find((col) => col.id === overId);
+    const destinationColumn = columns.find((col) => col.id === finalOverId);
+    console.log('🔍 Destination column:', destinationColumn?.id);
 
     if (destinationColumn && onRecordMove) {
-      // Get the active record
-      const activeRecord = records.find((r) => r.id === activeId);
-      if (activeRecord) {
-        const currentStatus = activeRecord.record?.[config.statusField] ?? activeRecord.data?.[config.statusField];
+      console.log('✅ Moving record:', { activeId, currentStatus, newStatus: destinationColumn.id });
 
-        // Only trigger onRecordMove if status actually changed
-        if (currentStatus !== destinationColumn.id) {
-          onRecordMove(activeId, destinationColumn.id);
-        }
+      // Only trigger onRecordMove if status actually changed
+      if (currentStatus !== destinationColumn.id) {
+        onRecordMove(activeId, destinationColumn.id);
+      } else {
+        console.log('⏭️ Status unchanged, skipping move');
       }
+    } else {
+      console.log('❌ Cannot move - destinationColumn or onRecordMove missing');
     }
 
     setActiveRecordId(null);
+    setOverId(null);
   };
 
   // Toggle column collapse state
@@ -193,8 +325,9 @@ export function KanbanBoard({
   return (
     <DndContext
       sensors={sensors}
-      collisionDetection={closestCorners}
+      collisionDetection={customCollisionDetection}
       onDragStart={handleDragStart}
+      onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
       <div className={`overflow-x-auto overflow-y-hidden ${className}`}>

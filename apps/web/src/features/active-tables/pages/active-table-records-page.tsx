@@ -5,6 +5,7 @@ import { getRouteApi } from '@tanstack/react-router';
 // @ts-ignore
 import { useActiveTableRecordsWithConfig } from '../hooks/use-active-tables';
 import { useTableEncryption } from '../hooks/use-table-encryption';
+import { useUpdateRecordField } from '../hooks/use-update-record';
 import {
   decryptRecords,
   clearDecryptionCache,
@@ -59,12 +60,17 @@ export const ActiveTableRecordsPage = () => {
   // Initialize encryption hook (now guaranteed to have table.config when records load)
   const encryption = useTableEncryption(workspaceId ?? '', tableId, table?.config);
 
+  // Initialize record update mutation for kanban DnD
+  // IMPORTANT: Always call hook unconditionally (Rules of Hooks)
+  const updateRecordMutation = useUpdateRecordField(workspaceId ?? '', tableId ?? '', table);
+
   // Decrypt records if E2EE enabled and key is valid
   const [decryptedRecords, setDecryptedRecords] = useState(records);
   const [isDecrypting, setIsDecrypting] = useState(false);
 
   // Track last processed state to prevent infinite loops
   const lastProcessedRef = useRef<string>('');
+  const previousDecryptedRecordsRef = useRef<TableRecord[] | null>(null);
 
   // REAL API: Use real data from backend
   const useMockData = false; // Changed to use real API data
@@ -87,10 +93,18 @@ export const ActiveTableRecordsPage = () => {
   const displayRecords = useMockData ? mockRecords : decryptedRecords;
 
   useEffect(() => {
+    const recordsFingerprint = records.map((record) => ({
+      id: record.id,
+      record: record.record,
+      data: record.data,
+      updatedAt: record.updatedAt,
+      valueUpdatedAt: record.valueUpdatedAt,
+    }));
+
     // Create a unique key representing the current state
     const stateKey = JSON.stringify({
       isReady,
-      recordIds: records.map((r) => r.id),
+      recordsFingerprint,
       isE2EE: encryption.isE2EEEnabled,
       hasKey: !!encryption.encryptionKey,
       tableId: table?.id,
@@ -209,8 +223,74 @@ export const ActiveTableRecordsPage = () => {
   };
 
   const handleRecordMove = (recordId: string, newStatus: string) => {
-    console.log('Move record', recordId, 'to', newStatus);
-    // TODO: Implement record update mutation
+    // Check if table is loaded
+    if (!table) {
+      console.error('Table not loaded');
+      return;
+    }
+
+    // Get kanban config to find status field name
+    const kanbanConfig = table.config?.kanbanConfigs?.[0];
+    if (!kanbanConfig) {
+      console.error('Kanban config not found');
+      return;
+    }
+
+    // Check encryption key if E2EE enabled
+    if (table.config.e2eeEncryption && !encryption.isKeyValid) {
+      console.error('Encryption key required to update records');
+      return;
+    }
+
+    console.log(`Moving record ${recordId} to status: ${newStatus}`);
+
+    if (!useMockData) {
+      previousDecryptedRecordsRef.current = decryptedRecords;
+
+      setDecryptedRecords((prevRecords) =>
+        prevRecords.map((record) => {
+          if (record.id !== recordId) {
+            return record;
+          }
+
+          return {
+            ...record,
+            record: {
+              ...record.record,
+              [kanbanConfig.statusField]: newStatus,
+            },
+            data: record.data
+              ? {
+                  ...record.data,
+                  [kanbanConfig.statusField]: newStatus,
+                }
+              : record.data,
+          };
+        }),
+      );
+    }
+
+    // Update the status field with new value
+    updateRecordMutation.mutate(
+      {
+        recordId,
+        fieldName: kanbanConfig.statusField,
+        newValue: newStatus,
+      },
+      {
+        onSuccess: () => {
+          console.log('✅ Record status updated successfully');
+          previousDecryptedRecordsRef.current = null;
+        },
+        onError: (error) => {
+          console.error('❌ Failed to update record:', error);
+          if (!useMockData && previousDecryptedRecordsRef.current) {
+            setDecryptedRecords(previousDecryptedRecordsRef.current);
+            previousDecryptedRecordsRef.current = null;
+          }
+        },
+      },
+    );
   };
 
   const handleCommentAdd = (content: string) => {

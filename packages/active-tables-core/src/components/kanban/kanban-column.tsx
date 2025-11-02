@@ -33,8 +33,12 @@ export function KanbanColumn({
   messages,
   className = '',
 }: KanbanColumnProps) {
-  const { setNodeRef, isOver } = useDroppable({
+  const { setNodeRef, isOver, active } = useDroppable({
     id: columnId,
+    data: {
+      type: 'column',
+      columnId: columnId,
+    },
   });
 
   const [showMenu, setShowMenu] = useState(false);
@@ -259,7 +263,7 @@ export function KanbanColumn({
         >
           <SortableContext items={recordIds} strategy={verticalListSortingStrategy}>
             {processedRecords.length === 0 ? (
-              <div className="text-center py-8 text-gray-400 dark:text-gray-500 text-sm">
+              <div className="text-center py-20 text-gray-400 dark:text-gray-500 text-sm min-h-[200px] flex items-center justify-center">
                 {filterPriority || sortBy
                   ? `No ${filterPriority || ''} priority cards`
                   : messages?.dropHere || 'Drop cards here'}
