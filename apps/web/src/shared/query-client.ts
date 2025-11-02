@@ -4,8 +4,8 @@ export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: (failureCount, error: unknown) => {
-        // Don't retry on client errors (4xx)
         try {
+          // Don't retry on client errors (4xx)
           // Lazy check for status field on error
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const status = (error as any)?.status;
@@ -15,7 +15,7 @@ export const queryClient = new QueryClient({
           }
         } catch {}
         // Retry up to 3 times for network errors and 5xx errors
-        return failureCount < 3;
+        return failureCount < 2;
       },
     },
   },
