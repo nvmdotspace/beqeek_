@@ -100,13 +100,37 @@ export const useActiveTablesGroupedByWorkGroup = (workspaceId?: string) => {
       byGroup.set(table.workGroupId, list);
     });
 
-    return groups.map((group) => ({
+    const result = groups.map((group) => ({
       group,
       tables: byGroup.get(group.id) ?? [],
     }));
+
+    // Handle ungrouped tables (tables without a workGroup or with empty workGroupId)
+    const ungroupedTables: ActiveTable[] = [];
+    const existingGroupIds = new Set(groups.map((g) => g.id));
+
+    tableList.forEach((table) => {
+      if (!table.workGroupId || !existingGroupIds.has(table.workGroupId)) {
+        ungroupedTables.push(table);
+      }
+    });
+
+    // Add ungrouped tables as a default group if any exist
+    if (ungroupedTables.length > 0) {
+      result.push({
+        group: {
+          id: '',
+          name: 'Ungrouped',
+          description: 'Tables without a workgroup',
+        } as ActiveWorkGroup,
+        tables: ungroupedTables,
+      });
+    }
+
+    return result;
   }, [isEnabled, workGroupsQuery.data, tablesQuery.data]);
 
-  const hasAnyTables = grouped.some((entry) => entry.tables.length > 0);
+  const hasAnyTables = tables.length > 0;
 
   return {
     workGroups,
