@@ -33,6 +33,14 @@
       "import": "./dist/components/index.js",
       "types": "./dist/components/index.d.ts"
     },
+    "./components/kanban": {
+      "import": "./dist/components/kanban/index.js",
+      "types": "./dist/components/kanban/index.d.ts"
+    },
+    "./components/kanban/*": {
+      "import": "./dist/components/kanban/*.js",
+      "types": "./dist/components/kanban/*.d.ts"
+    },
     "./lexical-styles.css": "./src/components/fields/lexical/styles.css"
   },
   "files": [
@@ -61,6 +69,7 @@
     "crypto-js": "^4.2.0",
     "date-fns": "^4.1.0",
     "lexical": "^0.22.0",
+    "lucide-react": "^0.544.0",
     "zustand": "^5.0.8"
   },
   "peerDependencies": {

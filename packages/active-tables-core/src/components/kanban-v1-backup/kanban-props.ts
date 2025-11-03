@@ -154,9 +154,6 @@ export interface ColumnData {
   /** Column ID (status field value) */
   id: string;
 
-  /** Column name (for shadcn kanban compatibility) */
-  name: string;
-
   /** Column title */
   title: string;
 

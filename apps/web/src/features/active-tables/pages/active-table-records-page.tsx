@@ -10,6 +10,7 @@ import {
   decryptRecords,
   clearDecryptionCache,
   KanbanBoard,
+  KanbanBoardV2,
   GanttChartView,
   RecordList,
   type TableRecord,
@@ -506,7 +507,7 @@ export const ActiveTableRecordsPage = () => {
         <TabsContent value="kanban" className="mt-3 sm:mt-6 -mx-3 sm:mx-0">
           {kanbanConfig && displayTable.config && (
             <div className="kanban-mobile-wrapper">
-              <KanbanBoard
+              <KanbanBoardV2
                 table={displayTable}
                 records={displayRecords}
                 config={kanbanConfig}

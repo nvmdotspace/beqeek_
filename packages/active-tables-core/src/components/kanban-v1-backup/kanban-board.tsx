@@ -150,7 +150,6 @@ export function KanbanBoard({
 
     return statusField.options.map((option: FieldOption) => ({
       id: option.value,
-      name: option.text, // Added for compatibility
       title: option.text,
       recordIds: records
         .filter((r) => {
