@@ -141,6 +141,7 @@ export interface ActiveTableRecordPermissions {
 export interface ActiveTableRecord {
   id: string;
   record: Record<string, unknown>;
+  data?: Record<string, unknown>; // Alias for record data (for compatibility with @workspace/active-tables-core)
   createdBy?: string;
   updatedBy?: string;
   createdAt?: string;

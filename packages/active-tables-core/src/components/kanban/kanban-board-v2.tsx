@@ -5,8 +5,8 @@
  * Maintains original business logic and header design from v1.
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
-import type { DragEndEvent } from '@dnd-kit/core';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import type { DragEndEvent, DragOverEvent } from '@dnd-kit/core';
 import {
   KanbanProvider,
   KanbanBoard as ShadcnKanbanBoard,
@@ -16,7 +16,6 @@ import {
 } from '@workspace/ui/components/kanban';
 import { ChevronRight, ChevronDown } from 'lucide-react';
 import type { KanbanBoardProps, ColumnData } from './kanban-props.js';
-import type { TableRecord } from '../../types/record.js';
 import type { FieldConfig, FieldOption } from '../../types/field.js';
 import { formatFieldValue } from '../../utils/field-formatter.js';
 
@@ -41,6 +40,7 @@ export function KanbanBoardV2({
   const [columnMenus, setColumnMenus] = useState<Record<string, boolean>>({});
   const [sortBy, setSortBy] = useState<Record<string, string | null>>({});
   const [filterPriority, setFilterPriority] = useState<Record<string, string | null>>({});
+  const [draggedOverColumn, setDraggedOverColumn] = useState<string | null>(null);
 
   // Find the status field configuration
   const statusField = useMemo(() => {
@@ -59,29 +59,37 @@ export function KanbanBoardV2({
       .filter((f): f is FieldConfig => f !== undefined);
   }, [config.displayFields, table.config.fields]);
 
-  // Generate columns from status field options
+  // Generate columns from status field options - memoized for performance
   const columns = useMemo((): ColumnData[] => {
     if (!statusField || !statusField.options) {
       console.warn('Kanban: statusField not found or has no options');
       return [];
     }
 
-    return statusField.options.map((option: FieldOption) => ({
-      id: option.value,
-      name: option.text, // shadcn kanban uses 'name' instead of 'title'
-      title: option.text,
-      recordIds: records
-        .filter((r) => {
-          const value = r.record?.[config.statusField] ?? r.data?.[config.statusField];
-          return value === option.value;
-        })
-        .map((r) => r.id),
-      color: option.background_color || undefined,
-      textColor: option.text_color || undefined,
-    }));
+    // Create a map of record counts for faster lookup
+    const recordCounts = new Map<string, number>();
+    records.forEach((r) => {
+      const value = r.record?.[config.statusField] ?? r.data?.[config.statusField];
+      if (value) {
+        recordCounts.set(String(value), (recordCounts.get(String(value)) || 0) + 1);
+      }
+    });
+
+    return statusField.options.map((option: FieldOption) => {
+      const optionValue = String(option.value);
+      return {
+        id: optionValue,
+        name: option.text, // shadcn kanban uses 'name' instead of 'title'
+        title: option.text,
+        recordIds: [], // We'll calculate this lazily when needed
+        recordCount: recordCounts.get(optionValue) || 0,
+        color: option.background_color || undefined,
+        textColor: option.text_color || undefined,
+      };
+    });
   }, [statusField, records, config.statusField]);
 
-  // Convert records to kanban items format
+  // Convert records to kanban items format - memoized for performance
   const kanbanItems = useMemo(() => {
     return records.map((record) => {
       const statusValue = record.record?.[config.statusField] ?? record.data?.[config.statusField];
@@ -92,37 +100,114 @@ export function KanbanBoardV2({
       return {
         id: record.id,
         name: formatFieldValue(headlineValue, headlineField) || 'Untitled',
-        column: String(statusValue),
+        column: String(statusValue || 'unknown'), // Ensure column is always a string
         record, // Keep original record for reference
       };
     });
   }, [records, config.statusField, headlineField]);
 
+  const [boardData, setBoardData] = useState(kanbanItems);
+  const boardDataRef = useRef(boardData);
+  const pendingMovesRef = useRef<Map<string, string>>(new Map());
+
+  useEffect(() => {
+    setBoardData(kanbanItems);
+    boardDataRef.current = kanbanItems;
+    pendingMovesRef.current.clear();
+  }, [kanbanItems]);
+
+  useEffect(() => {
+    boardDataRef.current = boardData;
+  }, [boardData]);
+
+  // Handle drag over event
+  const resolveColumnFromOver = useCallback(
+    (over: DragOverEvent['over']) => {
+      if (!over) return null;
+
+      const sortableData = over.data?.current?.sortable as { containerId?: string } | undefined;
+      if (sortableData?.containerId) {
+        return String(sortableData.containerId);
+      }
+
+      const overId = String(over.id);
+
+      const directColumn = columns.find((col) => col.id === overId);
+      if (directColumn) {
+        return directColumn.id;
+      }
+
+      const overItem = boardDataRef.current.find((item) => item.id === overId);
+      if (overItem?.column) {
+        return String(overItem.column);
+      }
+
+      return null;
+    },
+    [columns],
+  );
+
+  const handleDragOver = useCallback(
+    (event: DragOverEvent) => {
+      const columnId = resolveColumnFromOver(event.over);
+      setDraggedOverColumn(columnId);
+    },
+    [resolveColumnFromOver],
+  );
+
   // Handle data change (drag & drop)
   const handleDataChange = useCallback(
     (newData: typeof kanbanItems) => {
-      if (readOnly || !onRecordMove) return;
+      setBoardData(newData);
+      boardDataRef.current = newData;
 
-      // Find items that changed columns
       newData.forEach((item) => {
-        const originalItem = kanbanItems.find((ki) => ki.id === item.id);
+        const originalItem = kanbanItems.find((original) => original.id === item.id);
         if (originalItem && originalItem.column !== item.column) {
-          console.log('✅ Moving record:', {
-            recordId: item.id,
-            from: originalItem.column,
-            to: item.column,
-          });
-          onRecordMove(item.id, item.column);
+          pendingMovesRef.current.set(item.id, String(item.column));
         }
       });
     },
-    [kanbanItems, onRecordMove, readOnly],
+    [kanbanItems],
   );
 
   // Handle drag end event
-  const handleDragEnd = useCallback((event: DragEndEvent) => {
-    console.log('🎯 Drag ended:', event);
-  }, []);
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event;
+
+      // Reset drag over state
+      setDraggedOverColumn(null);
+
+      if (!over || !onRecordMove || readOnly) {
+        return;
+      }
+
+      const activeId = String(active.id);
+      const overId = String(over.id);
+
+      const latestItems = boardDataRef.current;
+      const activeItem = latestItems.find((item) => item.id === activeId);
+      const originalItem = kanbanItems.find((item) => item.id === activeId);
+
+      if (!activeItem || !originalItem) {
+        return;
+      }
+
+      const pendingDestination = pendingMovesRef.current.get(activeId);
+      let destinationColumnId =
+        pendingDestination || resolveColumnFromOver(over) || draggedOverColumn || activeItem.column;
+
+      if (!destinationColumnId || destinationColumnId === originalItem.column) {
+        pendingMovesRef.current.delete(activeId);
+        return;
+      }
+
+      onRecordMove(activeId, destinationColumnId);
+      pendingMovesRef.current.delete(activeId);
+    },
+    [draggedOverColumn, kanbanItems, onRecordMove, readOnly, resolveColumnFromOver],
+  );
 
   // Toggle column collapse state
   const toggleColumnCollapse = useCallback((columnId: string) => {
@@ -167,14 +252,15 @@ export function KanbanBoardV2({
       <div className="min-h-[400px] min-w-max p-4">
         <KanbanProvider
           columns={columns as any}
-          data={kanbanItems}
+          data={boardData}
           onDataChange={handleDataChange}
+          onDragOver={handleDragOver}
           onDragEnd={handleDragEnd}
           className="flex gap-3"
         >
           {(column: any) => {
             const isCollapsed = collapsedColumns.has(column.id);
-            const columnRecords = kanbanItems.filter((item) => item.column === column.id);
+            const columnRecords = boardData.filter((item) => item.column === column.id);
 
             return (
               <ShadcnKanbanBoard

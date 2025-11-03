@@ -8,8 +8,6 @@ import { useTableEncryption } from '../hooks/use-table-encryption';
 import { useUpdateRecordField } from '../hooks/use-update-record';
 import {
   decryptRecords,
-  clearDecryptionCache,
-  KanbanBoard,
   KanbanBoardV2,
   GanttChartView,
   RecordList,
@@ -63,7 +61,7 @@ export const ActiveTableRecordsPage = () => {
 
   // Initialize record update mutation for kanban DnD
   // IMPORTANT: Always call hook unconditionally (Rules of Hooks)
-  const updateRecordMutation = useUpdateRecordField(workspaceId ?? '', tableId ?? '', table);
+  const updateRecordMutation = useUpdateRecordField(workspaceId ?? '', tableId ?? '', table ?? null);
 
   // Decrypt records if E2EE enabled and key is valid
   const [decryptedRecords, setDecryptedRecords] = useState(records);
@@ -97,7 +95,7 @@ export const ActiveTableRecordsPage = () => {
     const recordsFingerprint = records.map((record) => ({
       id: record.id,
       record: record.record,
-      data: record.data,
+      data: record.data || record.record, // Fallback to record if data is missing
       updatedAt: record.updatedAt,
       valueUpdatedAt: record.valueUpdatedAt,
     }));
@@ -265,7 +263,10 @@ export const ActiveTableRecordsPage = () => {
                   ...record.data,
                   [kanbanConfig.statusField]: newStatus,
                 }
-              : record.data,
+              : {
+                  ...record.record,
+                  [kanbanConfig.statusField]: newStatus,
+                },
           };
         }),
       );

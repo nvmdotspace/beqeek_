@@ -12,7 +12,7 @@ import {
 } from '@dnd-kit/core';
 import { arrayMove, SortableContext, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { createContext, type HTMLAttributes, type ReactNode, useContext, useState } from 'react';
+import { createContext, type HTMLAttributes, type ReactNode, useContext, useState, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 // @ts-ignore - tunnel-rat types issue
 import tunnel from 'tunnel-rat';
@@ -92,10 +92,13 @@ export const KanbanCard = <T extends KanbanItemProps = KanbanItemProps>({
   });
   const { activeCardId } = useContext(KanbanContext) as KanbanContextProps;
 
-  const style = {
-    transition,
-    transform: CSS.Transform.toString(transform),
-  };
+  const style = useMemo(
+    () => ({
+      transition,
+      transform: CSS.Transform.toString(transform),
+    }),
+    [transition, transform],
+  );
 
   return (
     <>
@@ -141,8 +144,8 @@ export const KanbanCards = <T extends KanbanItemProps = KanbanItemProps>({
   ...props
 }: KanbanCardsProps<T>) => {
   const { data } = useContext(KanbanContext) as KanbanContextProps<T>;
-  const filteredData = data.filter((item) => item.column === props.id);
-  const items = filteredData.map((item) => item.id);
+  const filteredData = useMemo(() => data.filter((item) => item.column === props.id), [data, props.id]);
+  const items = useMemo(() => filteredData.map((item) => item.id), [filteredData]);
 
   return (
     <ScrollArea className="overflow-hidden">
@@ -209,26 +212,29 @@ export const KanbanProvider = <
       return;
     }
 
+    // Performance optimization: only process if columns actually different
     const activeItem = data.find((item) => item.id === active.id);
-    const overItem = data.find((item) => item.id === over.id);
-
-    if (!activeItem) {
-      return;
-    }
+    if (!activeItem) return;
 
     const activeColumn = activeItem.column;
+    const overItem = data.find((item) => item.id === over.id);
     const overColumn = overItem?.column || columns.find((col) => col.id === over.id)?.id || columns[0]?.id;
 
-    if (activeColumn !== overColumn && overColumn) {
-      let newData = [...data];
-      const activeIndex = newData.findIndex((item) => item.id === active.id);
-      const overIndex = newData.findIndex((item) => item.id === over.id);
+    if (activeColumn === overColumn) {
+      return; // No change needed
+    }
 
-      if (activeIndex !== -1 && newData[activeIndex]) {
-        newData[activeIndex].column = overColumn;
+    let newData = data;
+    const activeIndex = newData.findIndex((item) => item.id === active.id);
+    const overIndex = overItem ? newData.findIndex((item) => item.id === over.id) : -1;
+
+    if (activeIndex !== -1 && overIndex !== -1 && activeColumn !== overColumn) {
+      // Only create new array if we need to change columns
+      newData = [...data];
+      if (newData[activeIndex]) {
+        newData[activeIndex].column = overColumn || '';
       }
       newData = arrayMove(newData, activeIndex, overIndex);
-
       onDataChange?.(newData);
     }
 
@@ -247,9 +253,15 @@ export const KanbanProvider = <
     }
 
     let newData = [...data];
-
+    const overItem = data.find((item) => item.id === over.id);
     const oldIndex = newData.findIndex((item) => item.id === active.id);
     const newIndex = newData.findIndex((item) => item.id === over.id);
+
+    // Ensure the column is properly set on the dropped item
+    if (oldIndex !== -1 && newData[oldIndex]) {
+      const targetColumn = overItem?.column || columns.find((col) => col.id === over.id)?.id || columns[0]?.id;
+      newData[oldIndex].column = targetColumn || '';
+    }
 
     newData = arrayMove(newData, oldIndex, newIndex);
 
