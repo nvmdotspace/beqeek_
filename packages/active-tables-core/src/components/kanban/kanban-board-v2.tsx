@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
-import type { DragEndEvent, DragOverEvent } from '@dnd-kit/core';
+import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 import {
   KanbanProvider,
   KanbanBoard as ShadcnKanbanBoard,
@@ -40,7 +40,6 @@ export function KanbanBoardV2({
   const [columnMenus, setColumnMenus] = useState<Record<string, boolean>>({});
   const [sortBy, setSortBy] = useState<Record<string, string | null>>({});
   const [filterPriority, setFilterPriority] = useState<Record<string, string | null>>({});
-  const [draggedOverColumn, setDraggedOverColumn] = useState<string | null>(null);
 
   // Find the status field configuration
   const statusField = useMemo(() => {
@@ -106,107 +105,128 @@ export function KanbanBoardV2({
     });
   }, [records, config.statusField, headlineField]);
 
-  const [boardData, setBoardData] = useState(kanbanItems);
-  const boardDataRef = useRef(boardData);
-  const pendingMovesRef = useRef<Map<string, string>>(new Map());
+  // Local state for kanban items - syncs with props
+  const [boardData, setBoardData] = useState(() => kanbanItems.map((item) => ({ ...item })));
 
+  // Snapshot of kanbanItems (SERVER SOURCE OF TRUTH) when drag starts
+  // IMPORTANT: Use kanbanItems (server state), NOT boardData (mutated by Provider)
+  const dragStartSnapshotRef = useRef<Record<string, { column: string; name: string }>>({});
+
+  // Sync boardData with kanbanItems from props (when records change from API)
   useEffect(() => {
-    setBoardData(kanbanItems);
-    boardDataRef.current = kanbanItems;
-    pendingMovesRef.current.clear();
+    setBoardData(kanbanItems.map((item) => ({ ...item })));
+    // Clear snapshot when server data changes (refetch completed)
+    // This ensures next drag uses fresh server state
+    dragStartSnapshotRef.current = {};
   }, [kanbanItems]);
 
-  useEffect(() => {
-    boardDataRef.current = boardData;
-  }, [boardData]);
+  // Handle drag start - save snapshot for comparison
+  const handleDragStart = useCallback(
+    (event: DragStartEvent) => {
+      // Snapshot kanbanItems (server state) NOT boardData (Provider mutates boardData during drag)
+      // This prevents comparing against stale state from previous drag
+      dragStartSnapshotRef.current = kanbanItems.reduce<Record<string, { column: string; name: string }>>(
+        (acc, item) => {
+          acc[item.id] = {
+            column: String(item.column),
+            name: item.name,
+          };
+          return acc;
+        },
+        {},
+      );
 
-  // Handle drag over event
-  const resolveColumnFromOver = useCallback(
-    (over: DragOverEvent['over']) => {
-      if (!over) return null;
-
-      const sortableData = over.data?.current?.sortable as { containerId?: string } | undefined;
-      if (sortableData?.containerId) {
-        return String(sortableData.containerId);
-      }
-
-      const overId = String(over.id);
-
-      const directColumn = columns.find((col) => col.id === overId);
-      if (directColumn) {
-        return directColumn.id;
-      }
-
-      const overItem = boardDataRef.current.find((item) => item.id === overId);
-      if (overItem?.column) {
-        return String(overItem.column);
-      }
-
-      return null;
-    },
-    [columns],
-  );
-
-  const handleDragOver = useCallback(
-    (event: DragOverEvent) => {
-      const columnId = resolveColumnFromOver(event.over);
-      setDraggedOverColumn(columnId);
-    },
-    [resolveColumnFromOver],
-  );
-
-  // Handle data change (drag & drop)
-  const handleDataChange = useCallback(
-    (newData: typeof kanbanItems) => {
-      setBoardData(newData);
-      boardDataRef.current = newData;
-
-      newData.forEach((item) => {
-        const originalItem = kanbanItems.find((original) => original.id === item.id);
-        if (originalItem && originalItem.column !== item.column) {
-          pendingMovesRef.current.set(item.id, String(item.column));
-        }
+      console.log('[Kanban] Drag started', {
+        cardId: event.active.id,
+        snapshotSize: Object.keys(dragStartSnapshotRef.current).length,
       });
     },
     [kanbanItems],
   );
 
-  // Handle drag end event
+  // Handle data change from dnd-kit (optimistic UI update)
+  const handleDataChange = useCallback((newData: typeof kanbanItems) => {
+    setBoardData(newData);
+  }, []);
+
+  // Handle drag end - detect column changes and call API
+  // IMPORTANT: Provider calls onDragEnd BEFORE onDataChange, so we must detect here
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
       const { active, over } = event;
 
-      // Reset drag over state
-      setDraggedOverColumn(null);
+      console.log('[Kanban] handleDragEnd', {
+        activeId: active.id,
+        overId: over?.id,
+        hasSnapshot: Object.keys(dragStartSnapshotRef.current).length > 0,
+      });
 
+      // Early return if invalid drop
       if (!over || !onRecordMove || readOnly) {
+        console.log('[Kanban] handleDragEnd: early return', { over: !!over, onRecordMove: !!onRecordMove, readOnly });
+        return;
+      }
+
+      // Check if we have a snapshot
+      if (Object.keys(dragStartSnapshotRef.current).length === 0) {
+        console.log('[Kanban] No snapshot available - skipping');
         return;
       }
 
       const activeId = String(active.id);
       const overId = String(over.id);
 
-      const latestItems = boardDataRef.current;
-      const activeItem = latestItems.find((item) => item.id === activeId);
-      const originalItem = kanbanItems.find((item) => item.id === activeId);
+      // Find the dragged item in snapshot (original state)
+      const snapshotItem = dragStartSnapshotRef.current[activeId];
 
-      if (!activeItem || !originalItem) {
+      if (!snapshotItem) {
+        console.log('[Kanban] Item not found in snapshot:', activeId);
+        dragStartSnapshotRef.current = {};
         return;
       }
 
-      const pendingDestination = pendingMovesRef.current.get(activeId);
-      let destinationColumnId =
-        pendingDestination || resolveColumnFromOver(over) || draggedOverColumn || activeItem.column;
+      // Determine target column from over element
+      // overId can be: column ID (q1, q2, q3, q4) or another card ID
+      const isDroppedOnColumn = columns.some((col) => col.id === overId);
+      let targetColumn: string;
 
-      if (!destinationColumnId || destinationColumnId === originalItem.column) {
-        pendingMovesRef.current.delete(activeId);
-        return;
+      if (isDroppedOnColumn) {
+        // Dropped directly on column
+        targetColumn = overId;
+      } else {
+        // Dropped on another card - find that card's column in kanbanItems (server state)
+        // IMPORTANT: Use kanbanItems, NOT boardData (Provider may have mutated it)
+        const overItem = kanbanItems.find((item) => item.id === overId);
+        if (overItem) {
+          targetColumn = String(overItem.column);
+        } else {
+          console.log('[Kanban] Cannot determine target column - card not found in server state');
+          return;
+        }
       }
 
-      onRecordMove(activeId, destinationColumnId);
-      pendingMovesRef.current.delete(activeId);
+      const oldColumn = String(snapshotItem.column);
+
+      console.log('[Kanban DEBUG] Column check:', {
+        activeId,
+        oldColumn,
+        targetColumn,
+        different: oldColumn !== targetColumn,
+      });
+
+      // Check if column actually changed
+      if (oldColumn !== targetColumn) {
+        console.log(`[Kanban] ✅ Column change detected: ${activeId} from "${oldColumn}" to "${targetColumn}"`);
+        console.log(`[Kanban] Calling onRecordMove...`);
+        onRecordMove(activeId, targetColumn);
+      } else {
+        console.log('[Kanban] No column change (same column) - skipping API call');
+      }
+
+      // DON'T clear snapshot here - it will be cleared when kanbanItems updates (refetch completes)
+      // This prevents race conditions with Provider's onDataChange
     },
-    [draggedOverColumn, kanbanItems, onRecordMove, readOnly, resolveColumnFromOver],
+    [kanbanItems, columns, onRecordMove, readOnly],
   );
 
   // Toggle column collapse state
@@ -254,7 +274,7 @@ export function KanbanBoardV2({
           columns={columns as any}
           data={boardData}
           onDataChange={handleDataChange}
-          onDragOver={handleDragOver}
+          onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
           className="flex gap-3"
         >

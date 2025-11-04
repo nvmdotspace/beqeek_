@@ -20,7 +20,6 @@ import { Badge } from '@workspace/ui/components/badge';
 import { Input } from '@workspace/ui/components/input';
 import { Skeleton } from '@workspace/ui/components/skeleton';
 import { Card, CardContent } from '@workspace/ui/components/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@workspace/ui/components/table';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@workspace/ui/components/tabs';
 
 // New components
@@ -69,7 +68,6 @@ export const ActiveTableRecordsPage = () => {
 
   // Track last processed state to prevent infinite loops
   const lastProcessedRef = useRef<string>('');
-  const previousDecryptedRecordsRef = useRef<TableRecord[] | null>(null);
 
   // REAL API: Use real data from backend
   const useMockData = false; // Changed to use real API data
@@ -224,55 +222,27 @@ export const ActiveTableRecordsPage = () => {
   const handleRecordMove = (recordId: string, newStatus: string) => {
     // Check if table is loaded
     if (!table) {
-      console.error('Table not loaded');
+      console.error('[Kanban] Table not loaded');
       return;
     }
 
     // Get kanban config to find status field name
     const kanbanConfig = table.config?.kanbanConfigs?.[0];
     if (!kanbanConfig) {
-      console.error('Kanban config not found');
+      console.error('[Kanban] Kanban config not found');
       return;
     }
 
     // Check encryption key if E2EE enabled
     if (table.config.e2eeEncryption && !encryption.isKeyValid) {
-      console.error('Encryption key required to update records');
+      console.error('[Kanban] Encryption key required to update records');
       return;
     }
 
-    console.log(`Moving record ${recordId} to status: ${newStatus}`);
+    console.log(`[Kanban API] Updating record ${recordId}: ${kanbanConfig.statusField} = "${newStatus}"`);
 
-    if (!useMockData) {
-      previousDecryptedRecordsRef.current = decryptedRecords;
-
-      setDecryptedRecords((prevRecords) =>
-        prevRecords.map((record) => {
-          if (record.id !== recordId) {
-            return record;
-          }
-
-          return {
-            ...record,
-            record: {
-              ...record.record,
-              [kanbanConfig.statusField]: newStatus,
-            },
-            data: record.data
-              ? {
-                  ...record.data,
-                  [kanbanConfig.statusField]: newStatus,
-                }
-              : {
-                  ...record.record,
-                  [kanbanConfig.statusField]: newStatus,
-                },
-          };
-        }),
-      );
-    }
-
-    // Update the status field with new value
+    // Call API - hook handles optimistic update automatically
+    // Flow: API call → onMutate (optimistic update) → onSuccess (invalidate) → refetch → decrypt → UI sync
     updateRecordMutation.mutate(
       {
         recordId,
@@ -281,15 +251,10 @@ export const ActiveTableRecordsPage = () => {
       },
       {
         onSuccess: () => {
-          console.log('✅ Record status updated successfully');
-          previousDecryptedRecordsRef.current = null;
+          console.log('[Kanban API] ✅ Record updated successfully');
         },
         onError: (error) => {
-          console.error('❌ Failed to update record:', error);
-          if (!useMockData && previousDecryptedRecordsRef.current) {
-            setDecryptedRecords(previousDecryptedRecordsRef.current);
-            previousDecryptedRecordsRef.current = null;
-          }
+          console.error('[Kanban API] ❌ Failed to update record:', error);
         },
       },
     );
