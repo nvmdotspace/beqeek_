@@ -162,6 +162,9 @@ export interface FieldConfig {
   /** Placeholder text for input */
   placeholder?: string;
 
+  /** Default value for new records */
+  defaultValue?: string;
+
   /** Whether field is required */
   required?: boolean;
 
@@ -170,9 +173,6 @@ export interface FieldConfig {
 
   /** Field name to use as label for reference/user fields */
   referenceLabelField?: string;
-
-  /** Help text to display below field */
-  helpText?: string;
 }
 
 // ============================================

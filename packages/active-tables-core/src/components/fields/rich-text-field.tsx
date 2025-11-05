@@ -59,7 +59,6 @@ export function RichTextField(props: FieldRendererProps) {
         disabled={disabled}
         className={className}
       />
-      {field.helpText && <p className="text-xs text-gray-500 mt-2">{field.helpText}</p>}
     </FieldWrapper>
   );
 }

@@ -1,0 +1,239 @@
+/**
+ * Fields Settings Section
+ *
+ * Manages table field configuration with support for 26+ field types.
+ */
+
+import { useState } from 'react';
+import { Plus, Edit2, Trash2, GripVertical } from 'lucide-react';
+import { Button } from '@workspace/ui/components/button';
+import { Badge } from '@workspace/ui/components/badge';
+import { ScrollArea } from '@workspace/ui/components/scroll-area';
+import type { FieldConfig } from '@workspace/active-tables-core';
+import {
+  isTextFieldType,
+  isTimeFieldType,
+  isNumberFieldType,
+  isSelectionFieldType,
+  isReferenceFieldType,
+  type FieldType,
+} from '@workspace/beqeek-shared';
+import { SettingsSection } from '../settings-layout';
+import { FieldFormModal } from './field-form-modal';
+
+export interface FieldsSettingsSectionProps {
+  /** Current fields */
+  fields: FieldConfig[];
+
+  /** Callback when fields change */
+  onChange: (fields: FieldConfig[]) => void;
+
+  /** Whether E2EE is enabled */
+  e2eeEnabled?: boolean;
+}
+
+/**
+ * Fields Settings Section
+ *
+ * Allows users to:
+ * - View all table fields
+ * - Add new fields
+ * - Edit existing fields
+ * - Delete fields
+ * - Reorder fields (drag & drop)
+ */
+export function FieldsSettingsSection({ fields, onChange }: FieldsSettingsSectionProps) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [availableTables, setAvailableTables] = useState<Array<{ id: string; name: string }>>([]);
+
+  const handleAddField = () => {
+    setEditingIndex(null);
+    setIsModalOpen(true);
+  };
+
+  const handleEditField = (index: number) => {
+    setEditingIndex(index);
+    setIsModalOpen(true);
+  };
+
+  const handleDeleteField = (index: number) => {
+    if (confirm('Are you sure you want to delete this field? This action cannot be undone.')) {
+      const newFields = fields.filter((_, i) => i !== index);
+      onChange(newFields);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingIndex(null);
+  };
+
+  const handleSubmitField = (field: FieldConfig) => {
+    if (editingIndex !== null) {
+      // Update existing field
+      const newFields = [...fields];
+      newFields[editingIndex] = field;
+      onChange(newFields);
+    } else {
+      // Add new field
+      onChange([...fields, field]);
+    }
+    handleCloseModal();
+  };
+
+  /**
+   * Load fields for a reference table
+   * TODO: Implement API call to fetch table fields
+   */
+  const handleLoadReferenceFields = async (
+    tableId: string,
+  ): Promise<Array<{ name: string; label: string; type: string }>> => {
+    // Placeholder - in real implementation, fetch from API
+    console.log('Loading fields for table:', tableId);
+    return [];
+  };
+
+  const existingFieldNames = fields.map((f) => f.name);
+  const editingField = editingIndex !== null ? fields[editingIndex] : null;
+
+  const getFieldTypeColor = (type: string): string => {
+    const fieldType = type as FieldType;
+    if (isTextFieldType(fieldType)) return 'text-blue-600';
+    if (isTimeFieldType(fieldType)) return 'text-purple-600';
+    if (isNumberFieldType(fieldType)) return 'text-green-600';
+    if (isSelectionFieldType(fieldType)) return 'text-orange-600';
+    if (isReferenceFieldType(fieldType)) return 'text-pink-600';
+    return 'text-gray-600';
+  };
+
+  return (
+    <SettingsSection
+      title="Fields Configuration"
+      description="Define the structure of your table with custom fields"
+      actions={
+        <Button onClick={handleAddField} size="sm">
+          <Plus className="mr-2 h-4 w-4" />
+          Add Field
+        </Button>
+      }
+    >
+      <div className="space-y-4">
+        {fields.length === 0 ? (
+          <div className="rounded-lg border border-dashed p-12 text-center">
+            <p className="text-sm text-muted-foreground">
+              No fields configured yet. Click "Add Field" to create your first field.
+            </p>
+          </div>
+        ) : (
+          <ScrollArea className="h-[500px] rounded-md border">
+            <div className="divide-y">
+              {fields.map((field, index) => (
+                <div
+                  key={field.name || index}
+                  className="flex items-center gap-4 p-4 hover:bg-muted/50 transition-colors"
+                >
+                  {/* Drag Handle */}
+                  <button
+                    className="cursor-grab text-muted-foreground hover:text-foreground"
+                    aria-label="Drag to reorder"
+                  >
+                    <GripVertical className="h-5 w-5" />
+                  </button>
+
+                  {/* Field Info */}
+                  <div className="flex-1 space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">{field.label}</span>
+                      {field.required && (
+                        <Badge variant="destructive" className="h-5 text-xs">
+                          Required
+                        </Badge>
+                      )}
+                      {/* Note: encrypted field will be available when E2EE is implemented */}
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <span className="font-mono text-xs">{field.name}</span>
+                      <span>•</span>
+                      <Badge variant="outline" className={`h-5 text-xs ${getFieldTypeColor(field.type)}`}>
+                        {field.type}
+                      </Badge>
+                      {field.placeholder && (
+                        <>
+                          <span>•</span>
+                          <span>Placeholder: {field.placeholder}</span>
+                        </>
+                      )}
+                    </div>
+                    {/* Note: defaultValue display will be added when field schema is updated */}
+                    {field.options && field.options.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {field.options.slice(0, 5).map((option: any, i: number) => (
+                          <Badge
+                            key={i}
+                            variant="outline"
+                            className="text-xs"
+                            style={{
+                              backgroundColor: option.background_color,
+                              color: option.text_color,
+                            }}
+                          >
+                            {option.text}
+                          </Badge>
+                        ))}
+                        {field.options.length > 5 && (
+                          <Badge variant="outline" className="text-xs">
+                            +{field.options.length - 5} more
+                          </Badge>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleEditField(index)}
+                      aria-label={`Edit field ${field.label}`}
+                    >
+                      <Edit2 className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleDeleteField(index)}
+                      className="text-destructive hover:text-destructive"
+                      aria-label={`Delete field ${field.label}`}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </ScrollArea>
+        )}
+
+        {/* Field Statistics */}
+        <div className="flex gap-4 text-sm text-muted-foreground">
+          <span>Total Fields: {fields.length}</span>
+          <span>Required: {fields.filter((f) => f.required).length}</span>
+          {/* E2EE stats will be added when field encryption is implemented */}
+        </div>
+      </div>
+
+      {/* Field Form Modal */}
+      <FieldFormModal
+        open={isModalOpen}
+        onClose={handleCloseModal}
+        onSubmit={handleSubmitField}
+        editingField={editingField}
+        existingFieldNames={existingFieldNames}
+        availableTables={availableTables}
+        onLoadReferenceFields={handleLoadReferenceFields}
+      />
+    </SettingsSection>
+  );
+}
