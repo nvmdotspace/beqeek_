@@ -8,7 +8,13 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createActiveTablesApiClient } from '@/shared/api/active-tables-client';
 import { buildEncryptedUpdatePayload, buildPlaintextUpdatePayload } from '@/shared/utils/field-encryption';
-import type { ActiveTable } from '@workspace/active-tables-core';
+import type { Table, FieldConfig, TableRecord, RecordsResponse } from '@workspace/active-tables-core';
+import type { FieldType } from '@workspace/beqeek-shared';
+
+/**
+ * Type for field values - can be string, number, boolean, Date, array, or null
+ */
+type FieldValue = string | number | boolean | Date | string[] | null | undefined;
 
 /**
  * Standard API response for record mutations
@@ -28,7 +34,7 @@ interface RecordMutationResponse {
 export interface UpdateRecordFieldParams {
   recordId: string;
   fieldName: string;
-  newValue: any;
+  newValue: FieldValue;
 }
 
 /**
@@ -51,7 +57,7 @@ export interface UpdateRecordFieldParams {
  * });
  * ```
  */
-export function useUpdateRecordField(workspaceId: string, tableId: string, table: ActiveTable | null) {
+export function useUpdateRecordField(workspaceId: string, tableId: string, table: Table | null) {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -74,7 +80,7 @@ export function useUpdateRecordField(workspaceId: string, tableId: string, table
         }
 
         // Find field schema
-        const fieldSchema = table.config.fields.find((f) => f.name === fieldName);
+        const fieldSchema = table.config.fields.find((f: FieldConfig) => f.name === fieldName);
 
         if (!fieldSchema) {
           throw new Error(`Field "${fieldName}" not found in table schema`);
@@ -84,7 +90,7 @@ export function useUpdateRecordField(workspaceId: string, tableId: string, table
         payload = buildEncryptedUpdatePayload(
           fieldName,
           newValue,
-          fieldSchema,
+          fieldSchema as { type: FieldType },
           encryptionKey,
           table.config.hashedKeywordFields || [],
         );
@@ -112,7 +118,7 @@ export function useUpdateRecordField(workspaceId: string, tableId: string, table
       });
 
       // Snapshot all queries for rollback
-      const previousQueries: any[] = [];
+      const previousQueries: { key: readonly unknown[]; data: unknown }[] = [];
       queryClient
         .getQueriesData({
           queryKey: ['active-table-records', workspaceId, tableId],
@@ -128,12 +134,12 @@ export function useUpdateRecordField(workspaceId: string, tableId: string, table
           queryKey: ['active-table-records', workspaceId, tableId],
           exact: false,
         },
-        (old: any) => {
+        (old: RecordsResponse | undefined) => {
           if (!old?.data) return old;
 
           return {
             ...old,
-            data: old.data.map((record: any) => {
+            data: old.data.map((record: TableRecord) => {
               if (record.id === recordId) {
                 return {
                   ...record,
@@ -163,7 +169,7 @@ export function useUpdateRecordField(workspaceId: string, tableId: string, table
     onError: (err, variables, context) => {
       // Rollback on error - restore all previous queries
       if (context?.previousQueries) {
-        context.previousQueries.forEach(({ key, data }: any) => {
+        context.previousQueries.forEach(({ key, data }) => {
           queryClient.setQueryData(key, data);
         });
       }
@@ -206,11 +212,11 @@ export function useUpdateRecordField(workspaceId: string, tableId: string, table
  * });
  * ```
  */
-export function useBatchUpdateRecord(workspaceId: string, tableId: string, table: ActiveTable | null) {
+export function useBatchUpdateRecord(workspaceId: string, tableId: string, table: Table | null) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ recordId, updates }: { recordId: string; updates: Record<string, any> }) => {
+    mutationFn: async ({ recordId, updates }: { recordId: string; updates: Record<string, FieldValue> }) => {
       if (!table) {
         throw new Error('Table configuration not loaded');
       }
@@ -219,9 +225,9 @@ export function useBatchUpdateRecord(workspaceId: string, tableId: string, table
       const isEncrypted = table.config.e2eeEncryption;
 
       let payload: {
-        record: Record<string, any>;
-        hashed_keywords: Record<string, any>;
-        record_hashes: Record<string, any>;
+        record: Record<string, string | unknown>;
+        hashed_keywords: Record<string, string>;
+        record_hashes: Record<string, string>;
       } = {
         record: {},
         hashed_keywords: {},
@@ -237,7 +243,7 @@ export function useBatchUpdateRecord(workspaceId: string, tableId: string, table
 
         // Encrypt each field
         for (const [fieldName, value] of Object.entries(updates)) {
-          const fieldSchema = table.config.fields.find((f) => f.name === fieldName);
+          const fieldSchema = table.config.fields.find((f: FieldConfig) => f.name === fieldName);
 
           if (!fieldSchema) {
             console.warn(`Field "${fieldName}" not found in schema, skipping`);
@@ -247,7 +253,7 @@ export function useBatchUpdateRecord(workspaceId: string, tableId: string, table
           const fieldPayload = buildEncryptedUpdatePayload(
             fieldName,
             value,
-            fieldSchema,
+            fieldSchema as { type: FieldType },
             encryptionKey,
             table.config.hashedKeywordFields || [],
           );
