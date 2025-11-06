@@ -310,23 +310,77 @@ function validateTableConfig(config: TableConfig): void {
 
   // Validate record list configuration
   if (config.recordListConfig) {
-    if (!config.recordListConfig.titleField) {
-      throw new Error('Record list configuration must have a title field');
-    }
+    const listConfig = config.recordListConfig as any;
 
-    if (!fieldNames.has(config.recordListConfig.titleField)) {
-      throw new Error(`Record list title field "${config.recordListConfig.titleField}" not found in table fields`);
+    // Validate based on layout type
+    if (listConfig.layout === 'head-column') {
+      // Head column layout requires titleField
+      if (!listConfig.titleField) {
+        throw new Error('Record list configuration with head-column layout must have a title field');
+      }
+
+      if (!fieldNames.has(listConfig.titleField)) {
+        throw new Error(`Record list title field "${listConfig.titleField}" not found in table fields`);
+      }
+    } else if (listConfig.layout === 'generic-table') {
+      // Generic table layout requires displayFields
+      if (!listConfig.displayFields || !Array.isArray(listConfig.displayFields)) {
+        throw new Error('Record list configuration with generic-table layout must have displayFields');
+      }
+
+      // Validate all display fields exist
+      for (const fieldName of listConfig.displayFields) {
+        if (!fieldNames.has(fieldName)) {
+          throw new Error(`Record list display field "${fieldName}" not found in table fields`);
+        }
+      }
     }
   }
 
   // Validate record detail configuration
   if (config.recordDetailConfig) {
-    if (!config.recordDetailConfig.titleField) {
-      throw new Error('Record detail configuration must have a title field');
+    const detailConfig = config.recordDetailConfig as any;
+
+    // headTitleField is optional, but if provided must be valid
+    if (detailConfig.headTitleField && !fieldNames.has(detailConfig.headTitleField)) {
+      throw new Error(`Record detail title field "${detailConfig.headTitleField}" not found in table fields`);
     }
 
-    if (!fieldNames.has(config.recordDetailConfig.titleField)) {
-      throw new Error(`Record detail title field "${config.recordDetailConfig.titleField}" not found in table fields`);
+    // Validate head-detail layout fields
+    if (detailConfig.layout === 'head-detail' && detailConfig.rowTailFields) {
+      for (const fieldName of detailConfig.rowTailFields) {
+        if (!fieldNames.has(fieldName)) {
+          throw new Error(`Record detail tail field "${fieldName}" not found in table fields`);
+        }
+      }
+    }
+
+    // Validate two-column layout fields
+    if (detailConfig.layout === 'two-column-detail') {
+      if (detailConfig.column1Fields) {
+        for (const fieldName of detailConfig.column1Fields) {
+          if (!fieldNames.has(fieldName)) {
+            throw new Error(`Record detail column 1 field "${fieldName}" not found in table fields`);
+          }
+        }
+      }
+
+      if (detailConfig.column2Fields) {
+        for (const fieldName of detailConfig.column2Fields) {
+          if (!fieldNames.has(fieldName)) {
+            throw new Error(`Record detail column 2 field "${fieldName}" not found in table fields`);
+          }
+        }
+      }
+    }
+
+    // Validate common fields
+    if (detailConfig.headSubLineFields) {
+      for (const fieldName of detailConfig.headSubLineFields) {
+        if (!fieldNames.has(fieldName)) {
+          throw new Error(`Record detail sub-line field "${fieldName}" not found in table fields`);
+        }
+      }
     }
   }
 

@@ -11,9 +11,18 @@ import { Input } from '@workspace/ui/components/input';
 import { Button } from '@workspace/ui/components/button';
 import { Badge } from '@workspace/ui/components/badge';
 import { Alert, AlertDescription } from '@workspace/ui/components/alert';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@workspace/ui/components/select';
 import type { TableConfig } from '@workspace/active-tables-core';
-import { isTextFieldType, type FieldType } from '@workspace/beqeek-shared';
+import {
+  FIELD_TYPE_SHORT_TEXT,
+  FIELD_TYPE_TEXT,
+  FIELD_TYPE_RICH_TEXT,
+  FIELD_TYPE_EMAIL,
+  FIELD_TYPE_URL,
+  type FieldType,
+} from '@workspace/beqeek-shared';
 import { SettingsSection } from '../settings-layout';
+import { MultiSelectField } from '../multi-select-field';
 
 export interface GeneralSettingsSectionProps {
   /** Table ID (read-only) */
@@ -46,6 +55,8 @@ export function GeneralSettingsSection({ tableId, config, onChange, fields }: Ge
   const [title, setTitle] = useState(config.title || '');
   const [tableLimit, setTableLimit] = useState(config.tableLimit || 1000);
   const [encryptionKey, setEncryptionKey] = useState(config.encryptionKey || '');
+  const [hashedKeywordFields, setHashedKeywordFields] = useState<string[]>(config.hashedKeywordFields || []);
+  const [defaultSort, setDefaultSort] = useState<'asc' | 'desc'>(config.defaultSort || 'asc');
 
   // UI state
   const [copiedId, setCopiedId] = useState(false);
@@ -53,16 +64,27 @@ export function GeneralSettingsSection({ tableId, config, onChange, fields }: Ge
   const [showKey, setShowKey] = useState(false);
   const [isEditingKey, setIsEditingKey] = useState(false);
 
-  // Get text-based fields for search
-  const textFields = fields.filter((f) => isTextFieldType(f.type as FieldType));
+  // Define encryptable field types (matching encryptFields from encryption-core)
+  const ENCRYPTABLE_FIELD_TYPES: string[] = [
+    FIELD_TYPE_SHORT_TEXT,
+    FIELD_TYPE_TEXT,
+    FIELD_TYPE_RICH_TEXT,
+    FIELD_TYPE_EMAIL,
+    FIELD_TYPE_URL,
+  ];
+
+  // Get encryptable text fields for search
+  const searchableFields = fields.filter((f) => ENCRYPTABLE_FIELD_TYPES.includes(f.type));
 
   // Update parent when local state changes
   useEffect(() => {
     onChange({
       title,
       tableLimit,
+      hashedKeywordFields,
+      defaultSort,
     });
-  }, [title, tableLimit, onChange]);
+  }, [title, tableLimit, hashedKeywordFields, defaultSort, onChange]);
 
   const handleCopyId = async () => {
     try {
@@ -157,7 +179,7 @@ export function GeneralSettingsSection({ tableId, config, onChange, fields }: Ge
         {/* Table Limit */}
         <div className="space-y-2">
           <Label htmlFor="table-limit">
-            Record Limit (Maximum 100,000) <span className="text-destructive">*</span>
+            Record Limit (Maximum 1000) <span className="text-destructive">*</span>
           </Label>
           <Input
             id="table-limit"
@@ -172,7 +194,24 @@ export function GeneralSettingsSection({ tableId, config, onChange, fields }: Ge
             required
             aria-required="true"
           />
-          <p className="text-xs text-muted-foreground">Maximum number of records allowed in this table (1-100,000)</p>
+          <p className="text-xs text-muted-foreground">Maximum number of records allowed in this table (1-1000)</p>
+        </div>
+
+        {/* Default Sort Direction */}
+        <div className="space-y-2">
+          <Label htmlFor="default-sort">
+            Default Sort Direction <span className="text-destructive">*</span>
+          </Label>
+          <Select value={defaultSort} onValueChange={(value) => setDefaultSort(value as 'asc' | 'desc')}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="asc">oldest</SelectItem>
+              <SelectItem value="desc">newest</SelectItem>
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground">Default sort order when displaying records in list view</p>
         </div>
 
         {/* Encryption Key Section - Always Visible */}
@@ -280,26 +319,20 @@ export function GeneralSettingsSection({ tableId, config, onChange, fields }: Ge
 
         {/* Note: First reference record setting removed - managed at field level */}
 
-        {/* Searchable Fields Info */}
+        {/* Searchable Fields */}
         <div className="space-y-2">
-          <Label>Searchable Fields</Label>
-          {config.hashedKeywordFields && config.hashedKeywordFields.length > 0 ? (
-            <div className="flex flex-wrap gap-2">
-              {config.hashedKeywordFields.map((fieldName) => {
-                const field = fields.find((f) => f.name === fieldName);
-                return (
-                  <Badge key={fieldName} variant="outline" className="px-3 py-1.5 text-sm">
-                    {field?.label || fieldName} ({field?.type || 'UNKNOWN'})
-                  </Badge>
-                );
-              })}
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              No searchable fields configured. Add text-based fields to enable search.
-            </p>
-          )}
-          <p className="text-xs text-muted-foreground">Configure searchable fields in the Fields section</p>
+          <Label htmlFor="searchable-fields">Searchable Fields</Label>
+          <MultiSelectField
+            id="searchable-fields"
+            options={searchableFields.map((f) => ({ value: f.name, label: f.label }))}
+            value={hashedKeywordFields}
+            onChange={(values) => setHashedKeywordFields(values)}
+            placeholder="Select fields to make searchable..."
+          />
+          <p className="text-xs text-muted-foreground">
+            Selected fields will be hashed and indexed for fast searching. Only text-based fields (Short Text, Text,
+            Rich Text, Email, URL) can be made searchable.
+          </p>
         </div>
       </div>
     </SettingsSection>

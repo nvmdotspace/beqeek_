@@ -70,7 +70,7 @@ export const ActiveTableSettingsPageV2 = () => {
   const [activeTab, setActiveTab] = useState<SettingsTabId>('general');
 
   // Fetch table data
-  const { data: tablesResp, isLoading, error: tablesError } = useActiveTables(workspaceId);
+  const { data: tablesResp, isLoading } = useActiveTables(workspaceId);
   const table = tablesResp?.data.find((item) => item.id === tableId);
   const error = table ? null : new Error('Table not found');
 
@@ -117,17 +117,63 @@ export const ActiveTableSettingsPageV2 = () => {
     setLocalConfig((prev) => (prev ? { ...prev, ...updates } : null));
   }, []);
 
+  // Clean config before saving - remove incomplete configurations
+  const cleanConfigForSave = useCallback((config: TableConfig): TableConfig => {
+    const cleaned = { ...config };
+
+    // Remove recordListConfig if it's incomplete
+    if (cleaned.recordListConfig) {
+      const listConfig = cleaned.recordListConfig as any;
+
+      // For head-column layout, remove if titleField is empty
+      if (listConfig.layout === 'head-column' && !listConfig.titleField) {
+        cleaned.recordListConfig = undefined;
+      }
+
+      // For generic-table layout, remove if displayFields is empty
+      if (
+        listConfig.layout === 'generic-table' &&
+        (!listConfig.displayFields || listConfig.displayFields.length === 0)
+      ) {
+        cleaned.recordListConfig = undefined;
+      }
+    }
+
+    // Remove recordDetailConfig if headTitleField is empty
+    // headTitleField is optional, so we only remove if the entire config is essentially empty
+    if (cleaned.recordDetailConfig) {
+      const detailConfig = cleaned.recordDetailConfig as any;
+
+      // Check if config is essentially empty (no meaningful fields selected)
+      const hasContent =
+        detailConfig.headTitleField ||
+        (detailConfig.headSubLineFields && detailConfig.headSubLineFields.length > 0) ||
+        (detailConfig.rowTailFields && detailConfig.rowTailFields.length > 0) ||
+        (detailConfig.column1Fields && detailConfig.column1Fields.length > 0) ||
+        (detailConfig.column2Fields && detailConfig.column2Fields.length > 0);
+
+      if (!hasContent) {
+        cleaned.recordDetailConfig = undefined;
+      }
+    }
+
+    return cleaned;
+  }, []);
+
   // Save changes
   const handleSave = useCallback(() => {
     if (!localConfig) return;
 
+    // Clean config before saving
+    const cleanedConfig = cleanConfigForSave(localConfig);
+
     updateConfig.mutate({
-      config: localConfig,
+      config: cleanedConfig,
       metadata: {
         name: localConfig.title,
       },
     });
-  }, [localConfig, updateConfig]);
+  }, [localConfig, cleanConfigForSave, updateConfig]);
 
   // Cancel changes
   const handleCancel = useCallback(() => {
@@ -270,9 +316,9 @@ export const ActiveTableSettingsPageV2 = () => {
                     (localConfig.recordDetailConfig as RecordDetailConfig) || {
                       layout: 'head-detail',
                       commentsPosition: 'right-panel',
-                      titleField: '',
-                      subLineFields: [],
-                      tailFields: [],
+                      headTitleField: '',
+                      headSubLineFields: [],
+                      rowTailFields: [],
                     }
                   }
                   fields={fields.map((f) => ({ name: f.name, label: f.label, type: f.type }))}

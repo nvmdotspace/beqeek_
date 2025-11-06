@@ -170,17 +170,17 @@ export interface TableConfig {
   /** Field names to hash for keyword search (E2EE) */
   hashedKeywordFields: string[];
 
-  /** Default sort field */
-  defaultSort: string;
+  /** Default sort direction */
+  defaultSort: 'asc' | 'desc';
 
   /** Kanban view configurations */
   kanbanConfigs: KanbanConfig[];
 
   /** Record list view configuration */
-  recordListConfig: RecordListConfig;
+  recordListConfig?: RecordListConfig;
 
   /** Record detail view configuration */
-  recordDetailConfig: RecordDetailConfig;
+  recordDetailConfig?: RecordDetailConfig;
 
   /** Permissions configurations */
   permissionsConfig: PermissionsConfig[];

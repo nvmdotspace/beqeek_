@@ -90,7 +90,7 @@ export interface ActiveTableConfig {
   tableLimit: number;
   e2eeEncryption: boolean;
   hashedKeywordFields: string[];
-  defaultSort: string;
+  defaultSort: 'asc' | 'desc';
   kanbanConfigs: KanbanConfig[];
   recordListConfig: RecordListConfig;
   recordDetailConfig: RecordDetailConfig;
