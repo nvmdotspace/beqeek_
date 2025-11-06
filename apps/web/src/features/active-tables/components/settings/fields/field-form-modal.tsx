@@ -6,7 +6,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { X, AlertCircle, Info } from 'lucide-react';
+import { Info } from 'lucide-react';
 import { Button } from '@workspace/ui/components/button';
 import { Input } from '@workspace/ui/components/input';
 import { Label } from '@workspace/ui/components/label';
@@ -32,6 +32,8 @@ import { FieldTypeSelector } from './field-type-selector';
 import { FieldOptionsEditor } from './field-options-editor';
 import { ReferenceFieldConfig } from './reference-field-config';
 import { generateUniqueFieldName, validateFieldName } from '../../../utils/field-name-generator';
+// @ts-ignore - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 
 export interface FieldFormModalProps {
   /** Whether modal is open */
@@ -240,17 +242,17 @@ export function FieldFormModal({
 
     // Type required
     if (!formData.type) {
-      errors.type = 'Field type is required';
+      errors.type = m.settings_fieldModal_errorTypeRequired();
     }
 
     // Label required
     if (!formData.label.trim()) {
-      errors.label = 'Field label is required';
+      errors.label = m.settings_fieldModal_errorLabelRequired();
     }
 
     // Name required and valid
     if (!formData.name.trim()) {
-      errors.name = 'Field name is required';
+      errors.name = m.settings_fieldModal_errorNameRequired();
     } else {
       const nameValidation = validateFieldName(formData.name);
       if (!nameValidation.valid) {
@@ -262,26 +264,26 @@ export function FieldFormModal({
           : existingFieldNames;
 
         if (filteredNames.includes(formData.name)) {
-          errors.name = 'Field name must be unique';
+          errors.name = m.settings_fieldModal_errorNameUnique();
         }
       }
     }
 
     // Options required for selection fields
     if (formData.type && requiresOptions(formData.type as FieldType) && formData.options.length === 0) {
-      errors.options = 'At least one option is required for selection fields';
+      errors.options = m.settings_fieldModal_errorOptionsRequired();
     }
 
     // Reference configuration required
     if (formData.type && requiresReference(formData.type as FieldType)) {
       if (!formData.referenceTableId) {
-        errors.referenceTableId = 'Reference table is required';
+        errors.referenceTableId = m.settings_fieldModal_errorReferenceTableRequired();
       }
       if (!formData.referenceLabelField) {
-        errors.referenceLabelField = 'Display field is required';
+        errors.referenceLabelField = m.settings_fieldModal_errorReferenceLabelRequired();
       }
       if (formData.type === FIELD_TYPE_FIRST_REFERENCE_RECORD && !formData.referenceField) {
-        errors.referenceField = 'Reference field is required for FIRST_REFERENCE_RECORD';
+        errors.referenceField = m.settings_fieldModal_errorReferenceFieldRequired();
       }
     }
 
@@ -336,11 +338,9 @@ export function FieldFormModal({
     <Dialog open={open} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-3xl max-h-[90vh] p-0">
         <DialogHeader className="p-6 pb-4">
-          <DialogTitle>{isEditing ? 'Edit Field' : 'Add New Field'}</DialogTitle>
+          <DialogTitle>{isEditing ? m.settings_fieldModal_titleEdit() : m.settings_fieldModal_titleAdd()}</DialogTitle>
           <DialogDescription>
-            {isEditing
-              ? 'Update the field configuration below.'
-              : 'Configure a new field for your table. Fields define the structure of your data.'}
+            {isEditing ? m.settings_fieldModal_descriptionEdit() : m.settings_fieldModal_descriptionAdd()}
           </DialogDescription>
         </DialogHeader>
 
@@ -358,9 +358,7 @@ export function FieldFormModal({
               <div className="rounded-md bg-blue-500/10 border border-blue-500/20 p-3">
                 <div className="flex gap-2">
                   <Info className="h-4 w-4 text-blue-600 mt-0.5 shrink-0" />
-                  <p className="text-sm text-blue-900 dark:text-blue-200">
-                    Field type cannot be changed after creation to maintain data integrity.
-                  </p>
+                  <p className="text-sm text-blue-900 dark:text-blue-200">{m.settings_fieldModal_typeLockedInfo()}</p>
                 </div>
               </div>
             )}
@@ -369,36 +367,36 @@ export function FieldFormModal({
 
             {/* Basic Field Configuration */}
             <div className="space-y-4">
-              <h3 className="text-sm font-semibold">Basic Configuration</h3>
+              <h3 className="text-sm font-semibold">{m.settings_fieldModal_sectionBasic()}</h3>
 
               {/* Label */}
               <div className="space-y-2">
                 <Label htmlFor="field-label">
-                  Field Label <span className="text-destructive">*</span>
+                  {m.settings_fieldModal_labelField()} <span className="text-destructive">{m.common_required()}</span>
                 </Label>
                 <Input
                   id="field-label"
                   value={formData.label}
                   onChange={(e) => handleLabelChange(e.target.value)}
-                  placeholder="e.g., Customer Name, Email Address, Order Date"
+                  placeholder={m.settings_fieldModal_labelPlaceholder()}
                   className={showValidation && validationErrors.label ? 'border-destructive' : ''}
                 />
                 {showValidation && validationErrors.label && (
                   <p className="text-sm text-destructive">{validationErrors.label}</p>
                 )}
-                <p className="text-xs text-muted-foreground">The display name shown to users</p>
+                <p className="text-xs text-muted-foreground">{m.settings_fieldModal_labelHelp()}</p>
               </div>
 
               {/* Name */}
               <div className="space-y-2">
                 <Label htmlFor="field-name">
-                  Field Name <span className="text-destructive">*</span>
+                  {m.settings_fieldModal_nameField()} <span className="text-destructive">{m.common_required()}</span>
                 </Label>
                 <Input
                   id="field-name"
                   value={formData.name}
                   onChange={(e) => handleNameChange(e.target.value)}
-                  placeholder="e.g., customer_name, email_address, order_date"
+                  placeholder={m.settings_fieldModal_namePlaceholder()}
                   className={`font-mono text-sm ${showValidation && validationErrors.name ? 'border-destructive' : ''}`}
                   disabled={isEditing}
                 />
@@ -406,43 +404,41 @@ export function FieldFormModal({
                   <p className="text-sm text-destructive">{validationErrors.name}</p>
                 )}
                 <p className="text-xs text-muted-foreground">
-                  {isEditing
-                    ? 'Field name cannot be changed after creation'
-                    : 'Unique identifier (auto-generated from label, lowercase, snake_case)'}
+                  {isEditing ? m.settings_fieldModal_nameLockedHelp() : m.settings_fieldModal_nameHelp()}
                 </p>
               </div>
 
               {/* Placeholder */}
               <div className="space-y-2">
-                <Label htmlFor="field-placeholder">Placeholder Text</Label>
+                <Label htmlFor="field-placeholder">{m.settings_fieldModal_placeholderField()}</Label>
                 <Input
                   id="field-placeholder"
                   value={formData.placeholder}
                   onChange={(e) => setFormData((prev) => ({ ...prev, placeholder: e.target.value }))}
-                  placeholder="e.g., Enter customer name..."
+                  placeholder={m.settings_fieldModal_placeholderPlaceholder()}
                 />
-                <p className="text-xs text-muted-foreground">Hint text shown in empty input fields</p>
+                <p className="text-xs text-muted-foreground">{m.settings_fieldModal_placeholderHelp()}</p>
               </div>
 
               {/* Default Value */}
               <div className="space-y-2">
-                <Label htmlFor="field-default-value">Default Value</Label>
+                <Label htmlFor="field-default-value">{m.settings_fieldModal_defaultValueField()}</Label>
                 <Input
                   id="field-default-value"
                   value={formData.defaultValue}
                   onChange={(e) => setFormData((prev) => ({ ...prev, defaultValue: e.target.value }))}
-                  placeholder="e.g., 2025, pending, https://example.com"
+                  placeholder={m.settings_fieldModal_defaultValuePlaceholder()}
                 />
-                <p className="text-xs text-muted-foreground">Initial value when creating new records</p>
+                <p className="text-xs text-muted-foreground">{m.settings_fieldModal_defaultValueHelp()}</p>
               </div>
 
               {/* Required Toggle */}
               <div className="flex items-center justify-between rounded-lg border p-4">
                 <div className="space-y-0.5">
                   <Label htmlFor="field-required" className="text-base">
-                    Required Field
+                    {m.settings_fieldModal_requiredField()}
                   </Label>
-                  <p className="text-sm text-muted-foreground">Users must provide a value for this field</p>
+                  <p className="text-sm text-muted-foreground">{m.settings_fieldModal_requiredHelp()}</p>
                 </div>
                 <Switch
                   id="field-required"
@@ -497,10 +493,10 @@ export function FieldFormModal({
 
         <DialogFooter className="p-6 pt-4 border-t">
           <Button type="button" variant="outline" onClick={handleCancel}>
-            Cancel
+            {m.common_cancel()}
           </Button>
           <Button type="button" onClick={handleSubmit}>
-            {isEditing ? 'Update Field' : 'Add Field'}
+            {isEditing ? m.settings_fieldModal_buttonUpdate() : m.settings_fieldModal_buttonAdd()}
           </Button>
         </DialogFooter>
       </DialogContent>

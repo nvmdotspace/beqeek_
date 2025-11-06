@@ -128,11 +128,11 @@ export function QuickFiltersSection({ quickFilters, fields, onChange }: QuickFil
         ) : (
           <ScrollArea className="max-h-[400px] rounded-md border">
             <div className="divide-y">
-              {quickFilters.map((filter) => {
+              {quickFilters.map((filter, index) => {
                 const field = fields.find((f) => f.name === filter.fieldName);
                 return (
                   <div
-                    key={filter.filterId}
+                    key={filter.filterId || `${filter.fieldName}-${index}`}
                     className="flex items-center gap-4 p-4 hover:bg-muted/50 transition-colors"
                   >
                     <div className="flex-1 space-y-1">
