@@ -32,7 +32,7 @@ export function TextareaField(props: FieldRendererProps) {
   // Display mode
   if (mode === 'display') {
     if (!stringValue) {
-      return <span className="text-gray-400 italic">{props.messages?.emptyValue || '—'}</span>;
+      return <span className="text-muted-foreground italic">{props.messages?.emptyValue || '—'}</span>;
     }
 
     // Preserve line breaks in display mode

@@ -76,7 +76,7 @@ export function ReferenceField(props: ReferenceFieldProps) {
     if (isMultiple) {
       const selectedIds = normalizedValue as string[];
       if (selectedIds.length === 0) {
-        return <span className="text-gray-400 italic">{props.messages?.emptyValue || '—'}</span>;
+        return <span className="text-muted-foreground italic">{props.messages?.emptyValue || '—'}</span>;
       }
 
       const selectedRecords = selectedIds
@@ -84,7 +84,7 @@ export function ReferenceField(props: ReferenceFieldProps) {
         .filter(Boolean) as ReferenceRecord[];
 
       if (selectedRecords.length === 0) {
-        return <span className="text-gray-500">{selectedIds.join(', ')}</span>;
+        return <span className="text-muted-foreground">{selectedIds.join(', ')}</span>;
       }
 
       return (
@@ -104,12 +104,12 @@ export function ReferenceField(props: ReferenceFieldProps) {
     // Single select display
     const selectedId = normalizedValue as string;
     if (!selectedId) {
-      return <span className="text-gray-400 italic">{props.messages?.emptyValue || '—'}</span>;
+      return <span className="text-muted-foreground italic">{props.messages?.emptyValue || '—'}</span>;
     }
 
     const selectedRecord = referenceRecords.find((r) => r.id === selectedId);
     if (!selectedRecord) {
-      return <span className="text-gray-500">{selectedId}</span>;
+      return <span className="text-muted-foreground">{selectedId}</span>;
     }
 
     return (
@@ -134,7 +134,7 @@ export function ReferenceField(props: ReferenceFieldProps) {
   if (loading) {
     return (
       <FieldWrapper fieldId={fieldId} label={field.label} required={field.required} error={error}>
-        <div className="text-sm text-gray-500 italic">{props.messages?.loading || 'Loading...'}</div>
+        <div className="text-sm text-muted-foreground italic">{props.messages?.loading || 'Loading...'}</div>
       </FieldWrapper>
     );
   }
@@ -164,7 +164,7 @@ export function ReferenceField(props: ReferenceFieldProps) {
         ))}
       </select>
       {isMultiple && (
-        <p className="text-xs text-gray-500 mt-1">
+        <p className="text-xs text-muted-foreground mt-1">
           {props.messages?.multiSelectHint || 'Hold Ctrl/Cmd to select multiple records'}
         </p>
       )}

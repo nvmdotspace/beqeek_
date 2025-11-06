@@ -99,12 +99,12 @@ export function ToolbarPlugin({ disabled = false }: ToolbarPluginProps) {
   };
 
   const buttonClass = (active: boolean) =>
-    `px-2 py-1 rounded hover:bg-gray-200 transition-colors ${
-      active ? 'bg-gray-300 font-semibold' : ''
+    `px-2 py-1 rounded hover:bg-accent transition-colors ${
+      active ? 'bg-accent font-semibold' : ''
     } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`;
 
   return (
-    <div className="flex items-center gap-1 p-2 border-b border-gray-300 bg-gray-50 rounded-t-lg flex-wrap">
+    <div className="flex items-center gap-1 p-2 border-b border-input bg-muted/50 rounded-t-lg flex-wrap">
       {/* Undo/Redo */}
       <button
         type="button"
