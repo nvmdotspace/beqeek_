@@ -163,17 +163,20 @@ export function FieldsSettingsSection({ fields, onChange }: FieldsSettingsSectio
       return;
     }
 
-    // Calculate insert position
-    const insertAt = draggedIndex < dropIndex ? dropIndex - 1 : dropIndex;
+    const insertAt = Math.max(0, Math.min(dropIndex, newFields.length));
 
     // Insert at new position
     newFields.splice(insertAt, 0, draggedField);
+
+    const nextPosition = newFields.findIndex((field) => field.name === draggedField.name);
+    const finalPosition = nextPosition >= 0 ? nextPosition : insertAt;
 
     // Log for debugging
     console.log('Drag reorder:', {
       from: draggedIndex,
       to: dropIndex,
       actualInsert: insertAt,
+      nextPosition: finalPosition,
       fieldName: draggedField.name,
       newOrder: newFields.map((f) => f.name),
     });
@@ -186,7 +189,7 @@ export function FieldsSettingsSection({ fields, onChange }: FieldsSettingsSectio
 
     // Show feedback
     toast.success('Field reordered', {
-      description: `"${draggedField.label}" moved to position ${insertAt + 1}`,
+      description: `"${draggedField.label}" moved to position ${finalPosition + 1}`,
     });
 
     // Clear drag state
