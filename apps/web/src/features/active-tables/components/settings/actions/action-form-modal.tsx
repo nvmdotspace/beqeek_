@@ -19,6 +19,8 @@ import { Label } from '@workspace/ui/components/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@workspace/ui/components/select';
 import { generateUUIDv7 } from '@workspace/beqeek-shared';
 import type { Action } from './actions-settings-section';
+// @ts-ignore - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 
 export interface ActionFormModalProps {
   /** Whether modal is open */
@@ -61,7 +63,7 @@ export function ActionFormModal({ open, onClose, editingAction, onSubmit }: Acti
     const newErrors: { name?: string } = {};
 
     if (!name.trim()) {
-      newErrors.name = 'Action name is required';
+      newErrors.name = m.settings_actionModal_errorNameRequired();
     }
 
     setErrors(newErrors);
@@ -92,24 +94,23 @@ export function ActionFormModal({ open, onClose, editingAction, onSubmit }: Acti
       <DialogContent className="sm:max-w-[500px]">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>{editingAction ? 'Edit Custom Action' : 'Add Custom Action'}</DialogTitle>
-            <DialogDescription>
-              Create a custom action for your workflow. The action ID will be used to trigger business logic on the
-              backend.
-            </DialogDescription>
+            <DialogTitle>
+              {editingAction ? m.settings_actionModal_titleEdit() : m.settings_actionModal_titleAdd()}
+            </DialogTitle>
+            <DialogDescription>{m.settings_actionModal_description()}</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
             {/* Action Name */}
             <div className="space-y-2">
               <Label htmlFor="action-name">
-                Action Name <span className="text-destructive">*</span>
+                {m.settings_actionModal_actionName()} <span className="text-destructive">{m.common_required()}</span>
               </Label>
               <Input
                 id="action-name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="e.g., Send Email Notification"
+                placeholder={m.settings_actionModal_actionNamePlaceholder()}
                 aria-invalid={!!errors.name}
                 aria-describedby={errors.name ? 'action-name-error' : undefined}
               />
@@ -122,7 +123,7 @@ export function ActionFormModal({ open, onClose, editingAction, onSubmit }: Acti
 
             {/* Icon Selector */}
             <div className="space-y-2">
-              <Label htmlFor="action-icon">Icon</Label>
+              <Label htmlFor="action-icon">{m.settings_actionModal_icon()}</Label>
               <Select value={icon} onValueChange={setIcon}>
                 <SelectTrigger>
                   <SelectValue />
@@ -135,26 +136,26 @@ export function ActionFormModal({ open, onClose, editingAction, onSubmit }: Acti
                   ))}
                 </SelectContent>
               </Select>
-              <p className="text-xs text-muted-foreground">Select an icon from Material Icons library</p>
+              <p className="text-xs text-muted-foreground">{m.settings_actionModal_iconHelp()}</p>
             </div>
 
             {/* Action ID (read-only for editing) */}
             {editingAction && (
               <div className="space-y-2">
-                <Label htmlFor="action-id">Action ID (Read-only)</Label>
+                <Label htmlFor="action-id">{m.settings_actionModal_actionId()}</Label>
                 <Input id="action-id" value={editingAction.actionId} disabled />
-                <p className="text-xs text-muted-foreground">
-                  This ID is used to identify the action in API calls and backend logic
-                </p>
+                <p className="text-xs text-muted-foreground">{m.settings_actionModal_actionIdHelp()}</p>
               </div>
             )}
           </div>
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={handleCancel}>
-              Cancel
+              {m.common_cancel()}
             </Button>
-            <Button type="submit">{editingAction ? 'Update Action' : 'Add Action'}</Button>
+            <Button type="submit">
+              {editingAction ? m.settings_actionModal_submitUpdate() : m.settings_actionModal_submitAdd()}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

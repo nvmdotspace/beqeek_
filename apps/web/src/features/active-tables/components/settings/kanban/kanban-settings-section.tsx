@@ -12,6 +12,8 @@ import { ScrollArea } from '@workspace/ui/components/scroll-area';
 import { KANBAN_STATUS_VALID_FIELD_TYPES } from '@workspace/beqeek-shared';
 import { SettingsSection } from '../settings-layout';
 import { KanbanFormModal } from './kanban-form-modal';
+// @ts-ignore - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 
 export interface KanbanConfig {
   kanbanScreenId: string;
@@ -54,7 +56,7 @@ export function KanbanSettingsSection({ kanbanConfigs, fields, onChange }: Kanba
   };
 
   const handleDeleteConfig = (index: number) => {
-    if (confirm('Are you sure you want to delete this Kanban screen?')) {
+    if (confirm(m.settings_kanban_deleteConfirm())) {
       onChange(kanbanConfigs.filter((_, i) => i !== index));
     }
   };
@@ -81,22 +83,23 @@ export function KanbanSettingsSection({ kanbanConfigs, fields, onChange }: Kanba
 
   return (
     <SettingsSection
-      title="Kanban Configuration"
-      description="Set up multiple Kanban board views for visualizing workflows"
+      title={m.settings_kanban_title()}
+      description={m.settings_kanban_description()}
       actions={
         <Button onClick={handleAddConfig} size="sm" disabled={eligibleStatusFields.length === 0}>
           <Plus className="mr-2 h-4 w-4" />
-          Add Kanban Screen
+          {m.settings_kanban_addButton()}
         </Button>
       }
     >
       <div className="space-y-4">
         {eligibleStatusFields.length === 0 && (
           <div className="rounded-lg border bg-yellow-50 dark:bg-yellow-950/30 p-4">
-            <p className="text-sm font-medium text-yellow-900 dark:text-yellow-100">Missing Status Fields</p>
+            <p className="text-sm font-medium text-yellow-900 dark:text-yellow-100">
+              {m.settings_kanban_missingFieldsTitle()}
+            </p>
             <p className="mt-1 text-xs text-yellow-700 dark:text-yellow-300">
-              You need at least one single-choice field (SELECT_ONE, SELECT_ONE_RECORD, SELECT_ONE_WORKSPACE_USER) to
-              create a Kanban board. These fields will be used as column categories.
+              {m.settings_kanban_missingFieldsDescription()}
             </p>
           </div>
         )}
@@ -104,10 +107,10 @@ export function KanbanSettingsSection({ kanbanConfigs, fields, onChange }: Kanba
         {kanbanConfigs.length === 0 ? (
           <div className="rounded-lg border border-dashed p-12 text-center">
             <p className="text-sm text-muted-foreground">
-              No Kanban screens configured yet.{' '}
+              {m.settings_kanban_empty()}{' '}
               {eligibleStatusFields.length > 0
-                ? 'Click "Add Kanban Screen" to create your first board.'
-                : 'Add single-choice fields to enable Kanban boards.'}
+                ? m.settings_kanban_emptyWithFields()
+                : m.settings_kanban_emptyNoFields()}
             </p>
           </div>
         ) : (
@@ -125,7 +128,7 @@ export function KanbanSettingsSection({ kanbanConfigs, fields, onChange }: Kanba
                       <div className="flex items-center gap-2">
                         <span className="font-medium">{config.screenName}</span>
                         <Badge variant="secondary" className="text-xs">
-                          Screen {index + 1}
+                          {m.settings_kanban_screenBadge({ screenNumber: index + 1 })}
                         </Badge>
                       </div>
 
@@ -135,16 +138,18 @@ export function KanbanSettingsSection({ kanbanConfigs, fields, onChange }: Kanba
 
                       <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
                         <div>
-                          <span className="text-muted-foreground">Status Field:</span>{' '}
+                          <span className="text-muted-foreground">{m.settings_kanban_statusField()}:</span>{' '}
                           <span className="font-medium">{statusField?.label || config.statusField}</span>
                         </div>
                         <div>
-                          <span className="text-muted-foreground">Headline Field:</span>{' '}
+                          <span className="text-muted-foreground">{m.settings_kanban_headlineField()}:</span>{' '}
                           <span className="font-medium">{headlineField?.label || config.kanbanHeadlineField}</span>
                         </div>
                         <div className="col-span-2">
-                          <span className="text-muted-foreground">Display Fields:</span>{' '}
-                          <span className="font-medium">{config.displayFields.length} selected</span>
+                          <span className="text-muted-foreground">{m.settings_kanban_displayFields()}:</span>{' '}
+                          <span className="font-medium">
+                            {m.settings_kanban_displayFieldsSelected({ count: config.displayFields.length })}
+                          </span>
                         </div>
                       </div>
 
@@ -160,7 +165,7 @@ export function KanbanSettingsSection({ kanbanConfigs, fields, onChange }: Kanba
                           })}
                           {config.displayFields.length > 5 && (
                             <Badge variant="outline" className="text-xs">
-                              +{config.displayFields.length - 5} more
+                              {m.settings_kanban_displayFieldsMore({ count: config.displayFields.length - 5 })}
                             </Badge>
                           )}
                         </div>
@@ -172,7 +177,7 @@ export function KanbanSettingsSection({ kanbanConfigs, fields, onChange }: Kanba
                         variant="ghost"
                         size="icon"
                         onClick={() => handleEditConfig(index)}
-                        aria-label={`Edit Kanban screen ${config.screenName}`}
+                        aria-label={m.settings_kanban_editScreen({ screenName: config.screenName })}
                       >
                         <Edit2 className="h-4 w-4" />
                       </Button>
@@ -181,7 +186,7 @@ export function KanbanSettingsSection({ kanbanConfigs, fields, onChange }: Kanba
                         size="icon"
                         onClick={() => handleDeleteConfig(index)}
                         className="text-destructive hover:text-destructive"
-                        aria-label={`Delete Kanban screen ${config.screenName}`}
+                        aria-label={m.settings_kanban_deleteScreen({ screenName: config.screenName })}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -195,18 +200,18 @@ export function KanbanSettingsSection({ kanbanConfigs, fields, onChange }: Kanba
 
         {/* Statistics */}
         <div className="flex gap-4 text-sm text-muted-foreground">
-          <span>Total Screens: {kanbanConfigs.length}</span>
-          <span>Eligible Status Fields: {eligibleStatusFields.length}</span>
+          <span>{m.settings_kanban_statsTotal({ count: kanbanConfigs.length })}</span>
+          <span>{m.settings_kanban_statsEligible({ count: eligibleStatusFields.length })}</span>
         </div>
 
         {/* Info */}
         <div className="rounded-lg border bg-blue-50 dark:bg-blue-950/30 p-4">
-          <p className="text-sm font-medium text-blue-900 dark:text-blue-100">Kanban Board Features</p>
+          <p className="text-sm font-medium text-blue-900 dark:text-blue-100">{m.settings_kanban_featuresTitle()}</p>
           <ul className="mt-2 space-y-1 text-xs text-blue-700 dark:text-blue-300">
-            <li>• Create multiple Kanban views for different workflows</li>
-            <li>• Each board uses a status field to organize cards into columns</li>
-            <li>• Drag-and-drop cards between columns to update status</li>
-            <li>• Customize which fields appear on each card</li>
+            <li>• {m.settings_kanban_feature1()}</li>
+            <li>• {m.settings_kanban_feature2()}</li>
+            <li>• {m.settings_kanban_feature3()}</li>
+            <li>• {m.settings_kanban_feature4()}</li>
           </ul>
         </div>
       </div>

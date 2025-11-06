@@ -21,6 +21,8 @@ import {
 } from '@workspace/ui/components/dialog';
 import { QUICK_FILTER_VALID_FIELD_TYPES, generateUUIDv7 } from '@workspace/beqeek-shared';
 import { SettingsSection } from '../settings-layout';
+// @ts-ignore - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 
 export interface QuickFilter {
   filterId: string;
@@ -62,7 +64,7 @@ export function QuickFiltersSection({ quickFilters, fields, onChange }: QuickFil
   };
 
   const handleDeleteFilter = (filterId: string) => {
-    if (confirm('Are you sure you want to delete this quick filter?')) {
+    if (confirm(m.settings_quickFilters_deleteConfirm())) {
       onChange(quickFilters.filter((qf) => qf.filterId !== filterId));
     }
   };
@@ -104,12 +106,12 @@ export function QuickFiltersSection({ quickFilters, fields, onChange }: QuickFil
 
   return (
     <SettingsSection
-      title="Quick Filters Configuration"
-      description="Create quick filters for common queries displayed at the top of the list view"
+      title={m.settings_quickFilters_title()}
+      description={m.settings_quickFilters_description()}
       actions={
         <Button onClick={handleAddFilter} size="sm" disabled={availableFields.length === 0}>
           <Plus className="mr-2 h-4 w-4" />
-          Add Quick Filter
+          {m.settings_quickFilters_addButton()}
         </Button>
       }
     >
@@ -117,10 +119,10 @@ export function QuickFiltersSection({ quickFilters, fields, onChange }: QuickFil
         {quickFilters.length === 0 ? (
           <div className="rounded-lg border border-dashed p-12 text-center">
             <p className="text-sm text-muted-foreground">
-              No quick filters configured yet.{' '}
+              {m.settings_quickFilters_empty()}{' '}
               {availableFields.length > 0
-                ? 'Click "Add Quick Filter" to create your first filter.'
-                : 'Add choice-based fields (SELECT, CHECKBOX, REFERENCE) to enable quick filters.'}
+                ? m.settings_quickFilters_emptyWithFields()
+                : m.settings_quickFilters_emptyNoFields()}
             </p>
           </div>
         ) : (
@@ -148,7 +150,9 @@ export function QuickFiltersSection({ quickFilters, fields, onChange }: QuickFil
                       size="icon"
                       onClick={() => handleDeleteFilter(filter.filterId)}
                       className="text-destructive hover:text-destructive"
-                      aria-label={`Delete filter ${filter.fieldLabel}`}
+                      aria-label={m.settings_quickFilters_deleteFilter({
+                        fieldName: filter.fieldLabel || filter.fieldName,
+                      })}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -162,17 +166,22 @@ export function QuickFiltersSection({ quickFilters, fields, onChange }: QuickFil
         {/* Statistics and Info */}
         <div className="space-y-2">
           <div className="flex gap-4 text-sm text-muted-foreground">
-            <span>Active Filters: {quickFilters.length}</span>
-            <span>Eligible Fields: {eligibleFields.length}</span>
-            <span>Available: {availableFields.length}</span>
+            <span>
+              {m.settings_quickFilters_statsActive()}: {quickFilters.length}
+            </span>
+            <span>
+              {m.settings_quickFilters_statsEligible()}: {eligibleFields.length}
+            </span>
+            <span>
+              {m.settings_quickFilters_statsAvailable()}: {availableFields.length}
+            </span>
           </div>
 
           <div className="rounded-lg border bg-blue-50 dark:bg-blue-950/30 p-4">
-            <p className="text-sm font-medium text-blue-900 dark:text-blue-100">Quick Filter Requirements</p>
-            <p className="mt-1 text-xs text-blue-700 dark:text-blue-300">
-              Only choice-based fields (SELECT, CHECKBOX, REFERENCE) can be used as quick filters. These filters will
-              appear prominently at the top of the list view for easy access.
+            <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
+              {m.settings_quickFilters_infoTitle()}
             </p>
+            <p className="mt-1 text-xs text-blue-700 dark:text-blue-300">{m.settings_quickFilters_infoDescription()}</p>
           </div>
         </div>
       </div>
@@ -181,18 +190,18 @@ export function QuickFiltersSection({ quickFilters, fields, onChange }: QuickFil
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>Add Quick Filter</DialogTitle>
-            <DialogDescription>Select a field to use as a quick filter in the list view</DialogDescription>
+            <DialogTitle>{m.settings_quickFilters_dialogTitle()}</DialogTitle>
+            <DialogDescription>{m.settings_quickFilters_dialogDescription()}</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label htmlFor="filter-field">
-                Field <span className="text-destructive">*</span>
+                {m.settings_quickFilters_fieldLabel()} <span className="text-destructive">{m.common_required()}</span>
               </Label>
               <Select value={selectedFieldName} onValueChange={setSelectedFieldName}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select field..." />
+                  <SelectValue placeholder={m.settings_quickFilters_fieldPlaceholder()} />
                 </SelectTrigger>
                 <SelectContent>
                   {availableFields.map((field) => (
@@ -202,18 +211,16 @@ export function QuickFiltersSection({ quickFilters, fields, onChange }: QuickFil
                   ))}
                 </SelectContent>
               </Select>
-              <p className="text-xs text-muted-foreground">
-                Only eligible fields (SELECT, CHECKBOX, REFERENCE types) are shown
-              </p>
+              <p className="text-xs text-muted-foreground">{m.settings_quickFilters_fieldHelp()}</p>
             </div>
           </div>
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)}>
-              Cancel
+              {m.common_cancel()}
             </Button>
             <Button type="button" onClick={handleSubmitFilter} disabled={!selectedFieldName}>
-              Add Filter
+              {m.settings_quickFilters_dialogSubmit()}
             </Button>
           </DialogFooter>
         </DialogContent>

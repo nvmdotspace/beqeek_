@@ -20,6 +20,8 @@ import { Label } from '@workspace/ui/components/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@workspace/ui/components/select';
 import { generateUUIDv7 } from '@workspace/beqeek-shared';
 import type { GanttConfig } from './gantt-settings-section';
+// @ts-ignore - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 
 export interface GanttFormModalProps {
   /** Whether modal is open */
@@ -106,19 +108,19 @@ export function GanttFormModal({
     } = {};
 
     if (!screenName.trim()) {
-      newErrors.screenName = 'Screen name is required';
+      newErrors.screenName = m.settings_ganttModal_errorScreenNameRequired();
     }
 
     if (!taskNameField) {
-      newErrors.taskNameField = 'Task name field is required';
+      newErrors.taskNameField = m.settings_ganttModal_errorTaskNameRequired();
     }
 
     if (!startDateField) {
-      newErrors.startDateField = 'Start date field is required';
+      newErrors.startDateField = m.settings_ganttModal_errorStartDateRequired();
     }
 
     if (!endDateField) {
-      newErrors.endDateField = 'End date field is required';
+      newErrors.endDateField = m.settings_ganttModal_errorEndDateRequired();
     }
 
     setErrors(newErrors);
@@ -153,24 +155,23 @@ export function GanttFormModal({
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>{editingConfig ? 'Edit Gantt Chart' : 'Add Gantt Chart'}</DialogTitle>
-            <DialogDescription>
-              Configure a Gantt chart view for project planning and timeline visualization. Tasks will be displayed as
-              horizontal bars on a timeline.
-            </DialogDescription>
+            <DialogTitle>
+              {editingConfig ? m.settings_ganttModal_titleEdit() : m.settings_ganttModal_titleAdd()}
+            </DialogTitle>
+            <DialogDescription>{m.settings_ganttModal_description()}</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
             {/* Screen Name */}
             <div className="space-y-2">
               <Label htmlFor="screen-name">
-                Screen Name <span className="text-destructive">*</span>
+                {m.settings_ganttModal_screenName()} <span className="text-destructive">{m.common_required()}</span>
               </Label>
               <Input
                 id="screen-name"
                 value={screenName}
                 onChange={(e) => setScreenName(e.target.value)}
-                placeholder="e.g., Project Timeline, Sprint Schedule"
+                placeholder={m.settings_ganttModal_screenNamePlaceholder()}
                 aria-invalid={!!errors.screenName}
                 aria-describedby={errors.screenName ? 'screen-name-error' : undefined}
               />
@@ -183,12 +184,12 @@ export function GanttFormModal({
 
             {/* Screen Description */}
             <div className="space-y-2">
-              <Label htmlFor="screen-description">Description</Label>
+              <Label htmlFor="screen-description">{m.settings_ganttModal_description_label()}</Label>
               <Textarea
                 id="screen-description"
                 value={screenDescription}
                 onChange={(e) => setScreenDescription(e.target.value)}
-                placeholder="Brief description of this Gantt chart..."
+                placeholder={m.settings_ganttModal_descriptionPlaceholder()}
                 rows={2}
               />
             </div>
@@ -196,11 +197,11 @@ export function GanttFormModal({
             {/* Task Name Field */}
             <div className="space-y-2">
               <Label htmlFor="task-name-field">
-                Task Name Field <span className="text-destructive">*</span>
+                {m.settings_ganttModal_taskNameField()} <span className="text-destructive">{m.common_required()}</span>
               </Label>
               <Select value={taskNameField} onValueChange={setTaskNameField}>
                 <SelectTrigger aria-invalid={!!errors.taskNameField}>
-                  <SelectValue placeholder="Select task name field..." />
+                  <SelectValue placeholder={m.settings_ganttModal_taskNameFieldPlaceholder()} />
                 </SelectTrigger>
                 <SelectContent>
                   {fields.map((field) => (
@@ -215,17 +216,17 @@ export function GanttFormModal({
                   {errors.taskNameField}
                 </p>
               )}
-              <p className="text-xs text-muted-foreground">Field used as the task name/label in the Gantt chart</p>
+              <p className="text-xs text-muted-foreground">{m.settings_ganttModal_taskNameFieldHelp()}</p>
             </div>
 
             {/* Start Date Field */}
             <div className="space-y-2">
               <Label htmlFor="start-date-field">
-                Start Date Field <span className="text-destructive">*</span>
+                {m.settings_ganttModal_startDateField()} <span className="text-destructive">{m.common_required()}</span>
               </Label>
               <Select value={startDateField} onValueChange={setStartDateField}>
                 <SelectTrigger aria-invalid={!!errors.startDateField}>
-                  <SelectValue placeholder="Select start date field..." />
+                  <SelectValue placeholder={m.settings_ganttModal_startDateFieldPlaceholder()} />
                 </SelectTrigger>
                 <SelectContent>
                   {eligibleDateFields.map((field) => (
@@ -240,17 +241,17 @@ export function GanttFormModal({
                   {errors.startDateField}
                 </p>
               )}
-              <p className="text-xs text-muted-foreground">When the task starts (DATE or DATETIME field required)</p>
+              <p className="text-xs text-muted-foreground">{m.settings_ganttModal_startDateFieldHelp()}</p>
             </div>
 
             {/* End Date Field */}
             <div className="space-y-2">
               <Label htmlFor="end-date-field">
-                End Date Field <span className="text-destructive">*</span>
+                {m.settings_ganttModal_endDateField()} <span className="text-destructive">{m.common_required()}</span>
               </Label>
               <Select value={endDateField} onValueChange={setEndDateField}>
                 <SelectTrigger aria-invalid={!!errors.endDateField}>
-                  <SelectValue placeholder="Select end date field..." />
+                  <SelectValue placeholder={m.settings_ganttModal_endDateFieldPlaceholder()} />
                 </SelectTrigger>
                 <SelectContent>
                   {eligibleDateFields.map((field) => (
@@ -265,18 +266,18 @@ export function GanttFormModal({
                   {errors.endDateField}
                 </p>
               )}
-              <p className="text-xs text-muted-foreground">When the task ends (DATE or DATETIME field required)</p>
+              <p className="text-xs text-muted-foreground">{m.settings_ganttModal_endDateFieldHelp()}</p>
             </div>
 
             {/* Progress Field (Optional) */}
             <div className="space-y-2">
-              <Label htmlFor="progress-field">Progress Field (Optional)</Label>
+              <Label htmlFor="progress-field">{m.settings_ganttModal_progressField()}</Label>
               <Select value={progressField} onValueChange={setProgressField}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select progress field (optional)..." />
+                  <SelectValue placeholder={m.settings_ganttModal_progressFieldPlaceholder()} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">None</SelectItem>
+                  <SelectItem value="">{m.common_none()}</SelectItem>
                   {eligibleProgressFields.map((field) => (
                     <SelectItem key={field.name} value={field.name}>
                       {field.label} ({field.type})
@@ -284,18 +285,18 @@ export function GanttFormModal({
                   ))}
                 </SelectContent>
               </Select>
-              <p className="text-xs text-muted-foreground">Numeric field (0-100) to show task completion percentage</p>
+              <p className="text-xs text-muted-foreground">{m.settings_ganttModal_progressFieldHelp()}</p>
             </div>
 
             {/* Dependency Field (Optional) */}
             <div className="space-y-2">
-              <Label htmlFor="dependency-field">Dependency Field (Optional)</Label>
+              <Label htmlFor="dependency-field">{m.settings_ganttModal_dependencyField()}</Label>
               <Select value={dependencyField} onValueChange={setDependencyField}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select dependency field (optional)..." />
+                  <SelectValue placeholder={m.settings_ganttModal_dependencyFieldPlaceholder()} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">None</SelectItem>
+                  <SelectItem value="">{m.common_none()}</SelectItem>
                   {eligibleDependencyFields.map((field) => (
                     <SelectItem key={field.name} value={field.name}>
                       {field.label} ({field.type})
@@ -303,17 +304,17 @@ export function GanttFormModal({
                   ))}
                 </SelectContent>
               </Select>
-              <p className="text-xs text-muted-foreground">
-                SELECT_LIST_RECORD field linking to other tasks this task depends on
-              </p>
+              <p className="text-xs text-muted-foreground">{m.settings_ganttModal_dependencyFieldHelp()}</p>
             </div>
           </div>
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={handleCancel}>
-              Cancel
+              {m.common_cancel()}
             </Button>
-            <Button type="submit">{editingConfig ? 'Update Chart' : 'Add Chart'}</Button>
+            <Button type="submit">
+              {editingConfig ? m.settings_ganttModal_submitUpdate() : m.settings_ganttModal_submitAdd()}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

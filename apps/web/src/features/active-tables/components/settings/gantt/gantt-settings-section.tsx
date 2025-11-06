@@ -16,6 +16,8 @@ import {
 } from '@workspace/beqeek-shared';
 import { SettingsSection } from '../settings-layout';
 import { GanttFormModal } from './gantt-form-modal';
+// @ts-ignore - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 
 export interface GanttConfig {
   ganttScreenId: string;
@@ -64,7 +66,7 @@ export function GanttSettingsSection({ ganttConfigs, fields, onChange }: GanttSe
   };
 
   const handleDeleteConfig = (index: number) => {
-    if (confirm('Are you sure you want to delete this Gantt chart?')) {
+    if (confirm(m.settings_gantt_deleteConfirm())) {
       onChange(ganttConfigs.filter((_, i) => i !== index));
     }
   };
@@ -91,21 +93,23 @@ export function GanttSettingsSection({ ganttConfigs, fields, onChange }: GanttSe
 
   return (
     <SettingsSection
-      title="Gantt Chart Configuration"
-      description="Set up Gantt chart views for project planning and timeline visualization"
+      title={m.settings_gantt_title()}
+      description={m.settings_gantt_description()}
       actions={
         <Button onClick={handleAddConfig} size="sm" disabled={!canCreateGantt}>
           <Plus className="mr-2 h-4 w-4" />
-          Add Gantt Chart
+          {m.settings_gantt_addButton()}
         </Button>
       }
     >
       <div className="space-y-4">
         {!canCreateGantt && (
           <div className="rounded-lg border bg-yellow-50 dark:bg-yellow-950/30 p-4">
-            <p className="text-sm font-medium text-yellow-900 dark:text-yellow-100">Missing Date Fields</p>
+            <p className="text-sm font-medium text-yellow-900 dark:text-yellow-100">
+              {m.settings_gantt_missingFieldsTitle()}
+            </p>
             <p className="mt-1 text-xs text-yellow-700 dark:text-yellow-300">
-              You need at least two DATE or DATETIME fields (for start and end dates) to create a Gantt chart.
+              {m.settings_gantt_missingFieldsDescription()}
             </p>
           </div>
         )}
@@ -113,10 +117,8 @@ export function GanttSettingsSection({ ganttConfigs, fields, onChange }: GanttSe
         {ganttConfigs.length === 0 ? (
           <div className="rounded-lg border border-dashed p-12 text-center">
             <p className="text-sm text-muted-foreground">
-              No Gantt charts configured yet.{' '}
-              {canCreateGantt
-                ? 'Click "Add Gantt Chart" to create your first timeline view.'
-                : 'Add DATE or DATETIME fields to enable Gantt charts.'}
+              {m.settings_gantt_empty()}{' '}
+              {canCreateGantt ? m.settings_gantt_emptyWithFields() : m.settings_gantt_emptyNoFields()}
             </p>
           </div>
         ) : (
@@ -140,7 +142,7 @@ export function GanttSettingsSection({ ganttConfigs, fields, onChange }: GanttSe
                       <div className="flex items-center gap-2">
                         <span className="font-medium">{config.screenName}</span>
                         <Badge variant="secondary" className="text-xs">
-                          Chart {index + 1}
+                          {m.settings_gantt_chartBadge({ chartNumber: index + 1 })}
                         </Badge>
                       </div>
 
@@ -150,26 +152,26 @@ export function GanttSettingsSection({ ganttConfigs, fields, onChange }: GanttSe
 
                       <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
                         <div>
-                          <span className="text-muted-foreground">Task Name:</span>{' '}
+                          <span className="text-muted-foreground">{m.settings_gantt_taskName()}:</span>{' '}
                           <span className="font-medium">{taskNameField?.label || config.taskNameField}</span>
                         </div>
                         <div>
-                          <span className="text-muted-foreground">Start Date:</span>{' '}
+                          <span className="text-muted-foreground">{m.settings_gantt_startDate()}:</span>{' '}
                           <span className="font-medium">{startDateField?.label || config.startDateField}</span>
                         </div>
                         <div>
-                          <span className="text-muted-foreground">End Date:</span>{' '}
+                          <span className="text-muted-foreground">{m.settings_gantt_endDate()}:</span>{' '}
                           <span className="font-medium">{endDateField?.label || config.endDateField}</span>
                         </div>
                         {progressField && (
                           <div>
-                            <span className="text-muted-foreground">Progress:</span>{' '}
+                            <span className="text-muted-foreground">{m.settings_gantt_progress()}:</span>{' '}
                             <span className="font-medium">{progressField.label}</span>
                           </div>
                         )}
                         {dependencyField && (
                           <div className="col-span-2">
-                            <span className="text-muted-foreground">Dependencies:</span>{' '}
+                            <span className="text-muted-foreground">{m.settings_gantt_dependencies()}:</span>{' '}
                             <span className="font-medium">{dependencyField.label}</span>
                           </div>
                         )}
@@ -181,7 +183,7 @@ export function GanttSettingsSection({ ganttConfigs, fields, onChange }: GanttSe
                         variant="ghost"
                         size="icon"
                         onClick={() => handleEditConfig(index)}
-                        aria-label={`Edit Gantt chart ${config.screenName}`}
+                        aria-label={m.settings_gantt_editChart({ screenName: config.screenName })}
                       >
                         <Edit2 className="h-4 w-4" />
                       </Button>
@@ -190,7 +192,7 @@ export function GanttSettingsSection({ ganttConfigs, fields, onChange }: GanttSe
                         size="icon"
                         onClick={() => handleDeleteConfig(index)}
                         className="text-destructive hover:text-destructive"
-                        aria-label={`Delete Gantt chart ${config.screenName}`}
+                        aria-label={m.settings_gantt_deleteChart({ screenName: config.screenName })}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -204,20 +206,20 @@ export function GanttSettingsSection({ ganttConfigs, fields, onChange }: GanttSe
 
         {/* Statistics */}
         <div className="flex gap-4 text-sm text-muted-foreground">
-          <span>Total Charts: {ganttConfigs.length}</span>
-          <span>Date Fields: {eligibleDateFields.length}</span>
-          <span>Progress Fields: {eligibleProgressFields.length}</span>
-          <span>Dependency Fields: {eligibleDependencyFields.length}</span>
+          <span>{m.settings_gantt_statsTotal({ count: ganttConfigs.length })}</span>
+          <span>{m.settings_gantt_statsDateFields({ count: eligibleDateFields.length })}</span>
+          <span>{m.settings_gantt_statsProgressFields({ count: eligibleProgressFields.length })}</span>
+          <span>{m.settings_gantt_statsDependencyFields({ count: eligibleDependencyFields.length })}</span>
         </div>
 
         {/* Info */}
         <div className="rounded-lg border bg-blue-50 dark:bg-blue-950/30 p-4">
-          <p className="text-sm font-medium text-blue-900 dark:text-blue-100">Gantt Chart Features</p>
+          <p className="text-sm font-medium text-blue-900 dark:text-blue-100">{m.settings_gantt_featuresTitle()}</p>
           <ul className="mt-2 space-y-1 text-xs text-blue-700 dark:text-blue-300">
-            <li>• Visualize project timelines and task schedules</li>
-            <li>• Track task progress with progress bars</li>
-            <li>• Manage task dependencies with connecting lines</li>
-            <li>• Ideal for project planning and resource allocation</li>
+            <li>• {m.settings_gantt_feature1()}</li>
+            <li>• {m.settings_gantt_feature2()}</li>
+            <li>• {m.settings_gantt_feature3()}</li>
+            <li>• {m.settings_gantt_feature4()}</li>
           </ul>
         </div>
       </div>

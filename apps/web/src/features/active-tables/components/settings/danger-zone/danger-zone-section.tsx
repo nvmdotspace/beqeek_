@@ -18,6 +18,8 @@ import {
 import { Input } from '@workspace/ui/components/input';
 import { Label } from '@workspace/ui/components/label';
 import { SettingsSection } from '../settings-layout';
+// @ts-ignore - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 
 export interface DangerZoneSectionProps {
   /** Table name for confirmation */
@@ -59,8 +61,8 @@ export function DangerZoneSection({ tableName, onDelete, isDeleting = false }: D
   return (
     <>
       <SettingsSection
-        title="Danger Zone"
-        description="Irreversible and dangerous actions"
+        title={m.settings_dangerZone_title()}
+        description={m.settings_dangerZone_description()}
         className="border-destructive"
       >
         <div className="space-y-6">
@@ -69,10 +71,8 @@ export function DangerZoneSection({ tableName, onDelete, isDeleting = false }: D
             <div className="flex items-start gap-3">
               <AlertTriangle className="h-5 w-5 text-destructive mt-0.5" />
               <div className="flex-1">
-                <h3 className="font-semibold text-destructive">Warning: Irreversible Actions</h3>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Actions in this section are permanent and cannot be undone. Please proceed with extreme caution.
-                </p>
+                <h3 className="font-semibold text-destructive">{m.settings_dangerZone_warningTitle()}</h3>
+                <p className="mt-2 text-sm text-muted-foreground">{m.settings_dangerZone_warningDescription()}</p>
               </div>
             </div>
           </div>
@@ -82,21 +82,19 @@ export function DangerZoneSection({ tableName, onDelete, isDeleting = false }: D
             <div>
               <h3 className="text-lg font-semibold text-destructive flex items-center gap-2">
                 <Trash2 className="h-5 w-5" />
-                Delete This Table
+                {m.settings_dangerZone_deleteTitle()}
               </h3>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Permanently delete this table and all associated data. This action cannot be undone.
-              </p>
+              <p className="mt-2 text-sm text-muted-foreground">{m.settings_dangerZone_deleteDescription()}</p>
             </div>
 
             <div className="rounded-md bg-muted p-4 space-y-2">
-              <p className="text-sm font-medium">This will permanently delete:</p>
+              <p className="text-sm font-medium">{m.settings_dangerZone_deleteListTitle()}</p>
               <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
-                <li>All table records and data</li>
-                <li>All comments and attachments</li>
-                <li>All table configuration and settings</li>
-                <li>All permissions and access rules</li>
-                <li>All associated views (Kanban, Gantt, etc.)</li>
+                <li>{m.settings_dangerZone_deleteItem1()}</li>
+                <li>{m.settings_dangerZone_deleteItem2()}</li>
+                <li>{m.settings_dangerZone_deleteItem3()}</li>
+                <li>{m.settings_dangerZone_deleteItem4()}</li>
+                <li>{m.settings_dangerZone_deleteItem5()}</li>
               </ul>
             </div>
 
@@ -108,18 +106,20 @@ export function DangerZoneSection({ tableName, onDelete, isDeleting = false }: D
               className="w-full"
             >
               <Trash2 className="mr-2 h-5 w-5" />
-              {isDeleting ? 'Deleting...' : 'Delete This Table Permanently'}
+              {isDeleting ? m.settings_dangerZone_deleting() : m.settings_dangerZone_deleteButton()}
             </Button>
           </div>
 
           {/* Additional Info */}
           <div className="rounded-lg border bg-blue-50 dark:bg-blue-950/30 p-4">
-            <p className="text-sm font-medium text-blue-900 dark:text-blue-100">Before You Delete</p>
+            <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
+              {m.settings_dangerZone_beforeDeleteTitle()}
+            </p>
             <ul className="mt-2 space-y-1 text-xs text-blue-700 dark:text-blue-300">
-              <li>• Make sure you have exported any data you need to keep</li>
-              <li>• Inform your team members about the deletion</li>
-              <li>• Consider archiving the table instead of deleting it</li>
-              <li>• Verify that no critical workflows depend on this table</li>
+              <li>• {m.settings_dangerZone_beforeDeleteTip1()}</li>
+              <li>• {m.settings_dangerZone_beforeDeleteTip2()}</li>
+              <li>• {m.settings_dangerZone_beforeDeleteTip3()}</li>
+              <li>• {m.settings_dangerZone_beforeDeleteTip4()}</li>
             </ul>
           </div>
         </div>
@@ -131,46 +131,40 @@ export function DangerZoneSection({ tableName, onDelete, isDeleting = false }: D
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-destructive">
               <AlertTriangle className="h-5 w-5" />
-              Confirm Table Deletion
+              {m.settings_dangerZone_confirmTitle()}
             </DialogTitle>
-            <DialogDescription>
-              This action is permanent and cannot be undone. All data will be lost forever.
-            </DialogDescription>
+            <DialogDescription>{m.settings_dangerZone_confirmDescription()}</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
             <div className="rounded-lg border-2 border-destructive bg-destructive/5 p-4">
-              <p className="text-sm font-medium text-destructive">You are about to delete:</p>
+              <p className="text-sm font-medium text-destructive">{m.settings_dangerZone_confirmAboutTo()}</p>
               <p className="mt-2 text-base font-bold">{tableName}</p>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="confirm-text">
-                Type the table name to confirm: <span className="font-mono font-bold">{tableName}</span>
-              </Label>
+              <Label htmlFor="confirm-text">{m.settings_dangerZone_confirmTypePrompt({ tableName })}</Label>
               <Input
                 id="confirm-text"
                 value={confirmText}
                 onChange={(e) => setConfirmText(e.target.value)}
-                placeholder="Type table name here..."
+                placeholder={m.settings_dangerZone_confirmPlaceholder()}
                 className="font-mono"
               />
-              <p className="text-xs text-muted-foreground">
-                This confirmation ensures you really want to delete this table.
-              </p>
+              <p className="text-xs text-muted-foreground">{m.settings_dangerZone_confirmHelp()}</p>
             </div>
 
             <div className="rounded-md bg-yellow-50 dark:bg-yellow-950/30 p-3">
               <p className="text-xs text-yellow-800 dark:text-yellow-200">
-                <strong>Warning:</strong> This will immediately delete the table and all its data. There is no way to
-                recover it after deletion.
+                <strong>{m.settings_dangerZone_confirmFinalWarningLabel()}</strong>{' '}
+                {m.settings_dangerZone_confirmFinalWarningText()}
               </p>
             </div>
           </div>
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={handleCancel} disabled={isDeleting}>
-              Cancel
+              {m.common_cancel()}
             </Button>
             <Button
               type="button"
@@ -178,7 +172,7 @@ export function DangerZoneSection({ tableName, onDelete, isDeleting = false }: D
               onClick={handleConfirmDelete}
               disabled={!isConfirmValid || isDeleting}
             >
-              {isDeleting ? 'Deleting...' : 'Yes, Delete Permanently'}
+              {isDeleting ? m.settings_dangerZone_deleting() : m.settings_dangerZone_confirmButton()}
             </Button>
           </DialogFooter>
         </DialogContent>

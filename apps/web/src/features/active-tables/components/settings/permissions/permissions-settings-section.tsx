@@ -20,6 +20,8 @@ import {
   COMMENT_MODIFY_PERMISSIONS,
 } from '@workspace/beqeek-shared';
 import { SettingsSection } from '../settings-layout';
+// @ts-ignore - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 
 export interface PermissionConfig {
   teamId: string;
@@ -201,12 +203,9 @@ export function PermissionsSettingsSection({
 
   if (loading) {
     return (
-      <SettingsSection
-        title="Permissions Configuration"
-        description="Manage team and role-based permissions for actions"
-      >
+      <SettingsSection title={m.settings_permissions_title()} description={m.settings_permissions_description()}>
         <div className="rounded-lg border p-12 text-center">
-          <p className="text-sm text-muted-foreground">Loading teams and roles...</p>
+          <p className="text-sm text-muted-foreground">{m.settings_permissions_loading()}</p>
         </div>
       </SettingsSection>
     );
@@ -214,14 +213,13 @@ export function PermissionsSettingsSection({
 
   if (teams.length === 0) {
     return (
-      <SettingsSection
-        title="Permissions Configuration"
-        description="Manage team and role-based permissions for actions"
-      >
+      <SettingsSection title={m.settings_permissions_title()} description={m.settings_permissions_description()}>
         <div className="rounded-lg border bg-yellow-50 dark:bg-yellow-950/30 p-4">
-          <p className="text-sm font-medium text-yellow-900 dark:text-yellow-100">No Teams Found</p>
+          <p className="text-sm font-medium text-yellow-900 dark:text-yellow-100">
+            {m.settings_permissions_noTeamsTitle()}
+          </p>
           <p className="mt-1 text-xs text-yellow-700 dark:text-yellow-300">
-            You need to create teams and roles in your workspace before configuring permissions.
+            {m.settings_permissions_noTeamsDescription()}
           </p>
         </div>
       </SettingsSection>
@@ -229,14 +227,11 @@ export function PermissionsSettingsSection({
   }
 
   return (
-    <SettingsSection
-      title="Permissions Configuration"
-      description="Manage team and role-based permissions for all actions"
-    >
+    <SettingsSection title={m.settings_permissions_title()} description={m.settings_permissions_description()}>
       <div className="space-y-6">
         {/* Team Selector */}
         <div className="space-y-2">
-          <Label>Select Team</Label>
+          <Label>{m.settings_permissions_selectTeam()}</Label>
           <Select value={selectedTeam} onValueChange={setSelectedTeam}>
             <SelectTrigger>
               <SelectValue />
@@ -254,7 +249,7 @@ export function PermissionsSettingsSection({
         {/* Permissions Matrix */}
         {teamRoles.length === 0 ? (
           <div className="rounded-lg border border-dashed p-8 text-center">
-            <p className="text-sm text-muted-foreground">No roles found for this team.</p>
+            <p className="text-sm text-muted-foreground">{m.settings_permissions_noRoles()}</p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -262,10 +257,11 @@ export function PermissionsSettingsSection({
               <div className="flex items-start gap-2">
                 <Info className="h-4 w-4 mt-0.5 text-blue-600 dark:text-blue-400" />
                 <div>
-                  <p className="text-sm font-medium text-blue-900 dark:text-blue-100">Permissions Matrix</p>
+                  <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                    {m.settings_permissions_matrixTitle()}
+                  </p>
                   <p className="mt-1 text-xs text-blue-700 dark:text-blue-300">
-                    Configure permissions for each role and action. Different actions have different permission options
-                    based on their type.
+                    {m.settings_permissions_matrixDescription()}
                   </p>
                 </div>
               </div>
@@ -277,7 +273,7 @@ export function PermissionsSettingsSection({
                   <div key={role.id} className="mb-6 rounded-lg border bg-card p-4">
                     <div className="mb-4 flex items-center gap-2">
                       <Badge variant="default">{role.name}</Badge>
-                      <span className="text-sm text-muted-foreground">Role Permissions</span>
+                      <span className="text-sm text-muted-foreground">{m.settings_permissions_rolePermissions()}</span>
                     </div>
 
                     <div className="space-y-3">
@@ -323,10 +319,10 @@ export function PermissionsSettingsSection({
 
         {/* Statistics */}
         <div className="flex gap-4 text-sm text-muted-foreground">
-          <span>Teams: {teams.length}</span>
-          <span>Roles: {roles.length}</span>
-          <span>Actions: {actions.length}</span>
-          <span>Configurations: {permissionsConfig.length}</span>
+          <span>{m.settings_permissions_statsTeams({ count: teams.length })}</span>
+          <span>{m.settings_permissions_statsRoles({ count: roles.length })}</span>
+          <span>{m.settings_permissions_statsActions({ count: actions.length })}</span>
+          <span>{m.settings_permissions_statsConfigurations({ count: permissionsConfig.length })}</span>
         </div>
       </div>
     </SettingsSection>

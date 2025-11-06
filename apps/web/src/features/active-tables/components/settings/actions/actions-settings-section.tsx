@@ -15,6 +15,8 @@ import { initDefaultActions, type DefaultAction } from '@workspace/beqeek-shared
 import { toast } from '@workspace/ui/components/sonner';
 import { SettingsSection } from '../settings-layout';
 import { ActionFormModal } from './action-form-modal';
+// @ts-ignore - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 
 export type ActionType =
   | 'create'
@@ -88,7 +90,7 @@ export function ActionsSettingsSection({ actions, onChange }: ActionsSettingsSec
   };
 
   const handleDeleteAction = (index: number) => {
-    if (confirm('Are you sure you want to delete this action? This action cannot be undone.')) {
+    if (confirm(m.settings_actions_deleteConfirm())) {
       const newCustomActions = customActions.filter((_, i) => i !== index);
       onChange([...systemActions, ...newCustomActions]);
     }
@@ -114,8 +116,8 @@ export function ActionsSettingsSection({ actions, onChange }: ActionsSettingsSec
 
   const handleCopyActionId = (actionId: string) => {
     navigator.clipboard.writeText(actionId);
-    toast.success('Copied to clipboard', {
-      description: `Action ID: ${actionId}`,
+    toast.success(m.settings_actions_toastCopied(), {
+      description: m.settings_actions_toastCopiedDescription({ actionId }),
     });
   };
 
@@ -125,32 +127,32 @@ export function ActionsSettingsSection({ actions, onChange }: ActionsSettingsSec
     if (type === 'custom') {
       return (
         <Badge variant="default" className="text-xs">
-          Custom
+          {m.settings_actions_badgeCustom()}
         </Badge>
       );
     }
     return (
       <Badge variant="secondary" className="text-xs">
-        System
+        {m.settings_actions_badgeSystem()}
       </Badge>
     );
   };
 
   return (
     <SettingsSection
-      title="Actions Configuration"
-      description="Manage default system actions and create custom actions for specific workflows"
+      title={m.settings_actions_title()}
+      description={m.settings_actions_description()}
       actions={
         <Button onClick={handleAddAction} size="sm">
           <Plus className="mr-2 h-4 w-4" />
-          Add Custom Action
+          {m.settings_actions_addButton()}
         </Button>
       }
     >
       <div className="space-y-6">
         {/* System Actions */}
         <div className="space-y-3">
-          <h3 className="text-sm font-medium">System Actions (Read-only)</h3>
+          <h3 className="text-sm font-medium">{m.settings_actions_systemTitle()}</h3>
           <div className="rounded-lg border bg-muted/30 p-4">
             <div className="space-y-2">
               {systemActions.map((action) => (
@@ -163,14 +165,14 @@ export function ActionsSettingsSection({ actions, onChange }: ActionsSettingsSec
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
                       <span className="font-mono">{action.type}</span>
                       <span>•</span>
-                      <span>Icon: {action.icon}</span>
+                      <span>{m.settings_actions_iconLabel({ icon: action.icon })}</span>
                     </div>
                   </div>
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={() => handleCopyActionId(action.actionId)}
-                    aria-label={`Copy action ID for ${action.name}`}
+                    aria-label={m.settings_actions_copyActionId({ name: action.name })}
                   >
                     <Copy className="h-4 w-4" />
                   </Button>
@@ -182,12 +184,10 @@ export function ActionsSettingsSection({ actions, onChange }: ActionsSettingsSec
 
         {/* Custom Actions */}
         <div className="space-y-3">
-          <h3 className="text-sm font-medium">Custom Actions</h3>
+          <h3 className="text-sm font-medium">{m.settings_actions_customTitle()}</h3>
           {customActions.length === 0 ? (
             <div className="rounded-lg border border-dashed p-12 text-center">
-              <p className="text-sm text-muted-foreground">
-                No custom actions configured yet. Click "Add Custom Action" to create your first custom action.
-              </p>
+              <p className="text-sm text-muted-foreground">{m.settings_actions_customEmpty()}</p>
             </div>
           ) : (
             <ScrollArea className="max-h-[400px] rounded-md border">
@@ -205,7 +205,7 @@ export function ActionsSettingsSection({ actions, onChange }: ActionsSettingsSec
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <span className="font-mono text-xs">{action.actionId}</span>
                         <span>•</span>
-                        <span>Icon: {action.icon}</span>
+                        <span>{m.settings_actions_iconLabel({ icon: action.icon })}</span>
                       </div>
                     </div>
 
@@ -214,7 +214,7 @@ export function ActionsSettingsSection({ actions, onChange }: ActionsSettingsSec
                         variant="ghost"
                         size="icon"
                         onClick={() => handleCopyActionId(action.actionId)}
-                        aria-label={`Copy action ID for ${action.name}`}
+                        aria-label={m.settings_actions_copyActionId({ name: action.name })}
                       >
                         <Copy className="h-4 w-4" />
                       </Button>
@@ -222,7 +222,7 @@ export function ActionsSettingsSection({ actions, onChange }: ActionsSettingsSec
                         variant="ghost"
                         size="icon"
                         onClick={() => handleEditAction(index)}
-                        aria-label={`Edit action ${action.name}`}
+                        aria-label={m.settings_actions_editAction({ name: action.name })}
                       >
                         <Edit2 className="h-4 w-4" />
                       </Button>
@@ -231,7 +231,7 @@ export function ActionsSettingsSection({ actions, onChange }: ActionsSettingsSec
                         size="icon"
                         onClick={() => handleDeleteAction(index)}
                         className="text-destructive hover:text-destructive"
-                        aria-label={`Delete action ${action.name}`}
+                        aria-label={m.settings_actions_deleteAction({ name: action.name })}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -245,9 +245,9 @@ export function ActionsSettingsSection({ actions, onChange }: ActionsSettingsSec
 
         {/* Statistics */}
         <div className="flex gap-4 text-sm text-muted-foreground">
-          <span>System Actions: {systemActions.length}</span>
-          <span>Custom Actions: {customActions.length}</span>
-          <span>Total: {actions.length}</span>
+          <span>{m.settings_actions_statsSystem({ count: systemActions.length })}</span>
+          <span>{m.settings_actions_statsCustom({ count: customActions.length })}</span>
+          <span>{m.settings_actions_statsTotal({ count: actions.length })}</span>
         </div>
       </div>
 

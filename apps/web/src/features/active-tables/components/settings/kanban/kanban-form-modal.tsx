@@ -21,6 +21,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { generateUUIDv7 } from '@workspace/beqeek-shared';
 import { MultiSelectField } from '../multi-select-field';
 import type { KanbanConfig } from './kanban-settings-section';
+// @ts-ignore - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 
 export interface KanbanFormModalProps {
   /** Whether modal is open */
@@ -83,15 +85,15 @@ export function KanbanFormModal({
     const newErrors: { screenName?: string; statusField?: string; headlineField?: string } = {};
 
     if (!screenName.trim()) {
-      newErrors.screenName = 'Screen name is required';
+      newErrors.screenName = m.settings_kanbanModal_errorScreenNameRequired();
     }
 
     if (!statusField) {
-      newErrors.statusField = 'Status field is required';
+      newErrors.statusField = m.settings_kanbanModal_errorStatusFieldRequired();
     }
 
     if (!headlineField) {
-      newErrors.headlineField = 'Headline field is required';
+      newErrors.headlineField = m.settings_kanbanModal_errorHeadlineFieldRequired();
     }
 
     setErrors(newErrors);
@@ -126,24 +128,23 @@ export function KanbanFormModal({
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>{editingConfig ? 'Edit Kanban Screen' : 'Add Kanban Screen'}</DialogTitle>
-            <DialogDescription>
-              Configure a Kanban board view for visualizing your workflow. Records will be organized into columns based
-              on the status field.
-            </DialogDescription>
+            <DialogTitle>
+              {editingConfig ? m.settings_kanbanModal_titleEdit() : m.settings_kanbanModal_titleAdd()}
+            </DialogTitle>
+            <DialogDescription>{m.settings_kanbanModal_description()}</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
             {/* Screen Name */}
             <div className="space-y-2">
               <Label htmlFor="screen-name">
-                Screen Name <span className="text-destructive">*</span>
+                {m.settings_kanbanModal_screenName()} <span className="text-destructive">{m.common_required()}</span>
               </Label>
               <Input
                 id="screen-name"
                 value={screenName}
                 onChange={(e) => setScreenName(e.target.value)}
-                placeholder="e.g., Task Pipeline, Sales Workflow"
+                placeholder={m.settings_kanbanModal_screenNamePlaceholder()}
                 aria-invalid={!!errors.screenName}
                 aria-describedby={errors.screenName ? 'screen-name-error' : undefined}
               />
@@ -156,12 +157,12 @@ export function KanbanFormModal({
 
             {/* Screen Description */}
             <div className="space-y-2">
-              <Label htmlFor="screen-description">Description</Label>
+              <Label htmlFor="screen-description">{m.settings_kanbanModal_description_label()}</Label>
               <Textarea
                 id="screen-description"
                 value={screenDescription}
                 onChange={(e) => setScreenDescription(e.target.value)}
-                placeholder="Brief description of this Kanban view..."
+                placeholder={m.settings_kanbanModal_descriptionPlaceholder()}
                 rows={2}
               />
             </div>
@@ -169,11 +170,11 @@ export function KanbanFormModal({
             {/* Status Field */}
             <div className="space-y-2">
               <Label htmlFor="status-field">
-                Status Field <span className="text-destructive">*</span>
+                {m.settings_kanbanModal_statusField()} <span className="text-destructive">{m.common_required()}</span>
               </Label>
               <Select value={statusField} onValueChange={setStatusField}>
                 <SelectTrigger aria-invalid={!!errors.statusField}>
-                  <SelectValue placeholder="Select status field..." />
+                  <SelectValue placeholder={m.settings_kanbanModal_statusFieldPlaceholder()} />
                 </SelectTrigger>
                 <SelectContent>
                   {eligibleStatusFields.map((field) => (
@@ -188,19 +189,17 @@ export function KanbanFormModal({
                   {errors.statusField}
                 </p>
               )}
-              <p className="text-xs text-muted-foreground">
-                This field's values will become columns in the Kanban board. Only single-choice fields are allowed.
-              </p>
+              <p className="text-xs text-muted-foreground">{m.settings_kanbanModal_statusFieldHelp()}</p>
             </div>
 
             {/* Headline Field */}
             <div className="space-y-2">
               <Label htmlFor="headline-field">
-                Headline Field <span className="text-destructive">*</span>
+                {m.settings_kanbanModal_headlineField()} <span className="text-destructive">{m.common_required()}</span>
               </Label>
               <Select value={headlineField} onValueChange={setHeadlineField}>
                 <SelectTrigger aria-invalid={!!errors.headlineField}>
-                  <SelectValue placeholder="Select headline field..." />
+                  <SelectValue placeholder={m.settings_kanbanModal_headlineFieldPlaceholder()} />
                 </SelectTrigger>
                 <SelectContent>
                   {fields.map((field) => (
@@ -215,32 +214,30 @@ export function KanbanFormModal({
                   {errors.headlineField}
                 </p>
               )}
-              <p className="text-xs text-muted-foreground">
-                This field will be prominently displayed as the card title in the Kanban board
-              </p>
+              <p className="text-xs text-muted-foreground">{m.settings_kanbanModal_headlineFieldHelp()}</p>
             </div>
 
             {/* Display Fields */}
             <div className="space-y-2">
-              <Label htmlFor="display-fields">Display Fields</Label>
+              <Label htmlFor="display-fields">{m.settings_kanbanModal_displayFields()}</Label>
               <MultiSelectField
                 id="display-fields"
                 options={fieldOptions}
                 value={displayFields}
                 onChange={setDisplayFields}
-                placeholder="Select fields to display on cards..."
+                placeholder={m.settings_kanbanModal_displayFieldsPlaceholder()}
               />
-              <p className="text-xs text-muted-foreground">
-                Additional fields to show on each Kanban card for quick reference
-              </p>
+              <p className="text-xs text-muted-foreground">{m.settings_kanbanModal_displayFieldsHelp()}</p>
             </div>
           </div>
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={handleCancel}>
-              Cancel
+              {m.common_cancel()}
             </Button>
-            <Button type="submit">{editingConfig ? 'Update Screen' : 'Add Screen'}</Button>
+            <Button type="submit">
+              {editingConfig ? m.settings_kanbanModal_submitUpdate() : m.settings_kanbanModal_submitAdd()}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>
