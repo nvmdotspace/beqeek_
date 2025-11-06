@@ -2,6 +2,7 @@
  * Fields Settings Section
  *
  * Manages table field configuration with support for 26+ field types.
+ * Includes drag and drop functionality for reordering fields.
  */
 
 import { useState } from 'react';
@@ -9,6 +10,7 @@ import { Plus, Edit2, Trash2, GripVertical } from 'lucide-react';
 import { Button } from '@workspace/ui/components/button';
 import { Badge } from '@workspace/ui/components/badge';
 import { ScrollArea } from '@workspace/ui/components/scroll-area';
+import { toast } from '@workspace/ui/components/sonner';
 import type { FieldConfig } from '@workspace/active-tables-core';
 import {
   isTextFieldType,
@@ -45,7 +47,12 @@ export interface FieldsSettingsSectionProps {
 export function FieldsSettingsSection({ fields, onChange }: FieldsSettingsSectionProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
-  const [availableTables, setAvailableTables] = useState<Array<{ id: string; name: string }>>([]);
+  const availableTables: Array<{ id: string; name: string }> = []; // TODO: Load from API when reference fields are implemented
+
+  // Drag and drop state
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [renderKey, setRenderKey] = useState(0); // Force re-render when needed
 
   const handleAddField = () => {
     setEditingIndex(null);
@@ -58,9 +65,16 @@ export function FieldsSettingsSection({ fields, onChange }: FieldsSettingsSectio
   };
 
   const handleDeleteField = (index: number) => {
-    if (confirm('Are you sure you want to delete this field? This action cannot be undone.')) {
+    const fieldToDelete = fields[index];
+    if (!fieldToDelete) return;
+
+    if (confirm(`Are you sure you want to delete the field "${fieldToDelete.label}"? This action cannot be undone.`)) {
       const newFields = fields.filter((_, i) => i !== index);
       onChange(newFields);
+
+      toast.success('Field deleted', {
+        description: `"${fieldToDelete.label}" has been removed`,
+      });
     }
   };
 
@@ -75,11 +89,109 @@ export function FieldsSettingsSection({ fields, onChange }: FieldsSettingsSectio
       const newFields = [...fields];
       newFields[editingIndex] = field;
       onChange(newFields);
+
+      toast.success('Field updated', {
+        description: `"${field.label}" has been updated`,
+      });
     } else {
       // Add new field
       onChange([...fields, field]);
+
+      toast.success('Field added', {
+        description: `"${field.label}" has been added to the table`,
+      });
     }
     handleCloseModal();
+  };
+
+  // Drag and drop handlers
+  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, index: number) => {
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = 'move';
+
+    // Simplified visual feedback for better performance
+    if (e.currentTarget instanceof HTMLElement) {
+      e.currentTarget.style.opacity = '0.5';
+      e.currentTarget.style.cursor = 'grabbing';
+    }
+  };
+
+  const handleDragEnd = (e: React.DragEvent<HTMLDivElement>) => {
+    // Reset styles
+    if (e.currentTarget instanceof HTMLElement) {
+      e.currentTarget.style.opacity = '';
+      e.currentTarget.style.cursor = '';
+    }
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  };
+
+  const handleDragEnter = (e: React.DragEvent<HTMLDivElement>, index: number) => {
+    e.preventDefault();
+    if (draggedIndex !== null && draggedIndex !== index) {
+      setDragOverIndex(index);
+    }
+  };
+
+  const handleDragLeave = () => {
+    // Only clear on actual leave
+    setDragOverIndex(null);
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>, dropIndex: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (draggedIndex === null || draggedIndex === dropIndex) {
+      setDraggedIndex(null);
+      setDragOverIndex(null);
+      return;
+    }
+
+    // Create completely new array
+    const newFields = [...fields];
+    const [draggedField] = newFields.splice(draggedIndex, 1);
+
+    if (!draggedField) {
+      setDraggedIndex(null);
+      setDragOverIndex(null);
+      return;
+    }
+
+    // Calculate insert position
+    const insertAt = draggedIndex < dropIndex ? dropIndex - 1 : dropIndex;
+
+    // Insert at new position
+    newFields.splice(insertAt, 0, draggedField);
+
+    // Log for debugging
+    console.log('Drag reorder:', {
+      from: draggedIndex,
+      to: dropIndex,
+      actualInsert: insertAt,
+      fieldName: draggedField.name,
+      newOrder: newFields.map((f) => f.name),
+    });
+
+    // Force re-render by updating key
+    setRenderKey((prev) => prev + 1);
+
+    // Pass the new array to onChange
+    onChange(newFields);
+
+    // Show feedback
+    toast.success('Field reordered', {
+      description: `"${draggedField.label}" moved to position ${insertAt + 1}`,
+    });
+
+    // Clear drag state
+    setDraggedIndex(null);
+    setDragOverIndex(null);
   };
 
   /**
@@ -95,7 +207,7 @@ export function FieldsSettingsSection({ fields, onChange }: FieldsSettingsSectio
   };
 
   const existingFieldNames = fields.map((f) => f.name);
-  const editingField = editingIndex !== null ? fields[editingIndex] : null;
+  const editingField = editingIndex !== null && fields[editingIndex] ? fields[editingIndex] : null;
 
   const getFieldTypeColor = (type: string): string => {
     const fieldType = type as FieldType;
@@ -130,13 +242,24 @@ export function FieldsSettingsSection({ fields, onChange }: FieldsSettingsSectio
             <div className="divide-y">
               {fields.map((field, index) => (
                 <div
-                  key={field.name || index}
-                  className="flex items-center gap-4 p-4 hover:bg-muted/50 transition-colors"
+                  key={`${renderKey}-${field.name}-${index}`}
+                  className={`flex items-center gap-4 p-4 hover:bg-muted/30 relative border-l-4 ${
+                    dragOverIndex === index ? 'bg-primary/5 border-primary' : 'border-transparent'
+                  } ${draggedIndex === index ? 'opacity-50' : ''}`}
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, index)}
+                  onDragEnd={handleDragEnd}
+                  onDragEnter={(e) => handleDragEnter(e, index)}
+                  onDragLeave={handleDragLeave}
+                  onDragOver={handleDragOver}
+                  onDrop={(e) => handleDrop(e, index)}
                 >
                   {/* Drag Handle */}
                   <button
-                    className="cursor-grab text-muted-foreground hover:text-foreground"
-                    aria-label="Drag to reorder"
+                    className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground p-1.5 rounded-md hover:bg-muted/40 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1"
+                    aria-label={`Drag to reorder ${field.label}`}
+                    tabIndex={0}
+                    type="button"
                   >
                     <GripVertical className="h-5 w-5" />
                   </button>
@@ -169,17 +292,16 @@ export function FieldsSettingsSection({ fields, onChange }: FieldsSettingsSectio
                     {field.options && field.options.length > 0 && (
                       <div className="flex flex-wrap gap-1 mt-2">
                         {field.options.slice(0, 5).map((option: any, i: number) => (
-                          <Badge
+                          <span
                             key={i}
-                            variant="outline"
-                            className="text-xs"
+                            className="inline-block px-2 py-0.5 text-xs font-medium rounded-full"
                             style={{
-                              backgroundColor: option.background_color,
-                              color: option.text_color,
+                              backgroundColor: option.background_color || '#f3f4f6',
+                              color: option.text_color || '#1f2937',
                             }}
                           >
                             {option.text}
-                          </Badge>
+                          </span>
                         ))}
                         {field.options.length > 5 && (
                           <Badge variant="outline" className="text-xs">
