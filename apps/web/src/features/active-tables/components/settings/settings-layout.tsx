@@ -73,11 +73,14 @@ export interface SettingsSectionProps {
 
   /** Additional actions for the section */
   actions?: ReactNode;
+
+  /** Additional CSS classes for the card */
+  className?: string;
 }
 
-export function SettingsSection({ title, description, children, actions }: SettingsSectionProps) {
+export function SettingsSection({ title, description, children, actions, className }: SettingsSectionProps) {
   return (
-    <Card>
+    <Card className={className}>
       <div className="p-6">
         <div className="mb-4 flex items-start justify-between">
           <div className="space-y-0.5">

@@ -45,6 +45,20 @@ import { UnsavedChangesDialog } from '../components/settings/unsaved-changes-dia
 // Section components
 import { GeneralSettingsSection } from '../components/settings/general/general-settings-section';
 import { FieldsSettingsSection } from '../components/settings/fields/fields-settings-section';
+import { ActionsSettingsSection, type Action } from '../components/settings/actions/actions-settings-section';
+import {
+  ListViewSettingsSection,
+  type RecordListConfig,
+} from '../components/settings/views/list-view-settings-section';
+import {
+  DetailViewSettingsSection,
+  type RecordDetailConfig,
+} from '../components/settings/views/detail-view-settings-section';
+import { QuickFiltersSection, type QuickFilter } from '../components/settings/filters/quick-filters-section';
+import { KanbanSettingsSection } from '../components/settings/kanban/kanban-settings-section';
+import { GanttSettingsSection, type GanttConfig } from '../components/settings/gantt/gantt-settings-section';
+import { PermissionsSettingsSection } from '../components/settings/permissions/permissions-settings-section';
+import { DangerZoneSection } from '../components/settings/danger-zone/danger-zone-section';
 
 // Type-safe route API
 const route = getRouteApi(ROUTES.ACTIVE_TABLES.TABLE_SETTINGS);
@@ -238,110 +252,87 @@ export const ActiveTableSettingsPageV2 = () => {
 
               {/* Actions Settings */}
               <SettingsTabContent value="actions">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Actions Configuration</CardTitle>
-                    <CardDescription>Manage default and custom actions</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground">
-                      Actions settings section will be implemented in Phase 3
-                    </p>
-                  </CardContent>
-                </Card>
+                <ActionsSettingsSection
+                  actions={(localConfig.actions as Action[]) || []}
+                  onChange={(newActions) => handleConfigChange({ actions: newActions })}
+                />
               </SettingsTabContent>
 
               {/* List View Settings */}
               <SettingsTabContent value="list-view">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>List View Configuration</CardTitle>
-                    <CardDescription>Configure how records are displayed in list view</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground">List view settings will be implemented in Phase 3</p>
-                  </CardContent>
-                </Card>
+                <ListViewSettingsSection
+                  config={
+                    (localConfig.recordListConfig as RecordListConfig) || { layout: 'generic-table', displayFields: [] }
+                  }
+                  fields={fields.map((f) => ({ name: f.name, label: f.label, type: f.type }))}
+                  onChange={(newConfig) => handleConfigChange({ recordListConfig: newConfig as any })}
+                />
               </SettingsTabContent>
 
               {/* Quick Filters */}
               <SettingsTabContent value="quick-filters">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Quick Filters</CardTitle>
-                    <CardDescription>Create quick filters for common queries</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground">Quick filters will be implemented in Phase 4</p>
-                  </CardContent>
-                </Card>
+                <QuickFiltersSection
+                  quickFilters={(localConfig.quickFilters as QuickFilter[]) || []}
+                  fields={fields.map((f) => ({ name: f.name, label: f.label, type: f.type }))}
+                  onChange={(newFilters) => handleConfigChange({ quickFilters: newFilters as any })}
+                />
               </SettingsTabContent>
 
               {/* Detail View Settings */}
               <SettingsTabContent value="detail-view">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Detail View Configuration</CardTitle>
-                    <CardDescription>Configure how record details are displayed</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground">Detail view settings will be implemented in Phase 3</p>
-                  </CardContent>
-                </Card>
+                <DetailViewSettingsSection
+                  config={
+                    (localConfig.recordDetailConfig as RecordDetailConfig) || {
+                      layout: 'head-detail',
+                      commentsPosition: 'right-panel',
+                      titleField: '',
+                      subLineFields: [],
+                      tailFields: [],
+                    }
+                  }
+                  fields={fields.map((f) => ({ name: f.name, label: f.label, type: f.type }))}
+                  onChange={(newConfig) => handleConfigChange({ recordDetailConfig: newConfig as any })}
+                />
               </SettingsTabContent>
 
               {/* Kanban Settings */}
               <SettingsTabContent value="kanban">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Kanban Configuration</CardTitle>
-                    <CardDescription>Set up kanban boards for this table</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground">Kanban settings will be implemented in Phase 4</p>
-                  </CardContent>
-                </Card>
+                <KanbanSettingsSection
+                  kanbanConfigs={localConfig.kanbanConfigs || []}
+                  fields={fields.map((f) => ({ name: f.name, label: f.label, type: f.type }))}
+                  onChange={(newConfigs) => handleConfigChange({ kanbanConfigs: newConfigs })}
+                />
               </SettingsTabContent>
 
               {/* Gantt Settings */}
               <SettingsTabContent value="gantt">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Gantt Chart Configuration</CardTitle>
-                    <CardDescription>Set up gantt charts for project planning</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground">Gantt settings will be implemented in Phase 4</p>
-                  </CardContent>
-                </Card>
+                <GanttSettingsSection
+                  ganttConfigs={(localConfig.ganttCharts as GanttConfig[]) || []}
+                  fields={fields.map((f) => ({ name: f.name, label: f.label, type: f.type }))}
+                  onChange={(newConfigs) => handleConfigChange({ ganttCharts: newConfigs as any })}
+                />
               </SettingsTabContent>
 
               {/* Permissions */}
               <SettingsTabContent value="permissions">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Permissions Configuration</CardTitle>
-                    <CardDescription>Manage team and role-based permissions</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground">Permissions settings will be implemented in Phase 5</p>
-                  </CardContent>
-                </Card>
+                <PermissionsSettingsSection
+                  permissionsConfig={localConfig.permissionsConfig || []}
+                  actions={(localConfig.actions as Action[]) || []}
+                  workspaceId={workspaceId}
+                  onChange={(newPermissions) => handleConfigChange({ permissionsConfig: newPermissions })}
+                />
               </SettingsTabContent>
 
               {/* Danger Zone */}
               <SettingsTabContent value="danger-zone">
-                <Card className="border-destructive">
-                  <CardHeader>
-                    <CardTitle className="text-destructive">Danger Zone</CardTitle>
-                    <CardDescription>Irreversible and dangerous actions</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground">
-                      Danger zone (table deletion) will be implemented in Phase 5
-                    </p>
-                  </CardContent>
-                </Card>
+                <DangerZoneSection
+                  tableName={localConfig.title || table.name}
+                  onDelete={() => {
+                    // TODO: Implement table deletion API call
+                    console.log('Delete table:', tableId);
+                  }}
+                  isDeleting={false}
+                />
               </SettingsTabContent>
             </SettingsTabs>
           }

@@ -45,10 +45,10 @@ export function RecordDetailView({
   const config = tableConfig.recordDetailConfig;
 
   // Get field configurations
-  const titleFieldName = config.titleField || config.headTitleField;
+  const titleFieldName = config.titleField;
   const titleField = tableConfig.fields.find((f) => f.name === titleFieldName);
 
-  const subLineFieldNames = config.subLineFields || config.headSubLineFields || [];
+  const subLineFieldNames = config.subLineFields || [];
   const subLineFields = subLineFieldNames
     .map((name) => tableConfig.fields.find((f) => f.name === name))
     .filter((f): f is FieldConfig => f !== undefined);
@@ -115,7 +115,7 @@ function HeadDetailLayout({
   config: RecordDetailConfig;
   fields: FieldConfig[];
 }) {
-  const tailFieldNames = config.tailFields || config.rowTailFields || [];
+  const tailFieldNames = config.tailFields || [];
   const tailFields = tailFieldNames
     .map((name) => fields.find((f) => f.name === name))
     .filter((f): f is FieldConfig => f !== undefined);
