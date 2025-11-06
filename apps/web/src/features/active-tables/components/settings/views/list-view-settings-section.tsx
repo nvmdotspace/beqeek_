@@ -13,6 +13,8 @@ import { Badge } from '@workspace/ui/components/badge';
 import { RECORD_LIST_LAYOUT_GENERIC_TABLE, RECORD_LIST_LAYOUT_HEAD_COLUMN } from '@workspace/beqeek-shared';
 import { SettingsSection } from '../settings-layout';
 import { MultiSelectField } from '../multi-select-field';
+// @ts-ignore - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 
 export interface RecordListConfig {
   layout: 'generic-table' | 'head-column';
@@ -85,24 +87,26 @@ export function ListViewSettingsSection({ config, fields, onChange }: ListViewSe
   const fieldOptions = fields.map((f) => ({ value: f.name, label: f.label }));
 
   return (
-    <SettingsSection title="List View Configuration" description="Configure how records are displayed in the list view">
+    <SettingsSection title={m.settings_listView_title()} description={m.settings_listView_description()}>
       <div className="space-y-6">
         {/* Layout Selector */}
         <div className="space-y-2">
-          <Label>Layout Type</Label>
+          <Label>{m.settings_listView_layoutType()}</Label>
           <Select value={layout} onValueChange={(value) => handleLayoutChange(value as RecordListConfig['layout'])}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value={RECORD_LIST_LAYOUT_GENERIC_TABLE}>Generic Table</SelectItem>
-              <SelectItem value={RECORD_LIST_LAYOUT_HEAD_COLUMN}>Head Column (Card Style)</SelectItem>
+              <SelectItem value={RECORD_LIST_LAYOUT_GENERIC_TABLE}>
+                {m.settings_listView_layoutGenericTable()}
+              </SelectItem>
+              <SelectItem value={RECORD_LIST_LAYOUT_HEAD_COLUMN}>{m.settings_listView_layoutHeadColumn()}</SelectItem>
             </SelectContent>
           </Select>
           <p className="text-xs text-muted-foreground">
             {layout === RECORD_LIST_LAYOUT_GENERIC_TABLE
-              ? 'Standard table view with columns for each field'
-              : 'Compact card-style view suitable for mobile or tight spaces'}
+              ? m.settings_listView_layoutGenericTableHelp()
+              : m.settings_listView_layoutHeadColumnHelp()}
           </p>
         </div>
 
@@ -110,12 +114,14 @@ export function ListViewSettingsSection({ config, fields, onChange }: ListViewSe
         {layout === RECORD_LIST_LAYOUT_GENERIC_TABLE && (
           <div className="space-y-4 rounded-lg border p-4 bg-muted/30">
             <div className="flex items-center gap-2">
-              <Badge>Generic Table</Badge>
-              <span className="text-sm text-muted-foreground">Each record is a row, each field is a column</span>
+              <Badge>{m.settings_listView_layoutGenericTable()}</Badge>
+              <span className="text-sm text-muted-foreground">
+                {m.settings_listView_genericTableBadgeDescription()}
+              </span>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="display-fields">Display Fields</Label>
+              <Label htmlFor="display-fields">{m.settings_listView_displayFields()}</Label>
               <MultiSelectField
                 id="display-fields"
                 options={fieldOptions}
@@ -124,11 +130,9 @@ export function ListViewSettingsSection({ config, fields, onChange }: ListViewSe
                   setDisplayFields(values);
                   handleChange({ displayFields: values });
                 }}
-                placeholder="Select fields to display..."
+                placeholder={m.settings_listView_displayFieldsPlaceholder()}
               />
-              <p className="text-xs text-muted-foreground">
-                Selected fields will appear as columns in the list view (order matters)
-              </p>
+              <p className="text-xs text-muted-foreground">{m.settings_listView_displayFieldsHelp()}</p>
             </div>
           </div>
         )}
@@ -137,14 +141,14 @@ export function ListViewSettingsSection({ config, fields, onChange }: ListViewSe
         {layout === RECORD_LIST_LAYOUT_HEAD_COLUMN && (
           <div className="space-y-4 rounded-lg border p-4 bg-muted/30">
             <div className="flex items-center gap-2">
-              <Badge>Head Column</Badge>
-              <span className="text-sm text-muted-foreground">Compact card-style view</span>
+              <Badge>{m.settings_listView_layoutHeadColumn()}</Badge>
+              <span className="text-sm text-muted-foreground">{m.settings_listView_headColumnBadgeDescription()}</span>
             </div>
 
             {/* Title Field */}
             <div className="space-y-2">
               <Label htmlFor="title-field">
-                Title Field <span className="text-destructive">*</span>
+                {m.settings_listView_titleField()} <span className="text-destructive">{m.common_required()}</span>
               </Label>
               <Select
                 value={titleField}
@@ -154,7 +158,7 @@ export function ListViewSettingsSection({ config, fields, onChange }: ListViewSe
                 }}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select title field..." />
+                  <SelectValue placeholder={m.settings_listView_titleFieldPlaceholder()} />
                 </SelectTrigger>
                 <SelectContent>
                   {fields.map((field) => (
@@ -164,12 +168,12 @@ export function ListViewSettingsSection({ config, fields, onChange }: ListViewSe
                   ))}
                 </SelectContent>
               </Select>
-              <p className="text-xs text-muted-foreground">Main field displayed prominently (bold, large text)</p>
+              <p className="text-xs text-muted-foreground">{m.settings_listView_titleFieldHelp()}</p>
             </div>
 
             {/* Sub Line Fields */}
             <div className="space-y-2">
-              <Label htmlFor="subline-fields">Sub-line Fields</Label>
+              <Label htmlFor="subline-fields">{m.settings_listView_subLineFields()}</Label>
               <MultiSelectField
                 id="subline-fields"
                 options={fieldOptions}
@@ -178,14 +182,14 @@ export function ListViewSettingsSection({ config, fields, onChange }: ListViewSe
                   setSubLineFields(values);
                   handleChange({ subLineFields: values });
                 }}
-                placeholder="Select sub-line fields..."
+                placeholder={m.settings_listView_subLineFieldsPlaceholder()}
               />
-              <p className="text-xs text-muted-foreground">Fields displayed below the title in smaller text</p>
+              <p className="text-xs text-muted-foreground">{m.settings_listView_subLineFieldsHelp()}</p>
             </div>
 
             {/* Tail Fields */}
             <div className="space-y-2">
-              <Label htmlFor="tail-fields">Tail Fields</Label>
+              <Label htmlFor="tail-fields">{m.settings_listView_tailFields()}</Label>
               <MultiSelectField
                 id="tail-fields"
                 options={fieldOptions}
@@ -194,22 +198,17 @@ export function ListViewSettingsSection({ config, fields, onChange }: ListViewSe
                   setTailFields(values);
                   handleChange({ tailFields: values });
                 }}
-                placeholder="Select tail fields..."
+                placeholder={m.settings_listView_tailFieldsPlaceholder()}
               />
-              <p className="text-xs text-muted-foreground">
-                Fields displayed at the end of each row (status, date, etc.)
-              </p>
+              <p className="text-xs text-muted-foreground">{m.settings_listView_tailFieldsHelp()}</p>
             </div>
           </div>
         )}
 
         {/* Preview Info */}
         <div className="rounded-lg border bg-blue-50 dark:bg-blue-950/30 p-4">
-          <p className="text-sm font-medium text-blue-900 dark:text-blue-100">Preview Information</p>
-          <p className="mt-1 text-xs text-blue-700 dark:text-blue-300">
-            Changes will be applied immediately when you save the settings. The list view will reflect your
-            configuration.
-          </p>
+          <p className="text-sm font-medium text-blue-900 dark:text-blue-100">{m.settings_listView_previewTitle()}</p>
+          <p className="mt-1 text-xs text-blue-700 dark:text-blue-300">{m.settings_listView_previewDescription()}</p>
         </div>
       </div>
     </SettingsSection>

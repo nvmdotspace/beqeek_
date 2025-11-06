@@ -20,63 +20,65 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@workspace/ui/components/tabs';
 import { ScrollArea, ScrollBar } from '@workspace/ui/components/scroll-area';
 import type { SettingsTabId } from '../../types/settings';
+// @ts-ignore - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 
 /**
- * Tab configuration
+ * Get tab configuration with translations
  */
-const TAB_CONFIG: Array<{
+const getTabConfig = (): Array<{
   id: SettingsTabId;
   label: string;
   icon: ReactNode;
-}> = [
+}> => [
   {
     id: 'general',
-    label: 'General',
+    label: m.settings_tabs_general(),
     icon: <Settings className="h-4 w-4" />,
   },
   {
     id: 'fields',
-    label: 'Fields',
+    label: m.settings_tabs_fields(),
     icon: <TableProperties className="h-4 w-4" />,
   },
   {
     id: 'actions',
-    label: 'Actions',
+    label: m.settings_tabs_actions(),
     icon: <Zap className="h-4 w-4" />,
   },
   {
     id: 'list-view',
-    label: 'List View',
+    label: m.settings_tabs_listView(),
     icon: <LayoutList className="h-4 w-4" />,
   },
   {
     id: 'quick-filters',
-    label: 'Filters',
+    label: m.settings_tabs_quickFilters(),
     icon: <Filter className="h-4 w-4" />,
   },
   {
     id: 'detail-view',
-    label: 'Detail View',
+    label: m.settings_tabs_detailView(),
     icon: <FileText className="h-4 w-4" />,
   },
   {
     id: 'kanban',
-    label: 'Kanban',
+    label: m.settings_tabs_kanban(),
     icon: <Columns className="h-4 w-4" />,
   },
   {
     id: 'gantt',
-    label: 'Gantt',
+    label: m.settings_tabs_gantt(),
     icon: <GanttChart className="h-4 w-4" />,
   },
   {
     id: 'permissions',
-    label: 'Permissions',
+    label: m.settings_tabs_permissions(),
     icon: <Shield className="h-4 w-4" />,
   },
   {
     id: 'danger-zone',
-    label: 'Danger Zone',
+    label: m.settings_tabs_dangerZone(),
     icon: <AlertTriangle className="h-4 w-4" />,
   },
 ];
@@ -99,6 +101,8 @@ export interface SettingsTabsProps {
  * and vertical scrollable list (mobile).
  */
 export function SettingsTabs({ activeTab, onTabChange, children }: SettingsTabsProps) {
+  const tabConfig = getTabConfig();
+
   return (
     <Tabs
       value={activeTab}
@@ -109,7 +113,7 @@ export function SettingsTabs({ activeTab, onTabChange, children }: SettingsTabsP
       <div className="shrink-0 border-b">
         <ScrollArea className="w-full">
           <TabsList className="inline-flex h-auto justify-start gap-0 bg-transparent p-0 lg:flex-wrap">
-            {TAB_CONFIG.map((tab) => (
+            {tabConfig.map((tab) => (
               <TabsTrigger
                 key={tab.id}
                 value={tab.id}

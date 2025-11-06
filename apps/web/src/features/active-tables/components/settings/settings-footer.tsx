@@ -6,6 +6,8 @@
 
 import { Save, X, RotateCcw, Loader2 } from 'lucide-react';
 import { Button } from '@workspace/ui/components/button';
+// @ts-ignore - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 
 export interface SettingsFooterProps {
   /** Whether there are unsaved changes */
@@ -34,9 +36,9 @@ export function SettingsFooter({ isDirty, isSaving, onSave, onCancel, disabled }
   return (
     <div className="flex items-center justify-between">
       <div className="text-sm text-muted-foreground">
-        {isDirty && !isSaving && <span>You have unsaved changes</span>}
-        {isSaving && <span>Saving changes...</span>}
-        {!isDirty && !isSaving && <span>All changes saved</span>}
+        {isDirty && !isSaving && <span>{m.settings_header_unsaved()}</span>}
+        {isSaving && <span>{m.settings_footer_saving()}</span>}
+        {!isDirty && !isSaving && <span>{m.settings_save_success()}</span>}
       </div>
 
       <div className="flex gap-2">
@@ -45,10 +47,10 @@ export function SettingsFooter({ isDirty, isSaving, onSave, onCancel, disabled }
           size="sm"
           onClick={onCancel}
           disabled={disabled || isSaving}
-          aria-label="Cancel changes"
+          aria-label={m.settings_footer_cancel()}
         >
           <X className="mr-2 h-4 w-4" />
-          Cancel
+          {m.settings_footer_cancel()}
         </Button>
 
         <Button
@@ -56,17 +58,17 @@ export function SettingsFooter({ isDirty, isSaving, onSave, onCancel, disabled }
           size="sm"
           onClick={onSave}
           disabled={disabled || !isDirty || isSaving}
-          aria-label="Save changes"
+          aria-label={m.settings_footer_save()}
         >
           {isSaving ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Saving...
+              {m.settings_footer_saving()}
             </>
           ) : (
             <>
               <Save className="mr-2 h-4 w-4" />
-              Save Changes
+              {m.settings_footer_save()}
             </>
           )}
         </Button>

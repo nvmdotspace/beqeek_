@@ -21,6 +21,8 @@ import {
   FIELD_TYPE_URL,
   type FieldType,
 } from '@workspace/beqeek-shared';
+// @ts-ignore - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 import { SettingsSection } from '../settings-layout';
 import { MultiSelectField } from '../multi-select-field';
 
@@ -129,49 +131,47 @@ export function GeneralSettingsSection({ tableId, config, onChange, fields }: Ge
   };
 
   return (
-    <SettingsSection title="General Configuration" description="Basic table information and settings">
+    <SettingsSection title={m.settings_general_title()} description={m.settings_general_description()}>
       <div className="space-y-5">
         {/* Table ID (Read-only) */}
         <div className="space-y-2">
-          <Label htmlFor="table-id">Table ID</Label>
+          <Label htmlFor="table-id">{m.settings_general_tableId()}</Label>
           <div className="flex gap-2">
             <Input
               id="table-id"
               value={tableId}
               readOnly
               className="flex-1 bg-muted font-mono text-sm"
-              aria-label="Table ID (read-only)"
+              aria-label={m.settings_general_tableId()}
             />
             <Button
               variant="outline"
               size="icon"
               onClick={handleCopyId}
               className="shrink-0"
-              aria-label="Copy table ID"
+              aria-label={m.settings_general_copyTableId()}
             >
               {copiedId ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
             </Button>
           </div>
-          <p className="text-xs text-muted-foreground">
-            Unique identifier for this table. Use this when referencing the table in APIs.
-          </p>
+          <p className="text-xs text-muted-foreground">{m.settings_general_tableIdHelp()}</p>
         </div>
 
         {/* Table Title */}
         <div className="space-y-2">
           <Label htmlFor="table-title">
-            Table Title <span className="text-destructive">*</span>
+            {m.settings_general_tableTitle()} <span className="text-destructive">{m.common_required()}</span>
           </Label>
           <Input
             id="table-title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Enter table title"
+            placeholder={m.settings_general_tableTitlePlaceholder()}
             maxLength={100}
             required
             aria-required="true"
           />
-          <p className="text-xs text-muted-foreground">Maximum 100 characters</p>
+          <p className="text-xs text-muted-foreground">{m.settings_general_tableTitleHelp()}</p>
         </div>
 
         {/* Note: Description removed as it's not part of TableConfig type */}
@@ -179,7 +179,7 @@ export function GeneralSettingsSection({ tableId, config, onChange, fields }: Ge
         {/* Table Limit */}
         <div className="space-y-2">
           <Label htmlFor="table-limit">
-            Record Limit (Maximum 1000) <span className="text-destructive">*</span>
+            {m.settings_general_tableLimit()} <span className="text-destructive">{m.common_required()}</span>
           </Label>
           <Input
             id="table-limit"
@@ -187,41 +187,39 @@ export function GeneralSettingsSection({ tableId, config, onChange, fields }: Ge
             value={tableLimit}
             onChange={(e) => {
               const value = parseInt(e.target.value) || 1;
-              setTableLimit(Math.min(100000, Math.max(1, value)));
+              setTableLimit(Math.min(1000, Math.max(1, value)));
             }}
             min={1}
-            max={100000}
+            max={1000}
             required
             aria-required="true"
           />
-          <p className="text-xs text-muted-foreground">Maximum number of records allowed in this table (1-1000)</p>
+          <p className="text-xs text-muted-foreground">{m.settings_general_tableLimitHelp()}</p>
         </div>
 
         {/* Default Sort Direction */}
         <div className="space-y-2">
           <Label htmlFor="default-sort">
-            Default Sort Direction <span className="text-destructive">*</span>
+            {m.settings_general_defaultSort()} <span className="text-destructive">{m.common_required()}</span>
           </Label>
           <Select value={defaultSort} onValueChange={(value) => setDefaultSort(value as 'asc' | 'desc')}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="asc">oldest</SelectItem>
-              <SelectItem value="desc">newest</SelectItem>
+              <SelectItem value="asc">{m.settings_general_sortAsc()}</SelectItem>
+              <SelectItem value="desc">{m.settings_general_sortDesc()}</SelectItem>
             </SelectContent>
           </Select>
-          <p className="text-xs text-muted-foreground">Default sort order when displaying records in list view</p>
+          <p className="text-xs text-muted-foreground">{m.settings_general_defaultSortHelp()}</p>
         </div>
 
         {/* Encryption Key Section - Always Visible */}
         <div className="space-y-3 rounded-lg border p-4">
           <div className="space-y-0.5">
-            <Label htmlFor="encryption-key">Encryption Key</Label>
+            <Label htmlFor="encryption-key">{m.settings_general_encryptionKey()}</Label>
             <p className="text-sm text-muted-foreground">
-              {config.e2eeEncryption
-                ? 'End-to-End Encryption (E2EE) - Key stored locally on your device'
-                : 'Server-Side Encryption - Key managed by server'}
+              {config.e2eeEncryption ? m.settings_general_encryptionE2EE() : m.settings_general_encryptionServer()}
             </p>
           </div>
 
@@ -230,18 +228,20 @@ export function GeneralSettingsSection({ tableId, config, onChange, fields }: Ge
             <Alert variant="destructive" className="border-red-600 bg-red-50 dark:bg-red-950">
               <AlertTriangle className="h-4 w-4 text-red-600" />
               <AlertDescription className="text-red-800 dark:text-red-200">
-                <strong className="text-red-900 dark:text-red-100">Critical Security Warning:</strong> You are using
-                End-to-End Encryption (E2EE). The encryption key is stored ONLY on your device. If you lose this key,
-                your data will be permanently lost and cannot be recovered. Please backup your encryption key securely.
+                <strong className="text-red-900 dark:text-red-100">
+                  {m.settings_general_encryptionWarningTitle()}
+                </strong>{' '}
+                {m.settings_general_encryptionWarningE2EE()}
               </AlertDescription>
             </Alert>
           ) : (
             <Alert className="border-yellow-600 bg-yellow-50 dark:bg-yellow-950">
               <Info className="h-4 w-4 text-yellow-600" />
               <AlertDescription className="text-yellow-800 dark:text-yellow-200">
-                <strong className="text-yellow-900 dark:text-yellow-100">Server-Side Encryption:</strong> The encryption
-                key is managed by the server. Data is encrypted at rest and in transit, but the server administrator has
-                access to decrypt your data. For maximum privacy, consider enabling E2EE mode.
+                <strong className="text-yellow-900 dark:text-yellow-100">
+                  {m.settings_general_encryptionServerTitle()}
+                </strong>{' '}
+                {m.settings_general_encryptionWarningServer()}
               </AlertDescription>
             </Alert>
           )}
@@ -257,9 +257,9 @@ export function GeneralSettingsSection({ tableId, config, onChange, fields }: Ge
                   onChange={handleKeyChange}
                   disabled={!isEditingKey}
                   className={`pr-10 font-mono text-sm ${!isEditingKey ? 'bg-muted' : ''}`}
-                  placeholder="No encryption key configured"
+                  placeholder={m.settings_general_encryptionPlaceholder()}
                   maxLength={32}
-                  aria-label="Encryption key input"
+                  aria-label={m.settings_general_encryptionKey()}
                 />
                 <Button
                   variant="ghost"
@@ -267,7 +267,7 @@ export function GeneralSettingsSection({ tableId, config, onChange, fields }: Ge
                   onClick={() => setShowKey(!showKey)}
                   className="absolute right-0 top-0 h-full"
                   disabled={!encryptionKey}
-                  aria-label={showKey ? 'Hide encryption key' : 'Show encryption key'}
+                  aria-label={showKey ? m.settings_general_encryptionHide() : m.settings_general_encryptionShow()}
                 >
                   {showKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </Button>
@@ -280,7 +280,7 @@ export function GeneralSettingsSection({ tableId, config, onChange, fields }: Ge
                   size="icon"
                   onClick={handleCancelEdit}
                   className="h-10 w-10 shrink-0"
-                  aria-label="Cancel editing"
+                  aria-label={m.settings_general_encryptionCancel()}
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -291,7 +291,7 @@ export function GeneralSettingsSection({ tableId, config, onChange, fields }: Ge
                     size="icon"
                     onClick={handleEditKey}
                     className="h-10 w-10 shrink-0"
-                    aria-label="Edit encryption key"
+                    aria-label={m.settings_general_encryptionEdit()}
                   >
                     <Edit2 className="h-4 w-4" />
                   </Button>
@@ -301,7 +301,7 @@ export function GeneralSettingsSection({ tableId, config, onChange, fields }: Ge
                     onClick={handleCopyKey}
                     disabled={!encryptionKey}
                     className="h-10 w-10 shrink-0"
-                    aria-label="Copy encryption key"
+                    aria-label={m.settings_general_encryptionCopy()}
                   >
                     {copiedKey ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
                   </Button>
@@ -310,9 +310,7 @@ export function GeneralSettingsSection({ tableId, config, onChange, fields }: Ge
             </div>
 
             <p className="text-xs text-muted-foreground">
-              {isEditingKey
-                ? 'Enter a 32-character encryption key. Changes will be saved automatically when you reach 32 characters.'
-                : 'Click the edit button to modify the encryption key. The key must be exactly 32 characters long.'}
+              {isEditingKey ? m.settings_general_encryptionHelpEditing() : m.settings_general_encryptionHelpViewing()}
             </p>
           </div>
         </div>
@@ -321,18 +319,15 @@ export function GeneralSettingsSection({ tableId, config, onChange, fields }: Ge
 
         {/* Searchable Fields */}
         <div className="space-y-2">
-          <Label htmlFor="searchable-fields">Searchable Fields</Label>
+          <Label htmlFor="searchable-fields">{m.settings_general_searchableFields()}</Label>
           <MultiSelectField
             id="searchable-fields"
             options={searchableFields.map((f) => ({ value: f.name, label: f.label }))}
             value={hashedKeywordFields}
             onChange={(values) => setHashedKeywordFields(values)}
-            placeholder="Select fields to make searchable..."
+            placeholder={m.settings_general_searchableFieldsPlaceholder()}
           />
-          <p className="text-xs text-muted-foreground">
-            Selected fields will be hashed and indexed for fast searching. Only text-based fields (Short Text, Text,
-            Rich Text, Email, URL) can be made searchable.
-          </p>
+          <p className="text-xs text-muted-foreground">{m.settings_general_searchableFieldsHelp()}</p>
         </div>
       </div>
     </SettingsSection>

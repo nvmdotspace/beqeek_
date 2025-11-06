@@ -18,6 +18,8 @@ import { Button } from '@workspace/ui/components/button';
 import { ArrowLeft } from 'lucide-react';
 import { toast } from '@workspace/ui/components/sonner';
 import type { TableConfig } from '@workspace/active-tables-core';
+// @ts-ignore - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 
 import { ROUTES } from '@/shared/route-paths';
 import { useActiveTables } from '../hooks/use-active-tables';
@@ -97,8 +99,8 @@ export const ActiveTableSettingsPageV2 = () => {
   // Update table config mutation
   const updateConfig = useUpdateTableConfig(workspaceId, tableId, table || null, {
     onSuccess: () => {
-      toast.success('Settings saved', {
-        description: 'Your table configuration has been updated successfully.',
+      toast.success(m.settings_toast_success_title(), {
+        description: m.settings_toast_success_description(),
       });
       // Update original config to match saved state
       if (localConfig) {
@@ -106,8 +108,8 @@ export const ActiveTableSettingsPageV2 = () => {
       }
     },
     onError: (err) => {
-      toast.error('Save failed', {
-        description: err.message || 'Failed to save table configuration. Please try again.',
+      toast.error(m.settings_toast_error_title(), {
+        description: err.message || m.settings_toast_error_description(),
       });
     },
   });
