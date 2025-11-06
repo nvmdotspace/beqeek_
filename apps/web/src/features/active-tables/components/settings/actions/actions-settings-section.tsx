@@ -12,6 +12,7 @@ import { Button } from '@workspace/ui/components/button';
 import { Badge } from '@workspace/ui/components/badge';
 import { ScrollArea } from '@workspace/ui/components/scroll-area';
 import { initDefaultActions, type DefaultAction } from '@workspace/beqeek-shared';
+import { toast } from '@workspace/ui/components/sonner';
 import { SettingsSection } from '../settings-layout';
 import { ActionFormModal } from './action-form-modal';
 
@@ -113,8 +114,9 @@ export function ActionsSettingsSection({ actions, onChange }: ActionsSettingsSec
 
   const handleCopyActionId = (actionId: string) => {
     navigator.clipboard.writeText(actionId);
-    // In production, show a toast notification
-    console.log('Action ID copied:', actionId);
+    toast.success('Copied to clipboard', {
+      description: `Action ID: ${actionId}`,
+    });
   };
 
   const editingAction = editingIndex !== null ? (customActions[editingIndex] ?? null) : null;

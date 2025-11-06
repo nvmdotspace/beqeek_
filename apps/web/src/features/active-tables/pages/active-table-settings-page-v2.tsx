@@ -16,18 +16,7 @@ import { Skeleton } from '@workspace/ui/components/skeleton';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@workspace/ui/components/card';
 import { Button } from '@workspace/ui/components/button';
 import { ArrowLeft } from 'lucide-react';
-// Note: Using simple toast replacement until full toast implementation is added
-const useToast = () => ({
-  toast: ({ title, description, variant }: { title: string; description?: string; variant?: string }) => {
-    const message = description ? `${title}\n${description}` : title;
-    if (variant === 'destructive') {
-      alert(`Error: ${message}`);
-    } else {
-      console.log(message);
-      // In production, this would use a proper toast library
-    }
-  },
-});
+import { toast } from '@workspace/ui/components/sonner';
 import type { TableConfig } from '@workspace/active-tables-core';
 
 import { ROUTES } from '@/shared/route-paths';
@@ -76,7 +65,6 @@ const route = getRouteApi(ROUTES.ACTIVE_TABLES.TABLE_SETTINGS);
 export const ActiveTableSettingsPageV2 = () => {
   const navigate = route.useNavigate();
   const { tableId, workspaceId, locale } = route.useParams();
-  const { toast } = useToast();
 
   // Active tab state
   const [activeTab, setActiveTab] = useState<SettingsTabId>('general');
@@ -109,8 +97,7 @@ export const ActiveTableSettingsPageV2 = () => {
   // Update table config mutation
   const updateConfig = useUpdateTableConfig(workspaceId, tableId, table || null, {
     onSuccess: () => {
-      toast({
-        title: 'Settings saved',
+      toast.success('Settings saved', {
         description: 'Your table configuration has been updated successfully.',
       });
       // Update original config to match saved state
@@ -119,10 +106,8 @@ export const ActiveTableSettingsPageV2 = () => {
       }
     },
     onError: (err) => {
-      toast({
-        title: 'Save failed',
+      toast.error('Save failed', {
         description: err.message || 'Failed to save table configuration. Please try again.',
-        variant: 'destructive',
       });
     },
   });
