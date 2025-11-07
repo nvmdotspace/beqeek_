@@ -66,6 +66,7 @@
     "@lexical/utils": "^0.22.0",
     "@workspace/beqeek-shared": "workspace:*",
     "@workspace/encryption-core": "workspace:*",
+    "@workspace/ui": "workspace:*",
     "crypto-js": "^4.2.0",
     "date-fns": "^4.1.0",
     "lexical": "^0.22.0",
