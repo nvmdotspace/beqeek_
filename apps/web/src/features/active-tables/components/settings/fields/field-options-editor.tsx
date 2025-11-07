@@ -5,7 +5,7 @@
  * Allows adding, editing, reordering, and deleting options with color customization.
  */
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useRef, useEffect } from 'react';
 import { Plus, Trash2, GripVertical, Palette, RefreshCcw, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@workspace/ui/components/button';
 import { Input } from '@workspace/ui/components/input';
@@ -99,14 +99,49 @@ function isGeneratedFromText(option: FieldOption): boolean {
  * Features:
  * - Add/edit/delete options
  * - Color picker with presets
- * - Drag to reorder (UI only, no drag library)
- * - Inline editing
+ * - Drag to reorder options (native HTML5 drag-and-drop)
+ * - Inline editing with auto-sync or custom values
+ * - Visual feedback during drag operations
  * - Validation (unique values, required text)
+ *
+ * Implementation Notes:
+ * - Entire card is draggable (same as fields-settings-section.tsx pattern)
+ * - Input fields have stopPropagation on drag events to ensure keyboard input works reliably
+ * - Uses stable React keys via useRef to prevent focus loss during typing
+ * - Keys are only regenerated when options.length changes (add/delete/reorder)
  */
 export function FieldOptionsEditor({ options, onChange, error, errorMessage }: FieldOptionsEditorProps) {
   const [newOptionText, setNewOptionText] = useState('');
   const [expandedOptionIndex, setExpandedOptionIndex] = useState<number | null>(null);
   const [activeColorPickerIndex, setActiveColorPickerIndex] = useState<number | null>(null);
+
+  // Drag and drop state
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+
+  // Generate stable IDs for options using a counter
+  const nextIdRef = useRef(0);
+  const optionIdsRef = useRef<Map<number, string>>(new Map());
+
+  // Only regenerate IDs when options length changes (add/delete/reorder)
+  useEffect(() => {
+    // Clear old IDs and assign new ones based on current length
+    if (optionIdsRef.current.size !== options.length) {
+      optionIdsRef.current.clear();
+      options.forEach((_, idx) => {
+        optionIdsRef.current.set(idx, `option-${nextIdRef.current++}`);
+      });
+    }
+  }, [options.length]);
+
+  const getOptionKey = (index: number): string => {
+    if (!optionIdsRef.current.has(index)) {
+      const id = `option-${nextIdRef.current++}`;
+      optionIdsRef.current.set(index, id);
+      return id;
+    }
+    return optionIdsRef.current.get(index)!;
+  };
 
   const duplicateValues = useMemo(() => {
     const counts = new Map<string, number>();
@@ -248,6 +283,93 @@ export function FieldOptionsEditor({ options, onChange, error, errorMessage }: F
     closeColorPicker();
   };
 
+  /**
+   * Drag and drop handlers
+   */
+  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, index: number) => {
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = 'move';
+
+    // Simplified visual feedback for better performance
+    if (e.currentTarget instanceof HTMLElement) {
+      e.currentTarget.style.opacity = '0.5';
+      e.currentTarget.style.cursor = 'grabbing';
+    }
+  };
+
+  const handleDragEnd = (e: React.DragEvent<HTMLDivElement>) => {
+    // Reset styles
+    if (e.currentTarget instanceof HTMLElement) {
+      e.currentTarget.style.opacity = '';
+      e.currentTarget.style.cursor = '';
+    }
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  };
+
+  const handleDragEnter = (e: React.DragEvent<HTMLDivElement>, index: number) => {
+    e.preventDefault();
+    if (draggedIndex !== null && draggedIndex !== index) {
+      setDragOverIndex(index);
+    }
+  };
+
+  const handleDragLeave = () => {
+    // Only clear on actual leave
+    setDragOverIndex(null);
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>, dropIndex: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (draggedIndex === null || draggedIndex === dropIndex) {
+      setDraggedIndex(null);
+      setDragOverIndex(null);
+      return;
+    }
+
+    // Create completely new array
+    const newOptions = [...options];
+    const [draggedOption] = newOptions.splice(draggedIndex, 1);
+
+    if (!draggedOption) {
+      setDraggedIndex(null);
+      setDragOverIndex(null);
+      return;
+    }
+
+    const insertAt = Math.max(0, Math.min(dropIndex, newOptions.length));
+
+    // Insert at new position
+    newOptions.splice(insertAt, 0, draggedOption);
+
+    const nextPosition = newOptions.findIndex((opt) => opt.value === draggedOption.value);
+    const finalPosition = nextPosition >= 0 ? nextPosition : insertAt;
+
+    // Log for debugging
+    console.log('Option reorder:', {
+      from: draggedIndex,
+      to: dropIndex,
+      actualInsert: insertAt,
+      nextPosition: finalPosition,
+      optionValue: draggedOption.value,
+      newOrder: newOptions.map((opt) => opt.value),
+    });
+
+    // Pass the new array to onChange
+    onChange(newOptions);
+
+    // Clear drag state
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  };
+
   return (
     <div className="space-y-4">
       <div className="space-y-2">
@@ -302,24 +424,32 @@ export function FieldOptionsEditor({ options, onChange, error, errorMessage }: F
 
               return (
                 <div
-                  key={`${trimmedValue || option.text || 'option'}-${index}`}
+                  key={getOptionKey(index)}
                   className={cn(
-                    'rounded-lg border bg-card transition-all',
+                    'rounded-lg border bg-card transition-all relative border-l-4',
                     valueError ? 'border-destructive/60' : 'border-border',
                     isExpanded ? 'shadow-md' : 'shadow-sm',
+                    dragOverIndex === index ? 'bg-primary/5 border-l-primary' : 'border-l-transparent',
+                    draggedIndex === index ? 'opacity-50' : '',
                   )}
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, index)}
+                  onDragEnd={handleDragEnd}
+                  onDragEnter={(e) => handleDragEnter(e, index)}
+                  onDragLeave={handleDragLeave}
+                  onDragOver={handleDragOver}
+                  onDrop={(e) => handleDrop(e, index)}
                 >
                   {/* Compact Header - Always Visible */}
                   <div className="flex items-center gap-2 p-3">
-                    <Button
+                    <button
                       type="button"
-                      size="icon"
-                      variant="ghost"
-                      className="h-7 w-7 cursor-grab active:cursor-grabbing"
-                      aria-label="Drag to reorder"
+                      className="h-7 w-7 flex items-center justify-center cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground p-1.5 rounded-md hover:bg-muted/40 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1"
+                      aria-label={`Drag to reorder ${option.text || 'option'}`}
+                      tabIndex={0}
                     >
-                      <GripVertical className="h-4 w-4 text-muted-foreground" />
-                    </Button>
+                      <GripVertical className="h-4 w-4" />
+                    </button>
 
                     <div
                       className="flex min-w-0 flex-1 cursor-pointer items-center"
@@ -384,6 +514,8 @@ export function FieldOptionsEditor({ options, onChange, error, errorMessage }: F
                                 handleUpdateOptionText(index, value);
                               }
                             }}
+                            onDragStart={(e) => e.stopPropagation()}
+                            onDrop={(e) => e.stopPropagation()}
                             placeholder="Option text"
                             maxLength={100}
                           />
@@ -422,6 +554,8 @@ export function FieldOptionsEditor({ options, onChange, error, errorMessage }: F
                             id={`option-value-${index}`}
                             value={option.value ?? ''}
                             onChange={(e) => handleOptionValueChange(index, e.target.value)}
+                            onDragStart={(e) => e.stopPropagation()}
+                            onDrop={(e) => e.stopPropagation()}
                             placeholder="system_value"
                             className={cn(valueError && 'border-destructive focus-visible:ring-destructive')}
                           />
@@ -485,6 +619,8 @@ export function FieldOptionsEditor({ options, onChange, error, errorMessage }: F
                                 type="color"
                                 value={option.text_color || '#1F2937'}
                                 onChange={(e) => handleColorInputChange(index, 'text_color', e.target.value)}
+                                onDragStart={(e) => e.stopPropagation()}
+                                onDrop={(e) => e.stopPropagation()}
                                 className="h-9 w-20 cursor-pointer"
                               />
                             </div>
@@ -500,6 +636,8 @@ export function FieldOptionsEditor({ options, onChange, error, errorMessage }: F
                                 type="color"
                                 value={option.background_color || '#F3F4F6'}
                                 onChange={(e) => handleColorInputChange(index, 'background_color', e.target.value)}
+                                onDragStart={(e) => e.stopPropagation()}
+                                onDrop={(e) => e.stopPropagation()}
                                 className="h-9 w-20 cursor-pointer"
                               />
                             </div>
