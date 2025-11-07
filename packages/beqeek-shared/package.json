@@ -17,6 +17,10 @@
       "import": "./dist/constants/table-types.js",
       "types": "./dist/constants/table-types.d.ts"
     },
+    "./constants/layouts": {
+      "import": "./dist/constants/layouts.js",
+      "types": "./dist/constants/layouts.d.ts"
+    },
     "./validators": {
       "import": "./dist/validators/index.js",
       "types": "./dist/validators/index.d.ts"

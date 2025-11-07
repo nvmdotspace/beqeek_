@@ -21,6 +21,7 @@ import { Alert, AlertDescription, AlertTitle } from '@workspace/ui/components/al
 import { cn } from '@workspace/ui/lib/utils';
 import type { ActiveTable } from '../types';
 import { useEncryption } from '../hooks/use-encryption-stub';
+import { ErrorCard } from '@/components/error-display';
 
 const formatStatusLabel = (tableType?: string) => {
   if (!tableType) return 'standard';
@@ -46,7 +47,6 @@ export const ActiveTablesPage = () => {
   const [automationFilter, setAutomationFilter] = useState<'all' | 'automated' | 'manual'>('all');
   const [showAllStatusFilters, setShowAllStatusFilters] = useState<boolean>(false);
   const { isReady: isEncryptionReady } = useEncryption();
-  const [apiError, setApiError] = useState<string | null>(null);
 
   // Priority STATUS filters (most common, shown by default)
   const priorityStatusFilters = ['employee profile', 'department', 'work process', 'contract'];
@@ -75,14 +75,13 @@ export const ActiveTablesPage = () => {
     workspaceId: workspaceId || '',
     onSuccess: (message) => {
       console.log(message);
-      setApiError(null);
       setIsTableDialogOpen(false);
       setEditingTable(null);
       refetch();
     },
     onError: (error) => {
       console.error(error);
-      setApiError(error);
+      // Error will be shown via toast in the hook
     },
   });
 
@@ -246,14 +245,6 @@ export const ActiveTablesPage = () => {
 
   return (
     <div className="space-y-6 p-6">
-      {/* API Error Alert */}
-      {apiError && (
-        <Alert variant="destructive">
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription>{apiError}</AlertDescription>
-        </Alert>
-      )}
-
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div className="space-y-1">
@@ -509,9 +500,7 @@ export const ActiveTablesPage = () => {
       ) : null}
 
       {!isTablesLoading && error ? (
-        <div className="rounded-lg border border-destructive bg-destructive/20 p-6 text-sm text-destructive">
-          {error instanceof Error ? error.message : m.activeTables_page_errorGeneric()}
-        </div>
+        <ErrorCard error={error} onRetry={() => refetch()} showDetails={import.meta.env.DEV} />
       ) : null}
 
       {!isTablesLoading && !error && !hasAnyTables ? <ActiveTablesEmptyState onCreate={handleCreateTable} /> : null}

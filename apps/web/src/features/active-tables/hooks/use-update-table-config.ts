@@ -12,6 +12,12 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createActiveTablesApiClient } from '@/shared/api/active-tables-client';
 import type { Table, TableConfig } from '@workspace/active-tables-core';
 import type { FieldType } from '@workspace/beqeek-shared';
+import {
+  RECORD_LIST_LAYOUT_HEAD_COLUMN,
+  RECORD_LIST_LAYOUT_GENERIC_TABLE,
+  RECORD_DETAIL_LAYOUT_HEAD_DETAIL,
+  RECORD_DETAIL_LAYOUT_TWO_COLUMN,
+} from '@workspace/beqeek-shared/constants/layouts';
 
 /**
  * Request payload for updating table configuration
@@ -313,7 +319,7 @@ function validateTableConfig(config: TableConfig): void {
     const listConfig = config.recordListConfig as any;
 
     // Validate based on layout type
-    if (listConfig.layout === 'head-column') {
+    if (listConfig.layout === RECORD_LIST_LAYOUT_HEAD_COLUMN) {
       // Head column layout requires titleField
       if (!listConfig.titleField) {
         throw new Error('Record list configuration with head-column layout must have a title field');
@@ -322,7 +328,7 @@ function validateTableConfig(config: TableConfig): void {
       if (!fieldNames.has(listConfig.titleField)) {
         throw new Error(`Record list title field "${listConfig.titleField}" not found in table fields`);
       }
-    } else if (listConfig.layout === 'generic-table') {
+    } else if (listConfig.layout === RECORD_LIST_LAYOUT_GENERIC_TABLE) {
       // Generic table layout requires displayFields
       if (!listConfig.displayFields || !Array.isArray(listConfig.displayFields)) {
         throw new Error('Record list configuration with generic-table layout must have displayFields');
@@ -347,7 +353,7 @@ function validateTableConfig(config: TableConfig): void {
     }
 
     // Validate head-detail layout fields
-    if (detailConfig.layout === 'head-detail' && detailConfig.rowTailFields) {
+    if (detailConfig.layout === RECORD_DETAIL_LAYOUT_HEAD_DETAIL && detailConfig.rowTailFields) {
       for (const fieldName of detailConfig.rowTailFields) {
         if (!fieldNames.has(fieldName)) {
           throw new Error(`Record detail tail field "${fieldName}" not found in table fields`);
@@ -356,7 +362,7 @@ function validateTableConfig(config: TableConfig): void {
     }
 
     // Validate two-column layout fields
-    if (detailConfig.layout === 'two-column-detail') {
+    if (detailConfig.layout === RECORD_DETAIL_LAYOUT_TWO_COLUMN) {
       if (detailConfig.column1Fields) {
         for (const fieldName of detailConfig.column1Fields) {
           if (!fieldNames.has(fieldName)) {

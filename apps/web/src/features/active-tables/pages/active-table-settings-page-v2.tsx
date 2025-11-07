@@ -12,7 +12,6 @@
 
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { getRouteApi } from '@tanstack/react-router';
-import { Skeleton } from '@workspace/ui/components/skeleton';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@workspace/ui/components/card';
 import { Button } from '@workspace/ui/components/button';
 import { ArrowLeft } from 'lucide-react';
@@ -26,6 +25,12 @@ import { useActiveTables } from '../hooks/use-active-tables';
 import { useUpdateTableConfig } from '../hooks/use-update-table-config';
 import type { SettingsTabId } from '../types/settings';
 import { validateTableConfig } from '../utils/settings-validation';
+import { ErrorCard } from '@/components/error-display';
+import {
+  RECORD_LIST_LAYOUT_GENERIC_TABLE,
+  RECORD_DETAIL_LAYOUT_HEAD_DETAIL,
+  COMMENTS_POSITION_RIGHT_PANEL,
+} from '@workspace/beqeek-shared/constants/layouts';
 
 // Layout components
 import { SettingsLayout } from '../components/settings/settings-layout';
@@ -33,6 +38,7 @@ import { SettingsHeader } from '../components/settings/settings-header';
 import { SettingsTabs, SettingsTabContent } from '../components/settings/settings-tabs';
 import { SettingsFooter } from '../components/settings/settings-footer';
 import { UnsavedChangesDialog } from '../components/settings/unsaved-changes-dialog';
+import { SettingsLoading } from '../components/settings/settings-loading';
 
 // Section components
 import { GeneralSettingsSection } from '../components/settings/general/general-settings-section';
@@ -173,31 +179,39 @@ export const ActiveTableSettingsPageV2 = () => {
     setPendingNavigation(null);
   }, []);
 
-  // Loading state
-  if (isLoading) {
+  // Loading state - also show loading if table exists but localConfig not initialized yet
+  if (isLoading || (table && !localConfig)) {
+    return <SettingsLoading />;
+  }
+
+  // Error state
+  if (error) {
     return (
-      <div className="container mx-auto max-w-7xl space-y-6 p-6">
-        <div className="flex items-center gap-4">
-          <Skeleton className="h-10 w-10" />
-          <div className="space-y-2">
-            <Skeleton className="h-8 w-64" />
-            <Skeleton className="h-4 w-96" />
-          </div>
-        </div>
-        <Skeleton className="h-[600px] w-full" />
+      <div className="container mx-auto max-w-7xl p-6">
+        <ErrorCard
+          error={error}
+          onRetry={() => window.location.reload()}
+          onBack={() => {
+            navigate({
+              to: ROUTES.ACTIVE_TABLES.LIST,
+              params: { locale, workspaceId },
+            });
+          }}
+          showDetails={import.meta.env.DEV}
+        />
       </div>
     );
   }
 
-  // Error state
-  if (error || !table || !localConfig) {
+  // Not found state (no error but no table/config)
+  if (!table || !localConfig) {
     return (
       <div className="container mx-auto max-w-7xl p-6">
         <Card className="border-destructive">
           <CardHeader>
-            <CardTitle className="text-destructive">Failed to load table</CardTitle>
+            <CardTitle className="text-destructive">Table Not Found</CardTitle>
             <CardDescription>
-              {error?.message || 'Table not found or you do not have permission to access it.'}
+              The table you are looking for does not exist or you do not have permission to access it.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -269,7 +283,7 @@ export const ActiveTableSettingsPageV2 = () => {
                 <ListViewSettingsSection
                   config={
                     (localConfig.recordListConfig as unknown as RecordListConfig) || {
-                      layout: 'generic-table',
+                      layout: RECORD_LIST_LAYOUT_GENERIC_TABLE,
                       displayFields: [],
                     }
                   }
@@ -298,8 +312,8 @@ export const ActiveTableSettingsPageV2 = () => {
                 <DetailViewSettingsSection
                   config={
                     (localConfig.recordDetailConfig as unknown as RecordDetailConfig) || {
-                      layout: 'head-detail',
-                      commentsPosition: 'right-panel',
+                      layout: RECORD_DETAIL_LAYOUT_HEAD_DETAIL,
+                      commentsPosition: COMMENTS_POSITION_RIGHT_PANEL,
                       headTitleField: '',
                       headSubLineFields: [],
                       rowTailFields: [],

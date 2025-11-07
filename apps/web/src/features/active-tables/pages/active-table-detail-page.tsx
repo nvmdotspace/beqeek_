@@ -20,6 +20,7 @@ import type { ActiveFieldConfig, ActiveTable, ActiveWorkGroup } from '../types';
 import { useTableEncryption } from '../hooks/use-table-encryption';
 import { getEncryptionTypeForField } from '@workspace/active-tables-core';
 import { ROUTES } from '@/shared/route-paths';
+import { ErrorCard } from '@/components/error-display';
 
 import { Button } from '@workspace/ui/components/button';
 import { Badge } from '@workspace/ui/components/badge';
@@ -232,7 +233,21 @@ export const ActiveTableDetailPage = () => {
     );
   }
 
-  if (!tableId || tableError || !table) {
+  // Error state - use enhanced error display
+  if (tableError) {
+    return (
+      <div className="space-y-6 p-6">
+        <Button variant="ghost" onClick={handleBack} className="flex items-center gap-2">
+          <ArrowLeft className="h-4 w-4" />
+          {m.activeTables_detail_backToList()}
+        </Button>
+        <ErrorCard error={tableError} onBack={handleBack} onRetry={() => window.location.reload()} />
+      </div>
+    );
+  }
+
+  // Not found state
+  if (!tableId || !table) {
     return (
       <div className="space-y-6 p-6">
         <Button variant="ghost" onClick={handleBack} className="flex items-center gap-2">

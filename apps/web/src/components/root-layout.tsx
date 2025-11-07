@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
 import { Outlet, useLocation } from '@tanstack/react-router';
 import { AppLayout } from '@/components/app-layout';
+import { PageTransition } from '@/components/page-transition';
 
 interface RootLayoutProps {
   children?: ReactNode;
@@ -14,7 +15,9 @@ export const RootLayout = ({ children }: RootLayoutProps) => {
 
   return (
     <>
-      <AppLayout showSidebar={showSidebar}>{children || <Outlet />}</AppLayout>
+      <AppLayout showSidebar={showSidebar}>
+        <PageTransition>{children || <Outlet />}</PageTransition>
+      </AppLayout>
     </>
   );
 };

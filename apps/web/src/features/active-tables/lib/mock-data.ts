@@ -8,6 +8,12 @@
 import type { TableConfig, KanbanConfig, GanttConfig, RecordDetailConfig } from '@workspace/active-tables-core';
 import type { TableRecord } from '@workspace/active-tables-core';
 import type { FieldConfig } from '@workspace/active-tables-core';
+import {
+  RECORD_LIST_LAYOUT_HEAD_COLUMN,
+  RECORD_DETAIL_LAYOUT_HEAD_DETAIL,
+  RECORD_DETAIL_LAYOUT_TWO_COLUMN,
+  COMMENTS_POSITION_RIGHT_PANEL,
+} from '@workspace/beqeek-shared/constants/layouts';
 
 /**
  * Generate a mock table config with all features enabled
@@ -39,12 +45,12 @@ export function generateMockTableConfig(): TableConfig {
     kanbanConfigs: [generateMockKanbanConfig()],
     ganttCharts: [generateMockGanttConfig()],
     recordListConfig: {
-      layout: 'head-column',
+      layout: RECORD_LIST_LAYOUT_HEAD_COLUMN,
       titleField: 'task_title',
       subLineFields: ['matrix_quadrant', 'assignee', 'status'],
       tailFields: ['start_date', 'duo_date'],
     },
-    recordDetailConfig: generateMockRecordDetailConfig('two-column-detail'),
+    recordDetailConfig: generateMockRecordDetailConfig(RECORD_DETAIL_LAYOUT_TWO_COLUMN),
     permissionsConfig: [],
   };
 }
@@ -232,12 +238,14 @@ export function generateMockGanttConfig(): GanttConfig {
  * Generate mock Record Detail configuration
  */
 export function generateMockRecordDetailConfig(
-  layout: 'head-detail' | 'two-column-detail' = 'two-column-detail',
+  layout:
+    | typeof RECORD_DETAIL_LAYOUT_HEAD_DETAIL
+    | typeof RECORD_DETAIL_LAYOUT_TWO_COLUMN = RECORD_DETAIL_LAYOUT_TWO_COLUMN,
 ): RecordDetailConfig {
-  if (layout === 'head-detail') {
+  if (layout === RECORD_DETAIL_LAYOUT_HEAD_DETAIL) {
     return {
       layout,
-      commentsPosition: 'right-panel',
+      commentsPosition: COMMENTS_POSITION_RIGHT_PANEL,
       titleField: 'task_title',
       subLineFields: ['matrix_quadrant', 'assignee', 'status'],
       tailFields: ['task_description', 'start_date', 'duo_date', 'progress', 'self_evaluation'],
@@ -246,7 +254,7 @@ export function generateMockRecordDetailConfig(
 
   return {
     layout,
-    commentsPosition: 'right-panel',
+    commentsPosition: COMMENTS_POSITION_RIGHT_PANEL,
     titleField: 'task_title',
     subLineFields: ['matrix_quadrant', 'assignee', 'status'],
     tailFields: [],

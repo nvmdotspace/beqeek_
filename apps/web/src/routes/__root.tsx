@@ -5,6 +5,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { RootLayout } from '@/components/root-layout';
 import { RoutePending } from '@/components/route-pending';
 import { RouteError } from '@/components/route-error';
+import { NavigationProgress } from '@/components/navigation-progress';
 
 export const Route = createRootRoute({
   component: RootComponent,
@@ -15,6 +16,7 @@ export const Route = createRootRoute({
 function RootComponent() {
   return (
     <>
+      <NavigationProgress />
       <RootLayout>
         <Outlet />
       </RootLayout>

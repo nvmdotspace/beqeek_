@@ -11,6 +11,11 @@ import {
 } from '../api/active-tables-api';
 import type { TableFormData } from '../components/table-management-dialog';
 import { TEXT_FIELD_TYPES, initDefaultActions } from '@workspace/beqeek-shared';
+import {
+  RECORD_LIST_LAYOUT_GENERIC_TABLE,
+  RECORD_DETAIL_LAYOUT_HEAD_DETAIL,
+  COMMENTS_POSITION_RIGHT_PANEL,
+} from '@workspace/beqeek-shared/constants/layouts';
 // @ts-ignore
 import { m } from '@/paraglide/generated/messages.js';
 
@@ -132,14 +137,14 @@ export function useTableManagement({
             defaultSort: 'desc',
             kanbanConfigs: [],
             recordListConfig: {
-              layout: 'generic-table',
+              layout: RECORD_LIST_LAYOUT_GENERIC_TABLE,
               titleField: localizedFields[0]?.name || 'id',
               subLineFields: [],
               tailFields: [],
             },
             recordDetailConfig: {
-              layout: 'head-detail',
-              commentsPosition: 'right-panel',
+              layout: RECORD_DETAIL_LAYOUT_HEAD_DETAIL,
+              commentsPosition: COMMENTS_POSITION_RIGHT_PANEL,
               titleField: localizedFields[0]?.name || 'id',
               subLineFields: [],
               tailFields: [],
@@ -216,14 +221,14 @@ export function useTableManagement({
             defaultSort: 'desc',
             kanbanConfigs: [],
             recordListConfig: {
-              layout: 'generic-table',
+              layout: RECORD_LIST_LAYOUT_GENERIC_TABLE,
               titleField: localizedFields[0]?.name || 'id',
               subLineFields: [],
               tailFields: [],
             },
             recordDetailConfig: {
-              layout: 'head-detail',
-              commentsPosition: 'right-panel',
+              layout: RECORD_DETAIL_LAYOUT_HEAD_DETAIL,
+              commentsPosition: COMMENTS_POSITION_RIGHT_PANEL,
               titleField: localizedFields[0]?.name || 'id',
               subLineFields: [],
               tailFields: [],

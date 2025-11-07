@@ -10,6 +10,11 @@ import { RecordDetailHeader } from './record-detail-header';
 import { RecordFieldDisplay } from './record-field-display';
 import { CommentsPanel, generateMockComments, type Comment } from './comments-panel';
 import { Card, CardContent } from '@workspace/ui/components/card';
+import {
+  RECORD_DETAIL_LAYOUT_HEAD_DETAIL,
+  RECORD_DETAIL_LAYOUT_TWO_COLUMN,
+  COMMENTS_POSITION_RIGHT_PANEL,
+} from '@workspace/beqeek-shared/constants/layouts';
 
 export interface RecordDetailViewProps {
   /** Record to display */
@@ -58,8 +63,8 @@ export function RecordDetailView({
   }
 
   // Determine layout
-  const layout = config.layout || 'head-detail';
-  const showComments = config.commentsPosition === 'right-panel' || config.commentsPosition === 'right';
+  const layout = config.layout || RECORD_DETAIL_LAYOUT_HEAD_DETAIL;
+  const showComments = config.commentsPosition === COMMENTS_POSITION_RIGHT_PANEL || config.commentsPosition === 'right';
 
   // Use mock comments if not provided
   const displayComments = comments || generateMockComments(record.id);
@@ -75,11 +80,11 @@ export function RecordDetailView({
 
             {/* Content based on layout */}
             <div className="mt-6">
-              {layout === 'head-detail' && (
+              {layout === RECORD_DETAIL_LAYOUT_HEAD_DETAIL && (
                 <HeadDetailLayout record={record} config={config} fields={tableConfig.fields} />
               )}
 
-              {layout === 'two-column-detail' && (
+              {layout === RECORD_DETAIL_LAYOUT_TWO_COLUMN && (
                 <TwoColumnDetailLayout record={record} config={config} fields={tableConfig.fields} />
               )}
             </div>

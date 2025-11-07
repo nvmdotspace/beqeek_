@@ -7,6 +7,7 @@
 
 import type { TableConfig } from '@workspace/active-tables-core';
 import type { RecordListConfig, RecordDetailConfig, KanbanConfig, GanttChart } from '../types';
+import { RECORD_LIST_LAYOUT_HEAD_COLUMN } from '@workspace/beqeek-shared/constants/layouts';
 
 export interface ValidationError {
   field: string;
@@ -21,7 +22,7 @@ export function validateListViewConfig(config: RecordListConfig | undefined): Va
 
   const errors: ValidationError[] = [];
 
-  if (config.layout === 'head-column') {
+  if (config.layout === RECORD_LIST_LAYOUT_HEAD_COLUMN) {
     if (!config.titleField || config.titleField.trim() === '') {
       errors.push({
         field: 'titleField',

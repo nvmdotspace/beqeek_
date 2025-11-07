@@ -13,6 +13,7 @@ import {
   RecordList,
   type TableRecord,
 } from '@workspace/active-tables-core';
+import { RECORD_LIST_LAYOUT_GENERIC_TABLE } from '@workspace/beqeek-shared/constants/layouts';
 import { ROUTES } from '@/shared/route-paths';
 
 import { Button } from '@workspace/ui/components/button';
@@ -25,6 +26,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@workspace/ui/componen
 // New components
 import { RecordDetailView } from '../components/record-detail-view';
 import { generateMockTableConfig, generateMockRecords } from '../lib/mock-data';
+import { ErrorCard } from '@/components/error-display';
 
 const LoadingState = () => (
   <div className="space-y-4">
@@ -280,6 +282,24 @@ export const ActiveTableRecordsPage = () => {
     );
   }
 
+  // Error state
+  if (tableError) {
+    return (
+      <div className="space-y-6 p-6">
+        <Button variant="ghost" onClick={handleBack} className="flex items-center gap-2">
+          <ArrowLeft className="h-4 w-4" />
+          Back to Table
+        </Button>
+        <ErrorCard
+          error={tableError}
+          onRetry={() => window.location.reload()}
+          onBack={handleBack}
+          showDetails={import.meta.env.DEV}
+        />
+      </div>
+    );
+  }
+
   if (!displayTable) {
     return (
       <div className="space-y-6 p-6">
@@ -303,11 +323,12 @@ export const ActiveTableRecordsPage = () => {
           <ArrowLeft className="h-4 w-4" />
           Back to Table
         </Button>
-        <Card className="border-destructive/40 bg-destructive/10">
-          <CardContent className="p-6">
-            <p className="text-destructive">Failed to load records</p>
-          </CardContent>
-        </Card>
+        <ErrorCard
+          error={recordsError}
+          onRetry={() => window.location.reload()}
+          onBack={handleBack}
+          showDetails={import.meta.env.DEV}
+        />
       </div>
     );
   }
@@ -438,7 +459,14 @@ export const ActiveTableRecordsPage = () => {
           <RecordList
             table={displayTable}
             records={filteredRecords}
-            config={displayTable.config.recordListConfig}
+            config={
+              displayTable.config.recordListConfig ?? {
+                layout: RECORD_LIST_LAYOUT_GENERIC_TABLE,
+                titleField: '',
+                subLineFields: [],
+                tailFields: [],
+              }
+            }
             loading={false}
             error={null}
             onRecordClick={handleViewRecord}
