@@ -5,13 +5,13 @@
  * Includes drag and drop functionality for reordering fields.
  */
 
-import { useState } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { Plus, Edit2, Trash2, GripVertical } from 'lucide-react';
 import { Button } from '@workspace/ui/components/button';
 import { Badge } from '@workspace/ui/components/badge';
 import { ScrollArea } from '@workspace/ui/components/scroll-area';
 import { toast } from '@workspace/ui/components/sonner';
-import type { FieldConfig } from '@workspace/active-tables-core';
+import type { FieldConfig, TableConfig } from '@workspace/active-tables-core';
 import {
   isTextFieldType,
   isTimeFieldType,
@@ -22,16 +22,32 @@ import {
 } from '@workspace/beqeek-shared';
 import { SettingsSection } from '../settings-layout';
 import { FieldFormModal } from './field-form-modal';
+import { FieldDeletionWarningDialog } from './field-deletion-warning-dialog';
+import { findFieldReferences, cleanupFieldReferences } from '../../../utils/field-cleanup';
+import { useActiveTables } from '../../../hooks/use-active-tables';
+import { getActiveTable } from '../../../api/active-tables-api';
 
 export interface FieldsSettingsSectionProps {
   /** Current fields */
   fields: FieldConfig[];
 
+  /** Full table configuration (needed for cleanup) */
+  config: TableConfig;
+
   /** Callback when fields change */
   onChange: (fields: FieldConfig[]) => void;
 
+  /** Callback when config needs to be updated (for cleanup) */
+  onConfigChange: (config: TableConfig) => void;
+
   /** Whether E2EE is enabled */
   e2eeEnabled?: boolean;
+
+  /** Workspace ID for fetching available tables */
+  workspaceId: string;
+
+  /** Current table ID (to exclude from reference options) */
+  currentTableId?: string;
 }
 
 /**
@@ -44,10 +60,42 @@ export interface FieldsSettingsSectionProps {
  * - Delete fields
  * - Reorder fields (drag & drop)
  */
-export function FieldsSettingsSection({ fields, onChange }: FieldsSettingsSectionProps) {
+export function FieldsSettingsSection({
+  fields,
+  config,
+  onChange,
+  onConfigChange,
+  workspaceId,
+  currentTableId,
+}: FieldsSettingsSectionProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
-  const availableTables: Array<{ id: string; name: string }> = []; // TODO: Load from API when reference fields are implemented
+
+  // Field deletion warning state
+  const [deletionWarning, setDeletionWarning] = useState<{
+    open: boolean;
+    fieldIndex: number;
+    fieldName: string;
+    fieldLabel: string;
+    references: Array<{ location: string; details: string }>;
+  } | null>(null);
+
+  // Fetch available tables for reference fields
+  // Performance: Uses React Query cache with 2min staleTime
+  const { data: tablesResp, isLoading: tablesLoading } = useActiveTables(workspaceId);
+
+  // Memoize available tables list to prevent unnecessary re-renders
+  // Performance tip from docs: Memoize field lists for large schemas
+  const availableTables = useMemo(() => {
+    if (!tablesResp?.data) return [];
+
+    return tablesResp.data
+      .filter((table) => table.id !== currentTableId) // Exclude current table
+      .map((table) => ({
+        id: table.id,
+        name: table.name,
+      }));
+  }, [tablesResp?.data, currentTableId]);
 
   // Drag and drop state
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
@@ -68,14 +116,51 @@ export function FieldsSettingsSection({ fields, onChange }: FieldsSettingsSectio
     const fieldToDelete = fields[index];
     if (!fieldToDelete) return;
 
-    if (confirm(`Are you sure you want to delete the field "${fieldToDelete.label}"? This action cannot be undone.`)) {
-      const newFields = fields.filter((_, i) => i !== index);
-      onChange(newFields);
+    // Find all references to this field in the configuration
+    const references = findFieldReferences(fieldToDelete.name, config);
 
-      toast.success('Field deleted', {
-        description: `"${fieldToDelete.label}" has been removed`,
-      });
-    }
+    // Show warning dialog
+    setDeletionWarning({
+      open: true,
+      fieldIndex: index,
+      fieldName: fieldToDelete.name,
+      fieldLabel: fieldToDelete.label,
+      references,
+    });
+  };
+
+  const handleConfirmDeletion = () => {
+    if (!deletionWarning) return;
+
+    const fieldToDelete = fields[deletionWarning.fieldIndex];
+    if (!fieldToDelete) return;
+
+    // Remove the field
+    const newFields = fields.filter((_, i) => i !== deletionWarning.fieldIndex);
+
+    // Clean up all references to this field in the configuration
+    const cleanedConfig = cleanupFieldReferences(fieldToDelete.name, config);
+
+    // Update both fields and config
+    onChange(newFields);
+    onConfigChange(cleanedConfig);
+
+    // Show success message
+    const message =
+      deletionWarning.references.length > 0
+        ? `"${fieldToDelete.label}" has been removed and ${deletionWarning.references.length} configuration(s) updated`
+        : `"${fieldToDelete.label}" has been removed`;
+
+    toast.success('Field deleted', {
+      description: message,
+    });
+
+    // Close dialog
+    setDeletionWarning(null);
+  };
+
+  const handleCancelDeletion = () => {
+    setDeletionWarning(null);
   };
 
   const handleCloseModal = () => {
@@ -199,20 +284,43 @@ export function FieldsSettingsSection({ fields, onChange }: FieldsSettingsSectio
 
   /**
    * Load fields for a reference table
-   * TODO: Implement API call to fetch table fields
+   * Performance: Lazy load only when table selected, uses React Query cache
+   * Performance tip from docs: Debounce API calls - not needed here as triggered by user selection
    */
-  const handleLoadReferenceFields = async (
-    tableId: string,
-  ): Promise<Array<{ name: string; label: string; type: string }>> => {
-    // Placeholder - in real implementation, fetch from API
-    console.log('Loading fields for table:', tableId);
-    return [];
-  };
+  const handleLoadReferenceFields = useCallback(
+    async (tableId: string): Promise<Array<{ name: string; label: string; type: string }>> => {
+      try {
+        // Fetch table config to get field definitions
+        const response = await getActiveTable(workspaceId, tableId);
 
-  const existingFieldNames = fields.map((f) => f.name);
+        if (!response.data?.config?.fields) {
+          return [];
+        }
+
+        // Extract field metadata for dropdown
+        return response.data.config.fields.map((field) => ({
+          name: field.name,
+          label: field.label,
+          type: field.type,
+        }));
+      } catch (error) {
+        console.error('Failed to load reference fields:', error);
+        toast.error('Failed to load fields', {
+          description: 'Could not load fields from the selected table',
+        });
+        return [];
+      }
+    },
+    [workspaceId],
+  );
+
+  // Memoize field names list - Performance tip from docs
+  const existingFieldNames = useMemo(() => fields.map((f) => f.name), [fields]);
+
   const editingField = editingIndex !== null && fields[editingIndex] ? fields[editingIndex] : null;
 
-  const getFieldTypeColor = (type: string): string => {
+  // Memoize field type color getter - Performance optimization
+  const getFieldTypeColor = useCallback((type: string): string => {
     const fieldType = type as FieldType;
     if (isTextFieldType(fieldType)) return 'text-blue-600';
     if (isTimeFieldType(fieldType)) return 'text-purple-600';
@@ -220,7 +328,7 @@ export function FieldsSettingsSection({ fields, onChange }: FieldsSettingsSectio
     if (isSelectionFieldType(fieldType)) return 'text-orange-600';
     if (isReferenceFieldType(fieldType)) return 'text-pink-600';
     return 'text-gray-600';
-  };
+  }, []);
 
   return (
     <SettingsSection
@@ -359,6 +467,21 @@ export function FieldsSettingsSection({ fields, onChange }: FieldsSettingsSectio
         availableTables={availableTables}
         onLoadReferenceFields={handleLoadReferenceFields}
       />
+
+      {/* Field Deletion Warning Dialog */}
+      {deletionWarning && (
+        <FieldDeletionWarningDialog
+          open={deletionWarning.open}
+          onOpenChange={(open) => {
+            if (!open) setDeletionWarning(null);
+          }}
+          fieldName={deletionWarning.fieldName}
+          fieldLabel={deletionWarning.fieldLabel}
+          references={deletionWarning.references}
+          onConfirm={handleConfirmDeletion}
+          onCancel={handleCancelDeletion}
+        />
+      )}
     </SettingsSection>
   );
 }

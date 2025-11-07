@@ -246,7 +246,11 @@ export const ActiveTableSettingsPageV2 = () => {
               <SettingsTabContent value="fields">
                 <FieldsSettingsSection
                   fields={fields}
+                  config={localConfig}
                   onChange={(newFields) => handleConfigChange({ fields: newFields })}
+                  onConfigChange={(cleanedConfig) => setLocalConfig(cleanedConfig)}
+                  workspaceId={workspaceId}
+                  currentTableId={tableId}
                 />
               </SettingsTabContent>
 
