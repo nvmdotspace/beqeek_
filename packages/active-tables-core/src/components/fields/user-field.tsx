@@ -56,7 +56,7 @@ export function UserField(props: FieldRendererProps) {
     if (isMultiple) {
       const selectedIds = normalizedValue as string[];
       if (selectedIds.length === 0) {
-        return <span className="text-gray-400 italic">{props.messages?.emptyValue || '—'}</span>;
+        return <span className="text-muted-foreground italic">{props.messages?.emptyValue || '—'}</span>;
       }
 
       return (
@@ -76,7 +76,7 @@ export function UserField(props: FieldRendererProps) {
     // Single select display
     const selectedId = normalizedValue as string;
     if (!selectedId) {
-      return <span className="text-gray-400 italic">{props.messages?.emptyValue || '—'}</span>;
+      return <span className="text-muted-foreground italic">{props.messages?.emptyValue || '—'}</span>;
     }
 
     return (
@@ -123,7 +123,7 @@ export function UserField(props: FieldRendererProps) {
         ))}
       </select>
       {isMultiple && (
-        <p className="text-xs text-gray-500 mt-1">
+        <p className="text-xs text-muted-foreground mt-1">
           {props.messages?.multiSelectHint || 'Hold Ctrl/Cmd to select multiple users'}
         </p>
       )}

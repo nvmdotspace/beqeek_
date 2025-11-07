@@ -36,7 +36,7 @@ export function RichTextField(props: FieldRendererProps) {
   // Display mode - render HTML safely
   if (mode === 'display') {
     if (!stringValue) {
-      return <span className="text-gray-400 italic">{props.messages?.emptyValue || '—'}</span>;
+      return <span className="text-muted-foreground italic">{props.messages?.emptyValue || '—'}</span>;
     }
 
     // Render rich text content with Lexical styling
@@ -59,7 +59,6 @@ export function RichTextField(props: FieldRendererProps) {
         disabled={disabled}
         className={className}
       />
-      {field.helpText && <p className="text-xs text-gray-500 mt-2">{field.helpText}</p>}
     </FieldWrapper>
   );
 }

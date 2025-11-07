@@ -385,6 +385,48 @@ All UI changes MUST follow `docs/design-system.md`:
 - **Styling**: TailwindCSS utilities + `cn()` for conditional classes
 - **Reusability**: Export shared components from `packages/ui`
 
+### Input Styling Standards (MANDATORY)
+
+All input components MUST use design tokens for consistent appearance:
+
+**Standard Input Classes:**
+
+```tsx
+// Base input styling
+border border-input rounded-md
+bg-background text-foreground
+transition-all
+placeholder:text-muted-foreground
+
+// Focus state (consistent across all inputs)
+focus-visible:outline-none
+focus-visible:ring-1
+focus-visible:ring-inset
+focus-visible:ring-ring
+
+// Error state
+aria-invalid:border-destructive
+
+// Disabled state
+disabled:cursor-not-allowed
+disabled:opacity-50
+```
+
+**Design Tokens (CSS Variables):**
+
+- `border-input`: Input border color (adapts to dark/light mode)
+- `bg-background`: Background color
+- `text-foreground`: Text color
+- `text-muted-foreground`: Placeholder/muted text
+- `ring-ring`: Focus ring color
+- `border-destructive`: Error border color
+
+**NEVER use hardcoded colors:**
+
+- ❌ `border-gray-300`, `bg-gray-100`, `text-gray-400`
+- ❌ `focus:ring-blue-500`, `border-red-500`
+- ✅ Use design tokens that respect theme
+
 ### API Integration
 
 **Base client**: `apps/web/src/shared/api/http-client.ts` (Axios)

@@ -33,7 +33,7 @@ export function DateTimeField(props: FieldRendererProps) {
   // Display mode
   if (mode === 'display') {
     if (!stringValue) {
-      return <span className="text-gray-400 italic">{props.messages?.emptyValue || '—'}</span>;
+      return <span className="text-muted-foreground italic">{props.messages?.emptyValue || '—'}</span>;
     }
 
     try {
@@ -50,10 +50,13 @@ export function DateTimeField(props: FieldRendererProps) {
 
   const inputClasses = `
     w-full px-3 py-2
-    border border-gray-300 rounded-lg
-    focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
-    disabled:bg-gray-100 disabled:cursor-not-allowed
-    ${error ? 'border-red-500' : ''}
+    border border-input rounded-lg
+    bg-background text-foreground
+    transition-all
+    placeholder:text-muted-foreground
+    focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring
+    disabled:cursor-not-allowed disabled:opacity-50
+    aria-invalid:border-destructive
     ${className || ''}
   `.trim();
 

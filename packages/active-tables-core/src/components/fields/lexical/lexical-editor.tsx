@@ -87,21 +87,18 @@ export function LexicalEditor({
   return (
     <LexicalComposer initialConfig={config}>
       <div
-        className={`relative border border-gray-300 rounded-lg bg-white ${disabled ? 'opacity-50' : ''} ${className}`}
+        className={`relative border border-input rounded-lg bg-background ${disabled ? 'opacity-50' : ''} ${className}`}
       >
         <ToolbarPlugin disabled={disabled} />
 
         <div className="relative">
           <RichTextPlugin
             contentEditable={
-              <ContentEditable
-                className="lexical-content-editable min-h-[200px] p-3 outline-none"
-                style={{
-                  backgroundColor: disabled ? '#f3f4f6' : '#ffffff',
-                }}
-              />
+              <ContentEditable className="lexical-content-editable min-h-[200px] p-3 outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring" />
             }
-            placeholder={<div className="absolute top-3 left-3 text-gray-400 pointer-events-none">{placeholder}</div>}
+            placeholder={
+              <div className="absolute top-3 left-3 text-muted-foreground pointer-events-none">{placeholder}</div>
+            }
             ErrorBoundary={LexicalErrorBoundary}
           />
           <HistoryPlugin />

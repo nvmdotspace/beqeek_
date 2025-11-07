@@ -114,5 +114,5 @@ export function FieldRenderer(props: FieldRendererProps) {
   }
 
   // Fallback for unknown types
-  return <div className="text-gray-500 italic">Unsupported field type: {field.type}</div>;
+  return <div className="text-muted-foreground italic">Unsupported field type: {field.type}</div>;
 }

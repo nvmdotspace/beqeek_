@@ -60,13 +60,13 @@ Ví dụ:
 
 ```json
 {
-  "id": "806087624279195649",
-  "name": "BEQEEK - Công việc",
+  "id": "826289384109113345",
+  "name": "Công việc full type",
   "workGroupId": "",
   "tableType": "TASK_EISENHOWER",
   "description": "",
   "config": {
-    "title": "BEQEEK - Công việc",
+    "title": "Công việc full type",
     "fields": [
       {
         "type": "SHORT_TEXT",
@@ -106,31 +106,59 @@ Ví dụ:
         "name": "matrix_quadrant",
         "placeholder": "Chọn nhóm ma trận Eisenhower",
         "defaultValue": "q1",
-        "required": true,
+        "required": false,
         "options": [
           {
-            "text": "Quan trọng & Khẩn cấp (Main-stream)",
+            "text": "Quan trọng & Khẩn cấp (Làm ngay)",
             "value": "q1",
             "text_color": "#ffffff",
             "background_color": "#dc3545"
           },
           {
-            "text": "Quan trọng & Không khẩn cấp (Growth)",
+            "text": "Quan trọng & Không khẩn cấp (Kế hoạch)",
             "value": "q2",
             "text_color": "#ffffff",
             "background_color": "#28a745"
           },
           {
-            "text": "Không quan trọng & Khẩn cấp (No-problem)",
+            "text": "Không quan trọng & Khẩn cấp (Ủy quyền)",
             "value": "q3",
             "text_color": "#ffffff",
-            "background_color": "#f15c14"
+            "background_color": "#ffc107"
           },
           {
-            "text": "Không quan trọng & Không khẩn cấp (Idea)",
+            "text": "Không quan trọng & Không khẩn cấp (Loại bỏ)",
             "value": "q4",
             "text_color": "#ffffff",
             "background_color": "#6c757d"
+          }
+        ]
+      },
+      {
+        "type": "SELECT_ONE",
+        "label": "Kế hoạch triển khai",
+        "name": "no_plan",
+        "placeholder": "Chọn kế hoạch",
+        "defaultValue": "",
+        "required": false,
+        "options": [
+          {
+            "text": "Chưa có kế hoạch",
+            "value": "no_plan",
+            "text_color": "#ffffff",
+            "background_color": "#6c757d"
+          },
+          {
+            "text": "Sẽ triển khai sớm",
+            "value": "implement_soon",
+            "text_color": "#ffffff",
+            "background_color": "#28a745"
+          },
+          {
+            "text": "Sẽ triển khai sau",
+            "value": "implement_later",
+            "text_color": "#ffffff",
+            "background_color": "#ffc107"
           }
         ]
       },
@@ -143,7 +171,7 @@ Ví dụ:
         "required": false,
         "options": [
           {
-            "text": "Rất thuận lợi",
+            "text": "Thuận lợi",
             "value": "excellent",
             "text_color": "#ffffff",
             "background_color": "#28a745"
@@ -222,6 +250,219 @@ Ví dụ:
             "background_color": "#dc3545"
           }
         ]
+      },
+      {
+        "type": "SELECT_LIST_WORKSPACE_USER",
+        "label": "Người liên quan",
+        "name": "related_users",
+        "placeholder": "Chọn người liên quan",
+        "defaultValue": "",
+        "required": false,
+        "referenceLabelField": "fullName"
+      },
+      {
+        "type": "SELECT_LIST",
+        "label": "Thẻ màu",
+        "name": "color_tag",
+        "placeholder": "Chọn thẻ màu",
+        "defaultValue": "",
+        "required": false,
+        "options": [
+          {
+            "text": "đen",
+            "value": "den",
+            "text_color": "#000000",
+            "background_color": "#ffffff"
+          },
+          {
+            "text": "vàng",
+            "value": "vang",
+            "text_color": "#ffff80",
+            "background_color": "#ffffff"
+          },
+          {
+            "text": "đỏ",
+            "value": "do",
+            "text_color": "#ff0000",
+            "background_color": "#ffffff"
+          }
+        ]
+      },
+      {
+        "type": "TEXT",
+        "label": "Ghi chú",
+        "name": "notes",
+        "placeholder": "Nhập ghi chú",
+        "defaultValue": "",
+        "required": false
+      },
+      {
+        "type": "SELECT_LIST_RECORD",
+        "label": "Phòng ban liên quan",
+        "name": "related_departments",
+        "placeholder": "Chọn phòng ban liên quan",
+        "defaultValue": "",
+        "required": false,
+        "referenceTableId": "818041752232394753",
+        "referenceField": "",
+        "referenceLabelField": "department_name",
+        "additionalCondition": ""
+      },
+      {
+        "type": "SELECT_ONE_RECORD",
+        "label": "Hồ sơ nhân sự",
+        "name": "employee",
+        "placeholder": "Chọn hồ sơ nhân sự",
+        "defaultValue": "",
+        "required": false,
+        "referenceTableId": "818040940370329601",
+        "referenceField": "",
+        "referenceLabelField": "employee_name",
+        "additionalCondition": ""
+      },
+      {
+        "type": "CHECKBOX_LIST",
+        "label": "Check list",
+        "name": "check_list",
+        "placeholder": "Chọn check list",
+        "defaultValue": "",
+        "required": false,
+        "options": [
+          {
+            "text": "Đã kiểm tra",
+            "value": "checked",
+            "text_color": "#000000",
+            "background_color": "#ffffff"
+          },
+          {
+            "text": "Đã báo cáo sếp",
+            "value": "reported",
+            "text_color": "#000000",
+            "background_color": "#ffffff"
+          },
+          {
+            "text": "Đã triển khai",
+            "value": "deployed",
+            "text_color": "#000000",
+            "background_color": "#ffffff"
+          }
+        ]
+      },
+      {
+        "type": "YEAR",
+        "label": "Năm",
+        "name": "year",
+        "placeholder": "Nhập năm",
+        "defaultValue": "2025",
+        "required": false
+      },
+      {
+        "type": "MONTH",
+        "label": "Tháng",
+        "name": "month",
+        "placeholder": "Nhập tháng",
+        "defaultValue": "01",
+        "required": false
+      },
+      {
+        "type": "DAY",
+        "label": "Ngày",
+        "name": "day",
+        "placeholder": "Nhập ngày",
+        "defaultValue": "01",
+        "required": false
+      },
+      {
+        "type": "HOUR",
+        "label": "Giờ",
+        "name": "hour",
+        "placeholder": "Nhập giờ",
+        "defaultValue": "00",
+        "required": false
+      },
+      {
+        "type": "MINUTE",
+        "label": "Phút",
+        "name": "minutes",
+        "placeholder": "Nhập phút",
+        "defaultValue": "00",
+        "required": false
+      },
+      {
+        "type": "DATE",
+        "label": "Ngày tháng",
+        "name": "date",
+        "placeholder": "Nhập ngày",
+        "defaultValue": "",
+        "required": false
+      },
+      {
+        "type": "TIME",
+        "label": "Thời gian (giờ-phút-giây)",
+        "name": "time",
+        "placeholder": "Nhập thời gian",
+        "defaultValue": "00:00",
+        "required": false
+      },
+      {
+        "type": "INTEGER",
+        "label": "Trọng số công việc",
+        "name": "task_weight",
+        "placeholder": "Nhập trọng số công việc",
+        "defaultValue": "",
+        "required": false
+      },
+      {
+        "type": "NUMERIC",
+        "label": "Tiền về dự kiến (VNĐ)",
+        "name": "money",
+        "placeholder": "Nhập tiền về dự kiến",
+        "defaultValue": "100000.00",
+        "required": false
+      },
+      {
+        "type": "EMAIL",
+        "label": "Email khách hàng",
+        "name": "customer_email",
+        "placeholder": "Nhập email khách hàng",
+        "defaultValue": "sangdung.ts@gmail.com",
+        "required": false
+      },
+      {
+        "type": "URL",
+        "label": "Trang chủ",
+        "name": "home_url",
+        "placeholder": "Nhập trang chủ",
+        "defaultValue": "https://beqeek.com",
+        "required": false
+      },
+      {
+        "type": "CHECKBOX_YES_NO",
+        "label": "Đã nhận đủ tiền",
+        "name": "check_money",
+        "placeholder": "Đã nhận đủ tiền",
+        "defaultValue": "",
+        "required": false
+      },
+      {
+        "type": "CHECKBOX_ONE",
+        "label": "Danh mục",
+        "name": "category",
+        "placeholder": "Chọn danh mục",
+        "defaultValue": "",
+        "required": false
+      },
+      {
+        "type": "FIRST_REFERENCE_RECORD",
+        "label": "Hội nhập",
+        "name": "onboarding",
+        "placeholder": "Trường này readonly, nếu dòng chữ này xuất hiện có nghĩa là đang sai ở đâu đó",
+        "defaultValue": "",
+        "required": false,
+        "referenceTableId": "826375571175899137",
+        "referenceField": "task",
+        "referenceLabelField": "employee_name",
+        "additionalCondition": ""
       }
     ],
     "actions": [
@@ -229,58 +470,55 @@ Ví dụ:
         "name": "Tạo mới bản ghi",
         "type": "create",
         "icon": "create",
-        "actionId": "019937ae-8d78-31-79-a814a27c0a82bfb4"
+        "actionId": "019a4d0c-10ef-25-71-867906c9311ccf6f"
       },
       {
         "name": "Truy cập bản ghi",
         "type": "access",
         "icon": "access",
-        "actionId": "01996252-6846-af-70-89a45328757b6799"
+        "actionId": "019a4d0c-10ef-d8-79-9e3a81dd216fea78"
       },
       {
         "name": "Cập nhật bản ghi",
         "type": "update",
         "icon": "update",
-        "actionId": "019937ae-8d78-db-7b-aa553c8f76a1af39"
+        "actionId": "019a4d0c-10ef-02-75-8a11db1d3983350e"
       },
       {
         "name": "Xoá bản ghi",
         "type": "delete",
         "icon": "delete",
-        "actionId": "019937ae-8d78-c4-79-946f6368381aebc3"
+        "actionId": "019a4d0c-10ef-0a-7f-abdb19e7476ce35a"
       },
       {
         "name": "Thêm bình luận",
         "type": "comment_create",
         "icon": "create",
-        "actionId": "01993cf9-62ef-e1-7f-ba950b621d61d98c"
+        "actionId": "019a4d0c-10ef-e1-7e-b88341cc7cea411f"
       },
       {
         "name": "Truy cập bình luận",
         "type": "comment_access",
         "icon": "access",
-        "actionId": "01996b76-1421-14-7c-8e7126c4865fb6db"
+        "actionId": "019a4d0c-10ef-d0-70-a27fa08cd9cfa519"
       },
       {
         "name": "Cập nhật bình luận",
         "type": "comment_update",
         "icon": "update",
-        "actionId": "01993cf9-62ef-f0-77-99a733ac836d58b6"
+        "actionId": "019a4d0c-10ef-c1-77-a71217b1b582a247"
       },
       {
         "name": "Xoá bình luận",
         "type": "comment_delete",
         "icon": "delete",
-        "actionId": "01993cf9-62ef-6f-7c-a42cee93c4320a0a"
-      },
-      {
-        "name": "Oke",
-        "type": "custom",
-        "icon": null,
-        "actionId": "0199621a-c5b6-ac-78-8439705f6242bc9a"
+        "actionId": "019a4d0c-10ef-a1-75-a91ac148711bb090"
       }
     ],
     "quickFilters": [
+      {
+        "fieldName": "assignee"
+      },
       {
         "fieldName": "status"
       },
@@ -288,44 +526,83 @@ Ví dụ:
         "fieldName": "matrix_quadrant"
       },
       {
-        "fieldName": "assignee"
+        "fieldName": "self_evaluation"
+      },
+      {
+        "fieldName": "related_users"
       }
     ],
-    "tableLimit": 5,
+    "tableLimit": 1000,
     "e2eeEncryption": false,
     "hashedKeywordFields": ["task_title", "task_description"],
     "defaultSort": "desc",
     "kanbanConfigs": [
       {
-        "kanbanScreenId": "01989c54-df1f-17-76-ad27b943ab03c397",
+        "kanbanScreenId": "01995098-a0bf-7c1b-9bca-5877b1ae7ceb",
         "screenName": "Ma trận Eisenhower",
         "screenDescription": "",
         "statusField": "matrix_quadrant",
         "kanbanHeadlineField": "task_title",
-        "displayFields": ["start_date", "duo_date", "assignee", "status", "self_evaluation"]
+        "displayFields": ["start_date", "duo_date", "assignee", "status", "self_evaluation", "plan"]
       },
       {
-        "kanbanScreenId": "01989c55-b354-c2-79-9f64e56bec5759a0",
+        "kanbanScreenId": "01995098-a0bf-76b4-9eb6-efc9ce0797ca",
         "screenName": "Trạng thái",
         "screenDescription": "",
         "statusField": "status",
         "kanbanHeadlineField": "task_title",
-        "displayFields": ["start_date", "duo_date", "matrix_quadrant", "assignee", "self_evaluation"]
+        "displayFields": ["start_date", "duo_date", "matrix_quadrant", "assignee", "self_evaluation", "plan"]
       },
       {
-        "kanbanScreenId": "01989c57-a2b4-c7-88-bbc953a8be37d6f1",
+        "kanbanScreenId": "01995098-a0bf-7cb0-9036-3bd1a23fadfa",
         "screenName": "Tình trạng công việc",
         "screenDescription": "Phân loại theo đánh giá tình trạng",
         "statusField": "self_evaluation",
         "kanbanHeadlineField": "task_title",
-        "displayFields": ["assignee", "matrix_quadrant", "status", "duo_date"]
+        "displayFields": ["assignee", "matrix_quadrant", "status", "duo_date", "plan"]
+      },
+      {
+        "kanbanScreenId": "01995098-a0bf-7897-9adf-05e5891b2b1e",
+        "screenName": "Kế hoạch",
+        "screenDescription": "Phân loại theo kế hoạch triển khai",
+        "statusField": "plan",
+        "kanbanHeadlineField": "task_title",
+        "displayFields": ["matrix_quadrant", "assignee", "status", "self_evaluation", "duo_date"]
       }
     ],
     "recordListConfig": {
-      "layout": "head-column",
-      "titleField": "task_title",
-      "subLineFields": ["matrix_quadrant", "assignee", "status"],
-      "tailFields": ["start_date", "duo_date"]
+      "layout": "generic-table",
+      "displayFields": [
+        "task_title",
+        "task_description",
+        "start_date",
+        "duo_date",
+        "matrix_quadrant",
+        "no_plan",
+        "self_evaluation",
+        "assignee",
+        "status",
+        "related_users",
+        "color_tag",
+        "notes",
+        "related_departments",
+        "employee",
+        "check_list",
+        "year",
+        "month",
+        "day",
+        "hour",
+        "minutes",
+        "date",
+        "time",
+        "task_weight",
+        "money",
+        "customer_email",
+        "home_url",
+        "check_money",
+        "category",
+        "onboarding"
+      ]
     },
     "recordDetailConfig": {
       "layout": "head-detail",
@@ -336,51 +613,47 @@ Ví dụ:
     },
     "permissionsConfig": [
       {
-        "teamId": "823437958798376961",
-        "roleId": "823437959322664961",
+        "teamId": "818003905471315969",
+        "roleId": "818003906121433089",
         "actions": [
           {
-            "actionId": "019937ae-8d78-31-79-a814a27c0a82bfb4",
+            "actionId": "019a4d0c-10ef-25-71-867906c9311ccf6f",
             "permission": "allowed"
           },
           {
-            "actionId": "01996252-6846-af-70-89a45328757b6799",
+            "actionId": "019a4d0c-10ef-d8-79-9e3a81dd216fea78",
             "permission": "all"
           },
           {
-            "actionId": "019937ae-8d78-db-7b-aa553c8f76a1af39",
+            "actionId": "019a4d0c-10ef-02-75-8a11db1d3983350e",
             "permission": "all"
           },
           {
-            "actionId": "019937ae-8d78-c4-79-946f6368381aebc3",
+            "actionId": "019a4d0c-10ef-0a-7f-abdb19e7476ce35a",
             "permission": "all"
           },
           {
-            "actionId": "01993cf9-62ef-e1-7f-ba950b621d61d98c",
-            "permission": "all"
+            "actionId": "019a4d0c-10ef-e1-7e-b88341cc7cea411f",
+            "permission": "self_created"
           },
           {
-            "actionId": "01996b76-1421-14-7c-8e7126c4865fb6db",
-            "permission": "all"
+            "actionId": "019a4d0c-10ef-d0-70-a27fa08cd9cfa519",
+            "permission": "comment_self_created"
           },
           {
-            "actionId": "01993cf9-62ef-f0-77-99a733ac836d58b6",
-            "permission": "all"
+            "actionId": "019a4d0c-10ef-c1-77-a71217b1b582a247",
+            "permission": "comment_self_created"
           },
           {
-            "actionId": "01993cf9-62ef-6f-7c-a42cee93c4320a0a",
-            "permission": "all"
-          },
-          {
-            "actionId": "0199621a-c5b6-ac-78-8439705f6242bc9a",
-            "permission": "all"
+            "actionId": "019a4d0c-10ef-a1-75-a91ac148711bb090",
+            "permission": "comment_self_created"
           }
         ]
       }
     ],
     "ganttCharts": [
       {
-        "ganttScreenId": "01989c56-557e-c5-77-b9b953a8be37d6f0",
+        "ganttScreenId": "01995098-a0bf-76ff-b96e-5218415dd40a",
         "screenName": "Timeline công việc",
         "screenDescription": "",
         "taskNameField": "task_title",
@@ -390,8 +663,8 @@ Ví dụ:
         "dependencyField": null
       }
     ],
-    "encryptionKey": "ECZXIFx3wMRZ9vFskZOpPGpw63KHyAnl",
-    "encryptionAuthKey": "378001b13df53e005505b18f7cf5a38c6c9b0098a691f0a88d57868cc76ba97e"
+    "encryptionKey": "IvmrHQzycueDW7jgW9BftcCbrf20RUUt",
+    "encryptionAuthKey": "7fe470dde1e39355502a6616ba21ef328d8c99b63e37a742c7035e7f880ffb95"
   }
 }
 ```
@@ -425,22 +698,99 @@ Mỗi phần tử trong mảng `fields` định nghĩa một cột trong bảng 
 - **`SHORT_TEXT`**, **`EMAIL`**, **`URL`**: Dùng cho chuỗi ngắn.
   - **UI Control**: Input text (`<input type="text">`).
   - **Validation**: `EMAIL` và `URL` cần có validation định dạng.
+  - **Ví dụ JSON**:
+    ```json
+    {
+      "type": "SHORT_TEXT",
+      "label": "Tên công việc",
+      "name": "task_title",
+      "placeholder": "Nhập tên công việc",
+      "defaultValue": "",
+      "required": true
+    }
+    ```
 - **`TEXT`**: Dùng cho đoạn văn bản dài.
   - **UI Control**: Textarea (`<textarea>`).
+  - **Ví dụ JSON**:
+    ```json
+    {
+      "type": "TEXT",
+      "label": "Ghi chú",
+      "name": "notes",
+      "placeholder": "Nhập ghi chú",
+      "defaultValue": "",
+      "required": false
+    }
+    ```
 - **`RICH_TEXT`**: Dùng cho nội dung có định dạng.
   - **UI Control**: Một trình soạn thảo WYSIWYG (ví dụ: TinyMCE, Quill.js).
+  - **Ví dụ JSON**:
+    ```json
+    {
+      "type": "RICH_TEXT",
+      "label": "Nội dung công việc",
+      "name": "task_description",
+      "placeholder": "Mô tả ngắn gọn về nội dung công việc",
+      "defaultValue": "",
+      "required": false
+    }
+    ```
 
 ##### b. Nhóm Thời gian
 
 - **`DATE`**, **`DATETIME`**, **`TIME`**: Dùng để chọn ngày/giờ.
   - **UI Control**: Một widget chọn ngày/giờ (Date/Time Picker).
+  - **Ví dụ JSON (`DATETIME`)**:
+    ```json
+    {
+      "type": "DATETIME",
+      "label": "Thời gian bắt đầu",
+      "name": "start_date",
+      "placeholder": "Chọn thời gian bắt đầu",
+      "defaultValue": "",
+      "required": false
+    }
+    ```
 - **`YEAR`**, **`MONTH`**, **`DAY`**, **`HOUR`**, **`MINUTE`**, **`SECOND`**: Dùng cho các giá trị số nguyên đại diện cho một phần của thời gian.
   - **UI Control**: Input số (`<input type="number">`) hoặc dropdown.
+  - **Ví dụ JSON (`YEAR`)**:
+    ```json
+    {
+      "type": "YEAR",
+      "label": "Năm",
+      "name": "year",
+      "placeholder": "Nhập năm",
+      "defaultValue": "2025",
+      "required": false
+    }
+    ```
 
 ##### c. Nhóm Số
 
 - **`INTEGER`**, **`NUMERIC`**: Dùng cho giá trị số.
   - **UI Control**: Input số (`<input type="number">`). `NUMERIC` cho phép nhập số thực, `INTEGER` chỉ cho phép số nguyên.
+  - **Ví dụ JSON (`INTEGER`)**:
+    ```json
+    {
+      "type": "INTEGER",
+      "label": "Trọng số công việc",
+      "name": "task_weight",
+      "placeholder": "Nhập trọng số công việc",
+      "defaultValue": "",
+      "required": false
+    }
+    ```
+  - **Ví dụ JSON (`NUMERIC`)**:
+    ```json
+    {
+      "type": "NUMERIC",
+      "label": "Tiền về dự kiến (VNĐ)",
+      "name": "money",
+      "placeholder": "Nhập tiền về dự kiến",
+      "defaultValue": "100000.00",
+      "required": false
+    }
+    ```
 
 ##### d. Nhóm Lựa chọn (Sử dụng thuộc tính `options`)
 
@@ -466,10 +816,71 @@ Thuộc tính `options` là một mảng các đối tượng, cho phép định
 
 - **`CHECKBOX_YES_NO`**: Lựa chọn đúng/sai.
   - **UI Control**: Một checkbox duy nhất.
+  - **Ví dụ JSON**:
+    ```json
+    {
+      "type": "CHECKBOX_YES_NO",
+      "label": "Đã nhận đủ tiền",
+      "name": "check_money",
+      "placeholder": "Đã nhận đủ tiền",
+      "defaultValue": "",
+      "required": false
+    }
+    ```
 - **`CHECKBOX_ONE`**, **`SELECT_ONE`**: Chọn một giá trị từ một danh sách.
   - **UI Control**: Nhóm radio button hoặc dropdown chọn một. Các lựa chọn được điền từ mảng `options`.
+  - **Ví dụ JSON (`SELECT_ONE`)**:
+    ```json
+    {
+      "type": "SELECT_ONE",
+      "label": "Trạng thái",
+      "name": "status",
+      "placeholder": "Chọn trạng thái",
+      "defaultValue": "pending",
+      "required": false,
+      "options": [
+        {
+          "text": "Chưa bắt đầu",
+          "value": "pending",
+          "text_color": "#ffffff",
+          "background_color": "#6c757d"
+        },
+        {
+          "text": "Hoàn thành",
+          "value": "completed",
+          "text_color": "#ffffff",
+          "background_color": "#28a745"
+        }
+      ]
+    }
+    ```
 - **`CHECKBOX_LIST`**, **`SELECT_LIST`**: Chọn nhiều giá trị từ một danh sách.
   - **UI Control**: Nhóm checkbox hoặc dropdown/tag input chọn nhiều. Các lựa chọn được điền từ mảng `options`.
+  - **Ví dụ JSON (`SELECT_LIST`)**:
+    ```json
+    {
+      "type": "SELECT_LIST",
+      "label": "Thẻ màu",
+      "name": "color_tag",
+      "placeholder": "Chọn thẻ màu",
+      "defaultValue": "",
+      "required": false,
+      "options": [
+        {
+          "text": "đen",
+          "value": "den",
+          "text_color": "#000000",
+          "background_color": "#ffffff"
+        },
+        {
+          "text": "vàng",
+          "value": "vang",
+          "text_color": "#ffff80",
+          "background_color": "#ffffff"
+        }
+      ]
+    }
+    ```
 
 ##### e. Nhóm Tham chiếu (Sử dụng các thuộc tính `reference_*`)
 
@@ -479,12 +890,64 @@ Thuộc tính `options` là một mảng các đối tượng, cho phép định
     - `referenceTableId`: ID của bảng nguồn cần lấy dữ liệu.
     - `referenceLabelField`: Tên trường trong bảng nguồn sẽ được dùng để hiển thị cho người dùng (ví dụ: `ten_san_pham`).
     - `additionalCondition`: (Tùy chọn) Một chuỗi điều kiện để lọc các bản ghi được phép chọn từ bảng nguồn (ví dụ: `"trang_thai='hoat_dong'"`).
-- **`FIRST_REFERENCE_RECORD`**: Một trường đặc biệt, read-only, dùng để hiển thị dữ liệu từ bản ghi tham chiếu đầu tiên.
+  - **Ví dụ JSON (`SELECT_ONE_RECORD`)**:
+    ```json
+    {
+      "type": "SELECT_ONE_RECORD",
+      "label": "Hồ sơ nhân sự",
+      "name": "employee",
+      "placeholder": "Chọn hồ sơ nhân sự",
+      "defaultValue": "",
+      "required": false,
+      "referenceTableId": "818040940370329601",
+      "referenceField": "",
+      "referenceLabelField": "employee_name",
+      "additionalCondition": ""
+    }
+    ```
+- **`FIRST_REFERENCE_RECORD`**: Một trường đặc biệt, **chỉ đọc (read-only)**, dùng để hiển thị dữ liệu từ một bản ghi ở bảng khác có liên kết ngược lại với bản ghi hiện tại.
+  - **Mục đích**: Thường dùng để hiển thị thông tin tóm tắt từ một mối quan hệ "has-one" hoặc "has-many" từ phía "một". Ví dụ: hiển thị "ngày thanh toán đầu tiên" của một "đơn hàng".
+  - **UI Control**: Chỉ hiển thị dưới dạng văn bản, không có control nhập liệu.
+  - **Thuộc tính liên quan**:
+    - `referenceTableId`: ID của bảng tham chiếu (bảng B) cần tìm kiếm.
+    - `referenceField`: **(Bắt buộc)** Tên của trường trong `referenceTableId` (bảng B) chứa ID của bản ghi hiện tại (bảng A). Trường này **phải có kiểu `SELECT_ONE_RECORD`** trên bảng tham chiếu. Đây là "khóa ngoại" của liên kết ngược.
+    - `referenceLabelField`: Tên trường trong `referenceTableId` (bảng B) sẽ được dùng để hiển thị giá trị.
+    - `additionalCondition`: (Tùy chọn) Điều kiện lọc bổ sung khi tìm kiếm trong bảng tham chiếu.
+  - **Cơ chế hoạt động API**:
+    - Để tối ưu, khi hiển thị một danh sách các bản ghi, frontend sẽ gom tất cả ID của các bản ghi đang hiển thị và gửi một truy vấn hàng loạt duy nhất đến `referenceTableId`.
+    - Truy vấn này sử dụng tham số `group` bằng với giá trị của `referenceField`. Điều này cho phép backend nhóm các kết quả theo `referenceField` và chỉ trả về bản ghi đầu tiên cho mỗi nhóm, giúp giảm đáng kể lượng dữ liệu truyền về và tối ưu hóa hiệu suất.
+  - **Ví dụ JSON**:
+    ```json
+    {
+      "type": "FIRST_REFERENCE_RECORD",
+      "label": "Hội nhập",
+      "name": "onboarding",
+      "placeholder": "Trường này readonly, nếu dòng chữ này xuất hiện có nghĩa là đang sai ở đâu đó",
+      "defaultValue": "",
+      "required": false,
+      "referenceTableId": "826375571175899137",
+      "referenceField": "task",
+      "referenceLabelField": "employee_name",
+      "additionalCondition": ""
+    }
+    ```
 
 ##### f. Nhóm Người dùng
 
 - **`SELECT_ONE_WORKSPACE_USER`**, **`SELECT_LIST_WORKSPACE_USER`**: Dùng để chọn một hoặc nhiều người dùng trong workspace.
   - **UI Control**: Một dropdown có chức năng tìm kiếm (autocomplete) để tìm và chọn người dùng.
+  - **Ví dụ JSON (`SELECT_ONE_WORKSPACE_USER`)**:
+    ```json
+    {
+      "type": "SELECT_ONE_WORKSPACE_USER",
+      "label": "Người phụ trách",
+      "name": "assignee",
+      "placeholder": "Chọn người phụ trách",
+      "defaultValue": "",
+      "required": false,
+      "referenceLabelField": "fullName"
+    }
+    ```
 
 ### 2.3. Đối tượng `Action` (Hành động)
 
