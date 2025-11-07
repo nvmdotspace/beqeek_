@@ -10,7 +10,7 @@
  * Based on the implementation plan in plans/20251105-active-table-settings-rebuild-plan.md
  */
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { getRouteApi } from '@tanstack/react-router';
 import { Skeleton } from '@workspace/ui/components/skeleton';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@workspace/ui/components/card';
@@ -25,6 +25,7 @@ import { ROUTES } from '@/shared/route-paths';
 import { useActiveTables } from '../hooks/use-active-tables';
 import { useUpdateTableConfig } from '../hooks/use-update-table-config';
 import type { SettingsTabId } from '../types/settings';
+import { validateTableConfig } from '../utils/settings-validation';
 
 // Layout components
 import { SettingsLayout } from '../components/settings/settings-layout';
@@ -119,63 +120,29 @@ export const ActiveTableSettingsPageV2 = () => {
     setLocalConfig((prev) => (prev ? { ...prev, ...updates } : null));
   }, []);
 
-  // Clean config before saving - remove incomplete configurations
-  const cleanConfigForSave = useCallback((config: TableConfig): TableConfig => {
-    const cleaned = { ...config };
-
-    // Remove recordListConfig if it's incomplete
-    if (cleaned.recordListConfig) {
-      const listConfig = cleaned.recordListConfig as any;
-
-      // For head-column layout, remove if titleField is empty
-      if (listConfig.layout === 'head-column' && !listConfig.titleField) {
-        cleaned.recordListConfig = undefined;
-      }
-
-      // For generic-table layout, remove if displayFields is empty
-      if (
-        listConfig.layout === 'generic-table' &&
-        (!listConfig.displayFields || listConfig.displayFields.length === 0)
-      ) {
-        cleaned.recordListConfig = undefined;
-      }
-    }
-
-    // Remove recordDetailConfig if headTitleField is empty
-    // headTitleField is optional, so we only remove if the entire config is essentially empty
-    if (cleaned.recordDetailConfig) {
-      const detailConfig = cleaned.recordDetailConfig as any;
-
-      // Check if config is essentially empty (no meaningful fields selected)
-      const hasContent =
-        detailConfig.headTitleField ||
-        (detailConfig.headSubLineFields && detailConfig.headSubLineFields.length > 0) ||
-        (detailConfig.rowTailFields && detailConfig.rowTailFields.length > 0) ||
-        (detailConfig.column1Fields && detailConfig.column1Fields.length > 0) ||
-        (detailConfig.column2Fields && detailConfig.column2Fields.length > 0);
-
-      if (!hasContent) {
-        cleaned.recordDetailConfig = undefined;
-      }
-    }
-
-    return cleaned;
-  }, []);
+  // Validate config
+  const validationErrors = useMemo(() => (localConfig ? validateTableConfig(localConfig) : []), [localConfig]);
 
   // Save changes
   const handleSave = useCallback(() => {
     if (!localConfig) return;
 
-    // Clean config before saving
-    const cleanedConfig = cleanConfigForSave(localConfig);
+    // Validate before saving
+    const errors = validateTableConfig(localConfig);
+    if (errors.length > 0) {
+      toast.error('Validation failed', {
+        description: 'Please fix the errors before saving.',
+      });
+      return;
+    }
 
     updateConfig.mutate({
-      config: cleanedConfig,
+      config: localConfig,
       metadata: {
         name: localConfig.title,
       },
     });
-  }, [localConfig, cleanConfigForSave, updateConfig]);
+  }, [localConfig, updateConfig]);
 
   // Cancel changes
   const handleCancel = useCallback(() => {
@@ -286,8 +253,10 @@ export const ActiveTableSettingsPageV2 = () => {
               {/* Actions Settings */}
               <SettingsTabContent value="actions">
                 <ActionsSettingsSection
-                  actions={(localConfig.actions as Action[]) || []}
-                  onChange={(newActions) => handleConfigChange({ actions: newActions })}
+                  actions={(localConfig.actions as unknown as Action[]) || []}
+                  onChange={(newActions) =>
+                    handleConfigChange({ actions: newActions as unknown as typeof localConfig.actions })
+                  }
                 />
               </SettingsTabContent>
 
@@ -295,19 +264,28 @@ export const ActiveTableSettingsPageV2 = () => {
               <SettingsTabContent value="list-view">
                 <ListViewSettingsSection
                   config={
-                    (localConfig.recordListConfig as RecordListConfig) || { layout: 'generic-table', displayFields: [] }
+                    (localConfig.recordListConfig as unknown as RecordListConfig) || {
+                      layout: 'generic-table',
+                      displayFields: [],
+                    }
                   }
                   fields={fields.map((f) => ({ name: f.name, label: f.label, type: f.type }))}
-                  onChange={(newConfig) => handleConfigChange({ recordListConfig: newConfig as any })}
+                  onChange={(newConfig) =>
+                    handleConfigChange({
+                      recordListConfig: newConfig as unknown as typeof localConfig.recordListConfig,
+                    })
+                  }
                 />
               </SettingsTabContent>
 
               {/* Quick Filters */}
               <SettingsTabContent value="quick-filters">
                 <QuickFiltersSection
-                  quickFilters={(localConfig.quickFilters as QuickFilter[]) || []}
+                  quickFilters={(localConfig.quickFilters as unknown as QuickFilter[]) || []}
                   fields={fields.map((f) => ({ name: f.name, label: f.label, type: f.type }))}
-                  onChange={(newFilters) => handleConfigChange({ quickFilters: newFilters as any })}
+                  onChange={(newFilters) =>
+                    handleConfigChange({ quickFilters: newFilters as unknown as typeof localConfig.quickFilters })
+                  }
                 />
               </SettingsTabContent>
 
@@ -315,7 +293,7 @@ export const ActiveTableSettingsPageV2 = () => {
               <SettingsTabContent value="detail-view">
                 <DetailViewSettingsSection
                   config={
-                    (localConfig.recordDetailConfig as RecordDetailConfig) || {
+                    (localConfig.recordDetailConfig as unknown as RecordDetailConfig) || {
                       layout: 'head-detail',
                       commentsPosition: 'right-panel',
                       headTitleField: '',
@@ -324,7 +302,11 @@ export const ActiveTableSettingsPageV2 = () => {
                     }
                   }
                   fields={fields.map((f) => ({ name: f.name, label: f.label, type: f.type }))}
-                  onChange={(newConfig) => handleConfigChange({ recordDetailConfig: newConfig as any })}
+                  onChange={(newConfig) =>
+                    handleConfigChange({
+                      recordDetailConfig: newConfig as unknown as typeof localConfig.recordDetailConfig,
+                    })
+                  }
                 />
               </SettingsTabContent>
 
@@ -340,9 +322,11 @@ export const ActiveTableSettingsPageV2 = () => {
               {/* Gantt Settings */}
               <SettingsTabContent value="gantt">
                 <GanttSettingsSection
-                  ganttConfigs={(localConfig.ganttCharts as GanttConfig[]) || []}
+                  ganttConfigs={(localConfig.ganttCharts as unknown as GanttConfig[]) || []}
                   fields={fields.map((f) => ({ name: f.name, label: f.label, type: f.type }))}
-                  onChange={(newConfigs) => handleConfigChange({ ganttCharts: newConfigs as any })}
+                  onChange={(newConfigs) =>
+                    handleConfigChange({ ganttCharts: newConfigs as unknown as typeof localConfig.ganttCharts })
+                  }
                 />
               </SettingsTabContent>
 
@@ -350,7 +334,7 @@ export const ActiveTableSettingsPageV2 = () => {
               <SettingsTabContent value="permissions">
                 <PermissionsSettingsSection
                   permissionsConfig={localConfig.permissionsConfig || []}
-                  actions={(localConfig.actions as Action[]) || []}
+                  actions={(localConfig.actions as unknown as Action[]) || []}
                   workspaceId={workspaceId}
                   onChange={(newPermissions) => handleConfigChange({ permissionsConfig: newPermissions })}
                 />
@@ -375,6 +359,7 @@ export const ActiveTableSettingsPageV2 = () => {
               isSaving={updateConfig.isPending}
               onSave={handleSave}
               onCancel={handleCancel}
+              validationErrors={validationErrors}
             />
           }
         >
