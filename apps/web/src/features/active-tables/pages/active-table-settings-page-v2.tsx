@@ -100,8 +100,8 @@ export const ActiveTableSettingsPageV2 = () => {
   // Update table config mutation
   const updateConfig = useUpdateTableConfig(workspaceId, tableId, table || null, {
     onSuccess: () => {
-      toast.success(m.settings_toast_success_title(), {
-        description: m.settings_toast_success_description(),
+      toast.success(m.settings_save_success(), {
+        description: m.settings_save_successDescription(),
       });
       // Update original config to match saved state
       if (localConfig) {
@@ -109,8 +109,8 @@ export const ActiveTableSettingsPageV2 = () => {
       }
     },
     onError: (err) => {
-      toast.error(m.settings_toast_error_title(), {
-        description: err.message || m.settings_toast_error_description(),
+      toast.error(m.settings_save_error(), {
+        description: err.message || 'Failed to save table configuration',
       });
     },
   });
