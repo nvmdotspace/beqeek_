@@ -91,17 +91,3 @@ export function isValidTable(obj: unknown): obj is Table {
     typeof candidate.config === 'object'
   );
 }
-
-// ============================================
-// Legacy Type Aliases (for backward compatibility)
-// ============================================
-
-/**
- * @deprecated Use WorkGroup instead
- */
-export type ActiveWorkGroup = WorkGroup;
-
-/**
- * @deprecated Use Table instead
- */
-export type ActiveTable = Table;

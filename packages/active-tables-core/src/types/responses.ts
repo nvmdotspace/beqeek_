@@ -108,22 +108,3 @@ export interface RecordsResponse {
   /** Offset for page-based pagination */
   offset?: number;
 }
-
-// ============================================
-// Legacy Type Aliases (for backward compatibility)
-// ============================================
-
-/**
- * @deprecated Use WorkGroupsResponse instead
- */
-export type ActiveWorkGroupsResponse = WorkGroupsResponse;
-
-/**
- * @deprecated Use TablesResponse instead
- */
-export type ActiveTablesResponse = TablesResponse;
-
-/**
- * @deprecated Use RecordsResponse instead
- */
-export type ActiveRecordsResponse = RecordsResponse;

@@ -312,7 +312,7 @@ export function FieldFormModal({
     }
 
     const fieldConfig: ReferenceFieldConfig = {
-      type: formData.type as string,
+      type: formData.type as FieldType,
       label: formData.label.trim(),
       name: formData.name.trim(),
       placeholder: formData.placeholder.trim() || undefined,

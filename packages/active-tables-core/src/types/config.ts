@@ -232,17 +232,3 @@ export function getKanbanConfig(config: TableConfig, screenId: string): KanbanCo
 export function getGanttConfig(config: TableConfig, screenId: string): GanttConfig | undefined {
   return config.ganttCharts?.find((g) => g.ganttScreenId === screenId);
 }
-
-// ============================================
-// Legacy Type Aliases (for backward compatibility)
-// ============================================
-
-/**
- * @deprecated Use TableConfig instead
- */
-export type ActiveTableConfig = TableConfig;
-
-/**
- * @deprecated Use GanttConfig instead
- */
-export type GanttChart = GanttConfig;

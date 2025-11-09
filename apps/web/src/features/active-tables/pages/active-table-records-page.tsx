@@ -10,10 +10,12 @@ import {
   decryptRecords,
   KanbanBoard,
   GanttChartView,
+  RecordList,
   type TableRecord,
-  type ActiveTable,
+  type Table,
 } from '@workspace/active-tables-core';
 import { ROUTES } from '@/shared/route-paths';
+import { RECORD_LIST_LAYOUT_GENERIC_TABLE } from '@workspace/beqeek-shared';
 
 import { Button } from '@workspace/ui/components/button';
 import { Badge } from '@workspace/ui/components/badge';
@@ -25,7 +27,6 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@workspace/ui/componen
 // Components
 import { generateMockTableConfig, generateMockRecords } from '../lib/mock-data';
 import { ErrorCard } from '@/components/error-display';
-import { RecordListView } from '../components/record-list-view';
 
 const LoadingState = () => (
   <div className="space-y-4">
@@ -77,7 +78,7 @@ export const ActiveTableRecordsPage = () => {
   const mockRecords = useMemo(() => generateMockRecords(12), []);
 
   // Use mock data or real data
-  const mockTable: ActiveTable = {
+  const mockTable: Table = {
     id: table?.id || 'mock-table-id',
     name: table?.name || 'Project Tasks - BEQEEK',
     workGroupId: table?.workGroupId || 'mock-workgroup-id',
@@ -88,7 +89,7 @@ export const ActiveTableRecordsPage = () => {
     updatedAt: table?.updatedAt,
   };
 
-  const displayTable: ActiveTable | null = useMockData ? mockTable : (table ?? null);
+  const displayTable: Table | null = useMockData ? mockTable : (table ?? null);
   const displayRecords = useMockData ? mockRecords : decryptedRecords;
 
   useEffect(() => {
@@ -460,12 +461,13 @@ export const ActiveTableRecordsPage = () => {
 
         {/* List View */}
         <TabsContent value="list" className="mt-6">
-          <RecordListView
+          <RecordList
             table={displayTable}
             records={filteredRecords}
-            isDecrypting={isDecrypting}
-            loading={false}
-            onRecordClick={(recordId) => handleViewRecord(recordId)}
+            config={displayTable.config.recordListConfig || { layout: RECORD_LIST_LAYOUT_GENERIC_TABLE }}
+            loading={isDecrypting || false}
+            onRecordClick={(record) => handleViewRecord(record)}
+            encryptionKey={encryption.encryptionKey || undefined}
           />
 
           {/* Pagination (TODO) */}

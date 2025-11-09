@@ -150,17 +150,3 @@ export function isValidActionConfig(action: unknown): action is ActionConfig {
     isValidActionType(candidate.type)
   );
 }
-
-// ============================================
-// Legacy Type Aliases (for backward compatibility)
-// ============================================
-
-/**
- * @deprecated Use ActionConfig instead
- */
-export type ActiveTableAction = ActionConfig;
-
-/**
- * @deprecated Use QuickFilterConfig instead
- */
-export type ActiveTableQuickFilter = QuickFilterConfig;

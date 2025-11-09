@@ -127,17 +127,3 @@ export function hasPermission(record: TableRecord, action: 'access' | 'update' |
 
   return record.permissions[action] ?? false;
 }
-
-// ============================================
-// Legacy Type Aliases (for backward compatibility)
-// ============================================
-
-/**
- * @deprecated Use TableRecord instead
- */
-export type ActiveTableRecord = TableRecord;
-
-/**
- * @deprecated Use RecordPermissions instead
- */
-export type ActiveTableRecordPermissions = RecordPermissions;

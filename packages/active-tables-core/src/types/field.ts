@@ -260,17 +260,3 @@ export function isValidFieldConfig(field: unknown): field is FieldConfig {
     isValidFieldType(candidate.type)
   );
 }
-
-// ============================================
-// Legacy Type Aliases (for backward compatibility)
-// ============================================
-
-/**
- * @deprecated Use FieldOption instead
- */
-export type ActiveTableOption = FieldOption;
-
-/**
- * @deprecated Use FieldConfig instead
- */
-export type ActiveFieldConfig = FieldConfig;
