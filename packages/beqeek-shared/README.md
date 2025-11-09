@@ -12,6 +12,51 @@ This package provides system-wide constants and validation helpers for the Beqee
 pnpm add @workspace/beqeek-shared
 ```
 
+## Quick Reference for Claude Code & Developers
+
+### Import Patterns
+
+```typescript
+// ✅ ALWAYS import constants instead of hardcoding
+import {
+  // Action types
+  ACTION_TYPE_COMMENT_CREATE,
+  COMMENT_ACTION_TYPES,
+
+  // Permission arrays for UI dropdowns
+  COMMENT_CREATE_PERMISSIONS,
+  COMMENT_ACCESS_PERMISSIONS,
+  COMMENT_MODIFY_PERMISSIONS,
+
+  // Field types
+  FIELD_TYPE_SHORT_TEXT,
+  TEXT_FIELD_TYPES,
+
+  // Layouts
+  RECORD_LIST_LAYOUT_GENERIC_TABLE,
+
+  // Types
+  type CommentActionType,
+  type FieldType,
+} from '@workspace/beqeek-shared';
+```
+
+### Anti-Patterns to Avoid
+
+```typescript
+// ❌ NEVER hardcode these values:
+const COMMENT_CREATE_OPTIONS = ['not_allowed', 'all', ...]; // DON'T DO THIS
+type CommentActionType = 'comment_create' | 'comment_access' | ...; // DON'T DO THIS
+const FIELD_TYPES = { SHORT_TEXT: 'SHORT_TEXT' }; // DON'T DO THIS
+
+// ✅ ALWAYS import from package:
+import {
+  COMMENT_CREATE_PERMISSIONS,
+  type CommentActionType,
+  FIELD_TYPE_SHORT_TEXT
+} from '@workspace/beqeek-shared';
+```
+
 ## Usage
 
 ### Field Types

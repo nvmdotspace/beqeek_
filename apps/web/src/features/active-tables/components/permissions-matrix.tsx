@@ -12,12 +12,18 @@ import { ScrollArea } from '@workspace/ui/components/scroll-area';
 import { Separator } from '@workspace/ui/components/separator';
 import { toast } from '@workspace/ui/components/sonner';
 
+import {
+  COMMENT_ACTION_TYPES,
+  COMMENT_CREATE_PERMISSIONS,
+  COMMENT_ACCESS_PERMISSIONS,
+  COMMENT_MODIFY_PERMISSIONS,
+  type CommentActionType,
+} from '@workspace/beqeek-shared';
+
 import type { ActiveTable, PermissionsConfig } from '../types';
 import { updateActiveTable } from '../api/active-tables-api';
 import { activeTablesQueryKey } from '../hooks/use-active-tables';
 import { useWorkspaceTeamsWithRoles } from '@/features/workspace/hooks/use-workspace-teams-with-roles';
-
-type CommentActionType = 'comment_create' | 'comment_access' | 'comment_update' | 'comment_delete';
 
 interface SelectionState {
   comment_create: string;
@@ -30,36 +36,6 @@ interface PermissionsMatrixProps {
   workspaceId: string;
   table: ActiveTable;
 }
-
-const COMMENT_CREATE_OPTIONS = [
-  'not_allowed',
-  'all',
-  'related_team_member',
-  'created_or_assigned_team_member',
-  'created_or_related_team_member',
-] as const;
-
-const COMMENT_ACCESS_OPTIONS = [
-  'not_allowed',
-  'all',
-  'comment_self_created',
-  'comment_self_created_or_tagged',
-  'comment_created_by_team',
-  'comment_created_or_tagged_team_member',
-] as const;
-
-const COMMENT_UPDATE_OPTIONS = [
-  'not_allowed',
-  'all',
-  'comment_self_created',
-  'comment_self_created_2h',
-  'comment_self_created_12h',
-  'comment_self_created_24h',
-  'comment_created_by_team',
-  'comment_created_by_team_2h',
-  'comment_created_by_team_12h',
-  'comment_created_by_team_24h',
-] as const;
 
 const translateOption = (value: string) => {
   switch (value) {
@@ -287,20 +263,13 @@ export const PermissionsMatrix = ({ workspaceId, table }: PermissionsMatrixProps
                       <tr key={key} className="hover:bg-muted/20">
                         <td className="px-3 py-3 text-sm font-medium text-foreground">{team.teamName}</td>
                         <td className="px-3 py-3 text-sm text-muted-foreground">{role.roleName}</td>
-                        {(
-                          [
-                            'comment_create',
-                            'comment_access',
-                            'comment_update',
-                            'comment_delete',
-                          ] as CommentActionType[]
-                        ).map((action) => {
+                        {COMMENT_ACTION_TYPES.map((action) => {
                           const options =
                             action === 'comment_create'
-                              ? COMMENT_CREATE_OPTIONS
+                              ? COMMENT_CREATE_PERMISSIONS
                               : action === 'comment_access'
-                                ? COMMENT_ACCESS_OPTIONS
-                                : COMMENT_UPDATE_OPTIONS;
+                                ? COMMENT_ACCESS_PERMISSIONS
+                                : COMMENT_MODIFY_PERMISSIONS;
                           return (
                             <td key={`${key}-${action}`} className="px-3 py-3">
                               <Select
