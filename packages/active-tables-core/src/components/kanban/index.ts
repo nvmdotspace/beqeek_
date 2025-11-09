@@ -3,12 +3,8 @@
  *
  * Export all Kanban-related components and types
  */
-
-// Main component
-export { KanbanBoard } from './kanban-board.js';
-
 // V2 with better animations (using shadcn/ui kanban)
-export { KanbanBoardV2 } from './kanban-board-v2.js';
+export { KanbanBoard } from './kanban-board.js';
 
 // Sub-components
 export { KanbanColumn } from './kanban-column.js';

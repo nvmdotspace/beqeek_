@@ -8,7 +8,7 @@ import { useUpdateRecordField } from '../hooks/use-update-record';
 import { useListContext } from '../hooks/use-list-context';
 import {
   decryptRecords,
-  KanbanBoardV2,
+  KanbanBoard,
   GanttChartView,
   type TableRecord,
   type ActiveTable,
@@ -480,7 +480,7 @@ export const ActiveTableRecordsPage = () => {
         <TabsContent value="kanban" className="mt-3 sm:mt-6 -mx-3 sm:mx-0">
           {kanbanConfig && displayTable.config && (
             <div className="kanban-mobile-wrapper">
-              <KanbanBoardV2
+              <KanbanBoard
                 table={displayTable}
                 records={displayRecords}
                 config={kanbanConfig}
