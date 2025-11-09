@@ -9,10 +9,17 @@ interface FieldBadgeProps {
   children: React.ReactNode;
   className?: string;
   variant?: 'default' | 'secondary' | 'destructive' | 'outline';
+  size?: 'base' | 'compact';
   style?: React.CSSProperties;
 }
 
-export function FieldBadge({ children, className = '', variant = 'default', style }: FieldBadgeProps) {
+export function FieldBadge({
+  children,
+  className = '',
+  variant = 'default',
+  size = 'compact',
+  style,
+}: FieldBadgeProps) {
   const baseClasses =
     'inline-flex items-center rounded-full border px-2 py-0.5 text-sm font-normal transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2';
 
@@ -23,8 +30,13 @@ export function FieldBadge({ children, className = '', variant = 'default', styl
     outline: 'border-border bg-background text-foreground',
   };
 
+  const sizeClasses = {
+    base: '',
+    compact: 'text-[11px] leading-[16px] tracking-tight',
+  };
+
   return (
-    <span className={`${baseClasses} ${variantClasses[variant]} ${className}`} style={style}>
+    <span className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`} style={style}>
       {children}
     </span>
   );

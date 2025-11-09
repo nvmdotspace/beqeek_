@@ -131,6 +131,7 @@ export const ActiveTableDetailPage = () => {
   const encryptionBadge = encryption.isE2EEEnabled ? (
     <Badge
       variant="outline"
+      size="compact"
       className={`flex items-center gap-2 ${
         encryption.keyValidationStatus === 'valid'
           ? 'border-green-500 text-green-700'
@@ -145,7 +146,7 @@ export const ActiveTableDetailPage = () => {
       {encryption.keyValidationStatus === 'valid' ? 'E2EE Active' : 'E2EE (Key Required)'}
     </Badge>
   ) : (
-    <Badge variant="secondary" className="flex items-center gap-2">
+    <Badge variant="secondary" size="compact" className="flex items-center gap-2">
       <Shield className="h-4 w-4" />
       Server Encryption
     </Badge>
@@ -201,7 +202,7 @@ export const ActiveTableDetailPage = () => {
               {m.activeTables_detail_backToList()}
             </Button>
             {workGroup ? (
-              <Badge variant="outline" className="flex items-center gap-2">
+              <Badge variant="outline" size="compact" className="flex items-center gap-2">
                 <ListTree className="h-3.5 w-3.5" />
                 {workGroup.name}
               </Badge>
@@ -216,11 +217,11 @@ export const ActiveTableDetailPage = () => {
 
         <div className="flex flex-wrap items-center gap-2">
           {encryptionBadge}
-          <Badge variant="outline" className="flex items-center gap-1">
+          <Badge variant="outline" size="compact" className="flex items-center gap-1">
             <LinkIcon className="h-3.5 w-3.5" />
             {m.activeTables_detail_tableType({ type: table.tableType })}
           </Badge>
-          <Badge variant="outline" className="flex items-center gap-1">
+          <Badge variant="outline" size="compact" className="flex items-center gap-1">
             <Lock className="h-3.5 w-3.5" />
             {m.activeTables_detail_fieldCount({ count: table.config?.fields?.length ?? 0 })}
           </Badge>
@@ -248,7 +249,7 @@ export const ActiveTableDetailPage = () => {
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-semibold">{m.activeTables_detail_fieldsTitle()}</h2>
-          <Badge variant="outline">
+          <Badge variant="outline" size="compact">
             {m.activeTables_detail_visibleFields({ count: table.config?.fields?.length ?? 0 })}
           </Badge>
         </div>

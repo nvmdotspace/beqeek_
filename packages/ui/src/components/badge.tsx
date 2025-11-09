@@ -18,9 +18,14 @@ const badgeVariants = cva(
           'bg-yellow-500/10 text-yellow-700 border-yellow-500/20 dark:bg-yellow-500/10 dark:text-yellow-400 dark:border-yellow-500/30',
         info: 'bg-blue-500/10 text-blue-700 border-blue-500/20 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/30',
       },
+      size: {
+        base: '',
+        compact: 'text-[11px] leading-[16px] tracking-tight',
+      },
     },
     defaultVariants: {
       variant: 'default',
+      size: 'base',
     },
   },
 );
@@ -28,9 +33,10 @@ const badgeVariants = cva(
 function Badge({
   className,
   variant,
+  size,
   ...props
 }: React.HTMLAttributes<HTMLSpanElement> & VariantProps<typeof badgeVariants>) {
-  return <span className={cn(badgeVariants({ variant }), className)} {...props} />;
+  return <span className={cn(badgeVariants({ variant, size }), className)} {...props} />;
 }
 
 export { Badge, badgeVariants };

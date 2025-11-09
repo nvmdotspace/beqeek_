@@ -5,7 +5,7 @@
  * Wraps encryption utilities with React state management
  */
 
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import {
   decryptFieldValue,
   decryptRecord,
@@ -32,7 +32,7 @@ export interface UseEncryptionOptions {
   /** Encryption auth key (for validation) */
   encryptionAuthKey?: string;
 
-  /** Auto-load key from localStorage on mount */
+  /** Autoload key from localStorage on mount */
   autoLoad?: boolean;
 }
 
@@ -232,7 +232,7 @@ export function useEncryption(options: UseEncryptionOptions = {}): UseEncryption
     [encryptionKey],
   );
 
-  // Auto-load on mount
+  // Autoload on mount
   useEffect(() => {
     if (autoLoad) {
       loadEncryptionKey();
@@ -274,8 +274,6 @@ export function useEncryption(options: UseEncryptionOptions = {}): UseEncryption
  * ```
  */
 export function useRecordDecryption(table: Table, _encryptionKey?: string) {
-  const _fields = useMemo(() => table.config.fields || [], [table.config.fields]);
-
   const decryptRecordFunc = useCallback((record: TableRecord): TableRecord => {
     // Note: This hook assumes records are already decrypted before being passed to components.
     // The actual decryption should happen at the API/data layer, not during render.

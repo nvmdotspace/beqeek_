@@ -5,7 +5,7 @@
  * Mobile-optimized design with Kanban-inspired visual consistency
  */
 
-import { useCallback } from 'react';
+import { Fragment, useCallback } from 'react';
 import type { ChangeEvent } from 'react';
 import type { LayoutProps } from './record-list-props.js';
 import type { TableRecord } from '../../types/record.js';
@@ -203,7 +203,7 @@ function CardContent({
       {hasSublineFields && (
         <>
           <div className="border-t border-border/30 pt-2">
-            <div className="flex flex-col gap-2">
+            <div className="grid grid-cols-[max-content_minmax(0,1fr)] gap-x-3 gap-y-2">
               {config.subLineFields!.map((fieldName: string) => {
                 const field = getFieldConfig(fieldName);
                 if (!field) return null;
@@ -214,9 +214,11 @@ function CardContent({
                 }
 
                 return (
-                  <div key={fieldName} className="flex items-start">
-                    <span className="text-xs font-medium text-muted-foreground mr-2 min-w-fit">{field.label}:</span>
-                    <div className="flex-1">
+                  <Fragment key={fieldName}>
+                    <span className="text-xs font-medium text-muted-foreground whitespace-nowrap leading-5">
+                      {field.label}:
+                    </span>
+                    <div className="min-w-0 leading-5">
                       <FieldListRenderer
                         field={field}
                         value={value}
@@ -227,7 +229,7 @@ function CardContent({
                         disableTruncate={true}
                       />
                     </div>
-                  </div>
+                  </Fragment>
                 );
               })}
             </div>

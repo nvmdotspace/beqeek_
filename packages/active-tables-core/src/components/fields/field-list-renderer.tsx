@@ -9,7 +9,7 @@ import type { FieldConfig } from '../../types/field.js';
 import type { Table } from '../../types/common.js';
 import type { CurrentUser, WorkspaceUser } from '../../types/responses.js';
 import type { ActiveTablesMessages } from '../../types/messages.js';
-import { FieldBadge } from '../common/field-badge.js';
+import { FieldBadge } from '../common/index.js';
 
 interface FieldListRendererProps {
   /** Field configuration */
@@ -47,6 +47,7 @@ function SelectFieldList({ field, value }: { field: FieldConfig; value: unknown 
             <FieldBadge
               key={val}
               variant={option?.background_color ? 'outline' : 'secondary'}
+              size="compact"
               style={
                 option?.background_color
                   ? {
@@ -73,6 +74,7 @@ function SelectFieldList({ field, value }: { field: FieldConfig; value: unknown 
   return (
     <FieldBadge
       variant={option?.background_color ? 'outline' : 'secondary'}
+      size="compact"
       style={
         option?.background_color
           ? {
