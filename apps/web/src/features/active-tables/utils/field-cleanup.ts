@@ -22,7 +22,7 @@ export function findFieldReferences(
 
   // Check kanban configurations
   if (config.kanbanConfigs) {
-    config.kanbanConfigs.forEach((kanban, index) => {
+    config.kanbanConfigs.forEach((kanban) => {
       if (kanban.statusField === fieldName) {
         references.push({
           location: 'Kanban Settings',

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Loader2, Shield, RotateCcw, Save } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-// @ts-ignore
+// @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@workspace/ui/components/card';
@@ -60,8 +60,6 @@ const COMMENT_UPDATE_OPTIONS = [
   'comment_created_by_team_12h',
   'comment_created_by_team_24h',
 ] as const;
-
-const COMMENT_DELETE_OPTIONS = COMMENT_UPDATE_OPTIONS;
 
 const translateOption = (value: string) => {
   switch (value) {

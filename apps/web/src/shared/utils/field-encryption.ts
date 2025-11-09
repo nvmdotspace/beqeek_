@@ -21,7 +21,7 @@ import type { FieldType } from '@workspace/beqeek-shared';
  * @param encryptionKey - 32-character encryption key from localStorage
  * @returns Encrypted value as hex string
  */
-export function encryptFieldValue(value: any, fieldType: FieldType, encryptionKey: string): string {
+export function encryptFieldValue(value: unknown, fieldType: FieldType, encryptionKey: string): string {
   if (value === null || value === undefined || value === '') {
     return '';
   }
@@ -38,15 +38,14 @@ export function encryptFieldValue(value: any, fieldType: FieldType, encryptionKe
       return CryptoJS.HmacSHA256(stringValue, encryptionKey).toString();
 
     case 'SHORT_TEXT':
+    case 'TEXT':
     case 'RICH_TEXT':
-    case 'LONG_TEXT':
       // AES-256-CBC for full encryption
       // Server cannot decrypt without key
       return CryptoJS.AES.encrypt(stringValue, encryptionKey).toString();
 
     case 'INTEGER':
     case 'NUMERIC':
-    case 'DECIMAL':
       // HMAC for now (loses ordering capability)
       // TODO: Implement OPE (Order-Preserving Encryption) for range queries
       return CryptoJS.HmacSHA256(stringValue, encryptionKey).toString();
@@ -58,8 +57,7 @@ export function encryptFieldValue(value: any, fieldType: FieldType, encryptionKe
       // TODO: Implement OPE for date range queries
       return CryptoJS.HmacSHA256(stringValue, encryptionKey).toString();
 
-    case 'BOOLEAN':
-    case 'CHECKBOX':
+    case 'CHECKBOX_YES_NO':
       // HMAC for boolean values
       return CryptoJS.HmacSHA256(stringValue, encryptionKey).toString();
 
@@ -88,17 +86,21 @@ export function encryptFieldValue(value: any, fieldType: FieldType, encryptionKe
  */
 export function buildEncryptedUpdatePayload(
   fieldName: string,
-  newValue: any,
+  newValue: unknown,
   fieldSchema: { type: FieldType },
   encryptionKey: string,
   hashedKeywordFields: string[] = [],
-) {
+): {
+  record: Record<string, string>;
+  hashed_keywords: Record<string, string>;
+  record_hashes: Record<string, string>;
+} {
   const encrypted = encryptFieldValue(newValue, fieldSchema.type, encryptionKey);
 
   const payload: {
-    record: Record<string, any>;
-    hashed_keywords: Record<string, any>;
-    record_hashes: Record<string, any>;
+    record: Record<string, string>;
+    hashed_keywords: Record<string, string>;
+    record_hashes: Record<string, string>;
   } = {
     record: { [fieldName]: encrypted },
     hashed_keywords: {},
@@ -143,7 +145,7 @@ export function buildEncryptedUpdatePayload(
  * @param newValue - New value
  * @returns Payload with plaintext value
  */
-export function buildPlaintextUpdatePayload(fieldName: string, newValue: any) {
+export function buildPlaintextUpdatePayload(fieldName: string, newValue: unknown) {
   return {
     record: { [fieldName]: newValue },
     hashed_keywords: {},

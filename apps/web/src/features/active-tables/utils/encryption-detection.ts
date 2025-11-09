@@ -56,7 +56,7 @@ export function analyzeRecordEncryption(record: ActiveTableRecord): EncryptionAn
   let encryptedFieldCount = 0;
 
   // Analyze all fields in the record
-  for (const [key, value] of Object.entries(record.record)) {
+  for (const [, value] of Object.entries(record.record)) {
     // Only analyze string values
     if (typeof value === 'string' && value.length > 0) {
       totalStringFields++;

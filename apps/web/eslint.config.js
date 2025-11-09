@@ -1,4 +1,11 @@
-import { config as reactInternalConfig } from "@workspace/eslint-config/react-internal"
+import { config as reactInternalConfig } from '@workspace/eslint-config/react-internal';
 
-/** @type {import("eslint").Linter.Config} */
-export default reactInternalConfig
+const sharedConfig = Array.isArray(reactInternalConfig) ? reactInternalConfig : [reactInternalConfig];
+
+/** @type {import("eslint").Linter.Config[]} */
+export default [
+  {
+    ignores: ['src/paraglide/**'],
+  },
+  ...sharedConfig,
+];

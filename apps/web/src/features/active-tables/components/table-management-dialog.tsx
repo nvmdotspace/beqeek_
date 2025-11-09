@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useForm } from '@tanstack/react-form';
 import { Eye, EyeOff, ChevronDown, ChevronUp } from 'lucide-react';
 
-// @ts-ignore
+// @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
 
 import { Button } from '@workspace/ui/components/button';
@@ -75,14 +75,17 @@ export const TableManagementDialog = ({
   const [showFieldsConfig, setShowFieldsConfig] = useState(true);
 
   // Initialize form with proper default values
-  const getDefaultValues = () => ({
-    name: table?.name || '',
-    description: table?.description || '',
-    workGroupId: table?.workGroupId || '',
-    tableType: table?.tableType || '',
-    e2eeEncryption: table?.config?.e2eeEncryption || false,
-    encryptionKey: table?.config?.encryptionKey || '',
-  });
+  const getDefaultValues = useCallback(
+    () => ({
+      name: table?.name || '',
+      description: table?.description || '',
+      workGroupId: table?.workGroupId || '',
+      tableType: table?.tableType || '',
+      e2eeEncryption: table?.config?.e2eeEncryption || false,
+      encryptionKey: table?.config?.encryptionKey || '',
+    }),
+    [table],
+  );
 
   const form = useForm({
     defaultValues: getDefaultValues(),
@@ -167,7 +170,7 @@ export const TableManagementDialog = ({
       setFields([]);
       form.reset();
     }
-  }, [table]);
+  }, [table, form, getDefaultValues]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

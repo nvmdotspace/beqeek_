@@ -2,13 +2,13 @@ import { apiRequest } from '@/shared/api/http-client';
 
 export interface ActionTriggerRequest {
   responseId: string;
-  workflowData: Record<string, any>;
-  extraData?: Record<string, any>;
+  workflowData: Record<string, unknown>;
+  extraData?: Record<string, unknown>;
 }
 
 export interface ActionResponse {
   message: string;
-  data?: any;
+  data?: Record<string, unknown>;
 }
 
 // Endpoints
@@ -37,7 +37,7 @@ export const generateResponseId = (): string => {
 };
 
 // Helper function to prepare workflow data
-export const prepareWorkflowData = (record: Record<string, any>): Record<string, any> => {
+export const prepareWorkflowData = (record: Record<string, unknown>): Record<string, unknown> => {
   return {
     ...record,
     timestamp: new Date().toISOString(),

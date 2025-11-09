@@ -6,7 +6,6 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Button } from '@workspace/ui/components/button';
 import { Label } from '@workspace/ui/components/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@workspace/ui/components/select';
 import { ScrollArea } from '@workspace/ui/components/scroll-area';
@@ -20,7 +19,7 @@ import {
   COMMENT_MODIFY_PERMISSIONS,
 } from '@workspace/beqeek-shared';
 import { SettingsSection } from '../settings-layout';
-// @ts-ignore - Paraglide generates JS without .d.ts files
+// @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
 
 export interface PermissionConfig {

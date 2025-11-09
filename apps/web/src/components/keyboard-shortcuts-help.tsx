@@ -73,7 +73,7 @@ export const KeyboardShortcutsHelp = ({ open, onOpenChange }: KeyboardShortcutsH
 
           <div className="pt-4 border-t">
             <p className="text-sm text-muted-foreground">
-              <strong>Tip:</strong> Keyboard shortcuts don't work when you're typing in input fields or text areas.
+              <strong>Tip:</strong> Keyboard shortcuts do not work when you are typing in input fields or text areas.
             </p>
           </div>
         </div>

@@ -132,7 +132,7 @@ export function FieldOptionsEditor({ options, onChange, error, errorMessage }: F
         optionIdsRef.current.set(idx, `option-${nextIdRef.current++}`);
       });
     }
-  }, [options.length]);
+  }, [options]);
 
   const getOptionKey = (index: number): string => {
     if (!optionIdsRef.current.has(index)) {

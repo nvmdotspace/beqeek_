@@ -2,7 +2,7 @@ import { cn } from '@workspace/ui/lib/utils';
 import { Button } from '@workspace/ui/components/button';
 import { Badge } from '@workspace/ui/components/badge';
 import { Clock, Database, Workflow, FileText, X, TrendingUp, Activity } from 'lucide-react';
-// @ts-ignore
+// @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
 import { useSidebarStore, selectRecentItems, selectCurrentWorkspace } from '@/stores/sidebar-store';
 import type { RecentItem } from '@/stores/sidebar-store';
@@ -68,28 +68,26 @@ export const ActivityTracking = ({ isCollapsed = false, className }: ActivityTra
   const recentItems = useSidebarStore(selectRecentItems);
   const { removeRecentItem, clearRecentItems } = useSidebarStore();
 
-  const handleItemClick = (item: RecentItem) => {
-    // Navigate to the item based on type
-    let href = '';
+  const buildItemHref = (item: RecentItem) => {
     switch (item.type) {
       case 'table':
-        href = `/workspaces/tables/${item.id}`;
-        break;
+        return `/workspaces/tables/${item.id}`;
       case 'workflow':
-        href = `/workflows/${item.id}`;
-        break;
+        return `/workflows/${item.id}`;
       case 'form':
-        href = `/forms/${item.id}`;
-        break;
+        return `/forms/${item.id}`;
       case 'record':
-        href = `/workspaces/tables/${item.tableId}/records/${item.id}`;
-        break;
+        return item.tableId ? `/workspaces/tables/${item.tableId}/records/${item.id}` : '/workspaces';
       default:
-        href = '/workspaces';
+        return '/workspaces';
     }
+  };
 
-    // Update the accessed time when clicking
-    // This would be handled by the navigation system
+  const handleItemClick = (item: RecentItem) => {
+    const href = buildItemHref(item);
+    if (href) {
+      window.location.assign(href);
+    }
   };
 
   const handleRemoveItem = (e: React.MouseEvent, itemId: string) => {

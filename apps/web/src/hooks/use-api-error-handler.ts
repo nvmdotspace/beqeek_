@@ -8,7 +8,6 @@ import { ApiError } from '@/shared/api/api-error';
 export const useApiErrorHandler = () => {
   const router = useRouter();
   const logout = useAuthStore((state) => state.logout);
-  const getLocalizedPath = useLanguageStore((state) => state.getLocalizedPath);
 
   const handleError = useCallback(
     (error: unknown) => {
@@ -25,7 +24,7 @@ export const useApiErrorHandler = () => {
 
       return false; // Error was not handled
     },
-    [router, logout, getLocalizedPath],
+    [router, logout],
   );
 
   return { handleError };

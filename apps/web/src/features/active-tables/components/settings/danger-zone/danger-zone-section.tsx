@@ -18,7 +18,7 @@ import {
 import { Input } from '@workspace/ui/components/input';
 import { Label } from '@workspace/ui/components/label';
 import { SettingsSection } from '../settings-layout';
-// @ts-ignore - Paraglide generates JS without .d.ts files
+// @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
 
 export interface DangerZoneSectionProps {

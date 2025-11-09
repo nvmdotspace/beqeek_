@@ -41,6 +41,8 @@ npm-debug.log*
 .DS_Store
 *.pem
 .pnpm-store/
+.tests-dist/
+.web-tests-dist/
 
 # Ai editor
 .trae

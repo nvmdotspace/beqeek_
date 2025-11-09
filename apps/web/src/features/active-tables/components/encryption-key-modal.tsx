@@ -66,6 +66,7 @@ export function EncryptionKeyModal({ isOpen, onClose, table, workspaceId, onKeyS
       setKeyInput('');
       onClose();
     } catch (error) {
+      console.error('Failed to save encryption key:', error);
       setValidationError('Failed to save encryption key');
     } finally {
       setIsSaving(false);

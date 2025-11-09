@@ -10,13 +10,13 @@ import {
   type UpdateTableRequest,
 } from '../api/active-tables-api';
 import type { TableFormData } from '../components/table-management-dialog';
-import { TEXT_FIELD_TYPES, initDefaultActions } from '@workspace/beqeek-shared';
+import { TEXT_FIELD_TYPES, initDefaultActions, type FieldType } from '@workspace/beqeek-shared';
 import {
   RECORD_LIST_LAYOUT_GENERIC_TABLE,
   RECORD_DETAIL_LAYOUT_HEAD_DETAIL,
   COMMENTS_POSITION_RIGHT_PANEL,
 } from '@workspace/beqeek-shared/constants/layouts';
-// @ts-ignore
+// @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
 
 export interface UseTableManagementOptions {
@@ -50,8 +50,37 @@ function hashKeyForAuth(key: string): string {
  * Auto-generate hashed keyword fields from text-type fields
  * These fields will be indexed for full-text search on encrypted data
  */
+type TextFieldType = (typeof TEXT_FIELD_TYPES)[number];
+
+const textFieldTypeSet = new Set<TextFieldType>(TEXT_FIELD_TYPES);
+
+const isTextFieldType = (type: FieldType): type is TextFieldType => textFieldTypeSet.has(type as TextFieldType);
+
 function generateHashedKeywordFields(fields: TableFormData['fields']): string[] {
-  return fields.filter((field) => TEXT_FIELD_TYPES.includes(field.type as any)).map((field) => field.name);
+  return fields.filter((field) => isTextFieldType(field.type as FieldType)).map((field) => field.name);
+}
+
+function extractErrorMessage(error: unknown, fallback: string): string {
+  if (typeof error === 'object' && error !== null) {
+    const maybeError = error as {
+      response?: { data?: { message?: string; error?: string } };
+      message?: string;
+    };
+
+    if (typeof maybeError.response?.data?.message === 'string') {
+      return maybeError.response.data.message;
+    }
+
+    if (typeof maybeError.response?.data?.error === 'string') {
+      return maybeError.response.data.error;
+    }
+
+    if (typeof maybeError.message === 'string') {
+      return maybeError.message;
+    }
+  }
+
+  return fallback;
 }
 
 /**
@@ -163,20 +192,9 @@ export function useTableManagement({
       queryClient.invalidateQueries({ queryKey: ['active-tables', workspaceId] });
       onSuccess?.('Table created successfully');
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       console.error('Failed to create table:', error);
-
-      // Extract error message from response
-      let errorMessage = 'Failed to create table. Please try again.';
-
-      if (error?.response?.data?.message) {
-        errorMessage = error.response.data.message;
-      } else if (error?.response?.data?.error) {
-        errorMessage = error.response.data.error;
-      } else if (error?.message) {
-        errorMessage = error.message;
-      }
-
+      const errorMessage = extractErrorMessage(error, 'Failed to create table. Please try again.');
       onError?.(errorMessage);
     },
   });
@@ -247,20 +265,9 @@ export function useTableManagement({
       queryClient.invalidateQueries({ queryKey: ['active-tables', workspaceId] });
       onSuccess?.('Table updated successfully');
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       console.error('Failed to update table:', error);
-
-      // Extract error message from response
-      let errorMessage = 'Failed to update table. Please try again.';
-
-      if (error?.response?.data?.message) {
-        errorMessage = error.response.data.message;
-      } else if (error?.response?.data?.error) {
-        errorMessage = error.response.data.error;
-      } else if (error?.message) {
-        errorMessage = error.message;
-      }
-
+      const errorMessage = extractErrorMessage(error, 'Failed to update table. Please try again.');
       onError?.(errorMessage);
     },
   });
@@ -275,9 +282,10 @@ export function useTableManagement({
       queryClient.invalidateQueries({ queryKey: ['active-tables', workspaceId] });
       onSuccess?.('Table deleted successfully');
     },
-    onError: (error) => {
+    onError: (error: unknown) => {
       console.error('Failed to delete table:', error);
-      onError?.('Failed to delete table. Please try again.');
+      const message = extractErrorMessage(error, 'Failed to delete table. Please try again.');
+      onError?.(message);
     },
   });
 

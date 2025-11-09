@@ -4,15 +4,15 @@
  * Manages Kanban board configuration with support for multiple screens
  */
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Plus, Edit2, Trash2 } from 'lucide-react';
 import { Button } from '@workspace/ui/components/button';
 import { Badge } from '@workspace/ui/components/badge';
 import { ScrollArea } from '@workspace/ui/components/scroll-area';
-import { KANBAN_STATUS_VALID_FIELD_TYPES } from '@workspace/beqeek-shared';
+import { KANBAN_STATUS_VALID_FIELD_TYPES, type FieldType } from '@workspace/beqeek-shared';
 import { SettingsSection } from '../settings-layout';
 import { KanbanFormModal } from './kanban-form-modal';
-// @ts-ignore - Paraglide generates JS without .d.ts files
+// @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
 
 export interface KanbanConfig {
@@ -43,7 +43,11 @@ export function KanbanSettingsSection({ kanbanConfigs, fields, onChange }: Kanba
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
   // Filter eligible status fields (only single-choice fields)
-  const eligibleStatusFields = fields.filter((f) => KANBAN_STATUS_VALID_FIELD_TYPES.includes(f.type as any));
+  const statusFieldSet = useMemo(
+    () => new Set<FieldType>(KANBAN_STATUS_VALID_FIELD_TYPES.map((type) => type as FieldType)),
+    [],
+  );
+  const eligibleStatusFields = fields.filter((field) => statusFieldSet.has(field.type as FieldType));
 
   const handleAddConfig = () => {
     setEditingIndex(null);

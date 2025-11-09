@@ -4,10 +4,10 @@
  * Provides Save, Cancel, and Reset buttons for settings forms.
  */
 
-import { Save, X, RotateCcw, Loader2, AlertCircle } from 'lucide-react';
+import { Save, X, Loader2, AlertCircle } from 'lucide-react';
 import { Button } from '@workspace/ui/components/button';
 import { Alert, AlertDescription } from '@workspace/ui/components/alert';
-// @ts-ignore - Paraglide generates JS without .d.ts files
+// @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
 import type { ValidationError } from '../../utils/settings-validation';
 

@@ -19,7 +19,7 @@ import { Label } from '@workspace/ui/components/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@workspace/ui/components/select';
 import { generateUUIDv7 } from '@workspace/beqeek-shared';
 import type { Action } from './actions-settings-section';
-// @ts-ignore - Paraglide generates JS without .d.ts files
+// @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
 
 export interface ActionFormModalProps {

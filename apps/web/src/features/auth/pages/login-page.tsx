@@ -8,7 +8,7 @@ import { Input } from '@workspace/ui/components/input';
 import { useLogin } from '../hooks/use-login';
 import { useAuthStore, selectIsAuthenticated } from '../stores/auth-store';
 import { useLanguageStore } from '@/stores/language-store';
-// @ts-ignore
+// @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
 
 export const LoginPage = () => {

@@ -22,7 +22,7 @@ import {
   Workflow,
   Zap,
 } from 'lucide-react';
-// @ts-ignore
+// @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
 import {
   useSidebarStore,
@@ -226,7 +226,7 @@ export const NavigationMenu = ({ isCollapsed = false, className }: NavigationMen
         ],
       },
     ];
-  }, [badgeCounts, currentWorkspace, locale]);
+  }, [currentWorkspace, locale]);
 
   const isActive = (href?: string) => {
     if (!href) return false;
@@ -237,25 +237,8 @@ export const NavigationMenu = ({ isCollapsed = false, className }: NavigationMen
     toggleSection(sectionId);
   };
 
-  const findActiveSectionId = (items: NavigationItem[], path: string): string | null => {
-    for (const item of items) {
-      if (item.href && (path === item.href || path.startsWith(item.href + '/'))) {
-        return item.id;
-      }
-
-      if (item.children) {
-        const match = findActiveSectionId(item.children, path);
-        if (match) {
-          return match;
-        }
-      }
-    }
-
-    return null;
-  };
-
   useEffect(() => {
-    const matchedSection = findActiveSectionId(navigationStructure, location.pathname);
+    const matchedSection = findSectionForPath(navigationStructure, location.pathname);
     if (matchedSection && matchedSection !== activeSection) {
       setActiveSection(matchedSection);
     } else if (!matchedSection && activeSection !== 'dashboard') {
@@ -336,4 +319,21 @@ export const NavigationMenu = ({ isCollapsed = false, className }: NavigationMen
   return (
     <nav className={cn('space-y-2', className)}>{navigationStructure.map((item) => renderNavigationItem(item))}</nav>
   );
+};
+
+const findSectionForPath = (items: NavigationItem[], path: string): string | null => {
+  for (const item of items) {
+    if (item.href && (path === item.href || path.startsWith(item.href + '/'))) {
+      return item.id;
+    }
+
+    if (item.children) {
+      const match = findSectionForPath(item.children, path);
+      if (match) {
+        return match;
+      }
+    }
+  }
+
+  return null;
 };

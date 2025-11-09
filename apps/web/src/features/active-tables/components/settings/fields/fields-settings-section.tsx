@@ -26,6 +26,7 @@ import { FieldDeletionWarningDialog } from './field-deletion-warning-dialog';
 import { findFieldReferences, cleanupFieldReferences } from '../../../utils/field-cleanup';
 import { useActiveTables } from '../../../hooks/use-active-tables';
 import { getActiveTable } from '../../../api/active-tables-api';
+import { FieldOption } from '@workspace/encryption-core';
 
 export interface FieldsSettingsSectionProps {
   /** Current fields */
@@ -82,7 +83,7 @@ export function FieldsSettingsSection({
 
   // Fetch available tables for reference fields
   // Performance: Uses React Query cache with 2min staleTime
-  const { data: tablesResp, isLoading: tablesLoading } = useActiveTables(workspaceId);
+  const { data: tablesResp } = useActiveTables(workspaceId);
 
   // Memoize available tables list to prevent unnecessary re-renders
   // Performance tip from docs: Memoize field lists for large schemas
@@ -345,7 +346,7 @@ export function FieldsSettingsSection({
         {fields.length === 0 ? (
           <div className="rounded-lg border border-dashed p-12 text-center">
             <p className="text-sm text-muted-foreground">
-              No fields configured yet. Click "Add Field" to create your first field.
+              No fields configured yet. Click &quot;Add Field&quot; to create your first field.
             </p>
           </div>
         ) : (
@@ -402,7 +403,7 @@ export function FieldsSettingsSection({
                     {/* Note: defaultValue display will be added when field schema is updated */}
                     {field.options && field.options.length > 0 && (
                       <div className="flex flex-wrap gap-1 mt-2">
-                        {field.options.slice(0, 5).map((option: any, i: number) => (
+                        {field.options.slice(0, 5).map((option: FieldOption, i: number) => (
                           <span
                             key={i}
                             className="inline-block px-2 py-0.5 text-xs font-medium rounded-full"

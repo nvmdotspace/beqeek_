@@ -41,7 +41,8 @@ apiClient.interceptors.request.use(async (config) => {
   }
 
   const authStore = useAuthStore.getState();
-  let { accessToken, refreshToken } = authStore;
+  let { accessToken } = authStore;
+  const { refreshToken } = authStore;
 
   if (!accessToken && refreshToken) {
     const refreshed = await authStore.refreshTokenIfNeeded();

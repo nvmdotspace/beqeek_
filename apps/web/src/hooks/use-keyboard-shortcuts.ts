@@ -202,22 +202,6 @@ export const useAppKeyboardShortcuts = () => {
 // Hook for accessibility enhancements
 export const useAccessibilityEnhancements = () => {
   useEffect(() => {
-    // Announce dynamic content changes to screen readers
-    const announceToScreenReader = (message: string) => {
-      const announcement = document.createElement('div');
-      announcement.setAttribute('aria-live', 'polite');
-      announcement.setAttribute('aria-atomic', 'true');
-      announcement.className = 'sr-only';
-      announcement.textContent = message;
-
-      document.body.appendChild(announcement);
-
-      // Remove after announcement
-      setTimeout(() => {
-        document.body.removeChild(announcement);
-      }, 1000);
-    };
-
     // Add focus management for modal dialogs
     const handleFocusTrap = (event: KeyboardEvent) => {
       if (event.key === 'Tab') {

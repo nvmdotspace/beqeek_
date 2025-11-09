@@ -4,7 +4,7 @@
  * Manages Gantt chart configuration for project planning and timeline visualization
  */
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Plus, Edit2, Trash2 } from 'lucide-react';
 import { Button } from '@workspace/ui/components/button';
 import { Badge } from '@workspace/ui/components/badge';
@@ -13,10 +13,11 @@ import {
   GANTT_DATE_VALID_FIELD_TYPES,
   GANTT_PROGRESS_VALID_FIELD_TYPES,
   GANTT_DEPENDENCY_VALID_FIELD_TYPES,
+  type FieldType,
 } from '@workspace/beqeek-shared';
 import { SettingsSection } from '../settings-layout';
 import { GanttFormModal } from './gantt-form-modal';
-// @ts-ignore - Paraglide generates JS without .d.ts files
+// @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
 
 export interface GanttConfig {
@@ -49,9 +50,22 @@ export function GanttSettingsSection({ ganttConfigs, fields, onChange }: GanttSe
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
   // Filter eligible fields
-  const eligibleDateFields = fields.filter((f) => GANTT_DATE_VALID_FIELD_TYPES.includes(f.type as any));
-  const eligibleProgressFields = fields.filter((f) => GANTT_PROGRESS_VALID_FIELD_TYPES.includes(f.type as any));
-  const eligibleDependencyFields = fields.filter((f) => GANTT_DEPENDENCY_VALID_FIELD_TYPES.includes(f.type as any));
+  const dateFieldSet = useMemo(
+    () => new Set<FieldType>(GANTT_DATE_VALID_FIELD_TYPES.map((type) => type as FieldType)),
+    [],
+  );
+  const progressFieldSet = useMemo(
+    () => new Set<FieldType>(GANTT_PROGRESS_VALID_FIELD_TYPES.map((type) => type as FieldType)),
+    [],
+  );
+  const dependencyFieldSet = useMemo(
+    () => new Set<FieldType>(GANTT_DEPENDENCY_VALID_FIELD_TYPES.map((type) => type as FieldType)),
+    [],
+  );
+
+  const eligibleDateFields = fields.filter((field) => dateFieldSet.has(field.type as FieldType));
+  const eligibleProgressFields = fields.filter((field) => progressFieldSet.has(field.type as FieldType));
+  const eligibleDependencyFields = fields.filter((field) => dependencyFieldSet.has(field.type as FieldType));
 
   const canCreateGantt = eligibleDateFields.length >= 2; // Need at least start and end date
 

@@ -21,7 +21,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { generateUUIDv7 } from '@workspace/beqeek-shared';
 import { MultiSelectField } from '../multi-select-field';
 import type { KanbanConfig } from './kanban-settings-section';
-// @ts-ignore - Paraglide generates JS without .d.ts files
+// @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
 
 export interface KanbanFormModalProps {

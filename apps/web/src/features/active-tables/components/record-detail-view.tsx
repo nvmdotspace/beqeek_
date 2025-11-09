@@ -47,7 +47,18 @@ export function RecordDetailView({
   loading = false,
   className = '',
 }: RecordDetailViewProps) {
-  const config = tableConfig.recordDetailConfig;
+  const defaultTitleField = tableConfig.fields[0]?.name ?? '';
+  const baseDetailConfig: RecordDetailConfig = {
+    layout: RECORD_DETAIL_LAYOUT_HEAD_DETAIL,
+    commentsPosition: COMMENTS_POSITION_RIGHT_PANEL,
+    titleField: defaultTitleField,
+    subLineFields: [],
+    tailFields: [],
+    column1Fields: [],
+    column2Fields: [],
+    ...(tableConfig.recordDetailConfig ?? {}),
+  };
+  const config = baseDetailConfig;
 
   // Get field configurations
   const titleFieldName = config.titleField;
@@ -59,7 +70,7 @@ export function RecordDetailView({
     .filter((f): f is FieldConfig => f !== undefined);
 
   if (!titleField) {
-    return <div className="p-4 text-destructive">Error: Title field "{config.titleField}" not found</div>;
+    return <div className="p-4 text-destructive">Error: Title field &quot;{config.titleField}&quot; not found</div>;
   }
 
   // Determine layout

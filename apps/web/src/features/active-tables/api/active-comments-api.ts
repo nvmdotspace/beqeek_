@@ -4,7 +4,7 @@ export interface Comment {
   id: string;
   parentId?: string;
   commentContent: string;
-  hashed_keywords?: Record<string, any>;
+  hashed_keywords?: Record<string, unknown>;
   createdBy: {
     id: string;
     fullName: string;
@@ -23,7 +23,7 @@ export interface CommentsResponse {
 
 export interface CommentQueryParams {
   paging?: 'cursor';
-  filtering?: Record<string, any>;
+  filtering?: Record<string, unknown>;
   next_id?: string | null;
   direction?: 'asc' | 'desc';
   limit?: number;
@@ -33,13 +33,13 @@ export interface CreateCommentRequest {
   commentContent: string;
   parentId?: string;
   mentions?: string[];
-  hashed_keywords?: Record<string, any>;
+  hashed_keywords?: Record<string, unknown>;
 }
 
 export interface UpdateCommentRequest {
   commentContent: string;
   mentions?: string[];
-  hashed_keywords?: Record<string, any>;
+  hashed_keywords?: Record<string, unknown>;
 }
 
 // Endpoints

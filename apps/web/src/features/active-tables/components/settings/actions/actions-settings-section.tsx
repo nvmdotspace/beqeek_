@@ -11,11 +11,11 @@ import { Plus, Edit2, Trash2, Copy } from 'lucide-react';
 import { Button } from '@workspace/ui/components/button';
 import { Badge } from '@workspace/ui/components/badge';
 import { ScrollArea } from '@workspace/ui/components/scroll-area';
-import { initDefaultActions, type DefaultAction } from '@workspace/beqeek-shared';
+import { initDefaultActions } from '@workspace/beqeek-shared';
 import { toast } from '@workspace/ui/components/sonner';
 import { SettingsSection } from '../settings-layout';
 import { ActionFormModal } from './action-form-modal';
-// @ts-ignore - Paraglide generates JS without .d.ts files
+// @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
 
 export type ActionType =

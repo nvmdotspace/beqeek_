@@ -41,7 +41,8 @@ export function EncryptionStatusCard({ table, encryption, onEnterKey }: Encrypti
             Server-side Encryption
           </Badge>
           <p className="text-sm text-muted-foreground">
-            This table uses server-side encryption. No client-side encryption key is required.
+            The table <span className="font-medium">{table.name}</span> uses server-side encryption. No client-side
+            encryption key is required.
           </p>
         </CardContent>
       </Card>
@@ -64,8 +65,8 @@ export function EncryptionStatusCard({ table, encryption, onEnterKey }: Encrypti
             No Key Loaded
           </Badge>
           <p className="text-sm text-muted-foreground">
-            This table uses end-to-end encryption. You need to enter your encryption key to view and manage encrypted
-            records.
+            The table <span className="font-medium">{table.name}</span> uses end-to-end encryption. Enter your
+            encryption key to view and manage encrypted records.
           </p>
           <Button onClick={onEnterKey} className="w-full sm:w-auto">
             <Key className="mr-2 h-4 w-4" />
@@ -92,7 +93,8 @@ export function EncryptionStatusCard({ table, encryption, onEnterKey }: Encrypti
             Key Validation Failed
           </Badge>
           <p className="text-sm text-muted-foreground">
-            The stored encryption key is invalid or does not match this table. Please enter the correct encryption key.
+            The stored encryption key is invalid for <span className="font-medium">{table.name}</span>. Please enter the
+            correct encryption key.
           </p>
           <div className="flex gap-2">
             <Button onClick={onEnterKey} className="flex-1 sm:flex-none">
@@ -124,7 +126,8 @@ export function EncryptionStatusCard({ table, encryption, onEnterKey }: Encrypti
           Key Loaded & Valid
         </Badge>
         <p className="text-sm text-muted-foreground">
-          Your encryption key is loaded and validated. You can now view and manage encrypted records securely.
+          Your encryption key for <span className="font-medium">{table.name}</span> is loaded and validated. You can now
+          view and manage encrypted records securely.
         </p>
         <div className="flex gap-2">
           <Button variant="outline" onClick={onEnterKey} size="sm">

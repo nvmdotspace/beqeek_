@@ -5,7 +5,7 @@
  * This is a placeholder to fix broken imports after removing @workspace/active-tables-hooks
  */
 
-export function useActiveRecords(tableId?: string, workspaceId?: string) {
+export function useActiveRecords(_tableId?: string, _workspaceId?: string) {
   // For now, return empty/default values
   // In production, this should fetch and manage active table records
   return {

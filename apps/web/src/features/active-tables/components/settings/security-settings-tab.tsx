@@ -172,7 +172,7 @@ export const SecuritySettingsTab = ({ table, workspaceId }: SecuritySettingsTabP
                   If you lose this key, you will <strong>permanently lose access</strong> to your encrypted data
                 </li>
                 <li>Store this key in a secure password manager</li>
-                <li>Do not share this key with anyone you don't trust</li>
+                <li>Do not share this key with anyone you don&rsquo;t trust</li>
               </ul>
             </AlertDescription>
           </Alert>

@@ -61,7 +61,7 @@ export function useGanttRecords(
       }
 
       // Filter and transform records for Gantt display
-      const ganttRecords = transformRecordsForGantt(decryptedRecords, ganttConfig, table);
+      const ganttRecords = transformRecordsForGantt(decryptedRecords, ganttConfig);
 
       return {
         records: ganttRecords,
@@ -81,13 +81,8 @@ export function useGanttRecords(
  *
  * @param records - Raw records
  * @param ganttConfig - Gantt configuration
- * @param table - Table with field definitions
  */
-function transformRecordsForGantt(
-  records: ActiveTableRecord[],
-  ganttConfig: GanttConfig,
-  table: ActiveTable,
-): ActiveTableRecord[] {
+function transformRecordsForGantt(records: ActiveTableRecord[], ganttConfig: GanttConfig): ActiveTableRecord[] {
   const { startDateField, endDateField } = ganttConfig;
 
   return records.filter((record) => {

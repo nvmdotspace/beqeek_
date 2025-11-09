@@ -5,7 +5,7 @@
  */
 
 import { useState } from 'react';
-import { MessageSquare, Send, User } from 'lucide-react';
+import { MessageSquare, Send } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { Button } from '@workspace/ui/components/button';
 import { Textarea } from '@workspace/ui/components/textarea';
@@ -42,7 +42,7 @@ export interface CommentsPanelProps {
  * Comments panel with input and list
  */
 export function CommentsPanel({
-  recordId,
+  recordId: _recordId,
   comments = [],
   onCommentAdd,
   loading = false,
@@ -157,7 +157,7 @@ function CommentItem({ comment }: { comment: Comment }) {
 /**
  * Generate mock comments for preview
  */
-export function generateMockComments(recordId: string): Comment[] {
+export function generateMockComments(_recordId: string): Comment[] {
   return [
     {
       id: 'comment-1',

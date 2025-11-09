@@ -25,11 +25,6 @@ import { Badge } from '@workspace/ui/components/badge';
 import { ScrollArea } from '@workspace/ui/components/scroll-area';
 import { Separator } from '@workspace/ui/components/separator';
 import {
-  TEXT_FIELD_TYPES,
-  TIME_FIELD_TYPES,
-  NUMBER_FIELD_TYPES,
-  SELECTION_FIELD_TYPES,
-  REFERENCE_FIELD_TYPES,
   type FieldType,
   // Import field type constants
   FIELD_TYPE_SHORT_TEXT,

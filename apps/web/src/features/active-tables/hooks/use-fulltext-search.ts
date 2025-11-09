@@ -140,7 +140,7 @@ export function useDebouncedFullTextSearch(
   table: ActiveTable | null,
   searchQuery: string,
   encryptionKey: string | null,
-  debounceMs: number = 300,
+  _debounceMs: number = 300,
   additionalFilters: Record<string, unknown> = {},
   limit: number = 50,
 ) {

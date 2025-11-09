@@ -4,13 +4,13 @@ import { useAuthStore, selectIsAuthenticated } from '@/features/auth';
 import { useSidebarStore, selectCurrentWorkspace } from '@/stores/sidebar-store';
 
 // Mock API functions - these should be replaced with actual API calls
-const fetchTablesCount = async (workspaceId: string): Promise<number> => {
+const fetchTablesCount = async (_workspaceId: string): Promise<number> => {
   // TODO: Replace with actual API call
   // return api.get(`/workspaces/${workspaceId}/tables/count`);
   return Math.floor(Math.random() * 20); // Mock data
 };
 
-const fetchWorkflowsCount = async (workspaceId: string): Promise<number> => {
+const fetchWorkflowsCount = async (_workspaceId: string): Promise<number> => {
   // TODO: Replace with actual API call
   // return api.get(`/workspaces/${workspaceId}/workflows/count`);
   return Math.floor(Math.random() * 15); // Mock data
@@ -22,7 +22,7 @@ const fetchNotificationsCount = async (): Promise<number> => {
   return Math.floor(Math.random() * 10); // Mock data
 };
 
-const fetchTeamMembersCount = async (workspaceId: string): Promise<number> => {
+const fetchTeamMembersCount = async (_workspaceId: string): Promise<number> => {
   // TODO: Replace with actual API call
   // return api.get(`/workspaces/${workspaceId}/members/count`);
   return Math.floor(Math.random() * 50); // Mock data
@@ -40,7 +40,7 @@ const fetchCalendarEventsCount = async (): Promise<number> => {
   return Math.floor(Math.random() * 8); // Mock data
 };
 
-const fetchProjectsCount = async (workspaceId: string): Promise<number> => {
+const fetchProjectsCount = async (_workspaceId: string): Promise<number> => {
   // TODO: Replace with actual API call
   // return api.get(`/workspaces/${workspaceId}/projects/count`);
   return Math.floor(Math.random() * 12); // Mock data

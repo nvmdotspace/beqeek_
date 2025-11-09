@@ -9,7 +9,6 @@ import { Copy, Check, Eye, EyeOff, Edit2, X, AlertTriangle, Info } from 'lucide-
 import { Label } from '@workspace/ui/components/label';
 import { Input } from '@workspace/ui/components/input';
 import { Button } from '@workspace/ui/components/button';
-import { Badge } from '@workspace/ui/components/badge';
 import { Alert, AlertDescription } from '@workspace/ui/components/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@workspace/ui/components/select';
 import type { TableConfig } from '@workspace/active-tables-core';
@@ -19,9 +18,8 @@ import {
   FIELD_TYPE_RICH_TEXT,
   FIELD_TYPE_EMAIL,
   FIELD_TYPE_URL,
-  type FieldType,
 } from '@workspace/beqeek-shared';
-// @ts-ignore - Paraglide generates JS without .d.ts files
+// @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
 import { SettingsSection } from '../settings-layout';
 import { MultiSelectField } from '../multi-select-field';

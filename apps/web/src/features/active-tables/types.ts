@@ -12,18 +12,11 @@ export interface ActiveTableOption {
   background_color?: string;
 }
 
-export interface ActiveFieldConfig {
-  type: string;
-  label: string;
-  name: string;
-  placeholder?: string;
-  required?: boolean;
-  defaultValue?: any;
-  options?: ActiveTableOption[];
-  // Reference field properties
+import type { FieldConfig } from '@workspace/active-tables-core';
+
+export interface ActiveFieldConfig extends FieldConfig {
   referenceTableId?: string;
   referenceField?: string;
-  referenceLabelField?: string;
   additionalCondition?: string;
 }
 
@@ -56,6 +49,7 @@ export interface RecordListConfig {
   titleField: string;
   subLineFields: string[];
   tailFields: string[];
+  displayFields?: string[];
 }
 
 export interface RecordDetailConfig {

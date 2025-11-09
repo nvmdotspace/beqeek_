@@ -5,7 +5,7 @@
  * Features dynamic form sections, validation, and progressive disclosure.
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Info } from 'lucide-react';
 import { Button } from '@workspace/ui/components/button';
 import { Input } from '@workspace/ui/components/input';
@@ -32,7 +32,8 @@ import { FieldTypeSelector } from './field-type-selector';
 import { FieldOptionsEditor } from './field-options-editor';
 import { ReferenceFieldConfig } from './reference-field-config';
 import { generateUniqueFieldName, validateFieldName } from '../../../utils/field-name-generator';
-// @ts-ignore - Paraglide generates JS without .d.ts files
+
+// @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
 
 export interface FieldFormModalProps {
@@ -81,6 +82,11 @@ interface ValidationErrors {
   referenceField?: string;
 }
 
+type ReferenceFieldConfig = FieldConfig & {
+  referenceTableId?: string;
+  referenceField?: string;
+};
+
 /**
  * Field Form Modal Component
  *
@@ -122,26 +128,48 @@ export function FieldFormModal({
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
   const [showValidation, setShowValidation] = useState(false);
 
+  /**
+   * Load fields for reference table
+   */
+  const loadReferenceTableFields = useCallback(
+    async (tableId: string) => {
+      if (!onLoadReferenceFields) return;
+
+      setLoadingReferenceFields(true);
+      try {
+        const fields = await onLoadReferenceFields(tableId);
+        setReferenceFields(fields);
+      } catch (error) {
+        console.error('Failed to load reference fields:', error);
+        setReferenceFields([]);
+      } finally {
+        setLoadingReferenceFields(false);
+      }
+    },
+    [onLoadReferenceFields],
+  );
+
   // Initialize form with editing field
   useEffect(() => {
     if (open && editingField) {
+      const referenceConfig = editingField as ReferenceFieldConfig;
       setFormData({
         type: editingField.type as FieldType,
         label: editingField.label,
         name: editingField.name,
         placeholder: editingField.placeholder || '',
-        defaultValue: (editingField as any).defaultValue || '',
+        defaultValue: editingField.defaultValue || '',
         required: editingField.required || false,
         options: editingField.options || [],
-        referenceTableId: (editingField as any).referenceTableId,
+        referenceTableId: referenceConfig.referenceTableId,
         referenceLabelField: editingField.referenceLabelField,
-        referenceField: (editingField as any).referenceField,
+        referenceField: referenceConfig.referenceField,
       });
       setNameManuallyEdited(true);
 
       // Load reference fields if editing reference field
-      if ((editingField as any).referenceTableId && onLoadReferenceFields) {
-        loadReferenceTableFields((editingField as any).referenceTableId);
+      if (referenceConfig.referenceTableId) {
+        loadReferenceTableFields(referenceConfig.referenceTableId);
       }
     } else if (open && !editingField) {
       // Reset form for new field
@@ -159,25 +187,7 @@ export function FieldFormModal({
       setShowValidation(false);
       setValidationErrors({});
     }
-  }, [open, editingField]);
-
-  /**
-   * Load fields for reference table
-   */
-  const loadReferenceTableFields = async (tableId: string) => {
-    if (!onLoadReferenceFields) return;
-
-    setLoadingReferenceFields(true);
-    try {
-      const fields = await onLoadReferenceFields(tableId);
-      setReferenceFields(fields);
-    } catch (error) {
-      console.error('Failed to load reference fields:', error);
-      setReferenceFields([]);
-    } finally {
-      setLoadingReferenceFields(false);
-    }
-  };
+  }, [open, editingField, loadReferenceTableFields]);
 
   /**
    * Auto-generate field name from label
@@ -301,7 +311,7 @@ export function FieldFormModal({
       return;
     }
 
-    const fieldConfig: FieldConfig = {
+    const fieldConfig: ReferenceFieldConfig = {
       type: formData.type as string,
       label: formData.label.trim(),
       name: formData.name.trim(),
@@ -317,7 +327,7 @@ export function FieldFormModal({
 
     // Add referenceTableId as a non-standard property (stored separately in backend)
     if (formData.referenceTableId) {
-      (fieldConfig as any).referenceTableId = formData.referenceTableId;
+      fieldConfig.referenceTableId = formData.referenceTableId;
     }
 
     onSubmit(fieldConfig);

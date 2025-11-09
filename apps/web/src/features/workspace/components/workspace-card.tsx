@@ -11,7 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@workspace/ui/components/av
 import { Button } from '@workspace/ui/components/button';
 
 import { initialsFromName } from '../utils/initials';
-// @ts-ignore
+// @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
 import { useCurrentLocale } from '@/hooks/use-current-locale';
 

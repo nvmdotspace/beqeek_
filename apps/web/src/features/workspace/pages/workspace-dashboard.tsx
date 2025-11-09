@@ -1,17 +1,16 @@
 import { useMemo, useState } from 'react';
 
-import { PlusCircle, Folder, Zap, Users } from 'lucide-react';
+import { Folder, Zap, Users } from 'lucide-react';
 
 import { useWorkspaces } from '../hooks/use-workspaces';
 
-import { Button } from '@workspace/ui/components/button';
 import { Card, CardContent } from '@workspace/ui/components/card';
 import { Skeleton } from '@workspace/ui/components/skeleton';
 
 import { WorkspaceCreateForm } from '../components/workspace-create-form';
 import { WorkspaceEmptyState } from '../components/workspace-empty-state';
 import { WorkspaceGrid } from '../components/workspace-grid';
-// @ts-ignore
+// @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
 
 export const WorkspaceDashboardPage = () => {

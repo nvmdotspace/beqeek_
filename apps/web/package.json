@@ -8,7 +8,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint . --max-warnings 120",
-    "check-types": "tsc --noEmit"
+    "check-types": "tsc --noEmit",
+    "test": "tsc -p tsconfig.tests.json && node --test \"../.web-tests-dist/tests/**/*.js\""
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

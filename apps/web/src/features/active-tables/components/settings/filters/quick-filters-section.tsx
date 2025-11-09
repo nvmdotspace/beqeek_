@@ -4,7 +4,7 @@
  * Manages quick filter configuration for fast record filtering
  */
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import { Button } from '@workspace/ui/components/button';
 import { Badge } from '@workspace/ui/components/badge';
@@ -19,9 +19,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@workspace/ui/components/dialog';
-import { QUICK_FILTER_VALID_FIELD_TYPES, generateUUIDv7 } from '@workspace/beqeek-shared';
+import { QUICK_FILTER_VALID_FIELD_TYPES, generateUUIDv7, type FieldType } from '@workspace/beqeek-shared';
 import { SettingsSection } from '../settings-layout';
-// @ts-ignore - Paraglide generates JS without .d.ts files
+// @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
 
 export interface QuickFilter {
@@ -50,7 +50,12 @@ export function QuickFiltersSection({ quickFilters, fields, onChange }: QuickFil
   const [selectedFieldName, setSelectedFieldName] = useState('');
 
   // Filter eligible fields (only choice-based fields)
-  const eligibleFields = fields.filter((f) => QUICK_FILTER_VALID_FIELD_TYPES.includes(f.type as any));
+  const quickFilterFieldSet = useMemo(
+    () => new Set<FieldType>(QUICK_FILTER_VALID_FIELD_TYPES.map((type) => type as FieldType)),
+    [],
+  );
+
+  const eligibleFields = fields.filter((field) => quickFilterFieldSet.has(field.type as FieldType));
 
   // Fields already used in quick filters
   const usedFieldNames = quickFilters.map((qf) => qf.fieldName);

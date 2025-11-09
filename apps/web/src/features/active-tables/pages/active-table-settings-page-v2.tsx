@@ -17,7 +17,7 @@ import { Button } from '@workspace/ui/components/button';
 import { ArrowLeft } from 'lucide-react';
 import { toast } from '@workspace/ui/components/sonner';
 import type { TableConfig } from '@workspace/active-tables-core';
-// @ts-ignore - Paraglide generates JS without .d.ts files
+// @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
 
 import { ROUTES } from '@/shared/route-paths';

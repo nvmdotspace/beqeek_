@@ -13,7 +13,7 @@ import {
   DropdownMenuGroup,
 } from '@workspace/ui/components/dropdown-menu';
 import { ChevronDown, Plus, Settings, Users, Zap, Search } from 'lucide-react';
-// @ts-ignore
+// @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
 import {
   useSidebarStore,
@@ -338,10 +338,10 @@ const WorkspaceDropdownContent = ({
         )}
       </DropdownMenuGroup>
 
-      {/* <DropdownMenuSeparator /> */}
+      <DropdownMenuSeparator />
 
       {/* Actions */}
-      {/* <DropdownMenuGroup>
+      <DropdownMenuGroup>
         <DropdownMenuItem onClick={handleCreateWorkspace} className="flex items-center gap-2 cursor-pointer">
           <Plus className="h-4 w-4" />
           <span>{m.workspace_selector_createWorkspace()}</span>
@@ -356,9 +356,7 @@ const WorkspaceDropdownContent = ({
             <span>{m.workspace_selector_workspaceSettings()}</span>
           </DropdownMenuItem>
         )}
-      </DropdownMenuGroup> */}
-
-      {/* <DropdownMenuSeparator /> */}
+      </DropdownMenuGroup>
     </DropdownMenuContent>
   );
 };

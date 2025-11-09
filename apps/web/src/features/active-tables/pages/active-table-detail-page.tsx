@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { getRouteApi } from '@tanstack/react-router';
 
-// @ts-ignore
+// @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
 import { useActiveTable, useActiveWorkGroups } from '../hooks/use-active-tables';
 import type { ActiveFieldConfig, ActiveTable, ActiveWorkGroup } from '../types';

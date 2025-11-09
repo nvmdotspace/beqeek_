@@ -5,8 +5,9 @@ import { ActiveTableCard } from '../components/active-table-card';
 import { useActiveTablesGroupedByWorkGroup } from '../hooks/use-active-tables';
 import { ActiveTablesEmptyState } from '../components/active-tables-empty-state';
 import { TableManagementDialog } from '../components/table-management-dialog';
+import type { TableFormData } from '../components/table-management-dialog';
 import { useTableManagement } from '../hooks/use-table-management';
-// @ts-ignore
+// @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
 import { getRouteApi } from '@tanstack/react-router';
 import { useSidebarStore, selectCurrentWorkspace } from '@/stores/sidebar-store';
@@ -71,7 +72,7 @@ export const ActiveTablesPage = () => {
     refetch,
   } = useActiveTablesGroupedByWorkGroup(workspaceId || '');
 
-  const { createTable, updateTable, deleteTable, isCreating, isUpdating, isDeleting } = useTableManagement({
+  const { createTable, updateTable, deleteTable, isCreating, isUpdating } = useTableManagement({
     workspaceId: workspaceId || '',
     onSuccess: (message) => {
       console.log(message);
@@ -206,7 +207,7 @@ export const ActiveTablesPage = () => {
     }
   };
 
-  const handleSaveTable = async (tableData: any) => {
+  const handleSaveTable = async (tableData: TableFormData) => {
     if (editingTable) {
       await updateTable(editingTable.id, tableData);
     } else {

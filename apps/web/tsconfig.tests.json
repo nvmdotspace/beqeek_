@@ -1,0 +1,18 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "outDir": "../.web-tests-dist",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "types": ["node"],
+    "declaration": false,
+    "emitDeclarationOnly": false,
+    "declarationMap": false
+  },
+  "include": [
+    "tests/**/*.ts",
+    "src/features/active-tables/components/record-list-view.helpers.ts",
+    "src/features/active-tables/types.ts"
+  ]
+}

@@ -1,8 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useForm } from '@tanstack/react-form';
-
-// @ts-ignore
-
 import { Button } from '@workspace/ui/components/button';
 import { Input } from '@workspace/ui/components/input';
 import { Label } from '@workspace/ui/components/label';
@@ -21,12 +18,31 @@ import { Card, CardContent, CardHeader, CardTitle } from '@workspace/ui/componen
 
 import type { ActiveTable, ActiveTableRecord, ActiveFieldConfig } from '../types';
 
+type FieldValue = string | number | boolean | string[] | null;
+
+const getDefaultValueForField = (field: ActiveFieldConfig): FieldValue => {
+  switch (field.type) {
+    case 'BOOLEAN':
+      return false;
+    case 'INTEGER':
+    case 'NUMERIC':
+      return 0;
+    case 'SELECT_LIST':
+      return [];
+    case 'DATE':
+    case 'DATETIME':
+      return '';
+    default:
+      return '';
+  }
+};
+
 interface RecordManagementDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   table: ActiveTable;
   record?: ActiveTableRecord | null;
-  onSave: (recordData: Record<string, any>) => Promise<void>;
+  onSave: (recordData: Record<string, FieldValue>) => Promise<void>;
   isLoading?: boolean;
 }
 
@@ -38,56 +54,33 @@ export const RecordManagementDialog = ({
   onSave,
   isLoading = false,
 }: RecordManagementDialogProps) => {
-  const [fieldValues, setFieldValues] = useState<Record<string, any>>({});
+  const getInitialValues = useCallback(() => {
+    const initialValues: Record<string, FieldValue> = {};
+
+    table.config.fields.forEach((fieldConfig) => {
+      const existingValue = (record?.record?.[fieldConfig.name] ?? null) as FieldValue | null;
+      initialValues[fieldConfig.name] = existingValue ?? getDefaultValueForField(fieldConfig);
+    });
+
+    return initialValues;
+  }, [record, table]);
 
   const form = useForm({
-    defaultValues: fieldValues,
+    defaultValues: getInitialValues(),
     onSubmit: async ({ value }) => {
       await onSave(value);
     },
   });
 
   useEffect(() => {
-    if (record) {
-      setFieldValues(record.record || {});
-      // Update form values
-      Object.keys(record.record || {}).forEach((key) => {
-        form.setFieldValue(key, record.record[key]);
-      });
-    } else {
-      // Initialize with empty values
-      const initialValues: Record<string, any> = {};
-      table.config.fields.forEach((field) => {
-        initialValues[field.name] = getDefaultValueForField(field);
-      });
-      setFieldValues(initialValues);
-      // Update form values
-      Object.keys(initialValues).forEach((key) => {
-        form.setFieldValue(key, initialValues[key]);
-      });
-    }
-  }, [record, table, form]);
-
-  const getDefaultValueForField = (field: ActiveFieldConfig): any => {
-    switch (field.type) {
-      case 'BOOLEAN':
-        return false;
-      case 'INTEGER':
-      case 'NUMERIC':
-        return 0;
-      case 'SELECT_LIST':
-        return [];
-      case 'DATE':
-      case 'DATETIME':
-        return '';
-      default:
-        return '';
-    }
-  };
+    form.reset();
+    form.update({
+      defaultValues: getInitialValues(),
+    });
+  }, [form, getInitialValues]);
 
   const renderFieldInput = (field: ActiveFieldConfig) => {
     const fieldName = field.name;
-    const fieldValue = fieldValues[fieldName] || getDefaultValueForField(field);
 
     switch (field.type) {
       case 'SHORT_TEXT':
@@ -115,11 +108,10 @@ export const RecordManagementDialog = ({
                   id={formField.name}
                   name={formField.name}
                   type={field.type === 'EMAIL' ? 'email' : field.type === 'URL' ? 'url' : 'text'}
-                  value={formField.state.value || ''}
+                  value={String(formField.state.value || '')}
                   onBlur={formField.handleBlur}
                   onChange={(e) => {
                     formField.handleChange(e.target.value);
-                    setFieldValues((prev) => ({ ...prev, [fieldName]: e.target.value }));
                   }}
                   placeholder={field.placeholder}
                 />
@@ -152,11 +144,10 @@ export const RecordManagementDialog = ({
                 <Textarea
                   id={formField.name}
                   name={formField.name}
-                  value={formField.state.value || ''}
+                  value={String(formField.state.value || '')}
                   onBlur={formField.handleBlur}
                   onChange={(e) => {
                     formField.handleChange(e.target.value);
-                    setFieldValues((prev) => ({ ...prev, [fieldName]: e.target.value }));
                   }}
                   placeholder={field.placeholder}
                   rows={4}
@@ -193,13 +184,16 @@ export const RecordManagementDialog = ({
                   name={formField.name}
                   type="number"
                   step={field.type === 'NUMERIC' ? '0.01' : '1'}
-                  value={formField.state.value || ''}
+                  value={
+                    formField.state.value !== null && formField.state.value !== undefined
+                      ? String(formField.state.value)
+                      : ''
+                  }
                   onBlur={formField.handleBlur}
                   onChange={(e) => {
                     const value =
                       field.type === 'INTEGER' ? parseInt(e.target.value) || 0 : parseFloat(e.target.value) || 0;
                     formField.handleChange(value);
-                    setFieldValues((prev) => ({ ...prev, [fieldName]: value }));
                   }}
                   placeholder={field.placeholder}
                 />
@@ -234,11 +228,10 @@ export const RecordManagementDialog = ({
                   id={formField.name}
                   name={formField.name}
                   type={field.type === 'DATETIME' ? 'datetime-local' : 'date'}
-                  value={formField.state.value || ''}
+                  value={String(formField.state.value || '')}
                   onBlur={formField.handleBlur}
                   onChange={(e) => {
                     formField.handleChange(e.target.value);
-                    setFieldValues((prev) => ({ ...prev, [fieldName]: e.target.value }));
                   }}
                 />
                 {formField.state.meta.errors && (
@@ -252,21 +245,24 @@ export const RecordManagementDialog = ({
       case 'BOOLEAN':
         return (
           <form.Field name={fieldName}>
-            {(formField) => (
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id={formField.name}
-                  checked={formField.state.value || false}
-                  onCheckedChange={(checked: boolean) => {
-                    formField.handleChange(checked);
-                    setFieldValues((prev) => ({ ...prev, [fieldName]: checked }));
-                  }}
-                />
-                <Label htmlFor={formField.name}>
-                  {field.label} {field.required && '*'}
-                </Label>
-              </div>
-            )}
+            {(formField) => {
+              const checkedValue = typeof formField.state.value === 'boolean' ? formField.state.value : false;
+
+              return (
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id={formField.name}
+                    checked={checkedValue}
+                    onCheckedChange={(checked: boolean) => {
+                      formField.handleChange(checked);
+                    }}
+                  />
+                  <Label htmlFor={formField.name}>
+                    {field.label} {field.required && '*'}
+                  </Label>
+                </div>
+              );
+            }}
           </form.Field>
         );
 
@@ -289,10 +285,9 @@ export const RecordManagementDialog = ({
                   {field.label} {field.required && '*'}
                 </Label>
                 <Select
-                  value={formField.state.value || ''}
+                  value={String(formField.state.value || '')}
                   onValueChange={(value: string) => {
                     formField.handleChange(value);
-                    setFieldValues((prev) => ({ ...prev, [fieldName]: value }));
                   }}
                 >
                   <SelectTrigger>
@@ -325,11 +320,10 @@ export const RecordManagementDialog = ({
                 <Input
                   id={formField.name}
                   name={formField.name}
-                  value={formField.state.value || ''}
+                  value={String(formField.state.value || '')}
                   onBlur={formField.handleBlur}
                   onChange={(e) => {
                     formField.handleChange(e.target.value);
-                    setFieldValues((prev) => ({ ...prev, [fieldName]: e.target.value }));
                   }}
                   placeholder={field.placeholder}
                 />

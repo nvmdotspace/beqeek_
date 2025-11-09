@@ -13,7 +13,6 @@ import {
   MessageSquare,
   Workflow,
   AlertTriangle,
-  FolderOpen,
 } from 'lucide-react';
 
 import type { ActiveTable } from '../types';
@@ -27,7 +26,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@workspace/ui/components/dropdown-menu';
-// @ts-ignore
+// @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
 import { useEncryption } from '../hooks/use-encryption-stub';
 import { cn } from '@workspace/ui/lib/utils';
@@ -42,13 +41,6 @@ interface ActiveTableCardProps {
   onOpenAutomations?: (table: ActiveTable) => void;
   onDelete?: (table: ActiveTable) => void;
 }
-
-const formatTableStatus = (tableType?: string) => {
-  if (!tableType) {
-    return 'standard';
-  }
-  return tableType.replace(/[_-]/g, ' ');
-};
 
 export const ActiveTableCard = memo(
   ({
@@ -74,7 +66,6 @@ export const ActiveTableCard = memo(
           }).format(new Date(table.updatedAt))
         : null;
 
-    const statusLabel = useMemo(() => formatTableStatus(table.tableType), [table.tableType]);
     const fieldPreview = useMemo(() => table.config?.fields?.slice(0, 3) ?? [], [table.config?.fields]);
     const ModuleIcon = useMemo(() => getModuleIcon(table.tableType), [table.tableType]);
     const moduleColors = useMemo(() => getModuleColors(table.tableType), [table.tableType]);

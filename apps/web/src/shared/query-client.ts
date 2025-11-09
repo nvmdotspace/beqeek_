@@ -13,7 +13,9 @@ export const queryClient = new QueryClient({
           if (status && status >= 400 && status < 500) {
             return false;
           }
-        } catch {}
+        } catch (error) {
+          console.warn('Query retry check failed:', error);
+        }
         // Retry up to 3 times for network errors and 5xx errors
         return failureCount < 2;
       },

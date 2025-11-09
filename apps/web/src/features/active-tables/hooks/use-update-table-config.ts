@@ -11,7 +11,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createActiveTablesApiClient } from '@/shared/api/active-tables-client';
 import type { Table, TableConfig } from '@workspace/active-tables-core';
-import type { FieldType } from '@workspace/beqeek-shared';
 import {
   RECORD_LIST_LAYOUT_HEAD_COLUMN,
   RECORD_LIST_LAYOUT_GENERIC_TABLE,
@@ -316,7 +315,7 @@ function validateTableConfig(config: TableConfig): void {
 
   // Validate record list configuration
   if (config.recordListConfig) {
-    const listConfig = config.recordListConfig as any;
+    const listConfig = config.recordListConfig as ExtendedRecordListConfig;
 
     // Validate based on layout type
     if (listConfig.layout === RECORD_LIST_LAYOUT_HEAD_COLUMN) {
@@ -345,7 +344,7 @@ function validateTableConfig(config: TableConfig): void {
 
   // Validate record detail configuration
   if (config.recordDetailConfig) {
-    const detailConfig = config.recordDetailConfig as any;
+    const detailConfig = config.recordDetailConfig as ExtendedRecordDetailConfig;
 
     // headTitleField is optional, but if provided must be valid
     if (detailConfig.headTitleField && !fieldNames.has(detailConfig.headTitleField)) {
@@ -381,8 +380,8 @@ function validateTableConfig(config: TableConfig): void {
     }
 
     // Validate common fields
-    if (detailConfig.headSubLineFields) {
-      for (const fieldName of detailConfig.headSubLineFields) {
+    if (detailConfig.subLineFields) {
+      for (const fieldName of detailConfig.subLineFields) {
         if (!fieldNames.has(fieldName)) {
           throw new Error(`Record detail sub-line field "${fieldName}" not found in table fields`);
         }
@@ -445,3 +444,13 @@ export function buildPartialConfigUpdate(currentConfig: TableConfig, updates: Pa
     encryptionAuthKey: updates.encryptionAuthKey ?? currentConfig.encryptionAuthKey,
   };
 }
+type ExtendedRecordListConfig = TableConfig['recordListConfig'] & {
+  displayFields?: string[];
+};
+
+type ExtendedRecordDetailConfig = TableConfig['recordDetailConfig'] & {
+  headTitleField?: string;
+  rowTailFields?: string[];
+  column1Fields?: string[];
+  column2Fields?: string[];
+};

@@ -9,7 +9,7 @@ export interface FetchActiveRecordsParams {
   offset?: number;
   pagingMode?: 'offset' | 'cursor';
   cursor?: string | null;
-  filters?: Record<string, any>;
+  filters?: Record<string, unknown>;
   sorting?: Array<{ field: string; direction: 'asc' | 'desc' }>;
 }
 
@@ -56,9 +56,9 @@ export const fetchActiveTableRecords = ({
 
 // Create operations
 export interface CreateRecordRequest {
-  record: Record<string, any>;
-  hashed_keywords?: Record<string, any>;
-  record_hashes?: Record<string, any>;
+  record: Record<string, unknown>;
+  hashed_keywords?: Record<string, unknown>;
+  record_hashes?: Record<string, unknown>;
 }
 
 export const createActiveTableRecord = (workspaceId: string, tableId: string, request: CreateRecordRequest) =>
@@ -70,9 +70,9 @@ export const createActiveTableRecord = (workspaceId: string, tableId: string, re
 
 // Update operations
 export interface UpdateRecordRequest {
-  record: Record<string, any>;
-  hashed_keywords?: Record<string, any>;
-  record_hashes?: Record<string, any>;
+  record: Record<string, unknown>;
+  hashed_keywords?: Record<string, unknown>;
+  record_hashes?: Record<string, unknown>;
 }
 
 export const updateActiveTableRecord = (

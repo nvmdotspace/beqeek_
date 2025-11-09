@@ -71,19 +71,25 @@ export interface GanttConfig {
 
 /**
  * Configuration for Record List view (table/card layout)
+ * Supports two layout patterns:
+ * 1. generic-table: Uses displayFields array
+ * 2. head-column: Uses titleField, subLineFields, tailFields
  */
 export interface RecordListConfig {
-  /** Layout type: 'table' | 'card' | 'compact' */
+  /** Layout type: 'generic-table' | 'table' | 'head-column' | 'card' | 'compact' */
   layout: string;
 
-  /** Field name to use as title */
-  titleField: string;
+  /** Field names to display (for generic-table layout) */
+  displayFields?: string[];
 
-  /** Field names to display as subline (below title) */
-  subLineFields: string[];
+  /** Field name to use as title (for head-column layout) */
+  titleField?: string;
 
-  /** Field names to display at the end (right side) */
-  tailFields: string[];
+  /** Field names to display as subline (for head-column layout) */
+  subLineFields?: string[];
+
+  /** Field names to display at the end (for head-column layout) */
+  tailFields?: string[];
 }
 
 /**

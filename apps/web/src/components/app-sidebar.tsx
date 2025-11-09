@@ -1,9 +1,8 @@
 import { useEffect } from 'react';
 import { cn } from '@workspace/ui/lib/utils';
 import { Button } from '@workspace/ui/components/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@workspace/ui/components/avatar';
-import { ChevronLeft, ChevronRight, X } from 'lucide-react';
-// @ts-ignore
+import { X } from 'lucide-react';
+// @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
 import { useBadgeCounts } from '@/hooks/use-badge-counts';
 import {
@@ -19,11 +18,10 @@ import { NavigationMenu } from './navigation-menu';
 import { ActivityTracking } from './activity-tracking';
 
 interface AppSidebarProps {
-  onToggle?: () => void;
   onCloseMobile?: () => void;
 }
 
-export const AppSidebar = ({ onToggle, onCloseMobile }: AppSidebarProps) => {
+export const AppSidebar = ({ onCloseMobile }: AppSidebarProps) => {
   const isAuthenticated = useAuthStore(selectIsAuthenticated);
 
   const isCollapsed = useSidebarStore(selectIsCollapsed);
@@ -31,7 +29,7 @@ export const AppSidebar = ({ onToggle, onCloseMobile }: AppSidebarProps) => {
   const isTablet = useSidebarStore(selectIsTablet);
   const isSidebarOpen = useSidebarStore(selectIsSidebarOpen);
 
-  const { setCollapsed, setMobile, setTablet, setSidebarOpen, toggleSidebar } = useSidebarStore();
+  const { setCollapsed, setMobile, setTablet, setSidebarOpen } = useSidebarStore();
 
   // Initialize real-time badge counts
   useBadgeCounts();
@@ -61,15 +59,6 @@ export const AppSidebar = ({ onToggle, onCloseMobile }: AppSidebarProps) => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, [isCollapsed, setCollapsed, setMobile, setTablet]);
-
-  const handleToggle = () => {
-    if (isMobile) {
-      toggleSidebar();
-    } else {
-      setCollapsed(!isCollapsed);
-    }
-    onToggle?.();
-  };
 
   const handleCloseMobile = () => {
     if (isMobile) {
@@ -120,24 +109,18 @@ export const AppSidebar = ({ onToggle, onCloseMobile }: AppSidebarProps) => {
       )}
       data-sidebar
     >
-      <SidebarContent isCollapsed={isCollapsed || isTablet} onToggle={handleToggle} showCloseButton={false} />
+      <SidebarContent isCollapsed={isCollapsed || isTablet} showCloseButton={false} />
     </div>
   );
 };
 
 interface SidebarContentProps {
   isCollapsed?: boolean;
-  onToggle?: () => void;
   onCloseMobile?: () => void;
   showCloseButton?: boolean;
 }
 
-const SidebarContent = ({
-  isCollapsed = false,
-  onToggle,
-  onCloseMobile,
-  showCloseButton = true,
-}: SidebarContentProps) => {
+const SidebarContent = ({ isCollapsed = false, onCloseMobile, showCloseButton = true }: SidebarContentProps) => {
   return (
     <>
       {/* Sidebar Header - Logo Only */}

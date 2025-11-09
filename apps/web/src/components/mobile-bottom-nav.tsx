@@ -2,7 +2,7 @@ import { Link, useLocation } from '@tanstack/react-router';
 import { cn } from '@workspace/ui/lib/utils';
 import { Badge } from '@workspace/ui/components/badge';
 import { Home, Database, Bell, Menu, Plus, Search } from 'lucide-react';
-// @ts-ignore
+// @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
 import {
   useSidebarStore,
@@ -32,7 +32,6 @@ export const MobileBottomNav = ({ className }: MobileBottomNavProps) => {
   const currentWorkspace = useSidebarStore(selectCurrentWorkspace);
   const badgeCounts = useSidebarStore(selectBadgeCounts);
   const canViewSection = useSidebarStore(selectCanViewSection);
-  const canCreateItem = useSidebarStore(selectCanCreateItem);
   const toggleSidebar = useSidebarStore((state) => state.toggleSidebar);
 
   const isActive = (href?: string) => {

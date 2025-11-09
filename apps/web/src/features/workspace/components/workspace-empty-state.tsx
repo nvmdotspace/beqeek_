@@ -1,10 +1,9 @@
 import type { ReactNode } from 'react';
 
-import { Building2, Sparkles } from 'lucide-react';
+import { Building2 } from 'lucide-react';
 
-import { Button } from '@workspace/ui/components/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@workspace/ui/components/card';
-// @ts-ignore
+import { Card, CardDescription, CardHeader, CardTitle } from '@workspace/ui/components/card';
+// @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
 
 export type WorkspaceEmptyStateProps = {
@@ -13,7 +12,11 @@ export type WorkspaceEmptyStateProps = {
   showForm: boolean;
 };
 
-export const WorkspaceEmptyState = ({ onCreateClick, createForm, showForm }: WorkspaceEmptyStateProps) => {
+export const WorkspaceEmptyState = ({
+  onCreateClick: _onCreateClick,
+  createForm: _createForm,
+  showForm: _showForm,
+}: WorkspaceEmptyStateProps) => {
   return (
     <Card className="border-dashed bg-muted/40 text-muted-foreground">
       <CardHeader className="space-y-4 text-center">

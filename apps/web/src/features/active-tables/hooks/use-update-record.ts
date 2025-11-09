@@ -224,7 +224,7 @@ export function useBatchUpdateRecord(workspaceId: string, tableId: string, table
       const client = createActiveTablesApiClient(workspaceId);
       const isEncrypted = table.config.e2eeEncryption;
 
-      let payload: {
+      const payload: {
         record: Record<string, string | unknown>;
         hashed_keywords: Record<string, string>;
         record_hashes: Record<string, string>;

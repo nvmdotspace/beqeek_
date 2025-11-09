@@ -217,7 +217,7 @@ Before integrating this client into production code:
    client.get<{ data: ActiveTable[] }>('/test').then((r) => r.data.data[0].id);
 
    // This should NOT compile:
-   // @ts-expect-error
+   // @ts-expect-error - Paraglide generates JS without .d.ts files
    client.get('/test').then((r) => r.data.wrongField);
    ```
 

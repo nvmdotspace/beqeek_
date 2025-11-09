@@ -4,9 +4,35 @@ import type { ActiveFieldConfig } from '../types';
 import { getEncryptionTypeForField, isEncryptableField } from '@workspace/active-tables-core';
 
 // Temporary type stubs until Phase 1
-type EncryptedPayload = any;
-type FieldEncryptionConfig = any;
-const buildEncryptedPayload = async (..._args: any[]): Promise<any> => ({});
+type EncryptedFieldData = { data: unknown } | Array<{ data: unknown }>;
+
+interface FieldEncryptionConfig {
+  enabled: boolean;
+  type: string;
+  searchable: boolean;
+  orderPreserving: boolean;
+  e2ee: boolean;
+  keyRotation: boolean;
+}
+
+interface EncryptedPayload {
+  record: Record<string, EncryptedFieldData>;
+  hashed_keywords: Record<string, string[]>;
+  record_hashes: Record<string, string | string[]>;
+  record_hash: string;
+}
+
+const buildEncryptedPayload = async (
+  _rawData: Record<string, unknown>,
+  _fieldConfigs: Map<string, FieldEncryptionConfig>,
+  _encryptionKeys: Map<string, string>,
+  _options?: { packAesInRecord?: boolean },
+): Promise<EncryptedPayload> => ({
+  record: {},
+  hashed_keywords: {},
+  record_hashes: {},
+  record_hash: '',
+});
 
 /**
  * Query-level encryption utilities for Active Tables
@@ -36,8 +62,8 @@ export class EncryptionError extends Error {
  * Maps ActiveFieldConfig to FieldEncryptionConfig with proper encryption types
  * TODO Phase 1: Re-enable when FieldEncryptionConfig is available
  */
-export function buildFieldConfigsMap(fields: ActiveFieldConfig[]): Map<string, any> {
-  const map = new Map<string, any>();
+export function buildFieldConfigsMap(fields: ActiveFieldConfig[]): Map<string, FieldEncryptionConfig> {
+  const map = new Map<string, FieldEncryptionConfig>();
 
   fields.forEach((field) => {
     // Skip fields that don't need encryption
@@ -99,7 +125,7 @@ export function buildEncryptionKeysMap(fields: ActiveFieldConfig[], encryptionKe
  * @throws EncryptionError if encryption fails
  */
 export async function encryptRecordForMutation(
-  rawData: Record<string, any>,
+  rawData: Record<string, unknown>,
   fields: ActiveFieldConfig[],
   encryptionKey: string,
 ): Promise<EncryptedPayload> {
@@ -134,16 +160,19 @@ export async function encryptRecordForMutation(
  * Converts EncryptedData objects to format expected by API
  * (base64 strings for AES, hex strings for HMAC, special format for OPE)
  */
-export function extractEncryptedRecord(encryptedPayload: EncryptedPayload): Record<string, any> {
-  const record: Record<string, any> = {};
+export function extractEncryptedRecord(encryptedPayload: EncryptedPayload): Record<string, unknown> {
+  const record: Record<string, unknown> = {};
 
   for (const [fieldName, encryptedValue] of Object.entries(encryptedPayload.record)) {
     if (Array.isArray(encryptedValue)) {
       // Handle array values (SELECT_LIST, CHECKBOX_LIST)
-      record[fieldName] = encryptedValue.map((item: any) => item.data);
+      record[fieldName] = encryptedValue.map((item) =>
+        typeof item === 'object' && item !== null && 'data' in item ? item.data : item,
+      );
+    } else if (typeof encryptedValue === 'object' && encryptedValue !== null && 'data' in encryptedValue) {
+      record[fieldName] = encryptedValue.data;
     } else {
-      // Handle single values
-      record[fieldName] = (encryptedValue as any).data;
+      record[fieldName] = encryptedValue;
     }
   }
 
@@ -158,7 +187,7 @@ export function extractEncryptedRecord(encryptedPayload: EncryptedPayload): Reco
  * @returns Object ready to send in API request body
  */
 export function prepareEncryptedRequest(encryptedPayload: EncryptedPayload): {
-  record: Record<string, any>;
+  record: Record<string, unknown>;
   hashed_keywords: Record<string, string[]>;
   record_hashes: Record<string, string | string[]>;
   record_hash: string;

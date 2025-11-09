@@ -90,7 +90,7 @@ export interface SidebarActions {
   toggleSidebar: () => void;
 
   // Permission Helpers
-  hasPermission: (resource: string, action: string) => boolean;
+  hasPermission: (resource: string, action: Permission['actions'][number]) => boolean;
   canViewSection: (section: string) => boolean;
   canCreateItem: (type: string) => boolean;
 }
@@ -135,7 +135,7 @@ export const useSidebarStore = create<SidebarStore>()(
 
         // Workspace Actions
         setCurrentWorkspace: (workspace) =>
-          set((state) => ({
+          set(() => ({
             currentWorkspace: workspace,
             // Reset navigation state when workspace changes
             activeSection: 'dashboard',
@@ -223,7 +223,7 @@ export const useSidebarStore = create<SidebarStore>()(
         toggleSidebar: () => set((state) => ({ isSidebarOpen: !state.isSidebarOpen })),
 
         // Permission Helpers
-        hasPermission: (resource, action) => {
+        hasPermission: (resource, action: Permission['actions'][number]) => {
           const { workspacePermissions } = get();
 
           // If permissions have not been loaded yet, allow access by default so the UI remains functional.
@@ -232,7 +232,7 @@ export const useSidebarStore = create<SidebarStore>()(
           }
 
           const permission = workspacePermissions.find((p) => p.resource === resource);
-          return permission ? permission.actions.includes(action as any) : false;
+          return permission ? permission.actions.includes(action) : false;
         },
 
         canViewSection: (section) => {

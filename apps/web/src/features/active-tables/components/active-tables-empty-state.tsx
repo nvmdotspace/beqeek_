@@ -2,7 +2,7 @@ import { Database, ArrowRight, Users, Workflow, Lock, Plus } from 'lucide-react'
 
 import { Card, CardContent } from '@workspace/ui/components/card';
 import { Button } from '@workspace/ui/components/button';
-// @ts-ignore
+// @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
 
 interface ActiveTablesEmptyStateProps {

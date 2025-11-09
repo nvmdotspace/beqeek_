@@ -1,19 +1,18 @@
 import { useMemo, useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Plus, Search, Filter, List, Columns, KanbanSquare, GanttChart } from 'lucide-react';
+import { ArrowLeft, Plus, Search, Filter, List, KanbanSquare, GanttChart } from 'lucide-react';
 import { getRouteApi } from '@tanstack/react-router';
 
-// @ts-ignore
 import { useActiveTableRecordsWithConfig } from '../hooks/use-active-tables';
 import { useTableEncryption } from '../hooks/use-table-encryption';
 import { useUpdateRecordField } from '../hooks/use-update-record';
+import { useListContext } from '../hooks/use-list-context';
 import {
   decryptRecords,
   KanbanBoardV2,
   GanttChartView,
-  RecordList,
   type TableRecord,
+  type ActiveTable,
 } from '@workspace/active-tables-core';
-import { RECORD_LIST_LAYOUT_GENERIC_TABLE } from '@workspace/beqeek-shared/constants/layouts';
 import { ROUTES } from '@/shared/route-paths';
 
 import { Button } from '@workspace/ui/components/button';
@@ -23,10 +22,10 @@ import { Skeleton } from '@workspace/ui/components/skeleton';
 import { Card, CardContent } from '@workspace/ui/components/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@workspace/ui/components/tabs';
 
-// New components
-import { RecordDetailView } from '../components/record-detail-view';
+// Components
 import { generateMockTableConfig, generateMockRecords } from '../lib/mock-data';
 import { ErrorCard } from '@/components/error-display';
+import { RecordListView } from '../components/record-list-view';
 
 const LoadingState = () => (
   <div className="space-y-4">
@@ -35,7 +34,7 @@ const LoadingState = () => (
   </div>
 );
 
-type ViewMode = 'list' | 'detail' | 'kanban' | 'gantt';
+type ViewMode = 'list' | 'kanban' | 'gantt';
 
 // Type-safe route API for records route
 const route = getRouteApi(ROUTES.ACTIVE_TABLES.TABLE_RECORDS);
@@ -43,14 +42,15 @@ const route = getRouteApi(ROUTES.ACTIVE_TABLES.TABLE_RECORDS);
 export const ActiveTableRecordsPage = () => {
   const navigate = route.useNavigate();
   const { tableId, workspaceId, locale } = route.useParams();
+  const searchParams = route.useSearch();
+  const listContext = useListContext();
 
-  // View mode state
-  const [viewMode, setViewMode] = useState<ViewMode>('list');
-  const [selectedRecordId, setSelectedRecordId] = useState<string | null>(null);
+  // View mode from URL (defaults to 'list')
+  const viewMode = searchParams.view || 'list';
 
   // Use combined hook to ensure table config loads before records
   // This prevents race conditions in encryption/decryption logic
-  const { table, tableLoading, tableError, records, recordsLoading, recordsError, isReady, nextId, previousId } =
+  const { table, tableLoading, tableError, records, recordsLoading, recordsError, isReady, nextId } =
     useActiveTableRecordsWithConfig(workspaceId, tableId, {
       paging: 'cursor',
       limit: 50,
@@ -77,18 +77,18 @@ export const ActiveTableRecordsPage = () => {
   const mockRecords = useMemo(() => generateMockRecords(12), []);
 
   // Use mock data or real data
-  const displayTable = useMockData
-    ? {
-        id: table?.id || 'mock-table-id',
-        name: table?.name || 'Project Tasks - BEQEEK',
-        workGroupId: table?.workGroupId || 'mock-workgroup-id',
-        tableType: table?.tableType || 'TASK_EISENHOWER',
-        description: table?.description,
-        config: mockTableConfig,
-        createdAt: table?.createdAt,
-        updatedAt: table?.updatedAt,
-      }
-    : table;
+  const mockTable: ActiveTable = {
+    id: table?.id || 'mock-table-id',
+    name: table?.name || 'Project Tasks - BEQEEK',
+    workGroupId: table?.workGroupId || 'mock-workgroup-id',
+    tableType: table?.tableType || 'TASK_EISENHOWER',
+    description: table?.description,
+    config: mockTableConfig,
+    createdAt: table?.createdAt,
+    updatedAt: table?.updatedAt,
+  };
+
+  const displayTable: ActiveTable | null = useMockData ? mockTable : (table ?? null);
   const displayRecords = useMockData ? mockRecords : decryptedRecords;
 
   useEffect(() => {
@@ -217,8 +217,19 @@ export const ActiveTableRecordsPage = () => {
 
   const handleViewRecord = (recordOrId: TableRecord | string) => {
     const id = typeof recordOrId === 'string' ? recordOrId : recordOrId.id;
-    setSelectedRecordId(id);
-    setViewMode('detail');
+
+    // Save list context for navigation
+    listContext.save({
+      recordIds: displayRecords.map((r) => r.id),
+      search: searchParams,
+      timestamp: Date.now(),
+    });
+
+    // Navigate to record detail page
+    navigate({
+      to: ROUTES.ACTIVE_TABLES.RECORD_DETAIL,
+      params: { locale, workspaceId, tableId, recordId: id },
+    });
   };
 
   const handleRecordMove = (recordId: string, newStatus: string) => {
@@ -260,12 +271,6 @@ export const ActiveTableRecordsPage = () => {
         },
       },
     );
-  };
-
-  const handleCommentAdd = (content: string) => {
-    console.log('Add comment:', content);
-    // TODO: Implement comment creation mutation
-    return Promise.resolve();
   };
 
   const isLoading = tableLoading || recordsLoading;
@@ -333,12 +338,6 @@ export const ActiveTableRecordsPage = () => {
     );
   }
 
-  // Display fields (first 5 fields)
-  const displayFields = displayTable.config?.fields?.slice(0, 5) ?? [];
-
-  // Selected record for detail view
-  const selectedRecord = selectedRecordId ? displayRecords.find((r) => r.id === selectedRecordId) : displayRecords[0];
-
   // Kanban and Gantt configs
   const kanbanConfig = displayTable.config?.kanbanConfigs?.[0];
   const ganttConfig = displayTable.config?.ganttCharts?.[0];
@@ -400,17 +399,22 @@ export const ActiveTableRecordsPage = () => {
       )}
 
       {/* View Mode Tabs */}
-      <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as ViewMode)}>
+      <Tabs
+        value={viewMode}
+        onValueChange={(v) => {
+          navigate({
+            to: ROUTES.ACTIVE_TABLES.TABLE_RECORDS,
+            params: { locale, workspaceId, tableId },
+            search: { ...searchParams, view: v as ViewMode },
+          });
+        }}
+      >
         <div className="flex flex-col gap-3 sm:gap-4">
           <div className="flex items-center justify-between gap-2 overflow-x-auto">
             <TabsList className="w-full sm:w-auto">
               <TabsTrigger value="list" className="flex-1 sm:flex-initial text-xs sm:text-sm">
                 <List className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
                 <span className="hidden sm:inline">List</span>
-              </TabsTrigger>
-              <TabsTrigger value="detail" className="flex-1 sm:flex-initial text-xs sm:text-sm">
-                <Columns className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
-                <span className="hidden sm:inline">Record Detail</span>
               </TabsTrigger>
               {kanbanConfig && (
                 <TabsTrigger value="kanban" className="flex-1 sm:flex-initial text-xs sm:text-sm">
@@ -456,26 +460,12 @@ export const ActiveTableRecordsPage = () => {
 
         {/* List View */}
         <TabsContent value="list" className="mt-6">
-          <RecordList
+          <RecordListView
             table={displayTable}
             records={filteredRecords}
-            config={
-              displayTable.config.recordListConfig ?? {
-                layout: RECORD_LIST_LAYOUT_GENERIC_TABLE,
-                titleField: '',
-                subLineFields: [],
-                tailFields: [],
-              }
-            }
+            isDecrypting={isDecrypting}
             loading={false}
-            error={null}
-            onRecordClick={handleViewRecord}
-            messages={{
-              loading: 'Loading records...',
-              error: 'Failed to load records',
-              noRecordsFound: 'No records found',
-              noRecordsDescription: 'Try adjusting your filters or create a new record',
-            }}
+            onRecordClick={(recordId) => handleViewRecord(recordId)}
           />
 
           {/* Pagination (TODO) */}
@@ -483,17 +473,6 @@ export const ActiveTableRecordsPage = () => {
             <div className="flex justify-center mt-4">
               <Button variant="outline">Load More</Button>
             </div>
-          )}
-        </TabsContent>
-
-        {/* Record Detail View */}
-        <TabsContent value="detail" className="mt-6">
-          {selectedRecord && displayTable.config && (
-            <RecordDetailView
-              record={selectedRecord}
-              tableConfig={displayTable.config}
-              onCommentAdd={handleCommentAdd}
-            />
           )}
         </TabsContent>
 

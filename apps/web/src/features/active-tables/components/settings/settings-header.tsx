@@ -8,7 +8,7 @@ import { ArrowLeft, Settings2 } from 'lucide-react';
 import { getRouteApi } from '@tanstack/react-router';
 import { Button } from '@workspace/ui/components/button';
 import { Badge } from '@workspace/ui/components/badge';
-// @ts-ignore - Paraglide generates JS without .d.ts files
+// @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
 import { ROUTES } from '@/shared/route-paths';
 
