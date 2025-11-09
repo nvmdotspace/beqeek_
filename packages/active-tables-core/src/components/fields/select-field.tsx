@@ -7,13 +7,18 @@
 import { useCallback } from 'react';
 import type { FieldRendererProps } from './field-renderer-props.js';
 import { FieldWrapper } from '../common/field-wrapper.js';
-import { FIELD_TYPE_SELECT_LIST, FIELD_TYPE_CHECKBOX_LIST } from '../../types/field.js';
+import { FIELD_TYPE_SELECT_LIST, FIELD_TYPE_CHECKBOX_LIST, type FieldType } from '../../types/field.js';
+
+const MULTI_VALUE_SELECT_TYPES: ReadonlySet<FieldType> = new Set<FieldType>([
+  FIELD_TYPE_SELECT_LIST,
+  FIELD_TYPE_CHECKBOX_LIST,
+]);
 import { validateFieldValue } from '../../utils/field-validation.js';
 
 export function SelectField(props: FieldRendererProps) {
   const { field, value, onChange, mode, disabled = false, error, className } = props;
 
-  const isMultiple = [FIELD_TYPE_SELECT_LIST, FIELD_TYPE_CHECKBOX_LIST].includes(field.type as any);
+  const isMultiple = MULTI_VALUE_SELECT_TYPES.has(field.type);
 
   // Normalize value to array for multiple select
   const normalizedValue = isMultiple ? (Array.isArray(value) ? value : value ? [value] : []) : (value ?? '');

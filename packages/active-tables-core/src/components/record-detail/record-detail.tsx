@@ -17,7 +17,6 @@ import { CommentsPanel } from './comments-panel.js';
  */
 export function RecordDetail(props: RecordDetailProps) {
   const {
-    table,
     record,
     config,
     loading = false,
@@ -33,42 +32,6 @@ export function RecordDetail(props: RecordDetailProps) {
     onRetry,
     className = '',
   } = props;
-
-  // Loading state
-  if (loading) {
-    return (
-      <div className={className}>
-        <LoadingState message={messages?.loading || 'Loading record...'} type="skeleton" />
-      </div>
-    );
-  }
-
-  // Error state
-  if (error) {
-    const errorMessage = typeof error === 'string' ? error : error.message;
-    return (
-      <div className={className}>
-        <ErrorState
-          message={messages?.error || 'Failed to load record'}
-          details={errorMessage}
-          onRetry={onRetry}
-          retryText={messages?.retry || 'Retry'}
-        />
-      </div>
-    );
-  }
-
-  // No record
-  if (!record) {
-    return (
-      <div className={className}>
-        <ErrorState
-          message={messages?.recordNotFound || 'Record not found'}
-          details={messages?.recordNotFoundDescription || 'This record may have been deleted'}
-        />
-      </div>
-    );
-  }
 
   // Prepare comments panel (if configured)
   const commentsPanel = useMemo(() => {
@@ -118,6 +81,42 @@ export function RecordDetail(props: RecordDetailProps) {
         return HeadDetailLayout;
     }
   }, [config.layout]);
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className={className}>
+        <LoadingState message={messages?.loading || 'Loading record...'} type="skeleton" />
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    const errorMessage = typeof error === 'string' ? error : error.message;
+    return (
+      <div className={className}>
+        <ErrorState
+          message={messages?.error || 'Failed to load record'}
+          details={errorMessage}
+          onRetry={onRetry}
+          retryText={messages?.retry || 'Retry'}
+        />
+      </div>
+    );
+  }
+
+  // No record
+  if (!record) {
+    return (
+      <div className={className}>
+        <ErrorState
+          message={messages?.recordNotFound || 'Record not found'}
+          details={messages?.recordNotFoundDescription || 'This record may have been deleted'}
+        />
+      </div>
+    );
+  }
 
   // Render layout with comments panel
   const detailContent = <LayoutComponent {...props} commentsPanel={commentsPanel} />;

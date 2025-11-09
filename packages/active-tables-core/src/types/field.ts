@@ -151,7 +151,7 @@ export interface FieldOption {
  */
 export interface FieldConfig {
   /** Field type (SHORT_TEXT, INTEGER, DATE, etc.) */
-  type: string;
+  type: FieldType;
 
   /** Display label */
   label: string;
@@ -179,39 +179,45 @@ export interface FieldConfig {
 // Type Guards
 // ============================================
 
+const TEXT_FIELD_TYPE_SET = new Set<string>(TEXT_FIELD_TYPES);
+const NUMBER_FIELD_TYPE_SET = new Set<string>(NUMBER_FIELD_TYPES);
+const TIME_FIELD_TYPE_SET = new Set<string>(TIME_FIELD_TYPES);
+const SELECTION_FIELD_TYPE_SET = new Set<string>(SELECTION_FIELD_TYPES);
+const REFERENCE_FIELD_TYPE_SET = new Set<string>(REFERENCE_FIELD_TYPES);
+
 /**
  * Check if field type is a text field
  */
-export function isTextField(type: string): boolean {
-  return TEXT_FIELD_TYPES.includes(type as any);
+export function isTextField(type: string): type is TextFieldType {
+  return TEXT_FIELD_TYPE_SET.has(type);
 }
 
 /**
  * Check if field type is a number field
  */
-export function isNumberField(type: string): boolean {
-  return NUMBER_FIELD_TYPES.includes(type as any);
+export function isNumberField(type: string): type is NumberFieldType {
+  return NUMBER_FIELD_TYPE_SET.has(type);
 }
 
 /**
  * Check if field type is a date/time field
  */
-export function isDateTimeField(type: string): boolean {
-  return TIME_FIELD_TYPES.includes(type as any);
+export function isDateTimeField(type: string): type is TimeFieldType {
+  return TIME_FIELD_TYPE_SET.has(type);
 }
 
 /**
  * Check if field type is a selection field
  */
-export function isSelectionField(type: string): boolean {
-  return SELECTION_FIELD_TYPES.includes(type as any);
+export function isSelectionField(type: string): type is SelectionFieldType {
+  return SELECTION_FIELD_TYPE_SET.has(type);
 }
 
 /**
  * Check if field type is a reference field
  */
-export function isReferenceField(type: string): boolean {
-  return REFERENCE_FIELD_TYPES.includes(type as any);
+export function isReferenceField(type: string): type is ReferenceFieldType {
+  return REFERENCE_FIELD_TYPE_SET.has(type);
 }
 
 /**
@@ -223,28 +229,35 @@ export const MULTI_VALUE_FIELD_TYPES = [
   FIELD_TYPES.SELECT_LIST_RECORD,
 ] as const;
 
+const MULTI_VALUE_FIELD_TYPE_SET = new Set<string>(MULTI_VALUE_FIELD_TYPES);
+
 export function isMultiValueField(type: string): boolean {
-  return MULTI_VALUE_FIELD_TYPES.includes(type as any);
+  return MULTI_VALUE_FIELD_TYPE_SET.has(type);
 }
 
 /**
  * Check if field type exists and is valid
  */
+const FIELD_TYPE_VALUES = Object.values(FIELD_TYPES) as FieldType[];
+
 export function isValidFieldType(type: string): type is FieldType {
-  return Object.values(FIELD_TYPES).includes(type as any);
+  return FIELD_TYPE_VALUES.includes(type as FieldType);
 }
 
 /**
  * Check if field config has required properties
  */
-export function isValidFieldConfig(field: any): field is FieldConfig {
+export function isValidFieldConfig(field: unknown): field is FieldConfig {
+  if (!field || typeof field !== 'object') {
+    return false;
+  }
+
+  const candidate = field as Partial<FieldConfig>;
   return (
-    field &&
-    typeof field === 'object' &&
-    typeof field.type === 'string' &&
-    typeof field.label === 'string' &&
-    typeof field.name === 'string' &&
-    isValidFieldType(field.type)
+    typeof candidate.type === 'string' &&
+    typeof candidate.label === 'string' &&
+    typeof candidate.name === 'string' &&
+    isValidFieldType(candidate.type)
   );
 }
 

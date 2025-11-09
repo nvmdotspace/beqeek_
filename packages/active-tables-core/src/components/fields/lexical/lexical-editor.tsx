@@ -51,7 +51,7 @@ function InitialContentPlugin({ html }: { html: string }) {
         root.append(paragraph);
       }
     });
-  }, []); // Only run once on mount
+  }, [editor, html]);
 
   return null;
 }

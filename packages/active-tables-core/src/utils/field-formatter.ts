@@ -3,12 +3,28 @@
  * Formats field values for display based on field type
  */
 
-import type { FieldConfig } from '../types/field.js';
+import {
+  FIELD_TYPE_SHORT_TEXT,
+  FIELD_TYPE_TEXT,
+  FIELD_TYPE_EMAIL,
+  FIELD_TYPE_DATE,
+  FIELD_TYPE_DATETIME,
+  FIELD_TYPE_INTEGER,
+  FIELD_TYPE_NUMERIC,
+  FIELD_TYPE_CHECKBOX_YES_NO,
+  FIELD_TYPE_SELECT_ONE,
+  FIELD_TYPE_SELECT_LIST,
+  FIELD_TYPE_CHECKBOX_ONE,
+  FIELD_TYPE_CHECKBOX_LIST,
+  FIELD_TYPE_RICH_TEXT,
+  FIELD_TYPE_URL,
+  type FieldConfig,
+} from '../types/field.js';
 
 /**
  * Format a field value for display
  */
-export function formatFieldValue(value: any, field?: FieldConfig): string {
+export function formatFieldValue(value: unknown, field?: FieldConfig): string {
   if (value == null || value === '') {
     return '';
   }
@@ -18,7 +34,7 @@ export function formatFieldValue(value: any, field?: FieldConfig): string {
   }
 
   switch (field.type) {
-    case 'DATE':
+    case FIELD_TYPE_DATE:
       if (value instanceof Date) {
         return value.toLocaleDateString();
       }
@@ -32,7 +48,7 @@ export function formatFieldValue(value: any, field?: FieldConfig): string {
       }
       return String(value);
 
-    case 'DATETIME':
+    case FIELD_TYPE_DATETIME:
       if (value instanceof Date) {
         return value.toLocaleString();
       }
@@ -46,19 +62,20 @@ export function formatFieldValue(value: any, field?: FieldConfig): string {
       }
       return String(value);
 
-    case 'NUMBER':
-    case 'INTEGER':
-    case 'NUMERIC':
+    case FIELD_TYPE_INTEGER:
+    case FIELD_TYPE_NUMERIC:
       if (typeof value === 'number') {
         return value.toLocaleString();
       }
       return String(value);
 
-    case 'BOOLEAN':
+    case FIELD_TYPE_CHECKBOX_YES_NO:
       return value ? 'Yes' : 'No';
 
-    case 'SELECT_ONE':
-    case 'SELECT_LIST':
+    case FIELD_TYPE_SELECT_ONE:
+    case FIELD_TYPE_SELECT_LIST:
+    case FIELD_TYPE_CHECKBOX_ONE:
+    case FIELD_TYPE_CHECKBOX_LIST:
       if (field.options) {
         const option = field.options.find((opt) => opt.value === value);
         if (option) {
@@ -70,14 +87,14 @@ export function formatFieldValue(value: any, field?: FieldConfig): string {
       }
       return String(value);
 
-    case 'RICH_TEXT':
+    case FIELD_TYPE_RICH_TEXT:
       // Strip HTML tags for display
       if (typeof value === 'string') {
         return value.replace(/<[^>]*>/g, '').trim();
       }
       return String(value);
 
-    case 'URL':
+    case FIELD_TYPE_URL:
       if (typeof value === 'string' && value.startsWith('http')) {
         try {
           const url = new URL(value);
@@ -88,10 +105,9 @@ export function formatFieldValue(value: any, field?: FieldConfig): string {
       }
       return String(value);
 
-    case 'EMAIL':
-    case 'PHONE':
-    case 'SHORT_TEXT':
-    case 'TEXT':
+    case FIELD_TYPE_EMAIL:
+    case FIELD_TYPE_SHORT_TEXT:
+    case FIELD_TYPE_TEXT:
     default:
       return String(value);
   }

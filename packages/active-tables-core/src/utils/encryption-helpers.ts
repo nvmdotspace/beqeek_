@@ -1,4 +1,4 @@
-import type { ActiveFieldConfig } from '../types/index.js';
+import type { FieldConfig } from '../types/index.js';
 import CryptoJS from 'crypto-js';
 
 /**
@@ -59,11 +59,7 @@ export function getEncryptionTypeForField(fieldType: string): 'AES-256-CBC' | 'O
  * @param encryptionKey - 32-char encryption key (UTF-8 string)
  * @returns Decrypted value or original if not encrypted
  */
-export async function decryptFieldValue(
-  value: unknown,
-  field: ActiveFieldConfig,
-  encryptionKey: string,
-): Promise<unknown> {
+export async function decryptFieldValue(value: unknown, field: FieldConfig, encryptionKey: string): Promise<unknown> {
   if (!value || !encryptionKey) {
     return value;
   }
@@ -197,7 +193,7 @@ async function decryptOPEValue(value: unknown, encryptionKey: string): Promise<s
  */
 async function decryptSelectValue(
   hashedValue: unknown,
-  field: ActiveFieldConfig,
+  field: FieldConfig,
   encryptionKey: string,
 ): Promise<string | string[]> {
   if (!hashedValue || !field.options) {
@@ -222,7 +218,7 @@ async function decryptSelectValue(
  */
 async function matchHashToOption(
   hash: string,
-  options: ActiveFieldConfig['options'],
+  options: FieldConfig['options'],
   encryptionKey: string,
 ): Promise<string> {
   if (!options || !Array.isArray(options)) {
@@ -282,7 +278,7 @@ export function validateEncryptionKey(encryptionKey: string, encryptionAuthKey: 
 /**
  * Check if field requires encryption
  */
-export function isEncryptableField(field: ActiveFieldConfig): boolean {
+export function isEncryptableField(field: FieldConfig): boolean {
   const encryptionType = getEncryptionTypeForField(field.type);
   return encryptionType !== 'NONE';
 }

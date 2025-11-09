@@ -74,7 +74,7 @@ export interface PaginatedResponse<T> {
 /**
  * Response from get work groups API
  */
-export interface WorkGroupsResponse extends PaginatedResponse<WorkGroup> {}
+export type WorkGroupsResponse = PaginatedResponse<WorkGroup>;
 
 // ============================================
 // Tables Response
@@ -83,7 +83,7 @@ export interface WorkGroupsResponse extends PaginatedResponse<WorkGroup> {}
 /**
  * Response from get tables API
  */
-export interface TablesResponse extends PaginatedResponse<Table> {}
+export type TablesResponse = PaginatedResponse<Table>;
 
 // ============================================
 // Records Response

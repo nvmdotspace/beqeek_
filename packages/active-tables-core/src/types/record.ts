@@ -101,8 +101,13 @@ export interface RecordComment {
 /**
  * Check if object is a valid record
  */
-export function isValidRecord(obj: any): obj is TableRecord {
-  return obj && typeof obj === 'object' && typeof obj.id === 'string' && obj.record && typeof obj.record === 'object';
+export function isValidRecord(obj: unknown): obj is TableRecord {
+  if (!obj || typeof obj !== 'object') {
+    return false;
+  }
+
+  const candidate = obj as Partial<TableRecord>;
+  return typeof candidate.id === 'string' && candidate.record !== undefined && typeof candidate.record === 'object';
 }
 
 /**

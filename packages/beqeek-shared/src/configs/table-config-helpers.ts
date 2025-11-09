@@ -5,7 +5,7 @@
  */
 
 import { TABLE_CONFIGS } from './table-configs.js';
-import type { TableConfig, TableFieldConfig } from '../types/table-config-types.js';
+import type { FieldDefaultValue, TableConfig, TableFieldConfig } from '../types/table-config-types.js';
 import type { TableType } from '../constants/table-types.js';
 import { TABLE_TYPE_BLANK } from '../constants/table-types.js';
 
@@ -373,9 +373,11 @@ export function getSelectFields(tableType: TableType): TableFieldConfig[] {
  * console.log(result.missingFields); // ['job_title_code', 'status']
  * ```
  */
+type TableRecordData = Record<string, FieldDefaultValue | undefined>;
+
 export function validateRequiredFields(
   tableType: TableType,
-  data: Record<string, any>,
+  data: TableRecordData,
 ): { valid: boolean; missingFields: string[] } {
   const requiredFields = getRequiredFields(tableType);
   const missingFields = requiredFields

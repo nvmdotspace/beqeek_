@@ -7,7 +7,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { format } from 'date-fns';
 import type { GanttTaskProps } from './gantt-props.js';
-import { calculateTaskPosition, positionToDate } from './gantt-utils.js';
+import { calculateTaskPosition } from './gantt-utils.js';
 
 /**
  * GanttTask component
@@ -18,7 +18,7 @@ export function GanttTask({
   task,
   rangeStart,
   rangeEnd,
-  zoomLevel,
+  zoomLevel: _zoomLevel,
   onClick,
   onDateChange,
   showProgress = true,
@@ -36,10 +36,7 @@ export function GanttTask({
 
   // Calculate position
   const position = calculateTaskPosition(task.startDate, task.endDate, rangeStart, rangeEnd, timelineWidth);
-
-  if (!position.isPartiallyVisible) {
-    return null; // Task is completely outside visible range
-  }
+  const isVisible = position.isPartiallyVisible;
 
   // Progress percentage (0-100)
   const progressPercent = task.progress ?? 0;
@@ -62,7 +59,9 @@ export function GanttTask({
 
   // Handle drag and resize
   useEffect(() => {
-    if (!isDragging && !isResizing) return;
+    if (!isVisible || (!isDragging && !isResizing)) {
+      return;
+    }
 
     const handleMouseMove = (e: MouseEvent) => {
       if (!tempPosition) return;
@@ -111,6 +110,7 @@ export function GanttTask({
       document.removeEventListener('mouseup', handleMouseUp);
     };
   }, [
+    isVisible,
     isDragging,
     isResizing,
     dragStartX,
@@ -118,9 +118,13 @@ export function GanttTask({
     rangeStart,
     rangeEnd,
     timelineWidth,
-    task.record,
+    task.id,
     onDateChange,
   ]);
+
+  if (!isVisible) {
+    return null; // Task is completely outside visible range
+  }
 
   // Get priority and status from task record
   const priority = task.record?.record?.priority || task.record?.data?.priority;

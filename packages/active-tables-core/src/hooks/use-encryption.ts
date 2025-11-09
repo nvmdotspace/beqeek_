@@ -273,8 +273,8 @@ export function useEncryption(options: UseEncryptionOptions = {}): UseEncryption
  * const displayRecord = decryptRecord(record);
  * ```
  */
-export function useRecordDecryption(table: Table, encryptionKey?: string) {
-  const fields = useMemo(() => table.config.fields || [], [table.config.fields]);
+export function useRecordDecryption(table: Table, _encryptionKey?: string) {
+  const _fields = useMemo(() => table.config.fields || [], [table.config.fields]);
 
   const decryptRecordFunc = useCallback((record: TableRecord): TableRecord => {
     // Note: This hook assumes records are already decrypted before being passed to components.

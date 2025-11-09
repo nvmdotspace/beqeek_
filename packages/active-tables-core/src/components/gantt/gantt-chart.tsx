@@ -9,7 +9,7 @@ import { GanttTimeline } from './gantt-timeline.js';
 import { GanttGrid } from './gantt-grid.js';
 import { GanttTask } from './gantt-task.js';
 import { useGanttZoom } from './use-gantt-zoom.js';
-import type { GanttChartProps, ZoomLevel } from './gantt-props.js';
+import type { GanttChartProps } from './gantt-props.js';
 import { recordsToTasks, calculateDateRange, getUnitWidth } from './gantt-utils.js';
 
 /**
@@ -26,7 +26,7 @@ export function GanttChartView({
   onTaskClick,
   loading = false,
   readOnly = false,
-  showDependencies = false,
+  showDependencies: _showDependencies = false,
   showProgress = true,
   showToday = true,
   table,
@@ -153,7 +153,7 @@ export function GanttChartView({
           className="flex-shrink-0 border-r border-gray-200 dark:border-gray-700 overflow-y-auto"
           style={{ width: LABEL_WIDTH }}
         >
-          {tasks.map((task, index) => (
+          {tasks.map((task) => (
             <div
               key={task.id}
               className="px-3 flex items-center border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-900 cursor-pointer transition-colors"

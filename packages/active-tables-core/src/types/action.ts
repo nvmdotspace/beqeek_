@@ -89,9 +89,7 @@ export const NAVIGATION_ACTION_TYPES = [
   ACTION_TYPES.NAVIGATE_TO,
 ] as const;
 
-export function isNavigationAction(type: string): boolean {
-  return NAVIGATION_ACTION_TYPES.includes(type as any);
-}
+const NAVIGATION_ACTION_TYPE_SET = new Set<ActionType>(NAVIGATION_ACTION_TYPES);
 
 /**
  * Data manipulation action types
@@ -102,9 +100,7 @@ export const DATA_ACTION_TYPES = [
   ACTION_TYPES.DELETE_RECORD,
 ] as const;
 
-export function isDataAction(type: string): boolean {
-  return DATA_ACTION_TYPES.includes(type as any);
-}
+const DATA_ACTION_TYPE_SET = new Set<ActionType>(DATA_ACTION_TYPES);
 
 /**
  * Workflow action types
@@ -115,28 +111,43 @@ export const WORKFLOW_ACTION_TYPES = [
   ACTION_TYPES.SEND_NOTIFICATION,
 ] as const;
 
-export function isWorkflowAction(type: string): boolean {
-  return WORKFLOW_ACTION_TYPES.includes(type as any);
-}
+const WORKFLOW_ACTION_TYPE_SET = new Set<ActionType>(WORKFLOW_ACTION_TYPES);
 
 /**
  * Check if action type is valid
  */
+const ACTION_TYPE_VALUES = Object.values(ACTION_TYPES) as ActionType[];
+
 export function isValidActionType(type: string): type is ActionType {
-  return Object.values(ACTION_TYPES).includes(type as any);
+  return ACTION_TYPE_VALUES.includes(type as ActionType);
 }
 
 /**
  * Check if action config has required properties
  */
-export function isValidActionConfig(action: any): action is ActionConfig {
+export function isNavigationAction(type: string): boolean {
+  return isValidActionType(type) && NAVIGATION_ACTION_TYPE_SET.has(type);
+}
+
+export function isDataAction(type: string): boolean {
+  return isValidActionType(type) && DATA_ACTION_TYPE_SET.has(type);
+}
+
+export function isWorkflowAction(type: string): boolean {
+  return isValidActionType(type) && WORKFLOW_ACTION_TYPE_SET.has(type);
+}
+
+export function isValidActionConfig(action: unknown): action is ActionConfig {
+  if (!action || typeof action !== 'object') {
+    return false;
+  }
+
+  const candidate = action as Partial<ActionConfig>;
   return (
-    action &&
-    typeof action === 'object' &&
-    typeof action.actionId === 'string' &&
-    typeof action.name === 'string' &&
-    typeof action.type === 'string' &&
-    isValidActionType(action.type)
+    typeof candidate.actionId === 'string' &&
+    typeof candidate.name === 'string' &&
+    typeof candidate.type === 'string' &&
+    isValidActionType(candidate.type)
   );
 }
 

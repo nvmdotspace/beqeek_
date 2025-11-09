@@ -20,20 +20,24 @@ export function KanbanColumn({
   columnId,
   title,
   color,
-  textColor,
+  textColor: _textColor,
   records,
-  config,
+  config: _config,
   headlineField,
   displayFields,
   onRecordClick,
   collapsed = false,
-  onToggleCollapse,
+  onToggleCollapse: _onToggleCollapse,
   readOnly = false,
   table,
   messages,
   className = '',
 }: KanbanColumnProps) {
-  const { setNodeRef, isOver, active } = useDroppable({
+  const {
+    setNodeRef,
+    isOver,
+    active: _active,
+  } = useDroppable({
     id: columnId,
     data: {
       type: 'column',

@@ -6,8 +6,13 @@
  */
 
 import { useCallback } from 'react';
+import type { ChangeEvent } from 'react';
 import type { LayoutProps } from './record-list-props.js';
 import type { TableRecord } from '../../types/record.js';
+import type { FieldConfig } from '../../types/field.js';
+import type { RecordListConfig } from '../../types/config.js';
+import type { Table } from '../../types/common.js';
+import type { CurrentUser, WorkspaceUser } from '../../types/responses.js';
 import { FieldRenderer } from '../fields/field-renderer.js';
 import { useRecordDecryption } from '../../hooks/use-encryption.js';
 
@@ -48,7 +53,7 @@ export function HeadColumnLayout(props: LayoutProps) {
 
   // Handle selection toggle
   const handleSelectionToggle = useCallback(
-    (recordId: string, event: React.MouseEvent) => {
+    (recordId: string, event: ChangeEvent<HTMLInputElement>) => {
       event.stopPropagation(); // Prevent card click
 
       if (!onSelectionChange) return;
@@ -103,7 +108,7 @@ export function HeadColumnLayout(props: LayoutProps) {
                 <input
                   type="checkbox"
                   checked={isSelected}
-                  onChange={(e) => handleSelectionToggle(record.id, e as any)}
+                  onChange={(e) => handleSelectionToggle(record.id, e)}
                   onClick={(e) => e.stopPropagation()}
                   className="mt-0.5 h-4 w-4 rounded border-input text-primary focus:ring-1 focus:ring-ring"
                 />
@@ -148,14 +153,14 @@ export function HeadColumnLayout(props: LayoutProps) {
  */
 interface CardContentProps {
   record: TableRecord;
-  config: any;
-  titleField: any;
-  titleValue: any;
-  getFieldConfig: (name: string) => any;
-  table: any;
-  currentUser: any;
-  workspaceUsers: any;
-  messages: any;
+  config: RecordListConfig;
+  titleField?: FieldConfig;
+  titleValue: unknown;
+  getFieldConfig: (name: string) => FieldConfig | undefined;
+  table: Table;
+  currentUser?: CurrentUser;
+  workspaceUsers?: WorkspaceUser[];
+  messages?: LayoutProps['messages'];
 }
 
 function CardContent({
@@ -184,7 +189,9 @@ function CardContent({
             messages={messages}
           />
         ) : (
-          <span>{titleValue || <span className="text-muted-foreground italic">(No title)</span>}</span>
+          <span>
+            {titleValue ? String(titleValue) : <span className="text-muted-foreground italic">(No title)</span>}
+          </span>
         )}
       </div>
 

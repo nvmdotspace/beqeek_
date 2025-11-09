@@ -111,7 +111,7 @@ export function GanttTimeline({
       {/* Date headers - Simplified design */}
       <div className="flex" style={{ width }}>
         {timeUnits.map((unit, index) => {
-          const isToday = unit.isToday;
+          const highlightToday = showToday && unit.isToday;
           const isWeekend = unit.isWeekend;
 
           return (
@@ -119,8 +119,12 @@ export function GanttTimeline({
               key={index}
               className={`
                 flex items-center justify-center py-1.5 border-r border-gray-200 dark:border-gray-700 text-[11px] font-medium
-                ${isToday ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 font-semibold' : ''}
-                ${isWeekend && !isToday ? 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400' : 'text-gray-700 dark:text-gray-300'}
+                ${highlightToday ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 font-semibold' : ''}
+                ${
+                  isWeekend && !highlightToday
+                    ? 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400'
+                    : 'text-gray-700 dark:text-gray-300'
+                }
               `}
               style={{ width: columnWidth, minWidth: columnWidth }}
             >

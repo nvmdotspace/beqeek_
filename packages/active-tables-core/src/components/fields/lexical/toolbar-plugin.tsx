@@ -11,13 +11,6 @@ import { $isListNode, ListNode, INSERT_ORDERED_LIST_COMMAND, INSERT_UNORDERED_LI
 import { $getNearestNodeOfType } from '@lexical/utils';
 import { $isLinkNode, TOGGLE_LINK_COMMAND } from '@lexical/link';
 
-const HEADING_OPTIONS = [
-  { label: 'Normal', value: 'paragraph' },
-  { label: 'Heading 1', value: 'h1' },
-  { label: 'Heading 2', value: 'h2' },
-  { label: 'Heading 3', value: 'h3' },
-];
-
 interface ToolbarPluginProps {
   disabled?: boolean;
 }

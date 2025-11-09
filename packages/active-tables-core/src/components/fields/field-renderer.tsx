@@ -42,7 +42,37 @@ import {
   FIELD_TYPE_SELECT_LIST_RECORD,
   FIELD_TYPE_SELECT_ONE_WORKSPACE_USER,
   FIELD_TYPE_SELECT_LIST_WORKSPACE_USER,
+  type FieldType,
 } from '../../types/field.js';
+
+const BASIC_TEXT_TYPES: ReadonlySet<FieldType> = new Set<FieldType>([
+  FIELD_TYPE_SHORT_TEXT,
+  FIELD_TYPE_EMAIL,
+  FIELD_TYPE_URL,
+]);
+const NUMBER_TYPES: ReadonlySet<FieldType> = new Set<FieldType>([FIELD_TYPE_INTEGER, FIELD_TYPE_NUMERIC]);
+const TIME_COMPONENT_TYPES: ReadonlySet<FieldType> = new Set<FieldType>([
+  FIELD_TYPE_YEAR,
+  FIELD_TYPE_MONTH,
+  FIELD_TYPE_DAY,
+  FIELD_TYPE_HOUR,
+  FIELD_TYPE_MINUTE,
+  FIELD_TYPE_SECOND,
+]);
+const SELECT_TYPES: ReadonlySet<FieldType> = new Set<FieldType>([
+  FIELD_TYPE_SELECT_ONE,
+  FIELD_TYPE_SELECT_LIST,
+  FIELD_TYPE_CHECKBOX_ONE,
+  FIELD_TYPE_CHECKBOX_LIST,
+]);
+const REFERENCE_TYPES: ReadonlySet<FieldType> = new Set<FieldType>([
+  FIELD_TYPE_SELECT_ONE_RECORD,
+  FIELD_TYPE_SELECT_LIST_RECORD,
+]);
+const USER_TYPES: ReadonlySet<FieldType> = new Set<FieldType>([
+  FIELD_TYPE_SELECT_ONE_WORKSPACE_USER,
+  FIELD_TYPE_SELECT_LIST_WORKSPACE_USER,
+]);
 
 /**
  * Main field renderer that routes to the appropriate component based on field type
@@ -51,7 +81,7 @@ export function FieldRenderer(props: FieldRendererProps) {
   const { field } = props;
 
   // Text fields
-  if ([FIELD_TYPE_SHORT_TEXT, FIELD_TYPE_EMAIL, FIELD_TYPE_URL].includes(field.type as any)) {
+  if (BASIC_TEXT_TYPES.has(field.type)) {
     return <TextField {...props} />;
   }
 
@@ -64,16 +94,12 @@ export function FieldRenderer(props: FieldRendererProps) {
   }
 
   // Number fields
-  if ([FIELD_TYPE_INTEGER, FIELD_TYPE_NUMERIC].includes(field.type as any)) {
+  if (NUMBER_TYPES.has(field.type)) {
     return <NumberField {...props} />;
   }
 
   // Time component fields (simple number inputs)
-  if (
-    [FIELD_TYPE_YEAR, FIELD_TYPE_MONTH, FIELD_TYPE_DAY, FIELD_TYPE_HOUR, FIELD_TYPE_MINUTE, FIELD_TYPE_SECOND].includes(
-      field.type as any,
-    )
-  ) {
+  if (TIME_COMPONENT_TYPES.has(field.type)) {
     return <NumberField {...props} />;
   }
 
@@ -91,11 +117,7 @@ export function FieldRenderer(props: FieldRendererProps) {
   }
 
   // Selection fields
-  if (
-    [FIELD_TYPE_SELECT_ONE, FIELD_TYPE_SELECT_LIST, FIELD_TYPE_CHECKBOX_ONE, FIELD_TYPE_CHECKBOX_LIST].includes(
-      field.type as any,
-    )
-  ) {
+  if (SELECT_TYPES.has(field.type)) {
     return <SelectField {...props} />;
   }
 
@@ -104,12 +126,12 @@ export function FieldRenderer(props: FieldRendererProps) {
   }
 
   // Reference fields
-  if ([FIELD_TYPE_SELECT_ONE_RECORD, FIELD_TYPE_SELECT_LIST_RECORD].includes(field.type as any)) {
+  if (REFERENCE_TYPES.has(field.type)) {
     return <ReferenceField {...props} />;
   }
 
   // User fields
-  if ([FIELD_TYPE_SELECT_ONE_WORKSPACE_USER, FIELD_TYPE_SELECT_LIST_WORKSPACE_USER].includes(field.type as any)) {
+  if (USER_TYPES.has(field.type)) {
     return <UserField {...props} />;
   }
 

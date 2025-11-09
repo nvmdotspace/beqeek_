@@ -150,7 +150,7 @@ export interface DragEventData {
 /**
  * Column data for sortable context
  */
-export interface ColumnData {
+export interface ColumnData extends Record<string, unknown> {
   /** Column ID (status field value) */
   id: string;
 

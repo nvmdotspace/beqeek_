@@ -11,7 +11,6 @@ import {
   DragOverlay,
   closestCenter,
   pointerWithin,
-  getFirstCollision,
   KeyboardSensor,
   PointerSensor,
   useSensor,
@@ -189,7 +188,7 @@ export function KanbanBoard({
 
   // Handle drag over - track which droppable we're over
   const handleDragOver = (event: DragOverEvent) => {
-    const { over, active } = event;
+    const { over } = event;
 
     if (!over) {
       setOverId(null);
@@ -197,7 +196,6 @@ export function KanbanBoard({
     }
 
     const overId = String(over.id);
-    const activeId = String(active.id);
 
     // If we're over a column directly, use that
     if (columns.some((col) => col.id === overId)) {
@@ -302,7 +300,7 @@ export function KanbanBoard({
   if (!statusField) {
     return (
       <div className="p-8 text-center text-red-600 dark:text-red-400">
-        {messages?.error || 'Error'}: Status field "{config.statusField}" not found
+        {messages?.error || 'Error'}: Status field &quot;{config.statusField}&quot; not found
       </div>
     );
   }
@@ -310,7 +308,7 @@ export function KanbanBoard({
   if (!headlineField) {
     return (
       <div className="p-8 text-center text-red-600 dark:text-red-400">
-        {messages?.error || 'Error'}: Headline field "{config.kanbanHeadlineField}" not found
+        {messages?.error || 'Error'}: Headline field &quot;{config.kanbanHeadlineField}&quot; not found
       </div>
     );
   }

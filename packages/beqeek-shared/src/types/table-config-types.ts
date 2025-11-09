@@ -6,7 +6,13 @@
  */
 
 import type { FieldType } from '../constants/field-types.js';
+import type { Permission } from '../constants/permissions.js';
 import type { TableType } from '../constants/table-types.js';
+
+/**
+ * Supported default value primitive types for table fields
+ */
+export type FieldDefaultValue = string | number | boolean | string[] | null;
 
 // ============================================
 // Field Configuration Types
@@ -30,7 +36,7 @@ export interface BaseFieldConfig {
   label: string; // i18n key
   name: string;
   placeholder?: string; // i18n key
-  defaultValue?: any;
+  defaultValue?: FieldDefaultValue;
   required: boolean;
 }
 
@@ -149,18 +155,39 @@ export type RecordDetailConfig = RecordDetailHeadConfig | RecordDetailTwoColumnC
 // Action Configuration (placeholder)
 // ============================================
 
+export type TableActionType =
+  | 'create'
+  | 'access'
+  | 'update'
+  | 'delete'
+  | 'custom'
+  | 'comment_create'
+  | 'comment_access'
+  | 'comment_update'
+  | 'comment_delete';
+
 export interface ActionConfig {
-  // Actions are auto-generated, leaving as empty array
-  // Future: may include custom action definitions
+  actionId: string;
+  name: string;
+  type: TableActionType;
+  description?: string;
+  icon?: string;
+  config?: Record<string, unknown>;
 }
 
 // ============================================
 // Permission Configuration (placeholder)
 // ============================================
 
+export interface PermissionRule {
+  actionId: string;
+  permission: Permission;
+}
+
 export interface PermissionConfig {
-  // Permissions configured after table creation
-  // Leaving as empty array for now
+  teamId: string;
+  roleId: string;
+  actions: PermissionRule[];
 }
 
 // ============================================

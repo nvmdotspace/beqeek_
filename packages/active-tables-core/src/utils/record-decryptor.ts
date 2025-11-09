@@ -1,4 +1,4 @@
-import type { ActiveTableRecord, ActiveFieldConfig } from '../types/index.js';
+import type { FieldConfig, TableRecord } from '../types/index.js';
 import { decryptFieldValue, isEncryptableField } from './encryption-helpers.js';
 import { globalDecryptionCache } from './decryption-cache.js';
 
@@ -21,11 +21,11 @@ import { globalDecryptionCache } from './decryption-cache.js';
  * @returns Record with decrypted data
  */
 export async function decryptRecord(
-  record: ActiveTableRecord,
-  fields: ActiveFieldConfig[],
+  record: TableRecord,
+  fields: FieldConfig[],
   encryptionKey: string,
   useCache = true,
-): Promise<ActiveTableRecord> {
+): Promise<TableRecord> {
   if (!encryptionKey || !record.record || typeof record.record !== 'object') {
     return record;
   }
@@ -90,12 +90,12 @@ export async function decryptRecord(
  * @returns Array of records with decrypted data
  */
 export async function decryptRecords(
-  records: ActiveTableRecord[],
-  fields: ActiveFieldConfig[],
+  records: TableRecord[],
+  fields: FieldConfig[],
   encryptionKey: string,
   useCache = true,
   batchSize = 50,
-): Promise<ActiveTableRecord[]> {
+): Promise<TableRecord[]> {
   if (!records || !Array.isArray(records) || records.length === 0) {
     return records;
   }
@@ -107,7 +107,7 @@ export async function decryptRecords(
 
   try {
     // Process records in batches to prevent overwhelming the event loop
-    const decryptedRecords: ActiveTableRecord[] = [];
+    const decryptedRecords: TableRecord[] = [];
 
     for (let i = 0; i < records.length; i += batchSize) {
       const batch = records.slice(i, i + batchSize);
@@ -141,8 +141,8 @@ export async function decryptRecords(
  * @returns Array of decrypted field values
  */
 export async function decryptFieldAcrossRecords(
-  records: ActiveTableRecord[],
-  field: ActiveFieldConfig,
+  records: TableRecord[],
+  field: FieldConfig,
   encryptionKey: string,
 ): Promise<unknown[]> {
   if (!records || !Array.isArray(records) || !encryptionKey) {
@@ -171,7 +171,7 @@ export async function decryptFieldAcrossRecords(
  * Get encryption statistics for a set of records
  * Useful for debugging and monitoring
  */
-export function getEncryptionStats(records: ActiveTableRecord[], fields: ActiveFieldConfig[]) {
+export function getEncryptionStats(records: TableRecord[], fields: FieldConfig[]) {
   const stats = {
     totalRecords: records.length,
     totalFields: fields.length,

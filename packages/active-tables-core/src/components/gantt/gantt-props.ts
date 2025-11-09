@@ -6,7 +6,7 @@
 
 import type { Table } from '../../types/common.js';
 import type { TableRecord } from '../../types/record.js';
-import type { GanttConfig, FieldConfig } from '../../types/index.js';
+import type { GanttConfig } from '../../types/index.js';
 import type { PartialMessages } from '../../types/messages.js';
 
 // ============================================

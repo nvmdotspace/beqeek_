@@ -65,22 +65,30 @@ export interface Table {
 /**
  * Check if object is a valid work group
  */
-export function isValidWorkGroup(obj: any): obj is WorkGroup {
-  return obj && typeof obj === 'object' && typeof obj.id === 'string' && typeof obj.name === 'string';
+export function isValidWorkGroup(obj: unknown): obj is WorkGroup {
+  if (!obj || typeof obj !== 'object') {
+    return false;
+  }
+
+  const candidate = obj as Partial<WorkGroup>;
+  return typeof candidate.id === 'string' && typeof candidate.name === 'string';
 }
 
 /**
  * Check if object is a valid table
  */
-export function isValidTable(obj: any): obj is Table {
+export function isValidTable(obj: unknown): obj is Table {
+  if (!obj || typeof obj !== 'object') {
+    return false;
+  }
+
+  const candidate = obj as Partial<Table>;
   return (
-    obj &&
-    typeof obj === 'object' &&
-    typeof obj.id === 'string' &&
-    typeof obj.name === 'string' &&
-    typeof obj.workGroupId === 'string' &&
-    obj.config &&
-    typeof obj.config === 'object'
+    typeof candidate.id === 'string' &&
+    typeof candidate.name === 'string' &&
+    typeof candidate.workGroupId === 'string' &&
+    candidate.config !== undefined &&
+    typeof candidate.config === 'object'
   );
 }
 

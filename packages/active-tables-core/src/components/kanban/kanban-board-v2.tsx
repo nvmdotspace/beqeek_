@@ -37,9 +37,6 @@ export function KanbanBoardV2({
   className = '',
 }: KanbanBoardProps) {
   const [collapsedColumns, setCollapsedColumns] = useState<Set<string>>(new Set());
-  const [columnMenus, setColumnMenus] = useState<Record<string, boolean>>({});
-  const [sortBy, setSortBy] = useState<Record<string, string | null>>({});
-  const [filterPriority, setFilterPriority] = useState<Record<string, string | null>>({});
 
   // Find the status field configuration
   const statusField = useMemo(() => {
@@ -246,7 +243,7 @@ export function KanbanBoardV2({
   if (!statusField) {
     return (
       <div className="p-8 text-center text-red-600 dark:text-red-400">
-        {messages?.error || 'Error'}: Status field "{config.statusField}" not found
+        {messages?.error || 'Error'}: Status field &quot;{config.statusField}&quot; not found
       </div>
     );
   }
@@ -254,7 +251,7 @@ export function KanbanBoardV2({
   if (!headlineField) {
     return (
       <div className="p-8 text-center text-red-600 dark:text-red-400">
-        {messages?.error || 'Error'}: Headline field "{config.kanbanHeadlineField}" not found
+        {messages?.error || 'Error'}: Headline field &quot;{config.kanbanHeadlineField}&quot; not found
       </div>
     );
   }
@@ -271,14 +268,14 @@ export function KanbanBoardV2({
     <div className={`overflow-x-auto overflow-y-hidden ${className}`}>
       <div className="min-h-[400px] min-w-max p-4">
         <KanbanProvider
-          columns={columns as any}
+          columns={columns}
           data={boardData}
           onDataChange={handleDataChange}
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
           className="flex gap-3"
         >
-          {(column: any) => {
+          {(column: ColumnData) => {
             const isCollapsed = collapsedColumns.has(column.id);
             const columnRecords = boardData.filter((item) => item.column === column.id);
 

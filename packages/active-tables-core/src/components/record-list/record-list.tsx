@@ -15,7 +15,27 @@ import { GenericTableLayout } from './generic-table-layout.js';
  * RecordList - Main list component with layout routing
  */
 export function RecordList(props: RecordListProps) {
-  const { table, records, config, loading = false, error = null, messages, onRetry, className = '' } = props;
+  const { records, config, loading = false, error = null, messages, onRetry, className = '' } = props;
+
+  // Determine layout component
+  const LayoutComponent = useMemo(() => {
+    const layoutType = config.layout.toLowerCase();
+
+    switch (layoutType) {
+      case 'head-column':
+      case 'card':
+        return HeadColumnLayout;
+
+      case 'table':
+      case 'generic-table':
+        return GenericTableLayout;
+
+      default:
+        // Default to table layout
+        console.warn(`Unknown layout type: ${config.layout}, falling back to table layout`);
+        return GenericTableLayout;
+    }
+  }, [config.layout]);
 
   // Loading state
   if (loading) {
@@ -52,26 +72,6 @@ export function RecordList(props: RecordListProps) {
       </div>
     );
   }
-
-  // Determine layout component
-  const LayoutComponent = useMemo(() => {
-    const layoutType = config.layout.toLowerCase();
-
-    switch (layoutType) {
-      case 'head-column':
-      case 'card':
-        return HeadColumnLayout;
-
-      case 'table':
-      case 'generic-table':
-        return GenericTableLayout;
-
-      default:
-        // Default to table layout
-        console.warn(`Unknown layout type: ${config.layout}, falling back to table layout`);
-        return GenericTableLayout;
-    }
-  }, [config.layout]);
 
   return <LayoutComponent {...props} />;
 }
