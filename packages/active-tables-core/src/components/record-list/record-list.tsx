@@ -10,6 +10,7 @@ import type { RecordListProps } from './record-list-props.js';
 import { EmptyState, LoadingState, ErrorState } from '../states/index.js';
 import { HeadColumnLayout } from './head-column-layout.js';
 import { GenericTableLayout } from './generic-table-layout.js';
+import { CompactLayout } from './compact-layout.js';
 
 /**
  * RecordList - Main list component with layout routing
@@ -29,6 +30,9 @@ export function RecordList(props: RecordListProps) {
       case 'table':
       case 'generic-table':
         return GenericTableLayout;
+
+      case 'compact':
+        return CompactLayout;
 
       default:
         // Default to table layout

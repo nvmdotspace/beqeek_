@@ -56,7 +56,7 @@ export function CommentsPanel({
 
     setIsSubmitting(true);
     try {
-      await onCommentAdd?.(newComment.trim());
+      onCommentAdd?.(newComment.trim());
       setNewComment('');
     } finally {
       setIsSubmitting(false);

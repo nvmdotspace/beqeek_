@@ -75,12 +75,33 @@ export interface GanttConfig {
  * 1. generic-table: Uses displayFields array
  * 2. head-column: Uses titleField, subLineFields, tailFields
  */
+/** Field ordering configuration for custom layouts */
+export interface FieldOrderConfig {
+  /** Field name */
+  fieldName: string;
+
+  /** Custom column width (for table layouts) */
+  width?: number;
+
+  /** Override default sortability */
+  sortable?: boolean;
+
+  /** Mobile display priority (1-5, higher = more important) */
+  priority?: number;
+
+  /** Whether to hide on mobile */
+  hideOnMobile?: boolean;
+}
+
 export interface RecordListConfig {
   /** Layout type: 'generic-table' | 'table' | 'head-column' | 'card' | 'compact' */
   layout: string;
 
   /** Field names to display (for generic-table layout) */
   displayFields?: string[];
+
+  /** Advanced field ordering with custom options */
+  fieldOrder?: FieldOrderConfig[];
 
   /** Field name to use as title (for head-column layout) */
   titleField?: string;
@@ -90,6 +111,15 @@ export interface RecordListConfig {
 
   /** Field names to display at the end (for head-column layout) */
   tailFields?: string[];
+
+  /** Mobile-specific options */
+  mobileOptions?: {
+    /** Use card view instead of table on mobile */
+    useCardView?: boolean;
+
+    /** Max fields to show in mobile cards */
+    maxFields?: number;
+  };
 }
 
 /**

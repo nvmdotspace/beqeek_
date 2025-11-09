@@ -5,7 +5,7 @@
  * Features: sortable columns, row selection, responsive design
  */
 
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import {
   useReactTable,
   getCoreRowModel,
@@ -17,9 +17,157 @@ import {
 } from '@tanstack/react-table';
 import type { LayoutProps } from './record-list-props.js';
 import type { TableRecord } from '../../types/record.js';
-import { FieldRenderer } from '../fields/field-renderer.js';
+import { FieldListRenderer } from '../fields/field-list-renderer.js';
 import { useRecordDecryption } from '../../hooks/use-encryption.js';
-import { useState } from 'react';
+
+// Mobile detection hook
+const useIsMobile = () => {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  return isMobile;
+};
+
+// Mobile Card View Component
+function MobileCardView({
+  records,
+  visibleFields,
+  tableMetadata,
+  onRecordClick,
+  selectedIds = [],
+  onSelectionChange,
+  decryptRecord,
+  currentUser,
+  workspaceUsers,
+  messages,
+}: {
+  records: TableRecord[];
+  visibleFields: string[];
+  tableMetadata: any;
+  onRecordClick?: (record: TableRecord) => void;
+  selectedIds?: string[];
+  onSelectionChange?: (selectedIds: string[]) => void;
+  decryptRecord: (record: TableRecord) => TableRecord;
+  currentUser?: any;
+  workspaceUsers?: any;
+  messages?: any;
+}) {
+  return (
+    <div className="space-y-3">
+      {records.map((record) => {
+        const decryptedRecord = decryptRecord(record);
+        const isSelected = selectedIds.includes(record.id);
+
+        return (
+          <div
+            key={record.id}
+            role="button"
+            tabIndex={0}
+            onClick={() => onRecordClick?.(record)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                onRecordClick?.(record);
+              }
+            }}
+            className={`
+              bg-card text-card-foreground rounded-lg border border-border p-3
+              cursor-pointer transition-colors hover:bg-accent/50
+              focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring
+              ${isSelected ? 'bg-accent border-accent-foreground/20' : ''}
+            `}
+          >
+            {onSelectionChange && (
+              <div className="flex items-start gap-3 mb-2">
+                <input
+                  type="checkbox"
+                  checked={isSelected}
+                  onChange={(e) => {
+                    e.stopPropagation();
+                    const newSelection = isSelected
+                      ? selectedIds.filter((id) => id !== record.id)
+                      : [...selectedIds, record.id];
+                    onSelectionChange(newSelection);
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                  className="mt-0.5 h-4 w-4 rounded border-input text-primary focus:ring-1 focus:ring-ring"
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="space-y-2">
+                    {visibleFields.slice(0, 3).map((fieldName) => {
+                      const fieldConfig = tableMetadata.config.fields.find((f: any) => f.name === fieldName);
+                      if (!fieldConfig) return null;
+
+                      const value = decryptedRecord.data![fieldName];
+                      const isFirst = visibleFields.indexOf(fieldName) === 0;
+
+                      return (
+                        <div
+                          key={fieldName}
+                          className={isFirst ? 'text-sm font-medium' : 'text-xs text-muted-foreground'}
+                        >
+                          {!isFirst && <span className="font-medium">{fieldConfig.label}: </span>}
+                          {value === null || value === undefined || value === '' ? (
+                            <span className="text-muted-foreground/50">—</span>
+                          ) : (
+                            <FieldListRenderer
+                              field={fieldConfig}
+                              value={value}
+                              table={tableMetadata}
+                              currentUser={currentUser}
+                              workspaceUsers={workspaceUsers}
+                              messages={messages}
+                            />
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {!onSelectionChange && (
+              <div className="space-y-2">
+                {visibleFields.slice(0, 3).map((fieldName) => {
+                  const fieldConfig = tableMetadata.config.fields.find((f: any) => f.name === fieldName);
+                  if (!fieldConfig) return null;
+
+                  const value = decryptedRecord.data![fieldName];
+                  const isFirst = visibleFields.indexOf(fieldName) === 0;
+
+                  return (
+                    <div key={fieldName} className={isFirst ? 'text-sm font-medium' : 'text-xs text-muted-foreground'}>
+                      {!isFirst && <span className="font-medium">{fieldConfig.label}: </span>}
+                      {value === null || value === undefined || value === '' ? (
+                        <span className="text-muted-foreground/50">—</span>
+                      ) : (
+                        <FieldListRenderer
+                          field={fieldConfig}
+                          value={value}
+                          table={tableMetadata}
+                          currentUser={currentUser}
+                          workspaceUsers={workspaceUsers}
+                          messages={messages}
+                        />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 export function GenericTableLayout(props: LayoutProps) {
   const {
@@ -38,10 +186,20 @@ export function GenericTableLayout(props: LayoutProps) {
 
   const { decryptRecord } = useRecordDecryption(tableMetadata, encryptionKey);
   const [sorting, setSorting] = useState<SortingState>([]);
+  const isMobile = useIsMobile();
 
-  // Get all visible fields based on layout type
+  // Get all visible fields based on layout type and field ordering
   const visibleFields = useMemo(() => {
-    // For generic-table layout, use displayFields array directly (as per spec section 2.4)
+    // Use fieldOrder if available (advanced configuration)
+    if (config.fieldOrder && config.fieldOrder.length > 0) {
+      // Filter out mobile-hidden fields if on mobile
+      const filteredFields = isMobile ? config.fieldOrder.filter((field) => !field.hideOnMobile) : config.fieldOrder;
+
+      // Sort by priority (higher priority first) or keep original order
+      return filteredFields.sort((a, b) => (b.priority || 0) - (a.priority || 0)).map((field) => field.fieldName);
+    }
+
+    // Fallback to displayFields array (as per spec section 2.4)
     if (config.displayFields && Array.isArray(config.displayFields)) {
       return config.displayFields;
     }
@@ -54,7 +212,7 @@ export function GenericTableLayout(props: LayoutProps) {
     config.tailFields?.forEach((f: string) => fields.add(f));
 
     return Array.from(fields);
-  }, [config]);
+  }, [config, isMobile]);
 
   // Create table columns
   const columns = useMemo<ColumnDef<TableRecord>[]>(() => {
@@ -100,6 +258,9 @@ export function GenericTableLayout(props: LayoutProps) {
       const fieldConfig = tableMetadata.config.fields.find((f) => f.name === fieldName);
       if (!fieldConfig) return;
 
+      // Get field order config for this field
+      const fieldOrderConfig = config.fieldOrder?.find((f) => f.fieldName === fieldName);
+
       cols.push({
         id: fieldName,
         accessorFn: (row) => (row.data || row.record)[fieldName],
@@ -114,10 +275,9 @@ export function GenericTableLayout(props: LayoutProps) {
           }
 
           return (
-            <FieldRenderer
+            <FieldListRenderer
               field={fieldConfig}
               value={value}
-              mode="display"
               table={tableMetadata}
               currentUser={currentUser}
               workspaceUsers={workspaceUsers}
@@ -125,7 +285,8 @@ export function GenericTableLayout(props: LayoutProps) {
             />
           );
         },
-        enableSorting: true,
+        enableSorting: fieldOrderConfig?.sortable !== false, // Default true, can be overridden
+        size: fieldOrderConfig?.width, // Custom width if specified
       });
     });
 
@@ -155,6 +316,26 @@ export function GenericTableLayout(props: LayoutProps) {
     getRowId: (row) => row.id,
   });
 
+  // Use mobile card view on small screens
+  if (isMobile) {
+    return (
+      <div className={className}>
+        <MobileCardView
+          records={records}
+          visibleFields={visibleFields}
+          tableMetadata={tableMetadata}
+          onRecordClick={onRecordClick}
+          selectedIds={selectedIds}
+          onSelectionChange={onSelectionChange}
+          decryptRecord={decryptRecord}
+          currentUser={currentUser}
+          workspaceUsers={workspaceUsers}
+          messages={messages}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className={`w-full ${className}`}>
       {/* shadcn-style table wrapper */}
@@ -178,35 +359,55 @@ export function GenericTableLayout(props: LayoutProps) {
                             header.column.getCanSort()
                               ? 'hover:bg-accent hover:text-accent-foreground h-8 px-2 -ml-2'
                               : ''
-                          }`}
+                          } ${header.column.getIsSorted() ? 'bg-accent text-accent-foreground' : ''}`}
                           onClick={header.column.getToggleSortingHandler()}
                           disabled={!header.column.getCanSort()}
                         >
                           {flexRender(header.column.columnDef.header, header.getContext())}
 
                           {header.column.getCanSort() && (
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="16"
-                              height="16"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              className="ml-1 h-3.5 w-3.5 opacity-50"
-                            >
-                              {{
-                                asc: <path d="M12 19V5M5 12l7-7 7 7" />,
-                                desc: <path d="M12 5v14M5 12l7 7 7-7" />,
-                              }[header.column.getIsSorted() as string] ?? (
-                                <>
-                                  <path d="m7 15 5 5 5-5" />
-                                  <path d="m7 9 5-5 5 5" />
-                                </>
-                              )}
-                            </svg>
+                            <div className="flex flex-col ml-1">
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="12"
+                                height="12"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className={`h-3 w-3 transition-colors ${
+                                  header.column.getIsSorted() === 'asc'
+                                    ? 'text-primary'
+                                    : header.column.getIsSorted() === 'desc'
+                                      ? 'text-muted-foreground'
+                                      : 'opacity-30'
+                                }`}
+                              >
+                                <path d="M12 19V5M5 12l7-7 7 7" />
+                              </svg>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="12"
+                                height="12"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className={`h-3 w-3 -mt-1 transition-colors ${
+                                  header.column.getIsSorted() === 'desc'
+                                    ? 'text-primary'
+                                    : header.column.getIsSorted() === 'asc'
+                                      ? 'text-muted-foreground'
+                                      : 'opacity-30'
+                                }`}
+                              >
+                                <path d="M12 5v14M5 12l7 7 7-7" />
+                              </svg>
+                            </div>
                           )}
                         </button>
                       )}
@@ -251,7 +452,7 @@ export function GenericTableLayout(props: LayoutProps) {
         )}
       </div>
 
-      {/* Mobile hint */}
+      {/* Mobile hint - only show on larger screens */}
       <div className="flex items-center justify-center gap-1 py-4 text-xs text-muted-foreground md:hidden">
         <svg
           xmlns="http://www.w3.org/2000/svg"

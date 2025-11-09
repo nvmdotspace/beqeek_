@@ -18,7 +18,7 @@ import { m } from '@/paraglide/generated/messages.js';
 import { useActiveTable, useActiveWorkGroups } from '../hooks/use-active-tables';
 import type { ActiveFieldConfig, ActiveTable, ActiveWorkGroup } from '../types';
 import { useTableEncryption } from '../hooks/use-table-encryption';
-import { getEncryptionTypeForField } from '@workspace/active-tables-core';
+import { FieldSummary } from '@workspace/active-tables-core';
 import { ROUTES } from '@/shared/route-paths';
 import { ErrorCard } from '@/components/error-display';
 
@@ -29,74 +29,6 @@ import { Skeleton } from '@workspace/ui/components/skeleton';
 import { EncryptionKeyModal } from '../components/encryption-key-modal';
 import { EncryptionStatusCard } from '../components/encryption-status-card';
 import { EncryptionTypeBreakdown } from '../components/encryption-type-breakdown';
-
-interface FieldSummaryProps {
-  field: ActiveFieldConfig;
-  isE2EEEnabled: boolean;
-}
-
-const FieldSummary = ({ field, isE2EEEnabled }: FieldSummaryProps) => {
-  const optionCount = field.options?.length ?? 0;
-  const encryptionType = isE2EEEnabled ? getEncryptionTypeForField(field.type) : 'NONE';
-
-  return (
-    <div className="rounded-lg border border-border/60 bg-card/40 p-4">
-      <div className="flex items-center justify-between gap-2">
-        <div>
-          <p className="text-sm font-semibold text-foreground">{field.label}</p>
-          <p className="text-xs text-muted-foreground">{field.name}</p>
-        </div>
-        <div className="flex flex-col items-end gap-1">
-          <Badge variant="info" className="uppercase">
-            {field.type}
-          </Badge>
-          {encryptionType !== 'NONE' && (
-            <Badge variant="outline" className="text-xs">
-              {encryptionType === 'AES-256-CBC' && <Shield className="mr-1 h-2.5 w-2.5" />}
-              {encryptionType === 'OPE' && <Lock className="mr-1 h-2.5 w-2.5" />}
-              {encryptionType === 'HMAC-SHA256' && <Hash className="mr-1 h-2.5 w-2.5" />}
-              {encryptionType}
-            </Badge>
-          )}
-        </div>
-      </div>
-
-      <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-        <Badge variant={field.required ? 'success' : 'warning'}>
-          {field.required ? m.activeTables_detail_fieldRequired() : m.activeTables_detail_fieldOptional()}
-        </Badge>
-        {optionCount > 0 ? (
-          <Badge variant="outline">{m.activeTables_detail_fieldOptions({ count: optionCount })}</Badge>
-        ) : null}
-      </div>
-
-      {field.placeholder ? <p className="mt-3 text-sm text-muted-foreground">{field.placeholder}</p> : null}
-
-      {field.options && field.options.length > 0 ? (
-        <div className="mt-3 flex flex-wrap gap-2">
-          {field.options.slice(0, 6).map((option) => (
-            <Badge
-              key={option.value}
-              variant="outline"
-              className="flex items-center gap-2"
-              style={
-                option.background_color
-                  ? {
-                      backgroundColor: option.background_color,
-                      color: option.text_color ?? 'inherit',
-                    }
-                  : undefined
-              }
-            >
-              {option.text}
-            </Badge>
-          ))}
-          {field.options.length > 6 ? <Badge variant="secondary">+{field.options.length - 6}</Badge> : null}
-        </div>
-      ) : null}
-    </div>
-  );
-};
 
 const LoadingState = () => (
   <div className="space-y-6">
@@ -322,7 +254,16 @@ export const ActiveTableDetailPage = () => {
         </div>
         <div className="grid gap-4 md:grid-cols-2">
           {table.config?.fields?.map((field) => (
-            <FieldSummary key={field.name} field={field} isE2EEEnabled={encryption.isE2EEEnabled} />
+            <FieldSummary
+              key={field.name}
+              field={field}
+              isE2EEEnabled={encryption.isE2EEEnabled}
+              messages={{
+                required: m.activeTables_detail_fieldRequired(),
+                optional: m.activeTables_detail_fieldOptional(),
+                options: (count: number) => m.activeTables_detail_fieldOptions({ count }),
+              }}
+            />
           ))}
         </div>
       </section>

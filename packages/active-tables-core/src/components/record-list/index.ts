@@ -11,3 +11,4 @@ export * from './record-list-props.js';
 // Layout components
 export * from './head-column-layout.js';
 export * from './generic-table-layout.js';
+export * from './compact-layout.js';

@@ -4,16 +4,16 @@
  * Renders SELECT_ONE, SELECT_LIST, CHECKBOX_ONE, and CHECKBOX_LIST field types
  */
 
-import { useCallback } from 'react';
+import React, { useCallback } from 'react';
 import type { FieldRendererProps } from './field-renderer-props.js';
-import { FieldWrapper } from '../common/field-wrapper.js';
+import { FieldWrapper } from '../common/index.js';
 import { FIELD_TYPE_SELECT_LIST, FIELD_TYPE_CHECKBOX_LIST, type FieldType } from '../../types/field.js';
 
 const MULTI_VALUE_SELECT_TYPES: ReadonlySet<FieldType> = new Set<FieldType>([
   FIELD_TYPE_SELECT_LIST,
   FIELD_TYPE_CHECKBOX_LIST,
 ]);
-import { validateFieldValue } from '../../utils/field-validation.js';
+import { validateFieldValue } from '../../utils/index.js';
 
 export function SelectField(props: FieldRendererProps) {
   const { field, value, onChange, mode, disabled = false, error, className } = props;
@@ -56,18 +56,17 @@ export function SelectField(props: FieldRendererProps) {
         <div className="flex flex-wrap gap-2">
           {selectedValues.map((val) => {
             const option = field.options?.find((opt: { value: string }) => opt.value === val);
-            if (!option) return null;
 
             return (
               <span
                 key={val}
-                className="inline-flex items-center px-2 py-1 rounded-full text-sm font-medium"
+                className="inline-flex items-center justify-center px-2 py-1 rounded-full text-sm font-medium min-h-[2rem]"
                 style={{
-                  color: option.text_color || '#1f2937',
-                  backgroundColor: option.background_color || '#e5e7eb',
+                  color: option?.text_color || '#1f2937',
+                  backgroundColor: option?.background_color || '#e5e7eb',
                 }}
               >
-                {option.text}
+                {option?.text || val}
               </span>
             );
           })}
@@ -82,17 +81,17 @@ export function SelectField(props: FieldRendererProps) {
     }
 
     const option = field.options?.find((opt: { value: string }) => opt.value === selectedValue);
-    if (!option) return <span>{selectedValue}</span>;
 
+    // Always apply badge styling for consistency with minimum height
     return (
       <span
-        className="inline-flex items-center px-2 py-1 rounded-full text-sm font-medium"
+        className="inline-flex items-center justify-center px-2 py-1 rounded-full text-sm font-medium min-h-[2rem]"
         style={{
-          color: option.text_color || '#1f2937',
-          backgroundColor: option.background_color || '#e5e7eb',
+          color: option?.text_color || '#1f2937',
+          backgroundColor: option?.background_color || '#e5e7eb',
         }}
       >
-        {option.text}
+        {option?.text || selectedValue}
       </span>
     );
   }

@@ -13,7 +13,7 @@ import type { FieldConfig } from '../../types/field.js';
 import type { RecordListConfig } from '../../types/config.js';
 import type { Table } from '../../types/common.js';
 import type { CurrentUser, WorkspaceUser } from '../../types/responses.js';
-import { FieldRenderer } from '../fields/field-renderer.js';
+import { FieldListRenderer } from '../fields/field-list-renderer.js';
 import { useRecordDecryption } from '../../hooks/use-encryption.js';
 
 export function HeadColumnLayout(props: LayoutProps) {
@@ -174,85 +174,99 @@ function CardContent({
   workspaceUsers,
   messages,
 }: CardContentProps) {
+  const hasSublineFields = config.subLineFields && config.subLineFields.length > 0;
+  const hasTailFields = config.tailFields && config.tailFields.length > 0;
+
   return (
     <div className="flex flex-col gap-3">
-      {/* Title */}
-      <div className="text-sm font-medium leading-none">
-        {titleField ? (
-          <FieldRenderer
-            field={titleField}
-            value={titleValue}
-            mode="display"
-            table={table}
-            currentUser={currentUser}
-            workspaceUsers={workspaceUsers}
-            messages={messages}
-          />
-        ) : (
-          <span>
-            {titleValue ? String(titleValue) : <span className="text-muted-foreground italic">(No title)</span>}
-          </span>
-        )}
+      {/* Title Section */}
+      <div className="space-y-1">
+        <div className="text-sm font-medium leading-tight">
+          {titleField ? (
+            <FieldListRenderer
+              field={titleField}
+              value={titleValue}
+              table={table}
+              currentUser={currentUser}
+              workspaceUsers={workspaceUsers}
+              messages={messages}
+            />
+          ) : (
+            <span>
+              {titleValue ? String(titleValue) : <span className="text-muted-foreground italic">(No title)</span>}
+            </span>
+          )}
+        </div>
       </div>
 
-      {/* Subline Fields (Status, Tags, Badges) */}
-      {config.subLineFields && config.subLineFields.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {config.subLineFields.map((fieldName: string) => {
-            const field = getFieldConfig(fieldName);
-            if (!field) return null;
+      {/* Subline Fields Section (Status, Tags, Badges) */}
+      {hasSublineFields && (
+        <>
+          <div className="border-t border-border/30 pt-2">
+            <div className="flex flex-col gap-2">
+              {config.subLineFields!.map((fieldName: string) => {
+                const field = getFieldConfig(fieldName);
+                if (!field) return null;
 
-            const value = (record.data || record.record)[fieldName];
-            if (value === null || value === undefined || value === '') {
-              return null;
-            }
+                const value = (record.data || record.record)[fieldName];
+                if (value === null || value === undefined || value === '') {
+                  return null;
+                }
 
-            return (
-              <div key={fieldName} className="inline-flex">
-                <FieldRenderer
-                  field={field}
-                  value={value}
-                  mode="display"
-                  table={table}
-                  currentUser={currentUser}
-                  workspaceUsers={workspaceUsers}
-                  messages={messages}
-                />
-              </div>
-            );
-          })}
-        </div>
+                return (
+                  <div key={fieldName} className="flex items-start">
+                    <span className="text-xs font-medium text-muted-foreground mr-2 min-w-fit">{field.label}:</span>
+                    <div className="flex-1">
+                      <FieldListRenderer
+                        field={field}
+                        value={value}
+                        table={table}
+                        currentUser={currentUser}
+                        workspaceUsers={workspaceUsers}
+                        messages={messages}
+                        disableTruncate={true}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </>
       )}
 
-      {/* Tail Fields (Metadata) */}
-      {config.tailFields && config.tailFields.length > 0 && (
-        <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
-          {config.tailFields.map((fieldName: string) => {
-            const field = getFieldConfig(fieldName);
-            if (!field) return null;
+      {/* Tail Fields Section (Metadata) */}
+      {hasTailFields && (
+        <>
+          <div className="border-t border-border/20 pt-2">
+            <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+              {config.tailFields!.map((fieldName: string) => {
+                const field = getFieldConfig(fieldName);
+                if (!field) return null;
 
-            const value = (record.data || record.record)[fieldName];
+                const value = (record.data || record.record)[fieldName];
 
-            return (
-              <div key={fieldName} className="flex items-center gap-1.5">
-                <span className="font-medium">{field.label}:</span>
-                {value === null || value === undefined || value === '' ? (
-                  <span className="text-muted-foreground/50">—</span>
-                ) : (
-                  <FieldRenderer
-                    field={field}
-                    value={value}
-                    mode="display"
-                    table={table}
-                    currentUser={currentUser}
-                    workspaceUsers={workspaceUsers}
-                    messages={messages}
-                  />
-                )}
-              </div>
-            );
-          })}
-        </div>
+                return (
+                  <div key={fieldName} className="flex items-center gap-1.5">
+                    <span className="font-medium">{field.label}:</span>
+                    {value === null || value === undefined || value === '' ? (
+                      <span className="text-muted-foreground/50">—</span>
+                    ) : (
+                      <FieldListRenderer
+                        field={field}
+                        value={value}
+                        table={table}
+                        currentUser={currentUser}
+                        workspaceUsers={workspaceUsers}
+                        messages={messages}
+                      />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </>
       )}
     </div>
   );
