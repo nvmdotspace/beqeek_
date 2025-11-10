@@ -26,6 +26,7 @@ interface SelectItemProps {
 interface SelectValueProps {
   placeholder?: string;
   className?: string;
+  children?: React.ReactNode;
 }
 
 const SelectContext = React.createContext<{
@@ -34,6 +35,7 @@ const SelectContext = React.createContext<{
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
   disabled: boolean;
+  getDisplayText?: (value: string) => string;
 }>({
   isOpen: false,
   setIsOpen: () => {},
@@ -84,9 +86,15 @@ export const SelectTrigger = React.forwardRef<HTMLButtonElement, SelectTriggerPr
 );
 SelectTrigger.displayName = 'SelectTrigger';
 
-export const SelectValue: React.FC<SelectValueProps> = ({ placeholder, className = '' }) => {
+export const SelectValue: React.FC<SelectValueProps> = ({ placeholder, className = '', children }) => {
   const { value } = React.useContext(SelectContext);
 
+  // If children provided, render them (for custom display)
+  if (children && value) {
+    return <span className={`block truncate ${className}`}>{children}</span>;
+  }
+
+  // Default: show value or placeholder
   return <span className={`block truncate ${className}`}>{value || placeholder}</span>;
 };
 

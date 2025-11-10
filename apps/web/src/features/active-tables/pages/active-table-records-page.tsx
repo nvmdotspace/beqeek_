@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { ArrowLeft, Plus, Search, Filter, List, KanbanSquare, GanttChart } from 'lucide-react';
+import { ArrowLeft, Plus, Search } from 'lucide-react';
 import { getRouteApi } from '@tanstack/react-router';
 
 import { useActiveTable } from '../hooks/use-active-tables';
@@ -19,7 +19,7 @@ import { Badge } from '@workspace/ui/components/badge';
 import { Input } from '@workspace/ui/components/input';
 import { Skeleton } from '@workspace/ui/components/skeleton';
 import { Card, CardContent } from '@workspace/ui/components/card';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@workspace/ui/components/tabs';
+import { TabsContent } from '@workspace/ui/components/tabs';
 
 // Components
 import { ErrorCard } from '@/components/error-display';
@@ -29,6 +29,9 @@ import { RecordsLoadingSkeleton } from '../components/records-loading-skeleton';
 import { RecordsEndIndicator } from '../components/records-end-indicator';
 import { RecordsErrorBanner } from '../components/records-error-banner';
 import { RecordsLiveAnnouncer } from '../components/records-live-announcer';
+import { QuickFiltersBar, type QuickFilterValue } from '../components/quick-filters-bar';
+import { ViewModeSelector, type ViewMode } from '../components/view-mode-selector';
+import { ViewConfigSelector } from '../components/view-config-selector';
 
 const LoadingState = () => (
   <div className="space-y-4">
@@ -36,8 +39,6 @@ const LoadingState = () => (
     <Skeleton className="h-64 w-full rounded-xl" />
   </div>
 );
-
-type ViewMode = 'list' | 'kanban' | 'gantt';
 
 // Type-safe route API for records route
 const route = getRouteApi(ROUTES.ACTIVE_TABLES.TABLE_RECORDS);
@@ -49,16 +50,16 @@ export const ActiveTableRecordsPage = () => {
   const listContext = useListContext();
 
   // Prefetch workspace users on page load for instant field input availability
-  // This ensures user reference field dropdowns open instantly (10ms instead of 250ms)
   useWorkspaceUsersWithPrefetch(workspaceId);
 
   // Fetch workspace users for display in record list (user reference fields)
   const { data: workspaceUsers } = useGetWorkspaceUsers(workspaceId, {
-    query: 'BASIC_WITH_AVATAR', // Same preset as prefetch for cache hit
+    query: 'BASIC_WITH_AVATAR',
   });
 
-  // View mode from URL (defaults to 'list')
-  const viewMode = searchParams.view || 'list';
+  // View mode and config from URL
+  const viewMode: ViewMode = (searchParams.view as ViewMode) || 'list';
+  const screenId = searchParams.screen;
 
   // Fetch table configuration first
   const tableQuery = useActiveTable(workspaceId, tableId);
@@ -66,8 +67,11 @@ export const ActiveTableRecordsPage = () => {
   const tableLoading = tableQuery.isLoading;
   const tableError = tableQuery.error;
 
-  // Initialize encryption hook (now guaranteed to have table.config when records load)
+  // Initialize encryption hook
   const encryption = useTableEncryption(workspaceId ?? '', tableId, table?.config);
+
+  // Quick filters state
+  const [quickFilters, setQuickFilters] = useState<QuickFilterValue[]>([]);
 
   // Use infinite scroll hook for records with automatic decryption
   const {
@@ -81,39 +85,77 @@ export const ActiveTableRecordsPage = () => {
   } = useInfiniteActiveTableRecords(workspaceId, tableId, table ?? null, {
     pageSize: 50,
     direction: 'desc',
-    enabled: !!table?.config, // Only fetch when table config is loaded
+    enabled: !!table?.config,
     encryptionKey: encryption.encryptionKey,
   });
 
   // Initialize record update mutation for kanban DnD
-  // IMPORTANT: Always call hook unconditionally (Rules of Hooks)
   const updateRecordMutation = useUpdateRecordField(workspaceId ?? '', tableId ?? '', table ?? null);
   useScrollShortcuts({
     enabled: viewMode === 'list',
   });
 
   const displayTable: Table | null = table ?? null;
-  const displayRecords = records;
 
   const [searchQuery, setSearchQuery] = useState('');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
+  // Apply quick filters and search
   const filteredRecords = useMemo(() => {
-    if (!searchQuery.trim()) return displayRecords;
+    let filtered = records;
 
-    const query = searchQuery.toLowerCase();
-    return displayRecords.filter((record) => {
-      return Object.values(record.record).some((value) => {
-        if (typeof value === 'string') {
-          return value.toLowerCase().includes(query);
-        }
-        if (typeof value === 'number') {
-          return value.toString().includes(query);
-        }
-        return false;
+    // Apply quick filters
+    if (quickFilters.length > 0) {
+      filtered = filtered.filter((record) => {
+        return quickFilters.every((filter) => {
+          const fieldValue = record.record?.[filter.fieldName] ?? record.data?.[filter.fieldName];
+
+          if (Array.isArray(filter.value)) {
+            return filter.value.includes(String(fieldValue));
+          }
+
+          return String(fieldValue) === String(filter.value);
+        });
       });
-    });
-  }, [displayRecords, searchQuery]);
+    }
+
+    // Apply search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter((record) => {
+        return Object.values(record.record).some((value) => {
+          if (typeof value === 'string') {
+            return value.toLowerCase().includes(query);
+          }
+          if (typeof value === 'number') {
+            return value.toString().includes(query);
+          }
+          return false;
+        });
+      });
+    }
+
+    return filtered;
+  }, [records, quickFilters, searchQuery]);
+
+  // Get current view configurations
+  const kanbanConfigs = displayTable?.config?.kanbanConfigs || [];
+  const ganttConfigs = displayTable?.config?.ganttCharts || [];
+
+  // Get current selected config or default to first
+  const currentKanbanConfig = useMemo(() => {
+    if (screenId && viewMode === 'kanban') {
+      return kanbanConfigs.find((c) => c.kanbanScreenId === screenId) || kanbanConfigs[0];
+    }
+    return kanbanConfigs[0];
+  }, [kanbanConfigs, screenId, viewMode]);
+
+  const currentGanttConfig = useMemo(() => {
+    if (screenId && viewMode === 'gantt') {
+      return ganttConfigs.find((c) => c.ganttScreenId === screenId) || ganttConfigs[0];
+    }
+    return ganttConfigs[0];
+  }, [ganttConfigs, screenId, viewMode]);
 
   const handleBack = () => {
     navigate({
@@ -127,21 +169,18 @@ export const ActiveTableRecordsPage = () => {
   };
 
   const handleCreateSuccess = (recordId: string) => {
-    // Navigate to the newly created record
     handleViewRecord(recordId);
   };
 
   const handleViewRecord = (recordOrId: TableRecord | string) => {
     const id = typeof recordOrId === 'string' ? recordOrId : recordOrId.id;
 
-    // Save list context for navigation
     listContext.save({
-      recordIds: displayRecords.map((r) => r.id),
+      recordIds: filteredRecords.map((r) => r.id),
       search: searchParams,
       timestamp: Date.now(),
     });
 
-    // Navigate to record detail page
     navigate({
       to: ROUTES.ACTIVE_TABLES.RECORD_DETAIL,
       params: { locale, workspaceId, tableId, recordId: id },
@@ -149,28 +188,14 @@ export const ActiveTableRecordsPage = () => {
   };
 
   const handleRecordMove = (recordId: string, newStatus: string) => {
-    // Check if table is loaded
-    if (!table) {
-      return;
-    }
+    if (!table || !currentKanbanConfig) return;
 
-    // Get kanban config to find status field name
-    const kanbanConfig = table.config?.kanbanConfigs?.[0];
-    if (!kanbanConfig) {
-      return;
-    }
+    if (table.config.e2eeEncryption && !encryption.isKeyValid) return;
 
-    // Check encryption key if E2EE enabled
-    if (table.config.e2eeEncryption && !encryption.isKeyValid) {
-      return;
-    }
-
-    // Call API - hook handles optimistic update automatically
-    // Flow: API call → onMutate (optimistic update) → onSuccess (invalidate) → refetch → decrypt → UI sync
     updateRecordMutation.mutate(
       {
         recordId,
-        fieldName: kanbanConfig.statusField,
+        fieldName: currentKanbanConfig.statusField,
         newValue: newStatus,
       },
       {
@@ -184,8 +209,24 @@ export const ActiveTableRecordsPage = () => {
     );
   };
 
+  const handleViewModeChange = (mode: ViewMode) => {
+    navigate({
+      to: ROUTES.ACTIVE_TABLES.TABLE_RECORDS,
+      params: { locale, workspaceId, tableId },
+      search: { ...searchParams, view: mode },
+    });
+  };
+
+  const handleScreenConfigChange = (configId: string) => {
+    navigate({
+      to: ROUTES.ACTIVE_TABLES.TABLE_RECORDS,
+      params: { locale, workspaceId, tableId },
+      search: { ...searchParams, screen: configId },
+    });
+  };
+
   const isLoading = tableLoading || recordsLoading;
-  const isInitialRecordListLoading = (recordsLoading || isDecrypting) && displayRecords.length === 0;
+  const isInitialRecordListLoading = (recordsLoading || isDecrypting) && filteredRecords.length === 0;
 
   if (isLoading) {
     return (
@@ -250,12 +291,8 @@ export const ActiveTableRecordsPage = () => {
     );
   }
 
-  // Kanban and Gantt configs
-  const kanbanConfig = displayTable.config?.kanbanConfigs?.[0];
-  const ganttConfig = displayTable.config?.ganttCharts?.[0];
-
   return (
-    <div className="space-y-4 p-3 sm:p-6">
+    <div className="flex flex-col h-full">
       {/* ARIA Live Region for Screen Readers */}
       <RecordsLiveAnnouncer
         isLoading={recordsLoading}
@@ -266,91 +303,71 @@ export const ActiveTableRecordsPage = () => {
       />
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 flex-wrap">
-            <Button variant="ghost" size="sm" className="h-8 px-2" onClick={handleBack}>
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              <span className="hidden sm:inline">Back to Table</span>
-              <span className="sm:hidden">Back</span>
-            </Button>
+      <div className="flex-shrink-0 border-b border-border bg-background px-3 sm:px-6 py-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              <Button variant="ghost" size="sm" className="h-8 px-2" onClick={handleBack}>
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                <span className="hidden sm:inline">Back to Table</span>
+                <span className="sm:hidden">Back</span>
+              </Button>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{displayTable.name || 'Records'}</h1>
+            {displayTable.description && (
+              <p className="max-w-2xl text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                {displayTable.description}
+              </p>
+            )}
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{displayTable.name || 'Records'}</h1>
-          {displayTable.description && (
-            <p className="max-w-2xl text-xs sm:text-sm text-muted-foreground leading-relaxed">
-              {displayTable.description}
-            </p>
-          )}
-        </div>
 
-        <div className="flex items-center gap-2 flex-wrap">
-          {encryption.isE2EEEnabled && (
-            <Badge
-              variant="outline"
-              className={
-                encryption.keyValidationStatus === 'valid'
-                  ? 'border-green-500 text-green-700 text-xs'
-                  : 'border-yellow-500 text-yellow-700 text-xs'
-              }
-            >
-              {encryption.keyValidationStatus === 'valid' ? 'E2EE Active' : 'E2EE (Key Required)'}
+          <div className="flex items-center gap-2 flex-wrap">
+            {encryption.isE2EEEnabled && (
+              <Badge
+                variant="outline"
+                className={
+                  encryption.keyValidationStatus === 'valid'
+                    ? 'border-green-500 text-green-700 text-xs'
+                    : 'border-yellow-500 text-yellow-700 text-xs'
+                }
+              >
+                {encryption.keyValidationStatus === 'valid' ? 'E2EE Active' : 'E2EE (Key Required)'}
+              </Badge>
+            )}
+            <Badge variant="outline" className="text-xs">
+              {filteredRecords.length} records
             </Badge>
-          )}
-          <Badge variant="outline" className="text-xs">
-            {filteredRecords.length} records
-          </Badge>
+          </div>
         </div>
       </div>
 
       {/* Encryption Warning */}
       {encryption.isE2EEEnabled && encryption.keyValidationStatus !== 'valid' && (
-        <Card className="border-yellow-500 bg-yellow-50">
-          <CardContent className="p-4">
-            <p className="text-sm text-yellow-800">
-              Encryption key is required to view encrypted data. Please go back to the table detail page to enter your
-              encryption key.
-            </p>
-          </CardContent>
-        </Card>
+        <div className="flex-shrink-0 px-3 sm:px-6 py-3">
+          <Card className="border-yellow-500 bg-yellow-50">
+            <CardContent className="p-4">
+              <p className="text-sm text-yellow-800">
+                Encryption key is required to view encrypted data. Please go back to the table detail page to enter your
+                encryption key.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
       )}
 
-      {/* View Mode Tabs */}
-      <Tabs
-        value={viewMode}
-        onValueChange={(v) => {
-          navigate({
-            to: ROUTES.ACTIVE_TABLES.TABLE_RECORDS,
-            params: { locale, workspaceId, tableId },
-            search: { ...searchParams, view: v as ViewMode },
-          });
-        }}
-      >
-        <div className="flex flex-col gap-3 sm:gap-4">
-          <div className="flex items-center justify-between gap-2 overflow-x-auto">
-            <TabsList className="w-full sm:w-auto">
-              <TabsTrigger value="list" className="flex-1 sm:flex-initial text-xs sm:text-sm">
-                <List className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
-                <span className="hidden sm:inline">List</span>
-              </TabsTrigger>
-              {kanbanConfig && (
-                <TabsTrigger value="kanban" className="flex-1 sm:flex-initial text-xs sm:text-sm">
-                  <KanbanSquare className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Kanban</span>
-                </TabsTrigger>
-              )}
-              {ganttConfig && (
-                <TabsTrigger value="gantt" className="flex-1 sm:flex-initial text-xs sm:text-sm">
-                  <GanttChart className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Gantt</span>
-                </TabsTrigger>
-              )}
-            </TabsList>
-          </div>
+      {/* Quick Filters Bar */}
+      {displayTable && <QuickFiltersBar table={displayTable} filters={quickFilters} onFilterChange={setQuickFilters} />}
 
-          {/* Actions (only show on list view) */}
-          {viewMode === 'list' && (
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-              <div className="relative flex-1 sm:max-w-md">
+      {/* View Controls */}
+      <div className="flex-shrink-0 border-b border-border bg-background px-3 sm:px-6 py-3">
+        <div className="flex flex-col gap-3 sm:gap-4">
+          {/* View Mode Selector + Search + Actions */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
+            <ViewModeSelector table={displayTable} currentMode={viewMode} onModeChange={handleViewModeChange} />
+
+            <div className="flex items-center gap-2 flex-1 sm:max-w-md">
+              {/* Search (all views) */}
+              <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   type="text"
@@ -360,100 +377,121 @@ export const ActiveTableRecordsPage = () => {
                   className="pl-10 text-sm"
                 />
               </div>
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" className="flex-1 sm:flex-initial text-xs sm:text-sm">
-                  <Filter className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
-                  <span className="hidden sm:inline">Filter</span>
-                </Button>
-                <Button onClick={handleCreateRecord} size="sm" className="flex-1 sm:flex-initial text-xs sm:text-sm">
-                  <Plus className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
-                  <span>New Record</span>
-                </Button>
-              </div>
+
+              {/* New Record Button */}
+              <Button onClick={handleCreateRecord} size="sm" className="text-xs sm:text-sm shrink-0">
+                <Plus className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">New Record</span>
+                <span className="sm:hidden">New</span>
+              </Button>
             </div>
-          )}
-        </div>
+          </div>
 
-        {/* List View */}
-        <TabsContent value="list" className="mt-6">
-          <RecordList
-            table={displayTable}
-            records={filteredRecords}
-            config={displayTable.config.recordListConfig || { layout: RECORD_LIST_LAYOUT_GENERIC_TABLE }}
-            loading={isInitialRecordListLoading}
-            onRecordClick={(record) => handleViewRecord(record)}
-            encryptionKey={encryption.encryptionKey || undefined}
-            workspaceUsers={workspaceUsers}
-          />
-
-          {/* Infinite scroll components */}
-          {recordsError && (
-            <RecordsErrorBanner error={recordsError} onRetry={() => fetchNextPage()} isRetrying={isFetchingNextPage} />
-          )}
-
-          {isFetchingNextPage && (
-            <RecordsLoadingSkeleton rowCount={3} columnCount={displayTable.config?.fields?.length || 5} />
-          )}
-
-          {!recordsError && hasNextPage && !isFetchingNextPage && (
-            <InfiniteScrollTrigger onLoadMore={fetchNextPage} hasMore={hasNextPage} isLoading={isFetchingNextPage} />
-          )}
-
-          {!hasNextPage && filteredRecords.length > 0 && (
-            <RecordsEndIndicator
-              recordCount={filteredRecords.length}
-              onBackToTop={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          {/* View Config Selector (Kanban/Gantt only) */}
+          {viewMode === 'kanban' && kanbanConfigs.length > 1 && (
+            <ViewConfigSelector
+              type="kanban"
+              configs={kanbanConfigs}
+              currentConfigId={currentKanbanConfig?.kanbanScreenId || ''}
+              onConfigChange={handleScreenConfigChange}
             />
           )}
-        </TabsContent>
+
+          {viewMode === 'gantt' && ganttConfigs.length > 1 && (
+            <ViewConfigSelector
+              type="gantt"
+              configs={ganttConfigs}
+              currentConfigId={currentGanttConfig?.ganttScreenId || ''}
+              onConfigChange={handleScreenConfigChange}
+            />
+          )}
+        </div>
+      </div>
+
+      {/* Content Area */}
+      <div className="flex-1 overflow-auto">
+        {/* List View */}
+        {viewMode === 'list' && (
+          <div className="p-3 sm:p-6">
+            <RecordList
+              table={displayTable}
+              records={filteredRecords}
+              config={displayTable.config.recordListConfig || { layout: RECORD_LIST_LAYOUT_GENERIC_TABLE }}
+              loading={isInitialRecordListLoading}
+              onRecordClick={(record) => handleViewRecord(record)}
+              encryptionKey={encryption.encryptionKey || undefined}
+              workspaceUsers={workspaceUsers}
+            />
+
+            {/* Infinite scroll components */}
+            {recordsError && (
+              <RecordsErrorBanner
+                error={recordsError}
+                onRetry={() => fetchNextPage()}
+                isRetrying={isFetchingNextPage}
+              />
+            )}
+
+            {isFetchingNextPage && (
+              <RecordsLoadingSkeleton rowCount={3} columnCount={displayTable.config?.fields?.length || 5} />
+            )}
+
+            {!recordsError && hasNextPage && !isFetchingNextPage && (
+              <InfiniteScrollTrigger onLoadMore={fetchNextPage} hasMore={hasNextPage} isLoading={isFetchingNextPage} />
+            )}
+
+            {!hasNextPage && filteredRecords.length > 0 && (
+              <RecordsEndIndicator
+                recordCount={filteredRecords.length}
+                onBackToTop={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              />
+            )}
+          </div>
+        )}
 
         {/* Kanban View */}
-        <TabsContent value="kanban" className="mt-3 sm:mt-6 -mx-3 sm:mx-0">
-          {kanbanConfig && displayTable.config && (
-            <div className="kanban-mobile-wrapper">
-              <KanbanBoard
-                table={displayTable}
-                records={displayRecords}
-                config={kanbanConfig}
-                onRecordMove={handleRecordMove}
-                onRecordClick={handleViewRecord}
-                className="px-2 sm:px-4 gap-2 sm:gap-4 pb-4"
-                messages={{
-                  loading: 'Loading...',
-                  dropHere: 'Drop cards here',
-                  error: 'Error',
-                  records: 'records',
-                }}
-              />
-            </div>
-          )}
-        </TabsContent>
+        {viewMode === 'kanban' && currentKanbanConfig && displayTable.config && (
+          <div className="p-3 sm:p-6">
+            <KanbanBoard
+              table={displayTable}
+              records={filteredRecords}
+              config={currentKanbanConfig}
+              onRecordMove={handleRecordMove}
+              onRecordClick={handleViewRecord}
+              className="gap-2 sm:gap-4"
+              messages={{
+                loading: 'Loading...',
+                dropHere: 'Drop cards here',
+                error: 'Error',
+                records: 'records',
+              }}
+            />
+          </div>
+        )}
 
         {/* Gantt View */}
-        <TabsContent value="gantt" className="mt-3 sm:mt-6 -mx-3 sm:mx-0">
-          {ganttConfig && displayTable.config && (
-            <Card className="border-0 sm:border">
-              <CardContent className="p-0 sm:p-4">
-                <div className="gantt-mobile-wrapper overflow-x-auto">
-                  <GanttChartView
-                    table={displayTable}
-                    records={displayRecords}
-                    config={ganttConfig}
-                    onTaskClick={handleViewRecord}
-                    showProgress={true}
-                    showToday={true}
-                    className="min-h-[400px] sm:min-h-[500px]"
-                    messages={{
-                      loading: 'Loading timeline...',
-                      noRecordsFound: 'No tasks to display',
-                    }}
-                  />
-                </div>
+        {viewMode === 'gantt' && currentGanttConfig && displayTable.config && (
+          <div className="p-3 sm:p-6">
+            <Card>
+              <CardContent className="p-4">
+                <GanttChartView
+                  table={displayTable}
+                  records={filteredRecords}
+                  config={currentGanttConfig}
+                  onTaskClick={handleViewRecord}
+                  showProgress={true}
+                  showToday={true}
+                  className="min-h-[400px] sm:min-h-[500px]"
+                  messages={{
+                    loading: 'Loading timeline...',
+                    noRecordsFound: 'No tasks to display',
+                  }}
+                />
               </CardContent>
             </Card>
-          )}
-        </TabsContent>
-      </Tabs>
+          </div>
+        )}
+      </div>
 
       {/* Create Record Dialog */}
       {displayTable && (

@@ -219,21 +219,35 @@ export const KanbanProvider = <
     const overItem = data.find((item) => item.id === over.id);
     const overColumn = overItem?.column || columns.find((col) => col.id === over.id)?.id || columns[0]?.id;
 
+    // BUSINESS RULE: Disable in-column reordering
+    // Only allow cross-column moves (cards always go to bottom of target column)
     if (activeColumn === overColumn) {
-      return; // No change needed
+      return; // No change needed - same column
     }
 
     let newData = data;
     const activeIndex = newData.findIndex((item) => item.id === active.id);
-    const overIndex = overItem ? newData.findIndex((item) => item.id === over.id) : -1;
 
-    if (activeIndex !== -1 && overIndex !== -1 && activeColumn !== overColumn) {
+    // For cross-column moves, move card to bottom of target column
+    if (activeIndex !== -1 && activeColumn !== overColumn) {
       // Only create new array if we need to change columns
       newData = [...data];
       if (newData[activeIndex]) {
         newData[activeIndex].column = overColumn || '';
       }
-      newData = arrayMove(newData, activeIndex, overIndex);
+
+      // Find the last index of the target column to insert at bottom
+      const targetColumnItems = newData.filter((item) => item.column === overColumn);
+      const lastItem = targetColumnItems[targetColumnItems.length - 1];
+      const lastTargetIndex = lastItem ? newData.lastIndexOf(lastItem) : newData.length - 1;
+
+      // Move to bottom of target column
+      const itemToMove = newData[activeIndex];
+      if (itemToMove) {
+        newData.splice(activeIndex, 1);
+        newData.splice(lastTargetIndex + 1, 0, itemToMove);
+      }
+
       onDataChange?.(newData);
     }
 
@@ -243,6 +257,7 @@ export const KanbanProvider = <
   const handleDragEnd = (event: DragEndEvent) => {
     setActiveCardId(null);
 
+    // Call parent's onDragEnd FIRST (for API calls)
     onDragEnd?.(event);
 
     const { active, over } = event;
@@ -251,20 +266,44 @@ export const KanbanProvider = <
       return;
     }
 
-    let newData = [...data];
+    const activeItem = data.find((item) => item.id === active.id);
     const overItem = data.find((item) => item.id === over.id);
-    const oldIndex = newData.findIndex((item) => item.id === active.id);
-    const newIndex = newData.findIndex((item) => item.id === over.id);
+    const activeColumn = activeItem?.column;
+    const overColumn = overItem?.column || columns.find((col) => col.id === over.id)?.id || columns[0]?.id;
 
-    // Ensure the column is properly set on the dropped item
-    if (oldIndex !== -1 && newData[oldIndex]) {
-      const targetColumn = overItem?.column || columns.find((col) => col.id === over.id)?.id || columns[0]?.id;
-      newData[oldIndex].column = targetColumn || '';
+    // BUSINESS RULE: Disable in-column reordering
+    // Only allow cross-column moves
+    if (activeColumn === overColumn) {
+      return; // Same column - do nothing
     }
 
-    newData = arrayMove(newData, oldIndex, newIndex);
+    // Cross-column move already handled in handleDragOver
+    // This is just a final sync in case onDragOver didn't fire
+    let newData = [...data];
+    const oldIndex = newData.findIndex((item) => item.id === active.id);
 
-    onDataChange?.(newData);
+    if (oldIndex !== -1 && newData[oldIndex]) {
+      const targetColumn = overItem?.column || columns.find((col) => col.id === over.id)?.id || columns[0]?.id;
+
+      // Only update if column actually changed
+      if (newData[oldIndex].column !== targetColumn) {
+        newData[oldIndex].column = targetColumn || '';
+
+        // Find the last index of the target column to insert at bottom
+        const targetColumnItems = newData.filter((item) => item.column === targetColumn);
+        const lastItem = targetColumnItems[targetColumnItems.length - 1];
+        const lastTargetIndex = lastItem ? newData.lastIndexOf(lastItem) : newData.length - 1;
+
+        // Move to bottom of target column
+        const itemToMove = newData[oldIndex];
+        if (itemToMove) {
+          newData.splice(oldIndex, 1);
+          newData.splice(lastTargetIndex + 1, 0, itemToMove);
+        }
+
+        onDataChange?.(newData);
+      }
+    }
   };
 
   const announcements: Announcements = {
