@@ -110,7 +110,7 @@ export function CommentsPanel(props: CommentsPanelProps) {
   const getUserName = useCallback(
     (userId: string) => {
       const user = workspaceUsers.find((u) => u.id === userId);
-      return user?.name || user?.email || 'Unknown User';
+      return user?.name || 'Unknown User';
     },
     [workspaceUsers],
   );

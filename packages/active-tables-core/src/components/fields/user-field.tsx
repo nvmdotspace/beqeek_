@@ -62,7 +62,7 @@ export function UserField(props: FieldRendererProps) {
       if (!user) return userId;
 
       const labelField = field.referenceLabelField || 'name';
-      return String(user[labelField as keyof typeof user] || user.name || user.email || user.id);
+      return String(user[labelField as keyof typeof user] || user.name || user.id);
     },
     [workspaceUsers, field.referenceLabelField],
   );
@@ -107,12 +107,13 @@ export function UserField(props: FieldRendererProps) {
 
   // Week 2: Use UserSelect for better UX (always use new component)
   // Map workspaceUsers to expected format
+  // Note: WorkspaceUser from responses.ts already has correct 'name' field
+
   const mappedUsers = workspaceUsers.map((user: any) => ({
     id: user.id,
-    name: user.fullName || user.name || '',
+    name: user.name || '', // Use 'name' directly (already mapped from API)
     email: user.email || '',
     avatar: user.avatar || user.photoUrl || '',
-    status: user.status || 'active',
   }));
 
   return (

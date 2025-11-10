@@ -179,11 +179,10 @@ export function CreateRecordDialog({
           'gap-0 p-0',
         )}
         onOpenAutoFocus={handleOpenAutoFocus}
-        aria-describedby="create-record-description"
       >
         <DialogHeader className="px-6 pt-6 pb-4 border-b">
-          <DialogTitle id="create-record-title">Create New Record</DialogTitle>
-          <DialogDescription id="create-record-description">
+          <DialogTitle>Create New Record</DialogTitle>
+          <DialogDescription>
             Fill in the fields below to create a new record in <strong>{table.name}</strong>
           </DialogDescription>
         </DialogHeader>
@@ -274,7 +273,7 @@ export function CreateRecordDialog({
             type="submit"
             form="create-record-form"
             disabled={createMutation.isPending}
-            className="w-full sm:w-auto min-h-[44px]"
+            className="w-full sm:w-auto"
             aria-label={createMutation.isPending ? 'Creating record, please wait' : 'Create record'}
           >
             {createMutation.isPending ? (

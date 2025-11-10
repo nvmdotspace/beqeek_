@@ -8,9 +8,9 @@ import type { FieldConfig } from '@workspace/active-tables-core';
  */
 export interface WorkspaceUser {
   id: string;
-  email: string;
-  name?: string;
+  name: string;
   avatar?: string;
+  role?: string;
 }
 
 /**
@@ -98,12 +98,12 @@ export function useWorkspaceUserData(
  *
  * @param userId - User ID to look up
  * @param userData - Data from useWorkspaceUserData
- * @param displayFormat - Format: 'name' | 'email' | 'name+email' (default: 'name')
+ * @param displayFormat - Format: 'name' | 'id' (default: 'name')
  */
 export function getUserDisplayValue(
   userId: string,
   userData: Record<string, WorkspaceUser> | undefined,
-  displayFormat: 'name' | 'email' | 'name+email' = 'name',
+  displayFormat: 'name' | 'id' = 'name',
 ): string {
   if (!userData || !userData[userId]) {
     return userId; // Fallback to ID if not found
@@ -113,13 +113,11 @@ export function getUserDisplayValue(
 
   switch (displayFormat) {
     case 'name':
-      return user.name || user.email;
-    case 'email':
-      return user.email;
-    case 'name+email':
-      return user.name ? `${user.name} (${user.email})` : user.email;
+      return user.name || userId;
+    case 'id':
+      return userId;
     default:
-      return user.name || user.email;
+      return user.name || userId;
   }
 }
 

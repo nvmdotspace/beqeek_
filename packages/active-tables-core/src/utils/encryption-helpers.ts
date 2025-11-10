@@ -105,12 +105,24 @@ async function decryptTextValue(encryptedValue: unknown, encryptionKey: string):
   }
 
   try {
+    // Check if value looks like base64 (basic validation)
+    if (!/^[A-Za-z0-9+/]+=*$/.test(encryptedValue)) {
+      // Not base64, might be unencrypted or invalid format
+      return encryptedValue;
+    }
+
     // Parse key as UTF-8 (32-char string), not HEX (64-char)
     // This matches the old HTML module: CryptoJS.enc.Utf8.parse(key)
     const keyBytes = CryptoJS.enc.Utf8.parse(encryptionKey);
 
     // Decode base64 encrypted data
     const encryptedWordArray = CryptoJS.enc.Base64.parse(encryptedValue);
+
+    // Validate minimum length (IV + at least 1 block of ciphertext)
+    if (encryptedWordArray.sigBytes < 32) {
+      // Too short to be valid encrypted data (16 bytes IV + 16 bytes min ciphertext)
+      return encryptedValue;
+    }
 
     // Extract IV from first 16 bytes (4 words)
     const iv = CryptoJS.lib.WordArray.create(
@@ -139,14 +151,18 @@ async function decryptTextValue(encryptedValue: unknown, encryptionKey: string):
     // Convert decrypted WordArray to UTF-8 string
     const result = decrypted.toString(CryptoJS.enc.Utf8);
 
-    if (!result) {
-      throw new Error('Decryption resulted in empty string - possible wrong key');
+    if (!result || result.trim() === '') {
+      // Empty result - likely wrong key or corrupted data
+      // Return original value to show user something went wrong
+      return encryptedValue;
     }
 
     return result;
   } catch (error) {
-    console.error('AES decryption failed:', error);
-    throw new Error(`Failed to decrypt text value: ${error}`);
+    // Decryption failed - return original value instead of throwing
+    // This allows the UI to continue working with partially decrypted data
+    console.warn('AES decryption failed, keeping encrypted value:', error);
+    return encryptedValue;
   }
 }
 
@@ -170,20 +186,30 @@ async function decryptOPEValue(value: unknown, encryptionKey: string): Promise<s
     const parts = value.split('|');
 
     if (parts.length !== 2) {
-      console.warn('Invalid OPE format - expected "ciphertext|strong_enc"');
-      return value; // Return original if format invalid
+      // Not in OPE format - could be plain value or different encryption
+      // Try to decrypt as plain AES first
+      const plainDecrypted = await decryptTextValue(value, encryptionKey);
+      // If decryption changed the value, use it; otherwise return original
+      return plainDecrypted !== value ? plainDecrypted : value;
     }
 
     // parts[0] = ciphertext (for sorting)
     // parts[1] = strong_enc (AES-256 encrypted original value)
     const strongEnc = parts[1];
 
+    if (!strongEnc || strongEnc.trim() === '') {
+      // Empty strong_enc part, return original
+      return value;
+    }
+
     // Decrypt the strong_enc part using AES-256-CBC
     const decrypted = await decryptTextValue(strongEnc, encryptionKey);
-    return decrypted;
+
+    // If decryption returned the encrypted value unchanged, return original OPE value
+    return decrypted === strongEnc ? value : decrypted;
   } catch (error) {
-    console.error('OPE decryption failed:', error);
-    return value; // Return original value on error
+    // Decryption failed - return original value silently
+    return value;
   }
 }
 

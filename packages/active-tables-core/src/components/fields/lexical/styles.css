@@ -5,10 +5,17 @@
 
 /* Content Editable */
 .lexical-content-editable {
+  display: block;
+  width: 100%;
+  min-width: 0;
   font-family: inherit;
   font-size: 0.875rem;
   line-height: 1.5;
-  color: #1f2937;
+  background-color: var(--background);
+  color: var(--foreground);
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 .lexical-content-editable:focus {
@@ -58,7 +65,8 @@
 }
 
 .editor-text-code {
-  background-color: #f3f4f6;
+  background-color: var(--muted);
+  color: var(--foreground);
   padding: 0.125rem 0.25rem;
   border-radius: 0.25rem;
   font-family: 'Courier New', monospace;
@@ -88,19 +96,19 @@
 
 /* Links */
 .editor-link {
-  color: #3b82f6;
+  color: var(--primary);
   text-decoration: underline;
   cursor: pointer;
 }
 
 .editor-link:hover {
-  color: #2563eb;
+  color: var(--primary-foreground);
 }
 
 /* Code blocks */
 .editor-code {
-  background-color: #1f2937;
-  color: #f3f4f6;
+  background-color: var(--foreground);
+  color: var(--background);
   padding: 0.75rem;
   border-radius: 0.5rem;
   font-family: 'Courier New', monospace;
@@ -111,11 +119,11 @@
 
 /* Quotes */
 .editor-quote {
-  border-left: 4px solid #d1d5db;
+  border-left: 4px solid var(--border);
   padding-left: 1rem;
   margin: 0.5rem 0;
   font-style: italic;
-  color: #6b7280;
+  color: var(--muted-foreground);
 }
 
 /* Display mode (read-only HTML rendering) */
@@ -123,7 +131,7 @@
   font-family: inherit;
   font-size: 0.875rem;
   line-height: 1.5;
-  color: #1f2937;
+  color: var(--foreground);
 }
 
 .lexical-display-content p {
@@ -160,7 +168,7 @@
 }
 
 .lexical-display-content a {
-  color: #3b82f6;
+  color: var(--primary);
   text-decoration: underline;
 }
 
@@ -173,7 +181,8 @@
 }
 
 .lexical-display-content code {
-  background-color: #f3f4f6;
+  background-color: var(--muted);
+  color: var(--foreground);
   padding: 0.125rem 0.25rem;
   border-radius: 0.25rem;
   font-family: 'Courier New', monospace;

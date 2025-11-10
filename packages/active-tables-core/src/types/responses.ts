@@ -39,9 +39,6 @@ export interface WorkspaceUser {
   /** User name */
   name: string;
 
-  /** User email */
-  email: string;
-
   /** Optional avatar URL */
   avatar?: string;
 

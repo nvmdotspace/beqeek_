@@ -15,15 +15,12 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Check, ChevronsUpDown, Search, Loader2, User } from 'lucide-react';
+import type { WorkspaceUser } from '../../types/responses.js';
 
-export interface WorkspaceUser {
-  id: string;
-  name?: string;
-  email?: string;
-  avatar?: string;
-  status?: 'active' | 'inactive';
-  [key: string]: unknown;
-}
+/**
+ * UserSelect uses the standard WorkspaceUser type from responses.ts
+ */
+export type UserSelectUser = WorkspaceUser;
 
 export interface UserSelectProps {
   /** Currently selected value (single or multiple user IDs) */
@@ -37,7 +34,7 @@ export interface UserSelectProps {
   /** Disabled state */
   disabled?: boolean;
   /** Available workspace users */
-  users: WorkspaceUser[];
+  users: UserSelectUser[];
   /** Loading state */
   loading?: boolean;
   /** Custom error message */
@@ -57,17 +54,25 @@ export function UserSelect({
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
+  const dropdownRef = useCallback((node: HTMLDivElement | null) => {
+    if (node) {
+      // Scroll dropdown into view when opened
+      node.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }, []);
+
   // Filter users based on search query (client-side)
   const filteredUsers = useMemo(() => {
-    if (!searchQuery.trim()) return users;
+    if (!searchQuery.trim()) {
+      return users;
+    }
 
     const query = searchQuery.toLowerCase();
-    return users.filter(
-      (user) =>
-        user.name?.toLowerCase().includes(query) ||
-        user.email?.toLowerCase().includes(query) ||
-        user.id.toLowerCase().includes(query),
+    const filtered = users.filter(
+      (user) => user.name?.toLowerCase().includes(query) || user.id.toLowerCase().includes(query),
     );
+
+    return filtered;
   }, [users, searchQuery]);
 
   // Handle selection
@@ -109,12 +114,12 @@ export function UserSelect({
     }
 
     const selectedUser = users.find((u) => u.id === value);
-    return selectedUser?.name || selectedUser?.email || (value as string);
+    return selectedUser?.name || (value as string);
   }, [value, users, placeholder, multiple]);
 
   // Get user display name
-  const getUserDisplayName = useCallback((user: WorkspaceUser) => {
-    return user.name || user.email || user.id;
+  const getUserDisplayName = useCallback((user: UserSelectUser) => {
+    return user.name || user.id;
   }, []);
 
   return (
@@ -157,7 +162,10 @@ export function UserSelect({
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} aria-hidden="true" />
 
           {/* Popover */}
-          <div className="absolute z-50 mt-1 w-full min-w-[300px] rounded-md border bg-popover text-popover-foreground shadow-md outline-none animate-in fade-in-0 zoom-in-95">
+          <div
+            ref={dropdownRef}
+            className="absolute z-50 mt-1 w-full min-w-[300px] rounded-md border bg-popover text-popover-foreground shadow-md outline-none animate-in fade-in-0 zoom-in-95"
+          >
             {/* Search Input */}
             <div className="flex items-center border-b px-3">
               <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" aria-hidden="true" />
@@ -165,7 +173,7 @@ export function UserSelect({
                 type="text"
                 role="searchbox"
                 aria-label="Search users"
-                placeholder="Search by name or email..."
+                placeholder="Search by name..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
@@ -200,7 +208,6 @@ export function UserSelect({
                       relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none
                       hover:bg-accent hover:text-accent-foreground
                       ${selected ? 'bg-accent' : ''}
-                      ${user.status === 'inactive' ? 'opacity-60' : ''}
                     `}
                   >
                     <Check className={`mr-2 h-4 w-4 ${selected ? 'opacity-100' : 'opacity-0'}`} aria-hidden="true" />
@@ -222,12 +229,6 @@ export function UserSelect({
                     {/* User Info */}
                     <div className="flex-1 truncate">
                       <div className="font-medium">{getUserDisplayName(user)}</div>
-                      {user.name && user.email && (
-                        <div className="text-xs text-muted-foreground truncate">{user.email}</div>
-                      )}
-                      {user.status === 'inactive' && (
-                        <div className="text-xs text-muted-foreground italic">Inactive</div>
-                      )}
                     </div>
                   </div>
                 );

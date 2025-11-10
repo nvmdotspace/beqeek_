@@ -63,8 +63,7 @@ export async function decryptRecord(
           globalDecryptionCache.set(fieldValue, fieldName, field.type, decryptedValue);
         }
       } catch (error) {
-        console.error(`Failed to decrypt field ${fieldName}:`, error);
-        // Keep original value on error
+        // Keep original value on error (already logged in decryptFieldValue)
         decryptedData[fieldName] = fieldValue;
       }
     }

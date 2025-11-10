@@ -14,7 +14,8 @@ import { LinkPlugin } from '@lexical/react/LexicalLinkPlugin';
 import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
+import type { MutableRefObject } from 'react';
 import { $getRoot, $createParagraphNode, EditorState, LexicalNode } from 'lexical';
 import { $generateHtmlFromNodes, $generateNodesFromDOM } from '@lexical/html';
 import { createEditorConfig } from './editor-config.js';
@@ -34,11 +35,11 @@ interface LexicalEditorProps {
 /**
  * Plugin to set initial HTML content
  */
-function InitialContentPlugin({ html }: { html: string }) {
+function InitialContentPlugin({ html, lastHtmlRef }: { html: string; lastHtmlRef: MutableRefObject<string> }) {
   const [editor] = useLexicalComposerContext();
 
   useEffect(() => {
-    if (!html) return;
+    if (!html || lastHtmlRef.current === html) return;
 
     editor.update(() => {
       const parser = new DOMParser();
@@ -55,8 +56,10 @@ function InitialContentPlugin({ html }: { html: string }) {
         const paragraph = $createParagraphNode();
         root.append(paragraph);
       }
+
+      lastHtmlRef.current = html;
     });
-  }, [editor, html]);
+  }, [editor, html, lastHtmlRef]);
 
   return null;
 }
@@ -64,12 +67,23 @@ function InitialContentPlugin({ html }: { html: string }) {
 /**
  * Plugin to handle content changes
  */
-function OnChangeHtmlPlugin({ onChange }: { onChange: (html: string) => void }) {
+function OnChangeHtmlPlugin({
+  onChange,
+  lastHtmlRef,
+}: {
+  onChange: (html: string) => void;
+  lastHtmlRef: MutableRefObject<string>;
+}) {
   const [editor] = useLexicalComposerContext();
 
   const handleChange = (editorState: EditorState) => {
     editorState.read(() => {
       const html = $generateHtmlFromNodes(editor);
+      if (html === lastHtmlRef.current) {
+        return;
+      }
+
+      lastHtmlRef.current = html;
       onChange(html);
     });
   };
@@ -89,6 +103,7 @@ export function LexicalEditor({
   onImageUpload,
 }: LexicalEditorProps) {
   const config = createEditorConfig('rich-text-editor', !disabled);
+  const lastSerializedHtmlRef = useRef(value);
 
   return (
     <LexicalComposer initialConfig={config}>
@@ -100,7 +115,7 @@ export function LexicalEditor({
         <div className="relative">
           <RichTextPlugin
             contentEditable={
-              <ContentEditable className="lexical-content-editable min-h-[200px] p-3 outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring" />
+              <ContentEditable className="lexical-content-editable min-h-[200px] w-full whitespace-pre-wrap break-words p-3 outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring" />
             }
             placeholder={
               <div className="absolute top-3 left-3 text-muted-foreground pointer-events-none">{placeholder}</div>
@@ -111,8 +126,8 @@ export function LexicalEditor({
           <ListPlugin />
           <LinkPlugin />
           <ImagePlugin onImageUpload={onImageUpload} disabled={disabled} />
-          <InitialContentPlugin html={value} />
-          <OnChangeHtmlPlugin onChange={onChange} />
+          <InitialContentPlugin html={value} lastHtmlRef={lastSerializedHtmlRef} />
+          <OnChangeHtmlPlugin onChange={onChange} lastHtmlRef={lastSerializedHtmlRef} />
         </div>
       </div>
     </LexicalComposer>
