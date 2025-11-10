@@ -356,7 +356,14 @@ export const ActiveTableRecordsPage = () => {
       )}
 
       {/* Quick Filters Bar */}
-      {displayTable && <QuickFiltersBar table={displayTable} filters={quickFilters} onFilterChange={setQuickFilters} />}
+      {displayTable && (
+        <QuickFiltersBar
+          table={displayTable}
+          filters={quickFilters}
+          onFilterChange={setQuickFilters}
+          workspaceUsers={workspaceUsers}
+        />
+      )}
 
       {/* View Controls */}
       <div className="flex-shrink-0 border-b border-border bg-background px-3 sm:px-6 py-3">
@@ -458,6 +465,7 @@ export const ActiveTableRecordsPage = () => {
               config={currentKanbanConfig}
               onRecordMove={handleRecordMove}
               onRecordClick={handleViewRecord}
+              workspaceUsers={workspaceUsers}
               className="gap-2 sm:gap-4"
               messages={{
                 loading: 'Loading...',

@@ -35,6 +35,7 @@ export function KanbanBoard({
   table,
   messages,
   className = '',
+  workspaceUsers,
 }: KanbanBoardProps) {
   const [collapsedColumns, setCollapsedColumns] = useState<Set<string>>(new Set());
 
@@ -95,12 +96,12 @@ export function KanbanBoard({
 
       return {
         id: record.id,
-        name: formatFieldValue(headlineValue, headlineField) || 'Untitled',
+        name: formatFieldValue(headlineValue, headlineField, workspaceUsers) || 'Untitled',
         column: String(statusValue || 'unknown'), // Ensure column is always a string
         record, // Keep original record for reference
       };
     });
-  }, [records, config.statusField, headlineField]);
+  }, [records, config.statusField, headlineField, workspaceUsers]);
 
   // Local state for kanban items - syncs with props
   const [boardData, setBoardData] = useState(() => kanbanItems.map((item) => ({ ...item })));
@@ -365,7 +366,7 @@ export function KanbanBoard({
                                   if (!value) return null;
 
                                   // Special handling for field types
-                                  const formattedValue = formatFieldValue(value, field);
+                                  const formattedValue = formatFieldValue(value, field, workspaceUsers);
                                   const isUserField =
                                     field.type === 'SELECT_ONE_WORKSPACE_USER' ||
                                     field.type === 'SELECT_LIST_WORKSPACE_USER';

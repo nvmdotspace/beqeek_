@@ -22,9 +22,23 @@ import {
 } from '../types/field.js';
 
 /**
- * Format a field value for display
+ * Workspace user for display name resolution
  */
-export function formatFieldValue(value: unknown, field?: FieldConfig): string {
+export interface WorkspaceUser {
+  id: string;
+  name: string;
+  avatar?: string;
+  role?: string;
+}
+
+/**
+ * Format a field value for display
+ *
+ * @param value - Field value to format
+ * @param field - Field configuration
+ * @param workspaceUsers - Optional workspace users for user field name resolution
+ */
+export function formatFieldValue(value: unknown, field?: FieldConfig, workspaceUsers?: WorkspaceUser[]): string {
   if (value == null || value === '') {
     return '';
   }
@@ -102,6 +116,31 @@ export function formatFieldValue(value: unknown, field?: FieldConfig): string {
         } catch {
           return value;
         }
+      }
+      return String(value);
+
+    case 'SELECT_ONE_WORKSPACE_USER':
+      if (typeof value === 'string' && workspaceUsers) {
+        const user = workspaceUsers.find((u) => u.id === value);
+        return user?.name || value; // Fallback to ID if not found
+      }
+      return String(value);
+
+    case 'SELECT_LIST_WORKSPACE_USER':
+      if (Array.isArray(value) && workspaceUsers) {
+        const userNames = value
+          .map((userId) => {
+            if (typeof userId === 'string') {
+              const user = workspaceUsers.find((u) => u.id === userId);
+              return user?.name || userId;
+            }
+            return String(userId);
+          })
+          .filter(Boolean);
+        return userNames.join(', ');
+      }
+      if (Array.isArray(value)) {
+        return value.join(', ');
       }
       return String(value);
 

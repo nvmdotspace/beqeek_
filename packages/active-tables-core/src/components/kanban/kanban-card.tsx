@@ -5,7 +5,6 @@
  * Displays headline field and additional display fields.
  */
 
-import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { format, isToday, isTomorrow, isYesterday, parseISO } from 'date-fns';
@@ -70,7 +69,6 @@ export function KanbanCard({
 
   const headlineValue = formatValue(getFieldValue(headlineField.name));
 
-  // Get priority for color coding with accessibility improvements
   const priority = getFieldValue('priority') as string;
   const getPriorityConfig = () => {
     switch (priority?.toLowerCase()) {

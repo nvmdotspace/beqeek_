@@ -32,6 +32,16 @@ export interface BaseKanbanProps {
 // ============================================
 
 /**
+ * Workspace user data for user field display
+ */
+export interface WorkspaceUser {
+  id: string;
+  name: string;
+  avatar?: string;
+  role?: string;
+}
+
+/**
  * Props for KanbanBoard component
  */
 export interface KanbanBoardProps extends BaseKanbanProps {
@@ -52,6 +62,9 @@ export interface KanbanBoardProps extends BaseKanbanProps {
 
   /** Disable drag and drop */
   readOnly?: boolean;
+
+  /** Workspace users for resolving user field display names */
+  workspaceUsers?: WorkspaceUser[];
 }
 
 // ============================================

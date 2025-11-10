@@ -16,10 +16,18 @@ export interface QuickFilterValue {
   value: string | string[];
 }
 
+export interface WorkspaceUser {
+  id: string;
+  name: string;
+  avatar?: string;
+  role?: string;
+}
+
 export interface QuickFiltersBarProps {
   table: Table;
   filters: QuickFilterValue[];
   onFilterChange: (filters: QuickFilterValue[]) => void;
+  workspaceUsers?: WorkspaceUser[];
   className?: string;
 }
 
@@ -32,18 +40,41 @@ function isValidQuickFilterField(field: FieldConfig): boolean {
 
 /**
  * Get filter options for a field
+ * Supports both regular options and workspace user fields
  */
-function getFilterOptions(field: FieldConfig): FieldOption[] {
+function getFilterOptions(field: FieldConfig, workspaceUsers?: WorkspaceUser[]): FieldOption[] {
+  // Regular fields with options
   if (field.options) {
     return field.options;
   }
+
+  // Workspace user fields - convert users to options format
+  if (
+    (field.type === 'SELECT_ONE_WORKSPACE_USER' || field.type === 'SELECT_LIST_WORKSPACE_USER') &&
+    workspaceUsers &&
+    workspaceUsers.length > 0
+  ) {
+    return workspaceUsers.map((user) => ({
+      value: user.id,
+      text: user.name,
+      background_color: undefined,
+      text_color: undefined,
+    }));
+  }
+
   return [];
 }
 
 /**
  * QuickFiltersBar Component
  */
-export function QuickFiltersBar({ table, filters, onFilterChange, className = '' }: QuickFiltersBarProps) {
+export function QuickFiltersBar({
+  table,
+  filters,
+  onFilterChange,
+  workspaceUsers,
+  className = '',
+}: QuickFiltersBarProps) {
   // Get configured quick filters from table config
   const quickFilterConfigs = table.config?.quickFilters || [];
 
@@ -94,7 +125,7 @@ export function QuickFiltersBar({ table, filters, onFilterChange, className = ''
       return `All ${field.label || field.name}`;
     }
 
-    const options = getFilterOptions(field);
+    const options = getFilterOptions(field, workspaceUsers);
     const option = options.find((opt) => String(opt.value) === currentValue);
     return option?.text || currentValue;
   };
@@ -117,7 +148,7 @@ export function QuickFiltersBar({ table, filters, onFilterChange, className = ''
           <div className="flex items-center gap-2 flex-wrap flex-1">
             {quickFilterFields.map((field) => {
               const currentValue = getFilterValue(field.name);
-              const options = getFilterOptions(field);
+              const options = getFilterOptions(field, workspaceUsers);
               const isActive = currentValue !== 'all';
 
               const displayText = getFilterDisplayText(field, currentValue);
