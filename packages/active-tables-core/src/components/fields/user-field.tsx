@@ -2,6 +2,8 @@
  * UserField Component
  *
  * Renders SELECT_ONE_WORKSPACE_USER and SELECT_LIST_WORKSPACE_USER field types
+ *
+ * Week 2: Enhanced with UserSelect for better UX
  */
 
 import { useCallback } from 'react';
@@ -9,6 +11,7 @@ import type { FieldRendererProps } from './field-renderer-props.js';
 import { FieldWrapper } from '../common/field-wrapper.js';
 import { FIELD_TYPES } from '../../types/field.js';
 import { validateFieldValue } from '../../utils/field-validation.js';
+import { UserSelect } from './user-select.js';
 
 export function UserField(props: FieldRendererProps) {
   const { field, value, onChange, mode, disabled = false, error, className, workspaceUsers = [] } = props;
@@ -18,6 +21,19 @@ export function UserField(props: FieldRendererProps) {
   // Normalize value
   const normalizedValue = isMultiple ? (Array.isArray(value) ? value : value ? [value] : []) : (value ?? '');
 
+  // Handle change for UserSelect (Week 2)
+  const handleUserSelectChange = useCallback(
+    (newValue: string | string[]) => {
+      const validationError = validateFieldValue(newValue, field);
+      if (validationError) {
+        console.warn(`Validation error for ${field.name}:`, validationError);
+      }
+      onChange?.(newValue);
+    },
+    [onChange, field],
+  );
+
+  // Handle change for legacy select (Week 1)
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
       if (isMultiple) {
@@ -89,44 +105,28 @@ export function UserField(props: FieldRendererProps) {
   // Edit mode
   const fieldId = `field-${field.name}`;
 
-  const selectClasses = `
-    w-full px-3 py-2
-    border border-gray-300 rounded-lg
-    focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
-    disabled:bg-gray-100 disabled:cursor-not-allowed
-    ${error ? 'border-red-500' : ''}
-    ${className || ''}
-  `.trim();
+  // Week 2: Use UserSelect for better UX (always use new component)
+  // Map workspaceUsers to expected format
+  const mappedUsers = workspaceUsers.map((user: any) => ({
+    id: user.id,
+    name: user.fullName || user.name || '',
+    email: user.email || '',
+    avatar: user.avatar || user.photoUrl || '',
+    status: user.status || 'active',
+  }));
 
   return (
     <FieldWrapper fieldId={fieldId} label={field.label} required={field.required} error={error}>
-      <select
-        id={fieldId}
-        name={field.name}
+      <UserSelect
         value={normalizedValue as string | string[]}
-        onChange={handleChange}
-        disabled={disabled}
-        required={field.required}
+        onChange={handleUserSelectChange}
         multiple={isMultiple}
-        size={isMultiple ? Math.min(workspaceUsers.length + 1, 6) : undefined}
-        className={selectClasses}
-        aria-invalid={!!error}
-        aria-describedby={error ? `${fieldId}-error` : undefined}
-      >
-        {!isMultiple && (
-          <option value="">{field.placeholder || props.messages?.selectPlaceholder || 'Select a user'}</option>
-        )}
-        {workspaceUsers.map((user: { id: string; fullName?: string; email?: string }) => (
-          <option key={user.id} value={user.id}>
-            {user.fullName || user.email}
-          </option>
-        ))}
-      </select>
-      {isMultiple && (
-        <p className="text-xs text-muted-foreground mt-1">
-          {props.messages?.multiSelectHint || 'Hold Ctrl/Cmd to select multiple users'}
-        </p>
-      )}
+        placeholder={field.placeholder || props.messages?.selectPlaceholder || 'Select a user'}
+        disabled={disabled}
+        users={mappedUsers}
+        loading={false}
+        error={error}
+      />
     </FieldWrapper>
   );
 }

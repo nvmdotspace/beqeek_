@@ -10,7 +10,7 @@ import { Plus, Edit2, Trash2, GripVertical } from 'lucide-react';
 import { Button } from '@workspace/ui/components/button';
 import { Badge } from '@workspace/ui/components/badge';
 import { ScrollArea } from '@workspace/ui/components/scroll-area';
-import { toast } from '@workspace/ui/components/sonner';
+import { toast } from 'sonner';
 import type { FieldConfig, TableConfig } from '@workspace/active-tables-core';
 import {
   isTextFieldType,

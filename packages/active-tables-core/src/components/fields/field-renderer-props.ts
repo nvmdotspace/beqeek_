@@ -10,6 +10,14 @@ import type { ActiveTablesMessages } from '../../types/messages.js';
 import type { Table } from '../../types/common.js';
 
 /**
+ * Week 2: Record type for async select
+ */
+export interface AsyncRecordSelectRecord {
+  id: string;
+  [key: string]: unknown;
+}
+
+/**
  * Base props shared by all field renderer components
  */
 export interface BaseFieldRendererProps {
@@ -43,6 +51,10 @@ export interface FieldRendererProps extends BaseFieldRendererProps {
   error?: string;
   /** Additional CSS class names */
   className?: string;
+  /** Week 2: Function to fetch records asynchronously (for reference fields) */
+  fetchRecords?: (query: string, page: number) => Promise<{ records: AsyncRecordSelectRecord[]; hasMore: boolean }>;
+  /** Week 2: Referenced table name for display (for reference fields) */
+  referencedTableName?: string;
 }
 
 /**

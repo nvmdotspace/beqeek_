@@ -1,6 +1,8 @@
 /**
  * Lexical Editor Configuration
  * Initial configuration for the Lexical editor
+ *
+ * Week 3: Added ImageNode for image upload support
  */
 
 import { HeadingNode, QuoteNode } from '@lexical/rich-text';
@@ -9,6 +11,7 @@ import { LinkNode } from '@lexical/link';
 import { CodeNode } from '@lexical/code';
 import type { InitialConfigType } from '@lexical/react/LexicalComposer';
 import { lexicalTheme } from './theme.js';
+import { ImageNode } from './nodes/image-node.js';
 
 /**
  * Error handler for Lexical editor errors
@@ -26,6 +29,6 @@ export function createEditorConfig(namespace: string, editable = true): InitialC
     theme: lexicalTheme,
     onError,
     editable,
-    nodes: [HeadingNode, QuoteNode, ListNode, ListItemNode, LinkNode, CodeNode],
+    nodes: [HeadingNode, QuoteNode, ListNode, ListItemNode, LinkNode, CodeNode, ImageNode],
   };
 }

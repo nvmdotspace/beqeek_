@@ -10,7 +10,7 @@ import { Button } from '@workspace/ui/components/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@workspace/ui/components/select';
 import { ScrollArea } from '@workspace/ui/components/scroll-area';
 import { Separator } from '@workspace/ui/components/separator';
-import { toast } from '@workspace/ui/components/sonner';
+import { toast } from 'sonner';
 
 import {
   COMMENT_ACTION_TYPES,

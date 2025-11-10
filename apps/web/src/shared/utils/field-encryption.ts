@@ -6,11 +6,16 @@
  *
  * Key insights:
  * - SELECT_ONE fields use HMAC-SHA256 for deterministic equality checks
+ * - Numbers/dates use OPE (Order-Preserving Encryption) for range queries
+ * - Text fields use AES-256-CBC for full encryption
  * - Server never sees plaintext values
  * - Encryption key stored only in client localStorage
+ *
+ * This module delegates to CommonUtils from @workspace/encryption-core
+ * to ensure consistency across the application.
  */
 
-import CryptoJS from 'crypto-js';
+import { CommonUtils, AES256, OPE, HMAC } from '@workspace/encryption-core';
 import type { FieldType } from '@workspace/beqeek-shared';
 
 /**
@@ -19,52 +24,66 @@ import type { FieldType } from '@workspace/beqeek-shared';
  * @param value - The plaintext value to encrypt
  * @param fieldType - The field type determining encryption method
  * @param encryptionKey - 32-character encryption key from localStorage
- * @returns Encrypted value as hex string
+ * @returns Encrypted value (string or string array for list fields)
  */
-export function encryptFieldValue(value: unknown, fieldType: FieldType, encryptionKey: string): string {
+export function encryptFieldValue(
+  value: unknown,
+  fieldType: FieldType,
+  encryptionKey: string,
+): string | string[] | unknown {
   if (value === null || value === undefined || value === '') {
-    return '';
+    return value;
   }
 
-  const stringValue = String(value);
-
-  switch (fieldType) {
-    case 'SELECT_ONE':
-    case 'SELECT_ONE_WORKSPACE_USER':
-    case 'SELECT_ONE_RECORD':
-      // HMAC-SHA256 for equality checks
-      // Benefits: Deterministic (same input = same hash), one-way, keyed
-      // Allows server to filter records by status using hash equality
-      return CryptoJS.HmacSHA256(stringValue, encryptionKey).toString();
-
-    case 'SHORT_TEXT':
-    case 'TEXT':
-    case 'RICH_TEXT':
-      // AES-256-CBC for full encryption
-      // Server cannot decrypt without key
-      return CryptoJS.AES.encrypt(stringValue, encryptionKey).toString();
-
-    case 'INTEGER':
-    case 'NUMERIC':
-      // HMAC for now (loses ordering capability)
-      // TODO: Implement OPE (Order-Preserving Encryption) for range queries
-      return CryptoJS.HmacSHA256(stringValue, encryptionKey).toString();
-
-    case 'DATE':
-    case 'DATETIME':
-    case 'TIME':
-      // HMAC for now (loses ordering capability)
-      // TODO: Implement OPE for date range queries
-      return CryptoJS.HmacSHA256(stringValue, encryptionKey).toString();
-
-    case 'CHECKBOX_YES_NO':
-      // HMAC for boolean values
-      return CryptoJS.HmacSHA256(stringValue, encryptionKey).toString();
-
-    default:
-      // Default to AES encryption for unknown types
-      return CryptoJS.AES.encrypt(stringValue, encryptionKey).toString();
+  // Text fields - AES-256-CBC encryption
+  if (CommonUtils.encryptFields().includes(fieldType)) {
+    return AES256.encrypt(String(value), encryptionKey);
   }
+
+  // Number/Date fields - OPE (Order-Preserving Encryption)
+  if (CommonUtils.opeEncryptFields().includes(fieldType)) {
+    if (!OPE.ope) {
+      OPE.ope = new OPE(encryptionKey);
+    }
+
+    const stringValue = String(value);
+    if (fieldType === 'DATE') {
+      return OPE.ope.encryptStringDate(stringValue);
+    } else if (fieldType === 'DATETIME') {
+      return OPE.ope.encryptStringDatetime(stringValue);
+    } else if (fieldType === 'TIME') {
+      return OPE.ope.encryptString(stringValue);
+    } else if (fieldType === 'NUMERIC') {
+      return OPE.ope.encryptDecimal(stringValue);
+    } else if (fieldType === 'INTEGER') {
+      return OPE.ope.encryptInt(stringValue);
+    } else {
+      // Other time fields (YEAR, MONTH, DAY, HOUR, MINUTE, SECOND)
+      return OPE.ope.encryptInt(stringValue);
+    }
+  }
+
+  // Select/Checkbox fields - HMAC-SHA256 hashing
+  if (CommonUtils.hashEncryptFields().includes(fieldType)) {
+    // Array fields
+    if (fieldType === 'CHECKBOX_LIST' || fieldType === 'SELECT_LIST') {
+      if (Array.isArray(value)) {
+        return HMAC.hashArray(value, encryptionKey);
+      }
+      return value;
+    }
+
+    // Single value fields
+    return HMAC.hash(String(value), encryptionKey);
+  }
+
+  // Reference fields - no encryption
+  if (CommonUtils.noneEncryptFields().includes(fieldType)) {
+    return value;
+  }
+
+  // Default: return original value
+  return value;
 }
 
 /**
@@ -91,48 +110,42 @@ export function buildEncryptedUpdatePayload(
   encryptionKey: string,
   hashedKeywordFields: string[] = [],
 ): {
-  record: Record<string, string>;
-  hashed_keywords: Record<string, string>;
-  record_hashes: Record<string, string>;
+  record: Record<string, string | string[]>;
+  hashed_keywords: Record<string, string | string[]>;
+  record_hashes: Record<string, string | string[]>;
 } {
   const encrypted = encryptFieldValue(newValue, fieldSchema.type, encryptionKey);
 
   const payload: {
-    record: Record<string, string>;
-    hashed_keywords: Record<string, string>;
-    record_hashes: Record<string, string>;
+    record: Record<string, string | string[]>;
+    hashed_keywords: Record<string, string | string[]>;
+    record_hashes: Record<string, string | string[]>;
   } = {
-    record: { [fieldName]: encrypted },
+    record: { [fieldName]: encrypted as string | string[] },
     hashed_keywords: {},
     record_hashes: {},
   };
 
-  // For SELECT_* fields, always add to record_hashes for equality queries
-  // This matches production behavior where record_hashes contains the same hash as record
-  if (
-    fieldSchema.type === 'SELECT_ONE' ||
-    fieldSchema.type === 'SELECT_ONE_WORKSPACE_USER' ||
-    fieldSchema.type === 'SELECT_ONE_RECORD'
-  ) {
-    payload.record_hashes[fieldName] = encrypted;
+  // Generate record hashes for all non-reference fields
+  if (!CommonUtils.noneEncryptFields().includes(fieldSchema.type)) {
+    if (Array.isArray(newValue)) {
+      payload.record_hashes[fieldName] = HMAC.hashArray(newValue, encryptionKey);
+    } else if (newValue !== null && newValue !== undefined && newValue !== '') {
+      payload.record_hashes[fieldName] = HMAC.hash(String(newValue), encryptionKey);
+    }
   }
 
-  // For OPE fields (numbers, dates), add to record_hashes for range queries
-  if (
-    fieldSchema.type === 'INTEGER' ||
-    fieldSchema.type === 'NUMERIC' ||
-    fieldSchema.type === 'DECIMAL' ||
-    fieldSchema.type === 'DATE' ||
-    fieldSchema.type === 'DATETIME' ||
-    fieldSchema.type === 'TIME'
-  ) {
-    payload.record_hashes[fieldName] = encrypted;
-  }
-
-  // Only add to hashed_keywords if field is in the list (for full-text search)
-  // In production example, this was empty {} for gender field
-  if (hashedKeywordFields.includes(fieldName)) {
-    payload.hashed_keywords[fieldName] = encrypted;
+  // Add to hashed_keywords if field is in the list (for full-text search)
+  // Used for searchable text fields
+  if (hashedKeywordFields.includes(fieldName) && newValue) {
+    if (Array.isArray(newValue)) {
+      payload.hashed_keywords[fieldName] = HMAC.hashArray(newValue, encryptionKey);
+    } else {
+      const keywords = CommonUtils.hashKeyword(String(newValue), encryptionKey);
+      if (keywords.length > 0) {
+        payload.hashed_keywords[fieldName] = keywords;
+      }
+    }
   }
 
   return payload;

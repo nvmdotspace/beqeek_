@@ -27,6 +27,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@workspace/ui/componen
 // Components
 import { generateMockTableConfig, generateMockRecords } from '../lib/mock-data';
 import { ErrorCard } from '@/components/error-display';
+import { CreateRecordDialog } from '../components/record-form/create-record-dialog';
 
 const LoadingState = () => (
   <div className="space-y-4">
@@ -186,6 +187,9 @@ export const ActiveTableRecordsPage = () => {
   // Search state
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Create record dialog state
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+
   // Filtered records
   const filteredRecords = useMemo(() => {
     if (!searchQuery.trim()) return displayRecords;
@@ -212,8 +216,12 @@ export const ActiveTableRecordsPage = () => {
   };
 
   const handleCreateRecord = () => {
-    // TODO: Open create record modal
-    console.log('Create record');
+    setIsCreateDialogOpen(true);
+  };
+
+  const handleCreateSuccess = (recordId: string) => {
+    // Navigate to the newly created record
+    handleViewRecord(recordId);
   };
 
   const handleViewRecord = (recordOrId: TableRecord | string) => {
@@ -525,6 +533,18 @@ export const ActiveTableRecordsPage = () => {
           )}
         </TabsContent>
       </Tabs>
+
+      {/* Create Record Dialog */}
+      {displayTable && !useMockData && (
+        <CreateRecordDialog
+          open={isCreateDialogOpen}
+          onOpenChange={setIsCreateDialogOpen}
+          table={displayTable}
+          workspaceId={workspaceId}
+          tableId={tableId}
+          onSuccess={handleCreateSuccess}
+        />
+      )}
     </div>
   );
 };

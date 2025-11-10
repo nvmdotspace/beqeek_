@@ -15,7 +15,7 @@ import { getRouteApi } from '@tanstack/react-router';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@workspace/ui/components/card';
 import { Button } from '@workspace/ui/components/button';
 import { ArrowLeft } from 'lucide-react';
-import { toast } from '@workspace/ui/components/sonner';
+import { toast } from 'sonner';
 import type { TableConfig } from '@workspace/active-tables-core';
 // @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';

@@ -2,7 +2,9 @@
  * ReferenceField Component
  *
  * Renders SELECT_ONE_RECORD and SELECT_LIST_RECORD field types
- * Note: This component requires parent app to provide record data
+ * Note: This component requires parent app to provide record data or fetchRecords function
+ *
+ * Week 2: Enhanced with AsyncRecordSelect for better UX
  */
 
 import { useCallback } from 'react';
@@ -10,6 +12,7 @@ import type { FieldRendererProps } from './field-renderer-props.js';
 import { FieldWrapper } from '../common/field-wrapper.js';
 import { FIELD_TYPES } from '../../types/field.js';
 import { validateFieldValue } from '../../utils/field-validation.js';
+import { AsyncRecordSelect, type AsyncRecordSelectRecord } from './async-record-select.js';
 
 export interface ReferenceRecord {
   id: string;
@@ -17,10 +20,14 @@ export interface ReferenceRecord {
 }
 
 export interface ReferenceFieldProps extends FieldRendererProps {
-  /** Referenced records data - provided by parent app */
+  /** Referenced records data - provided by parent app (legacy mode) */
   referenceRecords?: ReferenceRecord[];
   /** Loading state for reference records */
   loading?: boolean;
+  /** Function to fetch records asynchronously (new mode - Week 2) */
+  fetchRecords?: (query: string, page: number) => Promise<{ records: AsyncRecordSelectRecord[]; hasMore: boolean }>;
+  /** Referenced table name for display */
+  referencedTableName?: string;
 }
 
 export function ReferenceField(props: ReferenceFieldProps) {
@@ -34,6 +41,8 @@ export function ReferenceField(props: ReferenceFieldProps) {
     className,
     referenceRecords = [],
     loading = false,
+    fetchRecords,
+    referencedTableName,
   } = props;
 
   const isMultiple = field.type === FIELD_TYPES.SELECT_LIST_RECORD;
@@ -41,6 +50,19 @@ export function ReferenceField(props: ReferenceFieldProps) {
   // Normalize value
   const normalizedValue = isMultiple ? (Array.isArray(value) ? value : value ? [value] : []) : (value ?? '');
 
+  // Handle change for AsyncRecordSelect (Week 2)
+  const handleAsyncChange = useCallback(
+    (newValue: string | string[]) => {
+      const validationError = validateFieldValue(newValue, field);
+      if (validationError) {
+        console.warn(`Validation error for ${field.name}:`, validationError);
+      }
+      onChange?.(newValue);
+    },
+    [onChange, field],
+  );
+
+  // Handle change for legacy select (Week 1)
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
       if (isMultiple) {
@@ -131,7 +153,7 @@ export function ReferenceField(props: ReferenceFieldProps) {
     ${className || ''}
   `.trim();
 
-  if (loading) {
+  if (loading && !fetchRecords) {
     return (
       <FieldWrapper fieldId={fieldId} label={field.label} required={field.required} error={error}>
         <div className="text-sm text-muted-foreground italic">{props.messages?.loading || 'Loading...'}</div>
@@ -139,6 +161,26 @@ export function ReferenceField(props: ReferenceFieldProps) {
     );
   }
 
+  // Week 2: Use AsyncRecordSelect if fetchRecords is provided
+  if (fetchRecords) {
+    return (
+      <FieldWrapper fieldId={fieldId} label={field.label} required={field.required} error={error}>
+        <AsyncRecordSelect
+          value={normalizedValue as string | string[]}
+          onChange={handleAsyncChange}
+          multiple={isMultiple}
+          placeholder={field.placeholder || props.messages?.selectPlaceholder || 'Select a record'}
+          disabled={disabled}
+          labelFieldName={field.referenceLabelField || 'id'}
+          fetchRecords={fetchRecords}
+          tableName={referencedTableName || 'records'}
+          error={error}
+        />
+      </FieldWrapper>
+    );
+  }
+
+  // Week 1: Legacy mode with native select (fallback)
   return (
     <FieldWrapper fieldId={fieldId} label={field.label} required={field.required} error={error}>
       <select

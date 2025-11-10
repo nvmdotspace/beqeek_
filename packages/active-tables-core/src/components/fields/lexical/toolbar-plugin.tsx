@@ -1,6 +1,8 @@
 /**
  * Lexical Toolbar Plugin
  * Provides formatting controls for the rich text editor
+ *
+ * Week 3: Added image upload button
  */
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
@@ -10,12 +12,15 @@ import { $isHeadingNode } from '@lexical/rich-text';
 import { $isListNode, ListNode, INSERT_ORDERED_LIST_COMMAND, INSERT_UNORDERED_LIST_COMMAND } from '@lexical/list';
 import { $getNearestNodeOfType } from '@lexical/utils';
 import { $isLinkNode, TOGGLE_LINK_COMMAND } from '@lexical/link';
+import { INSERT_IMAGE_COMMAND } from './image-plugin.js';
 
 interface ToolbarPluginProps {
   disabled?: boolean;
+  /** Image upload handler (Week 3) */
+  onImageUpload?: (file: File) => Promise<string>;
 }
 
-export function ToolbarPlugin({ disabled = false }: ToolbarPluginProps) {
+export function ToolbarPlugin({ disabled = false, onImageUpload }: ToolbarPluginProps) {
   const [editor] = useLexicalComposerContext();
   const [isBold, setIsBold] = useState(false);
   const [isItalic, setIsItalic] = useState(false);
@@ -90,6 +95,11 @@ export function ToolbarPlugin({ disabled = false }: ToolbarPluginProps) {
       editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined);
     }
   };
+
+  // Week 3: Image upload handler
+  const insertImage = useCallback(() => {
+    editor.dispatchCommand(INSERT_IMAGE_COMMAND, undefined);
+  }, [editor]);
 
   const buttonClass = (active: boolean) =>
     `px-2 py-1 rounded hover:bg-accent transition-colors ${
@@ -192,6 +202,22 @@ export function ToolbarPlugin({ disabled = false }: ToolbarPluginProps) {
       >
         🔗 Link
       </button>
+
+      {/* Week 3: Image Upload Button */}
+      {onImageUpload && (
+        <>
+          <div className="w-px h-6 bg-gray-300 mx-1" />
+          <button
+            type="button"
+            onClick={insertImage}
+            disabled={disabled}
+            className={buttonClass(false)}
+            title="Insert Image"
+          >
+            🖼️ Image
+          </button>
+        </>
+      )}
     </div>
   );
 }

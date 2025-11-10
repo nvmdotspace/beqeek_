@@ -14,7 +14,6 @@ import { arrayMove, SortableContext, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { createContext, type HTMLAttributes, type ReactNode, useContext, useState, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-// @ts-expect-error - tunnel-rat types issue
 import tunnel from 'tunnel-rat';
 import { Card } from '../../../card.js';
 import { ScrollArea, ScrollBar } from '../../../scroll-area.js';

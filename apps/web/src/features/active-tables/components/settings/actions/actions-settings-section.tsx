@@ -12,7 +12,7 @@ import { Button } from '@workspace/ui/components/button';
 import { Badge } from '@workspace/ui/components/badge';
 import { ScrollArea } from '@workspace/ui/components/scroll-area';
 import { initDefaultActions } from '@workspace/beqeek-shared';
-import { toast } from '@workspace/ui/components/sonner';
+import { toast } from 'sonner';
 import { SettingsSection } from '../settings-layout';
 import { ActionFormModal } from './action-form-modal';
 // @ts-expect-error - Paraglide generates JS without .d.ts files

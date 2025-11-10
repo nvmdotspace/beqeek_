@@ -1,6 +1,8 @@
 /**
  * Lexical Rich Text Editor Component
  * A reusable rich text editor powered by Lexical
+ *
+ * Week 3: Added image upload support
  */
 
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
@@ -17,6 +19,7 @@ import { $getRoot, $createParagraphNode, EditorState, LexicalNode } from 'lexica
 import { $generateHtmlFromNodes, $generateNodesFromDOM } from '@lexical/html';
 import { createEditorConfig } from './editor-config.js';
 import { ToolbarPlugin } from './toolbar-plugin.js';
+import { ImagePlugin } from './image-plugin.js';
 
 interface LexicalEditorProps {
   value: string;
@@ -24,6 +27,8 @@ interface LexicalEditorProps {
   placeholder?: string;
   disabled?: boolean;
   className?: string;
+  /** Optional image upload handler (Week 3) */
+  onImageUpload?: (file: File) => Promise<string>;
 }
 
 /**
@@ -81,6 +86,7 @@ export function LexicalEditor({
   placeholder = 'Enter rich text content...',
   disabled = false,
   className = '',
+  onImageUpload,
 }: LexicalEditorProps) {
   const config = createEditorConfig('rich-text-editor', !disabled);
 
@@ -89,7 +95,7 @@ export function LexicalEditor({
       <div
         className={`relative border border-input rounded-lg bg-background ${disabled ? 'opacity-50' : ''} ${className}`}
       >
-        <ToolbarPlugin disabled={disabled} />
+        <ToolbarPlugin disabled={disabled} onImageUpload={onImageUpload} />
 
         <div className="relative">
           <RichTextPlugin
@@ -104,6 +110,7 @@ export function LexicalEditor({
           <HistoryPlugin />
           <ListPlugin />
           <LinkPlugin />
+          <ImagePlugin onImageUpload={onImageUpload} disabled={disabled} />
           <InitialContentPlugin html={value} />
           <OnChangeHtmlPlugin onChange={onChange} />
         </div>
