@@ -1,21 +1,16 @@
-import { useMemo, useState, useEffect, useRef } from 'react';
+import { useMemo, useState } from 'react';
 import { ArrowLeft, Plus, Search, Filter, List, KanbanSquare, GanttChart } from 'lucide-react';
 import { getRouteApi } from '@tanstack/react-router';
 
-import { useActiveTableRecordsWithConfig } from '../hooks/use-active-tables';
+import { useActiveTable } from '../hooks/use-active-tables';
+import { useInfiniteActiveTableRecords } from '../hooks/use-infinite-active-table-records';
 import { useTableEncryption } from '../hooks/use-table-encryption';
 import { useUpdateRecordField } from '../hooks/use-update-record';
 import { useListContext } from '../hooks/use-list-context';
+import { useScrollShortcuts } from '../hooks/use-scroll-shortcuts';
 import { useWorkspaceUsersWithPrefetch } from '@/features/workspace-users/hooks/use-workspace-users-with-prefetch';
 import { useGetWorkspaceUsers } from '@/features/workspace-users/hooks/use-get-workspace-users';
-import {
-  decryptRecords,
-  KanbanBoard,
-  GanttChartView,
-  RecordList,
-  type TableRecord,
-  type Table,
-} from '@workspace/active-tables-core';
+import { KanbanBoard, GanttChartView, RecordList, type TableRecord, type Table } from '@workspace/active-tables-core';
 import { ROUTES } from '@/shared/route-paths';
 import { RECORD_LIST_LAYOUT_GENERIC_TABLE } from '@workspace/beqeek-shared';
 
@@ -27,9 +22,13 @@ import { Card, CardContent } from '@workspace/ui/components/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@workspace/ui/components/tabs';
 
 // Components
-import { generateMockTableConfig, generateMockRecords } from '../lib/mock-data';
 import { ErrorCard } from '@/components/error-display';
 import { CreateRecordDialog } from '../components/record-form/create-record-dialog';
+import { InfiniteScrollTrigger } from '../components/infinite-scroll-trigger';
+import { RecordsLoadingSkeleton } from '../components/records-loading-skeleton';
+import { RecordsEndIndicator } from '../components/records-end-indicator';
+import { RecordsErrorBanner } from '../components/records-error-banner';
+import { RecordsLiveAnnouncer } from '../components/records-live-announcer';
 
 const LoadingState = () => (
   <div className="space-y-4">
@@ -61,147 +60,44 @@ export const ActiveTableRecordsPage = () => {
   // View mode from URL (defaults to 'list')
   const viewMode = searchParams.view || 'list';
 
-  // Use combined hook to ensure table config loads before records
-  // This prevents race conditions in encryption/decryption logic
-  const { table, tableLoading, tableError, records, recordsLoading, recordsError, isReady, nextId } =
-    useActiveTableRecordsWithConfig(workspaceId, tableId, {
-      paging: 'cursor',
-      limit: 50,
-      direction: 'desc',
-    });
+  // Fetch table configuration first
+  const tableQuery = useActiveTable(workspaceId, tableId);
+  const table = tableQuery.data?.data;
+  const tableLoading = tableQuery.isLoading;
+  const tableError = tableQuery.error;
 
   // Initialize encryption hook (now guaranteed to have table.config when records load)
   const encryption = useTableEncryption(workspaceId ?? '', tableId, table?.config);
 
+  // Use infinite scroll hook for records with automatic decryption
+  const {
+    records,
+    isLoading: recordsLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+    error: recordsError,
+    isDecrypting,
+  } = useInfiniteActiveTableRecords(workspaceId, tableId, table ?? null, {
+    pageSize: 50,
+    direction: 'desc',
+    enabled: !!table?.config, // Only fetch when table config is loaded
+    encryptionKey: encryption.encryptionKey,
+  });
+
   // Initialize record update mutation for kanban DnD
   // IMPORTANT: Always call hook unconditionally (Rules of Hooks)
   const updateRecordMutation = useUpdateRecordField(workspaceId ?? '', tableId ?? '', table ?? null);
+  useScrollShortcuts({
+    enabled: viewMode === 'list',
+  });
 
-  // Decrypt records if E2EE enabled and key is valid
-  const [decryptedRecords, setDecryptedRecords] = useState(records);
-  const [isDecrypting, setIsDecrypting] = useState(false);
+  const displayTable: Table | null = table ?? null;
+  const displayRecords = records;
 
-  // Track last processed state to prevent infinite loops
-  const lastProcessedRef = useRef<string>('');
-
-  // REAL API: Use real data from backend
-  const useMockData = false; // Changed to use real API data
-  const mockTableConfig = useMemo(() => generateMockTableConfig(), []);
-  const mockRecords = useMemo(() => generateMockRecords(12), []);
-
-  // Use mock data or real data
-  const mockTable: Table = {
-    id: table?.id || 'mock-table-id',
-    name: table?.name || 'Project Tasks - BEQEEK',
-    workGroupId: table?.workGroupId || 'mock-workgroup-id',
-    tableType: table?.tableType || 'TASK_EISENHOWER',
-    description: table?.description,
-    config: mockTableConfig,
-    createdAt: table?.createdAt,
-    updatedAt: table?.updatedAt,
-  };
-
-  const displayTable: Table | null = useMockData ? mockTable : (table ?? null);
-  const displayRecords = useMockData ? mockRecords : decryptedRecords;
-
-  useEffect(() => {
-    const recordsFingerprint = records.map((record) => ({
-      id: record.id,
-      record: record.record,
-      data: record.data || record.record, // Fallback to record if data is missing
-      updatedAt: record.updatedAt,
-      valueUpdatedAt: record.valueUpdatedAt,
-    }));
-
-    // Create a unique key representing the current state
-    const stateKey = JSON.stringify({
-      isReady,
-      recordsFingerprint,
-      isE2EE: encryption.isE2EEEnabled,
-      hasKey: !!encryption.encryptionKey,
-      tableId: table?.id,
-      fieldsCount: table?.config?.fields?.length,
-    });
-
-    // Skip if we've already processed this exact state
-    if (lastProcessedRef.current === stateKey) {
-      return;
-    }
-
-    const decryptAllRecords = async () => {
-      // Guard: Wait for table config to be loaded
-      if (!isReady || !table?.config) {
-        setDecryptedRecords([]);
-        return;
-      }
-
-      // Determine encryption key source
-      let decryptionKey: string | null = null;
-
-      if (encryption.isE2EEEnabled) {
-        // E2EE mode: Key from localStorage (user must input)
-        if (!encryption.isKeyValid || !encryption.encryptionKey) {
-          // No valid key - show encrypted data
-          setDecryptedRecords(records);
-          lastProcessedRef.current = stateKey;
-          return;
-        }
-        decryptionKey = encryption.encryptionKey;
-      } else {
-        // Server-side encryption mode: Key provided by server in config
-        decryptionKey = table.config.encryptionKey ?? null;
-      }
-
-      // If no encryption key available, show raw records
-      if (!decryptionKey) {
-        setDecryptedRecords(records);
-        lastProcessedRef.current = stateKey;
-        return;
-      }
-
-      // Decrypt records with available key using batch decryption
-      // Benefits: LRU caching, optimized batch processing, better error handling
-      setIsDecrypting(true);
-      try {
-        const decrypted = await decryptRecords(
-          records,
-          table.config.fields ?? [],
-          decryptionKey!,
-          true, // useCache - enable LRU caching for performance
-          50, // batchSize - process 50 records at a time
-        );
-        setDecryptedRecords(decrypted);
-        lastProcessedRef.current = stateKey;
-      } catch (error) {
-        console.error('Failed to decrypt records:', error);
-        setDecryptedRecords(records);
-        lastProcessedRef.current = stateKey;
-      } finally {
-        setIsDecrypting(false);
-      }
-    };
-
-    if (!useMockData) {
-      decryptAllRecords();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    isReady,
-    records,
-    encryption.isE2EEEnabled,
-    encryption.isKeyValid,
-    encryption.encryptionKey,
-    table?.id,
-    useMockData,
-  ]);
-
-  // Search state
   const [searchQuery, setSearchQuery] = useState('');
-
-  // Create record dialog state
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
-  // Filtered records
   const filteredRecords = useMemo(() => {
     if (!searchQuery.trim()) return displayRecords;
 
@@ -255,24 +151,19 @@ export const ActiveTableRecordsPage = () => {
   const handleRecordMove = (recordId: string, newStatus: string) => {
     // Check if table is loaded
     if (!table) {
-      console.error('[Kanban] Table not loaded');
       return;
     }
 
     // Get kanban config to find status field name
     const kanbanConfig = table.config?.kanbanConfigs?.[0];
     if (!kanbanConfig) {
-      console.error('[Kanban] Kanban config not found');
       return;
     }
 
     // Check encryption key if E2EE enabled
     if (table.config.e2eeEncryption && !encryption.isKeyValid) {
-      console.error('[Kanban] Encryption key required to update records');
       return;
     }
-
-    console.log(`[Kanban API] Updating record ${recordId}: ${kanbanConfig.statusField} = "${newStatus}"`);
 
     // Call API - hook handles optimistic update automatically
     // Flow: API call → onMutate (optimistic update) → onSuccess (invalidate) → refetch → decrypt → UI sync
@@ -294,8 +185,9 @@ export const ActiveTableRecordsPage = () => {
   };
 
   const isLoading = tableLoading || recordsLoading;
+  const isInitialRecordListLoading = (recordsLoading || isDecrypting) && displayRecords.length === 0;
 
-  if (isLoading && !useMockData) {
+  if (isLoading) {
     return (
       <div className="space-y-6 p-6">
         <Button variant="ghost" onClick={handleBack} className="flex items-center gap-2">
@@ -341,7 +233,7 @@ export const ActiveTableRecordsPage = () => {
     );
   }
 
-  if (recordsError && !useMockData) {
+  if (recordsError) {
     return (
       <div className="space-y-6 p-6">
         <Button variant="ghost" onClick={handleBack} className="flex items-center gap-2">
@@ -364,6 +256,15 @@ export const ActiveTableRecordsPage = () => {
 
   return (
     <div className="space-y-4 p-3 sm:p-6">
+      {/* ARIA Live Region for Screen Readers */}
+      <RecordsLiveAnnouncer
+        isLoading={recordsLoading}
+        isFetchingNextPage={isFetchingNextPage}
+        hasNextPage={hasNextPage}
+        error={recordsError}
+        recordCount={filteredRecords.length}
+      />
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div className="space-y-2">
@@ -373,11 +274,6 @@ export const ActiveTableRecordsPage = () => {
               <span className="hidden sm:inline">Back to Table</span>
               <span className="sm:hidden">Back</span>
             </Button>
-            {useMockData && (
-              <Badge variant="outline" className="border-blue-500 text-blue-700 text-xs">
-                Mock Data (Preview)
-              </Badge>
-            )}
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{displayTable.name || 'Records'}</h1>
           {displayTable.description && (
@@ -388,7 +284,7 @@ export const ActiveTableRecordsPage = () => {
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
-          {encryption.isE2EEEnabled && !useMockData && (
+          {encryption.isE2EEEnabled && (
             <Badge
               variant="outline"
               className={
@@ -407,7 +303,7 @@ export const ActiveTableRecordsPage = () => {
       </div>
 
       {/* Encryption Warning */}
-      {encryption.isE2EEEnabled && encryption.keyValidationStatus !== 'valid' && !useMockData && (
+      {encryption.isE2EEEnabled && encryption.keyValidationStatus !== 'valid' && (
         <Card className="border-yellow-500 bg-yellow-50">
           <CardContent className="p-4">
             <p className="text-sm text-yellow-800">
@@ -484,17 +380,30 @@ export const ActiveTableRecordsPage = () => {
             table={displayTable}
             records={filteredRecords}
             config={displayTable.config.recordListConfig || { layout: RECORD_LIST_LAYOUT_GENERIC_TABLE }}
-            loading={isDecrypting || false}
+            loading={isInitialRecordListLoading}
             onRecordClick={(record) => handleViewRecord(record)}
             encryptionKey={encryption.encryptionKey || undefined}
             workspaceUsers={workspaceUsers}
           />
 
-          {/* Pagination (TODO) */}
-          {nextId && !useMockData && (
-            <div className="flex justify-center mt-4">
-              <Button variant="outline">Load More</Button>
-            </div>
+          {/* Infinite scroll components */}
+          {recordsError && (
+            <RecordsErrorBanner error={recordsError} onRetry={() => fetchNextPage()} isRetrying={isFetchingNextPage} />
+          )}
+
+          {isFetchingNextPage && (
+            <RecordsLoadingSkeleton rowCount={3} columnCount={displayTable.config?.fields?.length || 5} />
+          )}
+
+          {!recordsError && hasNextPage && !isFetchingNextPage && (
+            <InfiniteScrollTrigger onLoadMore={fetchNextPage} hasMore={hasNextPage} isLoading={isFetchingNextPage} />
+          )}
+
+          {!hasNextPage && filteredRecords.length > 0 && (
+            <RecordsEndIndicator
+              recordCount={filteredRecords.length}
+              onBackToTop={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            />
           )}
         </TabsContent>
 
@@ -547,7 +456,7 @@ export const ActiveTableRecordsPage = () => {
       </Tabs>
 
       {/* Create Record Dialog */}
-      {displayTable && !useMockData && (
+      {displayTable && (
         <CreateRecordDialog
           open={isCreateDialogOpen}
           onOpenChange={setIsCreateDialogOpen}
