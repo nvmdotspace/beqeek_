@@ -7,7 +7,7 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createActiveTablesApiClient } from '@/shared/api/active-tables-client';
-import { buildEncryptedUpdatePayload, buildPlaintextUpdatePayload } from '@/shared/utils/field-encryption';
+import { buildEncryptedUpdatePayload } from '@/shared/utils/field-encryption';
 import type { Table, FieldConfig, TableRecord, RecordsResponse } from '@workspace/active-tables-core';
 import type { FieldType } from '@workspace/beqeek-shared';
 
@@ -67,37 +67,41 @@ export function useUpdateRecordField(workspaceId: string, tableId: string, table
       }
 
       const client = createActiveTablesApiClient(workspaceId);
-      const isEncrypted = table.config.e2eeEncryption;
+      const isE2EE = table.config.e2eeEncryption;
 
-      let payload;
+      let encryptionKey: string | null = null;
 
-      if (isEncrypted) {
-        // E2EE mode: Encrypt value before sending
-        const encryptionKey = localStorage.getItem(`table_${tableId}_encryption_key`);
+      if (isE2EE) {
+        // E2EE Mode: Use encryption key from localStorage
+        encryptionKey = localStorage.getItem(`table_${tableId}_encryption_key`);
 
         if (!encryptionKey) {
           throw new Error('Encryption key not found. Please enter your encryption key.');
         }
-
-        // Find field schema
-        const fieldSchema = table.config.fields.find((f: FieldConfig) => f.name === fieldName);
-
-        if (!fieldSchema) {
-          throw new Error(`Field "${fieldName}" not found in table schema`);
-        }
-
-        // Build encrypted payload
-        payload = buildEncryptedUpdatePayload(
-          fieldName,
-          newValue,
-          fieldSchema as { type: FieldType },
-          encryptionKey,
-          table.config.hashedKeywordFields || [],
-        );
       } else {
-        // Plaintext mode
-        payload = buildPlaintextUpdatePayload(fieldName, newValue);
+        // Server-Side Encryption Mode: Use encryption key from server config
+        encryptionKey = table.config.encryptionKey ?? null;
+
+        if (!encryptionKey) {
+          throw new Error('Table encryption key not found in config. Cannot encrypt data.');
+        }
       }
+
+      // Find field schema
+      const fieldSchema = table.config.fields.find((f: FieldConfig) => f.name === fieldName);
+
+      if (!fieldSchema) {
+        throw new Error(`Field "${fieldName}" not found in table schema`);
+      }
+
+      // Build encrypted payload (both modes require encryption!)
+      const payload = buildEncryptedUpdatePayload(
+        fieldName,
+        newValue,
+        fieldSchema as { type: FieldType },
+        encryptionKey,
+        table.config.hashedKeywordFields || [],
+      );
 
       // API endpoint: POST /api/workspace/{workspaceId}/workflow/patch/active_tables/{tableId}/records/{recordId}
       const response = await client.post<RecordMutationResponse>(
@@ -222,7 +226,25 @@ export function useBatchUpdateRecord(workspaceId: string, tableId: string, table
       }
 
       const client = createActiveTablesApiClient(workspaceId);
-      const isEncrypted = table.config.e2eeEncryption;
+      const isE2EE = table.config.e2eeEncryption;
+
+      let encryptionKey: string | null = null;
+
+      if (isE2EE) {
+        // E2EE Mode: Use encryption key from localStorage
+        encryptionKey = localStorage.getItem(`table_${tableId}_encryption_key`);
+
+        if (!encryptionKey) {
+          throw new Error('Encryption key not found. Please enter your encryption key.');
+        }
+      } else {
+        // Server-Side Encryption Mode: Use encryption key from server config
+        encryptionKey = table.config.encryptionKey ?? null;
+
+        if (!encryptionKey) {
+          throw new Error('Table encryption key not found in config. Cannot encrypt data.');
+        }
+      }
 
       const payload: {
         record: Record<string, string | unknown>;
@@ -234,38 +256,27 @@ export function useBatchUpdateRecord(workspaceId: string, tableId: string, table
         record_hashes: {},
       };
 
-      if (isEncrypted) {
-        const encryptionKey = localStorage.getItem(`table_${tableId}_encryption_key`);
+      // Encrypt each field (both modes require encryption!)
+      for (const [fieldName, value] of Object.entries(updates)) {
+        const fieldSchema = table.config.fields.find((f: FieldConfig) => f.name === fieldName);
 
-        if (!encryptionKey) {
-          throw new Error('Encryption key not found. Please enter your encryption key.');
+        if (!fieldSchema) {
+          console.warn(`Field "${fieldName}" not found in schema, skipping`);
+          continue;
         }
 
-        // Encrypt each field
-        for (const [fieldName, value] of Object.entries(updates)) {
-          const fieldSchema = table.config.fields.find((f: FieldConfig) => f.name === fieldName);
+        const fieldPayload = buildEncryptedUpdatePayload(
+          fieldName,
+          value,
+          fieldSchema as { type: FieldType },
+          encryptionKey,
+          table.config.hashedKeywordFields || [],
+        );
 
-          if (!fieldSchema) {
-            console.warn(`Field "${fieldName}" not found in schema, skipping`);
-            continue;
-          }
-
-          const fieldPayload = buildEncryptedUpdatePayload(
-            fieldName,
-            value,
-            fieldSchema as { type: FieldType },
-            encryptionKey,
-            table.config.hashedKeywordFields || [],
-          );
-
-          // Merge into main payload
-          Object.assign(payload.record, fieldPayload.record);
-          Object.assign(payload.hashed_keywords, fieldPayload.hashed_keywords);
-          Object.assign(payload.record_hashes, fieldPayload.record_hashes);
-        }
-      } else {
-        // Plaintext mode
-        payload.record = updates;
+        // Merge into main payload
+        Object.assign(payload.record, fieldPayload.record);
+        Object.assign(payload.hashed_keywords, fieldPayload.hashed_keywords);
+        Object.assign(payload.record_hashes, fieldPayload.record_hashes);
       }
 
       const response = await client.post<RecordMutationResponse>(

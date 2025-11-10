@@ -152,16 +152,13 @@ export function buildEncryptedUpdatePayload(
 }
 
 /**
- * Build plaintext update payload for non-encrypted tables
+ * Note: buildPlaintextUpdatePayload was removed.
  *
- * @param fieldName - Name of the field being updated
- * @param newValue - New value
- * @returns Payload with plaintext value
+ * According to encryption-modes-corrected.md, BOTH encryption modes
+ * (server-side and E2EE) require client-side encryption before sending.
+ * The only difference is WHERE the encryption key comes from:
+ * - Server-side: table.config.encryptionKey
+ * - E2EE: localStorage
+ *
+ * Both modes use buildEncryptedUpdatePayload().
  */
-export function buildPlaintextUpdatePayload(fieldName: string, newValue: unknown) {
-  return {
-    record: { [fieldName]: newValue },
-    hashed_keywords: {},
-    record_hashes: {},
-  };
-}

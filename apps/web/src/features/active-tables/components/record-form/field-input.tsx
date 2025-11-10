@@ -38,7 +38,7 @@ export function FieldInput({ field, form, table, workspaceId, disabled = false, 
     isLoading,
     error,
   } = useGetWorkspaceUsers(workspaceId, {
-    query: 'CREATE_RECORD_FORM',
+    query: 'BASIC_WITH_AVATAR',
     reactQueryOptions: {
       enabled: isUserField(field.type),
     },

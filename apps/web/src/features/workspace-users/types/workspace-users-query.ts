@@ -84,17 +84,6 @@ export interface GetWorkspaceUsersRequest {
  */
 export const WORKSPACE_USERS_QUERY_PRESETS = {
   /**
-   * Minimal fields for create record form dropdowns
-   * Returns only id and fullName
-   */
-  CREATE_RECORD_FORM: {
-    fields: 'id,fullName,avatar,thumbnailAvatar',
-    filtering: {},
-    limit: 100, // Reasonable limit for dropdown
-    offset: 0,
-  } satisfies WorkspaceUsersQueries,
-
-  /**
    * Basic user info with avatar
    * Suitable for user lists and cards
    */
