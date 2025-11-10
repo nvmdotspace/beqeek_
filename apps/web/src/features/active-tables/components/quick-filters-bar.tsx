@@ -5,9 +5,21 @@
  * Based on active-table-config-functional-spec.md section 2.6
  */
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
+import { ChevronDown } from 'lucide-react';
 import { Badge } from '@workspace/ui/components/badge';
+import { Button } from '@workspace/ui/components/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@workspace/ui/components/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@workspace/ui/components/popover';
+import { Checkbox } from '@workspace/ui/components/checkbox';
+import {
+  Command,
+  CommandInput,
+  CommandList,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+} from '@workspace/ui/components/command';
 import type { Table, QuickFilterConfig, FieldConfig, FieldOption } from '@workspace/active-tables-core';
 import { QUICK_FILTER_VALID_FIELD_TYPES } from '@workspace/beqeek-shared';
 
@@ -36,6 +48,13 @@ export interface QuickFiltersBarProps {
  */
 function isValidQuickFilterField(field: FieldConfig): boolean {
   return QUICK_FILTER_VALID_FIELD_TYPES.includes(field.type as any);
+}
+
+/**
+ * Check if field supports multi-select
+ */
+function isMultiSelectField(field: FieldConfig): boolean {
+  return field.type === 'SELECT_LIST' || field.type === 'SELECT_LIST_WORKSPACE_USER';
 }
 
 /**
@@ -95,28 +114,49 @@ export function QuickFiltersBar({
     return null;
   }
 
-  const handleFilterChange = (fieldName: string, value: string | null) => {
+  const handleFilterChange = (fieldName: string, value: string | string[] | null) => {
     const newFilters = filters.filter((f) => f.fieldName !== fieldName);
 
     if (value && value !== 'all') {
-      newFilters.push({
-        fieldName,
-        value,
-      });
+      // For multi-select, check if array has values
+      if (Array.isArray(value) && value.length === 0) {
+        // Empty array means clear filter
+      } else {
+        newFilters.push({
+          fieldName,
+          value,
+        });
+      }
     }
 
     onFilterChange(newFilters);
   };
 
-  const getFilterValue = (fieldName: string): string => {
+  const getFilterValue = (fieldName: string): string | string[] => {
     const filter = filters.find((f) => f.fieldName === fieldName);
     if (!filter) return 'all';
 
     if (Array.isArray(filter.value)) {
-      return filter.value[0] || 'all';
+      return filter.value.length > 0 ? filter.value : 'all';
     }
 
     return filter.value || 'all';
+  };
+
+  const toggleMultiSelectOption = (fieldName: string, optionValue: string) => {
+    const currentFilter = filters.find((f) => f.fieldName === fieldName);
+    const currentValues = Array.isArray(currentFilter?.value) ? currentFilter.value : [];
+
+    let newValues: string[];
+    if (currentValues.includes(optionValue)) {
+      // Remove value
+      newValues = currentValues.filter((v) => v !== optionValue);
+    } else {
+      // Add value
+      newValues = [...currentValues, optionValue];
+    }
+
+    handleFilterChange(fieldName, newValues.length > 0 ? newValues : null);
   };
 
   // Get display text for current filter value
@@ -132,8 +172,14 @@ export function QuickFiltersBar({
 
   const hasActiveFilters = filters.length > 0;
 
+  const handleClearAll = () => {
+    onFilterChange([]);
+  };
+
   return (
     <div
+      role="region"
+      aria-label="Quick filters"
       className={`
         sticky top-0 z-10
         bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60
@@ -142,59 +188,149 @@ export function QuickFiltersBar({
       `}
     >
       <div className="px-3 sm:px-6 py-3">
-        <div className="flex items-center gap-3 flex-wrap">
-          <span className="text-sm font-medium text-muted-foreground shrink-0">Quick Filters:</span>
+        {/* Header with Clear All button */}
+        <div className="flex items-center justify-between mb-2">
+          <span id="quick-filters-heading" className="text-sm font-medium text-muted-foreground shrink-0">
+            Quick Filters:
+          </span>
 
-          <div className="flex items-center gap-2 flex-wrap flex-1">
-            {quickFilterFields.map((field) => {
-              const currentValue = getFilterValue(field.name);
-              const options = getFilterOptions(field, workspaceUsers);
-              const isActive = currentValue !== 'all';
+          {hasActiveFilters && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleClearAll}
+              className="text-xs h-7"
+              aria-label={`Clear all ${filters.length} filters`}
+            >
+              Clear All ({filters.length})
+            </Button>
+          )}
 
-              const displayText = getFilterDisplayText(field, currentValue);
-
-              return (
-                <div key={field.name} className="flex items-center gap-1.5">
-                  <Select value={currentValue} onValueChange={(value) => handleFilterChange(field.name, value)}>
-                    <SelectTrigger
-                      className={`
-                        h-8 text-xs
-                        min-w-[160px] max-w-[280px]
-                        ${isActive ? 'border-primary' : ''}
-                      `}
-                    >
-                      <SelectValue placeholder={field.label || field.name}>
-                        <span className="truncate" title={displayText}>
-                          {displayText}
-                        </span>
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent className="max-w-[320px]">
-                      <SelectItem value="all">All {field.label || field.name}</SelectItem>
-                      {options.map((option) => (
-                        <SelectItem key={option.value} value={String(option.value)}>
-                          <div className="flex items-center gap-2 min-w-0">
-                            {option.background_color && (
-                              <div
-                                className="w-2 h-2 rounded-full shrink-0"
-                                style={{ backgroundColor: option.background_color }}
-                              />
-                            )}
-                            <span className="truncate" title={option.text}>
-                              {option.text}
-                            </span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              );
-            })}
+          {/* Screen reader live region */}
+          <div role="status" aria-live="polite" aria-atomic="true" className="sr-only">
+            {hasActiveFilters
+              ? `${filters.length} ${filters.length === 1 ? 'filter' : 'filters'} active`
+              : 'No filters active'}
           </div>
         </div>
 
-        {/* Active Filters Count */}
+        {/* Filter controls */}
+        <div role="group" aria-labelledby="quick-filters-heading" className="flex items-center gap-2 flex-wrap">
+          {quickFilterFields.map((field) => {
+            const currentValue = getFilterValue(field.name);
+            const options = getFilterOptions(field, workspaceUsers);
+            const isMultiSelect = isMultiSelectField(field);
+            const isActive = currentValue !== 'all';
+
+            // For multi-select
+            if (isMultiSelect) {
+              const selectedValues = Array.isArray(currentValue) ? currentValue : [];
+              const selectedCount = selectedValues.length;
+
+              return (
+                <div key={field.name} className="flex items-center gap-1.5">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        role="combobox"
+                        aria-label={`Filter by ${field.label || field.name}`}
+                        className={`
+                          h-8 text-xs justify-between
+                          min-w-[160px] max-w-[280px]
+                          ${isActive ? 'border-primary' : ''}
+                        `}
+                      >
+                        <span className="truncate">
+                          {selectedCount === 0
+                            ? `All ${field.label || field.name}`
+                            : `${field.label || field.name} (${selectedCount})`}
+                        </span>
+                        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[280px] p-0" align="start">
+                      <Command>
+                        <CommandInput placeholder={`Search ${field.label || field.name}...`} className="h-9" />
+                        <CommandList>
+                          <CommandEmpty>No options found.</CommandEmpty>
+                          <CommandGroup>
+                            {options.map((option) => {
+                              const isSelected = selectedValues.includes(String(option.value));
+                              return (
+                                <CommandItem
+                                  key={option.value}
+                                  onSelect={() => toggleMultiSelectOption(field.name, String(option.value))}
+                                  className="cursor-pointer"
+                                >
+                                  <Checkbox checked={isSelected} className="mr-2" />
+                                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                                    {option.background_color && (
+                                      <div
+                                        className="w-2 h-2 rounded-full shrink-0"
+                                        style={{ backgroundColor: option.background_color }}
+                                      />
+                                    )}
+                                    <span className="truncate">{option.text}</span>
+                                  </div>
+                                </CommandItem>
+                              );
+                            })}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              );
+            }
+
+            // For single-select
+            const displayText = getFilterDisplayText(field, currentValue as string);
+
+            return (
+              <div key={field.name} className="flex items-center gap-1.5">
+                <Select value={currentValue as string} onValueChange={(value) => handleFilterChange(field.name, value)}>
+                  <SelectTrigger
+                    aria-label={`Filter by ${field.label || field.name}`}
+                    className={`
+                      h-8 text-xs
+                      min-w-[160px] max-w-[280px]
+                      ${isActive ? 'border-primary' : ''}
+                    `}
+                  >
+                    <SelectValue placeholder={field.label || field.name}>
+                      <span className="truncate" title={displayText}>
+                        {displayText}
+                      </span>
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent className="max-w-[320px]">
+                    <SelectItem value="all">All {field.label || field.name}</SelectItem>
+                    {options.map((option) => (
+                      <SelectItem key={option.value} value={String(option.value)}>
+                        <div className="flex items-center gap-2 min-w-0">
+                          {option.background_color && (
+                            <div
+                              className="w-2 h-2 rounded-full shrink-0"
+                              style={{ backgroundColor: option.background_color }}
+                            />
+                          )}
+                          <span className="truncate" title={option.text}>
+                            {option.text}
+                          </span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Active Filters Count Badge */}
         {hasActiveFilters && (
           <div className="mt-2 flex items-center gap-1.5">
             <Badge variant="outline" className="text-[10px] h-5">
