@@ -162,10 +162,54 @@ function EmailFieldList({ value, disableTruncate }: { value: unknown; disableTru
 }
 
 /**
+ * Workspace user field renderer for list views
+ */
+function WorkspaceUserFieldList({ value, workspaceUsers }: { value: unknown; workspaceUsers?: WorkspaceUser[] }) {
+  const isArray = Array.isArray(value);
+
+  // Helper to find user by ID
+  const findUser = (userId: string) => {
+    return workspaceUsers?.find((user) => user.id === userId);
+  };
+
+  // Handle array of user IDs (SELECT_LIST_WORKSPACE_USER)
+  if (isArray) {
+    if (value.length === 0) {
+      return <span className="text-muted-foreground/50">—</span>;
+    }
+
+    return (
+      <div className="flex flex-wrap gap-1">
+        {value.map((userId) => {
+          const user = findUser(String(userId));
+          return (
+            <FieldBadge key={userId} variant="secondary" size="compact">
+              {user?.name || String(userId)}
+            </FieldBadge>
+          );
+        })}
+      </div>
+    );
+  }
+
+  // Handle single user ID (SELECT_ONE_WORKSPACE_USER)
+  if (!value) {
+    return <span className="text-muted-foreground/50">—</span>;
+  }
+
+  const user = findUser(String(value));
+  return (
+    <FieldBadge variant="secondary" size="compact">
+      {user?.name || String(value)}
+    </FieldBadge>
+  );
+}
+
+/**
  * Main FieldListRenderer component
  */
 export function FieldListRenderer(props: FieldListRendererProps) {
-  const { field, value, disableTruncate = false } = props;
+  const { field, value, workspaceUsers, disableTruncate = false } = props;
 
   // Empty value
   if (value === null || value === undefined || value === '') {
@@ -174,6 +218,11 @@ export function FieldListRenderer(props: FieldListRendererProps) {
 
   // Field type specific renderers
   const fieldType = field.type;
+
+  // Workspace user fields
+  if (fieldType === 'SELECT_ONE_WORKSPACE_USER' || fieldType === 'SELECT_LIST_WORKSPACE_USER') {
+    return <WorkspaceUserFieldList value={value} workspaceUsers={workspaceUsers} />;
+  }
 
   // Select fields
   if (

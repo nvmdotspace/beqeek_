@@ -12,3 +12,18 @@ export {
   type GetWorkspaceUsersRequest,
   type UseGetWorkspaceUsersOptions,
 } from './use-get-workspace-users';
+
+export {
+  useWorkspaceUsersWithPrefetch,
+  type UseWorkspaceUsersWithPrefetchOptions,
+} from './use-workspace-users-with-prefetch';
+
+export {
+  useUserMapping,
+  useUserById,
+  useUsersByIds,
+  getUserName,
+  getUserAvatar,
+  getUsersByIds,
+  hasUser,
+} from './use-user-mapping';

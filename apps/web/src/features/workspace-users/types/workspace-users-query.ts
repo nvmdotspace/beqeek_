@@ -84,6 +84,15 @@ export interface GetWorkspaceUsersRequest {
  */
 export const WORKSPACE_USERS_QUERY_PRESETS = {
   /**
+   * Minimal fields for create/update record forms
+   * Only fetches id and fullName for optimal performance
+   */
+  CREATE_RECORD_FORM: {
+    fields: 'id,fullName',
+    filtering: {},
+  } satisfies WorkspaceUsersQueries,
+
+  /**
    * Basic user info with avatar
    * Suitable for user lists and cards
    */
