@@ -1,6 +1,6 @@
 ### **Mô tả API**
 
-**Endpoint:** `POST /api/workspaces/{workspaceId}/workflow/get/active_tables/{tableId}/records`
+**Endpoint:** `POST /api/workspace/{workspaceId}/workflow/get/active_tables/{tableId}/records`
 
 **Method:** `POST`
 
@@ -56,6 +56,28 @@ Hệ thống lọc mạnh mẽ dựa trên thư viện `AlchemistRestfulApi`. C�
 | `historicalValueUpdatedAt` | datetime     | `filtering[historicalValueUpdatedAt][...][gt]=...` | Lọc theo thời gian cập nhật giá trị lịch sử của một trường. Áp dụng cho các trường kiểu lựa chọn đơn (select one).                   |
 | `historicalValue`          | mixed        | `filtering[historicalValue][eq]=...`               | Lọc theo giá trị lịch sử. Hỗ trợ toán tử `eq`.                                                                                       |
 
+**Lưu ý về Giá trị Lọc khi có Mã hóa (E2EE):**
+
+Vì bảng được bật mã hóa đầu cuối, giá trị (`value`) bạn truyền vào để lọc cần được xử lý đặc biệt phía client trước khi gửi lên server:
+
+- **Nhóm `fulltext`:**
+  - Giá trị phải là **hash của từ khóa** (keyword hash; code tham chiếu trong [active-table-records.blade.php](resources/views/html-module/active-table-records.blade.php): `CommonUtils.hashKeyword(query, States.currentTable?.config?.encryptionKey).join(' ')`).
+
+- **Nhóm `record`:**
+  - **Trường hợp 1: Toán tử so sánh bằng (`eq`, `ne`, `in`, `not_in`)**
+    - Áp dụng cho mọi kiểu trường (`encryptFields`, `opeEncryptFields`, `hashEncryptFields`).
+    - Giá trị truyền vào phải là **hash của giá trị** (value hash).
+  - **Trường hợp 2: Toán tử so sánh thứ tự (`lt`, `gt`, `lte`, `gte`, `between`, `not_between`)**
+    - Chỉ áp dụng cho các trường `opeEncryptFields`.
+    - Giá trị truyền vào phải là **dữ liệu đã được mã hóa** (encrypted data).
+
+**Lưu ý về Lọc các Trường Dữ liệu Không Mã hóa (Unencrypted Fields):**
+
+Đối với các trường dữ liệu không được mã hóa như `SELECT_LIST_RECORD`, `SELECT_ONE_RECORD`, `SELECT_ONE_WORKSPACE_USER`, `SELECT_LIST_WORKSPACE_USER`:
+
+- Dữ liệu truyền lên để lọc là **ID thô (raw ID)** của bản ghi hoặc người dùng.
+- Các toán tử được hỗ trợ: `eq`, `ne`, `in`, `not_in`.
+
 #### **Chi tiết Lọc theo Trường Dữ liệu (nhóm `record`)**
 
 Các toán tử (`operator`) có sẵn cho nhóm `record` phụ thuộc vào kiểu mã hóa của trường trong cấu hình hệ thống.
@@ -78,6 +100,54 @@ Các toán tử (`operator`) có sẵn cho nhóm `record` phụ thuộc vào ki�
 | `group` | string | Tên trường cần nhóm kết quả. |
 
 ---
+
+#### **Ví dụ Payload Lọc (Filtering Payload Example)**
+
+**Lọc theo fulltext:**
+
+```json
+{
+  "paging": "cursor",
+  "filtering": {
+    "fulltext": "6f6dcb309d226a807cb715f9bdc515e8a635c6bd3f2d2c82fa5716820e147549 3e1517251c4588d47dfd8ab5f9169729102b13eb162e5607aeb943cfcfa5026e"
+  },
+  "next_id": null,
+  "direction": "desc",
+  "limit": 5
+}
+```
+
+**Lọc trường không mã hóa (assignee, SELECT_ONE_WORKSPACE_USER, eq):**
+
+```json
+{
+  "paging": "cursor",
+  "filtering": {
+    "record": {
+      "assignee": "806145710083801089"
+    }
+  },
+  "next_id": null,
+  "direction": "desc",
+  "limit": 5
+}
+```
+
+**Ví dụ lọc trường `hashEncryptFields` (matrix_quadrant, SELECT_ONE, eq):**
+
+```json
+{
+  "paging": "cursor",
+  "filtering": {
+    "record": {
+      "matrix_quadrant": "1eb066999cbe576bef681901f200e637ee8a9e3c02b29ebbff3738a59676f52c"
+    }
+  },
+  "next_id": null,
+  "direction": "desc",
+  "limit": 5
+}
+```
 
 ### **Cấu trúc Phản hồi (Responses)**
 

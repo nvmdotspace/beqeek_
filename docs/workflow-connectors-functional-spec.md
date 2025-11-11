@@ -269,7 +269,3 @@ Module này có 3 màn hình chính: **Màn hình Chọn loại Connector** (`Se
   - Request Body: `{}` (rỗng)
   - Response: `{ "data": { "state": "..." } }`
   - **Ghi chú:** Frontend sẽ dùng `state` này để xây dựng URL redirect tới `https://app.o1erp.com/api/workflow/get/workflow_connectors/oauth2?state={state}`.
-
-- **OAuth2 Callback:**
-  - `GET https://app.o1erp.com/api/workflow/get/workflow_connectors/oauth2`
-  - Đây là URL mà nhà cung cấp dịch vụ sẽ gọi lại. Backend cần xử lý `code` và `state` từ query parameters.
