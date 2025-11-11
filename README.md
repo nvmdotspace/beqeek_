@@ -1,360 +1,324 @@
-# Beqeek Monorepo (React 19, Vite, Tailwind v4, shadcn/ui)
+# Beqeek - Workflow Automation Platform
 
-Monorepo sử dụng Turborepo + PNPM cho ứng dụng web React, tích hợp TailwindCSS v4, shadcn/ui và i18n qua Paraglide.
+**Modern workflow automation with client-side E2EE** | React 19 + Vite 6 + Turborepo
 
-## Yêu cầu môi trường
+Enterprise-grade workflow tables, drag-and-drop kanban boards, gantt charts, and end-to-end encryption—all in a single platform.
 
-- Node `>=22`
-- PNPM `10.x`
+## Quick Start
 
-## Cài đặt & chạy
+### Prerequisites
 
-### Cài đặt dependencies
+- Node.js >= 22
+- PNPM 10.x
 
-Cài đặt dependencies cho toàn bộ monorepo từ thư mục gốc:
+### Installation & Development
 
 ```bash
+# Install dependencies
 pnpm install
-```
 
-### Development
-
-#### Chạy toàn bộ monorepo (khuyến nghị)
-
-```bash
+# Start development server (entire monorepo)
 pnpm dev
-```
 
-Lệnh này sẽ:
-
-- Compile i18n messages (Paraglide)
-- Chạy development server cho tất cả apps
-- Tự động reload khi có thay đổi
-
-#### Chạy từng app riêng lẻ
-
-**App Web chính:**
-
-```bash
-# Từ thư mục gốc
+# Or run specific app
 pnpm --filter web dev
 
-# Hoặc từ thư mục app
-cd apps/web && pnpm dev
-
-# Chạy với host cụ thể (nếu cần)
-pnpm --filter web dev -- --host 127.0.0.1
-```
-
-**App Admin (khi có):**
-
-```bash
-pnpm --filter admin dev
-```
-
-**Product Page App (khi có):**
-
-```bash
-pnpm --filter product-page dev
+# Dev server runs on localhost:4173
 ```
 
 ### Production Build
 
-#### Build toàn bộ monorepo
-
 ```bash
+# Build entire monorepo
 pnpm build
-```
 
-Lệnh này sẽ:
-
-1. Compile i18n messages
-2. Build tất cả packages theo thứ tự dependency
-3. Build tất cả applications
-
-#### Build từng app riêng lẻ
-
-**App Web:**
-
-```bash
-# Build app web và dependencies
-pnpm --filter web build
-
-# Hoặc từ thư mục app
-cd apps/web && pnpm build
-```
-
-**Build packages riêng:**
-
-```bash
-# Build UI package
-pnpm --filter @workspace/ui build
-
-# Build core packages
-pnpm --filter @workspace/active-tables-core build
-pnpm --filter @workspace/encryption-core build
-```
-
-#### Preview sau khi build
-
-**Preview app web:**
-
-```bash
-# Từ thư mục gốc
-pnpm --filter web preview
-
-# Hoặc từ thư mục app
-cd apps/web && pnpm preview
-```
-
-#### Deployment Production
-
-**Build optimized cho production:**
-
-```bash
-# Set NODE_ENV và build
+# Build for production with optimization
 NODE_ENV=production pnpm build
-
-# Hoặc chỉ app web
-NODE_ENV=production pnpm --filter web build
-```
-
-**Kiểm tra build output:**
-
-```bash
-# Kiểm tra kích thước bundle
-ls -la apps/web/dist/
 
 # Preview production build
 pnpm --filter web preview
 ```
 
-**4. Docker deployment:**
-
-Dự án đã bao gồm các file cấu hình Docker sẵn sàng:
+### Docker Deployment
 
 ```bash
-# Build Docker image
-docker build -t beqeek-web .
-
-# Chạy container đơn giản
-docker run -p 3000:80 beqeek-web
-
-# Chạy với docker-compose (khuyến nghị)
+# Quick start with Docker Compose
 docker-compose up -d
 
-# Chạy với nginx proxy (cho production)
-docker-compose --profile proxy up -d
-
-# Xem logs
-docker-compose logs -f web
-
-# Stop services
-docker-compose down
-```
-
-**Cấu trúc Docker files:**
-
-- `Dockerfile.web` - Multi-stage build cho production
-- `compose.yml` - Container orchestration
-- `.dockerignore` - Loại trừ files không cần thiết
-
-## 🚀 Script Deployment Tự động
-
-Dự án bao gồm script `deploy.sh` để tự động hóa quá trình deployment:
-
-```bash
-# Cấp quyền thực thi (chỉ cần làm 1 lần)
+# Or use deployment script
 chmod +x deploy.sh
-
-# Deploy với Docker
 ./deploy.sh docker
-
-# Chạy local preview
-./deploy.sh local
-
-# Xem hướng dẫn
-./deploy.sh --help
 ```
 
-**Tính năng của script:**
+## Tech Stack
 
-- ✅ Kiểm tra prerequisites tự động
-- ✅ Install dependencies
-- ✅ Build application
-- ✅ Health checks
-- ✅ Error handling và logging
-- ✅ Docker deployment support
-- ✅ Colored output cho dễ đọc
+**Frontend**: React 19 · TypeScript 5.9 · Vite 6 · TailwindCSS v4
 
-**Files deployment đã tạo:**
+**Routing**: TanStack Router (file-based, type-safe)
 
-- `Dockerfile.web` - Multi-stage production build
-- `compose.yml` - Container orchestration
-- `.dockerignore` - Optimize Docker build
-- `deploy.sh` - Automated deployment script
-- `DEPLOYMENT.md` - Chi tiết hướng dẫn deployment
+**State**: React Query (server) · Zustand (global) · useState (local)
 
-## Cấu trúc chi tiết
+**UI**: shadcn/ui · Radix UI · Lucide icons
+
+**i18n**: Paraglide.js (Vietnamese, English)
+
+**Encryption**: AES-256-CBC · OPE · HMAC-SHA256
+
+**Build**: Turborepo · PNPM workspaces
+
+## Project Structure
 
 ```
 beqeek/
-├── apps/                          # Applications
-│   ├── web/                       # Ứng dụng web chính (Vite + React 19)
-│   │   ├── src/
-│   │   │   ├── components/        # Shared components (layout, error boundaries, etc.)
-│   │   │   ├── features/          # Feature modules
-│   │   │   │   ├── auth/         # Authentication (login, logout, stores)
-│   │   │   │   └── workspace/    # Workspace management
-│   │   │   ├── hooks/            # Custom React hooks
-│   │   │   ├── providers/        # React providers (theme, app context)
-│   │   │   ├── routes/           # TanStack Router file-based routes
-│   │   │   ├── shared/           # Shared utilities and API clients
-│   │   │   ├── stores/           # Global state (Zustand)
-│   │   │   ├── main.tsx         # App entry point
-│   │   │   └── router.tsx        # Router configuration
-│   │   ├── public/               # Static assets
-│   │   ├── package.json
-│   │   ├── vite.config.ts        # Vite configuration
-│   │   └── components.json       # shadcn/ui configuration
-│   ├── admin/                     # Admin application (placeholder)
-│   └── product-page/              # Product page application (placeholder)
+├── apps/
+│   └── web/                    # Main React application
+│       ├── src/
+│       │   ├── features/       # Feature modules (12+)
+│       │   │   ├── active-tables/  # Core workflow tables
+│       │   │   ├── auth/
+│       │   │   ├── workspace/
+│       │   │   └── ...
+│       │   ├── routes/         # TanStack Router (file-based)
+│       │   ├── components/     # Shared components
+│       │   ├── stores/         # Zustand stores
+│       │   ├── shared/         # API clients, utilities
+│       │   └── hooks/          # Custom React hooks
+│       └── vite.config.ts
 │
-├── packages/                       # Shared packages
-│   ├── ui/                       # UI component library
-│   │   ├── src/
-│   │   │   ├── components/       # shadcn/ui components
-│   │   │   ├── lib/
-│   │   │   │   └── utils.ts      # Utility functions (cn, etc.)
-│   │   │   └── styles/
-│   │   │       └── globals.css   # Global TailwindCSS styles
-│   │   ├── components.json       # shadcn/ui configuration
-│   │   └── postcss.config.mjs    # PostCSS/TailwindCSS v4 config
-│   ├── active-tables-core/       # Core Active Tables logic
-│   ├── active-tables-hooks/       # React hooks for Active Tables
-│   ├── encryption-core/           # Encryption utilities
-│   ├── eslint-config/            # Shared ESLint configuration
-│   │   ├── base.js               # Base ESLint config
-│   │   ├── next.js               # Next.js specific config
-│   │   └── react-internal.js     # React internal config
-│   └── typescript-config/        # Shared TypeScript configuration
-│       ├── base.json             # Base TypeScript config
-│       ├── nextjs.json           # Next.js specific config
-│       └── react-library.json    # React library config
+├── packages/
+│   ├── ui/                     # Component library (shadcn/ui)
+│   ├── active-tables-core/     # Active Tables React components
+│   ├── beqeek-shared/          # Shared constants, types (35 table templates)
+│   ├── encryption-core/        # E2EE utilities
+│   ├── eslint-config/          # Shared ESLint rules
+│   └── typescript-config/      # Shared TypeScript configs
 │
-├── docs/                         # Documentation
-│   ├── design-system.md          # Design system documentation
-│   ├── feature-*.md              # Feature specifications
-│   │   ├── feature-auth.md
-│   │   ├── feature-workspaces.md
-│   │   ├── feature-active-tables.md
-│   │   └── feature-workflow-*.md
-│   ├── monorepo-architecture-proposal.md
-│   ├── react-active-tables-plan.md
-│   ├── roadmap.md
-│   └── swagger.yaml              # API documentation
-│
-├── project.inlang/               # Parag.js i18n configuration
-├── paraglide.config.js           # Paraglide.js configuration
-├── messages/                     # Translation strings
-├── turbo.json                    # Turborepo configuration
-├── pnpm-workspace.yaml           # PNPM workspace configuration
-├── package.json                  # Root package configuration
-└── tsconfig.json                 # Root TypeScript configuration
+├── docs/                       # Comprehensive documentation
+└── messages/                   # i18n translations (vi, en)
 ```
 
-## UI Components (packages/ui)
+## Key Features
 
-- Import styles toàn cục:
+### Active Tables
 
-```ts
-import '@workspace/ui/globals.css';
-```
+- 25+ field types (text, number, date, select, reference, rich text)
+- Client-side E2EE with AES-256, OPE, HMAC
+- Multiple view layouts: Table, Kanban, Gantt, Card
+- Inline editing, comments, permissions
+- 35 pre-configured templates (HR, CRM, project management)
 
-- Import component ví dụ:
+### Security
 
-```tsx
-import { Button } from '@workspace/ui/components/button';
-```
+- **Zero-knowledge encryption**: Keys stored client-side only
+- **E2EE methods**: AES-256-CBC (text), OPE (numbers/dates), HMAC (selects)
+- **Authentication**: JWT bearer tokens
+- **Key management**: 32-char encryption key, SHA-256 auth key
 
-- Thêm component từ shadcn/ui vào app web:
+### Internationalization
 
-```bash
-pnpm dlx shadcn@latest add button -c apps/web
-```
+- Vietnamese (default) and English
+- Zero-runtime i18n with Paraglide.js
+- URL-based locale routing (`/$locale/*`)
 
-Thành phần sẽ được đồng bộ hoá sang `packages/ui/src/components` theo cấu hình xuất của package.
-
-## TailwindCSS v4
-
-- Đã cấu hình PostCSS/Tailwind v4 trong `apps/web` và `packages/ui`
-- Sử dụng cơ chế "explicit sources" của Tailwind v4 theo tài liệu chính thức
-
-## i18n (Paraglide)
-
-- Plugin Paraglide đã bật trong `apps/web/vite.config.ts`
-- Chuỗi dịch nằm trong `messages/` và được phát sinh vào `apps/web/src/paraglide/generated`
-
-## Router (TanStack)
-
-- Export `router` từ `apps/web/src/router.tsx`:
-
-```ts
-import { createRouter } from '@tanstack/react-router';
-// ...
-export const router = createRouter({ routeTree });
-
-declare module '@tanstack/react-router' {
-  interface Register {
-    router: typeof router;
-  }
-}
-```
-
-- Sử dụng `RouterProvider` trong `apps/web/src/main.tsx`:
-
-```tsx
-import { RouterProvider } from '@tanstack/react-router';
-import { router } from './router';
-
-// ...
-<RouterProvider router={router} />;
-```
-
-## Scripts hữu ích
-
-### Development
-
-- `pnpm dev` — chạy dev pipeline toàn repo (Turbo)
-- `pnpm --filter web dev` — chạy dev riêng app web
-- `pnpm --filter admin dev` — chạy dev app admin
-- `pnpm --filter product-page dev` — chạy dev product page
-
-### Build & Preview
-
-- `pnpm build` — build toàn repo
-- `pnpm --filter web build` — build riêng app web
-- `pnpm --filter web preview` — preview app web sau build
-- `NODE_ENV=production pnpm build` — build optimized cho production
+## Development Commands
 
 ### Code Quality
 
-- `pnpm lint` — lint toàn repo
-- `pnpm --filter web lint` — lint riêng app web
-- `pnpm --filter web check-types` — type check app web
-- `pnpm format` — format `ts/tsx/md`
+```bash
+# Lint entire monorepo
+pnpm lint
 
-### i18n
+# Format code with Prettier
+pnpm format
 
-- `pnpm machine-translate` — dịch tự động các message
+# Type check
+pnpm --filter web check-types
+```
 
-## Hướng dẫn đóng góp
+### Build & Package Management
 
-Xem thêm: [AGENTS.md](AGENTS.md) để biết quy ước cấu trúc, câu lệnh và conventions khi tạo PR.
+```bash
+# Build specific packages
+pnpm --filter @workspace/ui build
+pnpm --filter @workspace/active-tables-core build
 
-## Tài nguyên tham khảo
+# Update dependencies
+pnpm update
 
-- shadcn/ui — Monorepo: https://ui.shadcn.com/docs/monorepo
-- Turborepo: https://turbo.build/repo/docs
-- TailwindCSS v4: https://tailwindcss.com/docs
-- Paraglide (inlang): https://www.inlang.com/m/gercan/paraglide-js
+# Add dependency to specific package
+pnpm --filter web add <package-name>
+```
+
+### UI Components
+
+```bash
+# Add shadcn/ui component (auto-syncs to packages/ui)
+pnpm dlx shadcn@latest add button -c apps/web
+```
+
+### Internationalization
+
+```bash
+# Machine translate i18n messages
+pnpm machine-translate
+```
+
+## Architecture Highlights
+
+### State Management Philosophy
+
+| State Type | Tool        | Usage                               |
+| ---------- | ----------- | ----------------------------------- |
+| Local      | useState    | UI toggles, form inputs, modals     |
+| Server     | React Query | API data, caching, mutations        |
+| Global     | Zustand     | User preferences, auth, theme, i18n |
+
+**Anti-patterns:**
+
+- ❌ Never use Zustand for server data
+- ❌ Never use useState for global preferences
+- ❌ Never use local state for API data
+
+### Routing (TanStack Router)
+
+**File-based routing**: Routes auto-generated from `src/routes/**/*.tsx`
+
+```typescript
+// Type-safe params with getRouteApi()
+import { getRouteApi } from '@tanstack/react-router';
+import { ROUTES } from '@/shared/route-paths';
+
+const route = getRouteApi(ROUTES.ACTIVE_TABLES.TABLE_DETAIL);
+
+export function MyPage() {
+  const { tableId, workspaceId, locale } = route.useParams();
+  // Full TypeScript inference!
+}
+```
+
+### Styling Standards
+
+**Design tokens (MANDATORY):**
+
+```tsx
+// ✅ Use design tokens
+<input className="border border-input bg-background text-foreground" />
+
+// ❌ Never hardcode colors
+<input className="border border-gray-300 bg-gray-100" />
+```
+
+**Standard input classes:**
+
+```
+border border-input rounded-md
+bg-background text-foreground
+focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring
+disabled:cursor-not-allowed disabled:opacity-50
+```
+
+## Documentation
+
+Comprehensive documentation in `/docs`:
+
+- **[Project Overview (PDR)](docs/project-overview-pdr.md)**: Product vision, requirements, roadmap
+- **[Codebase Summary](docs/codebase-summary.md)**: 567k tokens, 441 files analyzed by Repomix
+- **[Code Standards](docs/code-standards.md)**: TypeScript patterns, React best practices, anti-patterns
+- **[System Architecture](docs/system-architecture.md)**: Data flow, encryption, performance, security
+- **[Design Guidelines](docs/design-guidelines.md)**: UI/UX standards, design tokens, accessibility
+- **[Deployment Guide](docs/deployment-guide.md)**: Docker, CI/CD, production setup
+- **[API Specification](docs/swagger.yaml)**: Complete REST API docs (19k+ tokens)
+- **[Feature Specifications](docs/active-tables/)**: Kanban, Gantt, filters business analysis
+
+## Package Reference
+
+### Shared Packages
+
+**@workspace/beqeek-shared** - Constants & Types (TypeScript-only):
+
+- 25+ field type constants
+- Action type constants (record, comment, custom)
+- Permission arrays for UI dropdowns
+- Layout constants (record list/detail, comments)
+- 35 table type templates
+
+**@workspace/active-tables-core** - React Components & Hooks:
+
+- Field renderers (text, number, date, select, reference, rich text)
+- Kanban board, Gantt chart, Record list/detail layouts
+- Hooks: usePermissions, useEncryption, useInlineEdit
+- Zustand stores: useViewStore, useFilterStore, useSelectionStore
+
+**@workspace/encryption-core** - E2EE Utilities:
+
+- AES-256-CBC encryption/decryption
+- Order-Preserving Encryption (OPE) for range queries
+- HMAC-SHA256 for equality checks
+- Key generation utilities
+
+**@workspace/ui** - Component Library:
+
+- 35+ shadcn/ui components (button, input, dialog, table, etc.)
+- TailwindCSS v4 global styles
+- `cn()` utility for class composition
+
+## Common Pitfalls
+
+1. **Hardcoding values** → Import from `@workspace/beqeek-shared`
+2. **Wrong state management** → Use React Query for API data, not useState
+3. **Missing type safety** → Use `getRouteApi()` for params, not type assertions
+4. **Hardcoded colors** → Use design tokens, not `text-gray-500`
+5. **Package not updating** → Run `pnpm build` to rebuild packages
+6. **Encryption key exposure** → Never log or transmit encryption keys
+
+## Performance
+
+**Build Metrics:**
+
+- Dev server startup: ~2s
+- HMR update: ~50ms
+- Production build: ~45s
+- Type check: ~15s
+
+**Bundle Size:**
+
+- Uncompressed: ~2.5MB
+- Gzipped: ~600KB
+- Per-route chunk: ~20-50KB
+
+**Optimizations:**
+
+- File-based routing → automatic code splitting
+- Manual chunk strategy (react, radix, tanstack, icons, vendor)
+- Virtual scrolling for large datasets (1000+ records)
+- Lazy loading with `React.lazy()` + Suspense
+
+## Contributing
+
+See [AGENTS.md](AGENTS.md) for development conventions and guidelines.
+
+**Before submitting PR:**
+
+- ✅ Run `pnpm lint` (no errors)
+- ✅ Run `pnpm build` (successful)
+- ✅ Run `pnpm --filter web check-types` (no errors)
+- ✅ Follow patterns in `/docs/code-standards.md`
+- ✅ Use design tokens, no hardcoded colors
+- ✅ Import constants from `@workspace/beqeek-shared`
+
+## Resources
+
+- **Turborepo**: https://turbo.build/repo/docs
+- **TanStack Router**: https://tanstack.com/router/latest
+- **TanStack Query**: https://tanstack.com/query/latest
+- **shadcn/ui**: https://ui.shadcn.com/docs
+- **TailwindCSS v4**: https://tailwindcss.com/docs
+- **Paraglide.js**: https://inlang.com/m/gercan/paraglide-js
+
+## License
+
+Private/Commercial - Internal project
+
+---
+
+**Need help?** Check [docs/](docs/) for comprehensive guides or review [CLAUDE.md](CLAUDE.md) for AI assistant instructions.

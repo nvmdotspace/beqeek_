@@ -1,353 +1,544 @@
 # Codebase Summary
 
+Generated from Repomix analysis on 2025-11-11
+
 ## Overview
 
-Beqeek monorepo: **React 19 + Vite + Turborepo** workflow automation platform with client-side E2EE.
+Beqeek: **React 19 + Vite + Turborepo** workflow automation platform with client-side E2EE.
 
-**LOC Estimate**: ~50k lines (packages: 15k, apps/web: 35k)
+**Total Files**: 441 files
+**Total Tokens**: 567,932 tokens
+**Total Chars**: 2,375,749 chars
 **Languages**: TypeScript (99%), CSS (1%)
 **Build Tool**: Turborepo + PNPM workspaces
 
-## Project Statistics
+## Top 5 Files by Token Count
 
-### Apps
+1. **docs/swagger.yaml** (19,681 tokens, 95,340 chars, 3.5%) - Complete API specification
+2. **packages/beqeek-shared/src/configs/table-configs.ts** (18,840 tokens, 79,381 chars, 3.3%) - 35 table templates
+3. **messages/vi.json** (14,869 tokens, 55,814 chars, 2.6%) - Vietnamese i18n messages
+4. **docs/active-table-config-functional-spec.md** (14,088 tokens, 48,635 chars, 2.5%) - Active Tables spec
+5. **docs/active-tables/gantt-business-analysis.md** (13,813 tokens, 51,081 chars, 2.4%) - Gantt feature analysis
 
-| App          | Purpose                | LOC  | Status        |
-| ------------ | ---------------------- | ---- | ------------- |
-| web          | Main React application | ~35k | ✅ Production |
-| admin        | Admin portal           | -    | 📝 Planned    |
-| product-page | Marketing site         | -    | 📝 Planned    |
-
-### Packages
-
-| Package            | Purpose                  | LOC  | Exports                      |
-| ------------------ | ------------------------ | ---- | ---------------------------- |
-| ui                 | shadcn/ui components     | ~8k  | 45+ components               |
-| active-tables-core | Core Active Tables logic | ~4k  | Components, hooks, stores    |
-| beqeek-shared      | Constants & types        | ~2k  | 35 table configs, validators |
-| encryption-core    | E2EE utilities           | ~1k  | AES, OPE, HMAC               |
-| eslint-config      | Linting rules            | ~200 | 3 configs                    |
-| typescript-config  | TS configs               | ~100 | 3 configs                    |
-
-## Directory Structure
+## Project Structure
 
 ```
-beqeek/                              (~50k LOC)
+beqeek/                              (~568k tokens total)
 ├── apps/
-│   └── web/                         (~35k LOC)
+│   └── web/                         # Main React 19 SPA
 │       ├── src/
-│       │   ├── features/            (~20k LOC, 12 features)
-│       │   │   ├── active-tables/   (~8k) - Tables, records, kanban, gantt
-│       │   │   ├── auth/            (~2k) - Login, logout, auth store
-│       │   │   ├── workspace/       (~3k) - Workspace management
-│       │   │   ├── team/            (~2k) - Team collaboration
-│       │   │   ├── roles/           (~1.5k) - Role management
-│       │   │   ├── analytics/       (~1k) - Usage metrics
-│       │   │   ├── workflows/       (~500) - Workflow automation (WIP)
-│       │   │   ├── notifications/   (~500) - Notifications
-│       │   │   ├── search/          (~400) - Global search
-│       │   │   ├── support/         (~300) - Help & support
-│       │   │   ├── organization/    (~300) - Org settings
-│       │   │   └── workspace-users/ (~500) - User management
+│       │   ├── features/            # 12 feature modules
+│       │   │   ├── active-tables/   # Core workflow tables (largest feature)
+│       │   │   │   ├── api/         # 4 API clients
+│       │   │   │   ├── components/  # 40+ components (settings, kanban, gantt, records)
+│       │   │   │   ├── hooks/       # 17 custom hooks
+│       │   │   │   ├── pages/       # 5 pages
+│       │   │   │   ├── types/       # Type definitions
+│       │   │   │   └── utils/       # Encryption, validation helpers
+│       │   │   ├── auth/            # Authentication
+│       │   │   ├── workspace/       # Workspace management
+│       │   │   ├── team/            # Team collaboration
+│       │   │   ├── roles/           # Role/permissions management
+│       │   │   ├── analytics/       # Usage metrics
+│       │   │   ├── workflows/       # Workflow automation (WIP)
+│       │   │   ├── notifications/   # Notifications
+│       │   │   ├── search/          # Global search
+│       │   │   ├── support/         # Help & support
+│       │   │   ├── organization/    # Org settings (starred, archived, recent)
+│       │   │   └── workspace-users/ # User management
 │       │   │
-│       │   ├── routes/              (~3k LOC, 25+ routes)
-│       │   │   ├── __root.tsx       - Root layout
-│       │   │   ├── $locale.tsx      - Locale wrapper
-│       │   │   └── $locale/         - Locale-specific routes
+│       │   ├── routes/              # TanStack Router (file-based)
+│       │   │   ├── __root.tsx
+│       │   │   ├── $locale.tsx
+│       │   │   ├── index.tsx
+│       │   │   ├── $.tsx            # 404 catch-all
+│       │   │   └── $locale/         # Locale-prefixed routes
 │       │   │       ├── login.tsx
 │       │   │       ├── workspaces.tsx
+│       │   │       ├── notifications.tsx
+│       │   │       ├── search.tsx
+│       │   │       ├── help.tsx
 │       │   │       └── workspaces/
 │       │   │           └── $workspaceId/
 │       │   │               ├── tables.tsx
-│       │   │               ├── tables/
-│       │   │               │   └── $tableId/
-│       │   │               │       ├── index.tsx
-│       │   │               │       ├── records.tsx
-│       │   │               │       └── settings.tsx
 │       │   │               ├── workflows.tsx
 │       │   │               ├── team.tsx
 │       │   │               ├── roles.tsx
-│       │   │               └── analytics.tsx
+│       │   │               ├── analytics.tsx
+│       │   │               ├── starred.tsx
+│       │   │               ├── recent-activity.tsx
+│       │   │               ├── archived.tsx
+│       │   │               └── tables/
+│       │   │                   └── $tableId/
+│       │   │                       ├── index.tsx      # Table config
+│       │   │                       ├── settings.tsx   # Table settings
+│       │   │                       └── records/
+│       │   │                           ├── index.tsx  # Records list
+│       │   │                           ├── $recordId.tsx # Record detail
+│       │   │                           └── route.tsx
 │       │   │
-│       │   ├── components/          (~2k LOC)
-│       │   │   ├── layout/          - Layout components
-│       │   │   ├── error-boundary/  - Error handling
-│       │   │   └── loading/         - Loading states
+│       │   ├── components/          # Shared components
+│       │   │   ├── app-layout.tsx
+│       │   │   ├── app-sidebar.tsx
+│       │   │   ├── root-layout.tsx
+│       │   │   ├── workspace-selector.tsx
+│       │   │   ├── navigation-menu.tsx
+│       │   │   ├── mobile-bottom-nav.tsx
+│       │   │   ├── error-boundary.tsx
+│       │   │   ├── error-display.tsx
+│       │   │   ├── api-error-boundary.tsx
+│       │   │   ├── route-error.tsx
+│       │   │   ├── route-pending.tsx
+│       │   │   ├── not-found.tsx
+│       │   │   ├── navigation-progress.tsx
+│       │   │   ├── page-transition.tsx
+│       │   │   ├── mode-toggle.tsx
+│       │   │   ├── keyboard-shortcuts-help.tsx
+│       │   │   ├── activity-tracking.tsx
+│       │   │   └── feature-placeholder.tsx
 │       │   │
-│       │   ├── stores/              (~1.5k LOC)
-│       │   │   ├── auth-store.ts    - Authentication state
-│       │   │   ├── sidebar-store.ts - Sidebar state
-│       │   │   └── language-store.ts - i18n state
+│       │   ├── stores/              # Zustand stores (3 total)
+│       │   │   ├── auth-store.ts    # User, token
+│       │   │   ├── sidebar-store.ts # Sidebar open/close
+│       │   │   └── language-store.ts # i18n locale
 │       │   │
-│       │   ├── shared/              (~3k LOC)
-│       │   │   ├── api/             - API clients (http-client, api-error)
-│       │   │   ├── query-client.ts  - React Query config
-│       │   │   ├── route-paths.ts   - Route constants
-│       │   │   └── utils/           - Shared utilities
+│       │   ├── shared/              # Shared utilities & API
+│       │   │   ├── api/
+│       │   │   │   ├── http-client.ts        # Axios base client
+│       │   │   │   ├── api-error.ts          # Error handling
+│       │   │   │   ├── active-tables-client.ts # Active Tables API
+│       │   │   │   ├── config.ts             # API config
+│       │   │   │   └── types.ts
+│       │   │   ├── utils/
+│       │   │   │   ├── error-utils.ts
+│       │   │   │   └── field-encryption.ts
+│       │   │   ├── query-client.ts  # React Query setup
+│       │   │   ├── route-paths.ts   # Route constants
+│       │   │   ├── route-helpers.md # Route patterns doc
+│       │   │   └── locales.ts       # Locale config
 │       │   │
-│       │   ├── hooks/               (~1k LOC)
-│       │   │   ├── use-auth.ts
-│       │   │   └── use-workspace.ts
+│       │   ├── hooks/               # Custom hooks
+│       │   │   ├── use-api-error-handler.ts
+│       │   │   ├── use-badge-counts.ts
+│       │   │   ├── use-current-locale.ts
+│       │   │   ├── use-keyboard-shortcuts.ts
+│       │   │   └── use-query-with-auth.ts
 │       │   │
-│       │   ├── providers/           (~500 LOC)
-│       │   │   ├── app-providers.tsx
+│       │   ├── providers/
+│       │   │   ├── app-providers.tsx # Root providers wrapper
 │       │   │   └── theme-provider.tsx
 │       │   │
-│       │   ├── main.tsx             - App entry point
-│       │   └── routeTree.gen.ts     - Auto-generated (gitignored)
+│       │   ├── main.tsx             # App entry point
+│       │   └── vite-env.d.ts
 │       │
-│       ├── public/                  - Static assets
-│       ├── vite.config.ts           - Vite configuration
-│       └── package.json
+│       ├── public/                  # Static assets
+│       │   ├── file.svg
+│       │   ├── globe.svg
+│       │   ├── tanstack.svg
+│       │   ├── vercel.svg
+│       │   └── window.svg
+│       │
+│       ├── .env.example
+│       ├── components.json          # shadcn/ui config
+│       ├── eslint.config.js
+│       ├── index.html
+│       ├── package.json
+│       ├── postcss.config.mjs
+│       ├── tsconfig.json
+│       ├── tsconfig.tests.json
+│       └── vite.config.ts
 │
 ├── packages/
-│   ├── ui/                          (~8k LOC)
+│   ├── ui/                          # Component library (shadcn/ui)
 │   │   ├── src/
-│   │   │   ├── components/          - 45+ shadcn/ui components
+│   │   │   ├── components/          # 35+ components
+│   │   │   │   ├── ui/
+│   │   │   │   │   └── shadcn-io/
+│   │   │   │   │       ├── kanban/
+│   │   │   │   │       │   └── index.tsx
+│   │   │   │   │       └── sonner.tsx
+│   │   │   │   ├── alert-dialog.tsx
+│   │   │   │   ├── alert.tsx
+│   │   │   │   ├── avatar.tsx
+│   │   │   │   ├── badge.tsx
+│   │   │   │   ├── breadcrumb.tsx
 │   │   │   │   ├── button.tsx
-│   │   │   │   ├── input.tsx
+│   │   │   │   ├── card.tsx
+│   │   │   │   ├── checkbox.tsx
+│   │   │   │   ├── color-picker.tsx
+│   │   │   │   ├── command.tsx
 │   │   │   │   ├── dialog.tsx
+│   │   │   │   ├── dropdown-menu.tsx
+│   │   │   │   ├── input.tsx
+│   │   │   │   ├── kanban.tsx
+│   │   │   │   ├── label.tsx
+│   │   │   │   ├── popover.tsx
+│   │   │   │   ├── progress.tsx
+│   │   │   │   ├── scroll-area.tsx
+│   │   │   │   ├── select.tsx
+│   │   │   │   ├── separator.tsx
+│   │   │   │   ├── sheet.tsx
+│   │   │   │   ├── skeleton.tsx
+│   │   │   │   ├── sonner.tsx
+│   │   │   │   ├── switch.tsx
 │   │   │   │   ├── table.tsx
-│   │   │   │   └── ...
+│   │   │   │   ├── tabs.tsx
+│   │   │   │   ├── textarea.tsx
+│   │   │   │   ├── tooltip.tsx
+│   │   │   │   └── index.ts
+│   │   │   ├── hooks/
 │   │   │   ├── lib/
-│   │   │   │   └── utils.ts         - cn() utility
-│   │   │   └── styles/
-│   │   │       └── globals.css      - TailwindCSS v4 styles
+│   │   │   │   └── utils.ts         # cn() utility
+│   │   │   ├── styles/
+│   │   │   │   └── globals.css      # TailwindCSS v4 styles
+│   │   │   └── index.ts
 │   │   ├── components.json
-│   │   └── postcss.config.mjs
+│   │   ├── eslint.config.js
+│   │   ├── package.json
+│   │   ├── postcss.config.mjs
+│   │   ├── tsconfig.json
+│   │   └── tsconfig.lint.json
 │   │
-│   ├── active-tables-core/          (~4k LOC)
-│   │   └── src/
-│   │       ├── components/
-│   │       │   ├── fields/          - 25+ field renderers
-│   │       │   ├── record-list/     - List view layouts
-│   │       │   ├── record-detail/   - Detail view layouts
-│   │       │   ├── kanban/          - Kanban board
-│   │       │   ├── gantt/           - Gantt chart
-│   │       │   └── states/          - Loading/error/empty
-│   │       ├── hooks/               - useActiveTable, usePermissions, etc.
-│   │       ├── stores/              - Zustand stores
-│   │       └── utils/               - Utilities
+│   ├── active-tables-core/          # Core Active Tables logic
+│   │   ├── src/
+│   │   │   ├── components/
+│   │   │   │   ├── common/          # Field utilities
+│   │   │   │   │   ├── field-badge.tsx
+│   │   │   │   │   ├── field-error.tsx
+│   │   │   │   │   ├── field-label.tsx
+│   │   │   │   │   ├── field-wrapper.tsx
+│   │   │   │   │   └── index.ts
+│   │   │   │   ├── fields/          # 15+ field renderers
+│   │   │   │   │   ├── lexical/     # Rich text editor
+│   │   │   │   │   │   ├── nodes/
+│   │   │   │   │   │   │   └── image-node.tsx
+│   │   │   │   │   │   ├── editor-config.ts
+│   │   │   │   │   │   ├── image-plugin.tsx
+│   │   │   │   │   │   ├── index.ts
+│   │   │   │   │   │   ├── lexical-editor.tsx
+│   │   │   │   │   │   ├── styles.css
+│   │   │   │   │   │   ├── theme.ts
+│   │   │   │   │   │   └── toolbar-plugin.tsx
+│   │   │   │   │   ├── async-record-select.tsx
+│   │   │   │   │   ├── checkbox-field.tsx
+│   │   │   │   │   ├── date-field.tsx
+│   │   │   │   │   ├── datetime-field.tsx
+│   │   │   │   │   ├── field-list-renderer.tsx
+│   │   │   │   │   ├── field-renderer-props.ts
+│   │   │   │   │   ├── field-renderer.tsx
+│   │   │   │   │   ├── field-summary.tsx
+│   │   │   │   │   ├── index.ts
+│   │   │   │   │   ├── number-field.tsx
+│   │   │   │   │   ├── reference-field.tsx
+│   │   │   │   │   ├── rich-text-field.tsx
+│   │   │   │   │   ├── select-field.tsx
+│   │   │   │   │   ├── text-field.tsx
+│   │   │   │   │   ├── textarea-field.tsx
+│   │   │   │   │   ├── time-field.tsx
+│   │   │   │   │   ├── user-field.tsx
+│   │   │   │   │   └── user-select.tsx
+│   │   │   │   ├── gantt/           # Gantt chart
+│   │   │   │   │   ├── gantt-chart.tsx
+│   │   │   │   │   ├── gantt-grid.tsx
+│   │   │   │   │   ├── gantt-props.ts
+│   │   │   │   │   ├── gantt-task.tsx
+│   │   │   │   │   ├── gantt-timeline.tsx
+│   │   │   │   │   ├── gantt-utils.ts
+│   │   │   │   │   ├── index.ts
+│   │   │   │   │   └── use-gantt-zoom.ts
+│   │   │   │   ├── kanban/          # Kanban board
+│   │   │   │   │   ├── index.ts
+│   │   │   │   │   ├── kanban-board.tsx
+│   │   │   │   │   ├── kanban-card.tsx
+│   │   │   │   │   ├── kanban-column.tsx
+│   │   │   │   │   └── kanban-props.ts
+│   │   │   │   ├── record-detail/   # Record detail layouts
+│   │   │   │   │   ├── comments-panel.tsx
+│   │   │   │   │   ├── head-detail-layout.tsx
+│   │   │   │   │   ├── index.ts
+│   │   │   │   │   ├── record-detail-props.ts
+│   │   │   │   │   ├── record-detail.tsx
+│   │   │   │   │   └── two-column-detail-layout.tsx
+│   │   │   │   ├── record-list/     # Record list layouts
+│   │   │   │   │   ├── compact-layout.tsx
+│   │   │   │   │   ├── generic-table-layout.tsx
+│   │   │   │   │   ├── head-column-layout.tsx
+│   │   │   │   │   ├── index.ts
+│   │   │   │   │   ├── record-list-props.ts
+│   │   │   │   │   └── record-list.tsx
+│   │   │   │   ├── states/          # Loading/error/empty states
+│   │   │   │   │   ├── empty-state.tsx
+│   │   │   │   │   ├── error-state.tsx
+│   │   │   │   │   ├── index.ts
+│   │   │   │   │   └── loading-state.tsx
+│   │   │   │   └── index.ts
+│   │   │   ├── constants/
+│   │   │   │   ├── default-messages.ts
+│   │   │   │   └── index.ts
+│   │   │   ├── hooks/               # React hooks
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── use-active-table.tsx
+│   │   │   │   ├── use-encryption.ts
+│   │   │   │   ├── use-field-value.ts
+│   │   │   │   ├── use-inline-edit.ts
+│   │   │   │   └── use-permissions.ts
+│   │   │   ├── stores/              # Zustand stores
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── use-filter-store.ts
+│   │   │   │   ├── use-selection-store.ts
+│   │   │   │   └── use-view-store.ts
+│   │   │   ├── types/               # Type definitions
+│   │   │   │   ├── action.ts
+│   │   │   │   ├── common.ts
+│   │   │   │   ├── config.ts
+│   │   │   │   ├── existing-types.ts
+│   │   │   │   ├── field.ts
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── messages.ts
+│   │   │   │   ├── record.ts
+│   │   │   │   └── responses.ts
+│   │   │   ├── utils/               # Utilities
+│   │   │   │   ├── decryption-cache.ts
+│   │   │   │   ├── encryption-helpers.ts
+│   │   │   │   ├── field-formatter.ts
+│   │   │   │   ├── field-validation.ts
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── permission-checker.ts
+│   │   │   │   └── record-decryptor.ts
+│   │   │   └── index.ts
+│   │   ├── eslint.config.js
+│   │   ├── package.json
+│   │   ├── README-LIST-VIEWS.md
+│   │   ├── README.md
+│   │   └── tsconfig.json
 │   │
-│   ├── beqeek-shared/               (~2k LOC)
-│   │   └── src/
-│   │       ├── constants/
-│   │       │   ├── field-types.ts   - 25+ field type constants
-│   │       │   ├── action-types.ts  - Action type constants
-│   │       │   ├── permissions.ts   - Permission arrays
-│   │       │   ├── layouts.ts       - Layout constants
-│   │       │   └── table-types.ts   - 35 table type constants
-│   │       ├── configs/             - 35 table configs
-│   │       ├── types/               - Shared types
-│   │       └── validators/          - Validation helpers
+│   ├── beqeek-shared/               # Shared constants & types
+│   │   ├── src/
+│   │   │   ├── configs/
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── table-config-helpers.ts
+│   │   │   │   └── table-configs.ts # 35 table templates (18k+ tokens)
+│   │   │   ├── constants/
+│   │   │   │   ├── action-types.ts
+│   │   │   │   ├── field-types.ts   # 25+ field type constants
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── layouts.ts       # Layout constants
+│   │   │   │   ├── permissions.ts   # Permission arrays
+│   │   │   │   └── table-types.ts
+│   │   │   ├── types/
+│   │   │   │   ├── index.ts
+│   │   │   │   └── table-config-types.ts
+│   │   │   ├── utils/
+│   │   │   │   ├── default-actions.ts
+│   │   │   │   └── uuid-generator.ts
+│   │   │   ├── validators/
+│   │   │   │   ├── index.ts
+│   │   │   │   └── table-type-validators.ts
+│   │   │   └── index.ts
+│   │   ├── eslint.config.js
+│   │   ├── package.json
+│   │   ├── README.md
+│   │   └── tsconfig.json
 │   │
-│   ├── encryption-core/             (~1k LOC)
-│   │   └── src/
-│   │       ├── aes.ts               - AES-256-CBC encryption
-│   │       ├── ope.ts               - Order-preserving encryption
-│   │       ├── hmac.ts              - HMAC-SHA256
-│   │       └── utils.ts             - Key generation
+│   ├── encryption-core/             # E2EE utilities
+│   │   ├── src/
+│   │   │   ├── algorithms/
+│   │   │   │   ├── aes-256.ts       # AES-256-CBC
+│   │   │   │   ├── hmac.ts          # HMAC-SHA256
+│   │   │   │   └── ope.ts           # Order-preserving encryption
+│   │   │   ├── common-utils.ts
+│   │   │   ├── index.ts
+│   │   │   ├── key-generator.ts
+│   │   │   └── types.ts
+│   │   ├── eslint.config.js
+│   │   ├── package.json
+│   │   ├── README.md
+│   │   └── tsconfig.json
 │   │
-│   ├── eslint-config/               (~200 LOC)
+│   ├── eslint-config/               # Shared ESLint rules
 │   │   ├── base.js
 │   │   ├── next.js
-│   │   └── react-internal.js
+│   │   ├── react-internal.js
+│   │   ├── package.json
+│   │   └── README.md
 │   │
-│   └── typescript-config/           (~100 LOC)
+│   └── typescript-config/           # Shared TS configs
 │       ├── base.json
 │       ├── nextjs.json
-│       └── react-library.json
+│       ├── react-library.json
+│       ├── package.json
+│       └── README.md
 │
-├── docs/                            (~10k LOC markdown)
-│   ├── project-overview-pdr.md
-│   ├── code-standards.md
-│   ├── codebase-summary.md
-│   ├── system-architecture.md
-│   ├── design-guidelines.md
-│   ├── deployment-guide.md
-│   ├── project-roadmap.md
-│   ├── swagger.yaml                 - API documentation
-│   ├── active-tables/               - Feature specs
+├── docs/                            # Documentation
+│   ├── active-tables/               # Feature specifications
+│   │   ├── gantt-business-analysis.md (13k+ tokens)
 │   │   ├── kanban-business-analysis.md
-│   │   ├── gantt-business-analysis.md
+│   │   ├── kanban-drag-drop-feature-analysis.md
 │   │   └── Quick-Filter-Business-Analysis.md
-│   └── specs/
-│       ├── active-table-config-functional-spec.md
-│       ├── encryption-modes-corrected.md
-│       └── workflow-*.md
+│   ├── active-table-config-functional-spec.md (14k+ tokens)
+│   ├── code-standards.md            # Coding standards & patterns
+│   ├── codebase-summary.md          # This file
+│   ├── deployment-guide.md          # Docker, CI/CD
+│   ├── design-guidelines.md         # UI/UX standards
+│   ├── doc-get-active-records.md
+│   ├── encryption-modes-corrected.md
+│   ├── first-reference-record-spec.md
+│   ├── hash_step.md
+│   ├── project-overview-pdr.md      # Product requirements
+│   ├── project-roadmap.md           # Feature roadmap
+│   ├── swagger.yaml                 # API spec (19k+ tokens)
+│   ├── system-architecture.md       # Architecture diagrams
+│   ├── workflow-connectors-functional-spec.md
+│   ├── workflow-forms-functional-spec.md
+│   └── workflow-units-functional-spec.md
 │
-├── messages/                        (~2k LOC JSON)
-│   ├── vi.json                      - Vietnamese (default)
-│   └── en.json                      - English
+├── messages/                        # i18n translations
+│   ├── vi.json                      # Vietnamese (14k+ tokens)
+│   └── en.json                      # English
 │
-├── .claude/                         - Claude Code workflows
-├── project.inlang/                  - Paraglide.js i18n config
-├── turbo.json                       - Turborepo config
-├── pnpm-workspace.yaml              - PNPM workspace config
-├── package.json                     - Root package.json
-├── CLAUDE.md                        - Claude Code instructions
-└── README.md                        - Project README
+├── plans/                           # Planning templates
+│   └── templates/
+│       ├── bug-fix-template.md
+│       ├── feature-implementation-template.md
+│       ├── refactor-template.md
+│       └── template-usage-guide.md
+│
+├── project.inlang/                  # Paraglide.js i18n config
+│   ├── .gitignore
+│   ├── project_id
+│   └── settings.json
+│
+├── scripts/
+│   └── lint-staged-helper.sh
+│
+├── .claude/                         # Claude Code workflows
+├── .husky/                          # Git hooks
+│   └── pre-commit
+│
+├── .dockerignore
+├── .env.example
+├── .eslintrc.js
+├── .gitignore
+├── .npmrc
+├── .prettierignore
+├── .prettierrc
+├── AGENTS.md                        # Agent guidelines
+├── CLAUDE.md                        # Claude Code instructions
+├── compose.yml                      # Docker Compose
+├── deploy.sh                        # Deployment script
+├── DEPLOYMENT.md                    # Deployment guide
+├── Dockerfile.web                   # Production Dockerfile
+├── IMPLEMENTATION_SUMMARY.md
+├── MIGRATION_FILE_BASED_ROUTING.md
+├── nginx.conf                       # Nginx config
+├── package.json                     # Root package.json
+├── pnpm-workspace.yaml              # PNPM workspace config
+├── README.md                        # Project README
+├── tsconfig.json                    # Root TS config
+└── turbo.json                       # Turborepo config
 ```
 
 ## Core Features Breakdown
 
-### 1. Active Tables (apps/web/src/features/active-tables, ~8k LOC)
+### Active Tables Feature (Largest Module)
 
-**Purpose**: Configurable workflow data tables with E2EE
-
-**Key Components**:
-
-- `TableList` - Display all tables in workspace
-- `TableDetailPage` - Table configuration & schema editor
-- `RecordsList` - Display records in table/card layouts
-- `RecordDetailPage` - Single record detail with inline editing
-- `KanbanView` - Drag-and-drop kanban board
-- `GanttView` - Timeline visualization
-- `CommentsList` - Comments on records
-
-**Hooks**:
-
-- `useTable` - Fetch table details
-- `useRecords` - Fetch/manage records
-- `useRecordDetail` - Single record operations
-- `useFieldEncryption` - Client-side E2EE
-
-**API Endpoints** (via shared/api/active-tables-client.ts):
-
-- `search/active_tables` - Get tables list
-- `get/active_tables` - Get table details
-- `create/active_tables` - Create table
-- `update/active_tables` - Update table
-- `get_active_records` - Get records
-- `create_active_records` - Create record
-- `update_active_records` - Update record
-
-**Field Types Supported** (25+):
-
-- Text: SHORT_TEXT, TEXT, RICH_TEXT, EMAIL, URL
-- Number: INTEGER, NUMERIC
-- Date: DATE, DATETIME, TIME, YEAR, MONTH, etc.
-- Selection: SELECT_ONE, SELECT_LIST, CHECKBOX_YES_NO, etc.
-- Reference: SELECT_ONE_RECORD, SELECT_LIST_RECORD, etc.
-
-### 2. Authentication (apps/web/src/features/auth, ~2k LOC)
+**Location**: `apps/web/src/features/active-tables/`
 
 **Components**:
 
-- `LoginPage` - Email/password login form
-- `AuthGuard` - Route protection
+- **Record Form** (2): create-record-dialog, field-input
+- **Settings** (25+): Actions, danger zone, fields, filters, gantt, general, kanban, permissions, views
+- **UI Components** (20+): Table cards, comments, encryption, inline editing, kanban, permissions
 
-**Stores**:
+**API Clients** (4):
 
-- `useAuthStore` (Zustand) - User state, token, login/logout
+- active-actions-api.ts
+- active-comments-api.ts
+- active-records-api.ts
+- active-tables-api.ts
 
-**Hooks**:
+**Hooks** (17):
 
-- `useAuth` - Access auth state
-- `getIsAuthenticated` - Auth check for route guards
+- use-active-tables, use-create-record, use-encryption-stub, use-infinite-active-table-records
+- use-list-context, use-list-table-records, use-record-by-id, use-record-comments
+- use-record-comments-with-permissions, use-scroll-shortcuts, use-table-encryption
+- use-table-management, use-update-record, use-update-record-field, use-update-table-config
 
-### 3. Workspace Management (apps/web/src/features/workspace, ~3k LOC)
+**Pages** (5):
 
-**Components**:
+- active-table-detail-page, active-table-records-page, active-table-settings-page
+- active-tables-page, record-detail-page
 
-- `WorkspaceList` - Display user's workspaces
-- `WorkspaceSwitcher` - Quick workspace switcher (sidebar)
-- `WorkspaceSettings` - Workspace configuration
+**Utilities**:
 
-**Hooks**:
+- encryption-detection, encryption-key-storage, field-cleanup, field-name-generator
+- module-icons, query-encryption, record-detail-config, settings-validation
 
-- `useWorkspaces` - Fetch workspaces list
-- `useCurrentWorkspace` - Get current workspace context
+### Other Features
 
-### 4. Team & Roles (~3.5k LOC)
-
-**Team** (apps/web/src/features/team):
-
-- User invitations
-- Team member management
-- Role assignment
-
-**Roles** (apps/web/src/features/roles):
-
-- Role creation/editing
-- Permission matrix configuration
-- Custom action permissions
-
-### 5. Analytics (apps/web/src/features/analytics, ~1k LOC)
-
-**Components**:
-
-- `UsageMetrics` - Track table/record operations
-- `ActivityTimeline` - Recent activity feed
+| Feature         | Location                 | Components | Hooks | Pages |
+| --------------- | ------------------------ | ---------- | ----- | ----- |
+| Auth            | features/auth            | -          | 2     | 1     |
+| Workspace       | features/workspace       | 4          | 3     | 1     |
+| Workspace Users | features/workspace-users | -          | 3     | -     |
+| Team            | features/team            | -          | -     | 1     |
+| Roles           | features/roles           | -          | -     | 1     |
+| Analytics       | features/analytics       | -          | -     | 1     |
+| Workflows       | features/workflows       | -          | -     | 1     |
+| Notifications   | features/notifications   | -          | -     | 1     |
+| Search          | features/search          | -          | -     | 1     |
+| Support         | features/support         | -          | -     | 1     |
+| Organization    | features/organization    | -          | -     | 3     |
 
 ## Technology Stack
 
-### Frontend Dependencies
+### Frontend Dependencies (Key Packages)
 
-**Core** (~3.5MB):
+**Core**:
 
 - react@19.1.1, react-dom@19.1.1
 - typescript@5.9.2
 - vite@6.0.3
 
-**Routing & State** (~1.2MB):
+**Routing & State**:
 
-- @tanstack/react-router@1.133.36 (file-based routing)
-- @tanstack/react-query@5.71.10 (server state)
+- @tanstack/react-router@1.133.36 (file-based routing with auto-generation)
+- @tanstack/react-query@5.71.10 (server state management)
 - @tanstack/react-table@8.21.3 (data tables)
 - @tanstack/react-form@1.11.0 (form validation)
-- zustand@5.0.1 (client state)
-- react-hook-form@7.66.0 (form handling)
+- zustand@5.0.1 (global client state)
 
-**UI** (~2.5MB):
+**UI Components**:
 
 - @radix-ui/\* (40+ primitives for shadcn/ui)
 - lucide-react@0.544.0 (icons)
-- tailwindcss@4.1.13
-- @dnd-kit/core@6.3.1 (drag-and-drop)
+- tailwindcss@4.1.13 (v4 CSS framework)
+- @dnd-kit/core@6.3.1 (drag-and-drop for kanban)
 
-**Utilities** (~800KB):
+**Utilities**:
 
 - axios@1.12.2 (HTTP client)
-- crypto-js@4.2.0 (encryption)
+- crypto-js@4.2.0 (client-side encryption)
 - date-fns@4.1.0 (date formatting)
 - sonner@1.7.4 (toast notifications)
 
-**i18n** (~200KB):
+**i18n**:
 
-- @inlang/paraglide-js@2.4.0
-
-**Dev Dependencies**:
-
-- @faker-js/faker@10.1.0 (test data)
-- @tanstack/react-query-devtools
-- @tanstack/react-router-devtools
-- eslint@9.36.0
-- prettier@3.6.2
+- @inlang/paraglide-js@2.4.0 (zero-runtime i18n)
 
 ### Build Configuration
 
-**Turborepo** (turbo.json):
+**Turborepo Tasks**:
 
-```json
-{
-  "tasks": {
-    "build": {
-      "dependsOn": ["^build"],
-      "outputs": ["dist/**"]
-    },
-    "dev": {
-      "cache": false,
-      "persistent": true
-    }
-  }
-}
-```
+- `build`: Depends on `^build` (builds packages first)
+- `dev`: Cache disabled, persistent
+- `lint`: Depends on `^lint`
+- `check-types`: Depends on `^check-types`
 
-**Vite** (apps/web/vite.config.ts):
+**Vite Configuration**:
 
-- Manual chunk splitting (react, radix, tanstack, icons, vendor)
-- TanStack Router plugin (auto-generates routes)
+- Manual chunk splitting: react, radix, tanstack, icons, vendor
+- TanStack Router plugin (auto-generates routeTree.gen.ts)
 - Paraglide i18n plugin
 - Dev server: localhost:4173
 
@@ -355,183 +546,63 @@ beqeek/                              (~50k LOC)
 
 - Strict mode enabled
 - Path alias: `@` → `src`
-- Project references for packages
-
-## API Architecture
-
-### Pattern
-
-POST-based RPC endpoints:
-
-```
-POST /api/workspace/{workspaceId}/workflow/{verb}/active_tables
-```
-
-### Client Structure
-
-**Base Client** (apps/web/src/shared/api/http-client.ts):
-
-```typescript
-const httpClient = axios.create({
-  baseURL: env.VITE_API_URL,
-  timeout: 30000,
-});
-
-// Interceptors for auth token + error handling
-httpClient.interceptors.request.use(addAuthToken);
-httpClient.interceptors.response.use(null, handleApiError);
-```
-
-**Error Handling** (apps/web/src/shared/api/api-error.ts):
-
-- Centralized error handling
-- User-friendly error messages
-- Auto-retry logic for network errors
-
-**Feature Clients**:
-
-- `active-tables-client.ts` - Active Tables API
-- `workspace-client.ts` - Workspace API
-- Each feature has its own client
+- Project references for monorepo packages
 
 ## State Management
 
 ### Philosophy
 
-| State Type | Tool        | Usage Count                        |
-| ---------- | ----------- | ---------------------------------- |
-| **Local**  | useState    | ~300+ instances                    |
-| **Server** | React Query | ~80+ queries, ~40+ mutations       |
-| **Global** | Zustand     | 3 stores (auth, sidebar, language) |
+| State Type | Tool        | Usage                                   | Count                         |
+| ---------- | ----------- | --------------------------------------- | ----------------------------- |
+| Local      | useState    | UI toggles, form inputs, modals         | ~300+ instances across webapp |
+| Server     | React Query | API data, caching, mutations            | ~80 queries, ~40 mutations    |
+| Global     | Zustand     | User preferences, auth, theme, language | 3 stores total                |
 
 ### Zustand Stores
 
-1. **Auth Store** (stores/auth-store.ts):
+1. **auth-store.ts**: User, token, login/logout
+2. **sidebar-store.ts**: Sidebar open/close state
+3. **language-store.ts**: i18n locale management
 
-```typescript
-interface AuthState {
-  user: User | null;
-  token: string | null;
-  setUser: (user: User) => void;
-  logout: () => void;
-}
-```
+### React Query Patterns
 
-2. **Sidebar Store** (stores/sidebar-store.ts):
-
-```typescript
-interface SidebarState {
-  isOpen: boolean;
-  toggle: () => void;
-  close: () => void;
-}
-```
-
-3. **Language Store** (stores/language-store.ts):
-
-```typescript
-interface LanguageState {
-  locale: 'vi' | 'en';
-  setLocale: (locale: 'vi' | 'en') => void;
-}
-```
-
-### React Query Keys
-
-**Naming Convention**: `['entity', ...identifiers, filters?]`
-
-Examples:
+**Query Keys**:
 
 ```typescript
 ['tables', workspaceId][('table', workspaceId, tableId)][('records', tableId, filters)][('record', recordId)][
   ('comments', recordId)
-];
+]['workspaces'][('workspace', workspaceId)];
 ```
 
-## Routing
+**Stale Time**: 5 minutes (default)
+**Cache Time**: 10 minutes (garbage collection)
 
-### File-Based Routes (TanStack Router)
+## Routing Architecture
 
-**Plugin**: `@tanstack/router-plugin/vite` auto-generates route tree on save
+### File-Based Routing (TanStack Router)
 
-**Route Files** → **URL Paths**:
+**Auto-Generated**: `src/routeTree.gen.ts` (gitignored)
+**Plugin**: `@tanstack/router-plugin/vite` generates routes on save
 
-```
-src/routes/
-├── __root.tsx              → Root layout (all routes)
-├── index.tsx               → / (redirect to /vi or /en)
-├── $locale.tsx             → Layout for /$locale routes
-└── $locale/
-    ├── index.tsx           → /$locale (redirect based on auth)
-    ├── login.tsx           → /$locale/login
-    ├── workspaces.tsx      → /$locale/workspaces
-    └── workspaces/
-        └── $workspaceId/
-            ├── tables.tsx  → /$locale/workspaces/:workspaceId/tables
-            └── tables/
-                └── $tableId/
-                    ├── index.tsx → /$locale/workspaces/:workspaceId/tables/:tableId
-                    ├── records.tsx → .../records
-                    └── settings.tsx → .../settings
-```
+**Route Structure**:
 
-**Generated File**: `src/routeTree.gen.ts` (gitignored, auto-generated)
+- `__root.tsx` → Root layout (all routes)
+- `index.tsx` → `/` (redirect to locale)
+- `$.tsx` → 404 catch-all
+- `$locale.tsx` → Layout for `/$locale` routes
+- `$locale/` → Locale-prefixed routes (vi, en)
 
-**Route Constants** (shared/route-paths.ts):
+**Type-Safe Params**: Use `getRouteApi()` with `ROUTES` constants from `route-paths.ts`
 
-```typescript
-export const ROUTES = {
-  LOGIN: '/$locale/login',
-  WORKSPACES: '/$locale/workspaces',
-  ACTIVE_TABLES: {
-    LIST: '/$locale/workspaces/$workspaceId/tables',
-    TABLE_DETAIL: '/$locale/workspaces/$workspaceId/tables/$tableId',
-    TABLE_RECORDS: '/$locale/workspaces/$workspaceId/tables/$tableId/records',
-  },
-};
-```
-
-**Type-Safe Params** (REQUIRED PATTERN):
-
-```typescript
-import { getRouteApi } from '@tanstack/react-router';
-import { ROUTES } from '@/shared/route-paths';
-
-const route = getRouteApi(ROUTES.ACTIVE_TABLES.TABLE_DETAIL);
-
-export function MyPage() {
-  const { tableId, workspaceId, locale } = route.useParams();
-  // Full type safety!
-}
-```
+**Lazy Loading**: Automatic code-splitting with `autoCodeSplitting: true`
 
 ## Internationalization
 
-### Paraglide.js Setup
+**Locales**: Vietnamese (vi - default), English (en)
+**Messages**: `messages/vi.json` (14k+ tokens), `messages/en.json`
+**Generated**: `apps/web/src/paraglide/generated/`
 
-**Supported Locales**:
-
-- `vi` (Vietnamese - default)
-- `en` (English)
-
-**Message Files**:
-
-- `messages/vi.json` (~1000 keys)
-- `messages/en.json` (~1000 keys)
-
-**Generated Output**: `apps/web/src/paraglide/generated/`
-
-**Usage**:
-
-```typescript
-import { m } from '@/paraglide/generated/messages';
-
-function MyComponent() {
-  return <h1>{m.welcome()}</h1>;
-}
-```
-
-**Locale Strategy** (Vite config):
+**Locale Strategy**:
 
 1. URL path (`/$locale`)
 2. Cookie (`locale`)
@@ -539,106 +610,30 @@ function MyComponent() {
 4. localStorage
 5. Default (`vi`)
 
-## Testing
-
-### Current Status
-
-- ❌ No tests yet
-- 📝 Test infrastructure ready (Vitest, Testing Library)
-- 📋 Test command available: `pnpm --filter web test`
-
-### Planned Coverage
-
-- Unit tests for utilities/hooks
-- Integration tests for features
-- E2E tests for critical flows (login, CRUD)
-
 ## Build Output
 
-### Production Build Size
+**Production Bundle** (~568k tokens total codebase):
 
-**apps/web/dist/**:
+- Uncompressed: ~2.5MB
+- Gzipped: ~600KB
+- Per-route chunk: ~20-50KB
 
-```
-assets/
-├── index-[hash].js         ~800KB (vendor)
-├── react-[hash].js         ~150KB (React 19)
-├── radix-[hash].js         ~300KB (Radix UI)
-├── tanstack-[hash].js      ~250KB (Router, Query, Table)
-├── icons-[hash].js         ~80KB (Lucide)
-├── date-fns-[hash].js      ~50KB
-└── [feature]-[hash].js     ~20-50KB per feature
+**Chunk Strategy**:
 
-Total: ~2.5MB (gzipped: ~600KB)
-```
-
-### Chunk Strategy (Vite config)
-
-- **react**: React core
-- **radix**: Radix UI primitives
-- **tanstack**: TanStack libraries
-- **icons**: Lucide icons
-- **date-fns**: Date utilities
-- **vendor**: Everything else from node_modules
-- **Per-route chunks**: Automatic code splitting
-
-## Performance Considerations
-
-### Optimizations
-
-1. **Code Splitting**: File-based routing → automatic route-based splitting
-2. **Tree Shaking**: TailwindCSS v4 CSS purging
-3. **Lazy Loading**: Components lazy-loaded via `React.lazy()`
-4. **Memoization**: `useMemo`, `useCallback` for expensive computations
-5. **Virtual Scrolling**: @tanstack/react-table for large datasets
-6. **Image Optimization**: Next-gen formats (WebP), lazy loading
-
-### Known Bottlenecks
-
-1. **Encryption Overhead**: Client-side E2EE adds ~50ms per record
-2. **Large Tables**: 1000+ records need virtualization
-3. **Initial Bundle**: ~2.5MB uncompressed (acceptable for enterprise app)
-
-## Security
-
-### Implemented
-
-1. **Client-Side E2EE**: AES-256, OPE, HMAC
-2. **Key Storage**: localStorage only (never transmitted)
-3. **Token Auth**: JWT bearer tokens
-4. **HTTPS Only**: Environment enforced
-5. **XSS Prevention**: React auto-escaping + DOMPurify (planned)
-6. **CSRF**: Token-based (backend responsibility)
-
-### Pending
-
-- [ ] Content Security Policy (CSP)
-- [ ] Input sanitization for rich text (DOMPurify)
-- [ ] Rate limiting (backend)
-- [ ] Audit logging
-
-## Maintenance & Updates
-
-### Dependencies Update Strategy
-
-- **Monthly**: Minor version updates
-- **Quarterly**: Major version updates (with testing)
-- **Security**: Immediate patching
-
-### Breaking Changes Log
-
-- **2025-01**: Upgraded to React 19 (from 18)
-- **2024-12**: Migrated to TailwindCSS v4 (from v3)
-- **2024-11**: File-based routing (from config-based)
+- react: React core (~150KB)
+- radix: Radix UI primitives (~300KB)
+- tanstack: Router, Query, Table (~250KB)
+- icons: Lucide icons (~80KB)
+- vendor: Other dependencies (~800KB)
+- Per-route: Lazy-loaded chunks (~20-50KB each)
 
 ## Key Metrics
 
 **Code Quality**:
 
 - TypeScript Coverage: 100%
-- ESLint Warnings: < 120 (allowed)
 - Strict Mode: Enabled
-- No `any` Types: Enforced (except edge cases)
+- No `any` Types: Enforced (with rare exceptions)
 
 **Build Performance**:
 
@@ -647,11 +642,12 @@ Total: ~2.5MB (gzipped: ~600KB)
 - Production Build: ~45s
 - Type Check: ~15s
 
-**Bundle Size**:
+**Security**:
 
-- Uncompressed: ~2.5MB
-- Gzipped: ~600KB
-- Per-Route Chunk: ~20-50KB
+- ✅ Client-side E2EE (AES-256, OPE, HMAC)
+- ✅ Token-based auth (JWT)
+- ✅ HTTPS enforced
+- ⚠️ Key loss = permanent data loss
 
 ## Common Commands
 
@@ -669,9 +665,6 @@ pnpm lint                          # ESLint
 pnpm format                        # Prettier
 pnpm --filter web check-types      # TypeScript
 
-# Testing
-pnpm --filter web test             # Run tests
-
 # i18n
 pnpm machine-translate             # Auto-translate messages
 
@@ -682,18 +675,33 @@ pnpm update                        # Update dependencies
 
 ## Documentation Index
 
-- **Project Overview**: `docs/project-overview-pdr.md`
-- **Code Standards**: `docs/code-standards.md`
-- **Architecture**: `docs/system-architecture.md`
-- **Design Guidelines**: `docs/design-guidelines.md`
-- **Deployment**: `docs/deployment-guide.md`
-- **Roadmap**: `docs/project-roadmap.md`
-- **API Spec**: `docs/swagger.yaml`
-- **Feature Specs**: `docs/active-tables/*.md`
+- **Project Overview**: `/docs/project-overview-pdr.md` - Product requirements, vision, roadmap
+- **Code Standards**: `/docs/code-standards.md` - Coding conventions, patterns, anti-patterns
+- **System Architecture**: `/docs/system-architecture.md` - Architecture diagrams, data flow
+- **Design Guidelines**: `/docs/design-guidelines.md` - UI/UX standards, design tokens
+- **Deployment**: `/docs/deployment-guide.md` - Docker, CI/CD, production setup
+- **Roadmap**: `/docs/project-roadmap.md` - Feature roadmap, priorities
+- **API Spec**: `/docs/swagger.yaml` (19k+ tokens) - Complete API documentation
+- **Feature Specs**: `/docs/active-tables/*.md` - Kanban, Gantt, filters analysis
 
-## Unresolved Questions
+## Repository Insights
 
-1. Backend API repository location? (Not in this monorepo)
-2. Production deployment target? (Self-hosted? Cloud?)
-3. Mobile app timeline? (React Native planned for Q2 2026)
-4. Third-party integrations priority? (Slack, GitHub, etc.)
+**Most Complex Files** (by tokens):
+
+1. API spec (19k tokens) - Comprehensive REST API documentation
+2. Table configs (18k tokens) - 35 pre-configured workflow templates
+3. Vietnamese i18n (14k tokens) - ~1000 translation keys
+4. Active Tables spec (14k tokens) - Core feature documentation
+5. Gantt analysis (13k tokens) - Timeline visualization requirements
+
+**Largest Packages** (by files):
+
+1. **ui** - 35+ shadcn/ui components
+2. **active-tables-core** - 60+ files (components, hooks, utils)
+3. **web app** - 200+ files across 12 features
+
+**Most Active Areas**:
+
+- Active Tables feature (core domain model)
+- UI component library (shared across apps)
+- Shared constants (35 table templates, field types, permissions)
