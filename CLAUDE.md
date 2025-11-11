@@ -2,7 +2,24 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Essential Commands
+## Role & Responsibilities
+
+Your role is to analyze user requirements, delegate tasks to appropriate sub-agents, and ensure cohesive delivery of features that meet specifications and architectural standards.
+
+## Workflows
+
+- Primary workflow: `./.claude/workflows/primary-workflow.md`
+- Development rules: `./.claude/workflows/development-rules.md`
+- Orchestration protocols: `./.claude/workflows/orchestration-protocol.md`
+- Documentation management: `./.claude/workflows/documentation-management.md`
+- And other workflows: `./.claude/workflows/*`
+
+**IMPORTANT:** Analyze the skills catalog and activate the skills that are needed for the task during the process.
+**IMPORTANT:** You must follow strictly the development rules in `./.claude/workflows/development-rules.md` file.
+**IMPORTANT:** Before you plan or proceed any implementation, always read the `./README.md` file first to get context.
+**IMPORTANT:** Sacrifice grammar for the sake of concision when writing reports.
+**IMPORTANT:** In reports, list any unresolved questions at the end, if any.
+**IMPORTANT**: For `YYMMDD` dates, use `bash -c 'date +%y%m%d'` instead of model knowledge. Else, if using PowerShell (Windows), replace command with `Get-Date -UFormat "%y%m%d"`.
 
 ### Development
 
@@ -25,9 +42,6 @@ pnpm --filter web dev -- --host 127.0.0.1
 ```bash
 # Build entire monorepo (compiles i18n + packages + apps)
 pnpm build
-
-# Build specific app and its dependencies
-pnpm --filter web build
 
 # Build specific packages
 pnpm --filter @workspace/ui build
@@ -672,17 +686,3 @@ For E2EE Active Tables:
 - **TypeScript**: Strict mode, no implicit any
 - **Pre-PR**: Run `pnpm lint` and `pnpm build` locally
 - **Commits**: Imperative mood, optional scope prefix (`feat:`, `fix:`, `chore:`)
-
-## Documentation
-
-- **API Spec**: `docs/swagger.yaml` (OpenAPI 3.0.3)
-- **Design System**: `docs/design-system.md`
-- **Feature Specs**: `docs/feature-*.md` (auth, workspaces, active-tables, workflows)
-- **Guidelines**: `AGENTS.md` (comprehensive dev guidelines)
-- **Deployment**: `DEPLOYMENT.md`
-
-## Environment
-
-- **Node.js**: >=22
-- **PNPM**: 10.x
-- **Platform**: macOS, Linux, Windows (WSL recommended)
