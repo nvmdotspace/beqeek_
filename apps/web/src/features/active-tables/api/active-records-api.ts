@@ -11,6 +11,12 @@ export interface FetchActiveRecordsParams {
   cursor?: string | null;
   filters?: Record<string, unknown>;
   sorting?: Array<{ field: string; direction: 'asc' | 'desc' }>;
+  // Additional params for cursor mode
+  paging?: 'cursor';
+  next_id?: string | null;
+  previous_id?: string | null;
+  direction?: 'asc' | 'desc';
+  group?: string | null;
 }
 
 // Endpoints
@@ -29,22 +35,31 @@ export const fetchActiveTableRecords = ({
   tableId,
   limit = 25,
   offset = 0,
-  pagingMode = 'offset',
+  pagingMode,
   cursor,
   filters,
   sorting,
+  // Cursor mode params (alternative API)
+  paging,
+  next_id,
+  previous_id,
+  direction,
+  group,
 }: FetchActiveRecordsParams) =>
   apiRequest<ActiveRecordsResponse>({
     url: recordsEndpoint(workspaceId, tableId),
     method: 'POST',
     data:
-      pagingMode === 'cursor'
+      paging === 'cursor' || pagingMode === 'cursor'
         ? {
             paging: 'cursor',
             limit,
-            next_id: cursor ?? undefined,
+            next_id: next_id ?? cursor ?? undefined,
+            previous_id: previous_id ?? undefined,
+            direction: direction ?? undefined,
             filtering: filters,
             sorting,
+            group: group ?? undefined,
           }
         : {
             limit,

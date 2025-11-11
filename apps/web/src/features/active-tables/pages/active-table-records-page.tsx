@@ -43,10 +43,20 @@ const LoadingState = () => (
 // Type-safe route API for records route
 const route = getRouteApi(ROUTES.ACTIVE_TABLES.TABLE_RECORDS);
 
+// Search params type from route definition
+interface RecordsSearchParams {
+  view?: 'list' | 'kanban' | 'gantt';
+  screen?: string;
+  filters?: string;
+  sort?: string;
+  search?: string;
+  page?: number;
+}
+
 export const ActiveTableRecordsPage = () => {
   const navigate = route.useNavigate();
   const { tableId, workspaceId, locale } = route.useParams();
-  const searchParams = route.useSearch();
+  const searchParams = route.useSearch() as RecordsSearchParams;
   const listContext = useListContext();
 
   // Prefetch workspace users on page load for instant field input availability

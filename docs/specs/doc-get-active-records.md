@@ -1,6 +1,6 @@
 ### **Mô tả API**
 
-**Endpoint:** `POST /api/workspaces/{workspaceId}/active_tables/{tableId}/records`
+**Endpoint:** `POST /api/workspaces/{workspaceId}/workflow/get/active_tables/{tableId}/records`
 
 **Method:** `POST`
 

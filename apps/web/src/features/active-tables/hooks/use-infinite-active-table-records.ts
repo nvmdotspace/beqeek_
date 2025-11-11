@@ -16,12 +16,13 @@
 
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useState, useEffect, useMemo } from 'react';
-import { getActiveTableRecords, type ActiveTableRecordsResponse } from '../api/active-tables-api';
+import { fetchActiveTableRecords } from '../api/active-records-api';
 import { decryptRecords } from '@workspace/active-tables-core';
 import type { TableRecord, Table } from '@workspace/active-tables-core';
+import type { ActiveRecordsResponse } from '../types';
 
 // Use the existing type from API
-type ListRecordsResponse = ActiveTableRecordsResponse;
+type ListRecordsResponse = ActiveRecordsResponse;
 
 /**
  * Options for infinite records query
@@ -78,7 +79,9 @@ export function useInfiniteActiveTableRecords(
   const query = useInfiniteQuery<ListRecordsResponse, Error>({
     queryKey: ['active-table-records', workspaceId, tableId, pageSize, direction],
     queryFn: async ({ pageParam }) => {
-      const response = await getActiveTableRecords(workspaceId, tableId, {
+      const response = await fetchActiveTableRecords({
+        workspaceId,
+        tableId,
         paging: 'cursor',
         limit: pageSize,
         direction,

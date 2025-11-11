@@ -3,13 +3,8 @@ import { useMemo } from 'react';
 import { useQueryWithAuth } from '@/hooks/use-query-with-auth';
 import { useAuthStore, selectIsAuthenticated } from '@/features/auth';
 
-import {
-  getActiveTables,
-  getActiveWorkGroups,
-  getActiveTable,
-  getActiveTableRecords,
-  type RecordQueryRequest,
-} from '../api/active-tables-api';
+import { getActiveTables, getActiveWorkGroups, getActiveTable } from '../api/active-tables-api';
+import { fetchActiveTableRecords, type FetchActiveRecordsParams } from '../api/active-records-api';
 import { useEncryption } from './use-encryption-stub';
 
 import type { ActiveTable, ActiveWorkGroup } from '../types';
@@ -21,12 +16,11 @@ export const activeTableQueryKey = (workspaceId?: string, tableId?: string) => [
   workspaceId ?? 'unknown',
   tableId ?? 'unknown',
 ];
-export const activeTableRecordsQueryKey = (workspaceId?: string, tableId?: string, params?: RecordQueryRequest) => [
-  'active-table-records',
-  workspaceId ?? 'unknown',
-  tableId ?? 'unknown',
-  params ?? {},
-];
+export const activeTableRecordsQueryKey = (
+  workspaceId?: string,
+  tableId?: string,
+  params?: Omit<FetchActiveRecordsParams, 'workspaceId' | 'tableId'>,
+) => ['active-table-records', workspaceId ?? 'unknown', tableId ?? 'unknown', params ?? {}];
 
 export const useActiveWorkGroups = (workspaceId?: string) => {
   const isAuthenticated = useAuthStore(selectIsAuthenticated);
@@ -59,18 +53,6 @@ export const useActiveTable = (workspaceId?: string, tableId?: string) => {
     queryKey: activeTableQueryKey(workspaceId, tableId),
     queryFn: () => getActiveTable(workspaceId!, tableId!),
     enabled: isAuthenticated && !!workspaceId && !!tableId,
-  });
-};
-
-export const useActiveTableRecords = (workspaceId?: string, tableId?: string, params?: RecordQueryRequest) => {
-  const isAuthenticated = useAuthStore(selectIsAuthenticated);
-
-  return useQueryWithAuth({
-    queryKey: activeTableRecordsQueryKey(workspaceId, tableId, params),
-    queryFn: () => getActiveTableRecords(workspaceId!, tableId!, params),
-    enabled: isAuthenticated && !!workspaceId && !!tableId,
-    staleTime: 2 * 60 * 1000, // 2 minutes
-    gcTime: 5 * 60 * 1000, // 5 minutes
   });
 };
 
@@ -158,7 +140,7 @@ export const useActiveTablesGroupedByWorkGroup = (workspaceId?: string) => {
 export const useActiveTableRecordsWithConfig = (
   workspaceId?: string,
   tableId?: string,
-  params?: RecordQueryRequest,
+  params?: Omit<FetchActiveRecordsParams, 'workspaceId' | 'tableId'>,
 ) => {
   const isAuthenticated = useAuthStore(selectIsAuthenticated);
 
@@ -169,7 +151,12 @@ export const useActiveTableRecordsWithConfig = (
   // Step 2: Only enable records query when table config is available
   const recordsQuery = useQueryWithAuth({
     queryKey: activeTableRecordsQueryKey(workspaceId, tableId, params),
-    queryFn: () => getActiveTableRecords(workspaceId!, tableId!, params),
+    queryFn: () =>
+      fetchActiveTableRecords({
+        workspaceId: workspaceId!,
+        tableId: tableId!,
+        ...params,
+      }),
     // Wait for table config to be loaded before fetching records
     enabled: isAuthenticated && !!workspaceId && !!tableId && !!table?.config,
   });
