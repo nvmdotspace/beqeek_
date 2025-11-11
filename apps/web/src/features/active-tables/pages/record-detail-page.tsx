@@ -15,7 +15,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { getRouteApi } from '@tanstack/react-router';
 
 // Hooks
@@ -25,7 +25,6 @@ import { useTableEncryption } from '../hooks/use-table-encryption';
 import { useRecordCommentsWithPermissions } from '../hooks/use-record-comments-with-permissions';
 import { useUpdateRecordField, canEditField } from '../hooks/use-update-record-field';
 import { useGetWorkspaceUsers } from '@/features/workspace-users/hooks/use-get-workspace-users';
-import { useInfiniteActiveTableRecords } from '../hooks/use-infinite-active-table-records';
 
 // Components
 import { Button } from '@workspace/ui/components/button';
@@ -43,6 +42,17 @@ import type { FieldConfig } from '@workspace/active-tables-core';
 
 // Type-safe route API
 const route = getRouteApi(ROUTES.ACTIVE_TABLES.RECORD_DETAIL);
+
+// Local type definition matching the settings configuration
+type RecordDetailConfigWithHead = {
+  layout: 'head-detail' | 'two-column-detail';
+  commentsPosition: 'right-panel' | 'bottom' | 'hidden';
+  headTitleField: string;
+  headSubLineFields: string[];
+  rowTailFields?: string[];
+  column1Fields?: string[];
+  column2Fields?: string[];
+};
 
 /**
  * Redesigned Record Detail Page
@@ -71,13 +81,6 @@ export function RecordDetailPage() {
     encryptionKey: encryption.encryptionKey,
   });
 
-  // Fetch record IDs for navigation (lightweight)
-  const { records: allRecords } = useInfiniteActiveTableRecords(workspaceId, tableId, table, {
-    enabled: !!table,
-    encryptionKey: encryption.encryptionKey,
-    pageSize: 1000, // TODO: Replace with record IDs-only API
-  });
-
   // Fetch workspace users
   const { data: workspaceUsers } = useGetWorkspaceUsers(workspaceId ?? '', {
     query: 'BASIC_WITH_AVATAR',
@@ -98,6 +101,21 @@ export function RecordDetailPage() {
     table,
     undefined, // TODO: Pass current user when available
   );
+
+  // Override comment permissions with API response if available
+  const effectiveCommentPermissions = useMemo(() => {
+    if (permissions?.comment_create !== undefined) {
+      // Use permissions from API response
+      return {
+        canCreate: permissions.comment_create ?? false,
+        canAccess: true, // If we can view the record, we can view comments
+        canUpdate: () => true, // TODO: Check from API
+        canDelete: () => true, // TODO: Check from API
+      };
+    }
+    // Fallback to calculated permissions
+    return commentPermissions;
+  }, [permissions, commentPermissions]);
 
   // Wrap comment mutations for components
   const handleAddComment = useCallback(
@@ -138,33 +156,12 @@ export function RecordDetailPage() {
   );
 
   // Navigation
-  const recordIds = useMemo(() => allRecords.map((r) => r.id), [allRecords]);
-  const currentIndex = recordIds.indexOf(recordId);
-  const previousId = currentIndex > 0 ? recordIds[currentIndex - 1] : null;
-  const nextId = currentIndex < recordIds.length - 1 ? recordIds[currentIndex + 1] : null;
-
   const handleBack = useCallback(() => {
     navigate({
       to: ROUTES.ACTIVE_TABLES.TABLE_RECORDS,
       params: { locale, workspaceId, tableId },
     });
   }, [navigate, locale, workspaceId, tableId]);
-
-  const handleNavigatePrevious = useCallback(() => {
-    if (!previousId) return;
-    navigate({
-      to: ROUTES.ACTIVE_TABLES.RECORD_DETAIL,
-      params: { locale, workspaceId, tableId, recordId: previousId },
-    });
-  }, [navigate, locale, workspaceId, tableId, previousId]);
-
-  const handleNavigateNext = useCallback(() => {
-    if (!nextId) return;
-    navigate({
-      to: ROUTES.ACTIVE_TABLES.RECORD_DETAIL,
-      params: { locale, workspaceId, tableId, recordId: nextId },
-    });
-  }, [navigate, locale, workspaceId, tableId, nextId]);
 
   // Quick actions
   const handleEdit = useCallback(() => {
@@ -191,39 +188,85 @@ export function RecordDetailPage() {
   const fieldSections = useMemo(() => {
     if (!table || !record) {
       return {
+        layout: 'head-detail' as const,
         titleField: undefined,
         sublineFields: [],
-        tailFields: [],
+        rowTailFields: [],
+        column1Fields: [],
+        column2Fields: [],
         contentFields: [],
       };
     }
 
-    const config = table.config.recordDetailConfig;
+    const config = table.config.recordDetailConfig as unknown as RecordDetailConfigWithHead | undefined;
     const allFields = table.config.fields || [];
 
+    // If no config, use default layout with first field as title
+    if (!config) {
+      const titleField = allFields[0];
+      const contentFields = allFields.slice(1);
+
+      return {
+        layout: 'head-detail' as const,
+        titleField,
+        sublineFields: [],
+        rowTailFields: [],
+        column1Fields: [],
+        column2Fields: [],
+        contentFields,
+      };
+    }
+
     // Title field (shown at top)
-    const titleField = allFields.find((f) => f.name === config.titleField);
+    const titleField = allFields.find((f) => f.name === config.headTitleField);
 
     // Subline fields (shown below title)
-    const sublineFields = config.subLineFields
-      ?.map((fieldName) => allFields.find((f) => f.name === fieldName))
+    const sublineFields = (config.headSubLineFields || [])
+      .map((fieldName: string) => allFields.find((f) => f.name === fieldName))
       .filter(Boolean) as FieldConfig[];
 
-    // Tail fields (shown on right of title)
-    const tailFields = config.tailFields
-      ?.map((fieldName) => allFields.find((f) => f.name === fieldName))
-      .filter(Boolean) as FieldConfig[];
+    let excludedFieldNames: string[] = [config.headTitleField, ...(config.headSubLineFields || [])];
 
-    // Main content fields (exclude title, subline, tail)
-    const excludedFieldNames = [config.titleField, ...(config.subLineFields || []), ...(config.tailFields || [])];
-    const contentFields = allFields.filter((f) => !excludedFieldNames.includes(f.name));
+    // Layout-specific fields
+    if (config.layout === 'two-column-detail') {
+      // Two-column layout: use column1Fields and column2Fields
+      const column1Fields = (config.column1Fields || [])
+        .map((fieldName: string) => allFields.find((f) => f.name === fieldName))
+        .filter(Boolean) as FieldConfig[];
 
-    return {
-      titleField,
-      sublineFields,
-      tailFields,
-      contentFields,
-    };
+      const column2Fields = (config.column2Fields || [])
+        .map((fieldName: string) => allFields.find((f) => f.name === fieldName))
+        .filter(Boolean) as FieldConfig[];
+
+      excludedFieldNames = [...excludedFieldNames, ...(config.column1Fields || []), ...(config.column2Fields || [])];
+
+      return {
+        layout: 'two-column-detail' as const,
+        titleField,
+        sublineFields,
+        rowTailFields: [],
+        column1Fields,
+        column2Fields,
+        contentFields: allFields.filter((f) => !excludedFieldNames.includes(f.name)),
+      };
+    } else {
+      // Head-detail layout (single column): use rowTailFields
+      const rowTailFields = (config.rowTailFields || [])
+        .map((fieldName: string) => allFields.find((f) => f.name === fieldName))
+        .filter(Boolean) as FieldConfig[];
+
+      excludedFieldNames = [...excludedFieldNames, ...(config.rowTailFields || [])];
+
+      return {
+        layout: 'head-detail' as const,
+        titleField,
+        sublineFields,
+        rowTailFields,
+        column1Fields: [],
+        column2Fields: [],
+        contentFields: allFields.filter((f) => !excludedFieldNames.includes(f.name)),
+      };
+    }
   }, [table, record]);
 
   // Loading state
@@ -291,37 +334,6 @@ export function RecordDetailPage() {
               <span className="hidden sm:inline">{locale === 'vi' ? 'Quay lại' : 'Back to List'}</span>
               <span className="sm:hidden">{locale === 'vi' ? 'Quay lại' : 'Back'}</span>
             </Button>
-
-            {/* Record Navigation */}
-            {recordIds.length > 1 && (
-              <div className="flex items-center gap-2">
-                <span className="hidden sm:inline text-sm text-muted-foreground">
-                  {locale === 'vi' ? 'Bản ghi' : 'Record'} {currentIndex + 1} / {recordIds.length}
-                </span>
-                <div className="flex items-center border rounded-md overflow-hidden">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    disabled={!previousId}
-                    onClick={handleNavigatePrevious}
-                    aria-label={locale === 'vi' ? 'Bản ghi trước' : 'Previous record'}
-                    className="rounded-none border-r h-8 w-8"
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    disabled={!nextId}
-                    onClick={handleNavigateNext}
-                    aria-label={locale === 'vi' ? 'Bản ghi tiếp' : 'Next record'}
-                    className="rounded-none h-8 w-8"
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </header>
@@ -371,35 +383,150 @@ export function RecordDetailPage() {
                 </CardContent>
               </Card>
 
-              {/* Main Fields */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>{locale === 'vi' ? 'Chi tiết' : 'Details'}</CardTitle>
-                </CardHeader>
-                <Separator />
-                <CardContent className="pt-6">
-                  <div className="space-y-4">
-                    {fieldSections.contentFields.map((field) => (
-                      <div key={field.name} className="grid gap-2">
-                        <label className="text-sm font-medium text-muted-foreground">{field.label || field.name}</label>
-                        <InlineEditableField
-                          field={field}
-                          value={record.data?.[field.name]}
-                          canEdit={canEditField(permissions, field)}
-                          onUpdate={handleUpdateField}
-                          isUpdating={isUpdating}
-                        />
+              {/* Layout-specific content */}
+              {fieldSections.layout === 'head-detail' ? (
+                <>
+                  {/* Head Detail Layout: Single Column */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>{locale === 'vi' ? 'Chi tiết' : 'Details'}</CardTitle>
+                    </CardHeader>
+                    <Separator />
+                    <CardContent className="pt-6">
+                      <div className="space-y-4">
+                        {/* Row Tail Fields (inline with labels on right) */}
+                        {fieldSections.rowTailFields.map((field) => (
+                          <div key={field.name} className="flex items-start justify-between gap-4 py-2">
+                            <label className="text-sm font-medium text-muted-foreground flex-shrink-0 pt-2">
+                              {field.label || field.name}
+                            </label>
+                            <div className="flex-1 text-right">
+                              <InlineEditableField
+                                field={field}
+                                value={record.data?.[field.name]}
+                                canEdit={canEditField(permissions, field)}
+                                onUpdate={handleUpdateField}
+                                isUpdating={isUpdating}
+                              />
+                            </div>
+                          </div>
+                        ))}
+
+                        {/* Content Fields (standard layout) */}
+                        {fieldSections.contentFields.map((field) => (
+                          <div key={field.name} className="grid gap-2">
+                            <label className="text-sm font-medium text-muted-foreground">
+                              {field.label || field.name}
+                            </label>
+                            <InlineEditableField
+                              field={field}
+                              value={record.data?.[field.name]}
+                              canEdit={canEditField(permissions, field)}
+                              onUpdate={handleUpdateField}
+                              isUpdating={isUpdating}
+                            />
+                          </div>
+                        ))}
                       </div>
-                    ))}
+                    </CardContent>
+                  </Card>
+                </>
+              ) : (
+                <>
+                  {/* Two Column Layout */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Column 1 */}
+                    {fieldSections.column1Fields.length > 0 && (
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>{locale === 'vi' ? 'Cột 1' : 'Column 1'}</CardTitle>
+                        </CardHeader>
+                        <Separator />
+                        <CardContent className="pt-6">
+                          <div className="space-y-4">
+                            {fieldSections.column1Fields.map((field) => (
+                              <div key={field.name} className="grid gap-2">
+                                <label className="text-sm font-medium text-muted-foreground">
+                                  {field.label || field.name}
+                                </label>
+                                <InlineEditableField
+                                  field={field}
+                                  value={record.data?.[field.name]}
+                                  canEdit={canEditField(permissions, field)}
+                                  onUpdate={handleUpdateField}
+                                  isUpdating={isUpdating}
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+
+                    {/* Column 2 */}
+                    {fieldSections.column2Fields.length > 0 && (
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>{locale === 'vi' ? 'Cột 2' : 'Column 2'}</CardTitle>
+                        </CardHeader>
+                        <Separator />
+                        <CardContent className="pt-6">
+                          <div className="space-y-4">
+                            {fieldSections.column2Fields.map((field) => (
+                              <div key={field.name} className="grid gap-2">
+                                <label className="text-sm font-medium text-muted-foreground">
+                                  {field.label || field.name}
+                                </label>
+                                <InlineEditableField
+                                  field={field}
+                                  value={record.data?.[field.name]}
+                                  onUpdate={handleUpdateField}
+                                  canEdit={canEditField(permissions, field)}
+                                  isUpdating={isUpdating}
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
                   </div>
-                </CardContent>
-              </Card>
+
+                  {/* Additional content fields not in columns */}
+                  {fieldSections.contentFields.length > 0 && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>{locale === 'vi' ? 'Thông tin khác' : 'Additional Information'}</CardTitle>
+                      </CardHeader>
+                      <Separator />
+                      <CardContent className="pt-6">
+                        <div className="space-y-4">
+                          {fieldSections.contentFields.map((field) => (
+                            <div key={field.name} className="grid gap-2">
+                              <label className="text-sm font-medium text-muted-foreground">
+                                {field.label || field.name}
+                              </label>
+                              <InlineEditableField
+                                field={field}
+                                value={record.data?.[field.name]}
+                                canEdit={canEditField(permissions, field)}
+                                onUpdate={handleUpdateField}
+                                isUpdating={isUpdating}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                </>
+              )}
 
               {/* Activity Timeline */}
               <ActivityTimeline
                 comments={comments}
                 activities={[]} // TODO: Fetch system activities from API
-                permissions={commentPermissions}
+                permissions={effectiveCommentPermissions}
                 currentUserId={undefined} // TODO: Get from auth
                 workspaceUsers={workspaceUsers}
                 isLoading={commentsLoading}

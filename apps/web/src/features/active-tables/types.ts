@@ -130,6 +130,10 @@ export interface ActiveTableRecordPermissions {
   access: boolean;
   update: boolean;
   delete?: boolean;
+  comment_create?: boolean;
+  comment_access?: boolean;
+  comment_update?: boolean;
+  comment_delete?: boolean;
 }
 
 export interface ActiveTableRecord {
