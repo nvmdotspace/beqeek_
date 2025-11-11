@@ -58,8 +58,8 @@ export const ROUTES = {
     /** Table detail: /$locale/workspaces/$workspaceId/tables/$tableId */
     TABLE_DETAIL: '/$locale/workspaces/$workspaceId/tables/$tableId' as const,
 
-    /** Table records: /$locale/workspaces/$workspaceId/tables/$tableId/records */
-    TABLE_RECORDS: '/$locale/workspaces/$workspaceId/tables/$tableId/records' as const,
+    /** Table records list (index): /$locale/workspaces/$workspaceId/tables/$tableId/records/ */
+    TABLE_RECORDS: '/$locale/workspaces/$workspaceId/tables/$tableId/records/' as const,
 
     /** Record detail: /$locale/workspaces/$workspaceId/tables/$tableId/records/$recordId */
     RECORD_DETAIL: '/$locale/workspaces/$workspaceId/tables/$tableId/records/$recordId' as const,

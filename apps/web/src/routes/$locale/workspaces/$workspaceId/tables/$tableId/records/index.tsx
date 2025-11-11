@@ -25,7 +25,7 @@ export interface RecordsSearchParams {
   page?: number;
 }
 
-export const Route = createFileRoute('/$locale/workspaces/$workspaceId/tables/$tableId/records')({
+export const Route = createFileRoute('/$locale/workspaces/$workspaceId/tables/$tableId/records/')({
   component: RecordsComponent,
   validateSearch: (search: Record<string, unknown>): RecordsSearchParams => {
     return {

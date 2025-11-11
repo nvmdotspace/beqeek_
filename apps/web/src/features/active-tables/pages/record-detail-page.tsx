@@ -14,7 +14,11 @@ import { getRouteApi } from '@tanstack/react-router';
 
 import { useActiveTableRecordsWithConfig } from '../hooks/use-active-tables';
 import { useListContext } from '../hooks/use-list-context';
-import { RecordDetailView } from '../components/record-detail-view';
+import { useTableEncryption } from '../hooks/use-table-encryption';
+import { useRecordComments } from '../hooks/use-record-comments';
+import { useGetWorkspaceUsers } from '@/features/workspace-users/hooks/use-get-workspace-users';
+import { RecordDetail } from '@workspace/active-tables-core';
+import { buildRecordDetailConfig } from '../utils/record-detail-config';
 import { Button } from '@workspace/ui/components/button';
 import { Skeleton } from '@workspace/ui/components/skeleton';
 import { ErrorCard } from '@/components/error-display';
@@ -38,6 +42,21 @@ export function RecordDetailPage() {
       limit: 1000, // Load all for navigation
       direction: 'desc',
     });
+
+  // Get encryption key for E2EE tables
+  const encryption = useTableEncryption(workspaceId ?? '', tableId ?? '', table?.config);
+
+  // Fetch workspace users for user reference fields
+  const { data: workspaceUsers } = useGetWorkspaceUsers(workspaceId ?? '', {
+    query: 'BASIC_WITH_AVATAR',
+  });
+
+  // Get comments for this record (stubbed for now)
+  const {
+    comments,
+    isLoading: commentsLoading,
+    addComment,
+  } = useRecordComments(workspaceId ?? '', tableId ?? '', recordId ?? '');
 
   // Find current record and navigation IDs
   const currentRecord = records.find((r) => r.id === recordId);
@@ -71,10 +90,13 @@ export function RecordDetailPage() {
     });
   };
 
-  const handleCommentAdd = (content: string) => {
-    console.log('Add comment:', content);
-    // TODO: Implement comment creation mutation
-    return Promise.resolve();
+  const handleCommentAdd = async (content: string) => {
+    try {
+      await addComment(content);
+    } catch (error) {
+      console.error('Failed to add comment:', error);
+      // Comment creation not yet implemented - gracefully handle
+    }
   };
 
   // Loading state
@@ -184,8 +206,27 @@ export function RecordDetailPage() {
       </div>
 
       {/* Record Detail View */}
-      {isReady && table.config && (
-        <RecordDetailView record={currentRecord} tableConfig={table.config} onCommentAdd={handleCommentAdd} />
+      {isReady && table && (
+        <RecordDetail
+          table={table}
+          record={currentRecord}
+          config={buildRecordDetailConfig(table.config.recordDetailConfig, table.config.fields || [])}
+          loading={recordsLoading}
+          error={recordsError}
+          currentUser={undefined} // TODO: Add when user profile API is available
+          workspaceUsers={workspaceUsers}
+          encryptionKey={encryption.encryptionKey || undefined}
+          comments={comments}
+          commentsLoading={commentsLoading}
+          onCommentAdd={handleCommentAdd}
+          messages={{
+            loading: 'Loading record...',
+            error: 'Failed to load record',
+            recordNotFound: 'Record not found',
+            retry: 'Retry',
+          }}
+          onRetry={() => window.location.reload()}
+        />
       )}
     </div>
   );
