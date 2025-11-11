@@ -117,7 +117,12 @@ export function useInfiniteActiveTableRecords(
 
       const needsDecryption = table.config.e2eeEncryption || table.config.encryptionKey;
       if (!needsDecryption) {
-        setDecryptedRecords(rawRecords);
+        // Ensure data property is synced with record property
+        const recordsWithData = rawRecords.map((r) => ({
+          ...r,
+          data: r.record,
+        }));
+        setDecryptedRecords(recordsWithData);
         return;
       }
 
@@ -131,7 +136,12 @@ export function useInfiniteActiveTableRecords(
       }
 
       if (!decryptKey) {
-        setDecryptedRecords(rawRecords);
+        // Ensure data property is synced with record property
+        const recordsWithData = rawRecords.map((r) => ({
+          ...r,
+          data: r.record,
+        }));
+        setDecryptedRecords(recordsWithData);
         return;
       }
 
@@ -146,11 +156,21 @@ export function useInfiniteActiveTableRecords(
           true, // useCache
           50, // batchSize
         );
-        setDecryptedRecords(decrypted);
+        // Ensure data property is synced with record property
+        const recordsWithData = decrypted.map((r) => ({
+          ...r,
+          data: r.record,
+        }));
+        setDecryptedRecords(recordsWithData);
       } catch (error) {
         console.error('[useInfiniteActiveTableRecords] Decryption failed:', error);
         setDecryptionError(error instanceof Error ? error : new Error('Decryption failed'));
-        setDecryptedRecords(rawRecords); // Fallback to raw records
+        // Fallback to raw records with data property synced
+        const recordsWithData = rawRecords.map((r) => ({
+          ...r,
+          data: r.record,
+        }));
+        setDecryptedRecords(recordsWithData);
       } finally {
         setIsDecrypting(false);
       }
