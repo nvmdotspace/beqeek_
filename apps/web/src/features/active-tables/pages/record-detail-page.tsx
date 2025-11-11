@@ -169,19 +169,9 @@ export function RecordDetailPage() {
     console.log('[handleEdit] Not implemented yet');
   }, []);
 
-  const handleDuplicate = useCallback(() => {
-    // TODO: Implement duplicate functionality
-    console.log('[handleDuplicate] Not implemented yet');
-  }, []);
-
   const handleDelete = useCallback(async () => {
     // TODO: Implement delete functionality
     console.log('[handleDelete] Not implemented yet');
-  }, []);
-
-  const handleShare = useCallback(() => {
-    // TODO: Implement share functionality
-    console.log('[handleShare] Not implemented yet');
   }, []);
 
   // Group fields by section (based on config or default grouping)
@@ -525,7 +515,6 @@ export function RecordDetailPage() {
               {/* Activity Timeline */}
               <ActivityTimeline
                 comments={comments}
-                activities={[]} // TODO: Fetch system activities from API
                 permissions={effectiveCommentPermissions}
                 currentUserId={undefined} // TODO: Get from auth
                 workspaceUsers={workspaceUsers}
@@ -546,9 +535,7 @@ export function RecordDetailPage() {
                   permissions={permissions}
                   workspaceUsers={workspaceUsers}
                   onEdit={handleEdit}
-                  onDuplicate={handleDuplicate}
                   onDelete={handleDelete}
-                  onShare={handleShare}
                   locale={locale}
                 />
               </div>

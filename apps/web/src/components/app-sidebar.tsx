@@ -2,8 +2,6 @@ import { useEffect } from 'react';
 import { cn } from '@workspace/ui/lib/utils';
 import { Button } from '@workspace/ui/components/button';
 import { X } from 'lucide-react';
-// @ts-expect-error - Paraglide generates JS without .d.ts files
-import { m } from '@/paraglide/generated/messages.js';
 import { useBadgeCounts } from '@/hooks/use-badge-counts';
 import {
   useSidebarStore,
@@ -15,7 +13,6 @@ import {
 import { useAuthStore, selectIsAuthenticated } from '@/features/auth/stores/auth-store';
 import { WorkspaceSelector } from './workspace-selector';
 import { NavigationMenu } from './navigation-menu';
-import { ActivityTracking } from './activity-tracking';
 
 interface AppSidebarProps {
   onCloseMobile?: () => void;
@@ -123,49 +120,25 @@ interface SidebarContentProps {
 const SidebarContent = ({ isCollapsed = false, onCloseMobile, showCloseButton = true }: SidebarContentProps) => {
   return (
     <>
-      {/* Sidebar Header - Logo Only */}
-      <div className={cn('flex items-center justify-between p-4', isCollapsed && 'justify-center px-2 py-3')}>
-        {/* Logo */}
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-foreground text-background">
-            <span className="text-lg font-bold">B</span>
+      {/* Workspace Selector at Top */}
+      <div className={cn('p-3', isCollapsed && 'px-2')}>
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex-1 min-w-0">
+            <WorkspaceSelector isCollapsed={isCollapsed} disablePadding showAvatar={true} className="w-full" />
           </div>
-          {!isCollapsed && (
-            <div>
-              <h1 className="text-lg font-semibold">BEQEEK</h1>
-            </div>
+          {/* Close button for mobile */}
+          {!isCollapsed && showCloseButton && onCloseMobile && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onCloseMobile}
+              className="h-8 w-8 text-muted-foreground hover:text-foreground flex-shrink-0"
+              aria-label="Close sidebar"
+            >
+              <X className="h-4 w-4" />
+            </Button>
           )}
         </div>
-
-        {/* Action Buttons */}
-        {!isCollapsed && (
-          <div className="flex items-center gap-1">
-            {/* Close button for mobile */}
-            {showCloseButton && onCloseMobile && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onCloseMobile}
-                className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                aria-label="Close sidebar"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* Workspace Selector Section */}
-      <div className={cn('border-b border-border p-4', isCollapsed && 'px-2 py-3')}>
-        {isCollapsed ? (
-          <WorkspaceSelector isCollapsed disablePadding className="w-full justify-center" />
-        ) : (
-          <div className="space-y-2">
-            <p className="text-xs font-medium uppercase text-muted-foreground">{m.sidebar_workspace()}</p>
-            <WorkspaceSelector disablePadding showAvatar={true} className="w-full" />
-          </div>
-        )}
       </div>
 
       {/* Sidebar Content */}
@@ -173,9 +146,6 @@ const SidebarContent = ({ isCollapsed = false, onCloseMobile, showCloseButton = 
         <div className={cn('space-y-4', isCollapsed ? 'p-2' : 'p-4')}>
           {/* Navigation Menu */}
           <NavigationMenu isCollapsed={isCollapsed} />
-
-          {/* Activity Tracking - Only show when not collapsed */}
-          {!isCollapsed && <ActivityTracking />}
         </div>
       </div>
     </>

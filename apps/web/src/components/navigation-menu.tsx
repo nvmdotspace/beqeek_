@@ -7,10 +7,6 @@ import {
   Archive,
   Bell,
   ChevronDown,
-  ChevronRight,
-  Clock,
-  Database,
-  FileText,
   HelpCircle,
   Home,
   LayoutGrid,
@@ -20,7 +16,6 @@ import {
   Star,
   Users,
   Workflow,
-  Zap,
 } from 'lucide-react';
 // @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
@@ -49,22 +44,20 @@ interface NavigationItem {
   isSection?: boolean;
 }
 
-export const NavigationMenu = ({ isCollapsed = false, className }: NavigationMenuProps) => {
+export const NavigationMenu = ({ isCollapsed = true, className }: NavigationMenuProps) => {
   const location = useLocation();
   const locale = useCurrentLocale();
   const currentWorkspace = useSidebarStore(selectCurrentWorkspace);
   const badgeCounts = useSidebarStore(selectBadgeCounts);
   const canViewSection = useSidebarStore(selectCanViewSection);
   const activeSection = useSidebarStore(selectActiveSection);
-  const { toggleSection, expandedSections } = useSidebarStore();
+  const { toggleSection } = useSidebarStore();
   const setActiveSection = useSidebarStore((state) => state.setActiveSection);
 
-  // Navigation structure based on UX analysis
   const navigationStructure: NavigationItem[] = useMemo(() => {
     const workspaceId = currentWorkspace?.id;
 
     return [
-      // Global Navigation (always visible)
       {
         id: 'dashboard',
         label: m.navigation_dashboard(),
@@ -84,42 +77,6 @@ export const NavigationMenu = ({ isCollapsed = false, className }: NavigationMen
         icon: Bell,
         badge: 'notifications',
       },
-
-      // Quick Actions (require workspace selection)
-      ...(currentWorkspace && workspaceId
-        ? [
-            {
-              id: 'quick-actions',
-              label: m.navigation_quickActions(),
-              icon: Zap,
-              isSection: true,
-              children: [
-                {
-                  id: 'new-table',
-                  label: m.navigation_newTable(),
-                  href: `/${locale}/workspaces/${workspaceId}/tables/new`,
-                  icon: Database,
-                  requiresPermission: 'tables',
-                },
-                {
-                  id: 'new-workflow',
-                  label: m.navigation_newWorkflow(),
-                  href: `/${locale}/workspaces/${workspaceId}/workflows/new`,
-                  icon: Workflow,
-                  requiresPermission: 'workflow',
-                },
-                {
-                  id: 'new-form',
-                  label: m.navigation_newForm(),
-                  href: `/${locale}/workspaces/${workspaceId}/forms/new`,
-                  icon: FileText,
-                  requiresPermission: 'forms',
-                },
-              ],
-            },
-          ]
-        : []),
-
       // Workspace Features (require workspace selection)
       ...(currentWorkspace && workspaceId
         ? [
@@ -188,12 +145,6 @@ export const NavigationMenu = ({ isCollapsed = false, className }: NavigationMen
                   icon: Star,
                 },
                 {
-                  id: 'recent-activity',
-                  label: m.navigation_recentActivity(),
-                  href: `/${locale}/workspaces/${workspaceId}/recent-activity`,
-                  icon: Clock,
-                },
-                {
                   id: 'archived',
                   label: m.navigation_archived(),
                   href: `/${locale}/workspaces/${workspaceId}/archived`,
@@ -247,15 +198,14 @@ export const NavigationMenu = ({ isCollapsed = false, className }: NavigationMen
   }, [location.pathname, navigationStructure, setActiveSection, activeSection]);
 
   const renderNavigationItem = (item: NavigationItem, level: number = 0) => {
-    // Check permissions
     if (item.requiresPermission && !canViewSection(item.requiresPermission)) {
       return null;
     }
 
-    const isExpanded = expandedSections.includes(item.id);
+    // Always expand sections (ignore expandedSections state)
+    const isExpanded = true;
 
     if (item.isSection) {
-      // Section header
       return (
         <div key={item.id} className="space-y-1 mt-4 first:mt-0">
           {!isCollapsed && (
@@ -263,7 +213,7 @@ export const NavigationMenu = ({ isCollapsed = false, className }: NavigationMen
               onClick={() => handleSectionToggle(item.id)}
               className="flex items-center gap-2 w-full p-2 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
             >
-              {isExpanded ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+              <ChevronDown className="h-3 w-3" />
               {item.label}
             </button>
           )}

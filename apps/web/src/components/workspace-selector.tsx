@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { cn } from '@workspace/ui/lib/utils';
 import { Button } from '@workspace/ui/components/button';
@@ -9,10 +9,9 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-  DropdownMenuLabel,
   DropdownMenuGroup,
 } from '@workspace/ui/components/dropdown-menu';
-import { ChevronDown, Plus, Settings, Users, Zap, Search } from 'lucide-react';
+import { ChevronDown, Plus, Zap } from 'lucide-react';
 // @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
 import {
@@ -26,6 +25,7 @@ import { useAuthStore, selectIsAuthenticated } from '@/features/auth/stores/auth
 import type { Workspace as ApiWorkspace } from '@/shared/api/types';
 import { initialsFromName } from '@/features/workspace/utils/initials';
 import { useCurrentLocale } from '@/hooks/use-current-locale';
+import { getWorkspaceLogo, getWorkspaceInitials } from '@/shared/utils/workspace-logo';
 
 interface WorkspaceSelectorProps {
   isCollapsed?: boolean;
@@ -37,11 +37,12 @@ interface WorkspaceSelectorProps {
 // Helper to get workspace avatar src with fallback
 const getWorkspaceAvatarSrc = (workspace: Workspace | null): string | undefined => {
   if (!workspace) return undefined;
-  return (
-    workspace.thumbnailLogo ||
-    workspace.logo ||
-    (workspace.namespace ? `https://api.dicebear.com/7.x/initials/svg?seed=${workspace.namespace}` : undefined)
-  );
+  return getWorkspaceLogo({
+    workspaceName: workspace.workspaceName,
+    thumbnailLogo: workspace.thumbnailLogo,
+    logo: workspace.logo,
+    namespace: workspace.namespace,
+  });
 };
 
 export const WorkspaceSelector = ({
@@ -57,9 +58,6 @@ export const WorkspaceSelector = ({
   const currentWorkspace = useSidebarStore(selectCurrentWorkspace);
   const availableWorkspaces = useSidebarStore(selectAvailableWorkspaces);
   const { setCurrentWorkspace, setAvailableWorkspaces } = useSidebarStore();
-
-  const [searchQuery, setSearchQuery] = useState('');
-  const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Update available workspaces when data changes
   useEffect(() => {
@@ -88,13 +86,6 @@ export const WorkspaceSelector = ({
     }
   }, [workspacesData?.data, setAvailableWorkspaces, currentWorkspace, setCurrentWorkspace]);
 
-  // Filter workspaces based on search query
-  const filteredWorkspaces = availableWorkspaces.filter(
-    (workspace) =>
-      workspace.workspaceName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      workspace.namespace?.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
-
   const locale = useCurrentLocale();
 
   const handleWorkspaceSelect = (workspace: Workspace) => {
@@ -117,24 +108,6 @@ export const WorkspaceSelector = ({
     });
   };
 
-  const handleJoinWorkspace = () => {
-    // For now, navigate to main workspaces page
-    navigate({
-      to: '/$locale/workspaces',
-      params: { locale },
-    });
-  };
-
-  const handleWorkspaceSettings = () => {
-    if (currentWorkspace) {
-      // Navigate to workspace settings (not implemented yet, redirect to workspaces for now)
-      navigate({
-        to: '/$locale/workspaces',
-        params: { locale },
-      });
-    }
-  };
-
   if (!isAuthenticated) {
     return null;
   }
@@ -148,33 +121,28 @@ export const WorkspaceSelector = ({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             {currentWorkspace ? (
-              <Button variant="ghost" size="icon" className="h-9 w-9 rounded-lg p-0">
-                <Avatar className="h-9 w-9 flex-shrink-0">
+              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg p-0">
+                <Avatar className="h-8 w-8 flex-shrink-0 rounded-lg">
                   <AvatarImage src={getWorkspaceAvatarSrc(currentWorkspace)} />
-                  <AvatarFallback className="text-xs bg-primary text-primary-foreground">
-                    {initialsFromName(currentWorkspace.workspaceName)}
+                  <AvatarFallback className="text-xs font-semibold bg-primary text-primary-foreground rounded-lg">
+                    {getWorkspaceInitials(currentWorkspace.workspaceName)}
                   </AvatarFallback>
                 </Avatar>
                 <span className="sr-only">{m.workspace_selector_ariaLabel()}</span>
               </Button>
             ) : (
-              <Button variant="ghost" size="icon" className="h-9 w-9 rounded-lg bg-primary text-primary-foreground">
-                <Zap className="h-5 w-5" />
+              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg bg-primary text-primary-foreground">
+                <Zap className="h-4 w-4" />
                 <span className="sr-only">{m.workspace_selector_ariaLabel()}</span>
               </Button>
             )}
           </DropdownMenuTrigger>
           <WorkspaceDropdownContent
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            filteredWorkspaces={filteredWorkspaces}
+            filteredWorkspaces={availableWorkspaces}
             isLoading={isLoading}
             currentWorkspace={currentWorkspace}
             handleWorkspaceSelect={handleWorkspaceSelect}
             handleCreateWorkspace={handleCreateWorkspace}
-            handleJoinWorkspace={handleJoinWorkspace}
-            handleWorkspaceSettings={handleWorkspaceSettings}
-            searchInputRef={searchInputRef}
           />
         </DropdownMenu>
       </div>
@@ -186,47 +154,37 @@ export const WorkspaceSelector = ({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
-            variant="outline"
-            className="w-full justify-between bg-background hover:bg-accent border-border h-10 rounded-lg"
+            variant="ghost"
+            className="w-full justify-between hover:bg-accent h-auto py-1.5 px-1.5 rounded-lg focus-visible:ring-0 focus-visible:ring-offset-0"
             aria-label={m.workspace_selector_ariaLabel()}
           >
             <div className="flex items-center gap-2 min-w-0 flex-1">
               {showAvatar && currentWorkspace && (
-                <Avatar className="h-7 w-7 flex-shrink-0">
+                <Avatar className="h-8 w-8 flex-shrink-0 rounded-lg">
                   <AvatarImage src={getWorkspaceAvatarSrc(currentWorkspace)} />
-                  <AvatarFallback className="text-xs bg-primary text-primary-foreground">
-                    {initialsFromName(currentWorkspace.workspaceName)}
+                  <AvatarFallback className="text-xs font-semibold bg-primary text-primary-foreground rounded-lg">
+                    {getWorkspaceInitials(currentWorkspace.workspaceName)}
                   </AvatarFallback>
                 </Avatar>
               )}
               {showAvatar && !currentWorkspace && (
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary text-primary-foreground flex-shrink-0">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground flex-shrink-0">
                   <Zap className="h-4 w-4" />
                 </div>
               )}
-              <div className="flex flex-col items-start min-w-0 flex-1">
-                <span className="text-sm font-medium truncate">
-                  {currentWorkspace?.workspaceName || m.workspace_selector_noWorkspace()}
-                </span>
-                {currentWorkspace?.namespace && (
-                  <span className="text-xs text-muted-foreground truncate">{currentWorkspace.namespace}</span>
-                )}
-              </div>
+              <span className="text-sm font-semibold truncate text-left">
+                {currentWorkspace?.workspaceName || m.workspace_selector_noWorkspace()}
+              </span>
             </div>
-            <ChevronDown className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+            <ChevronDown className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0 ml-1" />
           </Button>
         </DropdownMenuTrigger>
         <WorkspaceDropdownContent
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          filteredWorkspaces={filteredWorkspaces}
+          filteredWorkspaces={availableWorkspaces}
           isLoading={isLoading}
           currentWorkspace={currentWorkspace}
           handleWorkspaceSelect={handleWorkspaceSelect}
           handleCreateWorkspace={handleCreateWorkspace}
-          handleJoinWorkspace={handleJoinWorkspace}
-          handleWorkspaceSettings={handleWorkspaceSettings}
-          searchInputRef={searchInputRef}
         />
       </DropdownMenu>
     </div>
@@ -234,81 +192,28 @@ export const WorkspaceSelector = ({
 };
 
 interface WorkspaceDropdownContentProps {
-  searchQuery: string;
-  setSearchQuery: (value: string) => void;
   filteredWorkspaces: Workspace[];
   isLoading: boolean;
   currentWorkspace: Workspace | null;
   handleWorkspaceSelect: (workspace: Workspace) => void;
   handleCreateWorkspace: () => void;
-  handleJoinWorkspace: () => void;
-  handleWorkspaceSettings: () => void;
-  searchInputRef: React.Ref<HTMLInputElement>;
 }
 
 const WorkspaceDropdownContent = ({
-  searchQuery,
-  setSearchQuery,
   filteredWorkspaces,
   isLoading,
   currentWorkspace,
   handleWorkspaceSelect,
   handleCreateWorkspace,
-  handleJoinWorkspace,
-  handleWorkspaceSettings,
-  searchInputRef,
 }: WorkspaceDropdownContentProps) => {
   return (
-    <DropdownMenuContent className="w-80" align="start" sideOffset={4}>
-      {/* Current Workspace Info */}
-      {currentWorkspace && (
-        <>
-          <DropdownMenuLabel className="font-normal">
-            <div className="flex items-center gap-3">
-              <Avatar className="h-8 w-8">
-                <AvatarImage src={getWorkspaceAvatarSrc(currentWorkspace)} />
-                <AvatarFallback className="text-xs">{initialsFromName(currentWorkspace.workspaceName)}</AvatarFallback>
-              </Avatar>
-              <div className="flex flex-col">
-                <span className="text-sm font-medium">{currentWorkspace.workspaceName}</span>
-                {currentWorkspace.namespace && (
-                  <span className="text-xs text-muted-foreground">{currentWorkspace.namespace}</span>
-                )}
-              </div>
-            </div>
-          </DropdownMenuLabel>
-          <DropdownMenuSeparator />
-        </>
-      )}
-
-      {/* Search */}
-      <div className="p-2">
-        <div className="relative">
-          <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <input
-            ref={searchInputRef}
-            type="text"
-            placeholder={m.workspace_selector_searchPlaceholder()}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-8 pr-3 py-2 text-sm bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-          />
-        </div>
-      </div>
-
-      <DropdownMenuSeparator />
-
+    <DropdownMenuContent className="w-56" align="start" sideOffset={4}>
       {/* Workspace List */}
       <DropdownMenuGroup>
-        <DropdownMenuLabel className="text-xs font-medium text-muted-foreground">
-          {m.workspace_selector_yourWorkspaces()}
-        </DropdownMenuLabel>
         {isLoading ? (
           <div className="p-2 text-center text-sm text-muted-foreground">{m.workspace_selector_loading()}</div>
         ) : filteredWorkspaces.length === 0 ? (
-          <div className="p-2 text-center text-sm text-muted-foreground">
-            {searchQuery ? m.workspace_selector_noResults() : m.workspace_selector_noWorkspaces()}
-          </div>
+          <div className="p-2 text-center text-sm text-muted-foreground">{m.workspace_selector_noWorkspaces()}</div>
         ) : (
           filteredWorkspaces.map((workspace) => {
             const isSelected = currentWorkspace?.id === workspace.id;
@@ -316,22 +221,25 @@ const WorkspaceDropdownContent = ({
               <DropdownMenuItem
                 key={workspace.id}
                 onClick={() => handleWorkspaceSelect(workspace)}
-                className={cn(
-                  'flex items-center gap-3 p-3 cursor-pointer',
-                  isSelected && 'bg-accent text-accent-foreground',
-                )}
+                className="flex items-center gap-2.5 py-2 px-2.5 cursor-pointer"
               >
-                <Avatar className="h-8 w-8">
+                <Avatar className="h-8 w-8 flex-shrink-0 rounded-lg">
                   <AvatarImage src={getWorkspaceAvatarSrc(workspace)} />
-                  <AvatarFallback className="text-xs">{initialsFromName(workspace.workspaceName)}</AvatarFallback>
+                  <AvatarFallback className="text-xs font-semibold rounded-lg">
+                    {getWorkspaceInitials(workspace.workspaceName)}
+                  </AvatarFallback>
                 </Avatar>
-                <div className="flex flex-col min-w-0 flex-1">
-                  <span className="text-sm font-medium truncate">{workspace.workspaceName}</span>
-                  {workspace.namespace && (
-                    <span className="text-xs text-muted-foreground truncate">{workspace.namespace}</span>
-                  )}
-                </div>
-                {isSelected && <div className="h-2 w-2 rounded-full bg-primary flex-shrink-0" />}
+                <span className="text-sm font-medium truncate flex-1">{workspace.workspaceName}</span>
+                {isSelected && (
+                  <svg
+                    className="h-4 w-4 text-foreground flex-shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                )}
               </DropdownMenuItem>
             );
           })
@@ -340,23 +248,14 @@ const WorkspaceDropdownContent = ({
 
       <DropdownMenuSeparator />
 
-      {/* Actions */}
-      <DropdownMenuGroup>
-        <DropdownMenuItem onClick={handleCreateWorkspace} className="flex items-center gap-2 cursor-pointer">
-          <Plus className="h-4 w-4" />
-          <span>{m.workspace_selector_createWorkspace()}</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleJoinWorkspace} className="flex items-center gap-2 cursor-pointer">
-          <Users className="h-4 w-4" />
-          <span>{m.workspace_selector_joinWorkspace()}</span>
-        </DropdownMenuItem>
-        {currentWorkspace && (
-          <DropdownMenuItem onClick={handleWorkspaceSettings} className="flex items-center gap-2 cursor-pointer">
-            <Settings className="h-4 w-4" />
-            <span>{m.workspace_selector_workspaceSettings()}</span>
-          </DropdownMenuItem>
-        )}
-      </DropdownMenuGroup>
+      {/* Add New Team Action */}
+      <DropdownMenuItem
+        onClick={handleCreateWorkspace}
+        className="flex items-center gap-2.5 py-2 px-2.5 cursor-pointer"
+      >
+        <Plus className="h-4 w-4" />
+        <span className="text-sm">{m.workspace_selector_createWorkspace()}</span>
+      </DropdownMenuItem>
     </DropdownMenuContent>
   );
 };

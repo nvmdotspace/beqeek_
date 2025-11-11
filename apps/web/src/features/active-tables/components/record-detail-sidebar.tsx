@@ -16,7 +16,7 @@ import { Badge } from '@workspace/ui/components/badge';
 import { Button } from '@workspace/ui/components/button';
 import { Separator } from '@workspace/ui/components/separator';
 import { Avatar, AvatarImage, AvatarFallback } from '@workspace/ui/components/avatar';
-import { Pencil, Copy, Share, Trash2, User, Calendar, Clock } from 'lucide-react';
+import { Pencil, Trash2, User, Calendar, Clock } from 'lucide-react';
 import type { Table, TableRecord } from '@workspace/active-tables-core';
 import type { ActiveTableRecordPermissions } from '../types';
 
@@ -26,9 +26,7 @@ export interface RecordDetailSidebarProps {
   permissions?: ActiveTableRecordPermissions;
   workspaceUsers?: Array<{ id: string; name: string; avatar?: string }>;
   onEdit?: () => void;
-  onDuplicate?: () => void;
   onDelete?: () => void;
-  onShare?: () => void;
   locale?: string;
   className?: string;
 }
@@ -42,9 +40,7 @@ export function RecordDetailSidebar({
   permissions,
   workspaceUsers,
   onEdit,
-  onDuplicate,
   onDelete,
-  onShare,
   locale = 'vi',
   className = '',
 }: RecordDetailSidebarProps) {
@@ -75,8 +71,6 @@ export function RecordDetailSidebar({
     assignee: locale === 'vi' ? 'Người thực hiện' : 'Assignee',
     actions: locale === 'vi' ? 'Hành động' : 'Actions',
     edit: locale === 'vi' ? 'Chỉnh sửa' : 'Edit',
-    duplicate: locale === 'vi' ? 'Nhân bản' : 'Duplicate',
-    share: locale === 'vi' ? 'Chia sẻ' : 'Share',
     delete: locale === 'vi' ? 'Xóa' : 'Delete',
     unassigned: locale === 'vi' ? 'Chưa phân công' : 'Unassigned',
   };
@@ -88,7 +82,7 @@ export function RecordDetailSidebar({
   return (
     <div className={`space-y-4 ${className}`}>
       {/* Status Card */}
-      {statusValue && (
+      {statusValue != null && (
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-muted-foreground">{labels.status}</CardTitle>
@@ -183,52 +177,38 @@ export function RecordDetailSidebar({
       </Card>
 
       {/* Quick Actions Card */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm font-medium text-muted-foreground">{labels.actions}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          {/* Edit - requires update permission */}
-          {permissions?.update && onEdit && (
-            <Button variant="outline" size="sm" className="w-full justify-start" onClick={onEdit}>
-              <Pencil className="h-4 w-4 mr-2" />
-              {labels.edit}
-            </Button>
-          )}
-
-          {/* Duplicate - requires create permission (assumed from access) */}
-          {permissions?.access && onDuplicate && (
-            <Button variant="outline" size="sm" className="w-full justify-start" onClick={onDuplicate}>
-              <Copy className="h-4 w-4 mr-2" />
-              {labels.duplicate}
-            </Button>
-          )}
-
-          {/* Share */}
-          {onShare && (
-            <Button variant="outline" size="sm" className="w-full justify-start" onClick={onShare}>
-              <Share className="h-4 w-4 mr-2" />
-              {labels.share}
-            </Button>
-          )}
-
-          {/* Delete - requires delete permission */}
-          {permissions?.delete && onDelete && (
-            <>
-              <Separator />
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
-                onClick={onDelete}
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                {labels.delete}
+      {(permissions?.update || permissions?.delete) && (onEdit || onDelete) && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-muted-foreground">{labels.actions}</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {/* Edit - requires update permission */}
+            {permissions?.update && onEdit && (
+              <Button variant="outline" size="sm" className="w-full justify-start" onClick={onEdit}>
+                <Pencil className="h-4 w-4 mr-2" />
+                {labels.edit}
               </Button>
-            </>
-          )}
-        </CardContent>
-      </Card>
+            )}
+
+            {/* Delete - requires delete permission */}
+            {permissions?.delete && onDelete && (
+              <>
+                {permissions?.update && onEdit && <Separator />}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
+                  onClick={onDelete}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  {labels.delete}
+                </Button>
+              </>
+            )}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

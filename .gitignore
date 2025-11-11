@@ -50,3 +50,5 @@ npm-debug.log*
 .trae
 .claude
 .workflow
+
+docs/task-management
