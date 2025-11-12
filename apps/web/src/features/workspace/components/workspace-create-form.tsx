@@ -7,6 +7,7 @@ import { Button } from '@workspace/ui/components/button';
 import { Input } from '@workspace/ui/components/input';
 import { Label } from '@workspace/ui/components/label';
 import { Textarea } from '@workspace/ui/components/textarea';
+import { Text } from '@workspace/ui/components/typography';
 
 // @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
@@ -81,7 +82,9 @@ export const WorkspaceCreateForm = ({ onSuccess }: WorkspaceCreateFormProps) => 
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <Label htmlFor="namespace">{m.workspace_form_namespaceLabel()}</Label>
-          <span className="text-[11px] text-muted-foreground">{m.workspace_form_namespaceHelp()}</span>
+          <Text size="small" color="muted" className="text-[11px]">
+            {m.workspace_form_namespaceHelp()}
+          </Text>
         </div>
         <Input
           id="namespace"
@@ -103,10 +106,10 @@ export const WorkspaceCreateForm = ({ onSuccess }: WorkspaceCreateFormProps) => 
         />
       </div>
       {createWorkspaceMutation.isError ? (
-        <p className="text-sm text-destructive">
+        <Text size="small" className="text-destructive">
           {(createWorkspaceMutation.error instanceof Error && createWorkspaceMutation.error.message) ||
             m.workspace_form_createError()}
-        </p>
+        </Text>
       ) : null}
       <Button type="submit" className="w-full" disabled={!canSubmit || createWorkspaceMutation.isPending}>
         {createWorkspaceMutation.isPending ? (

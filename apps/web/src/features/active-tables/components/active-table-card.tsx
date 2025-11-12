@@ -19,6 +19,7 @@ import type { ActiveTable } from '../types';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@workspace/ui/components/card';
 import { Badge } from '@workspace/ui/components/badge';
 import { Button } from '@workspace/ui/components/button';
+import { Heading, Text } from '@workspace/ui/components/typography';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -112,13 +113,17 @@ export const ActiveTableCard = memo(
               </div>
 
               <div className="space-y-1.5 flex-1 min-w-0">
-                <CardTitle className="text-lg font-semibold tracking-tight break-words">{table.name}</CardTitle>
+                <Heading level={3} className="break-words">
+                  {table.name}
+                </Heading>
                 <Badge variant="outline" className={cn('text-[11px] capitalize font-medium w-fit', moduleColors.badge)}>
                   <ModuleIcon className="mr-1 h-2.5 w-2.5" />
                   {moduleTypeLabel}
                 </Badge>
                 {table.description ? (
-                  <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{table.description}</p>
+                  <Text size="small" color="muted" className="line-clamp-2 mt-1">
+                    {table.description}
+                  </Text>
                 ) : null}
               </div>
             </div>

@@ -10,6 +10,7 @@ import { Button } from '@workspace/ui/components/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@workspace/ui/components/select';
 import { ScrollArea } from '@workspace/ui/components/scroll-area';
 import { Separator } from '@workspace/ui/components/separator';
+import { Heading, Text } from '@workspace/ui/components/typography';
 import { toast } from 'sonner';
 
 import {
@@ -222,9 +223,11 @@ export const PermissionsMatrix = ({ workspaceId, table }: PermissionsMatrixProps
       <CardHeader className="flex flex-col gap-2">
         <div className="flex items-center gap-2">
           <Shield className="h-4 w-4" />
-          <CardTitle className="text-lg font-semibold">{m.activeTables_permissions_title()}</CardTitle>
+          <Heading level={3}>{m.activeTables_permissions_title()}</Heading>
         </div>
-        <CardDescription>{m.activeTables_permissions_description()}</CardDescription>
+        <Text size="small" color="muted">
+          {m.activeTables_permissions_description()}
+        </Text>
       </CardHeader>
       <Separator />
       <CardContent className="space-y-4">

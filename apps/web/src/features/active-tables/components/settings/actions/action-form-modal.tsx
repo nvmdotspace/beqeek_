@@ -103,7 +103,7 @@ export function ActionFormModal({ open, onClose, editingAction, onSubmit }: Acti
           <div className="space-y-4 py-4">
             {/* Action Name */}
             <div className="space-y-2">
-              <Label htmlFor="action-name">
+              <Label htmlFor="action-name" className="text-sm font-medium">
                 {m.settings_actionModal_actionName()} <span className="text-destructive">{m.common_required()}</span>
               </Label>
               <Input
@@ -115,7 +115,7 @@ export function ActionFormModal({ open, onClose, editingAction, onSubmit }: Acti
                 aria-describedby={errors.name ? 'action-name-error' : undefined}
               />
               {errors.name && (
-                <p id="action-name-error" className="text-sm text-destructive">
+                <p id="action-name-error" className="text-xs text-destructive">
                   {errors.name}
                 </p>
               )}
@@ -123,7 +123,9 @@ export function ActionFormModal({ open, onClose, editingAction, onSubmit }: Acti
 
             {/* Icon Selector */}
             <div className="space-y-2">
-              <Label htmlFor="action-icon">{m.settings_actionModal_icon()}</Label>
+              <Label htmlFor="action-icon" className="text-sm font-medium">
+                {m.settings_actionModal_icon()}
+              </Label>
               <Select value={icon} onValueChange={setIcon}>
                 <SelectTrigger>
                   <SelectValue />
@@ -142,7 +144,9 @@ export function ActionFormModal({ open, onClose, editingAction, onSubmit }: Acti
             {/* Action ID (read-only for editing) */}
             {editingAction && (
               <div className="space-y-2">
-                <Label htmlFor="action-id">{m.settings_actionModal_actionId()}</Label>
+                <Label htmlFor="action-id" className="text-sm font-medium">
+                  {m.settings_actionModal_actionId()}
+                </Label>
                 <Input id="action-id" value={editingAction.actionId} disabled />
                 <p className="text-xs text-muted-foreground">{m.settings_actionModal_actionIdHelp()}</p>
               </div>

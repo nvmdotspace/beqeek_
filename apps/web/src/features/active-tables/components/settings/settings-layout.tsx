@@ -7,6 +7,7 @@
 import { type ReactNode } from 'react';
 import { Card } from '@workspace/ui/components/card';
 import { Separator } from '@workspace/ui/components/separator';
+import { Heading, Text } from '@workspace/ui/components/typography';
 
 export interface SettingsLayoutProps {
   /** Header component */
@@ -84,8 +85,12 @@ export function SettingsSection({ title, description, children, actions, classNa
       <div className="p-6">
         <div className="mb-4 flex items-start justify-between">
           <div className="space-y-0.5">
-            <h3 className="text-lg font-semibold tracking-tight">{title}</h3>
-            {description && <p className="text-sm text-muted-foreground">{description}</p>}
+            <Heading level={3}>{title}</Heading>
+            {description && (
+              <Text size="small" color="muted">
+                {description}
+              </Text>
+            )}
           </div>
           {actions && <div className="flex gap-2">{actions}</div>}
         </div>

@@ -26,6 +26,7 @@ import { Button } from '@workspace/ui/components/button';
 import { Badge } from '@workspace/ui/components/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@workspace/ui/components/card';
 import { Skeleton } from '@workspace/ui/components/skeleton';
+import { Heading, Text } from '@workspace/ui/components/typography';
 import { EncryptionKeyModal } from '../components/encryption-key-modal';
 import { EncryptionStatusCard } from '../components/encryption-status-card';
 import { EncryptionTypeBreakdown } from '../components/encryption-type-breakdown';
@@ -209,9 +210,11 @@ export const ActiveTableDetailPage = () => {
             ) : null}
           </div>
 
-          <h1 className="text-3xl font-bold tracking-tight">{table.name}</h1>
+          <Heading level={1}>{table.name}</Heading>
           {table.description ? (
-            <p className="max-w-2xl text-sm text-muted-foreground leading-relaxed">{table.description}</p>
+            <Text size="small" color="muted" className="max-w-2xl leading-relaxed">
+              {table.description}
+            </Text>
           ) : null}
         </div>
 
@@ -248,7 +251,7 @@ export const ActiveTableDetailPage = () => {
 
       <section className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold">{m.activeTables_detail_fieldsTitle()}</h2>
+          <Heading level={2}>{m.activeTables_detail_fieldsTitle()}</Heading>
           <Badge variant="outline" size="compact">
             {m.activeTables_detail_visibleFields({ count: table.config?.fields?.length ?? 0 })}
           </Badge>

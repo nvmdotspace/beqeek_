@@ -2,8 +2,8 @@ import { FormEvent, useEffect, useState } from 'react';
 import { useRouter } from '@tanstack/react-router';
 
 import { Button } from '@workspace/ui/components/button';
-
 import { Input } from '@workspace/ui/components/input';
+import { Heading, Text } from '@workspace/ui/components/typography';
 
 import { useLogin } from '../hooks/use-login';
 import { useAuthStore, selectIsAuthenticated } from '../stores/auth-store';
@@ -68,20 +68,26 @@ export const LoginPage = () => {
                 <span className="text-xl font-bold">B</span>
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-white">BEQEEK</h1>
-                <p className="text-sm text-blue-400">Low-Code Platform</p>
+                <Heading level={1} className="text-white">
+                  BEQEEK
+                </Heading>
+                <Text size="small" className="text-blue-400">
+                  Low-Code Platform
+                </Text>
               </div>
             </div>
 
             {/* Main Heading */}
             <div className="space-y-4">
-              <h2 className="text-4xl font-semibold leading-tight text-white">
+              <Heading level={1} className="text-white leading-tight">
                 {m.auth_welcomeBack()}
                 <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">
                   {m.auth_digitalProcessPlatform()}
                 </span>
-              </h2>
-              <p className="text-lg text-slate-300 leading-relaxed">{m.auth_manageWorkspaces()}</p>
+              </Heading>
+              <Text size="large" className="text-slate-300 leading-relaxed">
+                {m.auth_manageWorkspaces()}
+              </Text>
             </div>
 
             {/* Features */}
@@ -97,8 +103,12 @@ export const LoginPage = () => {
                   </svg>
                 </div>
                 <div>
-                  <h3 className="font-medium text-white">Active Tables</h3>
-                  <p className="text-sm text-slate-400">{m.auth_manageStructuredData()}</p>
+                  <Heading level={3} className="text-white">
+                    Active Tables
+                  </Heading>
+                  <Text size="small" className="text-slate-400">
+                    {m.auth_manageStructuredData()}
+                  </Text>
                 </div>
               </div>
 
@@ -113,8 +123,12 @@ export const LoginPage = () => {
                   </svg>
                 </div>
                 <div>
-                  <h3 className="font-medium text-white">Workflow Automation</h3>
-                  <p className="text-sm text-slate-400">{m.auth_automateWorkProcesses()}</p>
+                  <Heading level={3} className="text-white">
+                    Workflow Automation
+                  </Heading>
+                  <Text size="small" className="text-slate-400">
+                    {m.auth_automateWorkProcesses()}
+                  </Text>
                 </div>
               </div>
 
@@ -129,8 +143,12 @@ export const LoginPage = () => {
                   </svg>
                 </div>
                 <div>
-                  <h3 className="font-medium text-white">End-to-End Encryption</h3>
-                  <p className="text-sm text-slate-400">{m.auth_secureDataE2E()}</p>
+                  <Heading level={3} className="text-white">
+                    End-to-End Encryption
+                  </Heading>
+                  <Text size="small" className="text-slate-400">
+                    {m.auth_secureDataE2E()}
+                  </Text>
                 </div>
               </div>
             </div>
@@ -139,15 +157,17 @@ export const LoginPage = () => {
             <div className="rounded-2xl border border-slate-700 bg-slate-800/50 p-6 backdrop-blur-sm">
               <div className="flex items-center gap-2 mb-3">
                 <div className="h-2 w-2 rounded-full bg-green-400 animate-pulse"></div>
-                <span className="text-sm font-semibold uppercase tracking-wide text-green-400">
+                <Text size="small" weight="semibold" className="uppercase tracking-wide text-green-400" as="span">
                   {m.auth_demoEnvironment()}
-                </span>
+                </Text>
               </div>
-              <p className="text-sm text-slate-300 leading-relaxed">
+              <Text size="small" className="text-slate-300 leading-relaxed">
                 {m.auth_useDemoAccount()}{' '}
                 <span className="font-mono bg-slate-700 px-2 py-1 rounded text-slate-200">captainbolt / nvmteam</span>
-              </p>
-              <p className="text-xs text-slate-400 mt-2">{m.auth_orCreateNewWorkspace()}</p>
+              </Text>
+              <Text size="small" className="text-slate-400 mt-2">
+                {m.auth_orCreateNewWorkspace()}
+              </Text>
             </div>
           </div>
         </div>
@@ -161,8 +181,12 @@ export const LoginPage = () => {
                 <span className="text-lg font-bold">B</span>
               </div>
               <div>
-                <h1 className="text-xl font-bold text-white">BEQEEK</h1>
-                <p className="text-xs text-blue-400">Low-Code Platform</p>
+                <Heading level={1} className="text-white">
+                  BEQEEK
+                </Heading>
+                <Text size="small" className="text-blue-400">
+                  Low-Code Platform
+                </Text>
               </div>
             </div>
 
@@ -170,14 +194,20 @@ export const LoginPage = () => {
             <div className="rounded-2xl border border-slate-700 bg-slate-800/50 backdrop-blur-sm p-8">
               <div className="space-y-6">
                 <div className="text-center">
-                  <h2 className="text-2xl font-semibold text-white">{m.auth_signIn()}</h2>
-                  <p className="text-sm text-slate-400 mt-2">{m.auth_accessYourAccount()}</p>
+                  <Heading level={2} className="text-white">
+                    {m.auth_signIn()}
+                  </Heading>
+                  <Text size="small" className="text-slate-400 mt-2">
+                    {m.auth_accessYourAccount()}
+                  </Text>
                 </div>
 
                 <form className="space-y-5" onSubmit={handleSubmit}>
                   <div className="space-y-2">
-                    <label htmlFor="username" className="text-sm font-medium text-slate-200">
-                      {m.auth_username()}
+                    <label htmlFor="username">
+                      <Text size="small" weight="medium" className="text-slate-200">
+                        {m.auth_username()}
+                      </Text>
                     </label>
                     <Input
                       id="username"
@@ -194,8 +224,10 @@ export const LoginPage = () => {
 
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <label htmlFor="password" className="text-sm font-medium text-slate-200">
-                        {m.auth_password()}
+                      <label htmlFor="password">
+                        <Text size="small" weight="medium" className="text-slate-200">
+                          {m.auth_password()}
+                        </Text>
                       </label>
                       <button
                         type="button"
@@ -220,8 +252,10 @@ export const LoginPage = () => {
                   </div>
 
                   {errorMessage ? (
-                    <div className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-400">
-                      {errorMessage}
+                    <div className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2">
+                      <Text size="small" className="text-red-400">
+                        {errorMessage}
+                      </Text>
                     </div>
                   ) : null}
 
@@ -235,7 +269,9 @@ export const LoginPage = () => {
                 </form>
 
                 <div className="text-center">
-                  <p className="text-xs text-slate-400">{m.auth_needNewAccount()}</p>
+                  <Text size="small" className="text-slate-400">
+                    {m.auth_needNewAccount()}
+                  </Text>
                 </div>
               </div>
             </div>

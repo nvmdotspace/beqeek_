@@ -7,6 +7,10 @@
     "./globals.css": "./src/styles/globals.css",
     "./postcss.config": "./postcss.config.mjs",
     "./lib/*": "./src/lib/*.ts",
+    "./components/typography": {
+      "types": "./src/components/typography/index.ts",
+      "default": "./src/components/typography/index.ts"
+    },
     "./components/*": {
       "types": "./src/components/*.tsx",
       "default": "./src/components/*.tsx"

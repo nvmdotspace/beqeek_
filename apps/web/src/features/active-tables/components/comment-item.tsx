@@ -16,6 +16,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@workspace/ui/components/av
 import { Button } from '@workspace/ui/components/button';
 import { Badge } from '@workspace/ui/components/badge';
 import { Textarea } from '@workspace/ui/components/textarea';
+import { Text } from '@workspace/ui/components/typography';
 import { Pencil, Trash2, Check, X } from 'lucide-react';
 import type { RecordComment } from '../hooks/use-record-comments-with-permissions';
 
@@ -197,7 +198,9 @@ export function CommentItem({
         </div>
 
         {/* Content - render as text */}
-        <div className="text-sm whitespace-pre-wrap">{comment.content}</div>
+        <Text size="small" className="whitespace-pre-wrap">
+          {comment.content}
+        </Text>
       </div>
     </div>
   );

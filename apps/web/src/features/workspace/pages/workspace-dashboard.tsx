@@ -6,6 +6,7 @@ import { useWorkspaces } from '../hooks/use-workspaces';
 
 import { Card, CardContent } from '@workspace/ui/components/card';
 import { Skeleton } from '@workspace/ui/components/skeleton';
+import { Heading, Text, Metric } from '@workspace/ui/components/typography';
 
 import { WorkspaceCreateForm } from '../components/workspace-create-form';
 import { WorkspaceEmptyState } from '../components/workspace-empty-state';
@@ -32,8 +33,8 @@ export const WorkspaceDashboardPage = () => {
       {/* Header */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight">{m.workspace_dashboard_title()}</h1>
-          <p className="text-muted-foreground">{subtitle}</p>
+          <Heading level={1}>{m.workspace_dashboard_title()}</Heading>
+          <Text color="muted">{subtitle}</Text>
         </div>
         {/* <div className="flex items-center gap-2">
           <Button onClick={() => setShowCreateForm((prev) => !prev)}>
@@ -49,10 +50,7 @@ export const WorkspaceDashboardPage = () => {
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">{m.workspace_dashboard_totalWorkspaces()}</p>
-                  <p className="text-2xl font-bold">{totalWorkspaces}</p>
-                </div>
+                <Metric size="medium" value={totalWorkspaces} label={m.workspace_dashboard_totalWorkspaces()} />
                 <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
                   <Folder className="h-4 w-4 text-blue-600" />
                 </div>
@@ -63,10 +61,7 @@ export const WorkspaceDashboardPage = () => {
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">{m.workspace_dashboard_activeTables()}</p>
-                  <p className="text-2xl font-bold">24</p>
-                </div>
+                <Metric size="medium" value={24} label={m.workspace_dashboard_activeTables()} />
                 <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
                   <Folder className="h-4 w-4 text-primary" />
                 </div>
@@ -77,10 +72,7 @@ export const WorkspaceDashboardPage = () => {
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">{m.workspace_dashboard_activeTables()}</p>
-                  <p className="text-2xl font-bold">24</p>
-                </div>
+                <Metric size="medium" value={24} label={m.workspace_dashboard_activeTables()} />
                 <div className="h-8 w-8 rounded-full bg-success/10 flex items-center justify-center">
                   <Folder className="h-4 w-4 text-success" />
                 </div>
@@ -91,10 +83,7 @@ export const WorkspaceDashboardPage = () => {
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">{m.workspace_dashboard_workflows()}</p>
-                  <p className="text-2xl font-bold">8</p>
-                </div>
+                <Metric size="medium" value={8} label={m.workspace_dashboard_workflows()} />
                 <div className="h-8 w-8 rounded-full bg-accent/10 flex items-center justify-center">
                   <Zap className="h-4 w-4 text-accent" />
                 </div>
@@ -105,10 +94,7 @@ export const WorkspaceDashboardPage = () => {
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">{m.workspace_dashboard_teamMembers()}</p>
-                  <p className="text-2xl font-bold">15</p>
-                </div>
+                <Metric size="medium" value={15} label={m.workspace_dashboard_teamMembers()} />
                 <div className="h-8 w-8 rounded-full bg-warning/10 flex items-center justify-center">
                   <Users className="h-4 w-4 text-warning" />
                 </div>
@@ -123,8 +109,10 @@ export const WorkspaceDashboardPage = () => {
         <Card>
           <CardContent className="pt-6">
             <div className="mb-6 space-y-1">
-              <h2 className="text-xl font-semibold">{m.workspace_dashboard_createNewTitle()}</h2>
-              <p className="text-sm text-muted-foreground">{m.workspace_dashboard_createNewDescription()}</p>
+              <Heading level={2}>{m.workspace_dashboard_createNewTitle()}</Heading>
+              <Text size="small" color="muted">
+                {m.workspace_dashboard_createNewDescription()}
+              </Text>
             </div>
             <WorkspaceCreateForm onSuccess={() => setShowCreateForm(false)} />
           </CardContent>
@@ -150,10 +138,12 @@ export const WorkspaceDashboardPage = () => {
       {!isLoading && error && (
         <Card className="border-destructive/50 bg-destructive/10">
           <CardContent className="pt-6">
-            <h2 className="text-lg font-semibold text-destructive">{m.workspace_dashboard_loadFailed()}</h2>
-            <p className="text-sm text-destructive/90 mt-2">
+            <Heading level={2} className="text-destructive">
+              {m.workspace_dashboard_loadFailed()}
+            </Heading>
+            <Text size="small" className="text-destructive/90 mt-2">
               {(error instanceof Error && error.message) || m.workspace_dashboard_errorRetry()}
-            </p>
+            </Text>
           </CardContent>
         </Card>
       )}
@@ -171,8 +161,10 @@ export const WorkspaceDashboardPage = () => {
       {!isLoading && !error && totalWorkspaces > 0 && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Danh sách workspace của bạn</h2>
-            <p className="text-sm text-muted-foreground">{totalWorkspaces} workspace</p>
+            <Heading level={2}>Danh sách workspace của bạn</Heading>
+            <Text size="small" color="muted">
+              {totalWorkspaces} workspace
+            </Text>
           </div>
           <WorkspaceGrid workspaces={workspaces} />
         </div>

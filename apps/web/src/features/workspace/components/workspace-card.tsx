@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from '@workspace/ui/components/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@workspace/ui/components/avatar';
 import { Button } from '@workspace/ui/components/button';
+import { Heading, Text } from '@workspace/ui/components/typography';
 
 import { initialsFromName } from '../utils/initials';
 // @ts-expect-error - Paraglide generates JS without .d.ts files
@@ -33,7 +34,7 @@ export const WorkspaceCard = ({ workspace }: WorkspaceCardProps) => {
           </AvatarFallback>
         </Avatar>
         <div className="grow space-y-1">
-          <CardTitle className="text-lg leading-tight">{workspaceName}</CardTitle>
+          <Heading level={3}>{workspaceName}</Heading>
           <CardDescription className="flex items-center gap-2 text-xs uppercase tracking-wide">
             <Badge variant="outline" className="border-white/10 bg-white/5 text-xs font-semibold text-foreground">
               <Globe className="size-3" />
@@ -52,10 +53,12 @@ export const WorkspaceCard = ({ workspace }: WorkspaceCardProps) => {
         <div className="flex items-center gap-2 rounded-lg border border-border/60 bg-card/60 p-2 text-sm text-muted-foreground">
           <Users className="size-3.5 text-primary" />
           <div className="space-y-0.5">
-            <p className="text-[10px] uppercase tracking-wide text-foreground/70">{m.workspace_card_managerLabel()}</p>
-            <p className="text-xs font-medium text-foreground">
+            <Text size="small" className="text-[10px] uppercase tracking-wide text-foreground/70">
+              {m.workspace_card_managerLabel()}
+            </Text>
+            <Text size="small" className="font-medium">
               {myWorkspaceUser?.fullName ?? m.workspace_card_noInfo()}
-            </p>
+            </Text>
           </div>
         </div>
         <div className="rounded-lg border border-dashed border-border/60 bg-muted/40 p-2 text-[10px] text-muted-foreground">

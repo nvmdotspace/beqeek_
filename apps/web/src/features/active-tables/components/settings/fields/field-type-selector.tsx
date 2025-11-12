@@ -330,7 +330,7 @@ export function FieldTypeSelector({ value, onChange, disabled, error }: FieldTyp
 
   return (
     <div className="space-y-2">
-      <Label htmlFor="field-type-selector">
+      <Label htmlFor="field-type-selector" className="text-sm font-medium">
         Field Type <span className="text-destructive">*</span>
       </Label>
 

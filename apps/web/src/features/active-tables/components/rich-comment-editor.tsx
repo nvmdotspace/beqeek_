@@ -14,6 +14,7 @@ import { useState, useCallback, useRef } from 'react';
 import { Button } from '@workspace/ui/components/button';
 import { Card, CardContent } from '@workspace/ui/components/card';
 import { Textarea } from '@workspace/ui/components/textarea';
+import { Text } from '@workspace/ui/components/typography';
 import { Keyboard } from 'lucide-react';
 
 export interface RichCommentEditorProps {
@@ -123,10 +124,14 @@ export function RichCommentEditor({
         {(isExpanded || !isEmpty) && (
           <div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
             {/* Keyboard hint */}
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Keyboard className="h-3 w-3" />
-              <span className="hidden sm:inline">Ctrl+Enter to submit, Esc to cancel</span>
-              <span className="sm:hidden">Ctrl+Enter to submit</span>
+            <div className="flex items-center gap-2">
+              <Keyboard className="h-3 w-3 text-muted-foreground" />
+              <Text size="small" color="muted" className="text-xs hidden sm:inline">
+                Ctrl+Enter to submit, Esc to cancel
+              </Text>
+              <Text size="small" color="muted" className="text-xs sm:hidden">
+                Ctrl+Enter to submit
+              </Text>
             </div>
 
             {/* Actions */}

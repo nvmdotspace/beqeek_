@@ -19,6 +19,7 @@ import { Badge } from '@workspace/ui/components/badge';
 import { Input } from '@workspace/ui/components/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@workspace/ui/components/card';
 import { Alert, AlertDescription, AlertTitle } from '@workspace/ui/components/alert';
+import { Heading, Text, Metric } from '@workspace/ui/components/typography';
 import { cn } from '@workspace/ui/lib/utils';
 import type { ActiveTable } from '../types';
 import { useEncryption } from '../hooks/use-encryption-stub';
@@ -249,12 +250,12 @@ export const ActiveTablesPage = () => {
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div className="space-y-1">
-            <h1 className="text-3xl font-bold tracking-tight">{m.activeTables_page_title()}</h1>
-            <p className="text-sm text-muted-foreground">
+            <Heading level={1}>{m.activeTables_page_title()}</Heading>
+            <Text size="small" color="muted">
               {currentWorkspace?.workspaceName
                 ? `Workspace • ${currentWorkspace.workspaceName}`
                 : m.activeTables_page_subtitle()}
-            </p>
+            </Text>
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -294,10 +295,10 @@ export const ActiveTablesPage = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-3xl font-bold tracking-tight text-foreground">{totalTables}</p>
-              <p className="mt-1 text-xs text-muted-foreground">
+              <Metric value={totalTables} />
+              <Text size="small" color="muted" className="mt-1">
                 Across {workGroups.length} workgroup{workGroups.length === 1 ? '' : 's'}
-              </p>
+              </Text>
             </CardContent>
           </Card>
 
@@ -311,10 +312,10 @@ export const ActiveTablesPage = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-3xl font-bold tracking-tight text-foreground">{encryptedTables}</p>
-              <p className="mt-1 text-xs text-muted-foreground">
+              <Metric value={encryptedTables} />
+              <Text size="small" color="muted" className="mt-1">
                 {encryptedTables ? `${encryptedPercentage}% with E2EE protection` : 'Ready to secure sensitive data'}
-              </p>
+              </Text>
             </CardContent>
           </Card>
 
@@ -328,8 +329,10 @@ export const ActiveTablesPage = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-3xl font-bold tracking-tight text-foreground">{automationEnabledTables}</p>
-              <p className="mt-1 text-xs text-muted-foreground">Trigger workflows from records</p>
+              <Metric value={automationEnabledTables} />
+              <Text size="small" color="muted" className="mt-1">
+                Trigger workflows from records
+              </Text>
             </CardContent>
           </Card>
         </div>
@@ -512,8 +515,12 @@ export const ActiveTablesPage = () => {
             <section key={group.id} className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-xl font-semibold">{group.name}</h2>
-                  {group.description ? <p className="text-sm text-muted-foreground">{group.description}</p> : null}
+                  <Heading level={2}>{group.name}</Heading>
+                  {group.description ? (
+                    <Text size="small" color="muted">
+                      {group.description}
+                    </Text>
+                  ) : null}
                 </div>
                 <Badge variant="outline" className="bg-background">
                   {m.activeTables_page_groupTableCount({ count: tables.length })}

@@ -31,6 +31,7 @@ import { Button } from '@workspace/ui/components/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@workspace/ui/components/card';
 import { Skeleton } from '@workspace/ui/components/skeleton';
 import { Separator } from '@workspace/ui/components/separator';
+import { Heading, Text } from '@workspace/ui/components/typography';
 import { ErrorCard } from '@/components/error-display';
 import { ActivityTimeline } from '../components/activity-timeline';
 import { RecordDetailSidebar } from '../components/record-detail-sidebar';
@@ -341,7 +342,7 @@ export function RecordDetailPage() {
                     {/* Title Field (large, inline editable) */}
                     {fieldSections.titleField && (
                       <div>
-                        <h1 className="text-2xl sm:text-3xl font-bold mb-1">
+                        <Heading level={1} className="mb-1">
                           <InlineEditableField
                             field={fieldSections.titleField}
                             value={record.data?.[fieldSections.titleField.name]}
@@ -350,7 +351,7 @@ export function RecordDetailPage() {
                             isUpdating={isUpdating}
                             editMode="double-click"
                           />
-                        </h1>
+                        </Heading>
                       </div>
                     )}
 

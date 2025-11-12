@@ -12,6 +12,7 @@ import { Textarea } from '@workspace/ui/components/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@workspace/ui/components/card';
 import { Avatar, AvatarFallback } from '@workspace/ui/components/avatar';
 import { Separator } from '@workspace/ui/components/separator';
+import { Heading, Text } from '@workspace/ui/components/typography';
 
 export interface Comment {
   id: string;
@@ -73,10 +74,10 @@ export function CommentsPanel({
   return (
     <Card className={`flex flex-col h-full ${className}`}>
       <CardHeader className="pb-3">
-        <CardTitle className="text-base flex items-center gap-2">
+        <Heading level={4} className="flex items-center gap-2">
           <MessageSquare className="h-4 w-4" />
           Comments & Activity
-        </CardTitle>
+        </Heading>
       </CardHeader>
 
       <Separator />
@@ -84,12 +85,18 @@ export function CommentsPanel({
       {/* Comments list */}
       <CardContent className="flex-1 overflow-y-auto p-4 space-y-4">
         {loading ? (
-          <div className="text-center text-sm text-muted-foreground py-8">Loading comments...</div>
+          <Text size="small" color="muted" className="text-center py-8">
+            Loading comments...
+          </Text>
         ) : comments.length === 0 ? (
-          <div className="text-center text-sm text-muted-foreground py-8">
+          <div className="text-center py-8">
             <MessageSquare className="h-12 w-12 mx-auto mb-2 opacity-20" />
-            <p>No comments yet</p>
-            <p className="text-xs mt-1">Be the first to comment</p>
+            <Text size="small" color="muted">
+              No comments yet
+            </Text>
+            <Text size="small" color="muted" className="text-xs mt-1">
+              Be the first to comment
+            </Text>
           </div>
         ) : (
           comments.map((comment) => <CommentItem key={comment.id} comment={comment} />)
@@ -110,7 +117,9 @@ export function CommentsPanel({
             disabled={isSubmitting}
           />
           <div className="flex items-center justify-between">
-            <p className="text-xs text-muted-foreground">Press Ctrl+Enter to submit</p>
+            <Text size="small" color="muted" className="text-xs">
+              Press Ctrl+Enter to submit
+            </Text>
             <Button size="sm" onClick={handleSubmit} disabled={!newComment.trim() || isSubmitting}>
               <Send className="h-3 w-3 mr-1" />
               {isSubmitting ? 'Sending...' : 'Send'}
@@ -145,10 +154,16 @@ function CommentItem({ comment }: { comment: Comment }) {
 
       <div className="flex-1 space-y-1">
         <div className="flex items-center justify-between">
-          <span className="text-sm font-medium">{comment.userName}</span>
-          <span className="text-xs text-muted-foreground">{timeAgo}</span>
+          <Text size="small" className="font-medium">
+            {comment.userName}
+          </Text>
+          <Text size="small" color="muted" className="text-xs">
+            {timeAgo}
+          </Text>
         </div>
-        <p className="text-sm text-foreground whitespace-pre-wrap">{comment.content}</p>
+        <Text size="small" className="whitespace-pre-wrap">
+          {comment.content}
+        </Text>
       </div>
     </div>
   );

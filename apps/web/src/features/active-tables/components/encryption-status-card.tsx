@@ -13,6 +13,7 @@ import { Shield, ShieldCheck, ShieldX, AlertTriangle, Key, X } from 'lucide-reac
 import { Card, CardContent, CardHeader, CardTitle } from '@workspace/ui/components/card';
 import { Badge } from '@workspace/ui/components/badge';
 import { Button } from '@workspace/ui/components/button';
+import { Heading, Text } from '@workspace/ui/components/typography';
 import type { ActiveTable } from '../types';
 import type { UseTableEncryptionReturn } from '../hooks/use-table-encryption';
 
@@ -30,20 +31,20 @@ export function EncryptionStatusCard({ table, encryption, onEnterKey }: Encrypti
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <Heading level={3} className="flex items-center gap-2">
             <Shield className="h-5 w-5 text-muted-foreground" />
             Encryption Status
-          </CardTitle>
+          </Heading>
         </CardHeader>
         <CardContent className="space-y-3">
           <Badge variant="secondary" className="flex w-fit items-center gap-2">
             <Shield className="h-4 w-4" />
             Server-side Encryption
           </Badge>
-          <p className="text-sm text-muted-foreground">
+          <Text size="small" color="muted">
             The table <span className="font-medium">{table.name}</span> uses server-side encryption. No client-side
             encryption key is required.
-          </p>
+          </Text>
         </CardContent>
       </Card>
     );
@@ -54,20 +55,20 @@ export function EncryptionStatusCard({ table, encryption, onEnterKey }: Encrypti
     return (
       <Card className="border-yellow-500">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <Heading level={3} className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-yellow-600" />
             Encryption Key Required
-          </CardTitle>
+          </Heading>
         </CardHeader>
         <CardContent className="space-y-3">
           <Badge variant="outline" className="flex w-fit items-center gap-2 border-yellow-500 text-yellow-700">
             <Key className="h-4 w-4" />
             No Key Loaded
           </Badge>
-          <p className="text-sm text-muted-foreground">
+          <Text size="small" color="muted">
             The table <span className="font-medium">{table.name}</span> uses end-to-end encryption. Enter your
             encryption key to view and manage encrypted records.
-          </p>
+          </Text>
           <Button onClick={onEnterKey} className="w-full sm:w-auto">
             <Key className="mr-2 h-4 w-4" />
             Enter Encryption Key
@@ -82,20 +83,20 @@ export function EncryptionStatusCard({ table, encryption, onEnterKey }: Encrypti
     return (
       <Card className="border-destructive">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <Heading level={3} className="flex items-center gap-2">
             <ShieldX className="h-5 w-5 text-destructive" />
             Invalid Encryption Key
-          </CardTitle>
+          </Heading>
         </CardHeader>
         <CardContent className="space-y-3">
           <Badge variant="destructive" className="flex w-fit items-center gap-2">
             <ShieldX className="h-4 w-4" />
             Key Validation Failed
           </Badge>
-          <p className="text-sm text-muted-foreground">
+          <Text size="small" color="muted">
             The stored encryption key is invalid for <span className="font-medium">{table.name}</span>. Please enter the
             correct encryption key.
-          </p>
+          </Text>
           <div className="flex gap-2">
             <Button onClick={onEnterKey} className="flex-1 sm:flex-none">
               <Key className="mr-2 h-4 w-4" />
@@ -115,20 +116,20 @@ export function EncryptionStatusCard({ table, encryption, onEnterKey }: Encrypti
   return (
     <Card className="border-green-500">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <Heading level={3} className="flex items-center gap-2">
           <ShieldCheck className="h-5 w-5 text-green-600" />
           Encryption Active
-        </CardTitle>
+        </Heading>
       </CardHeader>
       <CardContent className="space-y-3">
         <Badge variant="outline" className="flex w-fit items-center gap-2 border-green-500 text-green-700">
           <ShieldCheck className="h-4 w-4" />
           Key Loaded & Valid
         </Badge>
-        <p className="text-sm text-muted-foreground">
+        <Text size="small" color="muted">
           Your encryption key for <span className="font-medium">{table.name}</span> is loaded and validated. You can now
           view and manage encrypted records securely.
-        </p>
+        </Text>
         <div className="flex gap-2">
           <Button variant="outline" onClick={onEnterKey} size="sm">
             <Key className="mr-2 h-3.5 w-3.5" />

@@ -8,6 +8,7 @@ import { ArrowLeft, Settings2 } from 'lucide-react';
 import { getRouteApi } from '@tanstack/react-router';
 import { Button } from '@workspace/ui/components/button';
 import { Badge } from '@workspace/ui/components/badge';
+import { Heading, Text } from '@workspace/ui/components/typography';
 // @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
 import { ROUTES } from '@/shared/route-paths';
@@ -57,7 +58,7 @@ export function SettingsHeader({ tableName, description, isDirty }: SettingsHead
           </Button>
           <div className="flex items-center gap-2">
             <Settings2 className="h-6 w-6 text-muted-foreground" aria-hidden="true" />
-            <h1 className="text-3xl font-bold tracking-tight">{m.settings_header_title({ tableName })}</h1>
+            <Heading level={1}>{m.settings_header_title({ tableName })}</Heading>
             {isDirty && (
               <Badge variant="secondary" className="ml-2">
                 {m.settings_header_unsaved()}
@@ -65,8 +66,16 @@ export function SettingsHeader({ tableName, description, isDirty }: SettingsHead
             )}
           </div>
         </div>
-        {description && <p className="ml-14 text-muted-foreground">{description}</p>}
-        {!description && <p className="ml-14 text-muted-foreground">{m.settings_general_description()}</p>}
+        {description && (
+          <Text className="ml-14" color="muted">
+            {description}
+          </Text>
+        )}
+        {!description && (
+          <Text className="ml-14" color="muted">
+            {m.settings_general_description()}
+          </Text>
+        )}
       </div>
     </div>
   );

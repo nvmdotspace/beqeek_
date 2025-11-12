@@ -137,7 +137,7 @@ export function ReferenceFieldConfig({
     <div className="space-y-4 rounded-lg border p-4 bg-muted/30">
       <div className="flex items-center gap-2">
         <ExternalLink className="h-4 w-4 text-muted-foreground" />
-        <h4 className="text-sm font-semibold">Reference Configuration</h4>
+        <h4 className="text-base font-semibold">Reference Configuration</h4>
         {isFirstReferenceRecord && (
           <Badge variant="info" className="text-xs">
             Reverse Lookup
@@ -163,7 +163,7 @@ export function ReferenceFieldConfig({
 
       {/* Reference Table Selection */}
       <div className="space-y-2">
-        <Label htmlFor="reference-table">
+        <Label htmlFor="reference-table" className="text-sm font-medium">
           Reference Table <span className="text-destructive">*</span>
         </Label>
         <Select value={localTableId} onValueChange={handleTableChange}>
@@ -192,7 +192,7 @@ export function ReferenceFieldConfig({
       {/* Label Field Selection */}
       {localTableId && (
         <div className="space-y-2">
-          <Label htmlFor="label-field">
+          <Label htmlFor="label-field" className="text-sm font-medium">
             Display Field <span className="text-destructive">*</span>
           </Label>
           <Select
@@ -231,7 +231,7 @@ export function ReferenceFieldConfig({
       {/* Reference Field Selection (FIRST_REFERENCE_RECORD only) */}
       {isFirstReferenceRecord && localTableId && (
         <div className="space-y-2">
-          <Label htmlFor="reference-field">
+          <Label htmlFor="reference-field" className="text-sm font-medium">
             Reference Field <span className="text-destructive">*</span>
           </Label>
           <Select

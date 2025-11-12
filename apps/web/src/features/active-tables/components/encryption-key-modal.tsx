@@ -22,6 +22,7 @@ import { Button } from '@workspace/ui/components/button';
 import { Input } from '@workspace/ui/components/input';
 import { Label } from '@workspace/ui/components/label';
 import { Alert, AlertTitle, AlertDescription } from '@workspace/ui/components/alert';
+import { Text } from '@workspace/ui/components/typography';
 import { isValidEncryptionKey, validateEncryptionKey } from '@workspace/active-tables-core';
 import type { ActiveTable } from '../types';
 
@@ -94,18 +95,30 @@ export function EncryptionKeyModal({ isOpen, onClose, table, workspaceId, onKeyS
 
         <div className="space-y-4">
           {/* Table Info */}
-          <div className="rounded-lg bg-muted p-3 space-y-2 text-sm">
+          <div className="rounded-lg bg-muted p-3 space-y-2">
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Table:</span>
-              <span className="font-medium">{table.name}</span>
+              <Text size="small" color="muted">
+                Table:
+              </Text>
+              <Text size="small" className="font-medium">
+                {table.name}
+              </Text>
             </div>
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Table ID:</span>
-              <span className="font-mono text-xs">{table.id}</span>
+              <Text size="small" color="muted">
+                Table ID:
+              </Text>
+              <Text size="small" className="font-mono text-xs">
+                {table.id}
+              </Text>
             </div>
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Workspace:</span>
-              <span className="font-mono text-xs">{workspaceId}</span>
+              <Text size="small" color="muted">
+                Workspace:
+              </Text>
+              <Text size="small" className="font-mono text-xs">
+                {workspaceId}
+              </Text>
             </div>
           </div>
 
@@ -123,11 +136,19 @@ export function EncryptionKeyModal({ isOpen, onClose, table, workspaceId, onKeyS
               autoComplete="off"
               autoFocus
             />
-            <div className="flex justify-between text-xs">
-              <span className={keyInput.length === 32 ? 'text-success' : 'text-muted-foreground'}>
+            <div className="flex justify-between">
+              <Text
+                size="small"
+                className={keyInput.length === 32 ? 'text-success' : ''}
+                color={keyInput.length === 32 ? undefined : 'muted'}
+              >
                 {keyInput.length}/32 characters
-              </span>
-              {validationError && <span className="text-destructive">{validationError}</span>}
+              </Text>
+              {validationError && (
+                <Text size="small" className="text-destructive">
+                  {validationError}
+                </Text>
+              )}
             </div>
           </div>
 
@@ -136,7 +157,7 @@ export function EncryptionKeyModal({ isOpen, onClose, table, workspaceId, onKeyS
             <AlertTriangle className="h-4 w-4" />
             <AlertTitle>Important Security Notice</AlertTitle>
             <AlertDescription>
-              <ul className="list-disc pl-4 space-y-1 text-sm mt-2">
+              <ul className="list-disc pl-4 space-y-1 mt-2 text-sm">
                 <li>Keep your encryption key safe and secure</li>
                 <li>Loss of key means permanent loss of data access</li>
                 <li>Never share your key with anyone</li>

@@ -86,7 +86,9 @@ export const GeneralSettingsTab = ({ table, workspaceId }: GeneralSettingsTabPro
         <CardContent className="space-y-4">
           {/* Table ID (Read-only) */}
           <div className="space-y-2">
-            <Label htmlFor="table-id">ID Bảng</Label>
+            <Label htmlFor="table-id" className="text-sm font-medium">
+              ID Bảng
+            </Label>
             <div className="flex gap-2">
               <Input id="table-id" value={table.id} readOnly className="flex-1 bg-muted font-mono text-sm" />
               <Button variant="outline" size="icon" onClick={handleCopyId} className="shrink-0">
@@ -97,7 +99,9 @@ export const GeneralSettingsTab = ({ table, workspaceId }: GeneralSettingsTabPro
 
           {/* Encryption Key - Always show */}
           <div className="space-y-2">
-            <Label htmlFor="encryption-key">Khóa mã hóa</Label>
+            <Label htmlFor="encryption-key" className="text-sm font-medium">
+              Khóa mã hóa
+            </Label>
             <div className="flex gap-2">
               <div className="relative flex-1">
                 <Input
@@ -146,7 +150,9 @@ export const GeneralSettingsTab = ({ table, workspaceId }: GeneralSettingsTabPro
 
           {/* Record Limit */}
           <div className="space-y-2">
-            <Label htmlFor="record-limit">Giới hạn bản ghi (Tối đa 1000) *</Label>
+            <Label htmlFor="record-limit" className="text-sm font-medium">
+              Giới hạn bản ghi (Tối đa 1000) *
+            </Label>
             <Input
               id="record-limit"
               type="number"
@@ -158,13 +164,15 @@ export const GeneralSettingsTab = ({ table, workspaceId }: GeneralSettingsTabPro
 
           {/* Default Sort */}
           <div className="space-y-2">
-            <Label htmlFor="default-sort">Chiều sắp xếp mặc định *</Label>
+            <Label htmlFor="default-sort" className="text-sm font-medium">
+              Chiều sắp xếp mặc định *
+            </Label>
             <Input id="default-sort" value={table.config.defaultSort || 'Cũ nhất'} readOnly className="bg-muted" />
           </div>
 
           {/* Searchable Fields */}
           <div className="space-y-2">
-            <Label>Trường dữ liệu tìm kiếm *</Label>
+            <Label className="text-sm font-medium">Trường dữ liệu tìm kiếm *</Label>
             {hashedKeywordFields.length === 0 ? (
               <p className="text-sm text-muted-foreground">No searchable fields configured</p>
             ) : (

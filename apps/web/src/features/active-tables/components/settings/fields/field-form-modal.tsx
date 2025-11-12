@@ -377,11 +377,11 @@ export function FieldFormModal({
 
             {/* Basic Field Configuration */}
             <div className="space-y-4">
-              <h3 className="text-sm font-semibold">{m.settings_fieldModal_sectionBasic()}</h3>
+              <h3 className="text-base font-semibold">{m.settings_fieldModal_sectionBasic()}</h3>
 
               {/* Label */}
               <div className="space-y-2">
-                <Label htmlFor="field-label">
+                <Label htmlFor="field-label" className="text-sm font-medium">
                   {m.settings_fieldModal_labelField()} <span className="text-destructive">{m.common_required()}</span>
                 </Label>
                 <Input
@@ -392,14 +392,14 @@ export function FieldFormModal({
                   className={showValidation && validationErrors.label ? 'border-destructive' : ''}
                 />
                 {showValidation && validationErrors.label && (
-                  <p className="text-sm text-destructive">{validationErrors.label}</p>
+                  <p className="text-xs text-destructive">{validationErrors.label}</p>
                 )}
                 <p className="text-xs text-muted-foreground">{m.settings_fieldModal_labelHelp()}</p>
               </div>
 
               {/* Name */}
               <div className="space-y-2">
-                <Label htmlFor="field-name">
+                <Label htmlFor="field-name" className="text-sm font-medium">
                   {m.settings_fieldModal_nameField()} <span className="text-destructive">{m.common_required()}</span>
                 </Label>
                 <Input
@@ -411,7 +411,7 @@ export function FieldFormModal({
                   disabled={isEditing}
                 />
                 {showValidation && validationErrors.name && (
-                  <p className="text-sm text-destructive">{validationErrors.name}</p>
+                  <p className="text-xs text-destructive">{validationErrors.name}</p>
                 )}
                 <p className="text-xs text-muted-foreground">
                   {isEditing ? m.settings_fieldModal_nameLockedHelp() : m.settings_fieldModal_nameHelp()}
@@ -420,7 +420,9 @@ export function FieldFormModal({
 
               {/* Placeholder */}
               <div className="space-y-2">
-                <Label htmlFor="field-placeholder">{m.settings_fieldModal_placeholderField()}</Label>
+                <Label htmlFor="field-placeholder" className="text-sm font-medium">
+                  {m.settings_fieldModal_placeholderField()}
+                </Label>
                 <Input
                   id="field-placeholder"
                   value={formData.placeholder}
@@ -432,7 +434,9 @@ export function FieldFormModal({
 
               {/* Default Value */}
               <div className="space-y-2">
-                <Label htmlFor="field-default-value">{m.settings_fieldModal_defaultValueField()}</Label>
+                <Label htmlFor="field-default-value" className="text-sm font-medium">
+                  {m.settings_fieldModal_defaultValueField()}
+                </Label>
                 <Input
                   id="field-default-value"
                   value={formData.defaultValue}
@@ -445,7 +449,7 @@ export function FieldFormModal({
               {/* Required Toggle */}
               <div className="flex items-center justify-between rounded-lg border p-4">
                 <div className="space-y-0.5">
-                  <Label htmlFor="field-required" className="text-base">
+                  <Label htmlFor="field-required" className="text-sm font-medium">
                     {m.settings_fieldModal_requiredField()}
                   </Label>
                   <p className="text-sm text-muted-foreground">{m.settings_fieldModal_requiredHelp()}</p>

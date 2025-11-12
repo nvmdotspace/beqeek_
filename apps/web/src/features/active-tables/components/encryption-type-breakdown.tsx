@@ -15,6 +15,7 @@ import { Shield, Lock, Hash, Unlock } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@workspace/ui/components/card';
 import { Badge } from '@workspace/ui/components/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@workspace/ui/components/tabs';
+import { Heading, Text } from '@workspace/ui/components/typography';
 import { getEncryptionTypeForField } from '@workspace/active-tables-core';
 import type { ActiveFieldConfig } from '../types';
 
@@ -65,12 +66,12 @@ export function EncryptionTypeBreakdown({ fields, hashedKeywordFields, isE2EEEna
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Encryption Configuration</CardTitle>
+          <Heading level={3}>Encryption Configuration</Heading>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground">
+          <Text size="small" color="muted">
             End-to-end encryption is not enabled for this table. All data is encrypted at rest on the server.
-          </p>
+          </Text>
         </CardContent>
       </Card>
     );
@@ -79,7 +80,7 @@ export function EncryptionTypeBreakdown({ fields, hashedKeywordFields, isE2EEEna
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Encryption Configuration</CardTitle>
+        <Heading level={3}>Encryption Configuration</Heading>
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="aes" className="w-full">
@@ -104,10 +105,12 @@ export function EncryptionTypeBreakdown({ fields, hashedKeywordFields, isE2EEEna
 
           <TabsContent value="aes" className="space-y-3 mt-4">
             <div className="rounded-lg bg-muted p-3">
-              <h4 className="font-semibold text-sm mb-1">AES-256-CBC Encryption</h4>
-              <p className="text-xs text-muted-foreground">
+              <Heading level={4} className="mb-1">
+                AES-256-CBC Encryption
+              </Heading>
+              <Text size="small" color="muted" className="text-xs">
                 Strong encryption for text fields. Provides full confidentiality but prevents server-side searching.
-              </p>
+              </Text>
             </div>
             {fieldsByType.aes.length > 0 ? (
               <div className="flex flex-wrap gap-2">
@@ -119,16 +122,20 @@ export function EncryptionTypeBreakdown({ fields, hashedKeywordFields, isE2EEEna
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground">No fields using AES-256-CBC encryption</p>
+              <Text size="small" color="muted">
+                No fields using AES-256-CBC encryption
+              </Text>
             )}
           </TabsContent>
 
           <TabsContent value="ope" className="space-y-3 mt-4">
             <div className="rounded-lg bg-muted p-3">
-              <h4 className="font-semibold text-sm mb-1">Order-Preserving Encryption (OPE)</h4>
-              <p className="text-xs text-muted-foreground">
+              <Heading level={4} className="mb-1">
+                Order-Preserving Encryption (OPE)
+              </Heading>
+              <Text size="small" color="muted" className="text-xs">
                 Encryption that preserves numeric/date ordering. Enables range queries and sorting on encrypted data.
-              </p>
+              </Text>
             </div>
             {fieldsByType.ope.length > 0 ? (
               <div className="flex flex-wrap gap-2">
@@ -140,16 +147,20 @@ export function EncryptionTypeBreakdown({ fields, hashedKeywordFields, isE2EEEna
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground">No fields using OPE encryption</p>
+              <Text size="small" color="muted">
+                No fields using OPE encryption
+              </Text>
             )}
           </TabsContent>
 
           <TabsContent value="hmac" className="space-y-3 mt-4">
             <div className="rounded-lg bg-muted p-3">
-              <h4 className="font-semibold text-sm mb-1">HMAC-SHA256 Hashing</h4>
-              <p className="text-xs text-muted-foreground">
+              <Heading level={4} className="mb-1">
+                HMAC-SHA256 Hashing
+              </Heading>
+              <Text size="small" color="muted" className="text-xs">
                 One-way hashing for select fields. Enables exact-match filtering without revealing values.
-              </p>
+              </Text>
             </div>
             {fieldsByType.hmac.length > 0 ? (
               <div className="flex flex-wrap gap-2">
@@ -161,16 +172,20 @@ export function EncryptionTypeBreakdown({ fields, hashedKeywordFields, isE2EEEna
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground">No fields using HMAC hashing</p>
+              <Text size="small" color="muted">
+                No fields using HMAC hashing
+              </Text>
             )}
           </TabsContent>
 
           <TabsContent value="none" className="space-y-3 mt-4">
             <div className="rounded-lg bg-muted p-3">
-              <h4 className="font-semibold text-sm mb-1">No Encryption</h4>
-              <p className="text-xs text-muted-foreground">
+              <Heading level={4} className="mb-1">
+                No Encryption
+              </Heading>
+              <Text size="small" color="muted" className="text-xs">
                 Fields that are not encrypted client-side (e.g., file attachments, user references).
-              </p>
+              </Text>
             </div>
             {fieldsByType.none.length > 0 ? (
               <div className="flex flex-wrap gap-2">
@@ -182,7 +197,9 @@ export function EncryptionTypeBreakdown({ fields, hashedKeywordFields, isE2EEEna
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground">All fields are encrypted</p>
+              <Text size="small" color="muted">
+                All fields are encrypted
+              </Text>
             )}
           </TabsContent>
         </Tabs>
@@ -190,10 +207,10 @@ export function EncryptionTypeBreakdown({ fields, hashedKeywordFields, isE2EEEna
         {/* Hashed Keyword Fields */}
         {hashedKeywordFields.length > 0 && (
           <div className="mt-6 space-y-2">
-            <h4 className="font-semibold text-sm">Searchable Fields (Hashed Keywords)</h4>
-            <p className="text-xs text-muted-foreground">
+            <Heading level={4}>Searchable Fields (Hashed Keywords)</Heading>
+            <Text size="small" color="muted" className="text-xs">
               These encrypted fields support full-text search through hashed keywords:
-            </p>
+            </Text>
             <div className="flex flex-wrap gap-2">
               {hashedKeywordFields.map((fieldName) => {
                 const field = fields.find((f) => f.name === fieldName);

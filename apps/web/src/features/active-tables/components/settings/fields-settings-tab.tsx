@@ -41,7 +41,7 @@ export const FieldsSettingsTab = ({ table }: FieldsSettingsTabProps) => {
                 >
                   <div className="space-y-1 flex-1">
                     <div className="flex items-center gap-2">
-                      <Label className="font-semibold">{field.label}</Label>
+                      <Label className="text-sm font-semibold">{field.label}</Label>
                       {field.required && (
                         <Badge variant="destructive" className="text-xs">
                           Required

@@ -15,6 +15,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@workspace/ui/components/select';
 import { Switch } from '@workspace/ui/components/switch';
 import { Card, CardContent, CardHeader, CardTitle } from '@workspace/ui/components/card';
+import { Heading, Text } from '@workspace/ui/components/typography';
 
 import type { ActiveTable, ActiveTableRecord, ActiveFieldConfig } from '../types';
 
@@ -116,7 +117,9 @@ export const RecordManagementDialog = ({
                   placeholder={field.placeholder}
                 />
                 {formField.state.meta.errors && (
-                  <p className="text-sm text-destructive">{formField.state.meta.errors[0]}</p>
+                  <Text size="small" className="text-destructive">
+                    {formField.state.meta.errors[0]}
+                  </Text>
                 )}
               </div>
             )}
@@ -153,7 +156,9 @@ export const RecordManagementDialog = ({
                   rows={4}
                 />
                 {formField.state.meta.errors && (
-                  <p className="text-sm text-destructive">{formField.state.meta.errors[0]}</p>
+                  <Text size="small" className="text-destructive">
+                    {formField.state.meta.errors[0]}
+                  </Text>
                 )}
               </div>
             )}
@@ -198,7 +203,9 @@ export const RecordManagementDialog = ({
                   placeholder={field.placeholder}
                 />
                 {formField.state.meta.errors && (
-                  <p className="text-sm text-destructive">{formField.state.meta.errors[0]}</p>
+                  <Text size="small" className="text-destructive">
+                    {formField.state.meta.errors[0]}
+                  </Text>
                 )}
               </div>
             )}
@@ -235,7 +242,9 @@ export const RecordManagementDialog = ({
                   }}
                 />
                 {formField.state.meta.errors && (
-                  <p className="text-sm text-destructive">{formField.state.meta.errors[0]}</p>
+                  <Text size="small" className="text-destructive">
+                    {formField.state.meta.errors[0]}
+                  </Text>
                 )}
               </div>
             )}
@@ -302,7 +311,9 @@ export const RecordManagementDialog = ({
                   </SelectContent>
                 </Select>
                 {formField.state.meta.errors && (
-                  <p className="text-sm text-destructive">{formField.state.meta.errors[0]}</p>
+                  <Text size="small" className="text-destructive">
+                    {formField.state.meta.errors[0]}
+                  </Text>
                 )}
               </div>
             )}
@@ -354,7 +365,7 @@ export const RecordManagementDialog = ({
         >
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Record Data</CardTitle>
+              <Heading level={3}>Record Data</Heading>
             </CardHeader>
             <CardContent className="space-y-4">
               {table.config.fields.map((field) => (

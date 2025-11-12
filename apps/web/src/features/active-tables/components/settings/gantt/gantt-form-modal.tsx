@@ -164,7 +164,7 @@ export function GanttFormModal({
           <div className="space-y-4 py-4">
             {/* Screen Name */}
             <div className="space-y-2">
-              <Label htmlFor="screen-name">
+              <Label htmlFor="screen-name" className="text-sm font-medium">
                 {m.settings_ganttModal_screenName()} <span className="text-destructive">{m.common_required()}</span>
               </Label>
               <Input
@@ -176,7 +176,7 @@ export function GanttFormModal({
                 aria-describedby={errors.screenName ? 'screen-name-error' : undefined}
               />
               {errors.screenName && (
-                <p id="screen-name-error" className="text-sm text-destructive">
+                <p id="screen-name-error" className="text-xs text-destructive">
                   {errors.screenName}
                 </p>
               )}
@@ -184,7 +184,9 @@ export function GanttFormModal({
 
             {/* Screen Description */}
             <div className="space-y-2">
-              <Label htmlFor="screen-description">{m.settings_ganttModal_description_label()}</Label>
+              <Label htmlFor="screen-description" className="text-sm font-medium">
+                {m.settings_ganttModal_description_label()}
+              </Label>
               <Textarea
                 id="screen-description"
                 value={screenDescription}
@@ -196,7 +198,7 @@ export function GanttFormModal({
 
             {/* Task Name Field */}
             <div className="space-y-2">
-              <Label htmlFor="task-name-field">
+              <Label htmlFor="task-name-field" className="text-sm font-medium">
                 {m.settings_ganttModal_taskNameField()} <span className="text-destructive">{m.common_required()}</span>
               </Label>
               <Select value={taskNameField} onValueChange={setTaskNameField}>
@@ -212,7 +214,7 @@ export function GanttFormModal({
                 </SelectContent>
               </Select>
               {errors.taskNameField && (
-                <p id="task-name-field-error" className="text-sm text-destructive">
+                <p id="task-name-field-error" className="text-xs text-destructive">
                   {errors.taskNameField}
                 </p>
               )}
@@ -221,7 +223,7 @@ export function GanttFormModal({
 
             {/* Start Date Field */}
             <div className="space-y-2">
-              <Label htmlFor="start-date-field">
+              <Label htmlFor="start-date-field" className="text-sm font-medium">
                 {m.settings_ganttModal_startDateField()} <span className="text-destructive">{m.common_required()}</span>
               </Label>
               <Select value={startDateField} onValueChange={setStartDateField}>
@@ -237,7 +239,7 @@ export function GanttFormModal({
                 </SelectContent>
               </Select>
               {errors.startDateField && (
-                <p id="start-date-field-error" className="text-sm text-destructive">
+                <p id="start-date-field-error" className="text-xs text-destructive">
                   {errors.startDateField}
                 </p>
               )}
@@ -246,7 +248,7 @@ export function GanttFormModal({
 
             {/* End Date Field */}
             <div className="space-y-2">
-              <Label htmlFor="end-date-field">
+              <Label htmlFor="end-date-field" className="text-sm font-medium">
                 {m.settings_ganttModal_endDateField()} <span className="text-destructive">{m.common_required()}</span>
               </Label>
               <Select value={endDateField} onValueChange={setEndDateField}>
@@ -262,7 +264,7 @@ export function GanttFormModal({
                 </SelectContent>
               </Select>
               {errors.endDateField && (
-                <p id="end-date-field-error" className="text-sm text-destructive">
+                <p id="end-date-field-error" className="text-xs text-destructive">
                   {errors.endDateField}
                 </p>
               )}
@@ -271,7 +273,9 @@ export function GanttFormModal({
 
             {/* Progress Field (Optional) */}
             <div className="space-y-2">
-              <Label htmlFor="progress-field">{m.settings_ganttModal_progressField()}</Label>
+              <Label htmlFor="progress-field" className="text-sm font-medium">
+                {m.settings_ganttModal_progressField()}
+              </Label>
               <Select value={progressField} onValueChange={setProgressField}>
                 <SelectTrigger>
                   <SelectValue placeholder={m.settings_ganttModal_progressFieldPlaceholder()} />
@@ -290,7 +294,9 @@ export function GanttFormModal({
 
             {/* Dependency Field (Optional) */}
             <div className="space-y-2">
-              <Label htmlFor="dependency-field">{m.settings_ganttModal_dependencyField()}</Label>
+              <Label htmlFor="dependency-field" className="text-sm font-medium">
+                {m.settings_ganttModal_dependencyField()}
+              </Label>
               <Select value={dependencyField} onValueChange={setDependencyField}>
                 <SelectTrigger>
                   <SelectValue placeholder={m.settings_ganttModal_dependencyFieldPlaceholder()} />

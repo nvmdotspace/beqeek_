@@ -373,7 +373,7 @@ export function FieldOptionsEditor({ options, onChange, error, errorMessage }: F
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="new-option-input">
+        <Label htmlFor="new-option-input" className="text-sm font-medium">
           {m.settings_fieldOptions_title()} <span className="text-destructive">*</span>
         </Label>
         <p className="text-sm text-muted-foreground">{m.settings_fieldOptions_description()}</p>
@@ -503,7 +503,9 @@ export function FieldOptionsEditor({ options, onChange, error, errorMessage }: F
                       <div className="grid gap-4 md:grid-cols-2">
                         <div className="space-y-2">
                           <div className="flex h-8 items-center">
-                            <Label htmlFor={`option-text-${index}`}>{m.settings_fieldOptions_displayLabel()}</Label>
+                            <Label htmlFor={`option-text-${index}`} className="text-sm font-medium">
+                              {m.settings_fieldOptions_displayLabel()}
+                            </Label>
                           </div>
                           <Input
                             id={`option-text-${index}`}
@@ -529,7 +531,9 @@ export function FieldOptionsEditor({ options, onChange, error, errorMessage }: F
 
                         <div className="space-y-2">
                           <div className="flex h-8 items-center justify-between">
-                            <Label htmlFor={`option-value-${index}`}>{m.settings_fieldOptions_value()}</Label>
+                            <Label htmlFor={`option-value-${index}`} className="text-sm font-medium">
+                              {m.settings_fieldOptions_value()}
+                            </Label>
                             <div className="flex items-center gap-2">
                               <Badge variant="outline" className="text-xs">
                                 {isAutoValue
@@ -569,7 +573,7 @@ export function FieldOptionsEditor({ options, onChange, error, errorMessage }: F
                         </div>
 
                         <div className="space-y-3 md:col-span-2">
-                          <Label>{m.settings_fieldOptions_colorCustomization()}</Label>
+                          <Label className="text-sm font-medium">{m.settings_fieldOptions_colorCustomization()}</Label>
                           <div className="grid gap-4 sm:grid-cols-[1fr_auto_auto]">
                             <div className="space-y-2">
                               <Label className="text-xs text-muted-foreground">

@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import { cn } from '@workspace/ui/lib/utils';
 import { Button } from '@workspace/ui/components/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@workspace/ui/components/card';
+import { Heading, Text } from '@workspace/ui/components/typography';
 
 interface FeaturePlaceholderProps {
   title: string;
@@ -30,10 +31,10 @@ export const FeaturePlaceholder = ({
       <Card className="mx-auto max-w-3xl border-dashed">
         <CardHeader className="flex flex-col items-center gap-4 text-center">
           {icon && <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">{icon}</div>}
-          <CardTitle className="text-2xl font-semibold">{title}</CardTitle>
+          <Heading level={2}>{title}</Heading>
         </CardHeader>
-        <CardContent className="space-y-6 text-center text-muted-foreground">
-          <p>{description}</p>
+        <CardContent className="space-y-6 text-center">
+          <Text color="muted">{description}</Text>
           <div className="flex flex-wrap items-center justify-center gap-3">
             {primaryActionLabel && onPrimaryAction && <Button onClick={onPrimaryAction}>{primaryActionLabel}</Button>}
             {secondaryAction}

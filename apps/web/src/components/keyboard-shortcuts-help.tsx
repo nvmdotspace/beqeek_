@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@workspace/ui/components/dialog';
 import { Button } from '@workspace/ui/components/button';
 import { Badge } from '@workspace/ui/components/badge';
+import { Heading, Text } from '@workspace/ui/components/typography';
 import { Keyboard } from 'lucide-react';
 import { useAppKeyboardShortcuts } from '@/hooks/use-keyboard-shortcuts';
 
@@ -57,11 +58,15 @@ export const KeyboardShortcutsHelp = ({ open, onOpenChange }: KeyboardShortcutsH
         <div className="space-y-6">
           {Object.entries(groupedShortcuts).map(([category, categoryShortcuts]) => (
             <div key={category}>
-              <h3 className="text-lg font-semibold mb-3">{category}</h3>
+              <Heading level={3} className="mb-3">
+                {category}
+              </Heading>
               <div className="grid gap-2">
                 {categoryShortcuts.map((shortcut, index) => (
                   <div key={index} className="flex items-center justify-between p-3 rounded-lg border bg-card">
-                    <span className="text-sm font-medium">{shortcut.description}</span>
+                    <Text size="small" className="font-medium">
+                      {shortcut.description}
+                    </Text>
                     <Badge variant="secondary" className="font-mono text-xs">
                       {formatShortcut(shortcut)}
                     </Badge>
@@ -72,9 +77,9 @@ export const KeyboardShortcutsHelp = ({ open, onOpenChange }: KeyboardShortcutsH
           ))}
 
           <div className="pt-4 border-t">
-            <p className="text-sm text-muted-foreground">
+            <Text size="small" color="muted">
               <strong>Tip:</strong> Keyboard shortcuts do not work when you are typing in input fields or text areas.
-            </p>
+            </Text>
           </div>
         </div>
       </DialogContent>

@@ -2,6 +2,7 @@ import { Database, ArrowRight, Users, Workflow, Lock, Plus } from 'lucide-react'
 
 import { Card, CardContent } from '@workspace/ui/components/card';
 import { Button } from '@workspace/ui/components/button';
+import { Heading, Text } from '@workspace/ui/components/typography';
 // @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
 
@@ -17,8 +18,10 @@ export const ActiveTablesEmptyState = ({ onCreate }: ActiveTablesEmptyStateProps
       </div>
 
       <div className="space-y-4 max-w-2xl">
-        <h3 className="text-3xl font-bold tracking-tight">{m.activeTables_empty_title()}</h3>
-        <p className="text-lg text-muted-foreground leading-relaxed">{m.activeTables_empty_description()}</p>
+        <Heading level={1}>{m.activeTables_empty_title()}</Heading>
+        <Text size="large" color="muted" className="leading-relaxed">
+          {m.activeTables_empty_description()}
+        </Text>
       </div>
 
       {/* Use Cases */}
@@ -29,11 +32,11 @@ export const ActiveTablesEmptyState = ({ onCreate }: ActiveTablesEmptyStateProps
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900/20 dark:to-emerald-900/20">
                 <Users className="h-5 w-5 text-green-600 dark:text-green-400" />
               </div>
-              <h4 className="font-semibold text-base">Team Collaboration</h4>
+              <Heading level={4}>Team Collaboration</Heading>
             </div>
-            <p className="text-sm text-muted-foreground leading-relaxed">
+            <Text size="small" color="muted" className="leading-relaxed">
               Share data securely with your team. Add comments, mentions, and track changes in real-time.
-            </p>
+            </Text>
           </CardContent>
         </Card>
 
@@ -43,11 +46,11 @@ export const ActiveTablesEmptyState = ({ onCreate }: ActiveTablesEmptyStateProps
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-purple-100 to-fuchsia-100 dark:from-purple-900/20 dark:to-fuchsia-900/20">
                 <Workflow className="h-5 w-5 text-purple-600 dark:text-purple-400" />
               </div>
-              <h4 className="font-semibold text-base">Workflow Automation</h4>
+              <Heading level={4}>Workflow Automation</Heading>
             </div>
-            <p className="text-sm text-muted-foreground leading-relaxed">
+            <Text size="small" color="muted" className="leading-relaxed">
               Trigger custom actions, send notifications, and integrate with external systems automatically.
-            </p>
+            </Text>
           </CardContent>
         </Card>
 
@@ -57,18 +60,20 @@ export const ActiveTablesEmptyState = ({ onCreate }: ActiveTablesEmptyStateProps
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-orange-100 to-amber-100 dark:from-orange-900/20 dark:to-amber-900/20">
                 <Lock className="h-5 w-5 text-orange-600 dark:text-orange-400" />
               </div>
-              <h4 className="font-semibold text-base">End-to-End Security</h4>
+              <Heading level={4}>End-to-End Security</Heading>
             </div>
-            <p className="text-sm text-muted-foreground leading-relaxed">
+            <Text size="small" color="muted" className="leading-relaxed">
               Your sensitive data is encrypted on your device before being stored. Only you have the keys.
-            </p>
+            </Text>
           </CardContent>
         </Card>
       </div>
 
       {/* Common Use Cases */}
       <div className="bg-muted/30 rounded-xl p-6 max-w-3xl w-full">
-        <h4 className="font-semibold mb-4">Popular use cases:</h4>
+        <Heading level={4} className="mb-4">
+          Popular use cases:
+        </Heading>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
           <div className="flex items-center gap-2">
             <ArrowRight className="h-4 w-4 text-blue-600" />

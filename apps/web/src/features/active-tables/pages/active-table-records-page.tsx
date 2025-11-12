@@ -20,6 +20,7 @@ import { Input } from '@workspace/ui/components/input';
 import { Skeleton } from '@workspace/ui/components/skeleton';
 import { Card, CardContent } from '@workspace/ui/components/card';
 import { TabsContent } from '@workspace/ui/components/tabs';
+import { Heading, Text } from '@workspace/ui/components/typography';
 
 // Components
 import { ErrorCard } from '@/components/error-display';
@@ -323,11 +324,11 @@ export const ActiveTableRecordsPage = () => {
                 <span className="sm:hidden">Back</span>
               </Button>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{displayTable.name || 'Records'}</h1>
+            <Heading level={1}>{displayTable.name || 'Records'}</Heading>
             {displayTable.description && (
-              <p className="max-w-2xl text-xs sm:text-sm text-muted-foreground leading-relaxed">
+              <Text size="small" color="muted" className="max-w-2xl leading-relaxed">
                 {displayTable.description}
-              </p>
+              </Text>
             )}
           </div>
 

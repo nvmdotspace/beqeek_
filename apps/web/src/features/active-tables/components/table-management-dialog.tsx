@@ -21,6 +21,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@workspace/ui/components/switch';
 import { Badge } from '@workspace/ui/components/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@workspace/ui/components/card';
+import { Heading, Text } from '@workspace/ui/components/typography';
 
 import { TABLE_TYPE_METADATA, type TableType } from '@workspace/beqeek-shared';
 import { getTableConfig } from '@workspace/beqeek-shared/configs';
@@ -193,7 +194,7 @@ export const TableManagementDialog = ({
           {/* Basic Information */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Basic Information</CardTitle>
+              <Heading level={3}>Basic Information</Heading>
             </CardHeader>
             <CardContent className="space-y-4">
               <form.Field
@@ -214,7 +215,9 @@ export const TableManagementDialog = ({
                       placeholder="Enter table name"
                     />
                     {field.state.meta.errors && (
-                      <p className="text-sm text-destructive">{field.state.meta.errors[0]}</p>
+                      <Text size="small" className="text-destructive">
+                        {field.state.meta.errors[0]}
+                      </Text>
                     )}
                   </div>
                 )}
@@ -265,7 +268,9 @@ export const TableManagementDialog = ({
                           </SelectContent>
                         </Select>
                         {workGroups.length === 0 && (
-                          <p className="text-xs text-muted-foreground">Table will be created without a work group</p>
+                          <Text size="small" color="muted" className="text-xs">
+                            Table will be created without a work group
+                          </Text>
                         )}
                       </div>
                     );
@@ -289,9 +294,9 @@ export const TableManagementDialog = ({
                         </SelectContent>
                       </Select>
                       {field.state.value && (
-                        <p className="text-xs text-muted-foreground">
+                        <Text size="small" color="muted" className="text-xs">
                           {m[TABLE_TYPE_METADATA[field.state.value as TableType]?.descriptionKey as keyof typeof m]?.()}
-                        </p>
+                        </Text>
                       )}
                     </div>
                   )}
@@ -303,7 +308,7 @@ export const TableManagementDialog = ({
           {/* Security Settings */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Security Settings</CardTitle>
+              <Heading level={3}>Security Settings</Heading>
             </CardHeader>
             <CardContent className="space-y-4">
               <form.Field name="e2eeEncryption">
@@ -311,7 +316,9 @@ export const TableManagementDialog = ({
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
                       <Label htmlFor={field.name}>End-to-End Encryption</Label>
-                      <p className="text-sm text-muted-foreground">Enable client-side encryption for sensitive data</p>
+                      <Text size="small" color="muted">
+                        Enable client-side encryption for sensitive data
+                      </Text>
                     </div>
                     <Switch id={field.name} checked={field.state.value} onCheckedChange={handleE2EEToggle} />
                   </div>
@@ -343,9 +350,9 @@ export const TableManagementDialog = ({
                         </button>
                       )}
                     </div>
-                    <p className="text-xs text-muted-foreground">
+                    <Text size="small" color="muted" className="text-xs">
                       Auto-generated when E2EE is enabled. Store this key safely - it cannot be recovered.
-                    </p>
+                    </Text>
                   </div>
                 )}
               </form.Field>
@@ -355,8 +362,8 @@ export const TableManagementDialog = ({
           {/* Fields Configuration - View Only */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg flex items-center justify-between">
-                Fields Configuration
+              <div className="flex items-center justify-between">
+                <Heading level={3}>Fields Configuration</Heading>
                 <Button type="button" variant="ghost" size="sm" onClick={() => setShowFieldsConfig(!showFieldsConfig)}>
                   {showFieldsConfig ? (
                     <>
@@ -370,14 +377,14 @@ export const TableManagementDialog = ({
                     </>
                   )}
                 </Button>
-              </CardTitle>
+              </div>
             </CardHeader>
             {showFieldsConfig && (
               <CardContent className="space-y-4">
                 {fields.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
+                  <Text size="small" color="muted" className="text-center py-8">
                     No fields configured. Select a table type to auto-load fields.
-                  </div>
+                  </Text>
                 ) : (
                   <div className="space-y-3">
                     {fields.map((field, index) => (

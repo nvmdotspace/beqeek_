@@ -17,6 +17,7 @@ import {
 } from '@workspace/ui/components/dialog';
 import { Input } from '@workspace/ui/components/input';
 import { Label } from '@workspace/ui/components/label';
+import { Heading, Text } from '@workspace/ui/components/typography';
 import { SettingsSection } from '../settings-layout';
 // @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
@@ -71,8 +72,12 @@ export function DangerZoneSection({ tableName, onDelete, isDeleting = false }: D
             <div className="flex items-start gap-3">
               <AlertTriangle className="h-5 w-5 text-destructive mt-0.5" />
               <div className="flex-1">
-                <h3 className="font-semibold text-destructive">{m.settings_dangerZone_warningTitle()}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">{m.settings_dangerZone_warningDescription()}</p>
+                <Heading level={4} className="text-destructive">
+                  {m.settings_dangerZone_warningTitle()}
+                </Heading>
+                <Text size="small" color="muted" className="mt-2">
+                  {m.settings_dangerZone_warningDescription()}
+                </Text>
               </div>
             </div>
           </div>
@@ -80,11 +85,13 @@ export function DangerZoneSection({ tableName, onDelete, isDeleting = false }: D
           {/* Delete Table */}
           <div className="rounded-lg border-2 border-destructive p-6 space-y-4">
             <div>
-              <h3 className="text-lg font-semibold text-destructive flex items-center gap-2">
+              <Heading level={3} className="text-destructive flex items-center gap-2">
                 <Trash2 className="h-5 w-5" />
                 {m.settings_dangerZone_deleteTitle()}
-              </h3>
-              <p className="mt-2 text-sm text-muted-foreground">{m.settings_dangerZone_deleteDescription()}</p>
+              </Heading>
+              <Text size="small" color="muted" className="mt-2">
+                {m.settings_dangerZone_deleteDescription()}
+              </Text>
             </div>
 
             <div className="rounded-md bg-muted p-4 space-y-2">

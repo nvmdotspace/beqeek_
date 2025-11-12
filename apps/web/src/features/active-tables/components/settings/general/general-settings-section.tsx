@@ -133,7 +133,9 @@ export function GeneralSettingsSection({ tableId, config, onChange, fields }: Ge
       <div className="space-y-5">
         {/* Table ID (Read-only) */}
         <div className="space-y-2">
-          <Label htmlFor="table-id">{m.settings_general_tableId()}</Label>
+          <Label htmlFor="table-id" className="text-sm font-medium">
+            {m.settings_general_tableId()}
+          </Label>
           <div className="flex gap-2">
             <Input
               id="table-id"
@@ -157,7 +159,7 @@ export function GeneralSettingsSection({ tableId, config, onChange, fields }: Ge
 
         {/* Table Title */}
         <div className="space-y-2">
-          <Label htmlFor="table-title">
+          <Label htmlFor="table-title" className="text-sm font-medium">
             {m.settings_general_tableTitle()} <span className="text-destructive">{m.common_required()}</span>
           </Label>
           <Input
@@ -176,7 +178,7 @@ export function GeneralSettingsSection({ tableId, config, onChange, fields }: Ge
 
         {/* Table Limit */}
         <div className="space-y-2">
-          <Label htmlFor="table-limit">
+          <Label htmlFor="table-limit" className="text-sm font-medium">
             {m.settings_general_tableLimit()} <span className="text-destructive">{m.common_required()}</span>
           </Label>
           <Input
@@ -197,7 +199,7 @@ export function GeneralSettingsSection({ tableId, config, onChange, fields }: Ge
 
         {/* Default Sort Direction */}
         <div className="space-y-2">
-          <Label htmlFor="default-sort">
+          <Label htmlFor="default-sort" className="text-sm font-medium">
             {m.settings_general_defaultSort()} <span className="text-destructive">{m.common_required()}</span>
           </Label>
           <Select value={defaultSort} onValueChange={(value) => setDefaultSort(value as 'asc' | 'desc')}>
@@ -215,7 +217,9 @@ export function GeneralSettingsSection({ tableId, config, onChange, fields }: Ge
         {/* Encryption Key Section - Always Visible */}
         <div className="space-y-3 rounded-lg border p-4">
           <div className="space-y-0.5">
-            <Label htmlFor="encryption-key">{m.settings_general_encryptionKey()}</Label>
+            <Label htmlFor="encryption-key" className="text-sm font-medium">
+              {m.settings_general_encryptionKey()}
+            </Label>
             <p className="text-sm text-muted-foreground">
               {config.e2eeEncryption ? m.settings_general_encryptionE2EE() : m.settings_general_encryptionServer()}
             </p>
@@ -317,7 +321,9 @@ export function GeneralSettingsSection({ tableId, config, onChange, fields }: Ge
 
         {/* Searchable Fields */}
         <div className="space-y-2">
-          <Label htmlFor="searchable-fields">{m.settings_general_searchableFields()}</Label>
+          <Label htmlFor="searchable-fields" className="text-sm font-medium">
+            {m.settings_general_searchableFields()}
+          </Label>
           <MultiSelectField
             id="searchable-fields"
             options={searchableFields.map((f) => ({ value: f.name, label: f.label }))}

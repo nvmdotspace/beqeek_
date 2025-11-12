@@ -152,7 +152,7 @@ export function ActionsSettingsSection({ actions, onChange }: ActionsSettingsSec
       <div className="space-y-6">
         {/* System Actions */}
         <div className="space-y-3">
-          <h3 className="text-sm font-medium">{m.settings_actions_systemTitle()}</h3>
+          <h3 className="text-base font-semibold">{m.settings_actions_systemTitle()}</h3>
           <div className="rounded-lg border bg-muted/30 p-4">
             <div className="space-y-2">
               {systemActions.map((action) => (
@@ -184,7 +184,7 @@ export function ActionsSettingsSection({ actions, onChange }: ActionsSettingsSec
 
         {/* Custom Actions */}
         <div className="space-y-3">
-          <h3 className="text-sm font-medium">{m.settings_actions_customTitle()}</h3>
+          <h3 className="text-base font-semibold">{m.settings_actions_customTitle()}</h3>
           {customActions.length === 0 ? (
             <div className="rounded-lg border border-dashed p-12 text-center">
               <p className="text-sm text-muted-foreground">{m.settings_actions_customEmpty()}</p>
