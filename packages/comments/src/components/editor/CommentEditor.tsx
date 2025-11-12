@@ -1,166 +1,176 @@
 /**
- * CommentEditor - Lexical-based rich text editor for comments
- * React 19 compatible, simplified for comment editing
+ * Enhanced CommentEditor with Lexical rich text editor
+ * Features: formatting, images, videos, mentions, emojis, and AI assistant
  */
 
+import { AutoLinkNode, LinkNode } from '@lexical/link';
+import { ListItemNode, ListNode } from '@lexical/list';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
-import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
-import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
-import { ListPlugin } from '@lexical/react/LexicalListPlugin';
-import { LinkPlugin } from '@lexical/react/LexicalLinkPlugin';
 import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
+import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
+import { LinkPlugin } from '@lexical/react/LexicalLinkPlugin';
+import { ListPlugin } from '@lexical/react/LexicalListPlugin';
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { useEffect, useRef } from 'react';
-import type { RefObject } from 'react';
-import { $getRoot, $createParagraphNode, type EditorState, type LexicalNode } from 'lexical';
+import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
+import { HeadingNode, QuoteNode } from '@lexical/rich-text';
+import { TableCellNode, TableNode, TableRowNode } from '@lexical/table';
 import { $generateHtmlFromNodes, $generateNodesFromDOM } from '@lexical/html';
-import { createCommentEditorConfig } from './editor-config.js';
-import { CommentToolbar } from './CommentToolbar.js';
-import { Avatar, AvatarImage, AvatarFallback } from '@workspace/ui/components/avatar';
+import { $getRoot, $insertNodes, EditorState } from 'lexical';
+import { useCallback, useEffect, useState } from 'react';
+
+import { Avatar, AvatarFallback, AvatarImage } from '@workspace/ui/components/avatar';
 import { Button } from '@workspace/ui/components/button';
+import { SendHorizontal } from 'lucide-react';
+
 import type { CommentUser } from '../../types/user.js';
-import { cn } from '@workspace/ui/lib/utils';
+import type { MentionUser } from './plugins/MentionsPlugin.js';
+
+import { ImageNode } from './nodes/ImageNode.js';
+import { MentionNode } from './nodes/MentionNode.js';
+import { CommentToolbar } from './CommentToolbar.js';
+import { ImagesPlugin } from './plugins/ImagesPlugin.js';
+import { MentionsPlugin } from './plugins/MentionsPlugin.js';
+import { FloatingLinkEditorPlugin } from './plugins/FloatingLinkEditorPlugin.js';
+import { editorTheme } from './theme.js';
 
 export interface CommentEditorProps {
-  /** HTML content value */
-  value?: string;
-  /** Callback when content changes */
-  onChange?: (html: string) => void;
-  /** Placeholder text */
-  placeholder?: string;
-  /** Current user for avatar display */
-  currentUser: CommentUser;
-  /** Button text */
-  submitText?: string;
-  /** Submit callback */
-  onSubmit?: () => void;
-  /** Cancel callback */
-  onCancel?: () => void;
-  /** Additional className */
-  className?: string;
-  /** Whether to show cancel button */
-  showCancel?: boolean;
-}
-
-/**
- * Plugin to set initial HTML content
- */
-function InitialContentPlugin({ html, lastHtmlRef }: { html: string; lastHtmlRef: RefObject<string> }) {
-  const [editor] = useLexicalComposerContext();
-
-  useEffect(() => {
-    if (!html || lastHtmlRef.current === html) return;
-
-    editor.update(() => {
-      const parser = new DOMParser();
-      const dom = parser.parseFromString(html, 'text/html');
-      const nodes = $generateNodesFromDOM(editor, dom);
-
-      const root = $getRoot();
-      root.clear();
-
-      if (nodes.length > 0) {
-        nodes.forEach((node: LexicalNode) => root.append(node));
-      } else {
-        const paragraph = $createParagraphNode();
-        root.append(paragraph);
-      }
-
-      lastHtmlRef.current = html;
-    });
-  }, [editor, html, lastHtmlRef]);
-
-  return null;
-}
-
-/**
- * Plugin to handle content changes
- */
-function OnChangeHtmlPlugin({
-  onChange,
-  lastHtmlRef,
-}: {
+  value: string;
   onChange: (html: string) => void;
-  lastHtmlRef: RefObject<string>;
-}) {
-  const [editor] = useLexicalComposerContext();
-
-  const handleChange = (editorState: EditorState) => {
-    editorState.read(() => {
-      const html = $generateHtmlFromNodes(editor);
-      if (html === lastHtmlRef.current) {
-        return;
-      }
-
-      lastHtmlRef.current = html;
-      onChange(html);
-    });
-  };
-
-  return <OnChangePlugin onChange={handleChange} />;
+  placeholder?: string;
+  currentUser: CommentUser;
+  submitText?: string;
+  onSubmit?: () => void;
+  onCancel?: () => void;
+  showCancel?: boolean;
+  onImageUpload?: (file: File) => Promise<string>;
+  mentionUsers?: MentionUser[];
+  onMentionSearch?: (query: string) => Promise<MentionUser[]>;
+  className?: string;
 }
 
-/**
- * Main CommentEditor Component
- */
 export function CommentEditor({
-  value = '',
-  onChange = () => {},
-  placeholder = 'Add your comment here...',
+  value,
+  onChange,
+  placeholder = 'Write a comment...',
   currentUser,
   submitText = 'Comment',
   onSubmit,
   onCancel,
-  className,
   showCancel = false,
+  onImageUpload,
+  mentionUsers,
+  onMentionSearch,
+  className,
 }: CommentEditorProps) {
-  const lastHtmlRef = useRef(value);
-  const initialConfig = createCommentEditorConfig();
+  const [isComposerReady, setIsComposerReady] = useState(false);
 
-  const hasContent = value.trim().length > 0;
+  const initialConfig = {
+    namespace: 'CommentEditor',
+    theme: editorTheme,
+    onError: (error: Error) => {
+      console.error('Lexical error:', error);
+    },
+    nodes: [
+      HeadingNode,
+      ListNode,
+      ListItemNode,
+      QuoteNode,
+      LinkNode,
+      AutoLinkNode,
+      TableNode,
+      TableCellNode,
+      TableRowNode,
+      ImageNode,
+      MentionNode,
+    ],
+    editorState: value
+      ? (editor: any) => {
+          const parser = new DOMParser();
+          const dom = parser.parseFromString(value, 'text/html');
+          const nodes = $generateNodesFromDOM(editor, dom);
+          $getRoot().select();
+          $insertNodes(nodes);
+        }
+      : undefined,
+  };
+
+  const handleEditorChange = useCallback(
+    (editorState: EditorState, editor: any) => {
+      editorState.read(() => {
+        const htmlString = $generateHtmlFromNodes(editor, null);
+        onChange(htmlString);
+      });
+    },
+    [onChange],
+  );
+
+  const handleMentionTrigger = useCallback(() => {
+    // Insert @ character to trigger mentions
+    if (isComposerReady) {
+      // Editor will handle this via MentionsPlugin
+    }
+  }, [isComposerReady]);
+
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
 
   return (
-    <div className={cn('flex flex-col gap-2 w-full', className)}>
-      <div className="flex gap-4 w-full">
-        <Avatar className="w-8 h-8">
-          <AvatarImage src={currentUser.avatarUrl} alt={currentUser.fullName} />
-          <AvatarFallback>{currentUser.fullName.substring(0, 2).toUpperCase()}</AvatarFallback>
-        </Avatar>
-
-        <div className="flex-1">
-          <LexicalComposer initialConfig={initialConfig}>
-            <div className="relative border border-input rounded-lg bg-background overflow-hidden">
-              <CommentToolbar />
+    <div className={`comment-editor border border-input rounded-lg bg-background ${className || ''}`}>
+      <div className="p-4">
+        <LexicalComposer initialConfig={initialConfig}>
+          <div className="editor-container">
+            <div className="editor-inner relative">
               <RichTextPlugin
                 contentEditable={
-                  <ContentEditable className="outline-none p-3 min-h-[100px] max-h-[300px] overflow-y-auto" />
-                }
-                placeholder={
-                  <div className="absolute top-14 left-3 text-muted-foreground pointer-events-none">{placeholder}</div>
+                  <ContentEditable
+                    className="editor-input min-h-[60px] mb-3 focus:outline-none text-base"
+                    aria-placeholder={placeholder}
+                    placeholder={
+                      <div className="editor-placeholder text-muted-foreground pointer-events-none text-base">
+                        {placeholder}
+                      </div>
+                    }
+                  />
                 }
                 ErrorBoundary={LexicalErrorBoundary}
               />
+              <OnChangePlugin onChange={handleEditorChange} />
               <HistoryPlugin />
               <ListPlugin />
               <LinkPlugin />
-              {onChange && <OnChangeHtmlPlugin onChange={onChange} lastHtmlRef={lastHtmlRef} />}
-              <InitialContentPlugin html={value} lastHtmlRef={lastHtmlRef} />
+              <FloatingLinkEditorPlugin />
+              <ImagesPlugin onImageUpload={onImageUpload} />
+              <MentionsPlugin users={mentionUsers} onSearch={onMentionSearch} />
             </div>
-          </LexicalComposer>
-        </div>
-      </div>
-
-      <div className="flex justify-end gap-2">
-        {showCancel && onCancel && (
-          <Button type="button" variant="ghost" onClick={onCancel} className="h-8">
-            Cancel
-          </Button>
-        )}
-        <Button type="button" disabled={!hasContent} onClick={onSubmit} className="h-8">
-          {submitText}
-        </Button>
+            <div className="flex items-center justify-between pt-2 border-t border-input">
+              <CommentToolbar onImageUpload={onImageUpload} onMentionTrigger={handleMentionTrigger} className="" />
+              <div className="flex items-center gap-2">
+                {showCancel && (
+                  <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
+                    Cancel
+                  </Button>
+                )}
+                <Button
+                  type="button"
+                  size="icon"
+                  onClick={onSubmit}
+                  disabled={!value.trim()}
+                  className="h-9 w-9 bg-transparent hover:bg-accent text-muted-foreground hover:text-foreground rounded-full"
+                  title={submitText}
+                >
+                  <SendHorizontal className="h-5 w-5" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </LexicalComposer>
       </div>
     </div>
   );

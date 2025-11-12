@@ -1,128 +1,256 @@
 /**
- * Comment Toolbar Plugin
- * Simplified toolbar for comment editing with essential formatting options
+ * Enhanced CommentToolbar with rich text formatting and media insertion
+ * Based on image showing: Bold, Italic, Underline, Code, Link, Font size, Color, Text align
  */
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import { $getSelection, $isRangeSelection, FORMAT_TEXT_COMMAND } from 'lexical';
+import {
+  Bold,
+  Italic,
+  Underline,
+  Code,
+  Link as LinkIcon,
+  Type,
+  Palette,
+  AlignLeft,
+  Paperclip,
+  AtSign,
+  Smile,
+} from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
-import { $getSelection, $isRangeSelection, FORMAT_TEXT_COMMAND, UNDO_COMMAND, REDO_COMMAND } from 'lexical';
-import { $setBlocksType } from '@lexical/selection';
-import { $createHeadingNode } from '@lexical/rich-text';
-import { INSERT_UNORDERED_LIST_COMMAND, INSERT_ORDERED_LIST_COMMAND } from '@lexical/list';
-import { Button } from '@workspace/ui/components/button';
-import { Bold, Italic, List, ListOrdered, Undo2, Redo2, Heading2 } from 'lucide-react';
 
-export function CommentToolbar() {
+import { Button } from '@workspace/ui/components/button';
+import { Separator } from '@workspace/ui/components/separator';
+import { Popover, PopoverContent, PopoverTrigger } from '@workspace/ui/components/popover';
+import { EMOJI_PICKER_LIST } from '../../constants/emojis.js';
+import { INSERT_IMAGE_COMMAND } from '../editor/plugins/ImagesPlugin.js';
+import { $createTextNode } from 'lexical';
+import { TOGGLE_LINK_COMMAND } from '@lexical/link';
+
+export interface CommentToolbarProps {
+  onImageUpload?: (file: File) => Promise<string>;
+  onMentionTrigger?: () => void;
+  className?: string;
+}
+
+export function CommentToolbar({ onImageUpload, onMentionTrigger, className }: CommentToolbarProps) {
   const [editor] = useLexicalComposerContext();
+  const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
   const [isBold, setIsBold] = useState(false);
   const [isItalic, setIsItalic] = useState(false);
+  const [isUnderline, setIsUnderline] = useState(false);
+  const [isCode, setIsCode] = useState(false);
 
-  const updateToolbar = useCallback(() => {
-    const selection = $getSelection();
-    if ($isRangeSelection(selection)) {
-      setIsBold(selection.hasFormat('bold'));
-      setIsItalic(selection.hasFormat('italic'));
-    }
-  }, []);
-
+  // Update toolbar state based on selection
   useEffect(() => {
     return editor.registerUpdateListener(({ editorState }) => {
       editorState.read(() => {
-        updateToolbar();
+        const selection = $getSelection();
+        if ($isRangeSelection(selection)) {
+          setIsBold(selection.hasFormat('bold'));
+          setIsItalic(selection.hasFormat('italic'));
+          setIsUnderline(selection.hasFormat('underline'));
+          setIsCode(selection.hasFormat('code'));
+        }
       });
     });
-  }, [editor, updateToolbar]);
+  }, [editor]);
 
-  const formatBold = () => {
-    editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'bold');
-  };
+  const handleFormat = useCallback(
+    (format: 'bold' | 'italic' | 'underline' | 'code') => {
+      editor.dispatchCommand(FORMAT_TEXT_COMMAND, format);
+    },
+    [editor],
+  );
 
-  const formatItalic = () => {
-    editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'italic');
-  };
+  const handleInsertLink = useCallback(() => {
+    editor.dispatchCommand(TOGGLE_LINK_COMMAND, 'https://');
+  }, [editor]);
 
-  const formatHeading = () => {
-    editor.update(() => {
-      const selection = $getSelection();
-      if ($isRangeSelection(selection)) {
-        $setBlocksType(selection, () => $createHeadingNode('h2'));
+  const handleImageUpload = useCallback(() => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/png,image/jpeg,image/jpg,image/gif,image/webp';
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file && onImageUpload) {
+        try {
+          const url = await onImageUpload(file);
+          editor.dispatchCommand(INSERT_IMAGE_COMMAND, {
+            src: url,
+            altText: file.name,
+          });
+        } catch (error) {
+          console.error('Image upload failed:', error);
+        }
       }
-    });
-  };
+    };
+    input.click();
+  }, [editor, onImageUpload]);
 
-  const formatBulletList = () => {
-    editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined);
-  };
-
-  const formatNumberedList = () => {
-    editor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined);
-  };
-
-  const undo = () => {
-    editor.dispatchCommand(UNDO_COMMAND, undefined);
-  };
-
-  const redo = () => {
-    editor.dispatchCommand(REDO_COMMAND, undefined);
-  };
+  const insertEmoji = useCallback(
+    (emoji: string) => {
+      editor.update(() => {
+        const selection = $getSelection();
+        if ($isRangeSelection(selection)) {
+          selection.insertNodes([$createTextNode(emoji)]);
+        }
+      });
+      setEmojiPickerOpen(false);
+    },
+    [editor],
+  );
 
   return (
-    <div className="flex items-center gap-1 border-b border-input p-2">
-      <Button type="button" variant="ghost" size="sm" onClick={undo} className="h-8 w-8 p-0" title="Undo">
-        <Undo2 className="h-4 w-4" />
-      </Button>
-      <Button type="button" variant="ghost" size="sm" onClick={redo} className="h-8 w-8 p-0" title="Redo">
-        <Redo2 className="h-4 w-4" />
-      </Button>
-
-      <div className="mx-1 h-6 w-px bg-border" />
-
+    <div className={`flex items-center gap-1 ${className || ''}`}>
+      {/* Bold */}
       <Button
-        type="button"
         variant="ghost"
-        size="sm"
-        onClick={formatBold}
-        className={`h-8 w-8 p-0 ${isBold ? 'bg-accent' : ''}`}
+        size="icon"
+        onClick={() => handleFormat('bold')}
+        className={`h-8 w-8 ${isBold ? 'bg-accent' : ''}`}
         title="Bold"
+        type="button"
       >
         <Bold className="h-4 w-4" />
       </Button>
+
+      {/* Italic */}
       <Button
-        type="button"
         variant="ghost"
-        size="sm"
-        onClick={formatItalic}
-        className={`h-8 w-8 p-0 ${isItalic ? 'bg-accent' : ''}`}
+        size="icon"
+        onClick={() => handleFormat('italic')}
+        className={`h-8 w-8 ${isItalic ? 'bg-accent' : ''}`}
         title="Italic"
+        type="button"
       >
         <Italic className="h-4 w-4" />
       </Button>
 
-      <div className="mx-1 h-6 w-px bg-border" />
+      {/* Underline */}
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => handleFormat('underline')}
+        className={`h-8 w-8 ${isUnderline ? 'bg-accent' : ''}`}
+        title="Underline"
+        type="button"
+      >
+        <Underline className="h-4 w-4" />
+      </Button>
 
-      <Button type="button" variant="ghost" size="sm" onClick={formatHeading} className="h-8 w-8 p-0" title="Heading">
-        <Heading2 className="h-4 w-4" />
-      </Button>
+      {/* Code */}
       <Button
-        type="button"
         variant="ghost"
-        size="sm"
-        onClick={formatBulletList}
-        className="h-8 w-8 p-0"
-        title="Bullet List"
+        size="icon"
+        onClick={() => handleFormat('code')}
+        className={`h-8 w-8 ${isCode ? 'bg-accent' : ''}`}
+        title="Code"
+        type="button"
       >
-        <List className="h-4 w-4" />
+        <Code className="h-4 w-4" />
       </Button>
+
+      {/* Link */}
       <Button
-        type="button"
         variant="ghost"
-        size="sm"
-        onClick={formatNumberedList}
-        className="h-8 w-8 p-0"
-        title="Numbered List"
+        size="icon"
+        onClick={handleInsertLink}
+        className="h-8 w-8"
+        title="Insert link"
+        type="button"
       >
-        <ListOrdered className="h-4 w-4" />
+        <LinkIcon className="h-4 w-4" />
       </Button>
+
+      <Separator orientation="vertical" className="h-6 mx-1" />
+
+      {/* Font Size */}
+      <Button variant="ghost" size="icon" className="h-8 w-8" title="Font size" type="button" disabled>
+        <Type className="h-4 w-4 text-muted-foreground" />
+      </Button>
+
+      {/* Color */}
+      <Button variant="ghost" size="icon" className="h-8 w-8" title="Text color" type="button" disabled>
+        <Palette className="h-4 w-4 text-muted-foreground" />
+      </Button>
+
+      {/* Text Align */}
+      <Button variant="ghost" size="icon" className="h-8 w-8" title="Text align" type="button" disabled>
+        <AlignLeft className="h-4 w-4 text-muted-foreground" />
+      </Button>
+
+      <Separator orientation="vertical" className="h-6 mx-1" />
+
+      {/* Attachment */}
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={handleImageUpload}
+        className="h-8 w-8"
+        title="Attach image"
+        type="button"
+      >
+        <Paperclip className="h-4 w-4" />
+      </Button>
+
+      {/* Mention */}
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={onMentionTrigger}
+        className="h-8 w-8"
+        title="Mention someone (@)"
+        type="button"
+      >
+        <AtSign className="h-4 w-4" />
+      </Button>
+
+      {/* Emoji Picker */}
+      <Popover open={emojiPickerOpen} onOpenChange={setEmojiPickerOpen}>
+        <PopoverTrigger asChild>
+          <Button variant="ghost" size="icon" className="h-8 w-8" title="Insert emoji" type="button">
+            <Smile className="h-4 w-4" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="p-2" align="start" style={{ width: '320px' }}>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(8, minmax(0, 1fr))',
+              gap: '4px',
+              maxHeight: '280px',
+              overflowY: 'auto',
+            }}
+          >
+            {EMOJI_PICKER_LIST.map((emoji) => (
+              <button
+                key={emoji}
+                type="button"
+                onClick={() => insertEmoji(emoji)}
+                style={{
+                  width: '36px',
+                  height: '36px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '20px',
+                  border: 'none',
+                  background: 'transparent',
+                  cursor: 'pointer',
+                  borderRadius: '4px',
+                  transition: 'background-color 0.2s',
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--muted)')}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+              >
+                {emoji}
+              </button>
+            ))}
+          </div>
+        </PopoverContent>
+      </Popover>
     </div>
   );
 }

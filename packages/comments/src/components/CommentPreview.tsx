@@ -1,37 +1,72 @@
-import { useEffect, useState, type ReactNode } from 'react';
-import { Fragment, jsx, jsxs } from 'react/jsx-runtime';
-import { evaluate, type EvaluateOptions } from '@mdx-js/mdx';
+/**
+ * CommentPreview component
+ * Renders HTML content safely with proper styling
+ */
 
-type MDXProps = Record<string, unknown>;
-type ReactMDXContent = (props: MDXProps) => ReactNode;
-type Runtime = Pick<EvaluateOptions, 'jsx' | 'jsxs' | 'Fragment'>;
-
-const runtime = { jsx, jsxs, Fragment } as Runtime;
+import DOMPurify from 'isomorphic-dompurify';
+import { useMemo } from 'react';
 
 export interface CommentPreviewProps {
-  /** MDX source code to render */
   source: string;
-  /** Optional className for styling */
   className?: string;
 }
 
-/**
- * CommentPreview - Renders MDX content from comment text
- * Supports markdown formatting, links, code blocks, etc.
- * React 19 compatible with latest @mdx-js/mdx
- */
 export function CommentPreview({ source, className }: CommentPreviewProps) {
-  const [MdxContent, setMdxContent] = useState<ReactMDXContent>(() => () => null);
-
-  useEffect(() => {
-    evaluate(source, runtime).then((r) => {
-      setMdxContent(() => r.default);
+  const sanitizedHtml = useMemo(() => {
+    return DOMPurify.sanitize(source, {
+      ALLOWED_TAGS: [
+        'p',
+        'br',
+        'strong',
+        'em',
+        'u',
+        's',
+        'code',
+        'pre',
+        'a',
+        'img',
+        'video',
+        'iframe',
+        'ul',
+        'ol',
+        'li',
+        'h1',
+        'h2',
+        'h3',
+        'h4',
+        'h5',
+        'h6',
+        'blockquote',
+        'table',
+        'thead',
+        'tbody',
+        'tr',
+        'th',
+        'td',
+        'span',
+        'div',
+      ],
+      ALLOWED_ATTR: [
+        'href',
+        'src',
+        'alt',
+        'title',
+        'width',
+        'height',
+        'class',
+        'style',
+        'controls',
+        'aria-label',
+        'data-lexical-mention',
+        'data-mention-name',
+        'data-user-id',
+        'allow',
+        'allowfullscreen',
+      ],
+      ALLOWED_URI_REGEXP:
+        /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|sms|cid|xmpp|data):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
     });
   }, [source]);
 
-  return (
-    <div className={className}>
-      <MdxContent />
-    </div>
-  );
+  return <div className={`comment-preview ${className || ''}`} dangerouslySetInnerHTML={{ __html: sanitizedHtml }} />;
 }

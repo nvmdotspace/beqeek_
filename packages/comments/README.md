@@ -6,6 +6,9 @@ React comment system component library for Beqeek Active Tables. Built with Reac
 
 - ✅ **Rich Text Editing** - Lexical-based editor with formatting toolbar
 - ✅ **MDX Preview** - Render comments with markdown formatting
+- ✅ **Image Upload** - Drag-and-drop or click to upload images with file validation
+- ✅ **Table Support** - Insert and edit tables in comments (3x3 default)
+- ✅ **Emoji Picker** - Popover with 30 common emojis for quick insertion
 - ✅ **Emoji Reactions** - 8 reaction types (👍 👎 😄 🎉 😕 ❤️ 🚀 👀)
 - ✅ **Upvote System** - Optional upvoting with counts
 - ✅ **Nested Replies** - Thread conversations with reply support
@@ -53,12 +56,23 @@ function MyComponent() {
     avatarUrl: 'https://avatar.url',
   };
 
+  // Image upload handler
+  const handleImageUpload = async (file: File): Promise<string> => {
+    // Upload to your server/S3/CDN
+    const formData = new FormData();
+    formData.append('image', file);
+    const response = await fetch('/api/upload', { method: 'POST', body: formData });
+    const { url } = await response.json();
+    return url;
+  };
+
   return (
     <CommentSection
       value={comments}
       currentUser={currentUser}
       onChange={setComments}
       allowUpvote={true}
+      onImageUpload={handleImageUpload}
       onVoteChange={(commentId, upvoted) => {
         console.log(`Comment ${commentId} upvoted: ${upvoted}`);
       }}
@@ -96,6 +110,11 @@ import { useState } from 'react';
 function MyEditor({ currentUser }) {
   const [content, setContent] = useState('');
 
+  const handleImageUpload = async (file: File): Promise<string> => {
+    // Your upload logic
+    return 'https://example.com/uploaded-image.jpg';
+  };
+
   return (
     <CommentEditor
       value={content}
@@ -107,6 +126,7 @@ function MyEditor({ currentUser }) {
         console.log('Submit:', content);
         setContent('');
       }}
+      onImageUpload={handleImageUpload}
       showCancel={false}
     />
   );
@@ -177,34 +197,78 @@ type CommentUser = {
 };
 ```
 
-### ACTIONS_TYPE
+### ACTIONS_TYPE (Emoji Reactions)
 
 ```typescript
 enum ACTIONS_TYPE {
-  THUMB_UP = 'THUMB_UP',
-  THUMB_DOWN = 'THUMB_DOWN',
-  LAUGH = 'LAUGH',
-  HOORAY = 'HOORAY',
-  CONFUSED = 'CONFUSED',
-  HEART = 'HEART',
-  ROCKET = 'ROCKET',
-  EYE = 'EYE',
-  UPVOTE = 'UPVOTE',
+  THUMB_UP = 'THUMB_UP', // 👍
+  THUMB_DOWN = 'THUMB_DOWN', // 👎
+  LAUGH = 'LAUGH', // 😄
+  HOORAY = 'HOORAY', // 🎉
+  CONFUSED = 'CONFUSED', // 😕
+  HEART = 'HEART', // ❤️
+  ROCKET = 'ROCKET', // 🚀
+  EYE = 'EYE', // 👀
+  UPVOTE = 'UPVOTE', // Special upvote action
 }
 ```
+
+### EMOJI_PICKER_LIST (Content Emojis)
+
+```typescript
+// 30 common emojis for inserting into comment content via toolbar picker
+const EMOJI_PICKER_LIST = [
+  '😀',
+  '😃',
+  '😄',
+  '😁',
+  '😅',
+  '😂',
+  '🤣',
+  '😊',
+  '😇',
+  '🙂',
+  '🙃',
+  '😉',
+  '😌',
+  '😍',
+  '🥰',
+  '😘',
+  '😗',
+  '😙',
+  '😚',
+  '😋',
+  '😛',
+  '😝',
+  '😜',
+  '🤪',
+  '🤨',
+  '🧐',
+  '🤓',
+  '😎',
+  '🥳',
+  '🤩',
+] as const;
+```
+
+**Key Difference:**
+
+- `ACTIONS_TYPE` emojis (8 types) → React to comments (like Facebook reactions)
+- `EMOJI_PICKER_LIST` emojis (30 types) → Insert into comment content while writing
 
 ## API Reference
 
 ### CommentSection Props
 
-| Prop           | Type                                            | Description                            |
-| -------------- | ----------------------------------------------- | -------------------------------------- |
-| `value`        | `Comment[]`                                     | Array of comments                      |
-| `currentUser`  | `CommentUser`                                   | Current user object                    |
-| `onChange`     | `(comments: Comment[]) => void`                 | Callback when comments change          |
-| `allowUpvote`  | `boolean`                                       | Enable upvote feature (default: false) |
-| `onVoteChange` | `(commentId: string, upvoted: boolean) => void` | Vote change callback                   |
-| `className`    | `string`                                        | Additional CSS class                   |
+| Prop            | Type                                            | Description                              |
+| --------------- | ----------------------------------------------- | ---------------------------------------- |
+| `value`         | `Comment[]`                                     | Array of comments                        |
+| `currentUser`   | `CommentUser`                                   | Current user object                      |
+| `onChange`      | `(comments: Comment[]) => void`                 | Callback when comments change            |
+| `allowUpvote`   | `boolean`                                       | Enable upvote feature (default: false)   |
+| `onVoteChange`  | `(commentId: string, upvoted: boolean) => void` | Vote change callback                     |
+| `onImageUpload` | `(file: File) => Promise<string>`               | Image upload handler (returns image URL) |
+| `className`     | `string`                                        | Additional CSS class                     |
 
 ### CommentCard Props
 
@@ -220,17 +284,18 @@ enum ACTIONS_TYPE {
 
 ### CommentEditor Props
 
-| Prop          | Type                     | Description                             |
-| ------------- | ------------------------ | --------------------------------------- |
-| `value`       | `string`                 | HTML content                            |
-| `onChange`    | `(html: string) => void` | Content change callback                 |
-| `placeholder` | `string`                 | Placeholder text                        |
-| `currentUser` | `CommentUser`            | Current user for avatar                 |
-| `submitText`  | `string`                 | Submit button text (default: "Comment") |
-| `onSubmit`    | `() => void`             | Submit callback                         |
-| `onCancel`    | `() => void`             | Cancel callback                         |
-| `showCancel`  | `boolean`                | Show cancel button (default: false)     |
-| `className`   | `string`                 | Additional CSS class                    |
+| Prop            | Type                              | Description                              |
+| --------------- | --------------------------------- | ---------------------------------------- |
+| `value`         | `string`                          | HTML content                             |
+| `onChange`      | `(html: string) => void`          | Content change callback                  |
+| `placeholder`   | `string`                          | Placeholder text                         |
+| `currentUser`   | `CommentUser`                     | Current user for avatar                  |
+| `submitText`    | `string`                          | Submit button text (default: "Comment")  |
+| `onSubmit`      | `() => void`                      | Submit callback                          |
+| `onCancel`      | `() => void`                      | Cancel callback                          |
+| `showCancel`    | `boolean`                         | Show cancel button (default: false)      |
+| `onImageUpload` | `(file: File) => Promise<string>` | Image upload handler (returns image URL) |
+| `className`     | `string`                          | Additional CSS class                     |
 
 ## Migration from shadcn-comments
 
@@ -287,6 +352,53 @@ src/
 │   └── index.ts
 └── index.ts            # Main export
 ```
+
+## Editor Features
+
+### Rich Text Toolbar
+
+The CommentEditor includes a comprehensive toolbar with the following features:
+
+- **Undo/Redo** - Navigate editing history
+- **Bold/Italic** - Text formatting
+- **Heading** - H2 headings for structure
+- **Lists** - Bullet and numbered lists
+- **Image Upload** - Click to upload or drag-and-drop images (supports PNG, JPEG, GIF, WebP up to 5MB)
+- **Table Insertion** - Insert 3x3 tables with header row
+- **Emoji Picker** - Popover with 30 common emojis
+
+### Image Upload
+
+Images can be added via:
+
+- Click the Image button in toolbar → Select file
+- Drag and drop image files directly into editor
+
+File validation:
+
+- Supported types: PNG, JPEG, GIF, WebP
+- Max size: 5MB (configurable)
+- Images display with max-width: 800px
+- Alt text from filename
+
+### Table Support
+
+Tables are inserted as 3x3 grids with:
+
+- Header row enabled by default
+- Editable cells
+- Borders using design tokens (border-border, bg-muted)
+- Responsive styling
+
+### Emoji Picker
+
+Click the Smile icon in toolbar to open emoji picker for **inserting emojis into comment content**:
+
+- 30 common emojis in 8-column grid (defined in `EMOJI_PICKER_LIST`)
+- Click any emoji to insert at cursor position
+- Positioned near toolbar for easy access
+
+**Note:** This is different from **Emoji Reactions** which are used to react to existing comments (8 reaction types: 👍 👎 😄 🎉 😕 ❤️ 🚀 👀)
 
 ## Development
 

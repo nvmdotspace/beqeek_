@@ -18,3 +18,16 @@ export { CommentEditor } from './editor/CommentEditor.js';
 export type { CommentEditorProps } from './editor/CommentEditor.js';
 
 export { CommentToolbar } from './editor/CommentToolbar.js';
+export type { CommentToolbarProps } from './editor/CommentToolbar.js';
+
+// Plugins
+export { ImagesPlugin } from './editor/plugins/ImagesPlugin.js';
+export { VideoPlugin } from './editor/plugins/VideoPlugin.js';
+export { MentionsPlugin } from './editor/plugins/MentionsPlugin.js';
+export type { MentionsPluginProps, MentionUser } from './editor/plugins/MentionsPlugin.js';
+
+// Nodes
+export { ImageNode, $createImageNode, $isImageNode } from './editor/nodes/ImageNode.js';
+export { VideoNode, $createVideoNode, $isVideoNode } from './editor/nodes/VideoNode.js';
+export { MentionNode, $createMentionNode, $isMentionNode } from './editor/nodes/MentionNode.js';
+export { CommentEditorNodes } from './editor/nodes/index.js';

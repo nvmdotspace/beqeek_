@@ -133,6 +133,14 @@ export class ImageNode extends DecoratorNode<React.ReactElement> {
     return false;
   }
 
+  isInline(): boolean {
+    return true;
+  }
+
+  isIsolated(): boolean {
+    return true;
+  }
+
   decorate(): React.ReactElement {
     return (
       <img

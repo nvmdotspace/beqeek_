@@ -1,132 +1,138 @@
 /**
- * CommentSection - Main comment system component
- * Displays comment list and new comment editor
- * React 19 compatible with Lexical editor
+ * CommentSection component
+ * Displays a list of comments with reply functionality
  */
 
 import { useState } from 'react';
-import { MDXProvider } from '@mdx-js/react';
-import type { Comment, CommentChange } from '../types/comment.js';
+
+import type { Comment } from '../types/comment.js';
 import type { CommentUser } from '../types/user.js';
-import { CommentEditor } from './editor/CommentEditor.js';
+import type { MentionUser } from './editor/plugins/MentionsPlugin.js';
+
 import { CommentCard } from './CommentCard.js';
+import { CommentEditor } from './editor/CommentEditor.js';
 
 export interface CommentSectionProps {
-  /** Array of comments to display */
   value: Comment[];
-  /** Current user */
   currentUser: CommentUser;
-  /** Callback when comments change */
-  onChange?: (comments: Comment[]) => void;
-  /** Whether upvoting is allowed */
+  onChange: (comments: Comment[]) => void;
   allowUpvote?: boolean;
-  /** Callback when vote changes */
   onVoteChange?: (commentId: string, upvoted: boolean) => void;
-  /** Additional className */
+  onImageUpload?: (file: File) => Promise<string>;
+  mentionUsers?: MentionUser[];
+  onMentionSearch?: (query: string) => Promise<MentionUser[]>;
   className?: string;
 }
 
-/**
- * Generate unique ID for new comments
- */
-function generateId(length = 8): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-  for (let i = 0; i < length; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return result;
-}
-
-/**
- * CommentSection component
- * Main container for the comment system
- */
 export function CommentSection({
   value,
   currentUser,
   onChange,
-  allowUpvote = false,
+  allowUpvote,
   onVoteChange,
-  className = '',
+  onImageUpload,
+  mentionUsers,
+  onMentionSearch,
+  className,
 }: CommentSectionProps) {
   const [newCommentText, setNewCommentText] = useState('');
 
-  const handleNewComment = () => {
-    if (!onChange || !newCommentText.trim()) return;
+  const handleSubmitNewComment = () => {
+    if (!newCommentText.trim()) return;
 
     const newComment: Comment = {
-      id: generateId(),
+      id: Date.now().toString(),
       user: currentUser,
       text: newCommentText,
       createdAt: new Date(),
       replies: [],
       actions: {},
       selectedActions: [],
+      allowUpvote,
     };
 
-    onChange([newComment, ...value]);
+    onChange([...value, newComment]);
     setNewCommentText('');
   };
 
-  const handleCommentChange = (commentId: string, change: CommentChange) => {
-    if (!onChange) return;
+  const handleReply = (commentId: string, replyText: string) => {
+    const updatedComments = value.map((comment) => {
+      if (comment.id === commentId) {
+        const reply: Comment = {
+          id: Date.now().toString(),
+          user: currentUser,
+          parentId: commentId,
+          text: replyText,
+          createdAt: new Date(),
+          replies: [],
+          actions: {},
+          selectedActions: [],
+          allowUpvote,
+        };
+        return {
+          ...comment,
+          replies: [...(comment.replies || []), reply],
+        };
+      }
+      return comment;
+    });
+    onChange(updatedComments);
+  };
 
-    onChange(
-      value.map((comment) =>
-        comment.id === commentId
-          ? {
-              ...comment,
-              ...change,
-            }
-          : comment,
-      ),
-    );
+  const handleCommentChange = (commentId: string, change: any) => {
+    const updateComment = (comments: Comment[]): Comment[] => {
+      return comments.map((comment) => {
+        if (comment.id === commentId) {
+          return { ...comment, ...change };
+        }
+        if (comment.replies && comment.replies.length > 0) {
+          return {
+            ...comment,
+            replies: updateComment(comment.replies),
+          };
+        }
+        return comment;
+      });
+    };
+
+    onChange(updateComment(value));
   };
 
   const handleCommentDelete = (commentId: string) => {
-    if (!onChange) return;
-    onChange(value.filter((comment) => comment.id !== commentId));
-  };
-
-  const handleReply = (parentId: string, replyText: string) => {
-    if (!onChange) return;
-
-    const newReply: Comment = {
-      id: generateId(),
-      parentId,
-      user: currentUser,
-      text: replyText,
-      createdAt: new Date(),
-      replies: [],
+    const deleteComment = (comments: Comment[]): Comment[] => {
+      return comments
+        .filter((comment) => comment.id !== commentId)
+        .map((comment) => {
+          if (comment.replies && comment.replies.length > 0) {
+            return {
+              ...comment,
+              replies: deleteComment(comment.replies),
+            };
+          }
+          return comment;
+        });
     };
 
-    onChange(
-      value.map((comment) =>
-        comment.id === parentId
-          ? {
-              ...comment,
-              replies: [newReply, ...(comment.replies || [])],
-            }
-          : comment,
-      ),
-    );
+    onChange(deleteComment(value));
   };
 
   return (
-    <MDXProvider>
-      <div className={`max-w-screen-md flex flex-col gap-4 w-full ${className}`}>
-        {/* New comment editor */}
-        <CommentEditor
-          value={newCommentText}
-          onChange={setNewCommentText}
-          currentUser={currentUser}
-          placeholder="Add your comment here..."
-          submitText="Comment"
-          onSubmit={handleNewComment}
-        />
+    <div className={`comment-section space-y-4 ${className || ''}`}>
+      {/* New Comment Editor */}
+      <CommentEditor
+        value={newCommentText}
+        onChange={setNewCommentText}
+        currentUser={currentUser}
+        placeholder="Write a comment..."
+        submitText="Comment"
+        onSubmit={handleSubmitNewComment}
+        onImageUpload={onImageUpload}
+        mentionUsers={mentionUsers}
+        onMentionSearch={onMentionSearch}
+      />
 
-        {/* Comment list */}
+      {/* Comments List */}
+      <div className="space-y-4">
         {value.map((comment) => (
           <CommentCard
             key={comment.id}
@@ -137,9 +143,16 @@ export function CommentSection({
             onChange={(change) => handleCommentChange(comment.id, change)}
             onDelete={() => handleCommentDelete(comment.id)}
             onVoteChange={(upvoted) => onVoteChange?.(comment.id, upvoted)}
+            onImageUpload={onImageUpload}
+            mentionUsers={mentionUsers}
+            onMentionSearch={onMentionSearch}
           />
         ))}
       </div>
-    </MDXProvider>
+
+      {value.length === 0 && (
+        <div className="text-center text-muted-foreground py-8">No comments yet. Be the first to comment!</div>
+      )}
+    </div>
   );
 }

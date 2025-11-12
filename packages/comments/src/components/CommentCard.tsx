@@ -1,11 +1,13 @@
 /**
- * CommentCard - Individual comment display with reactions, edit, delete
- * Supports nested replies, emoji reactions, and upvotes
+ * CommentCard component
+ * Displays individual comment with reactions, replies, and actions
  */
 
+import { formatDistanceToNow } from 'date-fns';
+import { ChevronDown, ChevronUp, Copy, MessageCircle, MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
 import { useState } from 'react';
-import { formatDistance } from 'date-fns';
-import { Avatar, AvatarImage, AvatarFallback } from '@workspace/ui/components/avatar';
+
+import { Avatar, AvatarFallback, AvatarImage } from '@workspace/ui/components/avatar';
 import { Button } from '@workspace/ui/components/button';
 import {
   DropdownMenu,
@@ -13,122 +15,63 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@workspace/ui/components/dropdown-menu';
-import { Popover, PopoverContent, PopoverTrigger } from '@workspace/ui/components/popover';
-import { ArrowUpIcon, SmileIcon, EllipsisVertical, CircleIcon } from 'lucide-react';
+
 import type { Comment, CommentChange } from '../types/comment.js';
-import { ACTIONS_TYPE, ACTIONS } from '../types/comment.js';
 import type { CommentUser } from '../types/user.js';
-import { CommentPreview } from './CommentPreview.js';
+import type { MentionUser } from './editor/plugins/MentionsPlugin.js';
+
 import { CommentEditor } from './editor/CommentEditor.js';
+import { CommentPreview } from './CommentPreview.js';
 import { EmojiReactions } from './EmojiReactions.js';
-import { cn } from '@workspace/ui/lib/utils';
+import { ACTIONS_TYPE } from '../types/comment.js';
 
 export interface CommentCardProps {
-  /** Comment data */
   comment: Comment;
-  /** Current user */
   currentUser: CommentUser;
-  /** Whether upvoting is allowed */
   allowUpvote?: boolean;
-  /** Callback when reply is submitted */
-  onReply?: (replyText: string) => void;
-  /** Callback when comment is changed */
-  onChange?: (change: CommentChange) => void;
-  /** Callback when comment is deleted */
-  onDelete?: () => void;
-  /** Callback when vote changes */
+  onReply: (replyText: string) => void;
+  onChange: (change: CommentChange) => void;
+  onDelete: () => void;
   onVoteChange?: (upvoted: boolean) => void;
+  onImageUpload?: (file: File) => Promise<string>;
+  mentionUsers?: MentionUser[];
+  onMentionSearch?: (query: string) => Promise<MentionUser[]>;
+  depth?: number;
 }
 
-/**
- * CommentCard component
- * Displays a single comment with all its interactions
- */
 export function CommentCard({
   comment,
   currentUser,
-  allowUpvote = false,
+  allowUpvote,
   onReply,
   onChange,
   onDelete,
   onVoteChange,
+  onImageUpload,
+  mentionUsers,
+  onMentionSearch,
+  depth = 0,
 }: CommentCardProps) {
-  const [isReplying, setIsReplying] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [isReplying, setIsReplying] = useState(false);
   const [editedText, setEditedText] = useState(comment.text);
+  const [replyText, setReplyText] = useState('');
+  const [showReplies, setShowReplies] = useState(true);
 
-  const isOwnComment = currentUser.id === comment.user.id;
+  const isOwner = comment.user.id === currentUser.id;
+  const hasReplies = comment.replies && comment.replies.length > 0;
 
-  // Get reactions that have counts and are selected by user
-  const visibleReactions = ACTIONS.filter(
-    (action) => comment.actions?.[action.id] && comment.selectedActions?.includes(action.id),
-  );
-
-  // Upvote state
-  const upvoteCount = comment.actions?.UPVOTE ?? 0;
-  const isUpvoted = comment.selectedActions?.includes(ACTIONS_TYPE.UPVOTE);
-
-  const handleUpvote = () => {
-    if (!onChange || !onVoteChange) return;
-
-    const newUpvoted = !isUpvoted;
-    onVoteChange(newUpvoted);
-
-    if (newUpvoted) {
-      // Add upvote
-      onChange({
-        selectedActions: [...(comment.selectedActions ?? []), ACTIONS_TYPE.UPVOTE],
-        actions: {
-          ...(comment.actions || {}),
-          UPVOTE: upvoteCount + 1,
-        },
-      });
-    } else {
-      // Remove upvote
-      onChange({
-        selectedActions: comment.selectedActions?.filter((a) => a !== ACTIONS_TYPE.UPVOTE),
-        actions: {
-          ...(comment.actions || {}),
-          UPVOTE: Math.max(0, upvoteCount - 1),
-        },
-      });
-    }
-  };
-
-  const handleReactionSelect = (selectedReactions: ACTIONS_TYPE[], changedReaction: ACTIONS_TYPE) => {
-    if (!onChange) return;
-
-    const currentCount = comment.actions?.[changedReaction] ?? 0;
-    onChange({
-      selectedActions: selectedReactions,
-      actions: {
-        ...(comment.actions || {}),
-        [changedReaction]: currentCount + 1,
-      },
-    });
-  };
-
-  const handleReactionUnselect = (selectedReactions: ACTIONS_TYPE[], changedReaction: ACTIONS_TYPE) => {
-    if (!onChange) return;
-
-    const currentCount = comment.actions?.[changedReaction] ?? 0;
-    onChange({
-      selectedActions: selectedReactions,
-      actions: {
-        ...(comment.actions || {}),
-        [changedReaction]: Math.max(0, currentCount - 1),
-      },
-    });
-  };
-
-  const handleEdit = () => {
-    setIsEditing(true);
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
   };
 
   const handleSaveEdit = () => {
-    if (onChange && editedText !== comment.text) {
-      onChange({ text: editedText });
-    }
+    onChange({ text: editedText });
     setIsEditing(false);
   };
 
@@ -137,165 +80,212 @@ export function CommentCard({
     setIsEditing(false);
   };
 
-  const handleCopyLink = async () => {
-    const url = `${window.location.origin}${window.location.pathname}#comment-${comment.id}`;
-    if (navigator.clipboard && window.isSecureContext) {
-      await navigator.clipboard.writeText(url);
+  const handleSubmitReply = () => {
+    if (replyText.trim()) {
+      onReply(replyText);
+      setReplyText('');
+      setIsReplying(false);
     }
   };
 
-  const handleDelete = () => {
-    if (confirm('Are you sure you want to delete this comment?')) {
-      onDelete?.();
-    }
+  const handleCancelReply = () => {
+    setReplyText('');
+    setIsReplying(false);
   };
+
+  const handleCopyLink = () => {
+    const url = `${window.location.href}#comment-${comment.id}`;
+    navigator.clipboard.writeText(url);
+  };
+
+  const handleUpvote = () => {
+    const isCurrentlyUpvoted = comment.selectedActions?.includes(ACTIONS_TYPE.UPVOTE);
+    const newUpvoteCount = (comment.actions?.[ACTIONS_TYPE.UPVOTE] || 0) + (isCurrentlyUpvoted ? -1 : 1);
+
+    onChange({
+      actions: {
+        ...comment.actions,
+        [ACTIONS_TYPE.UPVOTE]: newUpvoteCount,
+      },
+      selectedActions: isCurrentlyUpvoted
+        ? comment.selectedActions?.filter((a) => a !== ACTIONS_TYPE.UPVOTE)
+        : [...(comment.selectedActions || []), ACTIONS_TYPE.UPVOTE],
+    });
+
+    onVoteChange?.(!isCurrentlyUpvoted);
+  };
+
+  const upvoteCount = comment.actions?.[ACTIONS_TYPE.UPVOTE] || 0;
+  const isUpvoted = comment.selectedActions?.includes(ACTIONS_TYPE.UPVOTE);
 
   return (
-    <div className="flex flex-col gap-1" id={`comment-${comment.id}`}>
-      <div className="flex gap-4">
-        <Avatar className="w-8 h-8">
+    <div id={`comment-${comment.id}`} className={depth > 0 ? 'ml-12 mt-4' : ''}>
+      <div className="flex gap-3">
+        <Avatar className="h-8 w-8 flex-shrink-0">
           <AvatarImage src={comment.user.avatarUrl} alt={comment.user.fullName} />
-          <AvatarFallback>{comment.user.fullName.substring(0, 2).toUpperCase()}</AvatarFallback>
+          <AvatarFallback>{getInitials(comment.user.fullName)}</AvatarFallback>
         </Avatar>
 
-        <div className="flex flex-col w-full">
-          <div className="min-h-[30px] rounded-lg border border-input">
-            {/* Header */}
-            <div className="h-[37px] w-full flex items-center justify-between border-b border-input px-3">
-              <span className="font-semibold">{comment.user.fullName}</span>
-
+        <div className="flex-1 min-w-0">
+          {/* Comment Header */}
+          <div className="flex items-center gap-2 mb-1">
+            <span className="font-medium text-sm">{comment.user.fullName}</span>
+            <span className="text-xs text-muted-foreground">
+              {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
+            </span>
+            {isOwner && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                    <EllipsisVertical className="h-4 w-4" />
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 ml-auto">
+                    <MoreHorizontal className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={handleCopyLink}>Copy link</DropdownMenuItem>
-                  {isOwnComment && (
-                    <>
-                      <DropdownMenuItem onClick={handleEdit}>Edit</DropdownMenuItem>
-                      <DropdownMenuItem onClick={handleDelete} className="text-destructive">
-                        Delete
-                      </DropdownMenuItem>
-                    </>
-                  )}
+                  <DropdownMenuItem onClick={() => setIsEditing(true)}>
+                    <Pencil className="h-4 w-4 mr-2" />
+                    Edit
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={onDelete} className="text-destructive">
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-            </div>
-
-            {/* Content */}
-            <div className="p-3">
-              {isEditing ? (
-                <CommentEditor
-                  value={editedText}
-                  onChange={setEditedText}
-                  currentUser={currentUser}
-                  submitText="Update"
-                  onSubmit={handleSaveEdit}
-                  onCancel={handleCancelEdit}
-                  showCancel
-                  className="border-0"
-                />
-              ) : (
-                <CommentPreview source={comment.text} className="prose prose-sm max-w-none" />
-              )}
-            </div>
-
-            {/* Reactions */}
-            {allowUpvote && !isEditing && (
-              <div className="flex flex-wrap items-center gap-2 md:gap-3 text-sm px-3 pb-2">
-                {/* Upvote button */}
-                <button
-                  onClick={handleUpvote}
-                  className={cn(
-                    'border rounded-xl px-2 py-0.5 inline-flex gap-1 items-center cursor-pointer transition-colors',
-                    isUpvoted ? 'border-primary text-primary' : 'hover:bg-accent',
-                  )}
-                >
-                  <ArrowUpIcon className="h-4 w-4" />
-                  <span>{upvoteCount}</span>
-                </button>
-
-                {/* Emoji picker */}
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" size="sm" className="h-7 w-7 p-0 rounded-full">
-                      <SmileIcon className="h-4 w-4" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="p-0.5 w-auto" align="start">
-                    <EmojiReactions
-                      value={comment.selectedActions}
-                      onSelect={handleReactionSelect}
-                      onUnSelect={handleReactionUnselect}
-                    />
-                  </PopoverContent>
-                </Popover>
-
-                {/* Visible reactions */}
-                {visibleReactions.map((action) => (
-                  <div key={action.id} className="border rounded-xl px-2 py-0.5 inline-flex gap-1 items-center">
-                    <span>{action.emoji}</span>
-                    <span>{comment.actions?.[action.id]}</span>
-                  </div>
-                ))}
-              </div>
             )}
           </div>
 
-          {/* Footer actions */}
-          <div className="flex gap-2 items-center text-sm font-semibold text-muted-foreground ml-1 mt-1">
-            <button onClick={() => setIsReplying(true)} className="text-primary cursor-pointer hover:underline">
-              Reply
-            </button>
-            <CircleIcon className="h-1 w-1 fill-current" />
-            <span>{formatDistance(comment.createdAt, new Date(), { addSuffix: true })}</span>
-          </div>
+          {/* Comment Content */}
+          {isEditing ? (
+            <div className="mt-2">
+              <CommentEditor
+                value={editedText}
+                onChange={setEditedText}
+                currentUser={currentUser}
+                placeholder="Edit comment..."
+                submitText="Save"
+                onSubmit={handleSaveEdit}
+                onCancel={handleCancelEdit}
+                showCancel={true}
+                onImageUpload={onImageUpload}
+                mentionUsers={mentionUsers}
+                onMentionSearch={onMentionSearch}
+              />
+            </div>
+          ) : (
+            <div className="prose prose-sm max-w-none">
+              <CommentPreview source={comment.text} />
+            </div>
+          )}
+
+          {/* Emoji Reactions */}
+          {!isEditing && (
+            <div className="mt-2">
+              <EmojiReactions
+                value={comment.selectedActions || []}
+                onSelect={(newSelected, changed) => {
+                  const newActions = { ...comment.actions };
+                  newActions[changed] = (newActions[changed] || 0) + 1;
+                  onChange({
+                    actions: newActions,
+                    selectedActions: newSelected,
+                  });
+                }}
+                onUnSelect={(newSelected, changed) => {
+                  const newActions = { ...comment.actions };
+                  newActions[changed] = Math.max(0, (newActions[changed] || 0) - 1);
+                  onChange({
+                    actions: newActions,
+                    selectedActions: newSelected,
+                  });
+                }}
+              />
+            </div>
+          )}
+
+          {/* Comment Actions */}
+          {!isEditing && (
+            <div className="flex items-center gap-4 mt-2">
+              {allowUpvote && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={`h-7 px-2 ${isUpvoted ? 'text-primary' : ''}`}
+                  onClick={handleUpvote}
+                >
+                  {isUpvoted ? <ChevronUp className="h-4 w-4 mr-1" /> : <ChevronDown className="h-4 w-4 mr-1" />}
+                  {upvoteCount > 0 && <span className="text-xs">{upvoteCount}</span>}
+                </Button>
+              )}
+              <Button variant="ghost" size="sm" className="h-7 px-2" onClick={() => setIsReplying(!isReplying)}>
+                <MessageCircle className="h-4 w-4 mr-1" />
+                <span className="text-xs">Reply</span>
+              </Button>
+              <Button variant="ghost" size="sm" className="h-7 px-2" onClick={handleCopyLink}>
+                <Copy className="h-4 w-4 mr-1" />
+                <span className="text-xs">Copy link</span>
+              </Button>
+            </div>
+          )}
+
+          {/* Reply Editor */}
+          {isReplying && (
+            <div className="mt-3">
+              <CommentEditor
+                value={replyText}
+                onChange={setReplyText}
+                currentUser={currentUser}
+                placeholder="Write a reply..."
+                submitText="Reply"
+                onSubmit={handleSubmitReply}
+                onCancel={handleCancelReply}
+                showCancel={true}
+                onImageUpload={onImageUpload}
+                mentionUsers={mentionUsers}
+                onMentionSearch={onMentionSearch}
+              />
+            </div>
+          )}
+
+          {/* Replies */}
+          {hasReplies && (
+            <div className="mt-4">
+              <Button variant="ghost" size="sm" className="h-7 px-2 mb-2" onClick={() => setShowReplies(!showReplies)}>
+                {showReplies ? (
+                  <>
+                    <ChevronUp className="h-4 w-4 mr-1" />
+                    Hide {comment.replies!.length} {comment.replies!.length === 1 ? 'reply' : 'replies'}
+                  </>
+                ) : (
+                  <>
+                    <ChevronDown className="h-4 w-4 mr-1" />
+                    Show {comment.replies!.length} {comment.replies!.length === 1 ? 'reply' : 'replies'}
+                  </>
+                )}
+              </Button>
+              {showReplies && (
+                <div className="space-y-4">
+                  {comment.replies!.map((reply) => (
+                    <CommentCard
+                      key={reply.id}
+                      comment={reply}
+                      currentUser={currentUser}
+                      allowUpvote={allowUpvote}
+                      onReply={onReply}
+                      onChange={onChange}
+                      onDelete={onDelete}
+                      onVoteChange={onVoteChange}
+                      onImageUpload={onImageUpload}
+                      mentionUsers={mentionUsers}
+                      onMentionSearch={onMentionSearch}
+                      depth={depth + 1}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
-
-      {/* Reply editor */}
-      {isReplying && onReply && (
-        <div className="ml-12">
-          <CommentEditor
-            currentUser={currentUser}
-            placeholder="Write a reply..."
-            submitText="Reply"
-            showCancel
-            onSubmit={() => {
-              // The parent component will handle the actual reply submission
-              setIsReplying(false);
-            }}
-            onCancel={() => setIsReplying(false)}
-          />
-        </div>
-      )}
-
-      {/* Nested replies */}
-      {comment.replies && comment.replies.length > 0 && (
-        <div className="ml-12 flex flex-col gap-2">
-          {comment.replies.map((reply) => (
-            <div key={reply.id} className="flex gap-2">
-              <Avatar className="w-7 h-7">
-                <AvatarImage src={reply.user.avatarUrl} alt={reply.user.fullName} />
-                <AvatarFallback>{reply.user.fullName.substring(0, 2).toUpperCase()}</AvatarFallback>
-              </Avatar>
-
-              <div className="flex flex-col flex-1">
-                <div className="bg-accent/50 rounded-lg p-3">
-                  <CommentPreview source={reply.text} className="text-sm" />
-                </div>
-                <div className="inline-flex gap-1 text-xs font-semibold text-muted-foreground mt-1">
-                  <span className="text-foreground">{reply.user.fullName}</span>
-                  <CircleIcon className="h-1 w-1 fill-current mt-1" />
-                  <span>{formatDistance(reply.createdAt, new Date(), { addSuffix: true })}</span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
     </div>
   );
 }

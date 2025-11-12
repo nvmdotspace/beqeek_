@@ -1,0 +1,282 @@
+/**
+ * Lexical editor styles
+ */
+
+.editor-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.editor-inner {
+  position: relative;
+  background: transparent;
+}
+
+.editor-input {
+  position: relative;
+  outline: 0;
+  min-height: 80px;
+  caret-color: var(--foreground);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.editor-placeholder {
+  color: var(--muted-foreground);
+  overflow: hidden;
+  position: absolute;
+  text-overflow: ellipsis;
+  top: 0;
+  left: 0;
+  user-select: none;
+  pointer-events: none;
+  font-size: 0.875rem;
+}
+
+.editor-text-bold {
+  font-weight: bold;
+}
+
+.editor-text-italic {
+  font-style: italic;
+}
+
+.editor-text-underline {
+  text-decoration: underline;
+}
+
+.editor-text-strikethrough {
+  text-decoration: line-through;
+}
+
+.editor-text-underlineStrikethrough {
+  text-decoration: underline line-through;
+}
+
+.editor-text-code {
+  background-color: var(--muted);
+  padding: 1px 0.25rem;
+  font-family: ui-monospace, monospace;
+  font-size: 94%;
+  border-radius: 4px;
+}
+
+/* Link styles with high specificity */
+.editor-link {
+  color: rgb(59, 130, 246) !important;
+  text-decoration: none !important;
+}
+
+.editor-link:hover {
+  text-decoration: underline !important;
+}
+
+/* Blue link color for all links in editor */
+.editor-input a,
+.editor-input a:visited {
+  color: rgb(59, 130, 246) !important;
+  text-decoration: none !important;
+}
+
+.editor-input a:hover {
+  text-decoration: underline !important;
+  color: rgb(59, 130, 246) !important;
+}
+
+.editor-code {
+  background-color: var(--muted);
+  font-family: ui-monospace, monospace;
+  display: block;
+  padding: 8px 8px 8px 52px;
+  line-height: 1.53;
+  font-size: 13px;
+  margin: 8px 0;
+  tab-size: 2;
+  overflow-x: auto;
+  position: relative;
+  border-radius: 8px;
+}
+
+.editor-list-ol {
+  padding: 0;
+  margin: 0 0 0 16px;
+  list-style-position: inside;
+}
+
+.editor-list-ul {
+  padding: 0;
+  margin: 0 0 0 16px;
+  list-style-position: inside;
+}
+
+.editor-listitem {
+  margin: 4px 0;
+}
+
+.editor-nested-listitem {
+  list-style-type: none;
+}
+
+.editor-heading-h1 {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.editor-heading-h2 {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.editor-heading-h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.editor-quote {
+  margin: 0;
+  margin-left: 20px;
+  margin-bottom: 10px;
+  font-size: 15px;
+  color: var(--muted-foreground);
+  border-left: 4px solid var(--border);
+  padding-left: 16px;
+}
+
+.editor-image {
+  cursor: default;
+  display: inline-block;
+  position: relative;
+  user-select: none;
+}
+
+.editor-image img {
+  max-width: 100%;
+  cursor: default;
+}
+
+.editor-video {
+  cursor: default;
+  display: inline-block;
+  position: relative;
+  user-select: none;
+}
+
+.editor-table {
+  border-collapse: collapse;
+  border-spacing: 0;
+  overflow-y: scroll;
+  overflow-x: scroll;
+  table-layout: fixed;
+  width: max-content;
+  margin: 16px 0;
+}
+
+.editor-tableCell {
+  border: 1px solid var(--border);
+  padding: 8px;
+  min-width: 100px;
+  vertical-align: top;
+  text-align: start;
+}
+
+.editor-tableCellHeader {
+  background-color: var(--muted);
+  font-weight: 600;
+  border: 1px solid var(--border);
+  padding: 8px;
+  min-width: 100px;
+  vertical-align: top;
+  text-align: start;
+}
+
+/* Mention styles */
+.mention {
+  background-color: rgba(24, 119, 232, 0.2);
+  color: var(--primary);
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+/* Typeahead menu */
+.typeahead-popover {
+  background: var(--popover);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+  display: block;
+  margin-top: 25px;
+  min-width: 180px;
+  z-index: 50;
+}
+
+.typeahead-popover ul {
+  padding: 0;
+  list-style: none;
+  margin: 0;
+  max-height: 200px;
+  overflow-y: scroll;
+}
+
+.typeahead-popover ul::-webkit-scrollbar {
+  display: none;
+}
+
+.typeahead-popover ul {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.typeahead-popover ul li {
+  margin: 0;
+  min-width: 180px;
+  font-size: 14px;
+  outline: none;
+  cursor: pointer;
+  border-radius: 0;
+  display: flex;
+  align-items: center;
+  padding: 8px;
+}
+
+.typeahead-popover li.selected {
+  background-color: var(--accent);
+}
+
+.typeahead-popover li:hover {
+  background-color: var(--accent);
+}
+
+.typeahead-popover li .text {
+  display: flex;
+  line-height: 20px;
+  flex-grow: 1;
+  min-width: 150px;
+}
+
+.mentions-menu {
+  width: 250px;
+}
+
+/* Floating Link Editor */
+.link-editor {
+  position: absolute;
+  z-index: 100;
+  opacity: 0;
+  background-color: var(--popover);
+  transition: opacity 0.2s;
+}
+
+.link-editor .link-input {
+  display: block;
+  width: 300px;
+  box-sizing: border-box;
+  font-size: 14px;
+}
