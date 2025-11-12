@@ -365,10 +365,10 @@ export function FieldFormModal({
             />
 
             {isEditing && (
-              <div className="rounded-md bg-blue-500/10 border border-blue-500/20 p-3">
+              <div className="rounded-md bg-info-subtle border border-info/20 p-3">
                 <div className="flex gap-2">
-                  <Info className="h-4 w-4 text-blue-600 mt-0.5 shrink-0" />
-                  <p className="text-sm text-blue-900 dark:text-blue-200">{m.settings_fieldModal_typeLockedInfo()}</p>
+                  <Info className="h-4 w-4 text-info mt-0.5 shrink-0" />
+                  <p className="text-sm text-info">{m.settings_fieldModal_typeLockedInfo()}</p>
                 </div>
               </div>
             )}

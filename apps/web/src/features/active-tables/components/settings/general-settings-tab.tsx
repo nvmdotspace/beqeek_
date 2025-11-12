@@ -92,7 +92,7 @@ export const GeneralSettingsTab = ({ table, workspaceId }: GeneralSettingsTabPro
             <div className="flex gap-2">
               <Input id="table-id" value={table.id} readOnly className="flex-1 bg-muted font-mono text-sm" />
               <Button variant="outline" size="icon" onClick={handleCopyId} className="shrink-0">
-                {copiedId ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
+                {copiedId ? <Check className="h-4 w-4 text-success" /> : <Copy className="h-4 w-4" />}
               </Button>
             </div>
           </div>
@@ -123,7 +123,7 @@ export const GeneralSettingsTab = ({ table, workspaceId }: GeneralSettingsTabPro
                 </Button>
               </div>
               <Button variant="outline" size="icon" onClick={handleCopyKey} disabled={!displayKey} className="shrink-0">
-                {copiedKey ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
+                {copiedKey ? <Check className="h-4 w-4 text-success" /> : <Copy className="h-4 w-4" />}
               </Button>
             </div>
 

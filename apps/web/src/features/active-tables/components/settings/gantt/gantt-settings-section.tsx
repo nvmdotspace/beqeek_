@@ -118,13 +118,9 @@ export function GanttSettingsSection({ ganttConfigs, fields, onChange }: GanttSe
     >
       <div className="space-y-4">
         {!canCreateGantt && (
-          <div className="rounded-lg border bg-yellow-50 dark:bg-yellow-950/30 p-4">
-            <p className="text-sm font-medium text-yellow-900 dark:text-yellow-100">
-              {m.settings_gantt_missingFieldsTitle()}
-            </p>
-            <p className="mt-1 text-xs text-yellow-700 dark:text-yellow-300">
-              {m.settings_gantt_missingFieldsDescription()}
-            </p>
+          <div className="rounded-lg border border-warning/20 bg-warning-subtle p-4">
+            <p className="text-sm font-medium text-warning">{m.settings_gantt_missingFieldsTitle()}</p>
+            <p className="mt-1 text-xs text-warning">{m.settings_gantt_missingFieldsDescription()}</p>
           </div>
         )}
 
@@ -227,9 +223,9 @@ export function GanttSettingsSection({ ganttConfigs, fields, onChange }: GanttSe
         </div>
 
         {/* Info */}
-        <div className="rounded-lg border bg-blue-50 dark:bg-blue-950/30 p-4">
-          <p className="text-sm font-medium text-blue-900 dark:text-blue-100">{m.settings_gantt_featuresTitle()}</p>
-          <ul className="mt-2 space-y-1 text-xs text-blue-700 dark:text-blue-300">
+        <div className="rounded-lg border border-info/20 bg-info-subtle p-4">
+          <p className="text-sm font-medium text-info">{m.settings_gantt_featuresTitle()}</p>
+          <ul className="mt-2 space-y-1 text-xs text-info">
             <li>• {m.settings_gantt_feature1()}</li>
             <li>• {m.settings_gantt_feature2()}</li>
             <li>• {m.settings_gantt_feature3()}</li>

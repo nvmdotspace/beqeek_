@@ -213,13 +213,9 @@ export function PermissionsSettingsSection({
   if (teams.length === 0) {
     return (
       <SettingsSection title={m.settings_permissions_title()} description={m.settings_permissions_description()}>
-        <div className="rounded-lg border bg-yellow-50 dark:bg-yellow-950/30 p-4">
-          <p className="text-sm font-medium text-yellow-900 dark:text-yellow-100">
-            {m.settings_permissions_noTeamsTitle()}
-          </p>
-          <p className="mt-1 text-xs text-yellow-700 dark:text-yellow-300">
-            {m.settings_permissions_noTeamsDescription()}
-          </p>
+        <div className="rounded-lg border border-warning/20 bg-warning-subtle p-4">
+          <p className="text-sm font-medium text-warning">{m.settings_permissions_noTeamsTitle()}</p>
+          <p className="mt-1 text-xs text-warning">{m.settings_permissions_noTeamsDescription()}</p>
         </div>
       </SettingsSection>
     );
@@ -252,16 +248,12 @@ export function PermissionsSettingsSection({
           </div>
         ) : (
           <div className="space-y-4">
-            <div className="rounded-lg border bg-blue-50 dark:bg-blue-950/30 p-4">
+            <div className="rounded-lg border border-info/20 bg-info-subtle p-4">
               <div className="flex items-start gap-2">
-                <Info className="h-4 w-4 mt-0.5 text-blue-600 dark:text-blue-400" />
+                <Info className="h-4 w-4 mt-0.5 text-info" />
                 <div>
-                  <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
-                    {m.settings_permissions_matrixTitle()}
-                  </p>
-                  <p className="mt-1 text-xs text-blue-700 dark:text-blue-300">
-                    {m.settings_permissions_matrixDescription()}
-                  </p>
+                  <p className="text-sm font-medium text-info">{m.settings_permissions_matrixTitle()}</p>
+                  <p className="mt-1 text-xs text-info">{m.settings_permissions_matrixDescription()}</p>
                 </div>
               </div>
             </div>

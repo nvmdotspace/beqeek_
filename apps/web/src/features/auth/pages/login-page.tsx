@@ -64,14 +64,14 @@ export const LoginPage = () => {
           <div className="max-w-lg space-y-8">
             {/* Logo */}
             <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-cyan-400 text-white">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-accent-blue to-accent-teal text-white">
                 <span className="text-xl font-bold">B</span>
               </div>
               <div>
                 <Heading level={1} className="text-white">
                   BEQEEK
                 </Heading>
-                <Text size="small" className="text-blue-400">
+                <Text size="small" className="text-accent-blue">
                   Low-Code Platform
                 </Text>
               </div>
@@ -81,7 +81,7 @@ export const LoginPage = () => {
             <div className="space-y-4">
               <Heading level={1} className="text-white leading-tight">
                 {m.auth_welcomeBack()}
-                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">
+                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-accent-blue to-accent-teal">
                   {m.auth_digitalProcessPlatform()}
                 </span>
               </Heading>
@@ -93,7 +93,7 @@ export const LoginPage = () => {
             {/* Features */}
             <div className="space-y-4">
               <div className="flex items-start gap-3">
-                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-green-500/20 text-green-400 mt-0.5">
+                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-accent-green-subtle text-accent-green mt-0.5">
                   <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
                     <path
                       fillRule="evenodd"
@@ -113,7 +113,7 @@ export const LoginPage = () => {
               </div>
 
               <div className="flex items-start gap-3">
-                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-500/20 text-blue-400 mt-0.5">
+                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-accent-blue-subtle text-accent-blue mt-0.5">
                   <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
                     <path
                       fillRule="evenodd"
@@ -133,7 +133,7 @@ export const LoginPage = () => {
               </div>
 
               <div className="flex items-start gap-3">
-                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-purple-500/20 text-purple-400 mt-0.5">
+                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-accent-purple-subtle text-accent-purple mt-0.5">
                   <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
                     <path
                       fillRule="evenodd"
@@ -156,8 +156,8 @@ export const LoginPage = () => {
             {/* Demo Account Info */}
             <div className="rounded-2xl border border-slate-700 bg-slate-800/50 p-6 backdrop-blur-sm">
               <div className="flex items-center gap-2 mb-3">
-                <div className="h-2 w-2 rounded-full bg-green-400 animate-pulse"></div>
-                <Text size="small" weight="semibold" className="uppercase tracking-wide text-green-400" as="span">
+                <div className="h-2 w-2 rounded-full bg-accent-green animate-pulse"></div>
+                <Text size="small" weight="semibold" className="uppercase tracking-wide text-accent-green" as="span">
                   {m.auth_demoEnvironment()}
                 </Text>
               </div>
@@ -177,14 +177,14 @@ export const LoginPage = () => {
           <div className="w-full max-w-sm lg:max-w-md space-y-8">
             {/* Mobile Logo */}
             <div className="lg:hidden flex items-center justify-center gap-3 mb-8">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-cyan-400 text-white">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-accent-blue to-accent-teal text-white">
                 <span className="text-lg font-bold">B</span>
               </div>
               <div>
                 <Heading level={1} className="text-white">
                   BEQEEK
                 </Heading>
-                <Text size="small" className="text-blue-400">
+                <Text size="small" className="text-accent-blue">
                   Low-Code Platform
                 </Text>
               </div>
@@ -218,7 +218,7 @@ export const LoginPage = () => {
                       onChange={(event) => setUsername(event.target.value)}
                       disabled={isPending}
                       required
-                      className="bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400 focus:border-blue-400 focus:ring-blue-400"
+                      className="bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400 focus:border-accent-blue focus:ring-accent-blue"
                     />
                   </div>
 
@@ -231,7 +231,7 @@ export const LoginPage = () => {
                       </label>
                       <button
                         type="button"
-                        className="text-xs font-medium text-blue-400 hover:text-blue-300 transition-colors"
+                        className="text-xs font-medium text-accent-blue hover:text-accent-blue/80 transition-colors"
                         onClick={() => setPassword('nvmteam')}
                       >
                         {m.auth_useDemo()}
@@ -247,13 +247,13 @@ export const LoginPage = () => {
                       onChange={(event) => setPassword(event.target.value)}
                       disabled={isPending}
                       required
-                      className="bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400 focus:border-blue-400 focus:ring-blue-400"
+                      className="bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400 focus:border-accent-blue focus:ring-accent-blue"
                     />
                   </div>
 
                   {errorMessage ? (
-                    <div className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2">
-                      <Text size="small" className="text-red-400">
+                    <div className="rounded-lg border border-destructive/20 bg-destructive/10 px-3 py-2">
+                      <Text size="small" className="text-destructive">
                         {errorMessage}
                       </Text>
                     </div>
@@ -261,7 +261,7 @@ export const LoginPage = () => {
 
                   <Button
                     type="submit"
-                    className="w-full bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 text-white font-medium transition-all duration-200 shadow-lg hover:shadow-xl"
+                    className="w-full bg-gradient-to-r from-accent-blue to-accent-teal hover:from-accent-blue/90 hover:to-accent-teal/90 text-white font-medium transition-all duration-200 shadow-lg hover:shadow-xl"
                     disabled={isPending}
                   >
                     {isPending ? m.auth_processing() : m.auth_signIn()}

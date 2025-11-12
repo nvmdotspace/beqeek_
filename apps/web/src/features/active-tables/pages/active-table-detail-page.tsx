@@ -134,9 +134,7 @@ export const ActiveTableDetailPage = () => {
       variant="outline"
       size="compact"
       className={`flex items-center gap-2 ${
-        encryption.keyValidationStatus === 'valid'
-          ? 'border-green-500 text-green-700'
-          : 'border-yellow-500 text-yellow-700'
+        encryption.keyValidationStatus === 'valid' ? 'border-success text-success' : 'border-warning text-warning'
       }`}
     >
       {encryption.keyValidationStatus === 'valid' ? (

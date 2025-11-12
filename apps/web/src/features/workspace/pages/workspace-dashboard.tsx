@@ -1,16 +1,18 @@
 import { useMemo, useState } from 'react';
 
-import { Folder, Zap, Users } from 'lucide-react';
+import { Folder, Zap, Users, Table } from 'lucide-react';
 
 import { useWorkspaces } from '../hooks/use-workspaces';
 
 import { Card, CardContent } from '@workspace/ui/components/card';
 import { Skeleton } from '@workspace/ui/components/skeleton';
-import { Heading, Text, Metric } from '@workspace/ui/components/typography';
+import { Heading, Text } from '@workspace/ui/components/typography';
+import { Inline, Stack } from '@workspace/ui/components/primitives';
 
 import { WorkspaceCreateForm } from '../components/workspace-create-form';
 import { WorkspaceEmptyState } from '../components/workspace-empty-state';
 import { WorkspaceGrid } from '../components/workspace-grid';
+import { StatBadge } from '../components/stat-badge';
 // @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
 
@@ -29,146 +31,116 @@ export const WorkspaceDashboardPage = () => {
   }, [error, isLoading, totalWorkspaces]);
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div className="space-y-1">
-          <Heading level={1}>{m.workspace_dashboard_title()}</Heading>
-          <Text color="muted">{subtitle}</Text>
+    <div className="p-[var(--space-400)]">
+      <Stack space="space-600">
+        {/* Page Title */}
+        <div>
+          <Heading level={2} className="text-2xl font-bold">
+            {m.workspace_dashboard_title()}
+          </Heading>
         </div>
-        {/* <div className="flex items-center gap-2">
-          <Button onClick={() => setShowCreateForm((prev) => !prev)}>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            {m.workspace_dashboard_newWorkspace()}
-          </Button>
-        </div> */}
-      </div>
 
-      {/* Stats Cards */}
-      {!isLoading && !error && totalWorkspaces > 0 && (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <Metric size="medium" value={totalWorkspaces} label={m.workspace_dashboard_totalWorkspaces()} />
-                <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
-                  <Folder className="h-4 w-4 text-blue-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <Metric size="medium" value={24} label={m.workspace_dashboard_activeTables()} />
-                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Folder className="h-4 w-4 text-primary" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <Metric size="medium" value={24} label={m.workspace_dashboard_activeTables()} />
-                <div className="h-8 w-8 rounded-full bg-success/10 flex items-center justify-center">
-                  <Folder className="h-4 w-4 text-success" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <Metric size="medium" value={8} label={m.workspace_dashboard_workflows()} />
-                <div className="h-8 w-8 rounded-full bg-accent/10 flex items-center justify-center">
-                  <Zap className="h-4 w-4 text-accent" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <Metric size="medium" value={15} label={m.workspace_dashboard_teamMembers()} />
-                <div className="h-8 w-8 rounded-full bg-warning/10 flex items-center justify-center">
-                  <Users className="h-4 w-4 text-warning" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
-      {/* Create Form */}
-      {showCreateForm && totalWorkspaces > 0 && (
-        <Card>
-          <CardContent className="pt-6">
-            <div className="mb-6 space-y-1">
-              <Heading level={2}>{m.workspace_dashboard_createNewTitle()}</Heading>
-              <Text size="small" color="muted">
-                {m.workspace_dashboard_createNewDescription()}
-              </Text>
-            </div>
-            <WorkspaceCreateForm onSuccess={() => setShowCreateForm(false)} />
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Loading State */}
-      {isLoading && (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 6 }).map((_, index) => (
-            <Card key={index}>
-              <CardContent className="space-y-4 pt-6">
-                <Skeleton className="h-6 w-3/4" />
-                <Skeleton className="h-10 w-full" />
-                <Skeleton className="h-20 w-full" />
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
-
-      {/* Error State */}
-      {!isLoading && error && (
-        <Card className="border-destructive/50 bg-destructive/10">
-          <CardContent className="pt-6">
-            <Heading level={2} className="text-destructive">
-              {m.workspace_dashboard_loadFailed()}
+        {/* Quick Summary Stats */}
+        {!isLoading && !error && totalWorkspaces > 0 && (
+          <Stack space="space-300">
+            <Heading level={3} className="text-lg font-semibold">
+              Tổng quan
             </Heading>
-            <Text size="small" className="text-destructive/90 mt-2">
-              {(error instanceof Error && error.message) || m.workspace_dashboard_errorRetry()}
-            </Text>
-          </CardContent>
-        </Card>
-      )}
+            <Inline space="space-250" align="center" wrap className="gap-y-[var(--space-250)]">
+              <StatBadge
+                icon={Folder}
+                value={totalWorkspaces}
+                label={m.workspace_dashboard_totalWorkspaces()}
+                color="accent-blue"
+                loading={isLoading}
+              />
+              <StatBadge icon={Table} value={24} label="Modules" color="primary" loading={isLoading} />
+              <StatBadge icon={Zap} value={8} label="Workflows" color="accent-purple" loading={isLoading} />
+              <StatBadge
+                icon={Users}
+                value={15}
+                label={m.workspace_dashboard_teamMembers()}
+                color="warning"
+                loading={isLoading}
+              />
+            </Inline>
+          </Stack>
+        )}
 
-      {/* Empty State */}
-      {!isLoading && !error && totalWorkspaces === 0 ? (
-        <WorkspaceEmptyState
-          onCreateClick={() => setShowCreateForm((prev) => !prev)}
-          createForm={<WorkspaceCreateForm onSuccess={() => setShowCreateForm(false)} />}
-          showForm={showCreateForm}
-        />
-      ) : null}
+        {/* Create Form */}
+        {showCreateForm && totalWorkspaces > 0 && (
+          <Card>
+            <CardContent className="pt-6">
+              <Stack space="space-050" className="mb-[var(--space-300)]">
+                <Heading level={2}>{m.workspace_dashboard_createNewTitle()}</Heading>
+                <Text size="small" color="muted">
+                  {m.workspace_dashboard_createNewDescription()}
+                </Text>
+              </Stack>
+              <WorkspaceCreateForm onSuccess={() => setShowCreateForm(false)} />
+            </CardContent>
+          </Card>
+        )}
 
-      {/* Workspace List Section */}
-      {!isLoading && !error && totalWorkspaces > 0 && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <Heading level={2}>Danh sách workspace của bạn</Heading>
-            <Text size="small" color="muted">
-              {totalWorkspaces} workspace
-            </Text>
+        {/* Loading State */}
+        {isLoading && (
+          <div className="grid gap-[var(--space-300)] md:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <Card key={index}>
+                <CardContent className="pt-6">
+                  <Stack space="space-200">
+                    <Skeleton className="h-6 w-3/4" />
+                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-20 w-full" />
+                  </Stack>
+                </CardContent>
+              </Card>
+            ))}
           </div>
-          <WorkspaceGrid workspaces={workspaces} />
-        </div>
-      )}
+        )}
+
+        {/* Error State */}
+        {!isLoading && error && (
+          <Card className="border-destructive/50 bg-destructive/10">
+            <CardContent className="pt-6">
+              <Stack space="space-100">
+                <Heading level={2} className="text-destructive">
+                  {m.workspace_dashboard_loadFailed()}
+                </Heading>
+                <Text size="small" className="text-destructive/90">
+                  {(error instanceof Error && error.message) || m.workspace_dashboard_errorRetry()}
+                </Text>
+              </Stack>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Empty State */}
+        {!isLoading && !error && totalWorkspaces === 0 ? (
+          <WorkspaceEmptyState
+            onCreateClick={() => setShowCreateForm((prev) => !prev)}
+            createForm={<WorkspaceCreateForm onSuccess={() => setShowCreateForm(false)} />}
+            showForm={showCreateForm}
+          />
+        ) : null}
+
+        {/* Workspace List Section */}
+        {!isLoading && !error && totalWorkspaces > 0 && (
+          <Stack space="space-300">
+            <div className="flex items-center justify-between">
+              <div>
+                <Heading level={3} className="text-lg font-semibold">
+                  Danh sách workspace của bạn
+                </Heading>
+                <Text size="small" color="muted">
+                  {totalWorkspaces} workspace đang hoạt động
+                </Text>
+              </div>
+            </div>
+            <WorkspaceGrid workspaces={workspaces} onFavorite={(id) => console.log('Toggle favorite:', id)} />
+          </Stack>
+        )}
+      </Stack>
     </div>
   );
 };

@@ -147,10 +147,10 @@ export function ReferenceFieldConfig({
 
       {/* FIRST_REFERENCE_RECORD Info */}
       {isFirstReferenceRecord && (
-        <div className="rounded-md bg-blue-500/10 border border-blue-500/20 p-3">
+        <div className="rounded-md bg-info-subtle border border-info/20 p-3">
           <div className="flex gap-2">
-            <AlertCircle className="h-4 w-4 text-blue-600 mt-0.5 shrink-0" />
-            <div className="text-sm text-blue-900 dark:text-blue-200">
+            <AlertCircle className="h-4 w-4 text-info mt-0.5 shrink-0" />
+            <div className="text-sm text-info">
               <p className="font-medium mb-1">Reverse Lookup Field</p>
               <p className="text-xs">
                 This read-only field displays data from the first record in the selected table that references the
@@ -288,8 +288,8 @@ export function ReferenceFieldConfig({
 
       {/* Summary */}
       {localTableId && localLabelField && (!isFirstReferenceRecord || localRefField) && (
-        <div className="rounded-md bg-green-500/10 border border-green-500/20 p-3">
-          <p className="text-sm text-green-900 dark:text-green-200">
+        <div className="rounded-md bg-success-subtle border border-success/20 p-3">
+          <p className="text-sm text-success">
             <strong>Configuration Complete</strong>
             <br />
             {isFirstReferenceRecord ? (

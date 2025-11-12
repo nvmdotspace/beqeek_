@@ -272,9 +272,9 @@ export function DetailViewSettingsSection({ config, fields, onChange }: DetailVi
         )}
 
         {/* Preview Info */}
-        <div className="rounded-lg border bg-blue-50 dark:bg-blue-950/30 p-4">
-          <p className="text-sm font-medium text-blue-900 dark:text-blue-100">{m.settings_detailView_previewTitle()}</p>
-          <p className="mt-1 text-xs text-blue-700 dark:text-blue-300">{m.settings_detailView_previewDescription()}</p>
+        <div className="rounded-lg border bg-info-subtle p-4">
+          <p className="text-sm font-medium text-info">{m.settings_detailView_previewTitle()}</p>
+          <p className="mt-1 text-xs text-info-subtle-foreground">{m.settings_detailView_previewDescription()}</p>
         </div>
       </div>
     </SettingsSection>

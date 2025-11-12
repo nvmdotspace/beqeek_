@@ -49,6 +49,80 @@
   --radius: 0.6rem;
 
   /* ========================================
+     SEMANTIC STATUS COLORS (Atlassian-inspired)
+     ======================================== */
+
+  /* Success - Green for positive states, completion, encryption */
+  --success: hsl(142 76% 36%);
+  --success-foreground: hsl(0 0% 98%);
+  --success-subtle: hsl(142 76% 96%);
+  --success-subtle-foreground: hsl(142 76% 25%);
+
+  /* Warning - Amber for caution, alerts, unencrypted states */
+  --warning: hsl(38 92% 50%);
+  --warning-foreground: hsl(0 0% 3.9%);
+  --warning-subtle: hsl(38 92% 95%);
+  --warning-subtle-foreground: hsl(38 92% 30%);
+
+  /* Info - Blue for informational messages */
+  --info: hsl(217 91% 60%);
+  --info-foreground: hsl(0 0% 98%);
+  --info-subtle: hsl(217 91% 96%);
+  --info-subtle-foreground: hsl(217 91% 30%);
+
+  /* ========================================
+     ACCENT COLORS (Atlassian palette)
+     ======================================== */
+
+  /* Blue - Primary accent, HRM, employee management */
+  --accent-blue: hsl(217 91% 60%);
+  --accent-blue-foreground: hsl(0 0% 98%);
+  --accent-blue-subtle: hsl(217 91% 96%);
+  --accent-blue-subtle-foreground: hsl(217 91% 30%);
+
+  /* Purple - Workflows, automation, processes */
+  --accent-purple: hsl(271 81% 56%);
+  --accent-purple-foreground: hsl(0 0% 98%);
+  --accent-purple-subtle: hsl(271 81% 96%);
+  --accent-purple-subtle-foreground: hsl(271 81% 30%);
+
+  /* Green - Data operations, databases, growth */
+  --accent-green: hsl(142 76% 36%);
+  --accent-green-foreground: hsl(0 0% 98%);
+  --accent-green-subtle: hsl(142 76% 96%);
+  --accent-green-subtle-foreground: hsl(142 76% 25%);
+
+  /* Teal - CRM, customers, communication */
+  --accent-teal: hsl(173 80% 40%);
+  --accent-teal-foreground: hsl(0 0% 98%);
+  --accent-teal-subtle: hsl(173 80% 96%);
+  --accent-teal-subtle-foreground: hsl(173 80% 25%);
+
+  /* Orange - Finance, analytics, metrics */
+  --accent-orange: hsl(24 94% 50%);
+  --accent-orange-foreground: hsl(0 0% 98%);
+  --accent-orange-subtle: hsl(24 94% 96%);
+  --accent-orange-subtle-foreground: hsl(24 94% 30%);
+
+  /* Magenta - Creative, design, branding */
+  --accent-magenta: hsl(328 85% 50%);
+  --accent-magenta-foreground: hsl(0 0% 98%);
+  --accent-magenta-subtle: hsl(328 85% 96%);
+  --accent-magenta-subtle-foreground: hsl(328 85% 30%);
+
+  /* Lime - Growth, success, achievements */
+  --accent-lime: hsl(82 84% 43%);
+  --accent-lime-foreground: hsl(0 0% 3.9%);
+  --accent-lime-subtle: hsl(82 84% 96%);
+  --accent-lime-subtle-foreground: hsl(82 84% 25%);
+
+  /* Yellow - Highlights, important items */
+  --accent-yellow: hsl(45 93% 58%);
+  --accent-yellow-foreground: hsl(0 0% 3.9%);
+  --accent-yellow-subtle: hsl(45 93% 96%);
+  --accent-yellow-subtle-foreground: hsl(45 93% 30%);
+
+  /* ========================================
      TYPOGRAPHY TOKENS
      ======================================== */
 
@@ -191,6 +265,84 @@
   --font-caption-size: var(--font-body-small-size);
   --font-caption-line-height: var(--font-body-small-line-height);
   --font-caption-weight: var(--font-weight-regular);
+
+  /* ========================================
+     SPACING TOKENS (Atlassian 8px system)
+     ======================================== */
+
+  /* Positive spacing - Based on 8px baseline grid
+     Token format: space.100 = 100% of base unit (8px)
+     All values are multiples or divisions of the 8px base */
+
+  --space-0: 0rem; /* 0px - Reset spacing */
+  --space-025: 0.125rem; /* 2px - Hairline gaps, icon padding */
+  --space-050: 0.25rem; /* 4px - Tight spacing, badges */
+  --space-075: 0.375rem; /* 6px - Compact UI elements */
+  --space-100: 0.5rem; /* 8px - BASE UNIT, default gaps */
+  --space-150: 0.75rem; /* 12px - Small component padding */
+  --space-200: 1rem; /* 16px - Standard spacing, button padding */
+  --space-250: 1.25rem; /* 20px - Medium gaps */
+  --space-300: 1.5rem; /* 24px - Card padding, section gaps */
+  --space-400: 2rem; /* 32px - Large component spacing */
+  --space-500: 2.5rem; /* 40px - Section padding */
+  --space-600: 3rem; /* 48px - Major layout spacing */
+  --space-800: 4rem; /* 64px - Page section gaps */
+  --space-1000: 5rem; /* 80px - Hero sections, major dividers */
+
+  /* Negative spacing - For margin adjustments and positioning */
+  --space-negative-025: -0.125rem; /* -2px - Fine positioning */
+  --space-negative-050: -0.25rem; /* -4px - Icon alignment */
+  --space-negative-075: -0.375rem; /* -6px - Offset adjustments */
+  --space-negative-100: -0.5rem; /* -8px - Overlap effects */
+  --space-negative-150: -0.75rem; /* -12px - Modal overlays */
+  --space-negative-200: -1rem; /* -16px - Pullback layouts */
+  --space-negative-300: -1.5rem; /* -24px - Decorative offsets */
+  --space-negative-400: -2rem; /* -32px - Deep overlaps */
+
+  /* ========================================
+     GRID & LAYOUT TOKENS
+     ======================================== */
+
+  /* Grid structure */
+  --grid-columns: 12; /* 12-column grid system */
+
+  /* Responsive gutters (space between columns) */
+  --grid-gutter-xs: 1rem; /* 16px - Mobile */
+  --grid-gutter-sm: 1rem; /* 16px - Small tablets */
+  --grid-gutter-md: 1.5rem; /* 24px - Tablets */
+  --grid-gutter-lg: 1.5rem; /* 24px - Small laptops */
+  --grid-gutter-xl: 1.5rem; /* 24px - Desktops */
+  --grid-gutter-2xl: 1.5rem; /* 24px - Large displays */
+
+  /* Responsive margins (outer grid edges) */
+  --grid-margin-xs: 1rem; /* 16px - Mobile */
+  --grid-margin-sm: 1.5rem; /* 24px - Small tablets */
+  --grid-margin-md: 2rem; /* 32px - Tablets */
+  --grid-margin-lg: 2.5rem; /* 40px - Small laptops */
+  --grid-margin-xl: 5rem; /* 80px - Desktops */
+  --grid-margin-2xl: 7.5rem; /* 120px - Large displays */
+
+  /* Current gutter/margin (updated by media queries) */
+  --grid-gutter: var(--grid-gutter-xs);
+  --grid-margin: var(--grid-margin-xs);
+
+  /* ========================================
+     BREAKPOINT TOKENS
+     ======================================== */
+
+  --breakpoint-xs: 0rem; /* 0px - Mobile portrait */
+  --breakpoint-sm: 30rem; /* 480px - Mobile landscape, small tablets */
+  --breakpoint-md: 48rem; /* 768px - Tablets */
+  --breakpoint-lg: 64rem; /* 1024px - Small laptops */
+  --breakpoint-xl: 90rem; /* 1440px - Desktops */
+  --breakpoint-2xl: 110.5rem; /* 1768px - Large displays */
+
+  /* Container max-widths for fixed grid */
+  --container-sm: 640px; /* Small */
+  --container-md: 768px; /* Medium */
+  --container-lg: 1024px; /* Large */
+  --container-xl: 1280px; /* Extra large */
+  --container-2xl: 1536px; /* 2X large */
 }
 
 .dark {
@@ -225,6 +377,63 @@
   --sidebar-accent: hsl(0 0% 14.9%);
   --sidebar-accent-foreground: hsl(0 0% 98%);
   --sidebar-border: hsl(0 0% 14.9%);
+
+  /* Semantic status colors - Dark mode */
+  --success: hsl(142 70% 45%);
+  --success-foreground: hsl(0 0% 3.9%);
+  --success-subtle: hsl(142 70% 12%);
+  --success-subtle-foreground: hsl(142 70% 70%);
+
+  --warning: hsl(38 90% 55%);
+  --warning-foreground: hsl(0 0% 3.9%);
+  --warning-subtle: hsl(38 90% 15%);
+  --warning-subtle-foreground: hsl(38 90% 75%);
+
+  --info: hsl(217 91% 65%);
+  --info-foreground: hsl(0 0% 3.9%);
+  --info-subtle: hsl(217 91% 15%);
+  --info-subtle-foreground: hsl(217 91% 75%);
+
+  /* Accent colors - Dark mode */
+  --accent-blue: hsl(217 91% 65%);
+  --accent-blue-foreground: hsl(0 0% 3.9%);
+  --accent-blue-subtle: hsl(217 91% 15%);
+  --accent-blue-subtle-foreground: hsl(217 91% 75%);
+
+  --accent-purple: hsl(271 81% 62%);
+  --accent-purple-foreground: hsl(0 0% 3.9%);
+  --accent-purple-subtle: hsl(271 81% 15%);
+  --accent-purple-subtle-foreground: hsl(271 81% 75%);
+
+  --accent-green: hsl(142 70% 45%);
+  --accent-green-foreground: hsl(0 0% 3.9%);
+  --accent-green-subtle: hsl(142 70% 12%);
+  --accent-green-subtle-foreground: hsl(142 70% 70%);
+
+  --accent-teal: hsl(173 80% 45%);
+  --accent-teal-foreground: hsl(0 0% 3.9%);
+  --accent-teal-subtle: hsl(173 80% 12%);
+  --accent-teal-subtle-foreground: hsl(173 80% 70%);
+
+  --accent-orange: hsl(24 94% 58%);
+  --accent-orange-foreground: hsl(0 0% 3.9%);
+  --accent-orange-subtle: hsl(24 94% 15%);
+  --accent-orange-subtle-foreground: hsl(24 94% 75%);
+
+  --accent-magenta: hsl(328 85% 58%);
+  --accent-magenta-foreground: hsl(0 0% 3.9%);
+  --accent-magenta-subtle: hsl(328 85% 15%);
+  --accent-magenta-subtle-foreground: hsl(328 85% 75%);
+
+  --accent-lime: hsl(82 84% 50%);
+  --accent-lime-foreground: hsl(0 0% 3.9%);
+  --accent-lime-subtle: hsl(82 84% 15%);
+  --accent-lime-subtle-foreground: hsl(82 84% 75%);
+
+  --accent-yellow: hsl(45 93% 65%);
+  --accent-yellow-foreground: hsl(0 0% 3.9%);
+  --accent-yellow-subtle: hsl(45 93% 15%);
+  --accent-yellow-subtle-foreground: hsl(45 93% 75%);
 }
 
 /* ========================================
@@ -332,6 +541,63 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
 
+  /* Semantic Status Color Tokens */
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-success-subtle: var(--success-subtle);
+  --color-success-subtle-foreground: var(--success-subtle-foreground);
+
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-warning-subtle: var(--warning-subtle);
+  --color-warning-subtle-foreground: var(--warning-subtle-foreground);
+
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-info-subtle: var(--info-subtle);
+  --color-info-subtle-foreground: var(--info-subtle-foreground);
+
+  /* Accent Color Tokens */
+  --color-accent-blue: var(--accent-blue);
+  --color-accent-blue-foreground: var(--accent-blue-foreground);
+  --color-accent-blue-subtle: var(--accent-blue-subtle);
+  --color-accent-blue-subtle-foreground: var(--accent-blue-subtle-foreground);
+
+  --color-accent-purple: var(--accent-purple);
+  --color-accent-purple-foreground: var(--accent-purple-foreground);
+  --color-accent-purple-subtle: var(--accent-purple-subtle);
+  --color-accent-purple-subtle-foreground: var(--accent-purple-subtle-foreground);
+
+  --color-accent-green: var(--accent-green);
+  --color-accent-green-foreground: var(--accent-green-foreground);
+  --color-accent-green-subtle: var(--accent-green-subtle);
+  --color-accent-green-subtle-foreground: var(--accent-green-subtle-foreground);
+
+  --color-accent-teal: var(--accent-teal);
+  --color-accent-teal-foreground: var(--accent-teal-foreground);
+  --color-accent-teal-subtle: var(--accent-teal-subtle);
+  --color-accent-teal-subtle-foreground: var(--accent-teal-subtle-foreground);
+
+  --color-accent-orange: var(--accent-orange);
+  --color-accent-orange-foreground: var(--accent-orange-foreground);
+  --color-accent-orange-subtle: var(--accent-orange-subtle);
+  --color-accent-orange-subtle-foreground: var(--accent-orange-subtle-foreground);
+
+  --color-accent-magenta: var(--accent-magenta);
+  --color-accent-magenta-foreground: var(--accent-magenta-foreground);
+  --color-accent-magenta-subtle: var(--accent-magenta-subtle);
+  --color-accent-magenta-subtle-foreground: var(--accent-magenta-subtle-foreground);
+
+  --color-accent-lime: var(--accent-lime);
+  --color-accent-lime-foreground: var(--accent-lime-foreground);
+  --color-accent-lime-subtle: var(--accent-lime-subtle);
+  --color-accent-lime-subtle-foreground: var(--accent-lime-subtle-foreground);
+
+  --color-accent-yellow: var(--accent-yellow);
+  --color-accent-yellow-foreground: var(--accent-yellow-foreground);
+  --color-accent-yellow-subtle: var(--accent-yellow-subtle);
+  --color-accent-yellow-subtle-foreground: var(--accent-yellow-subtle-foreground);
+
   /* Radius Tokens */
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -384,6 +650,50 @@
   --letter-spacing-h1: var(--font-heading-h1-letter-spacing);
   --letter-spacing-h2: var(--font-heading-h2-letter-spacing);
   --letter-spacing-h3: var(--font-heading-h3-letter-spacing);
+}
+
+/* ========================================
+   RESPONSIVE GRID UPDATES
+   ======================================== */
+
+/* Small devices (480px and up) */
+@media (min-width: 30rem) {
+  :root {
+    --grid-gutter: var(--grid-gutter-sm);
+    --grid-margin: var(--grid-margin-sm);
+  }
+}
+
+/* Medium devices (768px and up) */
+@media (min-width: 48rem) {
+  :root {
+    --grid-gutter: var(--grid-gutter-md);
+    --grid-margin: var(--grid-margin-md);
+  }
+}
+
+/* Large devices (1024px and up) */
+@media (min-width: 64rem) {
+  :root {
+    --grid-gutter: var(--grid-gutter-lg);
+    --grid-margin: var(--grid-margin-lg);
+  }
+}
+
+/* Extra large devices (1440px and up) */
+@media (min-width: 90rem) {
+  :root {
+    --grid-gutter: var(--grid-gutter-xl);
+    --grid-margin: var(--grid-margin-xl);
+  }
+}
+
+/* 2X large devices (1768px and up) */
+@media (min-width: 110.5rem) {
+  :root {
+    --grid-gutter: var(--grid-gutter-2xl);
+    --grid-margin: var(--grid-margin-2xl);
+  }
 }
 
 @layer base {

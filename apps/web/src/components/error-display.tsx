@@ -169,8 +169,8 @@ function getErrorVariant(error: ApiError | null): 'default' | 'destructive' {
  */
 function getErrorColorClass(error: ApiError | null): string {
   if (!error) return 'border-destructive';
-  if (error.isNetworkError()) return 'border-yellow-500';
-  if (error.isServerError()) return 'border-orange-500';
+  if (error.isNetworkError()) return 'border-warning';
+  if (error.isServerError()) return 'border-warning';
   return 'border-destructive';
 }
 
@@ -179,8 +179,8 @@ function getErrorColorClass(error: ApiError | null): string {
  */
 function getIconBgClass(error: ApiError | null): string {
   if (!error) return 'bg-destructive/10';
-  if (error.isNetworkError()) return 'bg-yellow-500/10';
-  if (error.isServerError()) return 'bg-orange-500/10';
+  if (error.isNetworkError()) return 'bg-warning-subtle';
+  if (error.isServerError()) return 'bg-warning-subtle';
   return 'bg-destructive/10';
 }
 
@@ -189,8 +189,8 @@ function getIconBgClass(error: ApiError | null): string {
  */
 function getIconColorClass(error: ApiError | null): string {
   if (!error) return 'text-destructive';
-  if (error.isNetworkError()) return 'text-yellow-600';
-  if (error.isServerError()) return 'text-orange-600';
+  if (error.isNetworkError()) return 'text-warning';
+  if (error.isServerError()) return 'text-warning';
   return 'text-destructive';
 }
 
@@ -199,7 +199,7 @@ function getIconColorClass(error: ApiError | null): string {
  */
 function getTextColorClass(error: ApiError | null): string {
   if (!error) return 'text-destructive';
-  if (error.isNetworkError()) return 'text-yellow-700';
-  if (error.isServerError()) return 'text-orange-700';
+  if (error.isNetworkError()) return 'text-warning';
+  if (error.isServerError()) return 'text-warning';
   return 'text-destructive';
 }

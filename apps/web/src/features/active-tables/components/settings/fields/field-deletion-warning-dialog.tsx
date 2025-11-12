@@ -106,9 +106,9 @@ export function FieldDeletionWarningDialog({
         )}
 
         {hasReferences && (
-          <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-900 dark:bg-yellow-950/30">
-            <p className="text-sm font-medium text-yellow-900 dark:text-yellow-100">What will happen:</p>
-            <ul className="mt-2 space-y-1 text-xs text-yellow-800 dark:text-yellow-200">
+          <div className="rounded-lg border border-warning/20 bg-warning-subtle p-4">
+            <p className="text-sm font-medium text-warning">What will happen:</p>
+            <ul className="mt-2 space-y-1 text-xs text-warning-subtle-foreground">
               <li>• The field will be removed from all configurations</li>
               <li>• Configurations that become invalid will be automatically deleted</li>
               <li>• Existing data in this field will be permanently deleted</li>

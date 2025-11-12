@@ -151,7 +151,7 @@ export function GeneralSettingsSection({ tableId, config, onChange, fields }: Ge
               className="shrink-0"
               aria-label={m.settings_general_copyTableId()}
             >
-              {copiedId ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
+              {copiedId ? <Check className="h-4 w-4 text-success" /> : <Copy className="h-4 w-4" />}
             </Button>
           </div>
           <p className="text-xs text-muted-foreground">{m.settings_general_tableIdHelp()}</p>
@@ -227,22 +227,18 @@ export function GeneralSettingsSection({ tableId, config, onChange, fields }: Ge
 
           {/* Warning Alert based on encryption mode */}
           {config.e2eeEncryption ? (
-            <Alert variant="destructive" className="border-red-600 bg-red-50 dark:bg-red-950">
-              <AlertTriangle className="h-4 w-4 text-red-600" />
-              <AlertDescription className="text-red-800 dark:text-red-200">
-                <strong className="text-red-900 dark:text-red-100">
-                  {m.settings_general_encryptionWarningTitle()}
-                </strong>{' '}
+            <Alert variant="destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>
+                <strong>{m.settings_general_encryptionWarningTitle()}</strong>{' '}
                 {m.settings_general_encryptionWarningE2EE()}
               </AlertDescription>
             </Alert>
           ) : (
-            <Alert className="border-yellow-600 bg-yellow-50 dark:bg-yellow-950">
-              <Info className="h-4 w-4 text-yellow-600" />
-              <AlertDescription className="text-yellow-800 dark:text-yellow-200">
-                <strong className="text-yellow-900 dark:text-yellow-100">
-                  {m.settings_general_encryptionServerTitle()}
-                </strong>{' '}
+            <Alert className="border-warning bg-warning-subtle">
+              <Info className="h-4 w-4 text-warning" />
+              <AlertDescription className="text-warning">
+                <strong className="text-warning">{m.settings_general_encryptionServerTitle()}</strong>{' '}
                 {m.settings_general_encryptionWarningServer()}
               </AlertDescription>
             </Alert>
@@ -305,7 +301,7 @@ export function GeneralSettingsSection({ tableId, config, onChange, fields }: Ge
                     className="h-10 w-10 shrink-0"
                     aria-label={m.settings_general_encryptionCopy()}
                   >
-                    {copiedKey ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
+                    {copiedKey ? <Check className="h-4 w-4 text-success" /> : <Copy className="h-4 w-4" />}
                   </Button>
                 </>
               )}

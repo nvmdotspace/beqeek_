@@ -1,7 +1,8 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { cn } from '@workspace/ui/lib/utils';
 import { Button } from '@workspace/ui/components/button';
-import { X } from 'lucide-react';
+import { Input } from '@workspace/ui/components/input';
+import { X, Search } from 'lucide-react';
 import { useBadgeCounts } from '@/hooks/use-badge-counts';
 import {
   useSidebarStore,
@@ -13,6 +14,8 @@ import {
 import { useAuthStore, selectIsAuthenticated } from '@/features/auth/stores/auth-store';
 import { WorkspaceSelector } from './workspace-selector';
 import { NavigationMenu } from './navigation-menu';
+// @ts-expect-error - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 
 interface AppSidebarProps {
   onCloseMobile?: () => void;
@@ -46,10 +49,8 @@ export const AppSidebar = ({ onCloseMobile }: AppSidebarProps) => {
         setCollapsed(true);
       }
 
-      // Auto-expand on desktop if previously collapsed on tablet
-      if (!newIsTablet && !newIsMobile && isCollapsed) {
-        setCollapsed(false);
-      }
+      // Note: Removed auto-expand logic to allow manual collapse on desktop
+      // Users can manually toggle collapse/expand on desktop via the button
     };
 
     handleResize();
@@ -118,6 +119,8 @@ interface SidebarContentProps {
 }
 
 const SidebarContent = ({ isCollapsed = false, onCloseMobile, showCloseButton = true }: SidebarContentProps) => {
+  const [searchQuery, setSearchQuery] = useState('');
+
   return (
     <>
       {/* Workspace Selector at Top */}
@@ -140,6 +143,24 @@ const SidebarContent = ({ isCollapsed = false, onCloseMobile, showCloseButton = 
           )}
         </div>
       </div>
+
+      {/* Search Bar - Only show when not collapsed */}
+      {!isCollapsed && (
+        <div className="px-3 pb-3">
+          <div className="relative group">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/60 transition-colors group-focus-within:text-muted-foreground" />
+            <Input
+              placeholder={m.common_searchPlaceholder()}
+              className="pl-9 pr-12 w-full h-10 bg-muted/30 border-border/40 rounded-lg transition-all hover:bg-muted/50 focus:bg-background"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <kbd className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border border-border/40 bg-muted/50 px-1.5 font-mono text-[10px] font-medium text-muted-foreground/60 opacity-100">
+              /
+            </kbd>
+          </div>
+        </div>
+      )}
 
       {/* Sidebar Content */}
       <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border">

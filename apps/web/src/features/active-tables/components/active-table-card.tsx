@@ -81,7 +81,7 @@ export const ActiveTableCard = memo(
           'hover:border-border hover:shadow-lg hover:bg-background',
           'cursor-pointer',
           'focus-visible:outline-none focus-visible:ring-2',
-          'focus-visible:ring-blue-500 focus-visible:ring-offset-2',
+          'focus-visible:ring-ring focus-visible:ring-offset-2',
         )}
         role="button"
         tabIndex={0}
@@ -132,7 +132,7 @@ export const ActiveTableCard = memo(
                 variant={isE2EE ? 'default' : 'outline'}
                 className={cn(
                   'flex items-center gap-1 text-[11px] whitespace-nowrap h-5 px-1.5',
-                  isE2EE ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : '',
+                  isE2EE ? 'bg-accent-green-subtle text-accent-green' : '',
                 )}
               >
                 {isE2EE ? (
@@ -179,7 +179,7 @@ export const ActiveTableCard = memo(
           <div className="grid grid-cols-1 gap-2.5 text-xs md:grid-cols-3">
             <div className="rounded-lg border border-border/50 bg-muted/30 p-2.5 transition-colors hover:bg-muted/40">
               <div className="flex items-center gap-1.5 font-medium text-foreground mb-1.5">
-                <Table className="h-3 w-3 text-blue-500" />
+                <Table className="h-3 w-3 text-accent-blue" />
                 <span className="text-[11px]">
                   {fieldCount} {fieldCount === 1 ? 'field' : 'fields'}
                 </span>
@@ -205,7 +205,7 @@ export const ActiveTableCard = memo(
             </div>
             <div className="rounded-lg border border-border/50 bg-muted/30 p-2.5 transition-colors hover:bg-muted/40">
               <div className="flex items-center gap-1.5 font-medium text-foreground mb-1.5">
-                <Workflow className="h-3 w-3 text-purple-500" />
+                <Workflow className="h-3 w-3 text-accent-purple" />
                 <span className="text-[11px]">
                   {actionsCount} {actionsCount === 1 ? 'automation' : 'automations'}
                 </span>
@@ -216,7 +216,7 @@ export const ActiveTableCard = memo(
             </div>
             <div className="rounded-lg border border-border/50 bg-muted/30 p-2.5 transition-colors hover:bg-muted/40">
               <div className="flex items-center gap-1.5 font-medium text-foreground mb-1.5">
-                <Database className="h-3 w-3 text-emerald-500" />
+                <Database className="h-3 w-3 text-accent-green" />
                 <span className="text-[11px]">
                   {quickFilterCount} {quickFilterCount === 1 ? 'filter' : 'filters'}
                 </span>
@@ -228,7 +228,7 @@ export const ActiveTableCard = memo(
           </div>
 
           {!isEncryptionReady && isE2EE ? (
-            <div className="flex items-center gap-2 rounded-md border border-yellow-200 bg-yellow-50/80 p-2 text-xs text-yellow-900 dark:border-yellow-500/40 dark:bg-yellow-950/40 dark:text-yellow-200">
+            <div className="flex items-center gap-2 rounded-md border border-warning/20 bg-warning-subtle p-2 text-xs text-warning">
               <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
               <span>{m.activeTables_card_encryptionNotReady()}</span>
             </div>

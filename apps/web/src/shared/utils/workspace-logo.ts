@@ -69,19 +69,20 @@ function hashString(str: string): number {
 export function getWorkspaceInitials(workspaceName: string): string {
   if (!workspaceName) return '?';
 
-  const words = workspaceName.trim().split(/\s+/);
+  const words = workspaceName.trim().split(/\s+/).filter(Boolean);
 
-  if (words.length >= 2) {
+  if (words.length >= 2 && words[0]?.[0] && words[1]?.[0]) {
     // Take first letter of first two words
     return (words[0][0] + words[1][0]).toUpperCase();
-  } else {
+  } else if (words.length === 1 && words[0]) {
     // Take first two letters of single word
     const name = words[0];
     if (name.length >= 2) {
       return name.substring(0, 2).toUpperCase();
     }
-    return name[0].toUpperCase();
+    return name[0] ? name[0].toUpperCase() : '?';
   }
+  return '?';
 }
 
 /**
@@ -91,7 +92,7 @@ export function getWorkspaceInitials(workspaceName: string): string {
 export function getWorkspaceGradient(workspaceName: string): { start: string; end: string } {
   const hash = hashString(workspaceName);
   const index = hash % GRADIENT_PALETTES.length;
-  return GRADIENT_PALETTES[index];
+  return GRADIENT_PALETTES[index] ?? GRADIENT_PALETTES[0]!;
 }
 
 /**

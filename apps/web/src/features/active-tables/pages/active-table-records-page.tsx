@@ -338,8 +338,8 @@ export const ActiveTableRecordsPage = () => {
                 variant="outline"
                 className={
                   encryption.keyValidationStatus === 'valid'
-                    ? 'border-green-500 text-green-700 text-xs'
-                    : 'border-yellow-500 text-yellow-700 text-xs'
+                    ? 'border-success text-success text-xs'
+                    : 'border-warning text-warning text-xs'
                 }
               >
                 {encryption.keyValidationStatus === 'valid' ? 'E2EE Active' : 'E2EE (Key Required)'}
@@ -355,9 +355,9 @@ export const ActiveTableRecordsPage = () => {
       {/* Encryption Warning */}
       {encryption.isE2EEEnabled && encryption.keyValidationStatus !== 'valid' && (
         <div className="flex-shrink-0 px-3 sm:px-6 py-3">
-          <Card className="border-yellow-500 bg-yellow-50">
+          <Card className="border-warning bg-warning-subtle">
             <CardContent className="p-4">
-              <p className="text-sm text-yellow-800">
+              <p className="text-sm text-warning">
                 Encryption key is required to view encrypted data. Please go back to the table detail page to enter your
                 encryption key.
               </p>

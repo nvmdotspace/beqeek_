@@ -288,8 +288,8 @@ export const ActiveTablesPage = () => {
           <Card className="border-border/60 bg-gradient-to-br from-background to-muted/20 shadow-sm">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/20">
-                  <Database className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-info-subtle">
+                  <Database className="h-4 w-4 text-info" />
                 </div>
                 <span>Modules</span>
               </CardTitle>
@@ -305,8 +305,8 @@ export const ActiveTablesPage = () => {
           <Card className="border-border/60 bg-gradient-to-br from-background to-muted/20 shadow-sm">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-900/20">
-                  <ShieldCheck className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-success-subtle">
+                  <ShieldCheck className="h-4 w-4 text-success" />
                 </div>
                 <span>Encrypted</span>
               </CardTitle>
@@ -322,8 +322,8 @@ export const ActiveTablesPage = () => {
           <Card className="border-border/60 bg-gradient-to-br from-background to-muted/20 shadow-sm">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-900/20">
-                  <Workflow className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent-purple-subtle">
+                  <Workflow className="h-4 w-4 text-accent-purple" />
                 </div>
                 <span>Automations</span>
               </CardTitle>
@@ -339,7 +339,7 @@ export const ActiveTablesPage = () => {
       </div>
 
       {shouldShowEncryptionReminder ? (
-        <Alert className="border-amber-300 bg-amber-50/80 text-amber-900 dark:border-amber-500/40 dark:bg-amber-950/40 dark:text-amber-100">
+        <Alert className="border-warning bg-warning-subtle text-warning">
           <KeyRound className="h-4 w-4" />
           <AlertTitle>Encryption key vault not ready</AlertTitle>
           <AlertDescription className="text-sm">

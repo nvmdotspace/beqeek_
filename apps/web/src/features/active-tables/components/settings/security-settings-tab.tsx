@@ -54,7 +54,7 @@ export const SecuritySettingsTab = ({ table, workspaceId }: SecuritySettingsTabP
           <CardTitle className="flex items-center gap-2">
             {isE2EEEnabled ? (
               <>
-                <ShieldCheck className="h-5 w-5 text-green-600" />
+                <ShieldCheck className="h-5 w-5 text-success" />
                 End-to-End Encryption Enabled
               </>
             ) : (
@@ -120,7 +120,7 @@ export const SecuritySettingsTab = ({ table, workspaceId }: SecuritySettingsTabP
                     disabled={!encryptionKey && !table.config.encryptionKey}
                     className="shrink-0"
                   >
-                    {copiedKey ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
+                    {copiedKey ? <Check className="h-4 w-4 text-success" /> : <Copy className="h-4 w-4" />}
                   </Button>
                 </div>
                 <p className="text-xs text-muted-foreground">
@@ -145,7 +145,7 @@ export const SecuritySettingsTab = ({ table, workspaceId }: SecuritySettingsTabP
                     disabled={!encryptionAuthKey}
                     className="shrink-0"
                   >
-                    {copiedAuthKey ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
+                    {copiedAuthKey ? <Check className="h-4 w-4 text-success" /> : <Copy className="h-4 w-4" />}
                   </Button>
                 </div>
                 <p className="text-xs text-muted-foreground">

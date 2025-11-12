@@ -53,15 +53,15 @@ export function EncryptionStatusCard({ table, encryption, onEnterKey }: Encrypti
   // E2EE enabled, no key or unknown status
   if (keyValidationStatus === 'unknown') {
     return (
-      <Card className="border-yellow-500">
+      <Card className="border-warning">
         <CardHeader>
           <Heading level={3} className="flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5 text-yellow-600" />
+            <AlertTriangle className="h-5 w-5 text-warning" />
             Encryption Key Required
           </Heading>
         </CardHeader>
         <CardContent className="space-y-3">
-          <Badge variant="outline" className="flex w-fit items-center gap-2 border-yellow-500 text-yellow-700">
+          <Badge variant="outline" className="flex w-fit items-center gap-2 border-warning text-warning">
             <Key className="h-4 w-4" />
             No Key Loaded
           </Badge>
@@ -114,15 +114,15 @@ export function EncryptionStatusCard({ table, encryption, onEnterKey }: Encrypti
 
   // E2EE enabled, valid key
   return (
-    <Card className="border-green-500">
+    <Card className="border-success">
       <CardHeader>
         <Heading level={3} className="flex items-center gap-2">
-          <ShieldCheck className="h-5 w-5 text-green-600" />
+          <ShieldCheck className="h-5 w-5 text-success" />
           Encryption Active
         </Heading>
       </CardHeader>
       <CardContent className="space-y-3">
-        <Badge variant="outline" className="flex w-fit items-center gap-2 border-green-500 text-green-700">
+        <Badge variant="outline" className="flex w-fit items-center gap-2 border-success text-success">
           <ShieldCheck className="h-4 w-4" />
           Key Loaded & Valid
         </Badge>

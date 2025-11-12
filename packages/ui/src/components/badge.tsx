@@ -12,11 +12,9 @@ const badgeVariants = cva(
         secondary: 'bg-muted text-muted-foreground',
         destructive: 'bg-destructive/15 text-destructive',
         outline: 'border-border bg-background text-foreground',
-        success:
-          'bg-green-500/10 text-green-700 border-green-500/20 dark:bg-green-500/10 dark:text-green-400 dark:border-green-500/30',
-        warning:
-          'bg-yellow-500/10 text-yellow-700 border-yellow-500/20 dark:bg-yellow-500/10 dark:text-yellow-400 dark:border-yellow-500/30',
-        info: 'bg-blue-500/10 text-blue-700 border-blue-500/20 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/30',
+        success: 'bg-success-subtle text-success border-success/20',
+        warning: 'bg-warning-subtle text-warning border-warning/20',
+        info: 'bg-info-subtle text-info border-info/20',
       },
       size: {
         base: '',

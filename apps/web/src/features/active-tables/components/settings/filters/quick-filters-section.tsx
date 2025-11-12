@@ -93,13 +93,13 @@ export function QuickFiltersSection({ quickFilters, fields, onChange }: QuickFil
 
   const getFieldTypeBadge = (type: string) => {
     const colors: Record<string, string> = {
-      CHECKBOX_YES_NO: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100',
-      SELECT_ONE: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100',
-      SELECT_LIST: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-100',
-      SELECT_ONE_RECORD: 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-100',
-      SELECT_LIST_RECORD: 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-100',
-      SELECT_ONE_WORKSPACE_USER: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-100',
-      SELECT_LIST_WORKSPACE_USER: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-100',
+      CHECKBOX_YES_NO: 'bg-success-subtle text-success',
+      SELECT_ONE: 'bg-info-subtle text-info',
+      SELECT_LIST: 'bg-accent-purple-subtle text-accent-purple',
+      SELECT_ONE_RECORD: 'bg-accent-pink-subtle text-accent-pink',
+      SELECT_LIST_RECORD: 'bg-accent-pink-subtle text-accent-pink',
+      SELECT_ONE_WORKSPACE_USER: 'bg-accent-orange-subtle text-accent-orange',
+      SELECT_LIST_WORKSPACE_USER: 'bg-accent-orange-subtle text-accent-orange',
     };
 
     return (
@@ -182,11 +182,9 @@ export function QuickFiltersSection({ quickFilters, fields, onChange }: QuickFil
             </span>
           </div>
 
-          <div className="rounded-lg border bg-blue-50 dark:bg-blue-950/30 p-4">
-            <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
-              {m.settings_quickFilters_infoTitle()}
-            </p>
-            <p className="mt-1 text-xs text-blue-700 dark:text-blue-300">{m.settings_quickFilters_infoDescription()}</p>
+          <div className="rounded-lg border border-info/20 bg-info-subtle p-4">
+            <p className="text-sm font-medium text-info">{m.settings_quickFilters_infoTitle()}</p>
+            <p className="mt-1 text-xs text-info">{m.settings_quickFilters_infoDescription()}</p>
           </div>
         </div>
       </div>

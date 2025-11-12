@@ -11,6 +11,10 @@
       "types": "./src/components/typography/index.ts",
       "default": "./src/components/typography/index.ts"
     },
+    "./components/primitives": {
+      "types": "./src/components/primitives/index.ts",
+      "default": "./src/components/primitives/index.ts"
+    },
     "./components/*": {
       "types": "./src/components/*.tsx",
       "default": "./src/components/*.tsx"

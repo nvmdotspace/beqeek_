@@ -118,11 +118,9 @@ export function DangerZoneSection({ tableName, onDelete, isDeleting = false }: D
           </div>
 
           {/* Additional Info */}
-          <div className="rounded-lg border bg-blue-50 dark:bg-blue-950/30 p-4">
-            <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
-              {m.settings_dangerZone_beforeDeleteTitle()}
-            </p>
-            <ul className="mt-2 space-y-1 text-xs text-blue-700 dark:text-blue-300">
+          <div className="rounded-lg border border-info/20 bg-info-subtle p-4">
+            <p className="text-sm font-medium text-info">{m.settings_dangerZone_beforeDeleteTitle()}</p>
+            <ul className="mt-2 space-y-1 text-xs text-info-subtle-foreground">
               <li>• {m.settings_dangerZone_beforeDeleteTip1()}</li>
               <li>• {m.settings_dangerZone_beforeDeleteTip2()}</li>
               <li>• {m.settings_dangerZone_beforeDeleteTip3()}</li>
@@ -161,8 +159,8 @@ export function DangerZoneSection({ tableName, onDelete, isDeleting = false }: D
               <p className="text-xs text-muted-foreground">{m.settings_dangerZone_confirmHelp()}</p>
             </div>
 
-            <div className="rounded-md bg-yellow-50 dark:bg-yellow-950/30 p-3">
-              <p className="text-xs text-yellow-800 dark:text-yellow-200">
+            <div className="rounded-md bg-warning-subtle border border-warning/20 p-3">
+              <p className="text-xs text-warning-subtle-foreground">
                 <strong>{m.settings_dangerZone_confirmFinalWarningLabel()}</strong>{' '}
                 {m.settings_dangerZone_confirmFinalWarningText()}
               </p>

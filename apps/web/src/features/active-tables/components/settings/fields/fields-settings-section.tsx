@@ -323,12 +323,12 @@ export function FieldsSettingsSection({
   // Memoize field type color getter - Performance optimization
   const getFieldTypeColor = useCallback((type: string): string => {
     const fieldType = type as FieldType;
-    if (isTextFieldType(fieldType)) return 'text-blue-600';
-    if (isTimeFieldType(fieldType)) return 'text-purple-600';
-    if (isNumberFieldType(fieldType)) return 'text-green-600';
-    if (isSelectionFieldType(fieldType)) return 'text-orange-600';
-    if (isReferenceFieldType(fieldType)) return 'text-pink-600';
-    return 'text-gray-600';
+    if (isTextFieldType(fieldType)) return 'text-info';
+    if (isTimeFieldType(fieldType)) return 'text-accent-purple';
+    if (isNumberFieldType(fieldType)) return 'text-accent-green';
+    if (isSelectionFieldType(fieldType)) return 'text-accent-orange';
+    if (isReferenceFieldType(fieldType)) return 'text-accent-magenta';
+    return 'text-muted-foreground';
   }, []);
 
   return (

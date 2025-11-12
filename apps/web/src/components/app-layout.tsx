@@ -3,8 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { AppSidebar } from './app-sidebar';
 import { MobileBottomNav, MobileFloatingAction } from './mobile-bottom-nav';
 import { Button } from '@workspace/ui/components/button';
-import { Menu, Search, Bell, Settings, X } from 'lucide-react';
-import { Input } from '@workspace/ui/components/input';
+import { Menu, Bell, Settings, X, PanelLeftClose, PanelLeft } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,32 +29,33 @@ import { useSidebarStore } from '@/stores/sidebar-store';
 interface AppLayoutProps {
   children: React.ReactNode;
   showSidebar?: boolean;
+  pageTitle?: string;
+  pageIcon?: React.ReactNode;
 }
 
-export const AppLayout = ({ children, showSidebar = true }: AppLayoutProps) => {
-  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-
+export const AppLayout = ({ children, showSidebar = true, pageTitle, pageIcon }: AppLayoutProps) => {
   const userId = useAuthStore((state) => state.userId);
   const logout = useLogout();
+
+  // Get sidebar state and actions
+  const isCollapsed = useSidebarStore((state) => state.isCollapsed);
+  const isMobile = useSidebarStore((state) => state.isMobile);
+  const isTablet = useSidebarStore((state) => state.isTablet);
   const setSidebarOpen = useSidebarStore((state) => state.setSidebarOpen);
+  const setCollapsed = useSidebarStore((state) => state.setCollapsed);
 
   // Initialize keyboard shortcuts and accessibility
   useAppKeyboardShortcuts();
   useAccessibilityEnhancements();
   useAriaManagement();
 
-  // Close mobile search when clicking outside
-  useEffect(() => {
-    const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && mobileSearchOpen) {
-        setMobileSearchOpen(false);
-      }
-    };
-
-    document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape);
-  }, [mobileSearchOpen]);
+  const handleToggleSidebar = () => {
+    if (isMobile) {
+      setSidebarOpen(true);
+    } else {
+      setCollapsed(!isCollapsed);
+    }
+  };
 
   if (!showSidebar) {
     return <div className="min-h-screen bg-background">{children}</div>;
@@ -69,13 +69,13 @@ export const AppLayout = ({ children, showSidebar = true }: AppLayoutProps) => {
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Header */}
         <header className="flex h-16 items-center justify-between border-b bg-background px-4 sm:px-6 relative z-30">
-          <div className="flex items-center gap-3 flex-1">
-            {/* Mobile Menu Toggle - handled by sidebar now */}
+          <div className="flex items-center gap-2 flex-1">
+            {/* Mobile Menu Toggle */}
             <div className="md:hidden">
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => setSidebarOpen(true)}
+                onClick={handleToggleSidebar}
                 className="h-9 w-9"
                 aria-label="Open sidebar"
               >
@@ -83,27 +83,21 @@ export const AppLayout = ({ children, showSidebar = true }: AppLayoutProps) => {
               </Button>
             </div>
 
-            {/* Desktop Search Bar */}
-            <div className="hidden md:flex relative max-w-md flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder={m.common_searchPlaceholder()}
-                className="pl-9 w-full"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
+            {/* Desktop Sidebar Toggle - Only show on desktop (lg+), hide on tablet */}
+            {!isTablet && !isMobile && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleToggleSidebar}
+                className="h-9 w-9"
+                aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              >
+                {isCollapsed ? <PanelLeft className="h-5 w-5" /> : <PanelLeftClose className="h-5 w-5" />}
+              </Button>
+            )}
 
-            {/* Mobile Search Button */}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setMobileSearchOpen(true)}
-              className="md:hidden flex items-center gap-2 px-3"
-            >
-              <Search className="h-4 w-4" />
-              <span>Search</span>
-            </Button>
+            {/* Page Title */}
+            {pageTitle && <h1 className="text-lg font-semibold truncate">{pageTitle}</h1>}
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">
@@ -163,36 +157,6 @@ export const AppLayout = ({ children, showSidebar = true }: AppLayoutProps) => {
             </DropdownMenu>
           </div>
         </header>
-
-        {/* Mobile Search Overlay */}
-        {mobileSearchOpen && (
-          <div className="fixed inset-0 bg-background z-50 lg:hidden">
-            <div className="flex h-16 items-center gap-3 border-b px-4">
-              <Button variant="ghost" size="icon" onClick={() => setMobileSearchOpen(false)}>
-                <X className="h-5 w-5" />
-              </Button>
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  placeholder={m.common_searchPlaceholder()}
-                  className="pl-9 w-full"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  autoFocus
-                />
-              </div>
-            </div>
-            <div className="p-4">
-              <div className="space-y-2">
-                <div className="text-sm font-medium text-muted-foreground">Quick Actions</div>
-                <div className="space-y-1">
-                  <div className="p-2 rounded-lg hover:bg-accent cursor-pointer">Create new table</div>
-                  <div className="p-2 rounded-lg hover:bg-accent cursor-pointer">Workflow settings</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Page Content */}
         <main className="flex-1 overflow-auto hide-scrollbar-mobile pb-16 md:pb-0">{children}</main>
