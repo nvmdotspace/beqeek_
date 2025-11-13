@@ -10,13 +10,13 @@ export default defineConfig({
       routesDirectory: path.resolve(__dirname, 'src/routes'),
       generatedRouteTree: path.resolve(__dirname, 'src/routeTree.gen.ts'),
       autoCodeSplitting: true,
-    }),
+    }) as any,
     react(),
     paraglideVitePlugin({
       project: path.resolve(__dirname, '../../project.inlang'),
       outdir: path.resolve(__dirname, 'src/paraglide/generated'),
       strategy: ['url', 'cookie', 'preferredLanguage', 'localStorage', 'baseLocale'],
-    }),
+    }) as any,
   ],
   resolve: {
     alias: {

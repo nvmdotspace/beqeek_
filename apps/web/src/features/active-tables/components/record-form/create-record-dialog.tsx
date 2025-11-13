@@ -36,6 +36,8 @@ import {
   FIELD_TYPE_TEXT,
   FIELD_TYPE_SELECT_LIST_RECORD,
   FIELD_TYPE_SELECT_LIST_WORKSPACE_USER,
+  FIELD_TYPE_INTEGER,
+  FIELD_TYPE_NUMERIC,
 } from '@workspace/beqeek-shared';
 
 interface CreateRecordDialogProps {
@@ -309,16 +311,25 @@ function getDefaultValues(table: Table): Record<string, any> {
 
     // Set default value if provided
     if (field.defaultValue !== undefined && field.defaultValue !== null) {
-      defaults[field.name] = field.defaultValue;
-    } else {
-      // Set empty defaults based on field type
-      if (field.type === FIELD_TYPE_CHECKBOX_YES_NO) {
-        defaults[field.name] = false;
-      } else if (field.type === FIELD_TYPE_SELECT_LIST || field.type === FIELD_TYPE_CHECKBOX_LIST) {
-        defaults[field.name] = [];
+      // For INTEGER/NUMERIC fields: ignore defaultValue = 0 to show empty input
+      const isNumberField = field.type === FIELD_TYPE_INTEGER || field.type === FIELD_TYPE_NUMERIC;
+      if (isNumberField && field.defaultValue === 0) {
+        // Skip this field - let it default to empty string below
       } else {
-        defaults[field.name] = '';
+        defaults[field.name] = field.defaultValue;
+        return;
       }
+    }
+
+    // Set empty defaults based on field type
+    if (field.type === FIELD_TYPE_CHECKBOX_YES_NO) {
+      defaults[field.name] = false;
+    } else if (field.type === FIELD_TYPE_SELECT_LIST || field.type === FIELD_TYPE_CHECKBOX_LIST) {
+      defaults[field.name] = [];
+    } else {
+      // For all other fields including INTEGER/NUMERIC, use empty string
+      // NumberField component with type="text" handles empty string correctly
+      defaults[field.name] = '';
     }
   });
 

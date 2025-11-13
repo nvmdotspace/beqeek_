@@ -23,6 +23,7 @@
     "@workspace/active-tables-core": "workspace:*",
     "@workspace/beqeek-shared": "workspace:*",
     "@workspace/comments": "workspace:*",
+    "@workspace/document-editor": "workspace:*",
     "@workspace/encryption-core": "workspace:*",
     "@workspace/ui": "workspace:*",
     "axios": "^1.12.2",

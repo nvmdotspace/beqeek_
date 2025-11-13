@@ -6,8 +6,8 @@ import { useThemeStore } from '@/stores';
  * Theme Toggle Component
  *
  * Toggles between light and dark mode
- * - Shows sun icon in dark mode
- * - Shows moon icon in light mode
+ * - Shows moon icon in dark mode (current state indicator)
+ * - Shows sun icon in light mode (current state indicator)
  * - Smooth transitions
  * - Accessible with aria-label
  */
@@ -27,9 +27,9 @@ export function ThemeToggle() {
       aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
     >
       {isDark ? (
-        <Sun className="h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-300 rotate-0 scale-100" />
-      ) : (
         <Moon className="h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-300 rotate-0 scale-100" />
+      ) : (
+        <Sun className="h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-300 rotate-0 scale-100" />
       )}
     </Button>
   );

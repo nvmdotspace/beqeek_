@@ -72,24 +72,38 @@ export const ActiveTableCard = memo(
           }
         }}
       >
-        <CardContent className="p-4">
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex items-center gap-3 flex-1 min-w-0">
+        <CardContent className="p-4 sm:p-5">
+          <div className="flex items-start justify-between gap-2.5 sm:gap-3">
+            <div className="flex items-start gap-2.5 sm:gap-3 flex-1 min-w-0">
               {/* Module Icon */}
-              <div className={cn('flex h-9 w-9 shrink-0 items-center justify-center rounded-lg', moduleColors.bg)}>
-                <ModuleIcon className={cn('h-4.5 w-4.5', moduleColors.text)} />
+              <div
+                className={cn(
+                  'flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-lg',
+                  moduleColors.bg,
+                )}
+              >
+                <ModuleIcon className={cn('h-4 w-4 sm:h-4.5 sm:w-4.5', moduleColors.text)} />
               </div>
 
-              <div className="flex-1 min-w-0 space-y-1">
-                <div className="flex items-center gap-2">
-                  <Heading level={4} className="truncate text-base">
-                    {table.name}
-                  </Heading>
+              <div className="flex-1 min-w-0 space-y-2">
+                {/* Title - Full width without competing for space */}
+                <Heading level={4} className="text-base leading-tight line-clamp-2 break-words">
+                  {table.name}
+                </Heading>
+
+                {/* Badges row - Stacked below title with consistent spacing */}
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <Badge
+                    variant="outline"
+                    className={cn('text-[10px] capitalize font-medium whitespace-nowrap', moduleColors.badge)}
+                  >
+                    {moduleTypeLabel}
+                  </Badge>
                   <Badge
                     variant={isE2EE ? 'default' : 'outline'}
                     className={cn(
-                      'flex items-center gap-1 text-[10px] whitespace-nowrap h-4 px-1',
-                      isE2EE ? 'bg-accent-green-subtle text-accent-green' : '',
+                      'flex items-center gap-0.5 text-[10px] whitespace-nowrap h-4 px-1.5',
+                      isE2EE ? 'bg-accent-green-subtle text-accent-green' : 'text-muted-foreground',
                     )}
                   >
                     {isE2EE ? (
@@ -105,11 +119,10 @@ export const ActiveTableCard = memo(
                     )}
                   </Badge>
                 </div>
-                <Badge variant="outline" className={cn('text-[10px] capitalize font-medium w-fit', moduleColors.badge)}>
-                  {moduleTypeLabel}
-                </Badge>
               </div>
             </div>
+
+            {/* Dropdown menu - Fixed position */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
                 <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0">

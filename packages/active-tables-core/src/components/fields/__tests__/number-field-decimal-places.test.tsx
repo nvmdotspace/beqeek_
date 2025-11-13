@@ -116,4 +116,53 @@ describe('Number Field with decimalPlaces Configuration', () => {
       expect(formatFieldValue(1000, quantityField)).toBe('1.000');
     });
   });
+
+  describe('Empty value handling', () => {
+    it('should return empty string for null or undefined values', () => {
+      const field: FieldConfig = {
+        type: FIELD_TYPE_INTEGER,
+        label: 'Quantity',
+        name: 'quantity',
+        required: false,
+      };
+
+      expect(formatFieldValue(null, field)).toBe('');
+      expect(formatFieldValue(undefined, field)).toBe('');
+      expect(formatFieldValue('', field)).toBe('');
+    });
+
+    it('should return empty string for empty values in NUMERIC fields', () => {
+      const field: FieldConfig = {
+        type: FIELD_TYPE_NUMERIC,
+        label: 'Price',
+        name: 'price',
+        required: false,
+        decimalPlaces: 2,
+      };
+
+      expect(formatFieldValue(null, field)).toBe('');
+      expect(formatFieldValue(undefined, field)).toBe('');
+      expect(formatFieldValue('', field)).toBe('');
+    });
+
+    it('should format zero as "0" not empty string', () => {
+      const intField: FieldConfig = {
+        type: FIELD_TYPE_INTEGER,
+        label: 'Quantity',
+        name: 'quantity',
+        required: false,
+      };
+
+      const numericField: FieldConfig = {
+        type: FIELD_TYPE_NUMERIC,
+        label: 'Price',
+        name: 'price',
+        required: false,
+        decimalPlaces: 2,
+      };
+
+      expect(formatFieldValue(0, intField)).toBe('0');
+      expect(formatFieldValue(0, numericField)).toBe('0');
+    });
+  });
 });
