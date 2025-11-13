@@ -460,9 +460,7 @@ export const TableManagementDialog = ({
               Cancel
             </Button>
             <Button type="submit" disabled={isLoading} variant="brand-primary">
-              {table
-                ? m.modules_dialog_updateButton() || 'Update Table'
-                : m.modules_dialog_createButton() || 'Create Table'}
+              {table ? 'Update Table' : 'Create Table'}
             </Button>
           </DialogFooter>
         </form>

@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
-import { RefreshCw, Search, Plus, ShieldCheck, Database, Workflow, KeyRound, Filter, Check } from 'lucide-react';
+import { RefreshCw, Search, ShieldCheck, Database, Workflow, KeyRound, Filter } from 'lucide-react';
 
 import { ActiveTableCard } from '../components/active-table-card';
 import { useActiveTablesGroupedByWorkGroup } from '../hooks/use-active-tables';
@@ -14,6 +14,8 @@ import { useSidebarStore, selectCurrentWorkspace } from '@/stores/sidebar-store'
 import { ROUTES } from '@/shared/route-paths';
 
 import { Button } from '@workspace/ui/components/button';
+import { FilterChip } from '@workspace/ui/components/filter-chip';
+import { NavTab } from '@workspace/ui/components/nav-tab';
 import { Skeleton } from '@workspace/ui/components/skeleton';
 import { Badge } from '@workspace/ui/components/badge';
 import { Input } from '@workspace/ui/components/input';
@@ -277,7 +279,6 @@ export const ActiveTablesPage = () => {
                 <RefreshCw className={cn('h-4 w-4', isFetching && 'animate-spin')} />
               </Button>
               <Button variant="brand-primary" size="sm" onClick={handleCreateTable} disabled={!workspaceId}>
-                <Plus className="mr-1.5 h-3.5 w-3.5" />
                 Create
               </Button>
             </div>
@@ -340,34 +341,18 @@ export const ActiveTablesPage = () => {
           {/* Workgroup Tabs Section - Level 2: Navigation with border-bottom accent */}
           <div className="mb-4">
             <div className="flex flex-wrap items-center gap-0 border-b border-border">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setSelectedWorkGroupId('all')}
-                className={cn(
-                  'rounded-none border-b-2 transition-colors',
-                  selectedWorkGroupId === 'all'
-                    ? 'border-[hsl(var(--brand-primary))] text-[hsl(var(--brand-primary))] font-semibold'
-                    : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border',
-                )}
-              >
+              <NavTab active={selectedWorkGroupId === 'all'} onClick={() => setSelectedWorkGroupId('all')} size="sm">
                 {m.activeTables_page_workGroupAll()}
-              </Button>
+              </NavTab>
               {workGroups.map((group) => (
-                <Button
+                <NavTab
                   key={group.id}
-                  variant="ghost"
-                  size="sm"
+                  active={selectedWorkGroupId === group.id}
                   onClick={() => setSelectedWorkGroupId(group.id)}
-                  className={cn(
-                    'rounded-none border-b-2 transition-colors',
-                    selectedWorkGroupId === group.id
-                      ? 'border-[hsl(var(--brand-primary))] text-[hsl(var(--brand-primary))] font-semibold'
-                      : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border',
-                  )}
+                  size="sm"
                 >
                   {group.name}
-                </Button>
+                </NavTab>
               ))}
             </div>
           </div>
@@ -381,38 +366,20 @@ export const ActiveTablesPage = () => {
                   Status
                 </Text>
                 <div className="flex-1 flex flex-wrap items-center gap-1.5">
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => setStatusFilter('all')}
-                    className={cn(
-                      'transition-all rounded-lg border',
-                      statusFilter === 'all'
-                        ? 'bg-[var(--brand-primary-subtle)] text-[var(--brand-primary)] border-[var(--brand-primary)] font-medium'
-                        : 'text-muted-foreground hover:text-foreground hover:bg-accent border-transparent',
-                    )}
-                  >
-                    {statusFilter === 'all' && <Check className="h-3.5 w-3.5 mr-1" />}
+                  <FilterChip active={statusFilter === 'all'} onClick={() => setStatusFilter('all')}>
                     All
-                  </Button>
+                  </FilterChip>
                   {statusOptions
                     .filter((status) => showAllStatusFilters || priorityStatusFilters.includes(status))
                     .map((status) => (
-                      <Button
+                      <FilterChip
                         key={status}
-                        size="sm"
-                        variant="ghost"
+                        active={statusFilter === status}
                         onClick={() => setStatusFilter(status)}
-                        className={cn(
-                          'capitalize transition-all rounded-lg border',
-                          statusFilter === status
-                            ? 'bg-[var(--brand-primary-subtle)] text-[var(--brand-primary)] border-[var(--brand-primary)] font-medium'
-                            : 'text-muted-foreground hover:text-foreground hover:bg-accent border-transparent',
-                        )}
+                        className="capitalize"
                       >
-                        {statusFilter === status && <Check className="h-3.5 w-3.5 mr-1" />}
                         {status}
-                      </Button>
+                      </FilterChip>
                     ))}
                   {statusOptions.length > priorityStatusFilters.length && (
                     <Button
@@ -436,48 +403,19 @@ export const ActiveTablesPage = () => {
                 Encryption
               </Text>
               <div className="flex-1 flex flex-wrap items-center gap-1.5">
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => setEncryptionFilter('all')}
-                  className={cn(
-                    'transition-all rounded-lg border',
-                    encryptionFilter === 'all'
-                      ? 'bg-[var(--brand-primary-subtle)] text-[var(--brand-primary)] border-[var(--brand-primary)] font-medium'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-accent border-transparent',
-                  )}
-                >
-                  {encryptionFilter === 'all' && <Check className="h-3.5 w-3.5 mr-1" />}
+                <FilterChip active={encryptionFilter === 'all'} onClick={() => setEncryptionFilter('all')}>
                   All
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
+                </FilterChip>
+                <FilterChip
+                  active={encryptionFilter === 'encrypted'}
                   onClick={() => setEncryptionFilter('encrypted')}
-                  className={cn(
-                    'transition-all rounded-lg border',
-                    encryptionFilter === 'encrypted'
-                      ? 'bg-[var(--brand-primary-subtle)] text-[var(--brand-primary)] border-[var(--brand-primary)] font-medium'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-accent border-transparent',
-                  )}
+                  variant="success"
                 >
-                  {encryptionFilter === 'encrypted' && <Check className="h-3.5 w-3.5 mr-1" />}
                   E2EE
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => setEncryptionFilter('standard')}
-                  className={cn(
-                    'transition-all rounded-lg border',
-                    encryptionFilter === 'standard'
-                      ? 'bg-[var(--brand-primary-subtle)] text-[var(--brand-primary)] border-[var(--brand-primary)] font-medium'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-accent border-transparent',
-                  )}
-                >
-                  {encryptionFilter === 'standard' && <Check className="h-3.5 w-3.5 mr-1" />}
+                </FilterChip>
+                <FilterChip active={encryptionFilter === 'standard'} onClick={() => setEncryptionFilter('standard')}>
                   Server-side
-                </Button>
+                </FilterChip>
               </div>
             </div>
 
@@ -487,48 +425,15 @@ export const ActiveTablesPage = () => {
                 Automation
               </Text>
               <div className="flex-1 flex flex-wrap items-center gap-1.5">
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => setAutomationFilter('all')}
-                  className={cn(
-                    'transition-all rounded-lg border',
-                    automationFilter === 'all'
-                      ? 'bg-[var(--brand-primary-subtle)] text-[var(--brand-primary)] border-[var(--brand-primary)] font-medium'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-accent border-transparent',
-                  )}
-                >
-                  {automationFilter === 'all' && <Check className="h-3.5 w-3.5 mr-1" />}
+                <FilterChip active={automationFilter === 'all'} onClick={() => setAutomationFilter('all')}>
                   All
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => setAutomationFilter('automated')}
-                  className={cn(
-                    'transition-all rounded-lg border',
-                    automationFilter === 'automated'
-                      ? 'bg-[var(--brand-primary-subtle)] text-[var(--brand-primary)] border-[var(--brand-primary)] font-medium'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-accent border-transparent',
-                  )}
-                >
-                  {automationFilter === 'automated' && <Check className="h-3.5 w-3.5 mr-1" />}
+                </FilterChip>
+                <FilterChip active={automationFilter === 'automated'} onClick={() => setAutomationFilter('automated')}>
                   With workflows
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => setAutomationFilter('manual')}
-                  className={cn(
-                    'transition-all rounded-lg border',
-                    automationFilter === 'manual'
-                      ? 'bg-[var(--brand-primary-subtle)] text-[var(--brand-primary)] border-[var(--brand-primary)] font-medium'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-accent border-transparent',
-                  )}
-                >
-                  {automationFilter === 'manual' && <Check className="h-3.5 w-3.5 mr-1" />}
+                </FilterChip>
+                <FilterChip active={automationFilter === 'manual'} onClick={() => setAutomationFilter('manual')}>
                   Manual only
-                </Button>
+                </FilterChip>
               </div>
             </div>
           </div>

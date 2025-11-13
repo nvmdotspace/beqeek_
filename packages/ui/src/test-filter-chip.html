@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FilterChip Component Test - Beqeek Design System</title>
+    <style>
+        /* Import Beqeek color tokens */
+        :root {
+            --brand-primary: hsl(217 91% 60%);
+            --brand-primary-subtle: hsl(217 91% 96%);
+            --success: hsl(142 76% 36%);
+            --success-subtle: hsl(142 76% 96%);
+            --warning: hsl(38 92% 50%);
+            --warning-subtle: hsl(38 92% 95%);
+            --destructive: hsl(0 84.2% 60.2%);
+            --muted-foreground: hsl(0 0% 45.1%);
+            --foreground: hsl(0 0% 3.9%);
+            --accent: hsl(0 0% 96.1%);
+            --border: hsl(0 0% 89.8%);
+            --background: hsl(0 0% 100%);
+        }
+
+        .dark {
+            --brand-primary: hsl(217 91% 65%);
+            --brand-primary-subtle: hsl(217 91% 15%);
+            --success: hsl(142 70% 45%);
+            --success-subtle: hsl(142 70% 12%);
+            --warning: hsl(38 90% 55%);
+            --warning-subtle: hsl(38 90% 15%);
+            --destructive: hsl(0 62.8% 30.6%);
+            --muted-foreground: hsl(0 0% 63.9%);
+            --foreground: hsl(0 0% 98%);
+            --accent: hsl(0 0% 14.9%);
+            --border: hsl(0 0% 14.9%);
+            --background: hsl(0 0% 3.9%);
+        }
+
+        /* Motion preferences */
+        @media (prefers-reduced-motion: no-preference) {
+            .filter-chip {
+                transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .filter-chip {
+                transition: none !important;
+            }
+            .filter-chip:hover {
+                transform: none !important;
+            }
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--background);
+            color: var(--foreground);
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .test-section {
+            margin-bottom: 3rem;
+            padding: 2rem;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: var(--background);
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .filter-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .filter-label {
+            min-width: 120px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--muted-foreground);
+            padding-top: 0.375rem;
+        }
+
+        .filter-group {
+            flex: 1;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.375rem;
+        }
+
+        /* FilterChip styles */
+        .filter-chip {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.375rem;
+            white-space: nowrap;
+            border-radius: 0.5rem;
+            border: 1px solid;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            padding: 0.375rem 0.75rem;
+            height: 2rem;
+        }
+
+        .filter-chip:focus-visible {
+            outline: 2px solid var(--brand-primary);
+            outline-offset: 2px;
+        }
+
+        /* Size variants */
+        .filter-chip-sm {
+            height: 1.75rem;
+            padding: 0.25rem 0.625rem;
+            font-size: 0.75rem;
+        }
+
+        .filter-chip-lg {
+            height: 2.25rem;
+            padding: 0.5rem 1rem;
+        }
+
+        /* Default variant (Brand Blue) */
+        .filter-chip-default.inactive {
+            border-color: transparent;
+            color: var(--muted-foreground);
+            background: transparent;
+        }
+
+        .filter-chip-default.inactive:hover {
+            background: var(--accent);
+            color: var(--foreground);
+        }
+
+        .filter-chip-default.active {
+            background: var(--brand-primary-subtle);
+            color: var(--brand-primary);
+            border-color: var(--brand-primary);
+            font-weight: 600;
+        }
+
+        /* Success variant (Green) */
+        .filter-chip-success.inactive {
+            border-color: transparent;
+            color: var(--muted-foreground);
+            background: transparent;
+        }
+
+        .filter-chip-success.inactive:hover {
+            background: var(--accent);
+            color: var(--foreground);
+        }
+
+        .filter-chip-success.active {
+            background: var(--success-subtle);
+            color: var(--success);
+            border-color: var(--success);
+            font-weight: 600;
+        }
+
+        /* Warning variant (Amber) */
+        .filter-chip-warning.inactive {
+            border-color: transparent;
+            color: var(--muted-foreground);
+            background: transparent;
+        }
+
+        .filter-chip-warning.inactive:hover {
+            background: var(--accent);
+            color: var(--foreground);
+        }
+
+        .filter-chip-warning.active {
+            background: var(--warning-subtle);
+            color: var(--warning);
+            border-color: var(--warning);
+            font-weight: 600;
+        }
+
+        /* Destructive variant (Red) */
+        .filter-chip-destructive.inactive {
+            border-color: transparent;
+            color: var(--muted-foreground);
+            background: transparent;
+        }
+
+        .filter-chip-destructive.inactive:hover {
+            background: var(--accent);
+            color: var(--foreground);
+        }
+
+        .filter-chip-destructive.active {
+            background: hsl(0 84.2% 60.2% / 0.1);
+            color: var(--destructive);
+            border-color: var(--destructive);
+            font-weight: 600;
+        }
+
+        .checkmark {
+            width: 0.875rem;
+            height: 0.875rem;
+            display: inline-block;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.5rem 1rem;
+            background: var(--accent);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .instructions {
+            background: hsl(217 91% 96%);
+            color: hsl(217 91% 30%);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid hsl(217 91% 60%);
+        }
+
+        .dark .instructions {
+            background: hsl(217 91% 15%);
+            color: hsl(217 91% 75%);
+        }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" onclick="toggleTheme()">
+        <span id="theme-icon">🌙</span> Toggle Dark Mode
+    </button>
+
+    <h1>FilterChip Component Test</h1>
+
+    <div class="instructions">
+        <strong>Interactive Test Page</strong>
+        <ul style="margin: 0.5rem 0 0 1.5rem;">
+            <li>Click filter chips to toggle active states</li>
+            <li>Test keyboard navigation with Tab and Enter/Space</li>
+            <li>Toggle dark mode to test color variants</li>
+            <li>Enable "Reduce Motion" in your OS to test accessibility</li>
+        </ul>
+    </div>
+
+    <div class="test-section">
+        <h2>All Variants - Default Size</h2>
+
+        <div class="filter-row">
+            <div class="filter-label">Default (Blue)</div>
+            <div class="filter-group">
+                <button class="filter-chip filter-chip-default active" onclick="toggleFilter(this)">
+                    <svg class="checkmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    All
+                </button>
+                <button class="filter-chip filter-chip-default inactive" onclick="toggleFilter(this)">
+                    Active
+                </button>
+                <button class="filter-chip filter-chip-default inactive" onclick="toggleFilter(this)">
+                    Archived
+                </button>
+            </div>
+        </div>
+
+        <div class="filter-row">
+            <div class="filter-label">Success (Green)</div>
+            <div class="filter-group">
+                <button class="filter-chip filter-chip-success active" onclick="toggleFilter(this)">
+                    <svg class="checkmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    All
+                </button>
+                <button class="filter-chip filter-chip-success inactive" onclick="toggleFilter(this)">
+                    Encrypted
+                </button>
+                <button class="filter-chip filter-chip-success inactive" onclick="toggleFilter(this)">
+                    Verified
+                </button>
+            </div>
+        </div>
+
+        <div class="filter-row">
+            <div class="filter-label">Warning (Amber)</div>
+            <div class="filter-group">
+                <button class="filter-chip filter-chip-warning active" onclick="toggleFilter(this)">
+                    <svg class="checkmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    All
+                </button>
+                <button class="filter-chip filter-chip-warning inactive" onclick="toggleFilter(this)">
+                    Pending
+                </button>
+                <button class="filter-chip filter-chip-warning inactive" onclick="toggleFilter(this)">
+                    Draft
+                </button>
+            </div>
+        </div>
+
+        <div class="filter-row">
+            <div class="filter-label">Destructive (Red)</div>
+            <div class="filter-group">
+                <button class="filter-chip filter-chip-destructive active" onclick="toggleFilter(this)">
+                    <svg class="checkmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    All
+                </button>
+                <button class="filter-chip filter-chip-destructive inactive" onclick="toggleFilter(this)">
+                    Deleted
+                </button>
+                <button class="filter-chip filter-chip-destructive inactive" onclick="toggleFilter(this)">
+                    Failed
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Size Variants</h2>
+
+        <div class="filter-row">
+            <div class="filter-label">Small</div>
+            <div class="filter-group">
+                <button class="filter-chip filter-chip-default filter-chip-sm active" onclick="toggleFilter(this)">
+                    <svg class="checkmark" style="width: 0.75rem; height: 0.75rem;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    Small Active
+                </button>
+                <button class="filter-chip filter-chip-default filter-chip-sm inactive" onclick="toggleFilter(this)">
+                    Small Inactive
+                </button>
+            </div>
+        </div>
+
+        <div class="filter-row">
+            <div class="filter-label">Default</div>
+            <div class="filter-group">
+                <button class="filter-chip filter-chip-default active" onclick="toggleFilter(this)">
+                    <svg class="checkmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    Default Active
+                </button>
+                <button class="filter-chip filter-chip-default inactive" onclick="toggleFilter(this)">
+                    Default Inactive
+                </button>
+            </div>
+        </div>
+
+        <div class="filter-row">
+            <div class="filter-label">Large</div>
+            <div class="filter-group">
+                <button class="filter-chip filter-chip-default filter-chip-lg active" onclick="toggleFilter(this)">
+                    <svg class="checkmark" style="width: 1rem; height: 1rem;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    Large Active
+                </button>
+                <button class="filter-chip filter-chip-default filter-chip-lg inactive" onclick="toggleFilter(this)">
+                    Large Inactive
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Real-World Example: Active Tables Filters</h2>
+
+        <div class="filter-row">
+            <div class="filter-label">Work Group</div>
+            <div class="filter-group">
+                <button class="filter-chip filter-chip-default active" onclick="toggleFilter(this)">
+                    <svg class="checkmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    All Groups
+                </button>
+                <button class="filter-chip filter-chip-default inactive" onclick="toggleFilter(this)">HRM</button>
+                <button class="filter-chip filter-chip-default inactive" onclick="toggleFilter(this)">CRM</button>
+                <button class="filter-chip filter-chip-default inactive" onclick="toggleFilter(this)">Finance</button>
+            </div>
+        </div>
+
+        <div class="filter-row">
+            <div class="filter-label">Encryption</div>
+            <div class="filter-group">
+                <button class="filter-chip filter-chip-success active" onclick="toggleFilter(this)">
+                    <svg class="checkmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    All
+                </button>
+                <button class="filter-chip filter-chip-success inactive" onclick="toggleFilter(this)">E2EE</button>
+                <button class="filter-chip filter-chip-success inactive" onclick="toggleFilter(this)">Server-side</button>
+            </div>
+        </div>
+
+        <div class="filter-row">
+            <div class="filter-label">Status</div>
+            <div class="filter-group">
+                <button class="filter-chip filter-chip-default active" onclick="toggleFilter(this)">
+                    <svg class="checkmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    All
+                </button>
+                <button class="filter-chip filter-chip-default inactive" onclick="toggleFilter(this)">Employee Profile</button>
+                <button class="filter-chip filter-chip-default inactive" onclick="toggleFilter(this)">Department</button>
+                <button class="filter-chip filter-chip-default inactive" onclick="toggleFilter(this)">Contract</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleFilter(button) {
+            const group = button.parentElement;
+            const buttons = group.querySelectorAll('.filter-chip');
+
+            // Remove active state from all buttons in group
+            buttons.forEach(btn => {
+                btn.classList.remove('active');
+                btn.classList.add('inactive');
+                const checkmark = btn.querySelector('.checkmark');
+                if (checkmark) {
+                    checkmark.remove();
+                }
+            });
+
+            // Add active state to clicked button
+            button.classList.remove('inactive');
+            button.classList.add('active');
+
+            // Add checkmark if not present
+            if (!button.querySelector('.checkmark')) {
+                const checkmark = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                checkmark.setAttribute('class', 'checkmark');
+                checkmark.setAttribute('viewBox', '0 0 24 24');
+                checkmark.setAttribute('fill', 'none');
+                checkmark.setAttribute('stroke', 'currentColor');
+                checkmark.setAttribute('stroke-width', '3');
+
+                const polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+                polyline.setAttribute('points', '20 6 9 17 4 12');
+
+                checkmark.appendChild(polyline);
+                button.insertBefore(checkmark, button.firstChild);
+            }
+
+            // Update aria-pressed
+            button.setAttribute('aria-pressed', 'true');
+            buttons.forEach(btn => {
+                if (btn !== button) {
+                    btn.setAttribute('aria-pressed', 'false');
+                }
+            });
+        }
+
+        function toggleTheme() {
+            document.documentElement.classList.toggle('dark');
+            const icon = document.getElementById('theme-icon');
+            icon.textContent = document.documentElement.classList.contains('dark') ? '☀️' : '🌙';
+        }
+
+        // Initialize aria-pressed attributes
+        document.querySelectorAll('.filter-chip').forEach(button => {
+            button.setAttribute('role', 'button');
+            button.setAttribute('aria-pressed', button.classList.contains('active') ? 'true' : 'false');
+        });
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.target.classList.contains('filter-chip')) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    e.target.click();
+                }
+            }
+        });
+
+        console.log('FilterChip test page loaded');
+        console.log('Motion preference:', window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'reduced' : 'normal');
+    </script>
+</body>
+</html>

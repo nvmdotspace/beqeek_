@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Motion Preferences Test - Beqeek Design System</title>
+    <link rel="stylesheet" href="./styles/globals.css">
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .test-section {
+            margin-bottom: 3rem;
+            padding: 2rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+        .test-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            margin: 0.5rem;
+        }
+
+        .brand-primary {
+            background: var(--brand-primary);
+            color: var(--brand-primary-foreground);
+        }
+
+        .brand-primary:hover {
+            background: var(--brand-primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(66, 135, 245, 0.3);
+        }
+
+        .test-card {
+            padding: 1.5rem;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .test-card:hover {
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+            transform: translateY(-2px);
+        }
+
+        .status-indicator {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 600;
+            margin-top: 1rem;
+        }
+
+        .status-normal {
+            background: var(--success-subtle);
+            color: var(--success);
+        }
+
+        .status-reduced {
+            background: var(--warning-subtle);
+            color: var(--warning);
+        }
+
+        .instructions {
+            background: var(--info-subtle);
+            color: var(--info-subtle-foreground);
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 2rem;
+        }
+
+        .instructions strong {
+            color: var(--info);
+        }
+    </style>
+</head>
+<body>
+    <h1>Motion Preferences Test</h1>
+
+    <div class="instructions">
+        <strong>How to test:</strong>
+        <ul>
+            <li><strong>macOS:</strong> System Preferences → Accessibility → Display → Reduce Motion</li>
+            <li><strong>Windows:</strong> Settings → Ease of Access → Display → Show animations</li>
+            <li><strong>Chrome DevTools:</strong> CMD+Shift+P → "Emulate CSS prefers-reduced-motion"</li>
+        </ul>
+        <p>The status indicator below will show your current preference.</p>
+    </div>
+
+    <div id="motion-status" class="status-indicator status-normal">
+        ✓ Normal Motion Enabled
+    </div>
+
+    <div class="test-section">
+        <h2>Test 1: Button Hover Effects</h2>
+        <p>Hover over these buttons. With normal motion, they should lift and glow. With reduced motion, they should only change color.</p>
+
+        <button class="test-button brand-primary">Brand Primary Button</button>
+        <button class="test-button" style="background: var(--destructive); color: var(--destructive-foreground);">
+            Destructive Button
+        </button>
+        <button class="test-button" style="background: var(--secondary); color: var(--secondary-foreground);">
+            Secondary Button
+        </button>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 2: Card Hover Effects</h2>
+        <p>Hover over these cards. With normal motion, they should lift. With reduced motion, they should stay in place.</p>
+
+        <div class="test-card">
+            <h3>Card Title 1</h3>
+            <p>This card should have a subtle lift effect on hover (normal motion only).</p>
+        </div>
+
+        <div class="test-card">
+            <h3>Card Title 2</h3>
+            <p>This card should have a subtle lift effect on hover (normal motion only).</p>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 3: Smooth Scroll</h2>
+        <p>Click this link to test smooth scrolling (normal motion only).</p>
+        <a href="#motion-status" style="color: var(--brand-primary); font-weight: 600;">
+            Scroll to top ↑
+        </a>
+        <div style="height: 100vh;"></div>
+    </div>
+
+    <script>
+        // Detect motion preference and update indicator
+        function updateMotionStatus() {
+            const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            const indicator = document.getElementById('motion-status');
+
+            if (prefersReduced) {
+                indicator.textContent = '⚠ Reduced Motion Active';
+                indicator.className = 'status-indicator status-reduced';
+            } else {
+                indicator.textContent = '✓ Normal Motion Enabled';
+                indicator.className = 'status-indicator status-normal';
+            }
+        }
+
+        // Update on load
+        updateMotionStatus();
+
+        // Listen for changes
+        window.matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', updateMotionStatus);
+
+        // Log to console
+        console.log('Motion preferences test loaded');
+        console.log('prefers-reduced-motion:', window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    </script>
+</body>
+</html>
