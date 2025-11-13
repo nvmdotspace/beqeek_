@@ -12,6 +12,7 @@ import { cn } from '@workspace/ui/lib/utils';
 
 import { ROUTES } from '@/shared/route-paths';
 import { getWorkspaceLogo } from '@/shared/utils/workspace-logo';
+import { useSidebarStore } from '@/stores/sidebar-store';
 // @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
 
@@ -31,8 +32,22 @@ export const WorkspaceCardCompact = ({
   const navigate = useNavigate();
   const { locale } = route.useParams();
   const [isFavorited, setIsFavorited] = useState(initialFavorited);
+  const { setCurrentWorkspace } = useSidebarStore();
 
   const handleCardClick = () => {
+    // Sync workspace to sidebar store before navigation
+    setCurrentWorkspace({
+      id: workspace.id,
+      workspaceName: workspace.workspaceName,
+      namespace: workspace.namespace,
+      description: workspace.description,
+      logo: workspace.logo,
+      thumbnailLogo: workspace.thumbnailLogo,
+      memberCount: 0,
+      tableCount: 0,
+      workflowCount: 0,
+    });
+
     navigate({
       to: ROUTES.ACTIVE_TABLES.LIST,
       params: { workspaceId: workspace.id, locale },

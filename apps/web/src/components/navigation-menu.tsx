@@ -165,7 +165,7 @@ export const NavigationMenu = ({ isCollapsed = true, className }: NavigationMenu
           {
             id: 'settings',
             label: m.navigation_settings(),
-            href: `/${locale}/workspaces`,
+            href: `/${locale}/settings`,
             icon: Settings,
           },
           {
@@ -181,7 +181,23 @@ export const NavigationMenu = ({ isCollapsed = true, className }: NavigationMenu
 
   const isActive = (href?: string) => {
     if (!href) return false;
-    return location.pathname === href || location.pathname.startsWith(href + '/');
+
+    // Exact match
+    if (location.pathname === href) return true;
+
+    // Special case: Dashboard (/workspaces) should ONLY match exact path
+    // Should NOT match /workspaces/{workspaceId}/...
+    if (href.endsWith('/workspaces')) {
+      return false; // Already checked exact match above
+    }
+
+    // For other routes, check if current path is a child route
+    // e.g., /vi/workspaces/123/tables/456 should match /vi/workspaces/123/tables
+    if (location.pathname.startsWith(href + '/')) {
+      return true;
+    }
+
+    return false;
   };
 
   const handleSectionToggle = (sectionId: string) => {
@@ -233,15 +249,17 @@ export const NavigationMenu = ({ isCollapsed = true, className }: NavigationMenu
         to={item.href || '#'}
         title={isCollapsed ? item.label : undefined}
         className={cn(
-          'group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-          'hover:bg-accent hover:text-accent-foreground',
-          active && 'bg-[hsl(var(--brand-primary-subtle))] text-[hsl(var(--brand-primary))] font-semibold',
+          'group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all duration-200',
+          // Default state - subtle and clean
+          'text-muted-foreground hover:text-foreground hover:bg-muted/50',
+          // Active state - subtle background with clear text
+          active && ['bg-muted text-foreground', 'font-medium'],
           isCollapsed && 'justify-center px-2',
         )}
         aria-current={active ? 'page' : undefined}
         onClick={() => setActiveSection(item.id)}
       >
-        <item.icon className="h-4 w-4 shrink-0" />
+        <item.icon className={cn('h-4 w-4 shrink-0 transition-colors', active && 'text-foreground')} />
 
         {!isCollapsed && (
           <>
