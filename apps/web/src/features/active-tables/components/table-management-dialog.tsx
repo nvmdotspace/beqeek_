@@ -270,7 +270,7 @@ export const TableManagementDialog = ({
                           </SelectContent>
                         </Select>
                         {workGroups.length === 0 && (
-                          <Text size="small" color="muted" className="text-xs">
+                          <Text size="small" color="muted">
                             Table will be created without a work group
                           </Text>
                         )}
@@ -296,7 +296,7 @@ export const TableManagementDialog = ({
                         </SelectContent>
                       </Select>
                       {field.state.value && (
-                        <Text size="small" color="muted" className="text-xs">
+                        <Text size="small" color="muted">
                           {m[TABLE_TYPE_METADATA[field.state.value as TableType]?.descriptionKey as keyof typeof m]?.()}
                         </Text>
                       )}
@@ -343,16 +343,18 @@ export const TableManagementDialog = ({
                         disabled={!form.getFieldValue('e2eeEncryption')}
                       />
                       {form.getFieldValue('e2eeEncryption') && field.state.value && (
-                        <button
+                        <Button
                           type="button"
+                          variant="ghost"
+                          size="icon"
                           onClick={() => setShowEncryptionKey(!showEncryptionKey)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                          className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
                         >
                           {showEncryptionKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                        </button>
+                        </Button>
                       )}
                     </div>
-                    <Text size="small" color="muted" className="text-xs">
+                    <Text size="small" color="muted">
                       Auto-generated when E2EE is enabled. Store this key safely - it cannot be recovered.
                     </Text>
                   </div>
@@ -396,11 +398,7 @@ export const TableManagementDialog = ({
                             <span className="font-medium text-base">
                               {m[field.label as keyof typeof m]?.() || field.label}
                             </span>
-                            {field.required && (
-                              <Badge variant="secondary" className="text-xs">
-                                Required
-                              </Badge>
-                            )}
+                            {field.required && <Badge variant="secondary">Required</Badge>}
                           </div>
                           <div className="text-sm text-muted-foreground space-y-1">
                             <div>
@@ -428,11 +426,12 @@ export const TableManagementDialog = ({
                                   {field.options.map((option, optIdx) => (
                                     <Badge
                                       key={optIdx}
+                                      variant="outline"
+                                      className="border"
                                       style={{
-                                        backgroundColor: option.background_color,
+                                        borderColor: option.background_color,
                                         color: option.text_color,
                                       }}
-                                      className="text-xs"
                                     >
                                       {m[option.text as keyof typeof m]?.() || option.text}
                                     </Badge>
@@ -460,8 +459,10 @@ export const TableManagementDialog = ({
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading}>
               Cancel
             </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? 'Saving...' : table ? 'Update Table' : 'Create Table'}
+            <Button type="submit" disabled={isLoading} variant="brand-primary">
+              {table
+                ? m.modules_dialog_updateButton() || 'Update Table'
+                : m.modules_dialog_createButton() || 'Create Table'}
             </Button>
           </DialogFooter>
         </form>

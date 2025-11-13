@@ -23,6 +23,15 @@
   --popover-foreground: hsl(0 0% 3.9%);
   --primary: hsl(0 0% 9%);
   --primary-foreground: hsl(0 0% 98%);
+
+  /* Brand Primary Color - Signature blue for CTAs and primary actions */
+  --brand-primary: hsl(217 91% 60%);
+  --brand-primary-foreground: hsl(0 0% 98%);
+  --brand-primary-hover: hsl(217 91% 55%);
+  --brand-primary-active: hsl(217 91% 50%);
+  --brand-primary-subtle: hsl(217 91% 96%);
+  --brand-primary-subtle-foreground: hsl(217 91% 30%);
+
   --secondary: hsl(0 0% 96.1%);
   --secondary-foreground: hsl(0 0% 9%);
   --muted: hsl(0 0% 96.1%);
@@ -34,6 +43,12 @@
   --border: hsl(0 0% 89.8%);
   --input: hsl(0 0% 89.8%);
   --ring: hsl(0 0% 3.9%);
+
+  /* Opacity Scale for consistent transparency */
+  --opacity-disabled: 0.5;
+  --opacity-subtle: 0.6;
+  --opacity-muted: 0.8;
+  --opacity-overlay: 0.85;
   --chart-1: hsl(12 76% 61%);
   --chart-2: hsl(173 58% 39%);
   --chart-3: hsl(197 37% 24%);
@@ -354,6 +369,15 @@
   --popover-foreground: hsl(0 0% 98%);
   --primary: hsl(0 0% 98%);
   --primary-foreground: hsl(0 0% 9%);
+
+  /* Brand Primary Color - Dark mode */
+  --brand-primary: hsl(217 91% 65%);
+  --brand-primary-foreground: hsl(0 0% 3.9%);
+  --brand-primary-hover: hsl(217 91% 70%);
+  --brand-primary-active: hsl(217 91% 75%);
+  --brand-primary-subtle: hsl(217 91% 15%);
+  --brand-primary-subtle-foreground: hsl(217 91% 75%);
+
   --secondary: hsl(0 0% 14.9%);
   --secondary-foreground: hsl(0 0% 98%);
   --muted: hsl(0 0% 14.9%);
@@ -365,11 +389,12 @@
   --border: hsl(0 0% 14.9%);
   --input: hsl(0 0% 14.9%);
   --ring: hsl(0 0% 83.1%);
-  --chart-1: hsl(220 70% 50%);
-  --chart-2: hsl(160 60% 45%);
-  --chart-3: hsl(30 80% 55%);
-  --chart-4: hsl(280 65% 60%);
-  --chart-5: hsl(340 75% 55%);
+  /* Chart colors - Dark mode (maintaining hue consistency with light mode) */
+  --chart-1: hsl(12 76% 70%); /* Orange - adjusted lightness only */
+  --chart-2: hsl(173 58% 55%); /* Teal - adjusted lightness only */
+  --chart-3: hsl(197 37% 45%); /* Blue - adjusted lightness only */
+  --chart-4: hsl(43 74% 75%); /* Yellow - adjusted lightness only */
+  --chart-5: hsl(27 87% 75%); /* Coral - adjusted lightness only */
   --sidebar: hsl(0 0% 9%);
   --sidebar-foreground: hsl(0 0% 98%);
   --sidebar-primary: hsl(0 0% 98%);

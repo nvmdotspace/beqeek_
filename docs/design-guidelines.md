@@ -276,6 +276,124 @@ const inputClasses = cn(
 </div>
 ```
 
+### Filter Buttons
+
+**Quick Filter Pattern** (Active Tables, Lists):
+
+Filter buttons are a specialized button variant used for filtering and categorizing content. They use brand colors to indicate active state.
+
+**Standard Implementation**:
+
+```typescript
+<Button
+  size="sm"
+  variant="ghost"
+  onClick={() => setFilter(value)}
+  className={cn(
+    'transition-all rounded-lg border',
+    isActive
+      ? 'bg-[var(--brand-primary-subtle)] text-[var(--brand-primary)] border-[var(--brand-primary)] font-medium'
+      : 'text-muted-foreground hover:text-foreground hover:bg-accent border-transparent'
+  )}
+>
+  {isActive && <Check className="h-3.5 w-3.5 mr-1" />}
+  Filter Label
+</Button>
+```
+
+**Color Tokens (CRITICAL)**:
+
+```css
+/* Active State */
+--brand-primary: hsl(217 91% 60%); /* Text & border */
+--brand-primary-subtle: hsl(217 91% 96%); /* Background */
+
+/* Inactive State */
+--muted-foreground: hsl(0 0% 45.1%); /* Text */
+--accent: hsl(0 0% 96.1%); /* Hover background */
+```
+
+**Usage Rules**:
+
+✅ **DO:**
+
+- Use `var(--token)` syntax in arbitrary values: `bg-[var(--brand-primary-subtle)]`
+- Include check icon for active filters
+- Use `transition-all` for smooth state changes
+- Keep all styles in className (no inline style prop)
+- Use `font-medium` for active state emphasis
+
+❌ **DON'T:**
+
+- Use `hsl(var(--token))` - double HSL wrapping is invalid
+- Mix className with inline style prop
+- Hardcode color values
+- Forget the check icon on active state
+- Use different colors for filter groups
+
+**States**:
+
+```typescript
+// Active (selected filter)
+'bg-[var(--brand-primary-subtle)] text-[var(--brand-primary)] border-[var(--brand-primary)] font-medium';
+
+// Inactive (default)
+'text-muted-foreground hover:text-foreground hover:bg-accent border-transparent';
+
+// Focus (accessibility)
+// Inherited from Button component's focus-visible styles
+```
+
+**Layout Pattern**:
+
+```typescript
+<div className="flex items-start gap-3">
+  {/* Label */}
+  <Text size="small" weight="medium" className="min-w-[100px] text-muted-foreground pt-1.5">
+    Filter Label
+  </Text>
+
+  {/* Filter buttons */}
+  <div className="flex-1 flex flex-wrap items-center gap-1.5">
+    <FilterButton isActive={filter === 'all'} onClick={() => setFilter('all')}>
+      All
+    </FilterButton>
+    <FilterButton isActive={filter === 'option1'} onClick={() => setFilter('option1')}>
+      Option 1
+    </FilterButton>
+    <FilterButton isActive={filter === 'option2'} onClick={() => setFilter('option2')}>
+      Option 2
+    </FilterButton>
+  </div>
+</div>
+```
+
+**Best Practices**:
+
+1. **Single Active State**: Only one filter per group should be active
+2. **Check Icon**: Always show check mark on active filters
+3. **Responsive**: Use `flex-wrap` to handle mobile layouts
+4. **Consistent Spacing**: Use `gap-1.5` (6px) between buttons
+5. **Label Alignment**: Align filter labels with `pt-1.5` to match button text baseline
+
+**Common Mistake - Color Implementation**:
+
+```typescript
+// ❌ WRONG: Double HSL wrapping + inline styles
+className="bg-[hsl(var(--brand-primary-subtle))]"
+style={{ borderColor: 'hsl(var(--brand-primary))' }}
+
+// ✅ CORRECT: Direct var() reference in arbitrary values
+className="bg-[var(--brand-primary-subtle)] border-[var(--brand-primary)]"
+```
+
+**Why It Matters**:
+
+- CSS custom properties already contain complete HSL values
+- Wrapping with `hsl()` creates invalid CSS: `hsl(hsl(217 91% 60%))`
+- Arbitrary values in Tailwind v4 must use `var()` directly
+- Inline styles prevent Tailwind optimization and purging
+
 ### Cards
 
 **Structure**:

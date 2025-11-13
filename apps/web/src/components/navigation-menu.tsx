@@ -235,7 +235,7 @@ export const NavigationMenu = ({ isCollapsed = true, className }: NavigationMenu
         className={cn(
           'group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
           'hover:bg-accent hover:text-accent-foreground',
-          active && 'bg-accent text-accent-foreground',
+          active && 'bg-[hsl(var(--brand-primary-subtle))] text-[hsl(var(--brand-primary))] font-semibold',
           isCollapsed && 'justify-center px-2',
         )}
         aria-current={active ? 'page' : undefined}
