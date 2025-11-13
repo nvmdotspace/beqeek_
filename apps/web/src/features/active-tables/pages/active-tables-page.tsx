@@ -17,13 +17,14 @@ import { Button } from '@workspace/ui/components/button';
 import { Skeleton } from '@workspace/ui/components/skeleton';
 import { Badge } from '@workspace/ui/components/badge';
 import { Input } from '@workspace/ui/components/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@workspace/ui/components/card';
 import { Alert, AlertDescription, AlertTitle } from '@workspace/ui/components/alert';
-import { Heading, Text, Metric } from '@workspace/ui/components/typography';
+import { Heading, Text } from '@workspace/ui/components/typography';
 import { cn } from '@workspace/ui/lib/utils';
 import type { ActiveTable } from '../types';
 import { useEncryption } from '../hooks/use-encryption-stub';
 import { ErrorCard } from '@/components/error-display';
+import { StatBadge } from '@/features/workspace/components/stat-badge';
+import { Inline } from '@workspace/ui/components/primitives';
 
 const formatStatusLabel = (tableType?: string) => {
   if (!tableType) return 'standard';
@@ -114,7 +115,6 @@ export const ActiveTablesPage = () => {
       ),
     [grouped],
   );
-  const encryptedPercentage = totalTables ? Math.round((encryptedTables / totalTables) * 100) : 0;
 
   const filteredGroups = useMemo(() => {
     if (!searchQuery) {
@@ -284,58 +284,29 @@ export const ActiveTablesPage = () => {
           </div>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-3">
-          <Card className="border-border/60 bg-gradient-to-br from-background to-muted/20 shadow-sm">
-            <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-info-subtle">
-                  <Database className="h-4 w-4 text-info" />
-                </div>
-                <span>Modules</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Metric value={totalTables} />
-              <Text size="small" color="muted" className="mt-1">
-                Across {workGroups.length} workgroup{workGroups.length === 1 ? '' : 's'}
-              </Text>
-            </CardContent>
-          </Card>
-
-          <Card className="border-border/60 bg-gradient-to-br from-background to-muted/20 shadow-sm">
-            <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-success-subtle">
-                  <ShieldCheck className="h-4 w-4 text-success" />
-                </div>
-                <span>Encrypted</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Metric value={encryptedTables} />
-              <Text size="small" color="muted" className="mt-1">
-                {encryptedTables ? `${encryptedPercentage}% with E2EE protection` : 'Ready to secure sensitive data'}
-              </Text>
-            </CardContent>
-          </Card>
-
-          <Card className="border-border/60 bg-gradient-to-br from-background to-muted/20 shadow-sm">
-            <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent-purple-subtle">
-                  <Workflow className="h-4 w-4 text-accent-purple" />
-                </div>
-                <span>Automations</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Metric value={automationEnabledTables} />
-              <Text size="small" color="muted" className="mt-1">
-                Trigger workflows from records
-              </Text>
-            </CardContent>
-          </Card>
-        </div>
+        <Inline space="space-250" align="center" wrap className="gap-y-[var(--space-250)]">
+          <StatBadge
+            icon={Database}
+            value={totalTables}
+            label="Modules"
+            color="accent-blue"
+            loading={isTablesLoading}
+          />
+          <StatBadge
+            icon={ShieldCheck}
+            value={encryptedTables}
+            label="Encrypted"
+            color="success"
+            loading={isTablesLoading}
+          />
+          <StatBadge
+            icon={Workflow}
+            value={automationEnabledTables}
+            label="Automations"
+            color="accent-purple"
+            loading={isTablesLoading}
+          />
+        </Inline>
       </div>
 
       {shouldShowEncryptionReminder ? (
@@ -365,37 +336,43 @@ export const ActiveTablesPage = () => {
           </div>
         </div>
 
-        <div className="flex flex-col gap-3 rounded-xl border border-border/60 bg-muted/20 p-4">
-          <div className="flex flex-wrap items-center gap-2">
-            <Button
-              variant={selectedWorkGroupId === 'all' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setSelectedWorkGroupId('all')}
-            >
-              {m.activeTables_page_workGroupAll()}
-            </Button>
-            {workGroups.map((group) => (
+        <div className="rounded-xl border border-border/60 bg-card p-4 shadow-sm">
+          {/* Workgroup Tabs Section */}
+          <div className="mb-4">
+            <div className="flex flex-wrap items-center gap-2">
               <Button
-                key={group.id}
-                variant={selectedWorkGroupId === group.id ? 'default' : 'outline'}
+                variant={selectedWorkGroupId === 'all' ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => setSelectedWorkGroupId(group.id)}
+                onClick={() => setSelectedWorkGroupId('all')}
               >
-                {group.name}
+                {m.activeTables_page_workGroupAll()}
               </Button>
-            ))}
+              {workGroups.map((group) => (
+                <Button
+                  key={group.id}
+                  variant={selectedWorkGroupId === group.id ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSelectedWorkGroupId(group.id)}
+                >
+                  {group.name}
+                </Button>
+              ))}
+            </div>
           </div>
 
-          {statusOptions.length ? (
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-medium text-muted-foreground min-w-[80px]">Status</span>
-                <div className="flex flex-wrap items-center gap-1.5">
+          {/* Filter Rows Section */}
+          <div className="space-y-3 pt-4 border-t border-border/40">
+            {/* Status Filter */}
+            {statusOptions.length ? (
+              <div className="flex items-start gap-3">
+                <Text size="small" weight="medium" className="min-w-[100px] text-muted-foreground pt-1.5">
+                  Status
+                </Text>
+                <div className="flex-1 flex flex-wrap items-center gap-1.5">
                   <Button
                     size="sm"
                     variant={statusFilter === 'all' ? 'default' : 'outline'}
                     onClick={() => setStatusFilter('all')}
-                    className="h-7 px-2.5 text-xs"
                   >
                     All
                   </Button>
@@ -406,7 +383,7 @@ export const ActiveTablesPage = () => {
                         key={status}
                         size="sm"
                         variant={statusFilter === status ? 'default' : 'outline'}
-                        className="capitalize h-7 px-2.5 text-xs"
+                        className="capitalize"
                         onClick={() => setStatusFilter(status)}
                       >
                         {status}
@@ -417,7 +394,7 @@ export const ActiveTablesPage = () => {
                       size="sm"
                       variant="ghost"
                       onClick={() => setShowAllStatusFilters(!showAllStatusFilters)}
-                      className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
+                      className="text-muted-foreground hover:text-foreground"
                     >
                       {showAllStatusFilters
                         ? '− Less'
@@ -426,18 +403,18 @@ export const ActiveTablesPage = () => {
                   )}
                 </div>
               </div>
-            </div>
-          ) : null}
+            ) : null}
 
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-medium text-muted-foreground min-w-[80px]">Encryption</span>
-              <div className="flex flex-wrap items-center gap-1.5">
+            {/* Encryption Filter */}
+            <div className="flex items-start gap-3">
+              <Text size="small" weight="medium" className="min-w-[100px] text-muted-foreground pt-1.5">
+                Encryption
+              </Text>
+              <div className="flex-1 flex flex-wrap items-center gap-1.5">
                 <Button
                   size="sm"
                   variant={encryptionFilter === 'all' ? 'default' : 'outline'}
                   onClick={() => setEncryptionFilter('all')}
-                  className="h-7 px-2.5 text-xs"
                 >
                   All
                 </Button>
@@ -445,7 +422,6 @@ export const ActiveTablesPage = () => {
                   size="sm"
                   variant={encryptionFilter === 'encrypted' ? 'default' : 'outline'}
                   onClick={() => setEncryptionFilter('encrypted')}
-                  className="h-7 px-2.5 text-xs"
                 >
                   E2EE
                 </Button>
@@ -453,23 +429,22 @@ export const ActiveTablesPage = () => {
                   size="sm"
                   variant={encryptionFilter === 'standard' ? 'default' : 'outline'}
                   onClick={() => setEncryptionFilter('standard')}
-                  className="h-7 px-2.5 text-xs"
                 >
                   Server-side
                 </Button>
               </div>
             </div>
-          </div>
 
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-medium text-muted-foreground min-w-[80px]">Automation</span>
-              <div className="flex flex-wrap items-center gap-1.5">
+            {/* Automation Filter */}
+            <div className="flex items-start gap-3">
+              <Text size="small" weight="medium" className="min-w-[100px] text-muted-foreground pt-1.5">
+                Automation
+              </Text>
+              <div className="flex-1 flex flex-wrap items-center gap-1.5">
                 <Button
                   size="sm"
                   variant={automationFilter === 'all' ? 'default' : 'outline'}
                   onClick={() => setAutomationFilter('all')}
-                  className="h-7 px-2.5 text-xs"
                 >
                   All
                 </Button>
@@ -477,7 +452,6 @@ export const ActiveTablesPage = () => {
                   size="sm"
                   variant={automationFilter === 'automated' ? 'default' : 'outline'}
                   onClick={() => setAutomationFilter('automated')}
-                  className="h-7 px-2.5 text-xs"
                 >
                   With workflows
                 </Button>
@@ -485,7 +459,6 @@ export const ActiveTablesPage = () => {
                   size="sm"
                   variant={automationFilter === 'manual' ? 'default' : 'outline'}
                   onClick={() => setAutomationFilter('manual')}
-                  className="h-7 px-2.5 text-xs"
                 >
                   Manual only
                 </Button>
@@ -526,7 +499,7 @@ export const ActiveTablesPage = () => {
                   {m.activeTables_page_groupTableCount({ count: tables.length })}
                 </Badge>
               </div>
-              <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
                 {tables.map((table) => (
                   <ActiveTableCard
                     key={table.id}

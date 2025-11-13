@@ -123,7 +123,9 @@ export const TableManagementDialog = ({
           name: field.name,
           placeholder: field.placeholder || '',
           required: field.required,
-          defaultValue: field.defaultValue,
+          // Convert FieldDefaultValue to string or undefined for ActiveFieldConfig
+          defaultValue:
+            field.defaultValue !== null && field.defaultValue !== undefined ? String(field.defaultValue) : undefined,
           // Copy options if they exist
           ...('options' in field ? { options: field.options } : {}),
           // Copy reference fields if they exist

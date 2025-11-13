@@ -15,6 +15,7 @@ import {
   ShieldCheck,
   Calculator,
   type LucideIcon,
+  Boxes,
 } from 'lucide-react';
 
 /**
@@ -108,11 +109,11 @@ export const MODULE_ICONS = {
   analytics: TrendingUp,
 
   // Standard / Generic
-  standard: Database,
-  default: Database,
-  generic: Database,
-  table: Database,
-  data: Database,
+  standard: Boxes,
+  default: Boxes,
+  generic: Boxes,
+  table: Boxes,
+  data: Boxes,
 } as const;
 
 /**

@@ -1,8 +1,9 @@
 # Beqeek Design System
 
-**Version**: 1.0.0
-**Last Updated**: 2025-11-12
+**Version**: 1.1.0
+**Last Updated**: 2025-11-13
 **Status**: Active
+**Latest Changes**: [Design Standardization Summary](./design-standardization-summary.md)
 
 ## Table of Contents
 
@@ -15,6 +16,7 @@
 7. [Accessibility](#accessibility)
 8. [Best Practices](#best-practices)
 9. [Vietnamese Typography](#vietnamese-typography)
+10. [Design Review Process](#design-review-process)
 
 ---
 
@@ -27,6 +29,9 @@ Beqeek's design system is built on TailwindCSS v4, shadcn/ui, and Radix UI primi
 - **WCAG 2.1 AA accessibility** standards
 - **Type-safe components** with full TypeScript support
 - **Vietnamese typography** optimization
+- **Component-based consistency** enforcing design standards
+
+> **🎯 Quick Start**: New to the design system? See [Design Review Checklist](./design-review-checklist.md) for PR requirements.
 
 ### Tech Stack
 
@@ -925,6 +930,55 @@ Before submitting a new component, verify:
 - **Radix UI**: https://www.radix-ui.com/
 - **WCAG 2.1**: https://www.w3.org/WAI/WCAG21/quickref/
 - **CVA**: https://cva.style/docs
+
+---
+
+## Design Review Process
+
+### Before Submitting PRs
+
+All UI changes MUST pass the [Design Review Checklist](./design-review-checklist.md) before submission.
+
+### Key Standards (Quick Reference)
+
+#### Typography Rules
+
+- ✅ **REQUIRED**: Use `<Heading>`, `<Text>`, `<Metric>` components
+- ❌ **PROHIBITED**: Manual text-\* classes on headings
+- Standard hierarchy: H1 (36px) → H2 (30px) → H3 (24px) → H4 (20px)
+
+#### Button Sizing
+
+- ✅ **REQUIRED**: Use `size` prop (sm/default/lg/icon)
+- ❌ **PROHIBITED**: Manual `h-*` classes on buttons
+- Default button height: 36px (h-9)
+
+#### Spacing Standards
+
+- Page padding: `p-6` (24px)
+- Section spacing: `space-600` (24px between sections)
+- Card grid gap: `gap-4` (16px)
+- Card padding: `p-4` (compact) or `p-6` (standard)
+
+#### Responsive Grid
+
+```tsx
+// Standard pattern for card grids
+<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+```
+
+### Related Documentation
+
+- [Design Review Checklist](./design-review-checklist.md) - PR requirements
+- [Design Standardization Summary](./design-standardization-summary.md) - Recent improvements
+- [Implementation Plan](../plans/20251113-1026-design-system-standardization/plan.md) - Full details
+
+### Getting Help
+
+1. Check [Design Review Checklist](./design-review-checklist.md)
+2. Review existing similar components
+3. Consult design system documentation
+4. Ask in #design-system channel
 
 ---
 

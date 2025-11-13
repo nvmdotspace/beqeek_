@@ -35,17 +35,13 @@ export const WorkspaceDashboardPage = () => {
       <Stack space="space-600">
         {/* Page Title */}
         <div>
-          <Heading level={2} className="text-2xl font-bold">
-            {m.workspace_dashboard_title()}
-          </Heading>
+          <Heading level={1}>{m.workspace_dashboard_title()}</Heading>
         </div>
 
         {/* Quick Summary Stats */}
         {!isLoading && !error && totalWorkspaces > 0 && (
           <Stack space="space-300">
-            <Heading level={3} className="text-lg font-semibold">
-              Tổng quan
-            </Heading>
+            <Heading level={2}>Tổng quan</Heading>
             <Inline space="space-250" align="center" wrap className="gap-y-[var(--space-250)]">
               <StatBadge
                 icon={Folder}
@@ -129,9 +125,7 @@ export const WorkspaceDashboardPage = () => {
           <Stack space="space-300">
             <div className="flex items-center justify-between">
               <div>
-                <Heading level={3} className="text-lg font-semibold">
-                  Danh sách workspace của bạn
-                </Heading>
+                <Heading level={2}>Danh sách workspace của bạn</Heading>
                 <Text size="small" color="muted">
                   {totalWorkspaces} workspace đang hoạt động
                 </Text>

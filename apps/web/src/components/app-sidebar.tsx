@@ -151,7 +151,7 @@ const SidebarContent = ({ isCollapsed = false, onCloseMobile, showCloseButton = 
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/60 transition-colors group-focus-within:text-muted-foreground" />
             <Input
               placeholder={m.common_searchPlaceholder()}
-              className="pl-9 pr-12 w-full h-10 bg-muted/30 border-border/40 rounded-lg transition-all hover:bg-muted/50 focus:bg-background"
+              className="pl-9 pr-12 w-full h-9 bg-muted/30 border-border/40 rounded-lg transition-all hover:bg-muted/50 focus:bg-background"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
