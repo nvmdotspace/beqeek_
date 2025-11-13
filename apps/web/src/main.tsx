@@ -8,6 +8,7 @@ import '@workspace/comments/styles';
 
 import { routeTree } from './routeTree.gen';
 import { AppProviders } from '@/providers/app-providers';
+import { initializeTheme } from '@/stores/theme-store';
 
 // Create router instance
 const router = createRouter({ routeTree });
@@ -34,6 +35,9 @@ const bootstrap = () => {
     '--font-geist-mono',
     "Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
   );
+
+  // Initialize theme before rendering
+  initializeTheme();
 
   ReactDOM.createRoot(rootElement).render(
     <React.StrictMode>

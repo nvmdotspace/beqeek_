@@ -1,0 +1,193 @@
+/**
+ * Workspace Team Role Types
+ *
+ * Based on API: /api/workspace/{workspaceId}/workspace/get/team_roles
+ * and /api/workspace/{workspaceId}/workspace/get/p/team_roles
+ */
+
+/**
+ * Workspace Team Role from API
+ */
+export interface WorkspaceTeamRole {
+  id: string;
+  isDefault?: boolean;
+  workspaceTeamId: string;
+  roleCode?: string;
+  roleName: string;
+  roleDescription?: string;
+  createdBy?: string;
+  updatedBy?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  labelIds?: string[];
+}
+
+/**
+ * Role query fields
+ */
+export type RoleField =
+  | 'id'
+  | 'isDefault'
+  | 'workspaceTeamId'
+  | 'roleCode'
+  | 'roleName'
+  | 'roleDescription'
+  | 'createdBy'
+  | 'updatedBy'
+  | 'createdAt'
+  | 'updatedAt'
+  | 'labelIds';
+
+/**
+ * Role filtering options
+ * Supported filters from swagger:
+ * - id:eq,in
+ * - labelId:eq,in
+ * - roleName:eq,contains
+ * - roleDescription:eq,contains
+ * - createdAt:eq,lte,gte,lt,gt|format:Y-m-d H:i:s
+ * - updatedAt:eq,lte,gte,lt,gt|format:Y-m-d H:i:s
+ */
+export interface RoleFiltering {
+  'id:eq'?: string;
+  'id:in'?: string[];
+  'labelId:eq'?: string;
+  'labelId:in'?: string[];
+  'roleName:eq'?: string;
+  'roleName:contains'?: string;
+  'roleDescription:eq'?: string;
+  'roleDescription:contains'?: string;
+  'createdAt:eq'?: string;
+  'createdAt:lte'?: string;
+  'createdAt:gte'?: string;
+  'createdAt:lt'?: string;
+  'createdAt:gt'?: string;
+  'updatedAt:eq'?: string;
+  'updatedAt:lte'?: string;
+  'updatedAt:gte'?: string;
+  'updatedAt:lt'?: string;
+  'updatedAt:gt'?: string;
+}
+
+/**
+ * Role sorting options
+ */
+export interface RoleSorting {
+  field: 'roleName' | 'createdAt' | 'updatedAt';
+  direction: 'asc' | 'desc';
+}
+
+/**
+ * Query configuration for roles
+ */
+export interface RoleQueries {
+  fields?: string;
+  filtering?: RoleFiltering;
+  limit?: number;
+  offset?: number;
+  sorting?: RoleSorting;
+}
+
+/**
+ * Role constraints (required for queries)
+ */
+export interface RoleConstraints {
+  workspaceTeamId: string;
+}
+
+/**
+ * Request body for GET roles
+ */
+export interface GetRolesRequest {
+  constraints: RoleConstraints;
+  queries?: RoleQueries;
+}
+
+/**
+ * Response for GET roles
+ */
+export interface GetRolesResponse {
+  data?: WorkspaceTeamRole[];
+  total?: number;
+  message?: string | null;
+}
+
+/**
+ * Role mutation data
+ */
+export interface RoleMutationData {
+  roleName: string;
+  roleCode?: string;
+  roleDescription?: string;
+  labelIds?: string[];
+}
+
+/**
+ * Request body for POST/PATCH role
+ */
+export interface RoleMutationRequest {
+  constraints: RoleConstraints;
+  data: RoleMutationData;
+}
+
+/**
+ * Response for POST role
+ */
+export interface RoleMutationResponse {
+  data?: WorkspaceTeamRole;
+  message?: string | null;
+}
+
+/**
+ * Request body for DELETE role
+ */
+export interface RoleDeleteRequest {
+  constraints: RoleConstraints;
+}
+
+/**
+ * Predefined query presets
+ */
+export const ROLE_QUERY_PRESETS = {
+  /**
+   * Basic role info
+   */
+  BASIC: {
+    fields: 'id,workspaceTeamId,roleCode,roleName,roleDescription',
+  } satisfies RoleQueries,
+
+  /**
+   * Full role details
+   */
+  FULL: {
+    fields:
+      'id,isDefault,workspaceTeamId,roleCode,roleName,roleDescription,createdBy,updatedBy,createdAt,updatedAt,labelIds',
+  } satisfies RoleQueries,
+
+  /**
+   * Minimal for dropdown/select
+   */
+  MINIMAL: {
+    fields: 'id,roleName',
+  } satisfies RoleQueries,
+} as const;
+
+/**
+ * Build role query request
+ */
+export function buildRoleQuery(
+  workspaceTeamId: string,
+  options?: RoleQueries | keyof typeof ROLE_QUERY_PRESETS,
+): GetRolesRequest {
+  const constraints: RoleConstraints = { workspaceTeamId };
+
+  if (!options) {
+    return { constraints, queries: ROLE_QUERY_PRESETS.FULL };
+  }
+
+  if (typeof options === 'string') {
+    return { constraints, queries: ROLE_QUERY_PRESETS[options] };
+  }
+
+  return { constraints, queries: options };
+}

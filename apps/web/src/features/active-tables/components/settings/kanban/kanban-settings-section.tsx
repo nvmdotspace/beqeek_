@@ -91,7 +91,6 @@ export function KanbanSettingsSection({ kanbanConfigs, fields, onChange }: Kanba
       description={m.settings_kanban_description()}
       actions={
         <Button onClick={handleAddConfig} size="sm" disabled={eligibleStatusFields.length === 0}>
-          <Plus className="mr-2 h-4 w-4" />
           {m.settings_kanban_addButton()}
         </Button>
       }

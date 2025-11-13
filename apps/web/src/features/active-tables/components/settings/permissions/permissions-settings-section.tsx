@@ -5,12 +5,12 @@
  * This is the most complex settings section due to the matrix structure
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Label } from '@workspace/ui/components/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@workspace/ui/components/select';
 import { ScrollArea } from '@workspace/ui/components/scroll-area';
 import { Badge } from '@workspace/ui/components/badge';
-import { Info } from 'lucide-react';
+import { Info, Loader2 } from 'lucide-react';
 import {
   CREATE_PERMISSIONS,
   RECORD_ACTION_PERMISSIONS,
@@ -19,6 +19,7 @@ import {
   COMMENT_MODIFY_PERMISSIONS,
 } from '@workspace/beqeek-shared';
 import { SettingsSection } from '../settings-layout';
+import { useGetTeams, useGetRoles, type WorkspaceTeam, type WorkspaceTeamRole } from '@/features/team';
 // @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
 
@@ -35,18 +36,6 @@ export interface Action {
   actionId: string;
   name: string;
   type: string;
-}
-
-// Placeholder types for teams/roles - in production, fetch from API
-interface Team {
-  id: string;
-  name: string;
-}
-
-interface Role {
-  id: string;
-  name: string;
-  teamId: string;
 }
 
 export interface PermissionsSettingsSectionProps {
@@ -115,49 +104,38 @@ export function PermissionsSettingsSection({
   workspaceId,
   onChange,
 }: PermissionsSettingsSectionProps) {
-  const [teams, setTeams] = useState<Team[]>([]);
-  const [roles, setRoles] = useState<Role[]>([]);
-  const [loading, setLoading] = useState(true);
   const [selectedTeam, setSelectedTeam] = useState<string>('');
 
-  // Fetch teams and roles
+  // Fetch teams from API
+  const {
+    data: teams = [],
+    isLoading: teamsLoading,
+    error: teamsError,
+  } = useGetTeams(workspaceId, {
+    query: 'BASIC', // Only need id and name
+  });
+
+  // Fetch roles for selected team
+  const {
+    data: roles = [],
+    isLoading: rolesLoading,
+    error: rolesError,
+  } = useGetRoles(workspaceId, selectedTeam, {
+    query: 'BASIC', // Only need id, name, and teamId
+    reactQueryOptions: {
+      enabled: !!selectedTeam, // Only fetch when a team is selected
+    },
+  });
+
+  // Set initial selected team when teams are loaded
   useEffect(() => {
-    // TODO: Replace with actual API calls
-    // For now, use placeholder data
-    const loadTeamsAndRoles = async () => {
-      setLoading(true);
-      try {
-        // Placeholder data - in production, fetch from:
-        // POST /api/workspace/{workspaceId}/workspace/get/p/teams
-        // POST /api/workspace/{workspaceId}/workspace/get/p/team_roles
-        const mockTeams: Team[] = [
-          { id: '1', name: 'Engineering' },
-          { id: '2', name: 'Product' },
-        ];
-        const mockRoles: Role[] = [
-          { id: 'r1', name: 'Admin', teamId: '1' },
-          { id: 'r2', name: 'Developer', teamId: '1' },
-          { id: 'r3', name: 'Manager', teamId: '2' },
-          { id: 'r4', name: 'Analyst', teamId: '2' },
-        ];
+    if (teams.length > 0 && !selectedTeam) {
+      setSelectedTeam(teams[0]!.id);
+    }
+  }, [teams, selectedTeam]);
 
-        setTeams(mockTeams);
-        setRoles(mockRoles);
-        if (mockTeams.length > 0) {
-          setSelectedTeam(mockTeams[0]!.id);
-        }
-      } catch (error) {
-        console.error('Failed to load teams/roles:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadTeamsAndRoles();
-  }, [workspaceId]);
-
-  // Get roles for selected team
-  const teamRoles = roles.filter((r) => r.teamId === selectedTeam);
+  const loading = teamsLoading || rolesLoading;
+  const hasError = teamsError || rolesError;
 
   // Handle permission change for a specific team-role-action
   const handlePermissionChange = (teamId: string, roleId: string, actionId: string, permission: string) => {
@@ -200,16 +178,33 @@ export function PermissionsSettingsSection({
     return actionPerm?.permission || 'not_allowed';
   };
 
+  // Show loading state
   if (loading) {
     return (
       <SettingsSection title={m.settings_permissions_title()} description={m.settings_permissions_description()}>
         <div className="rounded-lg border p-12 text-center">
-          <p className="text-sm text-muted-foreground">{m.settings_permissions_loading()}</p>
+          <Loader2 className="mx-auto h-8 w-8 animate-spin text-muted-foreground" />
+          <p className="mt-4 text-sm text-muted-foreground">{m.settings_permissions_loading()}</p>
         </div>
       </SettingsSection>
     );
   }
 
+  // Show error state
+  if (hasError) {
+    return (
+      <SettingsSection title={m.settings_permissions_title()} description={m.settings_permissions_description()}>
+        <div className="rounded-lg border border-destructive/20 bg-destructive/10 p-4">
+          <p className="text-sm font-medium text-destructive">Failed to load teams or roles</p>
+          <p className="mt-1 text-xs text-destructive/80">
+            {teamsError?.message || rolesError?.message || 'An error occurred while fetching data'}
+          </p>
+        </div>
+      </SettingsSection>
+    );
+  }
+
+  // Show empty state if no teams
   if (teams.length === 0) {
     return (
       <SettingsSection title={m.settings_permissions_title()} description={m.settings_permissions_description()}>
@@ -229,12 +224,12 @@ export function PermissionsSettingsSection({
           <Label>{m.settings_permissions_selectTeam()}</Label>
           <Select value={selectedTeam} onValueChange={setSelectedTeam}>
             <SelectTrigger>
-              <SelectValue>{teams.find((t) => t.id === selectedTeam)?.name}</SelectValue>
+              <SelectValue>{teams.find((t) => t.id === selectedTeam)?.teamName}</SelectValue>
             </SelectTrigger>
             <SelectContent>
               {teams.map((team) => (
                 <SelectItem key={team.id} value={team.id}>
-                  {team.name}
+                  {team.teamName}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -242,7 +237,12 @@ export function PermissionsSettingsSection({
         </div>
 
         {/* Permissions Matrix */}
-        {teamRoles.length === 0 ? (
+        {rolesLoading && selectedTeam ? (
+          <div className="rounded-lg border p-8 text-center">
+            <Loader2 className="mx-auto h-6 w-6 animate-spin text-muted-foreground" />
+            <p className="mt-2 text-sm text-muted-foreground">Loading roles...</p>
+          </div>
+        ) : roles.length === 0 ? (
           <div className="rounded-lg border border-dashed p-8 text-center">
             <p className="text-sm text-muted-foreground">{m.settings_permissions_noRoles()}</p>
           </div>
@@ -260,10 +260,11 @@ export function PermissionsSettingsSection({
 
             <ScrollArea className="h-[600px] rounded-md border">
               <div className="p-4">
-                {teamRoles.map((role) => (
+                {roles.map((role) => (
                   <div key={role.id} className="mb-6 rounded-lg border bg-card p-4">
                     <div className="mb-4 flex items-center gap-2">
-                      <Badge variant="default">{role.name}</Badge>
+                      <Badge variant="default">{role.roleName}</Badge>
+                      {role.isDefault && <Badge variant="outline">Default</Badge>}
                       <span className="text-sm text-muted-foreground">{m.settings_permissions_rolePermissions()}</span>
                     </div>
 

@@ -50,6 +50,7 @@ export function DateTimeField(props: FieldRendererProps) {
 
   const inputClasses = `
     w-full px-3 py-2
+    text-sm
     border border-input rounded-lg
     bg-background text-foreground
     transition-all

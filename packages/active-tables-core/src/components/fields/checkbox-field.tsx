@@ -51,11 +51,11 @@ export function CheckboxField(props: FieldRendererProps) {
   const fieldId = `field-${field.name}`;
 
   const checkboxClasses = `
-    w-4 h-4
-    text-blue-600 border-gray-300 rounded
-    focus:ring-2 focus:ring-blue-500
+    w-4 h-4 rounded
+    border-input
+    focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring
     disabled:cursor-not-allowed disabled:opacity-50
-    ${error ? 'border-red-500' : ''}
+    aria-invalid:border-destructive
     ${className || ''}
   `.trim();
 
@@ -72,9 +72,9 @@ export function CheckboxField(props: FieldRendererProps) {
         aria-invalid={!!error}
         aria-describedby={error ? `${fieldId}-error` : undefined}
       />
-      <label htmlFor={fieldId} className="text-sm font-medium text-gray-700 cursor-pointer">
+      <label htmlFor={fieldId} className="text-sm font-medium text-foreground cursor-pointer">
         {field.label}
-        {field.required && <span className="text-red-500 ml-1">*</span>}
+        {field.required && <span className="text-destructive ml-1">*</span>}
       </label>
     </FieldWrapper>
   );

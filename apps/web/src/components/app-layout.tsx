@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 
 import { AppSidebar } from './app-sidebar';
 import { MobileBottomNav, MobileFloatingAction } from './mobile-bottom-nav';
+import { ThemeToggle } from './theme-toggle';
 import { Button } from '@workspace/ui/components/button';
-import { Menu, Bell, Settings, X, PanelLeftClose, PanelLeft } from 'lucide-react';
+import { Menu, Settings, X, PanelLeftClose, PanelLeft } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,7 +12,6 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from '@workspace/ui/components/dropdown-menu';
-import { Badge } from '@workspace/ui/components/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@workspace/ui/components/avatar';
 
 import { useAuthStore } from '@/features/auth';
@@ -101,13 +101,8 @@ export const AppLayout = ({ children, showSidebar = true, pageTitle, pageIcon }:
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">
-            {/* Notifications */}
-            <Button variant="ghost" size="icon" className="relative h-9 w-9 sm:h-10 sm:w-10">
-              <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
-              <Badge className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full p-0 text-[10px] font-semibold flex items-center justify-center">
-                3
-              </Badge>
-            </Button>
+            {/* Theme Toggle */}
+            <ThemeToggle />
 
             {/* Quick Actions */}
             <DropdownMenu>
