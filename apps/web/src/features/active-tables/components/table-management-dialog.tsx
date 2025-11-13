@@ -17,15 +17,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@workspace/ui/components/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@workspace/ui/components/select';
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@workspace/ui/components/select';
 import { Switch } from '@workspace/ui/components/switch';
-import { Badge } from '@workspace/ui/components/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@workspace/ui/components/card';
+import { Card, CardContent, CardHeader } from '@workspace/ui/components/card';
 import { Heading, Text } from '@workspace/ui/components/typography';
 
 import { TABLE_TYPE_METADATA, type TableType } from '@workspace/beqeek-shared';
 import { getTableConfig } from '@workspace/beqeek-shared/configs';
 import { generateEncryptionKey } from '@workspace/encryption-core';
+import { FieldSummary } from '@workspace/active-tables-core';
 
 import type { ActiveTable, ActiveFieldConfig, ActiveWorkGroup } from '../types';
 
@@ -47,21 +47,6 @@ export interface TableFormData {
   e2eeEncryption: boolean;
   encryptionKey?: string;
 }
-
-const FIELD_TYPES = [
-  { value: 'SHORT_TEXT', label: 'Short Text' },
-  { value: 'RICH_TEXT', label: 'Rich Text' },
-  { value: 'INTEGER', label: 'Number' },
-  { value: 'NUMERIC', label: 'Decimal' },
-  { value: 'DATE', label: 'Date' },
-  { value: 'DATETIME', label: 'Date & Time' },
-  { value: 'SELECT_ONE', label: 'Single Select' },
-  { value: 'SELECT_LIST', label: 'Multi Select' },
-  { value: 'BOOLEAN', label: 'Checkbox' },
-  { value: 'EMAIL', label: 'Email' },
-  { value: 'PHONE', label: 'Phone' },
-  { value: 'URL', label: 'URL' },
-];
 
 export const TableManagementDialog = ({
   open,
@@ -124,8 +109,11 @@ export const TableManagementDialog = ({
           placeholder: field.placeholder || '',
           required: field.required,
           // Convert FieldDefaultValue to string or undefined for ActiveFieldConfig
+          // Handle empty string from API by converting to undefined
           defaultValue:
-            field.defaultValue !== null && field.defaultValue !== undefined ? String(field.defaultValue) : undefined,
+            field.defaultValue !== null && field.defaultValue !== undefined && field.defaultValue !== ''
+              ? String(field.defaultValue)
+              : undefined,
           // Copy options if they exist
           ...('options' in field ? { options: field.options } : {}),
           // Copy reference fields if they exist
@@ -138,6 +126,7 @@ export const TableManagementDialog = ({
               }
             : {}),
         }));
+        // Fields from TABLE_CONFIGS already have Vietnamese labels
         setFields(activeFields);
       }
     }
@@ -163,6 +152,7 @@ export const TableManagementDialog = ({
   // Update form when table changes
   useEffect(() => {
     if (table) {
+      // Fields from API are already localized (Vietnamese labels)
       setFields(table.config?.fields || []);
       // Reset form with new values
       form.reset();
@@ -280,28 +270,37 @@ export const TableManagementDialog = ({
                 </form.Field>
 
                 <form.Field name="tableType">
-                  {(field) => (
-                    <div className="space-y-2">
-                      <Label htmlFor={field.name}>Table Type</Label>
-                      <Select value={field.state.value} onValueChange={handleTableTypeChange}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select table type" />
-                        </SelectTrigger>
-                        <SelectContent className="max-h-[400px]">
-                          {Object.values(TABLE_TYPE_METADATA).map((typeMetadata) => (
-                            <SelectItem key={typeMetadata.type} value={typeMetadata.type}>
-                              {m[typeMetadata.nameKey as keyof typeof m]?.() || typeMetadata.type}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      {field.state.value && (
-                        <Text size="small" color="muted">
-                          {m[TABLE_TYPE_METADATA[field.state.value as TableType]?.descriptionKey as keyof typeof m]?.()}
-                        </Text>
-                      )}
-                    </div>
-                  )}
+                  {(field) => {
+                    const selectedType = field.state.value ? TABLE_TYPE_METADATA[field.state.value as TableType] : null;
+                    const displayValue = selectedType
+                      ? m[selectedType.nameKey as keyof typeof m]?.() || selectedType.type
+                      : 'Select table type';
+
+                    return (
+                      <div className="space-y-2">
+                        <Label htmlFor={field.name}>Table Type</Label>
+                        <Select value={field.state.value} onValueChange={handleTableTypeChange}>
+                          <SelectTrigger>
+                            <span className="truncate">{displayValue}</span>
+                          </SelectTrigger>
+                          <SelectContent className="max-h-[400px]">
+                            {Object.values(TABLE_TYPE_METADATA).map((typeMetadata) => (
+                              <SelectItem key={typeMetadata.type} value={typeMetadata.type}>
+                                {m[typeMetadata.nameKey as keyof typeof m]?.() || typeMetadata.type}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {field.state.value && (
+                          <Text size="small" color="muted">
+                            {m[
+                              TABLE_TYPE_METADATA[field.state.value as TableType]?.descriptionKey as keyof typeof m
+                            ]?.()}
+                          </Text>
+                        )}
+                      </div>
+                    );
+                  }}
                 </form.Field>
               </div>
             </CardContent>
@@ -390,64 +389,18 @@ export const TableManagementDialog = ({
                     No fields configured. Select a table type to auto-load fields.
                   </Text>
                 ) : (
-                  <div className="space-y-3">
-                    {fields.map((field, index) => (
-                      <div key={index} className="flex items-start justify-between p-4 border rounded-lg bg-muted/30">
-                        <div className="flex-1 space-y-2">
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium text-base">
-                              {m[field.label as keyof typeof m]?.() || field.label}
-                            </span>
-                            {field.required && <Badge variant="secondary">Required</Badge>}
-                          </div>
-                          <div className="text-sm text-muted-foreground space-y-1">
-                            <div>
-                              <span className="font-medium">Field Name:</span> {field.name}
-                            </div>
-                            <div>
-                              <span className="font-medium">Type:</span>{' '}
-                              {FIELD_TYPES.find((t) => t.value === field.type)?.label || field.type}
-                            </div>
-                            {field.placeholder && (
-                              <div>
-                                <span className="font-medium">Placeholder:</span>{' '}
-                                {m[field.placeholder as keyof typeof m]?.() || field.placeholder}
-                              </div>
-                            )}
-                            {field.defaultValue !== undefined && (
-                              <div>
-                                <span className="font-medium">Default:</span> {String(field.defaultValue)}
-                              </div>
-                            )}
-                            {'options' in field && field.options && field.options.length > 0 && (
-                              <div>
-                                <span className="font-medium">Options:</span>
-                                <div className="flex flex-wrap gap-1 mt-1">
-                                  {field.options.map((option, optIdx) => (
-                                    <Badge
-                                      key={optIdx}
-                                      variant="outline"
-                                      className="border"
-                                      style={{
-                                        borderColor: option.background_color,
-                                        color: option.text_color,
-                                      }}
-                                    >
-                                      {m[option.text as keyof typeof m]?.() || option.text}
-                                    </Badge>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-                            {'referenceTableId' in field && field.referenceTableId && (
-                              <div>
-                                <span className="font-medium">References:</span> {field.referenceTableId}
-                                {field.referenceLabelField && ` (${field.referenceLabelField})`}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {fields.map((field) => (
+                      <FieldSummary
+                        key={field.name}
+                        field={field}
+                        isE2EEEnabled={form.getFieldValue('e2eeEncryption')}
+                        messages={{
+                          required: m.activeTables_detail_fieldRequired(),
+                          optional: m.activeTables_detail_fieldOptional(),
+                          options: (count: number) => m.activeTables_detail_fieldOptions({ count }),
+                        }}
+                      />
                     ))}
                   </div>
                 )}

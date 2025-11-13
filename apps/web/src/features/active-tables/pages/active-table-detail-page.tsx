@@ -6,9 +6,7 @@ import {
   Link as LinkIcon,
   ListTree,
   Lock,
-  LayoutList,
   Settings2,
-  Hash,
   AlertTriangle,
 } from 'lucide-react';
 import { getRouteApi } from '@tanstack/react-router';
@@ -77,15 +75,9 @@ export const ActiveTableDetailPage = () => {
   const navigate = route.useNavigate();
   const { tableId, workspaceId, locale } = route.useParams();
 
-  // Fetch only the specific table instead of all tables
   const { data: tableResp, isLoading: tableLoading, error: tableError } = useActiveTable(workspaceId, tableId);
-
-  // Only fetch workGroups (we need this for the breadcrumb display)
   const { data: workGroupsResp, isLoading: workGroupsLoading } = useActiveWorkGroups(workspaceId);
-
   const { table, workGroup } = useActiveTableDetail(tableResp?.data, workGroupsResp?.data);
-
-  // Encryption state and hooks
   const [isEncryptionModalOpen, setIsEncryptionModalOpen] = useState(false);
   const encryption = useTableEncryption(workspaceId ?? '', tableId, table?.config);
 
