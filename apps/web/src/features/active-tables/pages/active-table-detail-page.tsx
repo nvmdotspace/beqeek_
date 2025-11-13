@@ -231,8 +231,7 @@ export const ActiveTableDetailPage = () => {
               <Settings2 className="mr-2 h-4 w-4" />
               Settings
             </Button>
-            <Button size="sm" onClick={handleViewRecords}>
-              <LayoutList className="mr-2 h-4 w-4" />
+            <Button variant="outline" size="sm" onClick={handleViewRecords}>
               {m.activeTables_detail_viewRecords()}
             </Button>
           </div>
