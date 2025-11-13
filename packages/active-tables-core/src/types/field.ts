@@ -173,6 +173,13 @@ export interface FieldConfig {
 
   /** Field name to use as label for reference/user fields */
   referenceLabelField?: string;
+
+  /**
+   * Number of decimal places for NUMERIC fields
+   * Default: 2 for NUMERIC, 0 for INTEGER
+   * Range: 0-10
+   */
+  decimalPlaces?: number;
 }
 
 // ============================================

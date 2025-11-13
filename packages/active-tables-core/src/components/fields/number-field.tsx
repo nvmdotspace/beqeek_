@@ -45,24 +45,27 @@ export function NumberField(props: FieldRendererProps) {
       return <span className="text-muted-foreground italic">{props.messages?.emptyValue || '—'}</span>;
     }
 
-    // Format for NUMERIC (decimal numbers)
-    if (field.type === FIELD_TYPES.NUMERIC) {
-      const formatted = new Intl.NumberFormat('vi-VN', {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 10,
-      }).format(Number(numericValue));
+    // Determine decimal places
+    const isNumeric = field.type === FIELD_TYPES.NUMERIC;
+    const decimalPlaces = field.decimalPlaces ?? (isNumeric ? 2 : 0);
 
-      return <span>{formatted}</span>;
-    }
+    // Format numbers with Vietnamese locale (dot for thousands, comma for decimal)
+    const formatted = new Intl.NumberFormat('vi-VN', {
+      minimumFractionDigits: isNumeric ? 0 : 0,
+      maximumFractionDigits: decimalPlaces,
+    }).format(Number(numericValue));
 
-    // Integer display
-    return <span>{numericValue}</span>;
+    return <span>{formatted}</span>;
   }
 
   // Edit mode
   const fieldId = `field-${field.name}`;
-  const isDecimal = field.type === FIELD_TYPES.NUMERIC;
-  const step = isDecimal ? 'any' : '1';
+  const isNumeric = field.type === FIELD_TYPES.NUMERIC;
+  const decimalPlaces = field.decimalPlaces ?? (isNumeric ? 2 : 0);
+
+  // Calculate step based on decimal places
+  // For decimalPlaces=2: step=0.01, for decimalPlaces=3: step=0.001, etc.
+  const step = isNumeric && decimalPlaces > 0 ? Math.pow(10, -decimalPlaces).toString() : '1';
 
   const inputClasses = `
     w-full px-3 py-2

@@ -77,11 +77,19 @@ export function formatFieldValue(value: unknown, field?: FieldConfig, workspaceU
       return String(value);
 
     case FIELD_TYPE_INTEGER:
-    case FIELD_TYPE_NUMERIC:
+    case FIELD_TYPE_NUMERIC: {
       if (typeof value === 'number') {
-        return value.toLocaleString();
+        const isNumeric = field.type === FIELD_TYPE_NUMERIC;
+        const decimalPlaces = field.decimalPlaces ?? (isNumeric ? 2 : 0);
+
+        // Format with Vietnamese locale (dot for thousands, comma for decimal)
+        return new Intl.NumberFormat('vi-VN', {
+          minimumFractionDigits: isNumeric ? 0 : 0,
+          maximumFractionDigits: decimalPlaces,
+        }).format(value);
       }
       return String(value);
+    }
 
     case FIELD_TYPE_CHECKBOX_YES_NO:
       return value ? 'Yes' : 'No';

@@ -398,7 +398,6 @@ export const ActiveTableRecordsPage = () => {
 
               {/* New Record Button */}
               <Button onClick={handleCreateRecord} size="sm" className="text-xs sm:text-sm shrink-0">
-                <Plus className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
                 <span className="hidden sm:inline">New Record</span>
                 <span className="sm:hidden">New</span>
               </Button>

@@ -109,7 +109,11 @@ export function DetailViewSettingsSection({ config, fields, onChange }: DetailVi
           <Label htmlFor="detail-layout">{m.settings_detailView_layoutType()}</Label>
           <Select value={layout} onValueChange={(value) => handleLayoutChange(value as RecordDetailConfig['layout'])}>
             <SelectTrigger>
-              <SelectValue />
+              <SelectValue>
+                {layout === RECORD_DETAIL_LAYOUT_HEAD_DETAIL
+                  ? m.settings_detailView_layoutHeadDetail()
+                  : m.settings_detailView_layoutTwoColumn()}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value={RECORD_DETAIL_LAYOUT_HEAD_DETAIL}>
@@ -136,7 +140,11 @@ export function DetailViewSettingsSection({ config, fields, onChange }: DetailVi
             }}
           >
             <SelectTrigger>
-              <SelectValue />
+              <SelectValue>
+                {commentsPosition === COMMENTS_POSITION_RIGHT_PANEL
+                  ? m.settings_detailView_commentsRightPanel()
+                  : m.settings_detailView_commentsHidden()}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value={COMMENTS_POSITION_RIGHT_PANEL}>

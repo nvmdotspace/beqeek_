@@ -94,7 +94,11 @@ export function ListViewSettingsSection({ config, fields, onChange }: ListViewSe
           <Label>{m.settings_listView_layoutType()}</Label>
           <Select value={layout} onValueChange={(value) => handleLayoutChange(value as RecordListConfig['layout'])}>
             <SelectTrigger>
-              <SelectValue />
+              <SelectValue>
+                {layout === RECORD_LIST_LAYOUT_GENERIC_TABLE
+                  ? m.settings_listView_layoutGenericTable()
+                  : m.settings_listView_layoutHeadColumn()}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value={RECORD_LIST_LAYOUT_GENERIC_TABLE}>
@@ -158,7 +162,9 @@ export function ListViewSettingsSection({ config, fields, onChange }: ListViewSe
                 }}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder={m.settings_listView_titleFieldPlaceholder()} />
+                  <SelectValue placeholder={m.settings_listView_titleFieldPlaceholder()}>
+                    {titleField ? fields.find((f) => f.name === titleField)?.label : undefined}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {fields.map((field) => (

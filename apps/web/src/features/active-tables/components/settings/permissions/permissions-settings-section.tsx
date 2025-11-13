@@ -229,7 +229,7 @@ export function PermissionsSettingsSection({
           <Label>{m.settings_permissions_selectTeam()}</Label>
           <Select value={selectedTeam} onValueChange={setSelectedTeam}>
             <SelectTrigger>
-              <SelectValue />
+              <SelectValue>{teams.find((t) => t.id === selectedTeam)?.name}</SelectValue>
             </SelectTrigger>
             <SelectContent>
               {teams.map((team) => (
@@ -286,7 +286,9 @@ export function PermissionsSettingsSection({
                                 }
                               >
                                 <SelectTrigger>
-                                  <SelectValue />
+                                  <SelectValue>
+                                    {permissionOptions.find((opt) => opt.value === currentValue)?.label}
+                                  </SelectValue>
                                 </SelectTrigger>
                                 <SelectContent>
                                   {permissionOptions.map((opt) => (
