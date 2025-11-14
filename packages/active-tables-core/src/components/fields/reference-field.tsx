@@ -1,13 +1,14 @@
 /**
  * ReferenceField Component
  *
- * Renders SELECT_ONE_RECORD and SELECT_LIST_RECORD field types
+ * Renders SELECT_ONE_RECORD and SELECT_LIST_RECORD field types using shadcn/ui Badge
  * Note: This component requires parent app to provide record data or fetchRecords function
  *
  * Week 2: Enhanced with AsyncRecordSelect for better UX
  */
 
 import { useCallback } from 'react';
+import { Badge } from '@workspace/ui/components/badge';
 import type { FieldRendererProps } from './field-renderer-props.js';
 import { FieldWrapper } from '../common/field-wrapper.js';
 import { FIELD_TYPES } from '../../types/field.js';
@@ -93,55 +94,7 @@ export function ReferenceField(props: ReferenceFieldProps) {
     [field.referenceLabelField],
   );
 
-  // Display mode
-  if (mode === 'display') {
-    if (isMultiple) {
-      const selectedIds = normalizedValue as string[];
-      if (selectedIds.length === 0) {
-        return <span className="text-muted-foreground italic">{props.messages?.emptyValue || '—'}</span>;
-      }
-
-      const selectedRecords = selectedIds
-        .map((id) => referenceRecords.find((r) => r.id === id))
-        .filter(Boolean) as ReferenceRecord[];
-
-      if (selectedRecords.length === 0) {
-        return <span className="text-muted-foreground">{selectedIds.join(', ')}</span>;
-      }
-
-      return (
-        <div className="flex flex-wrap gap-2">
-          {selectedRecords.map((record) => (
-            <span
-              key={record.id}
-              className="inline-flex items-center px-2 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800"
-            >
-              {getRecordLabel(record)}
-            </span>
-          ))}
-        </div>
-      );
-    }
-
-    // Single select display
-    const selectedId = normalizedValue as string;
-    if (!selectedId) {
-      return <span className="text-muted-foreground italic">{props.messages?.emptyValue || '—'}</span>;
-    }
-
-    const selectedRecord = referenceRecords.find((r) => r.id === selectedId);
-    if (!selectedRecord) {
-      return <span className="text-muted-foreground">{selectedId}</span>;
-    }
-
-    return (
-      <span className="inline-flex items-center px-2 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-        {getRecordLabel(selectedRecord)}
-      </span>
-    );
-  }
-
-  // Edit mode
+  // Edit mode only
   const fieldId = `field-${field.name}`;
 
   const selectClasses = `

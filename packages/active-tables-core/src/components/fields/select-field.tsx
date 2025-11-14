@@ -1,146 +1,140 @@
 /**
  * SelectField Component
  *
- * Renders SELECT_ONE, SELECT_LIST, CHECKBOX_ONE, and CHECKBOX_LIST field types
+ * Redesigned single-select menu aligned with the design system.
  */
 
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
+import { Select, SelectTrigger, SelectContent, SelectItem } from '@workspace/ui/components/select';
+import { cn } from '@workspace/ui/lib/utils';
 import type { FieldRendererProps } from './field-renderer-props.js';
 import { FieldWrapper } from '../common/index.js';
-import { FIELD_TYPE_SELECT_LIST, FIELD_TYPE_CHECKBOX_LIST, type FieldType } from '../../types/field.js';
-
-const MULTI_VALUE_SELECT_TYPES: ReadonlySet<FieldType> = new Set<FieldType>([
-  FIELD_TYPE_SELECT_LIST,
-  FIELD_TYPE_CHECKBOX_LIST,
-]);
 import { validateFieldValue } from '../../utils/index.js';
 
+interface OptionMeta {
+  value: string;
+  text: string;
+  /**
+   * Custom text color (bypasses design system - use sparingly)
+   * @warning May cause contrast issues in dark mode. Consider using design system colors.
+   */
+  text_color?: string;
+  /**
+   * Custom background color for option indicator
+   * @warning Should use design system colors when possible for theme consistency.
+   */
+  background_color?: string;
+}
+
 export function SelectField(props: FieldRendererProps) {
-  const { field, value, onChange, mode, disabled = false, error, className } = props;
+  const { field, value, onChange, disabled = false, error, className, messages } = props;
 
-  const isMultiple = MULTI_VALUE_SELECT_TYPES.has(field.type);
-
-  // Normalize value to array for multiple select
-  const normalizedValue = isMultiple ? (Array.isArray(value) ? value : value ? [value] : []) : (value ?? '');
+  const stringValue = value ? String(value) : '';
+  const options = (field.options as OptionMeta[] | undefined) ?? [];
+  const placeholder = field.placeholder || messages?.selectPlaceholder || 'Chọn một tuỳ chọn';
+  const noOptionsMessage = messages?.noDataAvailable || 'Không có tuỳ chọn khả dụng';
+  const fieldId = `field-${field.name}`;
+  const selectedOption = options.find((option) => option.value === stringValue);
 
   const handleChange = useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
-      if (isMultiple) {
-        const selectedOptions = Array.from(e.target.selectedOptions).map((option) => option.value);
-        const validationError = validateFieldValue(selectedOptions, field);
-        if (validationError) {
-          console.warn(`Validation error for ${field.name}:`, validationError);
-        }
-        onChange?.(selectedOptions);
-      } else {
-        const newValue = e.target.value;
-        const validationError = validateFieldValue(newValue, field);
-        if (validationError) {
-          console.warn(`Validation error for ${field.name}:`, validationError);
-        }
-        onChange?.(newValue);
+    (newValue: string) => {
+      const validationError = validateFieldValue(newValue, field);
+      if (validationError) {
+        console.warn(`Validation error for ${field.name}:`, validationError);
       }
+      onChange?.(newValue);
     },
-    [onChange, field, isMultiple],
+    [field, onChange],
   );
 
-  // Display mode
-  if (mode === 'display') {
-    if (isMultiple) {
-      const selectedValues = normalizedValue as string[];
-      if (selectedValues.length === 0) {
-        return <span className="text-muted-foreground italic">{props.messages?.emptyValue || '—'}</span>;
-      }
-
-      return (
-        <div className="flex flex-wrap gap-2">
-          {selectedValues.map((val) => {
-            const option = field.options?.find((opt: { value: string }) => opt.value === val);
-
-            return (
-              <span
-                key={val}
-                className="inline-flex items-center justify-center px-2 py-1 rounded-full text-sm font-medium min-h-[2rem]"
-                style={{
-                  color: option?.text_color || '#1f2937',
-                  backgroundColor: option?.background_color || '#e5e7eb',
-                }}
-              >
-                {option?.text || val}
-              </span>
-            );
-          })}
-        </div>
-      );
-    }
-
-    // Single select display
-    const selectedValue = normalizedValue as string;
-    if (!selectedValue) {
-      return <span className="text-muted-foreground italic">{props.messages?.emptyValue || '—'}</span>;
-    }
-
-    const option = field.options?.find((opt: { value: string }) => opt.value === selectedValue);
-
-    // Always apply badge styling for consistency with minimum height
+  if (options.length === 0) {
     return (
-      <span
-        className="inline-flex items-center justify-center px-2 py-1 rounded-full text-sm font-medium min-h-[2rem]"
-        style={{
-          color: option?.text_color || '#1f2937',
-          backgroundColor: option?.background_color || '#e5e7eb',
-        }}
-      >
-        {option?.text || selectedValue}
-      </span>
+      <FieldWrapper fieldId={fieldId} label={field.label} required={field.required} error={error}>
+        <div className="rounded-xl border border-dashed border-muted-foreground/40 bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
+          {noOptionsMessage}
+        </div>
+        <input type="hidden" name={field.name} value="" />
+      </FieldWrapper>
     );
   }
 
-  // Edit mode
-  const fieldId = `field-${field.name}`;
-
-  const selectClasses = `
-    w-full px-3 py-2
-    text-sm
-    border border-input rounded-lg
-    bg-background text-foreground
-    transition-all
-    placeholder:text-muted-foreground
-    focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring
-    disabled:cursor-not-allowed disabled:opacity-50
-    aria-invalid:border-destructive
-    ${className || ''}
-  `.trim();
-
   return (
     <FieldWrapper fieldId={fieldId} label={field.label} required={field.required} error={error}>
-      <select
-        id={fieldId}
-        name={field.name}
-        value={normalizedValue as string | string[]}
-        onChange={handleChange}
-        disabled={disabled}
-        required={field.required}
-        multiple={isMultiple}
-        size={isMultiple ? Math.min((field.options?.length || 3) + 1, 6) : undefined}
-        className={selectClasses}
-        aria-invalid={!!error}
-        aria-describedby={error ? `${fieldId}-error` : undefined}
-      >
-        {!isMultiple && (
-          <option value="">{field.placeholder || props.messages?.selectPlaceholder || 'Select an option'}</option>
-        )}
-        {field.options?.map((option: { value: string; text: string }) => (
-          <option key={option.value} value={option.value}>
-            {option.text}
-          </option>
-        ))}
-      </select>
-      {isMultiple && (
-        <p className="text-xs text-muted-foreground mt-1">
-          {props.messages?.multiSelectHint || 'Hold Ctrl/Cmd to select multiple options'}
-        </p>
-      )}
+      <Select value={stringValue || undefined} onValueChange={handleChange} disabled={disabled}>
+        <SelectTrigger
+          aria-invalid={!!error}
+          aria-describedby={error ? `${fieldId}-error` : undefined}
+          className={cn(
+            'text-left font-normal',
+            'focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring',
+            disabled && 'cursor-not-allowed opacity-50',
+            error && 'border-destructive focus-visible:ring-destructive/30',
+            className,
+          )}
+        >
+          <div
+            className={cn(
+              'flex w-full items-center gap-2 text-sm',
+              selectedOption ? 'text-foreground' : 'text-muted-foreground',
+            )}
+          >
+            {selectedOption ? <OptionPreview option={selectedOption} /> : placeholder}
+          </div>
+        </SelectTrigger>
+        <SelectContent className="rounded-lg border border-input bg-popover p-1 shadow-lg">
+          {options.map((option) => {
+            const isActive = option.value === stringValue;
+
+            return (
+              <SelectItem
+                key={option.value}
+                value={option.value}
+                className={cn(
+                  'w-full rounded-md px-2 py-2 text-sm font-medium transition-colors',
+                  'hover:bg-accent hover:text-accent-foreground',
+                  isActive && 'bg-accent/40 text-foreground',
+                )}
+              >
+                <div className="flex w-full items-center justify-between gap-3">
+                  <OptionPreview option={option} />
+                  <SelectionIndicator active={isActive} />
+                </div>
+              </SelectItem>
+            );
+          })}
+        </SelectContent>
+      </Select>
+
+      <input type="hidden" name={field.name} value={stringValue} />
     </FieldWrapper>
+  );
+}
+
+function OptionPreview({ option }: { option: OptionMeta }) {
+  return (
+    <span className="flex items-center gap-2 text-left text-sm text-foreground">
+      {option.background_color && (
+        <span
+          className="h-2.5 w-2.5 rounded-full border border-border"
+          style={{ backgroundColor: option.background_color }}
+        />
+      )}
+      <span>{option.text}</span>
+    </span>
+  );
+}
+
+function SelectionIndicator({ active }: { active: boolean }) {
+  return (
+    <span
+      className={cn(
+        'relative inline-flex h-4 w-4 items-center justify-center rounded-full border transition-all',
+        active ? 'border-primary' : 'border-input',
+      )}
+    >
+      <span
+        className={cn('h-2 w-2 rounded-full bg-primary transition-opacity', active ? 'opacity-100' : 'opacity-0')}
+      />
+    </span>
   );
 }

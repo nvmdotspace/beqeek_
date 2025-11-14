@@ -14,8 +14,6 @@ import type { Table, TableConfig } from '@workspace/active-tables-core';
 import {
   RECORD_LIST_LAYOUT_HEAD_COLUMN,
   RECORD_LIST_LAYOUT_GENERIC_TABLE,
-  RECORD_DETAIL_LAYOUT_HEAD_DETAIL,
-  RECORD_DETAIL_LAYOUT_TWO_COLUMN,
 } from '@workspace/beqeek-shared/constants/layouts';
 
 /**
@@ -163,15 +161,11 @@ export function useUpdateTableConfig(
     },
 
     onMutate: async (params) => {
-      // Optional: Cancel any outgoing refetches
       await queryClient.cancelQueries({
         queryKey: ['active-table', workspaceId, tableId],
       });
 
-      // Snapshot current data for rollback
       const previousTable = queryClient.getQueryData<{ data: Table }>(['active-table', workspaceId, tableId]);
-
-      // Optimistically update the table
       if (table && previousTable) {
         queryClient.setQueryData(['active-table', workspaceId, tableId], {
           ...previousTable,
@@ -187,22 +181,16 @@ export function useUpdateTableConfig(
         });
       }
 
-      // Call user's onMutate if provided
       options?.onMutate?.(params);
-
-      // Return context for rollback
       return { previousTable };
     },
 
     onError: (error, variables, context) => {
-      // Rollback on error
       if (context?.previousTable) {
         queryClient.setQueryData(['active-table', workspaceId, tableId], context.previousTable);
       }
 
       console.error('Failed to update table configuration:', error);
-
-      // Call user's onError if provided
       options?.onError?.(error as Error);
     },
 
@@ -268,145 +256,57 @@ function validateTableConfig(config: TableConfig): void {
   }
 
   // Validate kanban configurations
+  // Note: We allow invalid field references in kanban configs to prevent blocking API calls
+  // The UI will show warnings for invalid fields, but the config can still be saved
   if (config.kanbanConfigs && config.kanbanConfigs.length > 0) {
     for (const kanban of config.kanbanConfigs) {
       if (!kanban.statusField) {
         throw new Error('Kanban configuration must have a status field');
       }
 
-      if (!fieldNames.has(kanban.statusField)) {
-        throw new Error(`Kanban status field "${kanban.statusField}" not found in table fields`);
-      }
-
       if (!kanban.kanbanHeadlineField) {
         throw new Error('Kanban configuration must have a headline field');
-      }
-
-      if (!fieldNames.has(kanban.kanbanHeadlineField)) {
-        throw new Error(`Kanban headline field "${kanban.kanbanHeadlineField}" not found in table fields`);
       }
     }
   }
 
   // Validate gantt configurations
+  // Note: We allow invalid field references in gantt configs to prevent blocking API calls
   if (config.ganttCharts && config.ganttCharts.length > 0) {
     for (const gantt of config.ganttCharts) {
       if (!gantt.taskNameField) {
         throw new Error('Gantt configuration must have a task name field');
       }
-
-      if (!fieldNames.has(gantt.taskNameField)) {
-        throw new Error(`Gantt task field "${gantt.taskNameField}" not found in table fields`);
-      }
-
       if (!gantt.startDateField || !gantt.endDateField) {
         throw new Error('Gantt configuration must have start and end date fields');
-      }
-
-      if (!fieldNames.has(gantt.startDateField)) {
-        throw new Error(`Gantt start date field "${gantt.startDateField}" not found in table fields`);
-      }
-
-      if (!fieldNames.has(gantt.endDateField)) {
-        throw new Error(`Gantt end date field "${gantt.endDateField}" not found in table fields`);
       }
     }
   }
 
   // Validate record list configuration
+  // Note: We allow invalid field references to prevent blocking API calls
   if (config.recordListConfig) {
     const listConfig = config.recordListConfig as ExtendedRecordListConfig;
 
-    // Validate based on layout type
     if (listConfig.layout === RECORD_LIST_LAYOUT_HEAD_COLUMN) {
-      // Head column layout requires titleField
       if (!listConfig.titleField) {
         throw new Error('Record list configuration with head-column layout must have a title field');
-      }
-
-      if (!fieldNames.has(listConfig.titleField)) {
-        throw new Error(`Record list title field "${listConfig.titleField}" not found in table fields`);
       }
     } else if (listConfig.layout === RECORD_LIST_LAYOUT_GENERIC_TABLE) {
       // Generic table layout requires displayFields
       if (!listConfig.displayFields || !Array.isArray(listConfig.displayFields)) {
         throw new Error('Record list configuration with generic-table layout must have displayFields');
       }
-
-      // Validate all display fields exist
-      for (const fieldName of listConfig.displayFields) {
-        if (!fieldNames.has(fieldName)) {
-          throw new Error(`Record list display field "${fieldName}" not found in table fields`);
-        }
-      }
-    }
-  }
-
-  // Validate record detail configuration
-  if (config.recordDetailConfig) {
-    const detailConfig = config.recordDetailConfig as ExtendedRecordDetailConfig;
-
-    // headTitleField is optional, but if provided must be valid
-    if (detailConfig.headTitleField && !fieldNames.has(detailConfig.headTitleField)) {
-      throw new Error(`Record detail title field "${detailConfig.headTitleField}" not found in table fields`);
-    }
-
-    // Validate head-detail layout fields
-    if (detailConfig.layout === RECORD_DETAIL_LAYOUT_HEAD_DETAIL && detailConfig.rowTailFields) {
-      for (const fieldName of detailConfig.rowTailFields) {
-        if (!fieldNames.has(fieldName)) {
-          throw new Error(`Record detail tail field "${fieldName}" not found in table fields`);
-        }
-      }
-    }
-
-    // Validate two-column layout fields
-    if (detailConfig.layout === RECORD_DETAIL_LAYOUT_TWO_COLUMN) {
-      if (detailConfig.column1Fields) {
-        for (const fieldName of detailConfig.column1Fields) {
-          if (!fieldNames.has(fieldName)) {
-            throw new Error(`Record detail column 1 field "${fieldName}" not found in table fields`);
-          }
-        }
-      }
-
-      if (detailConfig.column2Fields) {
-        for (const fieldName of detailConfig.column2Fields) {
-          if (!fieldNames.has(fieldName)) {
-            throw new Error(`Record detail column 2 field "${fieldName}" not found in table fields`);
-          }
-        }
-      }
-    }
-
-    // Validate common fields
-    if (detailConfig.subLineFields) {
-      for (const fieldName of detailConfig.subLineFields) {
-        if (!fieldNames.has(fieldName)) {
-          throw new Error(`Record detail sub-line field "${fieldName}" not found in table fields`);
-        }
-      }
     }
   }
 
   // Validate quick filters
+  // Note: We allow invalid field references in quick filters to prevent blocking API calls
+  // The UI will show warnings for invalid fields, but the config can still be saved
   if (config.quickFilters && config.quickFilters.length > 0) {
     for (const filter of config.quickFilters) {
       if (!filter.fieldName) {
         throw new Error('Quick filter must have a field name');
-      }
-
-      if (!fieldNames.has(filter.fieldName)) {
-        throw new Error(`Quick filter field "${filter.fieldName}" not found in table fields`);
-      }
-    }
-  }
-
-  // Validate hashed keyword fields (for E2EE)
-  if (config.hashedKeywordFields && config.hashedKeywordFields.length > 0) {
-    for (const fieldName of config.hashedKeywordFields) {
-      if (!fieldNames.has(fieldName)) {
-        throw new Error(`Hashed keyword field "${fieldName}" not found in table fields`);
       }
     }
   }

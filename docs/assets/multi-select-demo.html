@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Multi-Select & Checkbox List - Design Demo</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
+      background: #fafafa;
+      padding: 40px 20px;
+      color: #09090b;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    }
+
+    h1 {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #09090b;
+    }
+
+    .subtitle {
+      color: #71717a;
+      margin-bottom: 32px;
+      font-size: 14px;
+    }
+
+    .section {
+      margin-bottom: 40px;
+    }
+
+    .section:last-child {
+      margin-bottom: 0;
+    }
+
+    .field-label {
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 8px;
+      display: block;
+      color: #09090b;
+    }
+
+    /* MultiSelectField Styles */
+    .multi-select-trigger {
+      width: 100%;
+      min-height: 40px;
+      padding: 8px 12px;
+      border: 1px solid #e4e4e7;
+      border-radius: 6px;
+      background: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      transition: all 150ms ease;
+      position: relative;
+    }
+
+    .multi-select-trigger:hover {
+      border-color: #d4d4d8;
+    }
+
+    .multi-select-trigger:focus-within {
+      outline: 2px solid #18181b;
+      outline-offset: 2px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      height: 24px;
+      padding: 0 8px;
+      background: #f4f4f5;
+      color: #09090b;
+      font-size: 12px;
+      font-weight: 500;
+      border-radius: 12px;
+      white-space: nowrap;
+    }
+
+    .badge-close {
+      cursor: pointer;
+      width: 12px;
+      height: 12px;
+      border-radius: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 150ms ease;
+    }
+
+    .badge-close:hover {
+      background: rgba(0, 0, 0, 0.1);
+    }
+
+    .chevron {
+      margin-left: auto;
+      width: 16px;
+      height: 16px;
+      opacity: 0.5;
+      transition: transform 150ms ease;
+    }
+
+    .chevron.open {
+      transform: rotate(180deg);
+    }
+
+    .placeholder {
+      color: #71717a;
+      font-size: 14px;
+    }
+
+    /* Dropdown Styles */
+    .dropdown {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      right: 0;
+      background: white;
+      border: 1px solid #e4e4e7;
+      border-radius: 6px;
+      box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+      z-index: 50;
+      max-height: 320px;
+      overflow-y: auto;
+      padding: 4px;
+      margin-top: 8px;
+      animation: slideDown 150ms ease-out;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-4px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .dropdown-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 40px;
+      padding: 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 150ms ease;
+    }
+
+    .dropdown-option:hover {
+      background: #f4f4f5;
+    }
+
+    .dropdown-option.selected {
+      background: rgba(244, 244, 245, 0.5);
+    }
+
+    .checkbox {
+      width: 16px;
+      height: 16px;
+      border: 1px solid #e4e4e7;
+      border-radius: 4px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 150ms ease;
+    }
+
+    .checkbox:hover {
+      background: #f4f4f5;
+    }
+
+    .checkbox.checked {
+      background: #18181b;
+      border-color: #18181b;
+    }
+
+    .checkmark {
+      width: 12px;
+      height: 12px;
+      stroke: white;
+      stroke-width: 2;
+      fill: none;
+    }
+
+    .option-text {
+      flex: 1;
+      font-size: 14px;
+    }
+
+    .color-swatch {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 1px solid #e4e4e7;
+      flex-shrink: 0;
+    }
+
+    /* CheckboxListField Styles */
+    .checkbox-list {
+      border: 1px solid #e4e4e7;
+      border-radius: 6px;
+      padding: 16px;
+      background: white;
+    }
+
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-height: 40px;
+    }
+
+    .checkbox-item:not(:last-child) {
+      margin-bottom: 12px;
+    }
+
+    .checkbox-label {
+      flex: 1;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Status indicator for demo */
+    .status-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      background: #dcfce7;
+      color: #166534;
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .comparison {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-top: 32px;
+    }
+
+    .comparison-item {
+      border: 1px solid #e4e4e7;
+      border-radius: 8px;
+      padding: 16px;
+      background: #fafafa;
+    }
+
+    .comparison-item h3 {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: #71717a;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .comparison-item.before {
+      opacity: 0.6;
+    }
+
+    .comparison-item.after .status-badge {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .comparison-item.before .status-badge {
+      background: #fef2f2;
+      color: #991b1b;
+    }
+
+    /* Fake radio button for "before" example */
+    .radio-button {
+      width: 16px;
+      height: 16px;
+      border: 2px solid #d4d4d8;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    @media (max-width: 768px) {
+      .comparison {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Multi-Select & Checkbox List Components</h1>
+    <p class="subtitle">Redesigned with modern UI/UX best practices</p>
+
+    <!-- Current Implementation -->
+    <div class="section">
+      <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+        Current Design
+        <span class="status-badge">Updated</span>
+      </h2>
+
+      <!-- MultiSelectField -->
+      <div style="margin-bottom: 32px;">
+        <label class="field-label">Thẻ màu</label>
+        <div class="multi-select-trigger" onclick="toggleDropdown(this)">
+          <span class="badge" style="background: #fef08a; color: #854d0e;">
+            vàng
+            <span class="badge-close">×</span>
+          </span>
+          <span class="badge" style="background: #fecaca; color: #991b1b;">
+            đỏ
+            <span class="badge-close">×</span>
+          </span>
+          <svg class="chevron" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+
+          <div class="dropdown" style="display: none;">
+            <div class="dropdown-option">
+              <div class="checkbox">
+                <svg class="checkmark" viewBox="0 0 24 24" style="display: none;">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </div>
+              <span class="option-text">đen</span>
+              <span class="color-swatch" style="background: #000000;"></span>
+            </div>
+            <div class="dropdown-option selected">
+              <div class="checkbox checked">
+                <svg class="checkmark" viewBox="0 0 24 24">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </div>
+              <span class="option-text" style="color: #854d0e;">vàng</span>
+              <span class="color-swatch" style="background: #fef08a;"></span>
+            </div>
+            <div class="dropdown-option selected">
+              <div class="checkbox checked">
+                <svg class="checkmark" viewBox="0 0 24 24">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </div>
+              <span class="option-text" style="color: #991b1b;">đỏ</span>
+              <span class="color-swatch" style="background: #fecaca;"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CheckboxListField -->
+      <div>
+        <label class="field-label">Check list</label>
+        <div class="checkbox-list">
+          <div class="checkbox-item">
+            <div class="checkbox">
+              <svg class="checkmark" viewBox="0 0 24 24" style="display: none;">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </div>
+            <label class="checkbox-label">Đã kiểm tra</label>
+          </div>
+          <div class="checkbox-item">
+            <div class="checkbox checked">
+              <svg class="checkmark" viewBox="0 0 24 24">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </div>
+            <label class="checkbox-label">Đã báo cáo sếp</label>
+          </div>
+          <div class="checkbox-item">
+            <div class="checkbox">
+              <svg class="checkmark" viewBox="0 0 24 24" style="display: none;">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </div>
+            <label class="checkbox-label">Đã triển khai</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Before/After Comparison -->
+    <div class="comparison">
+      <div class="comparison-item before">
+        <h3>Before <span class="status-badge">Old Design</span></h3>
+        <div style="margin-bottom: 16px;">
+          <div class="dropdown-option">
+            <div class="checkbox"></div>
+            <span class="option-text">đen</span>
+            <div class="radio-button"></div>
+          </div>
+          <div class="dropdown-option">
+            <div class="checkbox"></div>
+            <span class="option-text">Đã kiểm tra</span>
+            <div class="radio-button"></div>
+          </div>
+        </div>
+        <p style="font-size: 12px; color: #71717a; line-height: 1.6;">
+          ❌ Confusing: Radio buttons suggest single selection<br>
+          ❌ Redundant: Two selection indicators<br>
+          ❌ No color swatches for color options
+        </p>
+      </div>
+
+      <div class="comparison-item after">
+        <h3>After <span class="status-badge">New Design</span></h3>
+        <div style="margin-bottom: 16px;">
+          <div class="dropdown-option">
+            <div class="checkbox"></div>
+            <span class="option-text">đen</span>
+            <span class="color-swatch" style="background: #000000;"></span>
+          </div>
+          <div class="dropdown-option">
+            <div class="checkbox checked">
+              <svg class="checkmark" viewBox="0 0 24 24">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </div>
+            <span class="option-text">Đã kiểm tra</span>
+          </div>
+        </div>
+        <p style="font-size: 12px; color: #71717a; line-height: 1.6;">
+          ✅ Clear: Checkboxes indicate multi-select<br>
+          ✅ Clean: Single selection indicator<br>
+          ✅ Visual: Color swatches for colors
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function toggleDropdown(trigger) {
+      const dropdown = trigger.querySelector('.dropdown');
+      const chevron = trigger.querySelector('.chevron');
+      const isOpen = dropdown.style.display !== 'none';
+
+      dropdown.style.display = isOpen ? 'none' : 'block';
+      chevron.classList.toggle('open', !isOpen);
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.multi-select-trigger')) {
+        document.querySelectorAll('.dropdown').forEach(d => {
+          d.style.display = 'none';
+        });
+        document.querySelectorAll('.chevron').forEach(c => {
+          c.classList.remove('open');
+        });
+      }
+    });
+  </script>
+</body>
+</html>

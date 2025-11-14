@@ -1,10 +1,11 @@
 /**
  * TextField Component
  *
- * Renders SHORT_TEXT, EMAIL, and URL field types
+ * Renders SHORT_TEXT, EMAIL, and URL field types using shadcn/ui Input
  */
 
 import { useCallback } from 'react';
+import { Input } from '@workspace/ui/components/input';
 import type { FieldRendererProps } from './field-renderer-props.js';
 import { FieldWrapper } from '../common/field-wrapper.js';
 import { FIELD_TYPES } from '../../types/field.js';
@@ -31,58 +32,13 @@ export function TextField(props: FieldRendererProps) {
     [onChange, field],
   );
 
-  // Display mode
-  if (mode === 'display') {
-    if (!stringValue) {
-      return <span className="text-muted-foreground italic">{props.messages?.emptyValue || '—'}</span>;
-    }
-
-    // Render as link for URL type
-    if (field.type === FIELD_TYPES.URL) {
-      return (
-        <a
-          href={stringValue}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-blue-600 hover:text-blue-800 underline"
-        >
-          {stringValue}
-        </a>
-      );
-    }
-
-    // Render as mailto link for EMAIL type
-    if (field.type === FIELD_TYPES.EMAIL) {
-      return (
-        <a href={`mailto:${stringValue}`} className="text-blue-600 hover:text-blue-800">
-          {stringValue}
-        </a>
-      );
-    }
-
-    return <span>{stringValue}</span>;
-  }
-
-  // Edit mode
+  // Edit mode only
   const inputType = field.type === FIELD_TYPES.EMAIL ? 'email' : field.type === FIELD_TYPES.URL ? 'url' : 'text';
   const fieldId = `field-${field.name}`;
 
-  const inputClasses = `
-    w-full px-3 py-2
-    text-sm
-    border border-input rounded-lg
-    bg-background text-foreground
-    transition-all
-    placeholder:text-muted-foreground
-    focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring
-    disabled:cursor-not-allowed disabled:opacity-50
-    aria-invalid:border-destructive
-    ${className || ''}
-  `.trim();
-
   return (
     <FieldWrapper fieldId={fieldId} label={field.label} required={field.required} error={error}>
-      <input
+      <Input
         type={inputType}
         id={fieldId}
         name={field.name}
@@ -91,7 +47,7 @@ export function TextField(props: FieldRendererProps) {
         placeholder={field.placeholder}
         disabled={disabled}
         required={field.required}
-        className={inputClasses}
+        className={className}
         aria-invalid={!!error}
         aria-describedby={error ? `${fieldId}-error` : undefined}
       />

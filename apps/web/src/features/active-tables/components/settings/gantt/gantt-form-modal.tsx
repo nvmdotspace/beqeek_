@@ -203,7 +203,14 @@ export function GanttFormModal({
               </Label>
               <Select value={taskNameField} onValueChange={setTaskNameField}>
                 <SelectTrigger aria-invalid={!!errors.taskNameField}>
-                  <SelectValue placeholder={m.settings_ganttModal_taskNameFieldPlaceholder()} />
+                  <SelectValue placeholder={m.settings_ganttModal_taskNameFieldPlaceholder()}>
+                    {taskNameField
+                      ? (() => {
+                          const selectedField = fields.find((f) => f.name === taskNameField);
+                          return selectedField ? selectedField.label : taskNameField;
+                        })()
+                      : null}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {fields.map((field) => (
@@ -228,7 +235,14 @@ export function GanttFormModal({
               </Label>
               <Select value={startDateField} onValueChange={setStartDateField}>
                 <SelectTrigger aria-invalid={!!errors.startDateField}>
-                  <SelectValue placeholder={m.settings_ganttModal_startDateFieldPlaceholder()} />
+                  <SelectValue placeholder={m.settings_ganttModal_startDateFieldPlaceholder()}>
+                    {startDateField
+                      ? (() => {
+                          const selectedField = eligibleDateFields.find((f) => f.name === startDateField);
+                          return selectedField ? `${selectedField.label} (${selectedField.type})` : startDateField;
+                        })()
+                      : null}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {eligibleDateFields.map((field) => (
@@ -253,7 +267,14 @@ export function GanttFormModal({
               </Label>
               <Select value={endDateField} onValueChange={setEndDateField}>
                 <SelectTrigger aria-invalid={!!errors.endDateField}>
-                  <SelectValue placeholder={m.settings_ganttModal_endDateFieldPlaceholder()} />
+                  <SelectValue placeholder={m.settings_ganttModal_endDateFieldPlaceholder()}>
+                    {endDateField
+                      ? (() => {
+                          const selectedField = eligibleDateFields.find((f) => f.name === endDateField);
+                          return selectedField ? `${selectedField.label} (${selectedField.type})` : endDateField;
+                        })()
+                      : null}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {eligibleDateFields.map((field) => (
@@ -278,7 +299,15 @@ export function GanttFormModal({
               </Label>
               <Select value={progressField} onValueChange={setProgressField}>
                 <SelectTrigger>
-                  <SelectValue placeholder={m.settings_ganttModal_progressFieldPlaceholder()} />
+                  <SelectValue placeholder={m.settings_ganttModal_progressFieldPlaceholder()}>
+                    {progressField
+                      ? (() => {
+                          if (progressField === '') return m.common_none();
+                          const selectedField = eligibleProgressFields.find((f) => f.name === progressField);
+                          return selectedField ? `${selectedField.label} (${selectedField.type})` : progressField;
+                        })()
+                      : null}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="">{m.common_none()}</SelectItem>
@@ -299,7 +328,15 @@ export function GanttFormModal({
               </Label>
               <Select value={dependencyField} onValueChange={setDependencyField}>
                 <SelectTrigger>
-                  <SelectValue placeholder={m.settings_ganttModal_dependencyFieldPlaceholder()} />
+                  <SelectValue placeholder={m.settings_ganttModal_dependencyFieldPlaceholder()}>
+                    {dependencyField
+                      ? (() => {
+                          if (dependencyField === '') return m.common_none();
+                          const selectedField = eligibleDependencyFields.find((f) => f.name === dependencyField);
+                          return selectedField ? `${selectedField.label} (${selectedField.type})` : dependencyField;
+                        })()
+                      : null}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="">{m.common_none()}</SelectItem>

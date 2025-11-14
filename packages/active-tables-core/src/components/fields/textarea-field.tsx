@@ -1,10 +1,11 @@
 /**
  * TextareaField Component
  *
- * Renders TEXT field type (multiline text)
+ * Renders TEXT field type (multiline text) using shadcn/ui Textarea
  */
 
 import { useCallback } from 'react';
+import { Textarea } from '@workspace/ui/components/textarea';
 import type { FieldRendererProps } from './field-renderer-props.js';
 import { FieldWrapper } from '../common/field-wrapper.js';
 import { validateFieldValue } from '../../utils/field-validation.js';
@@ -29,36 +30,12 @@ export function TextareaField(props: FieldRendererProps) {
     [onChange, field],
   );
 
-  // Display mode
-  if (mode === 'display') {
-    if (!stringValue) {
-      return <span className="text-muted-foreground italic">{props.messages?.emptyValue || '—'}</span>;
-    }
-
-    // Preserve line breaks in display mode
-    return <div className="whitespace-pre-wrap">{stringValue}</div>;
-  }
-
-  // Edit mode
+  // Edit mode only
   const fieldId = `field-${field.name}`;
-
-  const textareaClasses = `
-    w-full px-3 py-2
-    text-sm
-    border border-input rounded-lg
-    bg-background text-foreground
-    transition-all
-    placeholder:text-muted-foreground
-    focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring
-    disabled:cursor-not-allowed disabled:opacity-50
-    aria-invalid:border-destructive
-    min-h-[100px] resize-y
-    ${className || ''}
-  `.trim();
 
   return (
     <FieldWrapper fieldId={fieldId} label={field.label} required={field.required} error={error}>
-      <textarea
+      <Textarea
         id={fieldId}
         name={field.name}
         value={stringValue}
@@ -66,7 +43,7 @@ export function TextareaField(props: FieldRendererProps) {
         placeholder={field.placeholder}
         disabled={disabled}
         required={field.required}
-        className={textareaClasses}
+        className={className}
         aria-invalid={!!error}
         aria-describedby={error ? `${fieldId}-error` : undefined}
         rows={4}

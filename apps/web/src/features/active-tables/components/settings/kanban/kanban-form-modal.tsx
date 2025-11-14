@@ -174,7 +174,14 @@ export function KanbanFormModal({
               </Label>
               <Select value={statusField} onValueChange={setStatusField}>
                 <SelectTrigger aria-invalid={!!errors.statusField}>
-                  <SelectValue placeholder={m.settings_kanbanModal_statusFieldPlaceholder()} />
+                  <SelectValue placeholder={m.settings_kanbanModal_statusFieldPlaceholder()}>
+                    {statusField
+                      ? (() => {
+                          const selectedField = eligibleStatusFields.find((f) => f.name === statusField);
+                          return selectedField ? `${selectedField.label} (${selectedField.type})` : statusField;
+                        })()
+                      : null}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {eligibleStatusFields.map((field) => (
@@ -199,7 +206,14 @@ export function KanbanFormModal({
               </Label>
               <Select value={headlineField} onValueChange={setHeadlineField}>
                 <SelectTrigger aria-invalid={!!errors.headlineField}>
-                  <SelectValue placeholder={m.settings_kanbanModal_headlineFieldPlaceholder()} />
+                  <SelectValue placeholder={m.settings_kanbanModal_headlineFieldPlaceholder()}>
+                    {headlineField
+                      ? (() => {
+                          const selectedField = fields.find((f) => f.name === headlineField);
+                          return selectedField ? selectedField.label : headlineField;
+                        })()
+                      : null}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {fields.map((field) => (

@@ -12,10 +12,19 @@
     "test:watch": "turbo test:watch",
     "test:coverage": "turbo test -- --coverage",
     "machine-translate": "inlang machine translate --project project.inlang",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build",
     "prepare": "husky"
   },
   "devDependencies": {
     "@inlang/paraglide-js": "2.4.0",
+    "@storybook/addon-essentials": "^8.6.14",
+    "@storybook/addon-interactions": "^8.6.14",
+    "@storybook/addon-links": "^8.6.14",
+    "@storybook/blocks": "^8.6.14",
+    "@storybook/react": "^8.6.14",
+    "@storybook/react-vite": "^8.6.14",
+    "@storybook/test": "^8.6.14",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
@@ -30,6 +39,7 @@
     "jsdom": "^27.2.0",
     "lint-staged": "^16.2.6",
     "prettier": "^3.6.2",
+    "storybook": "^8.6.14",
     "turbo": "^2.5.8",
     "typescript": "^5.9.2",
     "vitest": "^4.0.8"

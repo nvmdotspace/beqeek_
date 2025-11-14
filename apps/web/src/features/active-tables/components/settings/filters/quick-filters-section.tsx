@@ -68,10 +68,18 @@ export function QuickFiltersSection({ quickFilters, fields, onChange }: QuickFil
     setIsModalOpen(true);
   };
 
-  const handleDeleteFilter = (filterId: string) => {
-    if (confirm(m.settings_quickFilters_deleteConfirm())) {
-      onChange(quickFilters.filter((qf) => qf.filterId !== filterId));
-    }
+  const handleDeleteFilter = (filterIdOrFieldName: string | undefined) => {
+    // Handle both filterId (new data) and fieldName (legacy data without filterId)
+    const newFilters = quickFilters.filter((qf) => {
+      // If filterId exists in the data, use it for comparison
+      if (qf.filterId) {
+        return qf.filterId !== filterIdOrFieldName;
+      }
+      // Otherwise, fall back to fieldName comparison (legacy data)
+      return qf.fieldName !== filterIdOrFieldName;
+    });
+
+    onChange(newFilters);
   };
 
   const handleSubmitFilter = () => {
@@ -153,7 +161,7 @@ export function QuickFiltersSection({ quickFilters, fields, onChange }: QuickFil
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => handleDeleteFilter(filter.filterId)}
+                      onClick={() => handleDeleteFilter(filter.filterId || filter.fieldName)}
                       className="text-destructive hover:text-destructive"
                       aria-label={m.settings_quickFilters_deleteFilter({
                         fieldName: filter.fieldLabel || filter.fieldName,

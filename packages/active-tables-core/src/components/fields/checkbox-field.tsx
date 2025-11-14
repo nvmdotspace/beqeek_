@@ -1,80 +1,64 @@
 /**
  * CheckboxField Component
  *
- * Renders CHECKBOX_YES_NO field type (single boolean checkbox)
+ * Redesigned to match the current design system with an edit-only interactive tile.
  */
 
 import { useCallback } from 'react';
+import { Checkbox } from '@workspace/ui/components/checkbox';
+import { cn } from '@workspace/ui/lib/utils';
 import type { FieldRendererProps } from './field-renderer-props.js';
 import { FieldWrapper } from '../common/field-wrapper.js';
 
 export function CheckboxField(props: FieldRendererProps) {
-  const { field, value, onChange, mode, disabled = false, error, className } = props;
+  const { field, value, onChange, disabled = false, error, className } = props;
 
-  // Convert value to boolean
   const booleanValue = Boolean(value);
-
-  const handleChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      onChange?.(e.target.checked);
-    },
-    [onChange],
-  );
-
-  // Display mode
-  if (mode === 'display') {
-    return (
-      <span className="inline-flex items-center">
-        {booleanValue ? (
-          <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-            <path
-              fillRule="evenodd"
-              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-              clipRule="evenodd"
-            />
-          </svg>
-        ) : (
-          <svg className="w-5 h-5 text-muted-foreground" fill="currentColor" viewBox="0 0 20 20">
-            <path
-              fillRule="evenodd"
-              d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-              clipRule="evenodd"
-            />
-          </svg>
-        )}
-        <span className="ml-2">{booleanValue ? props.messages?.yes || 'Yes' : props.messages?.no || 'No'}</span>
-      </span>
-    );
-  }
-
-  // Edit mode
   const fieldId = `field-${field.name}`;
 
-  const checkboxClasses = `
-    w-4 h-4 rounded
-    border-input
-    focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring
-    disabled:cursor-not-allowed disabled:opacity-50
-    aria-invalid:border-destructive
-    ${className || ''}
-  `.trim();
+  const handleChange = useCallback(
+    (checked: boolean | 'indeterminate') => {
+      if (checked === 'indeterminate') {
+        return;
+      }
+
+      if (checked !== booleanValue) {
+        onChange?.(checked);
+      }
+    },
+    [booleanValue, onChange],
+  );
 
   return (
-    <FieldWrapper fieldId={fieldId} label="" error={error} className="flex items-center space-x-2">
-      <input
-        type="checkbox"
-        id={fieldId}
-        name={field.name}
-        checked={booleanValue}
-        onChange={handleChange}
-        disabled={disabled}
-        className={checkboxClasses}
-        aria-invalid={!!error}
-        aria-describedby={error ? `${fieldId}-error` : undefined}
-      />
-      <label htmlFor={fieldId} className="text-sm font-medium text-foreground cursor-pointer">
-        {field.label}
-        {field.required && <span className="text-destructive ml-1">*</span>}
+    <FieldWrapper
+      fieldId={fieldId}
+      label=""
+      required={field.required}
+      error={error}
+      className="mb-4"
+      fieldClassName="mt-0"
+    >
+      <label
+        htmlFor={fieldId}
+        className={cn(
+          'flex items-center gap-3 text-sm font-medium text-foreground',
+          disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer',
+          className,
+        )}
+      >
+        <Checkbox
+          id={fieldId}
+          name={field.name}
+          checked={booleanValue}
+          onCheckedChange={handleChange}
+          disabled={disabled}
+          aria-invalid={!!error}
+          aria-describedby={error ? `${fieldId}-error` : undefined}
+        />
+        <span>
+          {field.label}
+          {field.required && <span className="text-destructive ml-1">*</span>}
+        </span>
       </label>
     </FieldWrapper>
   );

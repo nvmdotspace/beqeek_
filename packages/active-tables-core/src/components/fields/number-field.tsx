@@ -1,13 +1,14 @@
 /**
  * NumberField Component
  *
- * Renders INTEGER and NUMERIC fields with real-time Vietnamese formatting
+ * Renders INTEGER and NUMERIC fields with real-time Vietnamese formatting using shadcn/ui Input
  * - Thousands separator: dot (.) - e.g., 1.234.567
  * - Decimal separator: comma (,) - e.g., 1.234,56
  * - Format as user types for better UX
  */
 
 import { useCallback, useState } from 'react';
+import { Input } from '@workspace/ui/components/input';
 import type { FieldRendererProps } from './field-renderer-props.js';
 import { FieldWrapper } from '../common/field-wrapper.js';
 import { FIELD_TYPES } from '../../types/field.js';
@@ -20,20 +21,6 @@ export function NumberField(props: FieldRendererProps) {
 
   // Track cursor position for proper cursor placement after formatting
   const [cursorPosition, setCursorPosition] = useState<number | null>(null);
-
-  // Display mode: Format number with Vietnamese locale
-  if (mode === 'display') {
-    if (value == null || value === '') {
-      return <span className="text-muted-foreground italic">{props.messages?.emptyValue || '—'}</span>;
-    }
-
-    const formatted = new Intl.NumberFormat('vi-VN', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: decimalPlaces,
-    }).format(Number(value));
-
-    return <span>{formatted}</span>;
-  }
 
   /**
    * Format number with Vietnamese locale while typing
@@ -173,19 +160,6 @@ export function NumberField(props: FieldRendererProps) {
   const displayValue = getDisplayValue();
   const fieldId = `field-${field.name}`;
 
-  const inputClasses = `
-    w-full px-3 py-2
-    text-sm
-    border border-input rounded-lg
-    bg-background text-foreground
-    transition-all
-    placeholder:text-muted-foreground
-    focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring
-    disabled:cursor-not-allowed disabled:opacity-50
-    aria-invalid:border-destructive
-    ${className || ''}
-  `.trim();
-
   // Placeholder with format hint
   const placeholder =
     field.placeholder ||
@@ -197,7 +171,7 @@ export function NumberField(props: FieldRendererProps) {
 
   return (
     <FieldWrapper fieldId={fieldId} label={field.label} required={field.required} error={error}>
-      <input
+      <Input
         type="text"
         inputMode="decimal"
         id={fieldId}
@@ -207,7 +181,7 @@ export function NumberField(props: FieldRendererProps) {
         placeholder={placeholder}
         disabled={disabled}
         required={field.required}
-        className={inputClasses}
+        className={className}
         aria-invalid={!!error}
         aria-describedby={error ? `${fieldId}-error` : undefined}
       />

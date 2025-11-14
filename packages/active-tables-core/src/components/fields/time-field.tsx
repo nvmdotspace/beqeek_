@@ -1,10 +1,11 @@
 /**
  * TimeField Component
  *
- * Renders TIME field type
+ * Renders TIME field type using shadcn/ui Input
  */
 
 import { useCallback } from 'react';
+import { Input } from '@workspace/ui/components/input';
 import type { FieldRendererProps } from './field-renderer-props.js';
 import { FieldWrapper } from '../common/field-wrapper.js';
 import { validateFieldValue } from '../../utils/field-validation.js';
@@ -29,34 +30,12 @@ export function TimeField(props: FieldRendererProps) {
     [onChange, field],
   );
 
-  // Display mode
-  if (mode === 'display') {
-    if (!stringValue) {
-      return <span className="text-muted-foreground italic">{props.messages?.emptyValue || '—'}</span>;
-    }
-
-    return <span>{stringValue}</span>;
-  }
-
-  // Edit mode
+  // Edit mode only
   const fieldId = `field-${field.name}`;
-
-  const inputClasses = `
-    w-full px-3 py-2
-    text-sm
-    border border-input rounded-lg
-    bg-background text-foreground
-    transition-all
-    placeholder:text-muted-foreground
-    focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring
-    disabled:cursor-not-allowed disabled:opacity-50
-    aria-invalid:border-destructive
-    ${className || ''}
-  `.trim();
 
   return (
     <FieldWrapper fieldId={fieldId} label={field.label} required={field.required} error={error}>
-      <input
+      <Input
         type="time"
         id={fieldId}
         name={field.name}
@@ -64,7 +43,7 @@ export function TimeField(props: FieldRendererProps) {
         onChange={handleChange}
         disabled={disabled}
         required={field.required}
-        className={inputClasses}
+        className={className}
         aria-invalid={!!error}
         aria-describedby={error ? `${fieldId}-error` : undefined}
       />

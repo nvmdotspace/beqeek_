@@ -10,7 +10,7 @@
  */
 
 import { useCallback, useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import {
   Dialog,
   DialogContent,
@@ -39,6 +39,10 @@ import {
   FIELD_TYPE_INTEGER,
   FIELD_TYPE_NUMERIC,
 } from '@workspace/beqeek-shared';
+import { MultiSelectField as ReusableMultiSelectField } from '../settings/multi-select-field';
+import { Label } from '@workspace/ui/components/label';
+
+const MULTI_SELECT_FIELD_TYPES = new Set<string>([FIELD_TYPE_SELECT_LIST, FIELD_TYPE_CHECKBOX_LIST]);
 
 interface CreateRecordDialogProps {
   open: boolean;
@@ -231,14 +235,67 @@ export function CreateRecordDialog({
             {/* Field Grid - Responsive layout */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {visibleFields.map((field, index) => {
-                // Full width for rich text, long text, and multi-select reference fields
+                // Full width for rich text, long text, multi-select reference fields, and checkbox fields
                 const fullWidthTypes = [
                   FIELD_TYPE_RICH_TEXT,
                   FIELD_TYPE_TEXT,
                   FIELD_TYPE_SELECT_LIST_RECORD,
                   FIELD_TYPE_SELECT_LIST_WORKSPACE_USER,
+                  FIELD_TYPE_CHECKBOX_YES_NO, // Add checkbox for balanced layout
                 ];
                 const isFullWidth = fullWidthTypes.includes(field.type as any);
+                const isMultiSelectField = MULTI_SELECT_FIELD_TYPES.has(field.type as string);
+
+                if (isMultiSelectField) {
+                  return (
+                    <div key={field.name} className={cn(isFullWidth && 'md:col-span-2')}>
+                      <Controller
+                        name={field.name}
+                        control={form.control}
+                        rules={{
+                          required: field.required ? `${field.label} is required` : false,
+                        }}
+                        render={({ field: formField, fieldState }) => {
+                          const options = Array.isArray(field.options)
+                            ? field.options.map(
+                                (option: {
+                                  value: string;
+                                  text: string;
+                                  text_color?: string;
+                                  background_color?: string;
+                                }) => ({
+                                  value: option.value,
+                                  label: option.text,
+                                  textColor: option.text_color,
+                                  backgroundColor: option.background_color,
+                                }),
+                              )
+                            : [];
+
+                          return (
+                            <div data-field-name={field.name} data-autofocus={index === 0} className="space-y-2">
+                              <Label htmlFor={`field-${field.name}`} className="text-sm font-medium text-foreground">
+                                {field.label}
+                                {field.required && <span className="ml-1 text-destructive">*</span>}
+                              </Label>
+                              <ReusableMultiSelectField
+                                id={`field-${field.name}`}
+                                options={options}
+                                value={Array.isArray(formField.value) ? formField.value : []}
+                                onChange={(nextValues) => formField.onChange(nextValues)}
+                                placeholder={field.placeholder || 'Select options'}
+                                disabled={createMutation.isPending}
+                              />
+                              {fieldState.error && (
+                                <p className="text-xs text-destructive">{fieldState.error.message}</p>
+                              )}
+                            </div>
+                          );
+                        }}
+                      />
+                    </div>
+                  );
+                }
 
                 return (
                   <div key={field.name} className={cn(isFullWidth && 'md:col-span-2')}>

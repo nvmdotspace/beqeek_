@@ -5,7 +5,7 @@
  */
 
 import { useMemo, useState } from 'react';
-import { Plus, Edit2, Trash2 } from 'lucide-react';
+import { Plus, Edit2, Trash2, AlertCircle } from 'lucide-react';
 import { Button } from '@workspace/ui/components/button';
 import { Badge } from '@workspace/ui/components/badge';
 import { ScrollArea } from '@workspace/ui/components/scroll-area';
@@ -113,11 +113,19 @@ export function KanbanSettingsSection({ kanbanConfigs, fields, onChange }: Kanba
             </p>
           </div>
         ) : (
-          <ScrollArea className="max-h-[500px] rounded-md border">
+          <ScrollArea className="h-[600px] rounded-md border">
             <div className="divide-y">
               {kanbanConfigs.map((config, index) => {
                 const statusField = fields.find((f) => f.name === config.statusField);
                 const headlineField = fields.find((f) => f.name === config.kanbanHeadlineField);
+                const hasInvalidStatusField = !statusField;
+                const hasInvalidHeadlineField = !headlineField;
+                const invalidDisplayFields = config.displayFields.filter(
+                  (fieldName) => !fields.find((f) => f.name === fieldName),
+                );
+                const hasInvalidFields =
+                  hasInvalidStatusField || hasInvalidHeadlineField || invalidDisplayFields.length > 0;
+
                 return (
                   <div
                     key={config.kanbanScreenId || index}
@@ -129,20 +137,45 @@ export function KanbanSettingsSection({ kanbanConfigs, fields, onChange }: Kanba
                         <Badge variant="secondary" className="text-xs">
                           {m.settings_kanban_screenBadge({ screenNumber: index + 1 })}
                         </Badge>
+                        {hasInvalidFields && (
+                          <Badge variant="destructive" className="text-xs gap-1">
+                            <AlertCircle className="h-3 w-3" />
+                            Trường không hợp lệ
+                          </Badge>
+                        )}
                       </div>
 
                       {config.screenDescription && (
                         <p className="text-sm text-muted-foreground">{config.screenDescription}</p>
                       )}
 
+                      {hasInvalidFields && (
+                        <div className="rounded-md border border-destructive/20 bg-destructive-subtle p-3">
+                          <p className="text-xs font-medium text-destructive">
+                            Một số trường đã được cấu hình không còn tồn tại trong bảng. Vui lòng chỉnh sửa màn hình này
+                            để cập nhật cấu hình.
+                          </p>
+                        </div>
+                      )}
+
                       <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
                         <div>
                           <span className="text-muted-foreground">{m.settings_kanban_statusField()}:</span>{' '}
-                          <span className="font-medium">{statusField?.label || config.statusField}</span>
+                          {hasInvalidStatusField ? (
+                            <span className="font-medium text-destructive line-through">{config.statusField}</span>
+                          ) : (
+                            <span className="font-medium">{statusField.label}</span>
+                          )}
                         </div>
                         <div>
                           <span className="text-muted-foreground">{m.settings_kanban_headlineField()}:</span>{' '}
-                          <span className="font-medium">{headlineField?.label || config.kanbanHeadlineField}</span>
+                          {hasInvalidHeadlineField ? (
+                            <span className="font-medium text-destructive line-through">
+                              {config.kanbanHeadlineField}
+                            </span>
+                          ) : (
+                            <span className="font-medium">{headlineField.label}</span>
+                          )}
                         </div>
                         <div className="col-span-2">
                           <span className="text-muted-foreground">{m.settings_kanban_displayFields()}:</span>{' '}
@@ -156,8 +189,13 @@ export function KanbanSettingsSection({ kanbanConfigs, fields, onChange }: Kanba
                         <div className="flex flex-wrap gap-1">
                           {config.displayFields.slice(0, 5).map((fieldName) => {
                             const field = fields.find((f) => f.name === fieldName);
+                            const isInvalid = !field;
                             return (
-                              <Badge key={fieldName} variant="outline" className="text-xs">
+                              <Badge
+                                key={fieldName}
+                                variant={isInvalid ? 'destructive' : 'outline'}
+                                className={`text-xs ${isInvalid ? 'line-through' : ''}`}
+                              >
                                 {field?.label || fieldName}
                               </Badge>
                             );

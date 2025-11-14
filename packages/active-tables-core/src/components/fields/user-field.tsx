@@ -1,12 +1,13 @@
 /**
  * UserField Component
  *
- * Renders SELECT_ONE_WORKSPACE_USER and SELECT_LIST_WORKSPACE_USER field types
+ * Renders SELECT_ONE_WORKSPACE_USER and SELECT_LIST_WORKSPACE_USER field types using shadcn/ui Badge
  *
  * Week 2: Enhanced with UserSelect for better UX
  */
 
 import { useCallback } from 'react';
+import { Badge } from '@workspace/ui/components/badge';
 import type { FieldRendererProps } from './field-renderer-props.js';
 import { FieldWrapper } from '../common/field-wrapper.js';
 import { FIELD_TYPES } from '../../types/field.js';
@@ -55,54 +56,7 @@ export function UserField(props: FieldRendererProps) {
     [onChange, field, isMultiple],
   );
 
-  // Get user label
-  const getUserLabel = useCallback(
-    (userId: string) => {
-      const user = workspaceUsers.find((u: { id: string }) => u.id === userId);
-      if (!user) return userId;
-
-      const labelField = field.referenceLabelField || 'name';
-      return String(user[labelField as keyof typeof user] || user.name || user.id);
-    },
-    [workspaceUsers, field.referenceLabelField],
-  );
-
-  // Display mode
-  if (mode === 'display') {
-    if (isMultiple) {
-      const selectedIds = normalizedValue as string[];
-      if (selectedIds.length === 0) {
-        return <span className="text-muted-foreground italic">{props.messages?.emptyValue || '—'}</span>;
-      }
-
-      return (
-        <div className="flex flex-wrap gap-2">
-          {selectedIds.map((userId) => (
-            <span
-              key={userId}
-              className="inline-flex items-center px-2 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800"
-            >
-              {getUserLabel(userId)}
-            </span>
-          ))}
-        </div>
-      );
-    }
-
-    // Single select display
-    const selectedId = normalizedValue as string;
-    if (!selectedId) {
-      return <span className="text-muted-foreground italic">{props.messages?.emptyValue || '—'}</span>;
-    }
-
-    return (
-      <span className="inline-flex items-center px-2 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
-        {getUserLabel(selectedId)}
-      </span>
-    );
-  }
-
-  // Edit mode
+  // Edit mode only
   const fieldId = `field-${field.name}`;
 
   // Week 2: Use UserSelect for better UX (always use new component)

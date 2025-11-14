@@ -144,16 +144,29 @@ export function PermissionsSettingsSection({
     let newPermissionsConfig: PermissionConfig[];
 
     if (existingConfigIndex !== -1) {
-      // Update existing config
-      newPermissionsConfig = [...permissionsConfig];
-      const existingConfig = newPermissionsConfig[existingConfigIndex]!;
-      const actionIndex = existingConfig.actions.findIndex((a) => a.actionId === actionId);
+      // Update existing config with deep copy to ensure state change detection
+      newPermissionsConfig = permissionsConfig.map((config, index) => {
+        if (index !== existingConfigIndex) {
+          return config;
+        }
 
-      if (actionIndex !== -1) {
-        existingConfig.actions[actionIndex]!.permission = permission;
-      } else {
-        existingConfig.actions.push({ actionId, permission });
-      }
+        // Deep copy the config being modified
+        const actionIndex = config.actions.findIndex((a) => a.actionId === actionId);
+
+        if (actionIndex !== -1) {
+          // Update existing action with new permission
+          return {
+            ...config,
+            actions: config.actions.map((action, idx) => (idx === actionIndex ? { ...action, permission } : action)),
+          };
+        } else {
+          // Add new action
+          return {
+            ...config,
+            actions: [...config.actions, { actionId, permission }],
+          };
+        }
+      });
     } else {
       // Create new config for this team-role
       newPermissionsConfig = [

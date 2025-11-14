@@ -33,21 +33,7 @@ export function RichTextField(props: FieldRendererProps) {
     [onChange, field],
   );
 
-  // Display mode - render HTML safely
-  if (mode === 'display') {
-    if (!stringValue) {
-      return <span className="text-muted-foreground italic">{props.messages?.emptyValue || '—'}</span>;
-    }
-
-    // Render rich text content with Lexical styling
-    return (
-      <div className="lexical-display-content">
-        <div dangerouslySetInnerHTML={{ __html: stringValue }} />
-      </div>
-    );
-  }
-
-  // Edit mode with Lexical editor
+  // Edit mode only with Lexical editor
   const fieldId = `field-${field.name}`;
 
   return (

@@ -7,11 +7,14 @@
 import { TextField } from './text-field.js';
 import { TextareaField } from './textarea-field.js';
 import { NumberField } from './number-field.js';
+import { TimeComponentField } from './time-component-field.js';
 import { DateField } from './date-field.js';
 import { DateTimeField } from './datetime-field.js';
 import { TimeField } from './time-field.js';
 import { SelectField } from './select-field.js';
+import { MultiSelectField } from './multi-select-field.js';
 import { CheckboxField } from './checkbox-field.js';
+import { CheckboxListField } from './checkbox-list-field.js';
 import { ReferenceField } from './reference-field.js';
 import { UserField } from './user-field.js';
 import { RichTextField } from './rich-text-field.js';
@@ -59,11 +62,9 @@ const TIME_COMPONENT_TYPES: ReadonlySet<FieldType> = new Set<FieldType>([
   FIELD_TYPE_MINUTE,
   FIELD_TYPE_SECOND,
 ]);
-const SELECT_TYPES: ReadonlySet<FieldType> = new Set<FieldType>([
+const SINGLE_SELECT_TYPES: ReadonlySet<FieldType> = new Set<FieldType>([
   FIELD_TYPE_SELECT_ONE,
-  FIELD_TYPE_SELECT_LIST,
   FIELD_TYPE_CHECKBOX_ONE,
-  FIELD_TYPE_CHECKBOX_LIST,
 ]);
 const REFERENCE_TYPES: ReadonlySet<FieldType> = new Set<FieldType>([
   FIELD_TYPE_SELECT_ONE_RECORD,
@@ -98,9 +99,9 @@ export function FieldRenderer(props: FieldRendererProps) {
     return <NumberField {...props} />;
   }
 
-  // Time component fields (simple number inputs)
+  // Time component fields (YEAR, MONTH, DAY, HOUR, MINUTE, SECOND)
   if (TIME_COMPONENT_TYPES.has(field.type)) {
-    return <NumberField {...props} />;
+    return <TimeComponentField {...props} />;
   }
 
   // Date/Time fields
@@ -116,13 +117,23 @@ export function FieldRenderer(props: FieldRendererProps) {
     return <TimeField {...props} />;
   }
 
-  // Selection fields
-  if (SELECT_TYPES.has(field.type)) {
+  // Selection fields - single select
+  if (SINGLE_SELECT_TYPES.has(field.type)) {
     return <SelectField {...props} />;
   }
 
+  // Selection fields - multi select
+  if (field.type === FIELD_TYPE_SELECT_LIST) {
+    return <MultiSelectField {...props} />;
+  }
+
+  // Checkbox fields
   if (field.type === FIELD_TYPE_CHECKBOX_YES_NO) {
     return <CheckboxField {...props} />;
+  }
+
+  if (field.type === FIELD_TYPE_CHECKBOX_LIST) {
+    return <CheckboxListField {...props} />;
   }
 
   // Reference fields

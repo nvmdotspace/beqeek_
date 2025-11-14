@@ -176,6 +176,10 @@ export const ActiveTableRecordsPage = () => {
   };
 
   const handleCreateRecord = () => {
+    // Blur the button to prevent aria-hidden focus warning
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
     setIsCreateDialogOpen(true);
   };
 
