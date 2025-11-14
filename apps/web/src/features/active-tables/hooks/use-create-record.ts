@@ -160,7 +160,7 @@ function buildEncryptedCreatePayload(
     },
   };
 
-  // Encrypt each field
+  // Step 1: Encrypt all fields first
   fields.forEach((field: FieldConfig) => {
     const fieldName = field.name;
     const value = record[fieldName];
@@ -174,18 +174,6 @@ function buildEncryptedCreatePayload(
     const encryptedValue = CommonUtils.encryptTableData(tableDetail as any, fieldName, value);
     payload.record[fieldName] = encryptedValue;
 
-    // Generate record hashes for all non-reference fields
-    if (!CommonUtils.noneEncryptFields().includes(field.type)) {
-      if (Array.isArray(value)) {
-        payload.record_hashes![fieldName] = HMAC.hashArray(
-          value.map((v) => String(v)),
-          encryptionKey,
-        );
-      } else {
-        payload.record_hashes![fieldName] = HMAC.hash(String(value), encryptionKey);
-      }
-    }
-
     // Generate hashed_keywords for search functionality
     if (CommonUtils.hashEncryptFields().includes(field.type)) {
       // SELECT/CHECKBOX fields: hashed_keywords = same as record (already hashed)
@@ -196,9 +184,31 @@ function buildEncryptedCreatePayload(
         payload.hashed_keywords![fieldName] = encryptedValue;
       }
     } else if (hashedKeywordFields.includes(fieldName) && typeof value === 'string') {
-      // Text fields: hash for exact match search (single hash, not tokenized)
-      // Use HMAC.hash() directly for single-value search, not CommonUtils.hashKeyword()
-      payload.hashed_keywords![fieldName] = HMAC.hash(value, encryptionKey);
+      // Text fields: tokenize and hash each token for full-text search
+      // Returns array of hashed tokens: ['hash1', 'hash2', ...]
+      payload.hashed_keywords![fieldName] = CommonUtils.hashKeyword(value, encryptionKey);
+    }
+  });
+
+  // Step 2: Generate record_hashes from ENCRYPTED values (not raw values)
+  // This ensures integrity check on server side matches encrypted data
+  fields.forEach((field: FieldConfig) => {
+    const fieldName = field.name;
+    const encryptedValue = payload.record[fieldName];
+
+    // Skip reference fields and undefined values
+    if (!encryptedValue || CommonUtils.noneEncryptFields().includes(field.type)) {
+      return;
+    }
+
+    // Hash the encrypted value
+    if (Array.isArray(encryptedValue)) {
+      payload.record_hashes![fieldName] = HMAC.hashArray(
+        encryptedValue.map((v) => String(v)),
+        encryptionKey,
+      );
+    } else {
+      payload.record_hashes![fieldName] = HMAC.hash(String(encryptedValue), encryptionKey);
     }
   });
 
