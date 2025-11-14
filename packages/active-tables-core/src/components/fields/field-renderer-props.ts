@@ -55,6 +55,8 @@ export interface FieldRendererProps extends BaseFieldRendererProps {
   fetchRecords?: (query: string, page: number) => Promise<{ records: AsyncRecordSelectRecord[]; hasMore: boolean }>;
   /** Week 2: Referenced table name for display (for reference fields) */
   referencedTableName?: string;
+  /** Week 2: Initial records for displaying pre-selected values (for reference fields) */
+  initialRecords?: AsyncRecordSelectRecord[];
 }
 
 /**

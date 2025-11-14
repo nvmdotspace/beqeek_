@@ -44,6 +44,7 @@ export function ReferenceField(props: ReferenceFieldProps) {
     loading = false,
     fetchRecords,
     referencedTableName,
+    initialRecords,
   } = props;
 
   const isMultiple = field.type === FIELD_TYPES.SELECT_LIST_RECORD;
@@ -128,6 +129,7 @@ export function ReferenceField(props: ReferenceFieldProps) {
           fetchRecords={fetchRecords}
           tableName={referencedTableName || 'records'}
           error={error}
+          initialRecords={initialRecords}
         />
       </FieldWrapper>
     );

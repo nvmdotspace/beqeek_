@@ -181,15 +181,37 @@ export function useUpdateRecordField(workspaceId: string, tableId: string, table
       console.error('Failed to update record:', err);
     },
 
-    onSuccess: () => {
+    onSuccess: (data, { recordId }) => {
       if (!table) return;
 
-      // Invalidate queries to refetch and sync with server
-      // Use queryKey prefix to match all queries regardless of params
-      queryClient.invalidateQueries({
-        queryKey: ['active-table-records', workspaceId, tableId],
-        exact: false, // Match all queries with this prefix
-      });
+      // Update cache with server response if it contains updated timestamp
+      if (data?.data?.updatedAt) {
+        queryClient.setQueriesData(
+          {
+            queryKey: ['active-table-records', workspaceId, tableId],
+            exact: false,
+          },
+          (old: RecordsResponse | undefined) => {
+            if (!old?.data) return old;
+
+            return {
+              ...old,
+              data: old.data.map((record: TableRecord) => {
+                if (record.id === recordId) {
+                  return {
+                    ...record,
+                    updatedAt: data.data!.updatedAt,
+                  };
+                }
+                return record;
+              }),
+            };
+          },
+        );
+      }
+
+      // DO NOT invalidate - optimistic update is already correct
+      // Invalidating would trigger expensive refetch (get all records, decrypt, re-render)
     },
   });
 }
@@ -287,13 +309,104 @@ export function useBatchUpdateRecord(workspaceId: string, tableId: string, table
       return response.data;
     },
 
-    onSuccess: () => {
+    onMutate: async ({ recordId, updates }) => {
       if (!table) return;
 
-      queryClient.invalidateQueries({
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({
         queryKey: ['active-table-records', workspaceId, tableId],
-        exact: false, // Match all queries with this prefix
+        exact: false,
       });
+
+      // Snapshot for rollback
+      const previousQueries: { key: readonly unknown[]; data: unknown }[] = [];
+      queryClient
+        .getQueriesData({
+          queryKey: ['active-table-records', workspaceId, tableId],
+          exact: false,
+        })
+        .forEach(([key, data]) => {
+          previousQueries.push({ key, data });
+        });
+
+      // Optimistically update all matching queries
+      queryClient.setQueriesData(
+        {
+          queryKey: ['active-table-records', workspaceId, tableId],
+          exact: false,
+        },
+        (old: RecordsResponse | undefined) => {
+          if (!old?.data) return old;
+
+          return {
+            ...old,
+            data: old.data.map((record: TableRecord) => {
+              if (record.id === recordId) {
+                return {
+                  ...record,
+                  record: {
+                    ...record.record,
+                    ...updates,
+                  },
+                  data: record.data
+                    ? {
+                        ...record.data,
+                        ...updates,
+                      }
+                    : undefined,
+                };
+              }
+              return record;
+            }),
+          };
+        },
+      );
+
+      return { previousQueries };
+    },
+
+    onError: (err, variables, context) => {
+      // Rollback on error
+      if (context?.previousQueries) {
+        context.previousQueries.forEach(({ key, data }) => {
+          queryClient.setQueryData(key, data);
+        });
+      }
+
+      console.error('Failed to batch update record:', err);
+    },
+
+    onSuccess: (data, { recordId }) => {
+      if (!table) return;
+
+      // Update cache with server response if it contains updated timestamp
+      if (data?.data?.updatedAt) {
+        queryClient.setQueriesData(
+          {
+            queryKey: ['active-table-records', workspaceId, tableId],
+            exact: false,
+          },
+          (old: RecordsResponse | undefined) => {
+            if (!old?.data) return old;
+
+            return {
+              ...old,
+              data: old.data.map((record: TableRecord) => {
+                if (record.id === recordId) {
+                  return {
+                    ...record,
+                    updatedAt: data.data!.updatedAt,
+                  };
+                }
+                return record;
+              }),
+            };
+          },
+        );
+      }
+
+      // DO NOT invalidate - would trigger expensive refetch
+      // Batch updates should also rely on optimistic updates
     },
   });
 }

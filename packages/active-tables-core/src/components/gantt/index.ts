@@ -1,36 +1,23 @@
 /**
  * Gantt Chart Components
  *
- * Export all Gantt-related components, hooks, and types
+ * Export all Gantt-related components using shadcn/ui Gantt
  */
 
 // Main component
-export { GanttChartView } from './gantt-chart.js';
-// Alias for convenience
-export { GanttChartView as GanttBoard } from './gantt-chart.js';
-
-// Sub-components
-export { GanttTimeline } from './gantt-timeline.js';
-export { GanttGrid } from './gantt-grid.js';
-export { GanttTask } from './gantt-task.js';
-
-// Hooks
-export { useGanttZoom } from './use-gantt-zoom.js';
+export { GanttChartView } from './gantt-chart-view.js';
+// Alias for backward compatibility
+export { GanttChartView as GanttBoard } from './gantt-chart-view.js';
 
 // Utilities
-export * from './gantt-utils.js';
+export * from './utils.js';
 
 // Types
 export type {
-  GanttChartProps,
-  GanttTimelineProps,
-  GanttGridProps,
-  GanttTaskProps,
+  GanttChartViewProps,
   BaseGanttProps,
-  ZoomLevel,
-  TimeUnit,
-  GanttTask as GanttTaskData,
-  TaskPosition,
+  ConvertedGanttFeature,
+  StatusMapping,
   DateRange,
-  DependencyLineProps,
-} from './gantt-props.js';
+  FieldMapping,
+} from './types.js';

@@ -8,6 +8,7 @@
 import { useState, useEffect } from 'react';
 import { ExternalLink, AlertCircle } from 'lucide-react';
 import { Label } from '@workspace/ui/components/label';
+import { Input } from '@workspace/ui/components/input';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@workspace/ui/components/select';
 import { Badge } from '@workspace/ui/components/badge';
 import { type FieldType, FIELD_TYPE_FIRST_REFERENCE_RECORD } from '@workspace/beqeek-shared';
@@ -25,6 +26,9 @@ export interface ReferenceFieldConfigProps {
   /** Reference field (for FIRST_REFERENCE_RECORD only) */
   referenceField?: string;
 
+  /** Additional condition for filtering records */
+  additionalCondition?: string;
+
   /** Available tables in workspace */
   availableTables: Array<{ id: string; name: string }>;
 
@@ -32,7 +36,12 @@ export interface ReferenceFieldConfigProps {
   availableFields: Array<{ name: string; label: string; type: string }>;
 
   /** Callback when configuration changes */
-  onChange: (config: { referenceTableId?: string; referenceLabelField?: string; referenceField?: string }) => void;
+  onChange: (config: {
+    referenceTableId?: string;
+    referenceLabelField?: string;
+    referenceField?: string;
+    additionalCondition?: string;
+  }) => void;
 
   /** Loading state for fields */
   loadingFields?: boolean;
@@ -59,6 +68,7 @@ export function ReferenceFieldConfig({
   referenceTableId,
   referenceLabelField,
   referenceField,
+  additionalCondition,
   availableTables,
   availableFields,
   onChange,
@@ -69,6 +79,7 @@ export function ReferenceFieldConfig({
   const [localTableId, setLocalTableId] = useState(referenceTableId);
   const [localLabelField, setLocalLabelField] = useState(referenceLabelField);
   const [localRefField, setLocalRefField] = useState(referenceField);
+  const [localAdditionalCondition, setLocalAdditionalCondition] = useState(additionalCondition);
 
   const isFirstReferenceRecord = fieldType === FIELD_TYPE_FIRST_REFERENCE_RECORD;
 
@@ -85,6 +96,10 @@ export function ReferenceFieldConfig({
     setLocalRefField(referenceField);
   }, [referenceField]);
 
+  useEffect(() => {
+    setLocalAdditionalCondition(additionalCondition);
+  }, [additionalCondition]);
+
   /**
    * Handle table selection
    */
@@ -96,6 +111,7 @@ export function ReferenceFieldConfig({
       referenceTableId: tableId,
       referenceLabelField: undefined,
       referenceField: undefined,
+      additionalCondition: localAdditionalCondition,
     });
   };
 
@@ -108,6 +124,7 @@ export function ReferenceFieldConfig({
       referenceTableId: localTableId,
       referenceLabelField: fieldName,
       referenceField: localRefField,
+      additionalCondition: localAdditionalCondition,
     });
   };
 
@@ -120,6 +137,20 @@ export function ReferenceFieldConfig({
       referenceTableId: localTableId,
       referenceLabelField: localLabelField,
       referenceField: fieldName,
+      additionalCondition: localAdditionalCondition,
+    });
+  };
+
+  /**
+   * Handle additional condition change
+   */
+  const handleAdditionalConditionChange = (condition: string) => {
+    setLocalAdditionalCondition(condition);
+    onChange({
+      referenceTableId: localTableId,
+      referenceLabelField: localLabelField,
+      referenceField: localRefField,
+      additionalCondition: condition,
     });
   };
 
@@ -275,6 +306,25 @@ export function ReferenceFieldConfig({
           </Select>
           <p className="text-xs text-muted-foreground">
             The field in <strong>{selectedTable?.name}</strong> that references this table
+          </p>
+        </div>
+      )}
+
+      {/* Additional Condition (Optional) */}
+      {localTableId && (
+        <div className="space-y-2">
+          <Label htmlFor="additional-condition" className="text-sm font-medium">
+            Điều kiện lọc bổ sung
+          </Label>
+          <Input
+            id="additional-condition"
+            value={localAdditionalCondition || ''}
+            onChange={(e) => handleAdditionalConditionChange(e.target.value)}
+            placeholder="status='active' AND is_deleted=false"
+            className="font-mono text-sm"
+          />
+          <p className="text-xs text-muted-foreground">
+            Điều kiện SQL để lọc các bản ghi được hiển thị trong dropdown (ví dụ: "status='active'")
           </p>
         </div>
       )}

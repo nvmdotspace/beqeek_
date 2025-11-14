@@ -10,7 +10,7 @@ import {
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
-import { arrayMove, SortableContext, useSortable } from '@dnd-kit/sortable';
+import { SortableContext, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { createContext, type HTMLAttributes, type ReactNode, useContext, useState, useMemo } from 'react';
 import { createPortal } from 'react-dom';
@@ -279,7 +279,7 @@ export const KanbanProvider = <
 
     // Cross-column move already handled in handleDragOver
     // This is just a final sync in case onDragOver didn't fire
-    let newData = [...data];
+    const newData = [...data];
     const oldIndex = newData.findIndex((item) => item.id === active.id);
 
     if (oldIndex !== -1 && newData[oldIndex]) {

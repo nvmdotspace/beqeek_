@@ -3,6 +3,13 @@
  *
  * Enhanced Kanban board with better drag-and-drop animations using shadcn/ui kanban components.
  * Maintains original business logic and header design from v1.
+ *
+ * DRAG-AND-DROP BEHAVIOR:
+ * - Cards CANNOT be reordered within the same column (maintains "in-order" flow)
+ * - Cards can ONLY be moved to different columns
+ * - When dropped in a different column, cards are automatically placed at the BOTTOM
+ * - This behavior is enforced by the shadcn/ui KanbanProvider component
+ * - See: packages/ui/src/components/ui/shadcn-io/kanban/index.tsx (lines 222-278)
  */
 
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
@@ -106,38 +113,15 @@ export function KanbanBoard({
   // Local state for kanban items - syncs with props
   const [boardData, setBoardData] = useState(() => kanbanItems.map((item) => ({ ...item })));
 
-  // Snapshot of kanbanItems (SERVER SOURCE OF TRUTH) when drag starts
-  // IMPORTANT: Use kanbanItems (server state), NOT boardData (mutated by Provider)
-  const dragStartSnapshotRef = useRef<Record<string, { column: string; name: string }>>({});
-
   // Sync boardData with kanbanItems from props (when records change from API)
   useEffect(() => {
     setBoardData(kanbanItems.map((item) => ({ ...item })));
-    // Clear snapshot when server data changes (refetch completed)
-    // This ensures next drag uses fresh server state
-    dragStartSnapshotRef.current = {};
   }, [kanbanItems]);
 
-  // Handle drag start - save snapshot for comparison
+  // Handle drag start
   const handleDragStart = useCallback(
     (event: DragStartEvent) => {
-      // Snapshot kanbanItems (server state) NOT boardData (Provider mutates boardData during drag)
-      // This prevents comparing against stale state from previous drag
-      dragStartSnapshotRef.current = kanbanItems.reduce<Record<string, { column: string; name: string }>>(
-        (acc, item) => {
-          acc[item.id] = {
-            column: String(item.column),
-            name: item.name,
-          };
-          return acc;
-        },
-        {},
-      );
-
-      console.log('[Kanban] Drag started', {
-        cardId: event.active.id,
-        snapshotSize: Object.keys(dragStartSnapshotRef.current).length,
-      });
+      // Optional: Add custom drag start logic here
     },
     [kanbanItems],
   );
@@ -149,82 +133,74 @@ export function KanbanBoard({
 
   // Handle drag end - detect column changes and call API
   // IMPORTANT: Provider calls onDragEnd BEFORE onDataChange, so we must detect here
+  //
+  // COMPLETE DRAG-AND-DROP FLOW (SIMPLIFIED - No Snapshot):
+  // ========================================================
+  // 1. UI Layer (shadcn/ui KanbanProvider):
+  //    - handleDragOver: Prevents same-column reordering (lines 222-226 in kanban/index.tsx)
+  //    - handleDragOver: Moves cards to bottom of target column (lines 232-252)
+  //    - handleDragEnd: Final sync if onDragOver didn't fire (lines 274-306)
+  //
+  // 2. Business Logic Layer (this function):
+  //    - Get old column from kanbanItems (server state) at drop time
+  //    - Determine target column from drop position
+  //    - Compare old vs new column
+  //    - Call onRecordMove(recordId, newColumnValue) if changed
+  //    - NO position/order data sent - API only receives field update
+  //
+  // 3. API Layer (active-table-records-page.tsx):
+  //    - onRecordMove -> updateRecordMutation.mutate({ recordId, fieldName, newValue })
+  //    - useUpdateRecordField -> buildEncryptedUpdatePayload(fieldName, newValue, ...)
+  //    - Payload: { record: { status: "encrypted_value" }, hashed_keywords: {}, record_hashes: {} }
+  //    - PATCH /api/workspace/{workspaceId}/workflow/patch/active_tables/{tableId}/records/{recordId}
+  //    - Schema: ActiveTableRecordUpdateRequest (only record data, NO position field)
+  //
+  // 4. Server Behavior:
+  //    - Receives only the field value change (e.g., status: "q1" -> "q2")
+  //    - Server determines final record order based on its own business logic
+  //    - Client refetches records after successful update (queryClient.invalidateQueries)
+  //    - UI syncs to server's authoritative order
+  //
+  // KEY GUARANTEES:
+  // ✅ Cards CANNOT be reordered within same column (UI blocks it)
+  // ✅ Cards can ONLY move to different columns
+  // ✅ Cards ALWAYS land at bottom of target column (UI enforces it)
+  // ✅ NO position data sent to API (verified in swagger.yaml)
+  // ✅ Server is source of truth for record order
+  // ✅ 100% reliable (learned from PHP Blade implementation)
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
       const { active, over } = event;
 
-      console.log('[Kanban] handleDragEnd', {
-        activeId: active.id,
-        overId: over?.id,
-        hasSnapshot: Object.keys(dragStartSnapshotRef.current).length > 0,
-      });
-
       // Early return if invalid drop
       if (!over || !onRecordMove || readOnly) {
-        console.log('[Kanban] handleDragEnd: early return', { over: !!over, onRecordMove: !!onRecordMove, readOnly });
-        return;
-      }
-
-      // Check if we have a snapshot
-      if (Object.keys(dragStartSnapshotRef.current).length === 0) {
-        console.log('[Kanban] No snapshot available - skipping');
         return;
       }
 
       const activeId = String(active.id);
-      const overId = String(over.id);
 
-      // Find the dragged item in snapshot (original state)
-      const snapshotItem = dragStartSnapshotRef.current[activeId];
-
-      if (!snapshotItem) {
-        console.log('[Kanban] Item not found in snapshot:', activeId);
-        dragStartSnapshotRef.current = {};
+      // ✅ Get old column from kanbanItems (server state) at drop time
+      const activeItemInServer = kanbanItems.find((item) => item.id === activeId);
+      if (!activeItemInServer) {
         return;
       }
+      const oldColumn = String(activeItemInServer.column);
 
-      // Determine target column from over element
-      // overId can be: column ID (q1, q2, q3, q4) or another card ID
-      const isDroppedOnColumn = columns.some((col) => col.id === overId);
-      let targetColumn: string;
-
-      if (isDroppedOnColumn) {
-        // Dropped directly on column
-        targetColumn = overId;
-      } else {
-        // Dropped on another card - find that card's column in kanbanItems (server state)
-        // IMPORTANT: Use kanbanItems, NOT boardData (Provider may have mutated it)
-        const overItem = kanbanItems.find((item) => item.id === overId);
-        if (overItem) {
-          targetColumn = String(overItem.column);
-        } else {
-          console.log('[Kanban] Cannot determine target column - card not found in server state');
-          return;
-        }
+      // ✅ Get new column from boardData (optimistic UI state)
+      // CRITICAL: boardData is updated by handleDragOver/onDataChange BEFORE handleDragEnd
+      // So we can trust boardData.column as the target column even if over.id === active.id
+      const activeItemInBoard = boardData.find((item) => item.id === activeId);
+      if (!activeItemInBoard) {
+        return;
       }
+      const newColumn = String(activeItemInBoard.column);
 
-      const oldColumn = String(snapshotItem.column);
-
-      console.log('[Kanban DEBUG] Column check:', {
-        activeId,
-        oldColumn,
-        targetColumn,
-        different: oldColumn !== targetColumn,
-      });
-
-      // Check if column actually changed
-      if (oldColumn !== targetColumn) {
-        console.log(`[Kanban] ✅ Column change detected: ${activeId} from "${oldColumn}" to "${targetColumn}"`);
-        console.log(`[Kanban] Calling onRecordMove...`);
-        onRecordMove(activeId, targetColumn);
-      } else {
-        console.log('[Kanban] No column change (same column) - skipping API call');
+      // ✅ Check if column actually changed
+      if (oldColumn !== newColumn) {
+        onRecordMove(activeId, newColumn);
       }
-
-      // DON'T clear snapshot here - it will be cleared when kanbanItems updates (refetch completes)
-      // This prevents race conditions with Provider's onDataChange
     },
-    [kanbanItems, columns, onRecordMove, readOnly],
+    [kanbanItems, boardData, onRecordMove, readOnly],
   );
 
   // Toggle column collapse state

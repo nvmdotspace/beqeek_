@@ -69,6 +69,20 @@ export const ROUTES = {
   },
 
   /**
+   * Workflow Forms feature routes
+   */
+  WORKFLOW_FORMS: {
+    /** Forms list: /$locale/workspaces/$workspaceId/workflow-forms */
+    LIST: '/$locale/workspaces/$workspaceId/workflow-forms' as const,
+
+    /** Template selection: /$locale/workspaces/$workspaceId/workflow-forms/select */
+    SELECT: '/$locale/workspaces/$workspaceId/workflow-forms/select' as const,
+
+    /** Form builder detail: /$locale/workspaces/$workspaceId/workflow-forms/$formId */
+    FORM_DETAIL: '/$locale/workspaces/$workspaceId/workflow-forms/$formId' as const,
+  },
+
+  /**
    * Workspace feature routes
    */
   WORKSPACE: {
@@ -76,7 +90,10 @@ export const ROUTES = {
     WORKFLOWS: '/$locale/workspaces/$workspaceId/workflows' as const,
 
     /** Team management: /$locale/workspaces/$workspaceId/team */
-    TEAM: '/$locale/workspaces/$workspaceId/team' as const,
+    TEAM: '/$locale/workspaces/$workspaceId/team/' as const,
+
+    /** Team detail: /$locale/workspaces/$workspaceId/team/$teamId */
+    TEAM_DETAIL: '/$locale/workspaces/$workspaceId/team/$teamId' as const,
 
     /** Roles & permissions: /$locale/workspaces/$workspaceId/roles */
     ROLES: '/$locale/workspaces/$workspaceId/roles' as const,
@@ -116,6 +133,7 @@ export function isValidRoutePath(path: string): boolean {
     ROUTES.HELP,
     ROUTES.NOT_FOUND,
     ...Object.values(ROUTES.ACTIVE_TABLES),
+    ...Object.values(ROUTES.WORKFLOW_FORMS),
     ...Object.values(ROUTES.WORKSPACE),
   ]);
 
@@ -129,6 +147,9 @@ export const ROUTE_GROUPS = {
   /** All Active Tables routes */
   ACTIVE_TABLES: Object.values(ROUTES.ACTIVE_TABLES),
 
+  /** All Workflow Forms routes */
+  WORKFLOW_FORMS: Object.values(ROUTES.WORKFLOW_FORMS),
+
   /** All Workspace feature routes */
   WORKSPACE: Object.values(ROUTES.WORKSPACE),
 
@@ -138,6 +159,7 @@ export const ROUTE_GROUPS = {
     ROUTES.NOTIFICATIONS,
     ROUTES.SEARCH,
     ...Object.values(ROUTES.ACTIVE_TABLES),
+    ...Object.values(ROUTES.WORKFLOW_FORMS),
     ...Object.values(ROUTES.WORKSPACE),
   ],
 

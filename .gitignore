@@ -52,3 +52,4 @@ npm-debug.log*
 .workflow
 
 docs/lexical-playground
+docs/html-module

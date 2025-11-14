@@ -70,6 +70,7 @@ interface FormData {
   referenceTableId?: string;
   referenceLabelField?: string;
   referenceField?: string;
+  additionalCondition?: string;
 }
 
 interface ValidationErrors {
@@ -164,6 +165,7 @@ export function FieldFormModal({
         referenceTableId: referenceConfig.referenceTableId,
         referenceLabelField: editingField.referenceLabelField,
         referenceField: referenceConfig.referenceField,
+        additionalCondition: editingField.additionalCondition,
       });
       setNameManuallyEdited(true);
 
@@ -232,6 +234,7 @@ export function FieldFormModal({
     referenceTableId?: string;
     referenceLabelField?: string;
     referenceField?: string;
+    additionalCondition?: string;
   }) => {
     setFormData((prev) => ({
       ...prev,
@@ -320,6 +323,7 @@ export function FieldFormModal({
       required: formData.required,
       options: formData.options.length > 0 ? formData.options : undefined,
       referenceLabelField: formData.referenceLabelField,
+      additionalCondition: formData.additionalCondition?.trim() || undefined,
       ...(formData.type === FIELD_TYPE_FIRST_REFERENCE_RECORD && {
         referenceField: formData.referenceField,
       }),
@@ -484,6 +488,7 @@ export function FieldFormModal({
                   referenceTableId={formData.referenceTableId}
                   referenceLabelField={formData.referenceLabelField}
                   referenceField={formData.referenceField}
+                  additionalCondition={formData.additionalCondition}
                   availableTables={availableTables}
                   availableFields={referenceFields}
                   onChange={handleReferenceConfigChange}

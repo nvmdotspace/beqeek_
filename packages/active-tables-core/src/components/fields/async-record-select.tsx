@@ -40,6 +40,8 @@ export interface AsyncRecordSelectProps {
   tableName?: string;
   /** Custom error message */
   error?: string;
+  /** Initial records for displaying pre-selected values (optional) */
+  initialRecords?: AsyncRecordSelectRecord[];
 }
 
 export function AsyncRecordSelect({
@@ -52,11 +54,13 @@ export function AsyncRecordSelect({
   fetchRecords,
   tableName = 'records',
   error,
+  initialRecords = [],
 }: AsyncRecordSelectProps) {
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
-  const [records, setRecords] = useState<AsyncRecordSelectRecord[]>([]);
+  const [records, setRecords] = useState<AsyncRecordSelectRecord[]>(initialRecords);
+  const [selectedRecords, setSelectedRecords] = useState<AsyncRecordSelectRecord[]>(initialRecords);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -101,6 +105,32 @@ export function AsyncRecordSelect({
     loadRecords();
   }, [open, debouncedQuery, currentPage, fetchRecords]);
 
+  // Update selectedRecords when value or records change
+  useEffect(() => {
+    if (!value) {
+      setSelectedRecords([]);
+      return;
+    }
+
+    const valueIds = Array.isArray(value) ? value : [value];
+    const allRecords = [...selectedRecords, ...records];
+    const uniqueRecordsMap = new Map<string, AsyncRecordSelectRecord>();
+
+    // Build map of unique records (selectedRecords take priority for label display)
+    allRecords.forEach((record) => {
+      if (!uniqueRecordsMap.has(record.id)) {
+        uniqueRecordsMap.set(record.id, record);
+      }
+    });
+
+    // Find records matching current value
+    const newSelectedRecords = valueIds
+      .map((id) => uniqueRecordsMap.get(id))
+      .filter((record): record is AsyncRecordSelectRecord => record !== undefined);
+
+    setSelectedRecords(newSelectedRecords);
+  }, [value, records]);
+
   // Handle selection
   const handleSelect = useCallback(
     (recordId: string) => {
@@ -139,9 +169,10 @@ export function AsyncRecordSelect({
       return `${selectedIds.length} selected`;
     }
 
-    const selectedRecord = records.find((r) => r.id === value);
+    // Use selectedRecords to find the label (includes initialRecords)
+    const selectedRecord = selectedRecords.find((r) => r.id === value);
     return (selectedRecord?.[labelFieldName] as string) || (value as string);
-  }, [value, records, labelFieldName, placeholder, multiple]);
+  }, [value, selectedRecords, labelFieldName, placeholder, multiple]);
 
   // Load more on scroll
   const handleScroll = useCallback(
@@ -243,7 +274,7 @@ export function AsyncRecordSelect({
               )}
 
               {/* Records */}
-              {!isError && records.length > 0 && (
+              {!isError && records.length > 0 && !(isLoading && currentPage === 1) && (
                 <>
                   {records.map((record) => {
                     const selected = isSelected(record.id);

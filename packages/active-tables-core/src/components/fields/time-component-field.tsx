@@ -23,39 +23,25 @@ import { validateFieldValue } from '../../utils/field-validation.js';
 const TIME_COMPONENT_RANGES: Record<
   string,
   {
-    min: number;
-    max: number;
     placeholder: string;
   }
 > = {
   [FIELD_TYPE_YEAR]: {
-    min: 1900,
-    max: 2100,
     placeholder: 'YYYY (e.g., 2025)',
   },
   [FIELD_TYPE_MONTH]: {
-    min: 1,
-    max: 12,
     placeholder: 'MM (1-12)',
   },
   [FIELD_TYPE_DAY]: {
-    min: 1,
-    max: 31,
     placeholder: 'DD (1-31)',
   },
   [FIELD_TYPE_HOUR]: {
-    min: 0,
-    max: 23,
     placeholder: 'HH (0-23)',
   },
   [FIELD_TYPE_MINUTE]: {
-    min: 0,
-    max: 59,
     placeholder: 'MM (0-59)',
   },
   [FIELD_TYPE_SECOND]: {
-    min: 0,
-    max: 59,
     placeholder: 'SS (0-59)',
   },
 };
@@ -94,12 +80,6 @@ export function TimeComponentField(props: FieldRendererProps) {
         return;
       }
 
-      // Check min/max bounds
-      if (parsed < config.min || parsed > config.max) {
-        console.warn(`Value ${parsed} out of range [${config.min}, ${config.max}] for ${field.type}`);
-        // Still allow the input but show warning
-      }
-
       // Validate with field validator
       const validationError = validateFieldValue(parsed, field);
       if (validationError) {
@@ -127,17 +107,10 @@ export function TimeComponentField(props: FieldRendererProps) {
         placeholder={placeholder}
         disabled={disabled}
         required={field.required}
-        min={config.min}
-        max={config.max}
         className={className}
         aria-invalid={!!error}
         aria-describedby={error ? `${fieldId}-error` : undefined}
       />
-      {!error && (
-        <p className="text-xs text-muted-foreground mt-1">
-          Range: {config.min} - {config.max}
-        </p>
-      )}
     </FieldWrapper>
   );
 }

@@ -141,14 +141,10 @@ export function useWorkspaceUsersWithPrefetch(workspaceId: string, options?: Use
 
     const requestBody: GetWorkspaceUsersRequest = buildWorkspaceUsersQuery(query);
     const queryKey = workspaceUsersQueryKey(workspaceId);
-
-    // Prefetch users in background
     void queryClient.prefetchQuery({
       queryKey: [...queryKey, requestBody.queries],
       queryFn: async () => {
         const client = createActiveTablesApiClient(workspaceId);
-
-        // API: POST /api/workspace/{workspaceId}/workspace/get/users
         const response = await client.post<GetWorkspaceUsersResponse>(
           '/workspace/get/users',
           requestBody as Record<string, unknown>,
@@ -156,12 +152,6 @@ export function useWorkspaceUsersWithPrefetch(workspaceId: string, options?: Use
 
         const apiUsers = response.data.data ?? [];
         const mappedUsers = apiUsers.map(mapApiUserToWorkspaceUser);
-
-        console.log('[useWorkspaceUsersWithPrefetch] Prefetched workspace users:', {
-          workspaceId,
-          count: mappedUsers.length,
-          query: query,
-        });
 
         return mappedUsers;
       },

@@ -45,7 +45,7 @@ export function FieldWrapper({
         </FieldLabel>
       )}
       <div className={fieldContainerClasses}>{children}</div>
-      <FieldError error={error} />
+      {error && <FieldError error={error} />}
     </div>
   );
 }

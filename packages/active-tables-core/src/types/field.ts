@@ -180,6 +180,42 @@ export interface FieldConfig {
    * Range: 0-10
    */
   decimalPlaces?: number;
+
+  // ============================================
+  // Reference Field Properties
+  // ============================================
+
+  /**
+   * ID of the referenced table (for SELECT_ONE_RECORD, SELECT_LIST_RECORD)
+   * @example "818040940370329601"
+   */
+  referenceTableId?: string;
+
+  /**
+   * Alternative name for referenceTableId (legacy support)
+   * @deprecated Use referenceTableId instead
+   */
+  referencedTableId?: string;
+
+  /**
+   * Field name in the referenced table to use as foreign key
+   * Required for FIRST_REFERENCE_RECORD
+   * @example "employee_id"
+   */
+  referenceField?: string;
+
+  /**
+   * Additional filter condition for referenced records
+   * Applied when fetching records for SELECT_ONE_RECORD or SELECT_LIST_RECORD
+   * @example "status='active' AND is_deleted=false"
+   */
+  additionalCondition?: string;
+
+  /**
+   * Human-readable name of the referenced table (for display purposes)
+   * @example "Employee Records"
+   */
+  referencedTableName?: string;
 }
 
 // ============================================
