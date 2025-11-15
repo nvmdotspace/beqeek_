@@ -9,6 +9,7 @@ import { useState } from 'react';
 import { getRouteApi } from '@tanstack/react-router';
 import { Button } from '@workspace/ui/components/button';
 import { Input } from '@workspace/ui/components/input';
+import { Search } from 'lucide-react';
 
 import { ROUTES } from '@/shared/route-paths';
 
@@ -34,42 +35,61 @@ export function WorkflowFormsSelect() {
   );
 
   return (
-    <div className="container mx-auto py-6 px-4">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-        <h1 className="text-3xl font-bold">Chọn Mẫu Form</h1>
-        <Button
-          variant="outline"
-          onClick={() =>
-            navigate({
-              to: ROUTES.WORKFLOW_FORMS.LIST,
-              params: { locale, workspaceId },
-            })
-          }
-        >
-          Xem danh sách
-        </Button>
+    <div className="h-full flex flex-col">
+      {/* Header */}
+      <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex h-16 items-center justify-between">
+            <div className="flex items-center gap-4">
+              <h1 className="text-2xl font-semibold tracking-tight">Chọn Mẫu Form</h1>
+            </div>
+            <Button
+              variant="outline"
+              onClick={() =>
+                navigate({
+                  to: ROUTES.WORKFLOW_FORMS.LIST,
+                  params: { locale, workspaceId },
+                })
+              }
+            >
+              Xem danh sách
+            </Button>
+          </div>
+        </div>
       </div>
 
-      <Input
-        placeholder="Tìm kiếm mẫu form..."
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        className="mb-6 max-w-md border border-input rounded-md bg-background text-foreground transition-all placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring"
-      />
+      {/* Content */}
+      <div className="flex-1 overflow-auto">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Search Bar */}
+          <div className="mb-8">
+            <div className="relative max-w-md">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Tìm kiếm mẫu form..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+          </div>
 
-      {filteredTemplates.length === 0 ? (
-        <EmptyState message="Không tìm thấy mẫu form nào" />
-      ) : (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {filteredTemplates.map((template) => (
-            <FormTemplateCard
-              key={template.type}
-              template={template}
-              onSelect={() => setSelectedTemplate(template.type)}
-            />
-          ))}
+          {/* Templates Grid */}
+          {filteredTemplates.length === 0 ? (
+            <EmptyState message="Không tìm thấy mẫu form nào" />
+          ) : (
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {filteredTemplates.map((template) => (
+                <FormTemplateCard
+                  key={template.type}
+                  template={template}
+                  onSelect={() => setSelectedTemplate(template.type)}
+                />
+              ))}
+            </div>
+          )}
         </div>
-      )}
+      </div>
 
       <CreateFormDialog
         open={!!selectedTemplate}

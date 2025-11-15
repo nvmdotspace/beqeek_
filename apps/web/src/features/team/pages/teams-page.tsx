@@ -1,12 +1,16 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { getRouteApi } from '@tanstack/react-router';
 import { ROUTES } from '@/shared/route-paths';
+import { useSidebarStore, selectCurrentWorkspace } from '@/stores/sidebar-store';
 import { useGetTeams } from '../hooks/use-get-teams';
 import { useDeleteTeam } from '../hooks/use-delete-team';
 import { TeamList } from '../components/team-list';
 import { TeamFormModal } from '../components/team-form-modal';
 import { Button } from '@workspace/ui/components/button';
-import { Plus } from 'lucide-react';
+import { Heading, Text } from '@workspace/ui/components/typography';
+import { Badge } from '@workspace/ui/components/badge';
+import { Input } from '@workspace/ui/components/input';
+import { Plus, Search, Users, Shield } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,11 +29,35 @@ const route = getRouteApi(ROUTES.WORKSPACE.TEAM);
 
 export function TeamsPage() {
   const { workspaceId } = route.useParams();
+  const currentWorkspace = useSidebarStore(selectCurrentWorkspace);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Fetch teams
   const { data: teams = [], isLoading } = useGetTeams(workspaceId, {
     query: 'WITH_ROLES', // Include roles for display
   });
+
+  // Calculate stats
+  const totalTeams = teams.length;
+  const totalMembers = useMemo(() => {
+    // This would need actual member count from API
+    // For now, using placeholder
+    return teams.reduce((sum, team) => sum + (team.teamRoles?.length || 0), 0);
+  }, [teams]);
+  const totalRoles = useMemo(() => {
+    return teams.reduce((sum, team) => sum + (team.teamRoles?.length || 0), 0);
+  }, [teams]);
+
+  // Filter teams by search query
+  const filteredTeams = useMemo(() => {
+    if (!searchQuery) return teams;
+    const lowerQuery = searchQuery.toLowerCase();
+    return teams.filter(
+      (team) =>
+        team.teamName.toLowerCase().includes(lowerQuery) ||
+        (team.teamDescription && team.teamDescription.toLowerCase().includes(lowerQuery)),
+    );
+  }, [teams, searchQuery]);
 
   // Modal state
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
@@ -73,21 +101,65 @@ export function TeamsPage() {
   const deletingTeam = teams.find((t) => t.id === deletingTeamId);
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">{m.team_page_title()}</h1>
-          <p className="text-muted-foreground">{m.team_page_description()}</p>
+    <div className="space-y-6 p-6">
+      {/* Header Section - Matching Active Tables pattern */}
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div className="space-y-1">
+            <Heading level={1}>{m.team_page_title()}</Heading>
+            <Text size="small" color="muted">
+              {currentWorkspace?.workspaceName
+                ? `Workspace • ${currentWorkspace.workspaceName}`
+                : m.team_page_description()}
+            </Text>
+          </div>
+
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="relative w-full sm:w-72">
+              <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Tìm kiếm đội nhóm..."
+                className="h-10 rounded-lg border-border/60 pl-8"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <Button variant="brand-primary" size="sm" onClick={handleCreateClick}>
+                <Plus className="h-4 w-4 mr-2" />
+                {m.team_create_button()}
+              </Button>
+            </div>
+          </div>
         </div>
-        <Button onClick={handleCreateClick}>
-          <Plus className="h-4 w-4 mr-2" />
-          {m.team_create_button()}
-        </Button>
+
+        {/* Stats badges */}
+        <div className="flex items-center gap-3">
+          <Badge variant="outline" className="flex items-center gap-1.5">
+            <Users className="h-3.5 w-3.5" />
+            <span>{totalTeams} đội nhóm</span>
+          </Badge>
+          <Badge variant="outline" className="flex items-center gap-1.5">
+            <Shield className="h-3.5 w-3.5" />
+            <span>{totalRoles} vai trò</span>
+          </Badge>
+        </div>
+      </div>
+
+      {/* Summary */}
+      <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+        <Badge variant="outline" className="border-dashed">
+          {filteredTeams.length} đội nhóm
+        </Badge>
       </div>
 
       {/* Team List */}
-      <TeamList teams={teams} onEditTeam={handleEditTeam} onDeleteTeam={handleDeleteClick} isLoading={isLoading} />
+      <TeamList
+        teams={filteredTeams}
+        onEditTeam={handleEditTeam}
+        onDeleteTeam={handleDeleteClick}
+        isLoading={isLoading}
+      />
 
       {/* Create/Edit Modal */}
       <TeamFormModal open={isFormModalOpen} onClose={() => setIsFormModalOpen(false)} team={editingTeam} />

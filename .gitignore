@@ -53,3 +53,4 @@ npm-debug.log*
 
 docs/lexical-playground
 docs/html-module
+apps/web/.tanstack

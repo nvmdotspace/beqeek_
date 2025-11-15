@@ -139,6 +139,12 @@ export const NavigationMenu = ({ isCollapsed = true, className }: NavigationMenu
               isSection: true,
               children: [
                 {
+                  id: 'documents',
+                  label: m.navigation_documents(),
+                  href: `/${locale}/workspaces/${workspaceId}/documents`,
+                  icon: FileText,
+                },
+                {
                   id: 'starred',
                   label: m.navigation_starred(),
                   href: `/${locale}/workspaces/${workspaceId}/starred`,

@@ -5,9 +5,8 @@ Ref: https://github.com/yoopta-editor/Yoopta-Editor
 ## Viết package mới beqeek-editor
 
 - Tạo package mới `beqeek-editor`
-- Phục vụ 2 mục đích
+- Phục vụ 1 mục đích
   - Cung cấp việc viết tài liệu tương tự notion (tập trung vào Large documents)
-  - Cung cấp component comment (thay thế package `@beqeek/comment` hiện tại)
 
 ## Yêu cầu
 
@@ -84,11 +83,3 @@ Source code tham khảo
 - Large documents:
   - https://yoopta.dev/examples/withShadcnUILibrary
   - https://github.com/yoopta-editor/Yoopta-Editor/blob/master/web/next-example/src/components/examples/withShadcnUILibrary/index.tsx
-
-- Chats using Yoopta-Editor:
-  - https://yoopta.dev/examples/withChatSlack
-  - https://github.com/yoopta-editor/Yoopta-Editor/blob/master/web/next-example/src/components/examples/withChatSlack/index.tsx
-
-Copy nguyên code từ source github và đảm bảo khả năng tích hợp với các thư viện hiện có trong dự án, bao gồm font chữ và các style khác.
-
-Tham khảo cách triển khai package "./packages/comments" để viết package mới

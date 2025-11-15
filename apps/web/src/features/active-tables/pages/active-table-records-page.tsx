@@ -1,5 +1,5 @@
-import { useMemo, useState, useEffect } from 'react';
-import { ArrowLeft, Plus, Search } from 'lucide-react';
+import { useMemo, useState, useEffect, useCallback, useRef } from 'react';
+import { ArrowLeft, Plus, Search, FileText, Shield } from 'lucide-react';
 import { getRouteApi } from '@tanstack/react-router';
 
 import { useActiveTable } from '../hooks/use-active-tables';
@@ -90,7 +90,41 @@ export const ActiveTableRecordsPage = () => {
       return [];
     }
   });
-  const [searchQuery, setSearchQuery] = useState('');
+
+  // Search query state - initialize from URL
+  const [searchQuery, setSearchQuery] = useState(() => {
+    return searchParams.search || '';
+  });
+
+  // Local search input state for immediate UI updates without URL changes
+  const [localSearchInput, setLocalSearchInput] = useState(() => {
+    return searchParams.search || '';
+  });
+
+  // Function to commit search (update both state and URL)
+  const commitSearch = useCallback(
+    (searchValue: string) => {
+      const trimmedValue = searchValue.trim();
+      setSearchQuery(trimmedValue);
+      setLocalSearchInput(trimmedValue);
+
+      const searchParam = trimmedValue || undefined;
+      const currentSearchParam = searchParams.search;
+
+      if (searchParam !== currentSearchParam) {
+        navigate({
+          to: ROUTES.ACTIVE_TABLES.TABLE_RECORDS,
+          params: { locale, workspaceId, tableId },
+          search: {
+            ...searchParams,
+            search: searchParam,
+          },
+          replace: true,
+        });
+      }
+    },
+    [navigate, locale, workspaceId, tableId, searchParams],
+  );
 
   // Sync filters with URL
   useEffect(() => {
@@ -110,6 +144,13 @@ export const ActiveTableRecordsPage = () => {
       });
     }
   }, [quickFilters, navigate, locale, workspaceId, tableId, searchParams]);
+
+  // Sync local search input and searchQuery when URL changes (e.g., browser back/forward)
+  useEffect(() => {
+    const urlSearchValue = searchParams.search || '';
+    setLocalSearchInput(urlSearchValue);
+    setSearchQuery(urlSearchValue);
+  }, [searchParams.search]);
 
   // Convert quick filters to API filtering format with encryption
   const apiFilters = useMemo(() => {
@@ -142,11 +183,13 @@ export const ActiveTableRecordsPage = () => {
   const {
     records,
     isLoading: recordsLoading,
+    isFetching,
     isFetchingNextPage,
     hasNextPage,
     fetchNextPage,
     error: recordsError,
     isDecrypting,
+    isFilterChange,
   } = useInfiniteActiveTableRecords(workspaceId, tableId, table ?? null, {
     pageSize: 50,
     direction: 'desc',
@@ -259,10 +302,13 @@ export const ActiveTableRecordsPage = () => {
     });
   };
 
-  const isLoading = tableLoading || recordsLoading;
+  const isInitialPageLoading = tableLoading && !table;
   const isInitialRecordListLoading = (recordsLoading || isDecrypting) && filteredRecords.length === 0;
+  const isFilterLoading = isFilterChange && isFetching;
+  const shouldShowRecordListLoading = isInitialRecordListLoading;
+  const showFilterOverlay = isFilterLoading && filteredRecords.length > 0;
 
-  if (isLoading) {
+  if (isInitialPageLoading) {
     return (
       <div className="space-y-6 p-6">
         <Button variant="ghost" onClick={handleBack} className="flex items-center gap-2">
@@ -326,7 +372,7 @@ export const ActiveTableRecordsPage = () => {
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="space-y-6 p-6">
       {/* ARIA Live Region for Screen Readers */}
       <RecordsLiveAnnouncer
         isLoading={recordsLoading}
@@ -336,57 +382,61 @@ export const ActiveTableRecordsPage = () => {
         recordCount={filteredRecords.length}
       />
 
-      {/* Header */}
-      <div className="flex-shrink-0 border-b border-border bg-background px-3 sm:px-6 py-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 flex-wrap">
-              <Button variant="ghost" size="sm" className="h-8 px-2" onClick={handleBack}>
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                <span className="hidden sm:inline">Back to Table</span>
-                <span className="sm:hidden">Back</span>
+      {/* Header Section - Matching Active Tables pattern */}
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" size="icon" onClick={handleBack} className="h-8 w-8">
+                <ArrowLeft className="h-4 w-4" />
               </Button>
+              <Heading level={1}>{displayTable.name || 'Records'}</Heading>
             </div>
-            <Heading level={1}>{displayTable.name || 'Records'}</Heading>
-            {displayTable.description && (
-              <Text size="small" color="muted" className="max-w-2xl leading-relaxed">
-                {displayTable.description}
-              </Text>
-            )}
+            <Text size="small" color="muted">
+              {displayTable.description || 'Quản lý bản ghi'}
+            </Text>
           </div>
 
-          <div className="flex items-center gap-2 flex-wrap">
-            {encryption.isE2EEEnabled && (
-              <Badge
-                variant="outline"
-                className={
-                  encryption.keyValidationStatus === 'valid'
-                    ? 'border-success text-success text-xs'
-                    : 'border-warning text-warning text-xs'
-                }
-              >
-                {encryption.keyValidationStatus === 'valid' ? 'E2EE Active' : 'E2EE (Key Required)'}
-              </Badge>
-            )}
-            <Badge variant="outline" className="text-xs">
-              {filteredRecords.length} records
-            </Badge>
+          <div className="flex items-center gap-2">
+            <Button onClick={handleCreateRecord} size="sm">
+              <Plus className="h-4 w-4 mr-2" />
+              Tạo bản ghi
+            </Button>
           </div>
+        </div>
+
+        {/* Stats badges */}
+        <div className="flex items-center gap-3 flex-wrap">
+          <Badge variant="outline" className="flex items-center gap-1.5">
+            <FileText className="h-3.5 w-3.5" />
+            <span>{filteredRecords.length} bản ghi</span>
+          </Badge>
+          {encryption.isE2EEEnabled && (
+            <Badge
+              variant="outline"
+              className={
+                encryption.keyValidationStatus === 'valid'
+                  ? 'border-success text-success flex items-center gap-1.5'
+                  : 'border-warning text-warning flex items-center gap-1.5'
+              }
+            >
+              <Shield className="h-3.5 w-3.5" />
+              <span>{encryption.keyValidationStatus === 'valid' ? 'E2EE Active' : 'E2EE (Key Required)'}</span>
+            </Badge>
+          )}
         </div>
       </div>
 
       {/* Encryption Warning */}
       {encryption.isE2EEEnabled && encryption.keyValidationStatus !== 'valid' && (
-        <div className="flex-shrink-0 px-3 sm:px-6 py-3">
-          <Card className="border-warning bg-warning-subtle">
-            <CardContent className="p-4">
-              <p className="text-sm text-warning">
-                Encryption key is required to view encrypted data. Please go back to the table detail page to enter your
-                encryption key.
-              </p>
-            </CardContent>
-          </Card>
-        </div>
+        <Card className="border-warning bg-warning-subtle">
+          <CardContent className="p-4">
+            <p className="text-sm text-warning">
+              Encryption key is required to view encrypted data. Please go back to the table detail page to enter your
+              encryption key.
+            </p>
+          </CardContent>
+        </Card>
       )}
 
       {/* Quick Filters Bar */}
@@ -399,31 +449,28 @@ export const ActiveTableRecordsPage = () => {
         />
       )}
 
-      {/* View Controls */}
-      <div className="flex-shrink-0 border-b border-border bg-background px-3 sm:px-6 py-3">
-        <div className="flex flex-col gap-3 sm:gap-4">
-          {/* View Mode Selector + Search + Actions */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
+      {/* View Controls - Matching Active Tables pattern */}
+      <div className="rounded-xl border border-border/60 bg-card p-4 shadow-sm">
+        <div className="flex flex-col gap-3">
+          {/* View Mode Selector + Search */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
             <ViewModeSelector table={displayTable} currentMode={viewMode} onModeChange={handleViewModeChange} />
 
-            <div className="flex items-center gap-2 flex-1 sm:max-w-md">
-              {/* Search (all views) */}
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  type="text"
-                  placeholder="Search records..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 text-sm"
-                />
-              </div>
-
-              {/* New Record Button */}
-              <Button onClick={handleCreateRecord} size="sm" className="text-xs sm:text-sm shrink-0">
-                <span className="hidden sm:inline">New Record</span>
-                <span className="sm:hidden">New</span>
-              </Button>
+            <div className="relative w-full sm:w-72">
+              <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Tìm kiếm bản ghi..."
+                value={localSearchInput}
+                onChange={(e) => setLocalSearchInput(e.target.value)}
+                onBlur={(e) => commitSearch(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    commitSearch(e.currentTarget.value);
+                  }
+                }}
+                className="h-10 rounded-lg border-border/60 pl-8"
+              />
             </div>
           </div>
 
@@ -449,19 +496,29 @@ export const ActiveTableRecordsPage = () => {
       </div>
 
       {/* Content Area */}
-      <div className="flex-1 overflow-auto">
+      <div className="space-y-4">
         {/* List View */}
         {viewMode === 'list' && (
-          <div className="p-3 sm:p-6">
-            <RecordList
-              table={displayTable}
-              records={filteredRecords}
-              config={displayTable.config.recordListConfig || { layout: RECORD_LIST_LAYOUT_GENERIC_TABLE }}
-              loading={isInitialRecordListLoading}
-              onRecordClick={(record) => handleViewRecord(record)}
-              encryptionKey={encryption.encryptionKey || undefined}
-              workspaceUsers={workspaceUsers}
-            />
+          <>
+            <div className="relative">
+              {showFilterOverlay && (
+                <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center rounded-lg">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary border-t-transparent"></div>
+                    <span className="text-sm">Đang tải...</span>
+                  </div>
+                </div>
+              )}
+              <RecordList
+                table={displayTable}
+                records={filteredRecords}
+                config={displayTable.config.recordListConfig || { layout: RECORD_LIST_LAYOUT_GENERIC_TABLE }}
+                loading={shouldShowRecordListLoading}
+                onRecordClick={(record) => handleViewRecord(record)}
+                encryptionKey={encryption.encryptionKey || undefined}
+                workspaceUsers={workspaceUsers}
+              />
+            </div>
 
             {/* Infinite scroll components */}
             {recordsError && (
@@ -486,51 +543,47 @@ export const ActiveTableRecordsPage = () => {
                 onBackToTop={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
               />
             )}
-          </div>
+          </>
         )}
 
         {/* Kanban View */}
         {viewMode === 'kanban' && currentKanbanConfig && displayTable.config && (
-          <div className="p-3 sm:p-6">
-            <KanbanBoard
-              table={displayTable}
-              records={filteredRecords}
-              config={currentKanbanConfig}
-              onRecordMove={handleRecordMove}
-              onRecordClick={handleViewRecord}
-              workspaceUsers={workspaceUsers}
-              className="gap-2 sm:gap-4"
-              messages={{
-                loading: 'Loading...',
-                dropHere: 'Drop cards here',
-                error: 'Error',
-                records: 'records',
-              }}
-            />
-          </div>
+          <KanbanBoard
+            table={displayTable}
+            records={filteredRecords}
+            config={currentKanbanConfig}
+            onRecordMove={handleRecordMove}
+            onRecordClick={handleViewRecord}
+            workspaceUsers={workspaceUsers}
+            className="gap-2 sm:gap-4"
+            messages={{
+              loading: 'Loading...',
+              dropHere: 'Drop cards here',
+              error: 'Error',
+              records: 'records',
+            }}
+          />
         )}
 
         {/* Gantt View */}
         {viewMode === 'gantt' && currentGanttConfig && displayTable.config && (
-          <div className="p-3 sm:p-6">
-            <Card>
-              <CardContent className="p-4">
-                <GanttChartView
-                  table={displayTable}
-                  records={filteredRecords}
-                  config={currentGanttConfig}
-                  onTaskClick={handleViewRecord}
-                  showProgress={true}
-                  showToday={true}
-                  className="min-h-[400px] sm:min-h-[500px]"
-                  messages={{
-                    loading: 'Loading timeline...',
-                    noRecordsFound: 'No tasks to display',
-                  }}
-                />
-              </CardContent>
-            </Card>
-          </div>
+          <Card>
+            <CardContent className="p-4">
+              <GanttChartView
+                table={displayTable}
+                records={filteredRecords}
+                config={currentGanttConfig}
+                onTaskClick={handleViewRecord}
+                showProgress={true}
+                showToday={true}
+                className="min-h-[400px] sm:min-h-[500px]"
+                messages={{
+                  loading: 'Loading timeline...',
+                  noRecordsFound: 'No tasks to display',
+                }}
+              />
+            </CardContent>
+          </Card>
         )}
       </div>
 

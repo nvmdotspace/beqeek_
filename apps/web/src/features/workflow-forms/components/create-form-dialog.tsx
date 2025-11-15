@@ -98,7 +98,7 @@ export function CreateFormDialog({ open, onClose, templateType, workspaceId }: C
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-[500px]">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>Tạo Form Mới</DialogTitle>

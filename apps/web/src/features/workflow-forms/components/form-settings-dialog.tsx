@@ -63,7 +63,7 @@ export function FormSettingsDialog({ open, onClose, form }: FormSettingsDialogPr
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>Cài đặt Form</DialogTitle>
           <DialogDescription>Chỉnh sửa thông tin cơ bản của form.</DialogDescription>

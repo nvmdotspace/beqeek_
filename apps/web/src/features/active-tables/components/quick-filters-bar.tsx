@@ -5,7 +5,7 @@
  * Based on active-table-config-functional-spec.md section 2.6
  */
 
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { Badge } from '@workspace/ui/components/badge';
 import { Button } from '@workspace/ui/components/button';
@@ -22,6 +22,7 @@ import {
 } from '@workspace/ui/components/command';
 import type { Table, QuickFilterConfig, FieldConfig, FieldOption } from '@workspace/active-tables-core';
 import { QUICK_FILTER_VALID_FIELD_TYPES } from '@workspace/beqeek-shared';
+import { cn } from '@workspace/ui/lib/utils';
 
 export interface QuickFilterValue {
   fieldName: string;
@@ -199,7 +200,6 @@ export function QuickFiltersBar({
               variant="ghost"
               size="sm"
               onClick={handleClearAll}
-              className="text-xs h-7"
               aria-label={`Clear all ${filters.length} filters`}
             >
               Clear All ({filters.length})
@@ -231,16 +231,14 @@ export function QuickFiltersBar({
                 <div key={field.name} className="flex items-center gap-1.5">
                   <Popover>
                     <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        size="sm"
+                      <button
+                        type="button"
                         role="combobox"
                         aria-label={`Filter by ${field.label || field.name}`}
-                        className={`
-                          h-8 text-xs justify-between
-                          min-w-[160px] max-w-[280px]
-                          ${isActive ? 'border-primary' : ''}
-                        `}
+                        className={cn(
+                          'flex justify-between min-w-[160px] max-w-[280px] rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50',
+                          isActive ? 'border-primary bg-primary/5 font-medium' : '',
+                        )}
                       >
                         <span className="truncate">
                           {selectedCount === 0
@@ -248,7 +246,7 @@ export function QuickFiltersBar({
                             : `${field.label || field.name} (${selectedCount})`}
                         </span>
                         <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                      </Button>
+                      </button>
                     </PopoverTrigger>
                     <PopoverContent className="w-[280px] p-0" align="start">
                       <Command>
@@ -264,8 +262,8 @@ export function QuickFiltersBar({
                                   onSelect={() => toggleMultiSelectOption(field.name, String(option.value))}
                                   className="cursor-pointer"
                                 >
-                                  <Checkbox checked={isSelected} className="mr-2" />
                                   <div className="flex items-center gap-2 min-w-0 flex-1">
+                                    <Checkbox checked={isSelected} className="shrink-0" />
                                     {option.background_color && (
                                       <div
                                         className="w-2 h-2 rounded-full shrink-0"
@@ -284,56 +282,65 @@ export function QuickFiltersBar({
                   </Popover>
                 </div>
               );
-            }
+            } else {
+              // For single-select
+              const displayText = getFilterDisplayText(field, currentValue as string);
 
-            // For single-select
-            const displayText = getFilterDisplayText(field, currentValue as string);
-
-            return (
-              <div key={field.name} className="flex items-center gap-1.5">
-                <Select value={currentValue as string} onValueChange={(value) => handleFilterChange(field.name, value)}>
-                  <SelectTrigger
-                    aria-label={`Filter by ${field.label || field.name}`}
-                    className={`
-                      h-8 text-xs
-                      min-w-[160px] max-w-[280px]
-                      ${isActive ? 'border-primary' : ''}
-                    `}
+              return (
+                <div key={field.name} className="flex items-center gap-1.5">
+                  <Select
+                    value={currentValue as string}
+                    onValueChange={(value) => handleFilterChange(field.name, value)}
                   >
-                    <SelectValue placeholder={field.label || field.name}>
-                      <span className="truncate" title={displayText}>
-                        {displayText}
-                      </span>
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent className="max-w-[320px]">
-                    <SelectItem value="all">All {field.label || field.name}</SelectItem>
-                    {options.map((option) => (
-                      <SelectItem key={option.value} value={String(option.value)}>
-                        <div className="flex items-center gap-2 min-w-0">
-                          {option.background_color && (
-                            <div
-                              className="w-2 h-2 rounded-full shrink-0"
-                              style={{ backgroundColor: option.background_color }}
-                            />
-                          )}
-                          <span className="truncate" title={option.text}>
-                            {option.text}
-                          </span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            );
+                    <SelectTrigger
+                      aria-label={`Filter by ${field.label || field.name}`}
+                      className={`
+                          min-w-[160px] max-w-[280px]
+                          ${isActive ? 'border-primary bg-primary/5 font-medium' : ''}
+                        `}
+                    >
+                      <SelectValue placeholder={field.label || field.name}>
+                        <span className="truncate" title={displayText}>
+                          {displayText}
+                        </span>
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent className="max-w-[320px]">
+                      <SelectItem value="all">All {field.label || field.name}</SelectItem>
+                      {options.map((option) => {
+                        const isSelected = currentValue === String(option.value);
+                        return (
+                          <SelectItem
+                            key={option.value}
+                            value={String(option.value)}
+                            className={isSelected ? 'bg-accent font-medium' : ''}
+                          >
+                            <div className="flex items-center gap-2 min-w-0">
+                              {option.background_color && (
+                                <div
+                                  className="w-2 h-2 rounded-full shrink-0"
+                                  style={{ backgroundColor: option.background_color }}
+                                />
+                              )}
+                              <span className="truncate" title={option.text}>
+                                {option.text}
+                              </span>
+                            </div>
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
+                </div>
+              );
+            }
           })}
         </div>
 
         {/* Active Filters Count Badge */}
         {hasActiveFilters && (
           <div className="mt-2 flex items-center gap-1.5">
-            <Badge variant="outline" className="text-[10px] h-5">
+            <Badge variant="outline" className="text-xs h-5">
               {filters.length} {filters.length === 1 ? 'filter' : 'filters'} active
             </Badge>
           </div>

@@ -89,8 +89,8 @@ export const ROUTES = {
     /** Workflows: /$locale/workspaces/$workspaceId/workflows */
     WORKFLOWS: '/$locale/workspaces/$workspaceId/workflows' as const,
 
-    /** Team management: /$locale/workspaces/$workspaceId/team */
-    TEAM: '/$locale/workspaces/$workspaceId/team' as const,
+    /** Team management: /$locale/workspaces/$workspaceId/team/ */
+    TEAM: '/$locale/workspaces/$workspaceId/team/' as const,
 
     /** Team detail: /$locale/workspaces/$workspaceId/team/$teamId */
     TEAM_DETAIL: '/$locale/workspaces/$workspaceId/team/$teamId' as const,
@@ -100,6 +100,9 @@ export const ROUTES = {
 
     /** Analytics: /$locale/workspaces/$workspaceId/analytics */
     ANALYTICS: '/$locale/workspaces/$workspaceId/analytics' as const,
+
+    /** Documents (future feature): /$locale/workspaces/$workspaceId/documents */
+    DOCUMENTS: '/$locale/workspaces/$workspaceId/documents' as const,
 
     /** Starred items: /$locale/workspaces/$workspaceId/starred */
     STARRED: '/$locale/workspaces/$workspaceId/starred' as const,

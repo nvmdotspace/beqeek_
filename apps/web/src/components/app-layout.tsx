@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
 import { AppSidebar } from './app-sidebar';
-import { MobileBottomNav, MobileFloatingAction } from './mobile-bottom-nav';
 import { ThemeToggle } from './theme-toggle';
 import { Button } from '@workspace/ui/components/button';
 import { Menu, Settings, X, PanelLeftClose, PanelLeft } from 'lucide-react';
@@ -156,12 +155,6 @@ export const AppLayout = ({ children, showSidebar = true, pageTitle, pageIcon }:
         {/* Page Content */}
         <main className="flex-1 overflow-auto hide-scrollbar-mobile pb-16 md:pb-0">{children}</main>
       </div>
-
-      {/* Mobile Bottom Navigation */}
-      <MobileBottomNav />
-
-      {/* Mobile Floating Action Button */}
-      <MobileFloatingAction />
     </div>
   );
 };

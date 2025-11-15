@@ -15,7 +15,7 @@
  */
 
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { fetchActiveTableRecords } from '../api/active-records-api';
 import { decryptRecords } from '@workspace/active-tables-core';
 import { CommonUtils } from '@workspace/encryption-core';
@@ -112,15 +112,25 @@ export function useInfiniteActiveTableRecords(
       encrypted.record = recordFilters;
     }
 
-    // Copy other filter properties (like fulltext) without encryption
+    // Handle search query - hash keywords for E2E tables
+    if (filters.fulltext && typeof filters.fulltext === 'string' && filters.fulltext.trim()) {
+      const searchEncryptionKey = table.config.e2eeEncryption ? encryptionKey : table.config.encryptionKey;
+      if (searchEncryptionKey) {
+        encrypted.fulltext = CommonUtils.hashKeyword(filters.fulltext.trim(), searchEncryptionKey).join(' ');
+      } else {
+        encrypted.fulltext = filters.fulltext.trim();
+      }
+    }
+
+    // Copy other filter properties without modification
     Object.entries(filters).forEach(([key, value]) => {
-      if (key !== 'record') {
+      if (key !== 'record' && key !== 'fulltext') {
         encrypted[key] = value;
       }
     });
 
     return encrypted;
-  }, [filters, table]);
+  }, [filters, table, encryptionKey]);
 
   const query = useInfiniteQuery<ListRecordsResponse, Error>({
     queryKey: ['active-table-records', workspaceId, tableId, pageSize, direction, encryptedFilters],
@@ -155,9 +165,41 @@ export function useInfiniteActiveTableRecords(
   // Decrypt records if encryption is enabled
   const [decryptedRecords, setDecryptedRecords] = useState<TableRecord[]>([]);
 
+  // Track previous filters to detect filter changes
+  const prevFiltersRef = useRef<Record<string, unknown> | undefined>(undefined);
+  const [isFilterChange, setIsFilterChange] = useState(false);
+
+  useEffect(() => {
+    const currentFilters = filters;
+    const previousFilters = prevFiltersRef.current;
+
+    // Check if filters actually changed (not just initial load)
+    const hasFiltersChanged = previousFilters && JSON.stringify(previousFilters) !== JSON.stringify(currentFilters);
+
+    if (hasFiltersChanged) {
+      setIsFilterChange(true);
+    } else if (!previousFilters) {
+      // Initial load
+      setIsFilterChange(false);
+    }
+
+    prevFiltersRef.current = currentFilters || {};
+  }, [filters]);
+
   useEffect(() => {
     const decryptAllRecords = async () => {
-      if (!table || rawRecords.length === 0) {
+      if (!table) {
+        setDecryptedRecords([]);
+        return;
+      }
+
+      // For filter changes, don't clear records immediately to avoid loading state conflict
+      if (rawRecords.length === 0 && isFilterChange && query.isFetching) {
+        // Keep existing records during filter fetch to prevent loading state conflict
+        return;
+      }
+
+      if (rawRecords.length === 0) {
         setDecryptedRecords([]);
         return;
       }
@@ -224,7 +266,14 @@ export function useInfiniteActiveTableRecords(
     };
 
     void decryptAllRecords();
-  }, [rawRecords, table, encryptionKey]);
+  }, [rawRecords, table, encryptionKey, isFilterChange]);
+
+  // Reset filter change state when fetch completes
+  useEffect(() => {
+    if (!query.isFetching && isFilterChange) {
+      setIsFilterChange(false);
+    }
+  }, [query.isFetching, isFilterChange]);
 
   return {
     records: decryptedRecords,
@@ -236,6 +285,7 @@ export function useInfiniteActiveTableRecords(
     error: query.error || decryptionError,
     isDecrypting,
     decryptionError,
+    isFilterChange, // Expose filter change state
     fetchNextPage: query.fetchNextPage,
     refetch: query.refetch,
     pageCount: query.data?.pages.length ?? 0,

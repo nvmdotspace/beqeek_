@@ -6,9 +6,10 @@
  */
 
 import { useState } from 'react';
-import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core';
+import { DndContext, closestCenter, DragEndEvent, DragStartEvent, DragOverEvent } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { Button } from '@workspace/ui/components/button';
+import { ScrollArea } from '@workspace/ui/components/scroll-area';
 import { Plus } from 'lucide-react';
 
 import { useFormBuilderStore } from '../stores/form-builder-store';
@@ -19,11 +20,23 @@ import { EmptyFieldList } from './empty-field-list';
 export function FieldList() {
   const { fields, reorderFields } = useFormBuilderStore();
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [activeId, setActiveId] = useState<number | null>(null);
+  const [overId, setOverId] = useState<number | null>(null);
+
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(Number(event.active.id));
+  };
+
+  const handleDragOver = (event: DragOverEvent) => {
+    setOverId(event.over ? Number(event.over.id) : null);
+  };
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
     if (!over || active.id === over.id) {
+      setActiveId(null);
+      setOverId(null);
       return;
     }
 
@@ -31,6 +44,13 @@ export function FieldList() {
     const newIndex = Number(over.id);
 
     reorderFields(oldIndex, newIndex);
+    setActiveId(null);
+    setOverId(null);
+  };
+
+  const handleDragCancel = () => {
+    setActiveId(null);
+    setOverId(null);
   };
 
   if (fields.length === 0) {
@@ -46,20 +66,39 @@ export function FieldList() {
     <>
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-medium">Danh sách Field</h3>
+          <div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Tổng: {fields.length} field{fields.length !== 1 ? 's' : ''} • Bắt buộc:{' '}
+              {fields.filter((f) => f.required).length}
+            </p>
+          </div>
           <Button onClick={() => setShowAddDialog(true)} size="sm">
             <Plus className="w-4 h-4 mr-2" />
             Thêm Field
           </Button>
         </div>
 
-        <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <DndContext
+          collisionDetection={closestCenter}
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDragEnd={handleDragEnd}
+          onDragCancel={handleDragCancel}
+        >
           <SortableContext items={fields.map((_, i) => i)} strategy={verticalListSortingStrategy}>
-            <div className="space-y-2">
-              {fields.map((field, index) => (
-                <FieldListItem key={index} field={field} index={index} />
-              ))}
-            </div>
+            <ScrollArea className="h-[500px] rounded-md border">
+              <div className="divide-y">
+                {fields.map((field, index) => (
+                  <FieldListItem
+                    key={index}
+                    field={field}
+                    index={index}
+                    isDraggedOver={overId === index}
+                    isBeingDragged={activeId === index}
+                  />
+                ))}
+              </div>
+            </ScrollArea>
           </SortableContext>
         </DndContext>
       </div>
