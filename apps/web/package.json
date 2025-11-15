@@ -55,6 +55,7 @@
     "@workspace/typescript-config": "workspace:*",
     "eslint": "^9.36.0",
     "jsdom": "^27.2.0",
+    "rollup-plugin-visualizer": "^6.0.5",
     "tailwindcss": "^4.1.13",
     "typescript": "^5.9.2",
     "vite": "^6.0.3",
