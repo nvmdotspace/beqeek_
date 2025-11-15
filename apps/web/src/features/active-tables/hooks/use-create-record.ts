@@ -174,19 +174,15 @@ function buildEncryptedCreatePayload(
     const encryptedValue = CommonUtils.encryptTableData(tableDetail as any, fieldName, value);
     payload.record[fieldName] = encryptedValue;
 
-    // Generate hashed_keywords for search functionality
-    if (CommonUtils.hashEncryptFields().includes(field.type)) {
-      // SELECT/CHECKBOX fields: hashed_keywords = same as record (already hashed)
-      // These fields are hashed with HMAC-SHA256, so we use the same hash for search
-      if (Array.isArray(encryptedValue)) {
-        payload.hashed_keywords![fieldName] = encryptedValue;
-      } else {
-        payload.hashed_keywords![fieldName] = encryptedValue;
-      }
-    } else if (hashedKeywordFields.includes(fieldName) && typeof value === 'string') {
+    // Generate hashed_keywords ONLY for text fields configured for full-text search
+    // Per blade.php logic (line 3162-3164), only add if:
+    // 1. Field is in hashedKeywordFields config (for full-text search)
+    // 2. AND field type is a text field (SHORT_TEXT, TEXT, RICH_TEXT, etc.)
+    // NOTE: SELECT/CHECKBOX fields are NOT added to hashed_keywords
+    if (hashedKeywordFields.includes(fieldName) && CommonUtils.encryptFields().includes(field.type)) {
       // Text fields: tokenize and hash each token for full-text search
       // Returns array of hashed tokens: ['hash1', 'hash2', ...]
-      payload.hashed_keywords![fieldName] = CommonUtils.hashKeyword(value, encryptionKey);
+      payload.hashed_keywords![fieldName] = CommonUtils.hashKeyword(value as string, encryptionKey);
     }
   });
 

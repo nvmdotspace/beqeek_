@@ -113,7 +113,7 @@ export function TeamFormModal({ open, onClose, team }: TeamFormModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>{isEditMode ? m.team_edit_title() : m.team_create_title()}</DialogTitle>
           <DialogDescription>{isEditMode ? m.team_edit_description() : m.team_create_description()}</DialogDescription>

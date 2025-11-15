@@ -14,6 +14,12 @@ export {
 } from './use-get-workspace-users';
 
 export {
+  useGetWorkspaceUsersRaw,
+  type ApiWorkspaceUser,
+  type UseGetWorkspaceUsersRawOptions,
+} from './use-get-workspace-users-raw';
+
+export {
   useWorkspaceUsersWithPrefetch,
   type UseWorkspaceUsersWithPrefetchOptions,
 } from './use-workspace-users-with-prefetch';

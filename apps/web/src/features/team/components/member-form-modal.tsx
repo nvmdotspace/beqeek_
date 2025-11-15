@@ -35,6 +35,7 @@ export function MemberFormModal({ open, onClose, preselectedTeamId }: MemberForm
 
   // Form state
   const [username, setUsername] = useState('');
+  const [debouncedUsername, setDebouncedUsername] = useState('');
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
   const [fullName, setFullName] = useState('');
@@ -42,17 +43,29 @@ export function MemberFormModal({ open, onClose, preselectedTeamId }: MemberForm
   const [selectedRoleId, setSelectedRoleId] = useState<string>('');
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  // Debounce username input to avoid excessive API calls
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedUsername(username);
+    }, 500); // 500ms debounce
+
+    return () => clearTimeout(timer);
+  }, [username]);
+
   // Username lookup
   const {
     data: lookupResult,
     isLoading: isLookingUp,
     isFetching: isFetchingLookup,
-  } = useLookupUsername(username, {
-    enabled: username.trim().length >= 2,
+  } = useLookupUsername(debouncedUsername, {
+    enabled: debouncedUsername.trim().length >= 2,
   });
 
-  const userExists = lookupResult !== null;
-  const showPasswordField = username.trim().length >= 2 && !userExists;
+  // Validate that lookupResult matches current debouncedUsername to avoid race conditions
+  const userExists = Boolean(
+    lookupResult && lookupResult.username?.toLowerCase() === debouncedUsername.trim().toLowerCase(),
+  );
+  const showPasswordField = !userExists; // Always show for new users, hide after lookup confirms existing user
 
   // Fetch teams
   const { data: teams = [] } = useGetTeams(workspaceId, { query: 'WITH_ROLES' });
@@ -145,32 +158,24 @@ export function MemberFormModal({ open, onClose, preselectedTeamId }: MemberForm
     e.preventDefault();
     if (!validateForm()) return;
 
-    if (userExists) {
-      // Invite existing user
+    if (userExists && lookupResult) {
+      // Invite existing user - requires userId from lookup
       inviteUser.mutate({
-        constraints: {
-          workspaceId,
-          workspaceTeamId: selectedTeamId,
-          workspaceTeamRoleId: selectedRoleId,
-        },
-        data: {
-          username: username.trim(),
-        },
+        workspaceId,
+        workspaceTeamId: selectedTeamId,
+        workspaceTeamRoleId: selectedRoleId,
+        userId: lookupResult.id,
       });
     } else {
       // Create new user
       createUser.mutate({
-        constraints: {
-          workspaceId,
-          workspaceTeamId: selectedTeamId,
-          workspaceTeamRoleId: selectedRoleId,
-        },
-        data: {
-          username: username.trim(),
-          password: password.trim(),
-          email: email.trim() || undefined,
-          fullName: fullName.trim() || undefined,
-        },
+        workspaceId,
+        workspaceTeamId: selectedTeamId,
+        workspaceTeamRoleId: selectedRoleId,
+        username: username.trim(),
+        password: password.trim(),
+        email: email.trim() || undefined,
+        fullName: fullName.trim() || undefined,
       });
     }
   };
@@ -202,9 +207,9 @@ export function MemberFormModal({ open, onClose, preselectedTeamId }: MemberForm
                 aria-invalid={!!errors.username}
                 className={errors.username ? 'border-destructive' : ''}
               />
-              {username.trim().length >= 2 && (
+              {debouncedUsername.trim().length >= 2 && (
                 <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                  {isLookingUpUsername ? (
+                  {isLookingUpUsername || isFetchingLookup || username !== debouncedUsername ? (
                     <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                   ) : userExists ? (
                     <CheckCircle2 className="h-4 w-4 text-green-600" />
@@ -215,7 +220,7 @@ export function MemberFormModal({ open, onClose, preselectedTeamId }: MemberForm
               )}
             </div>
             {errors.username && <p className="text-sm text-destructive">{errors.username}</p>}
-            {username.trim().length >= 2 && !isLookingUpUsername && (
+            {debouncedUsername.trim().length >= 2 && !isLookingUpUsername && username === debouncedUsername && (
               <p className="text-sm text-muted-foreground">
                 {userExists ? m.member_form_user_exists() : m.member_form_user_new()}
               </p>
@@ -283,12 +288,10 @@ export function MemberFormModal({ open, onClose, preselectedTeamId }: MemberForm
               onValueChange={setSelectedTeamId}
               disabled={isPending || !!preselectedTeamId}
             >
-              <SelectTrigger
-                id="team"
-                aria-invalid={!!errors.teamId}
-                className={errors.teamId ? 'border-destructive' : ''}
-              >
-                <SelectValue placeholder={m.member_form_team_placeholder()} />
+              <SelectTrigger aria-invalid={!!errors.teamId} className={errors.teamId ? 'border-destructive' : ''}>
+                <SelectValue placeholder={m.member_form_team_placeholder()}>
+                  {selectedTeamId && teams.find((t) => t.id === selectedTeamId)?.teamName}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {teams.map((team) => (
@@ -312,12 +315,14 @@ export function MemberFormModal({ open, onClose, preselectedTeamId }: MemberForm
               onValueChange={setSelectedRoleId}
               disabled={isPending || !selectedTeamId || roles.length === 0}
             >
-              <SelectTrigger
-                id="role"
-                aria-invalid={!!errors.roleId}
-                className={errors.roleId ? 'border-destructive' : ''}
-              >
-                <SelectValue placeholder={m.member_form_role_placeholder()} />
+              <SelectTrigger aria-invalid={!!errors.roleId} className={errors.roleId ? 'border-destructive' : ''}>
+                <SelectValue placeholder={m.member_form_role_placeholder()}>
+                  {selectedRoleId &&
+                    (() => {
+                      const role = roles.find((r) => r.id === selectedRoleId);
+                      return role ? `${role.roleName}${role.isDefault ? ` (${m.role_badge_default()})` : ''}` : null;
+                    })()}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {roles.map((role) => (

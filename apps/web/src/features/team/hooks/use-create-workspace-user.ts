@@ -2,32 +2,20 @@ import { useMutation, useQueryClient, type UseMutationOptions } from '@tanstack/
 import { apiClient } from '@/shared/api/http-client';
 
 interface CreateWorkspaceUserRequest {
-  constraints: {
-    workspaceId: string;
-    workspaceTeamId?: string;
-    workspaceTeamRoleId?: string;
-  };
-  data: {
-    username: string;
-    password: string;
-    email?: string;
-    fullName?: string;
-  };
+  workspaceId: string;
+  workspaceTeamId: string;
+  workspaceTeamRoleId: string;
+  username: string;
+  password: string;
+  email?: string;
+  fullName?: string;
 }
 
 interface CreateWorkspaceUserResponse {
-  id: string;
-  userId: string;
-  workspaceId: string;
-  workspaceTeamId?: string;
-  workspaceTeamRoleId?: string;
-  user: {
-    id: string;
-    username: string;
-    email?: string;
-    fullName?: string;
-  };
   message: string;
+  data: {
+    id: string;
+  };
 }
 
 interface UseCreateWorkspaceUserOptions {
@@ -38,7 +26,8 @@ interface UseCreateWorkspaceUserOptions {
 }
 
 /**
- * Hook to create a new user and add them to a workspace with optional team and role assignment
+ * Hook to create a new user and add them to a workspace with team and role assignment
+ * Matches Blade PHP API: POST /workspace/{workspaceId}/workspace/post/users
  *
  * @param workspaceId - Workspace ID
  * @param options - Mutation options
@@ -49,26 +38,39 @@ export function useCreateWorkspaceUser(workspaceId: string, options?: UseCreateW
 
   return useMutation<CreateWorkspaceUserResponse, Error, CreateWorkspaceUserRequest>({
     mutationFn: async (request: CreateWorkspaceUserRequest) => {
+      // Match Blade PHP payload structure:
+      // { constraints: { workspaceTeamId, workspaceTeamRoleId }, data: { username, password, email, fullName } }
       const response = await apiClient.post<CreateWorkspaceUserResponse>(
-        `/api/workspace/${workspaceId}/create/workspace_users`,
-        request,
+        `/api/workspace/${workspaceId}/workspace/post/users`,
+        {
+          constraints: {
+            workspaceTeamId: request.workspaceTeamId,
+            workspaceTeamRoleId: request.workspaceTeamRoleId,
+          },
+          data: {
+            username: request.username,
+            password: request.password,
+            email: request.email,
+            fullName: request.fullName,
+          },
+        },
       );
       return response.data;
     },
-    onSuccess: (data, variables, context) => {
-      // Invalidate workspace users query to refresh the list
-      queryClient.invalidateQueries({ queryKey: ['workspace', workspaceId, 'users'] });
-
-      // If assigned to a team, invalidate team members query
-      if (variables.constraints.workspaceTeamId) {
-        queryClient.invalidateQueries({
-          queryKey: ['workspace', workspaceId, 'team', variables.constraints.workspaceTeamId, 'members'],
-        });
-      }
-
-      // Call user's onSuccess if provided
-      options?.mutationOptions?.onSuccess?.(data, variables, context);
-    },
     ...options?.mutationOptions,
+    // Merge onSuccess callbacks to ensure cache invalidation always runs
+    onSuccess: (data, variables, context, meta) => {
+      // Invalidate workspace users query to refresh the list
+      queryClient.invalidateQueries({ queryKey: ['workspace', workspaceId, 'users'], exact: false });
+
+      // Invalidate team members query
+      queryClient.invalidateQueries({
+        queryKey: ['workspace', workspaceId, 'team', variables.workspaceTeamId, 'members'],
+        exact: false,
+      });
+
+      // Call user's onSuccess if provided (pass all 4 params)
+      options?.mutationOptions?.onSuccess?.(data, variables, context, meta);
+    },
   });
 }

@@ -61,14 +61,18 @@ export function useCreateRole(workspaceId: string, options?: UseCreateRoleOption
 
       return response.data.data;
     },
-    onSuccess: (_, variables) => {
-      // Invalidate roles list for the team
+    ...options?.mutationOptions,
+    // Merge onSuccess callbacks to ensure cache invalidation always runs
+    onSuccess: (data, variables, context, mutation) => {
+      // Always invalidate cache first
       queryClient.invalidateQueries({
         queryKey: ['workspace-team-roles', workspaceId, variables.constraints.workspaceTeamId],
+        exact: false,
       });
-      // Also invalidate teams list as it may include role counts
       queryClient.invalidateQueries({ queryKey: ['workspace-teams', workspaceId] });
+
+      // Then call user's onSuccess if provided
+      options?.mutationOptions?.onSuccess?.(data, variables, context, mutation);
     },
-    ...options?.mutationOptions,
   });
 }

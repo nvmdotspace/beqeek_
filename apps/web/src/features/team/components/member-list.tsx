@@ -1,8 +1,7 @@
 import { getRouteApi } from '@tanstack/react-router';
 import { ROUTES } from '@/shared/route-paths';
-import { useGetWorkspaceUsers } from '@/features/workspace-users/hooks/use-get-workspace-users';
+import { useGetWorkspaceUsersRaw } from '@/features/workspace-users/hooks/use-get-workspace-users-raw';
 import { useGetTeams } from '../hooks/use-get-teams';
-import { useGetRoles } from '../hooks/use-get-roles';
 import { Card, CardContent } from '@workspace/ui/components/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@workspace/ui/components/table';
 import { Avatar, AvatarFallback, AvatarImage } from '@workspace/ui/components/avatar';
@@ -38,47 +37,32 @@ interface MemberWithMemberships {
 export function MemberList({ teamId, isLoading: isLoadingProp }: MemberListProps) {
   const { workspaceId } = route.useParams();
 
-  // Fetch all workspace users with memberships
-  const { data: rawUsers = [], isLoading: isLoadingUsers } = useGetWorkspaceUsers(workspaceId, {
+  // Fetch all workspace users with memberships (RAW data to preserve workspaceMemberships)
+  const { data: rawUsers = [], isLoading: isLoadingUsers } = useGetWorkspaceUsersRaw(workspaceId, {
     query: 'FULL_DETAILS',
   });
 
-  // Fetch teams to map team IDs to names
+  // Fetch teams to map team IDs to names (includes roles via WITH_ROLES query)
   const { data: teams = [] } = useGetTeams(workspaceId, { query: 'WITH_ROLES' });
-
-  // Fetch roles for the specific team if teamId is provided
-  const { data: teamRoles = [] } = useGetRoles(workspaceId, teamId || '', {
-    query: 'FULL',
-  });
 
   const isLoading = isLoadingProp || isLoadingUsers;
 
   // Build lookup maps
   const teamMap = new Map(teams.map((team) => [team.id, team.teamName]));
-  const roleMap = new Map(teamRoles.map((role) => [role.id, role.roleName]));
+
+  // Build role map from ALL teams (not just current team)
+  const roleMap = new Map<string, string>();
+  teams.forEach((team) => {
+    team.teamRoles?.forEach((role) => {
+      roleMap.set(role.id, role.roleName);
+    });
+  });
 
   // Process users with memberships
-  const members: MemberWithMemberships[] = rawUsers
+  const members = rawUsers
     .map((user) => {
-      const apiUser = user as unknown as {
-        id: string;
-        fullName: string;
-        avatar?: string;
-        thumbnailAvatar?: string;
-        globalUser?: {
-          username: string;
-          email?: string;
-        };
-        workspaceMemberships?: Array<{
-          userId: string;
-          workspaceTeamRoleId: string;
-          workspaceTeamId: string;
-          invitedAt: string;
-        }>;
-      };
-
       const memberships =
-        apiUser.workspaceMemberships
+        user.workspaceMemberships
           ?.filter((membership) => (teamId ? membership.workspaceTeamId === teamId : true))
           .map((membership) => ({
             teamId: membership.workspaceTeamId,
@@ -94,14 +78,14 @@ export function MemberList({ teamId, isLoading: isLoadingProp }: MemberListProps
       }
 
       return {
-        id: apiUser.id,
-        fullName: apiUser.fullName,
-        username: apiUser.globalUser?.username,
-        email: apiUser.globalUser?.email,
-        avatar: apiUser.avatar,
-        thumbnailAvatar: apiUser.thumbnailAvatar,
+        id: user.id,
+        fullName: user.fullName,
+        username: user.globalUser?.username,
+        email: user.globalUser?.email,
+        avatar: user.avatar,
+        thumbnailAvatar: user.thumbnailAvatar,
         memberships,
-      };
+      } as MemberWithMemberships;
     })
     .filter((member): member is MemberWithMemberships => member !== null);
 

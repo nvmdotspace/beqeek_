@@ -147,7 +147,7 @@ export function TeamDetailPage() {
 
       {/* Delete Role Confirmation */}
       <AlertDialog open={!!deletingRoleId} onOpenChange={(open) => !open && setDeletingRoleId(null)}>
-        <AlertDialogContent>
+        <AlertDialogContent className="max-w-md">
           <AlertDialogHeader>
             <AlertDialogTitle>{m.role_delete_title()}</AlertDialogTitle>
             <AlertDialogDescription>

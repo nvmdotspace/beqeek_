@@ -35,7 +35,6 @@ export function RoleFormModal({ open, onClose, teamId, role }: RoleFormModalProp
 
   const [formData, setFormData] = useState<RoleMutationData>({
     roleName: '',
-    roleCode: '',
     roleDescription: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -71,11 +70,10 @@ export function RoleFormModal({ open, onClose, teamId, role }: RoleFormModalProp
     if (role) {
       setFormData({
         roleName: role.roleName,
-        roleCode: role.roleCode || '',
         roleDescription: role.roleDescription || '',
       });
     } else {
-      setFormData({ roleName: '', roleCode: '', roleDescription: '' });
+      setFormData({ roleName: '', roleDescription: '' });
     }
     setErrors({});
   }, [role, open]);
@@ -87,10 +85,6 @@ export function RoleFormModal({ open, onClose, teamId, role }: RoleFormModalProp
       newErrors.roleName = m.role_form_name_required();
     } else if (formData.roleName.length > 100) {
       newErrors.roleName = m.role_form_name_too_long();
-    }
-
-    if (formData.roleCode && formData.roleCode.length > 50) {
-      newErrors.roleCode = m.role_form_code_too_long();
     }
 
     if (formData.roleDescription && formData.roleDescription.length > 500) {
@@ -106,18 +100,24 @@ export function RoleFormModal({ open, onClose, teamId, role }: RoleFormModalProp
 
     if (!validateForm()) return;
 
+    // Only send fillable fields (roleName and roleDescription)
+    const payload: RoleMutationData = {
+      roleName: formData.roleName,
+      roleDescription: formData.roleDescription,
+    };
+
     if (isEditMode) {
       updateRole.mutate({
         roleId: role.id,
         request: {
           constraints: { workspaceTeamId: teamId },
-          data: formData,
+          data: payload,
         },
       });
     } else {
       createRole.mutate({
         constraints: { workspaceTeamId: teamId },
-        data: formData,
+        data: payload,
       });
     }
   };
@@ -126,7 +126,7 @@ export function RoleFormModal({ open, onClose, teamId, role }: RoleFormModalProp
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>{isEditMode ? m.role_edit_title() : m.role_create_title()}</DialogTitle>
           <DialogDescription>{isEditMode ? m.role_edit_description() : m.role_create_description()}</DialogDescription>
@@ -148,22 +148,6 @@ export function RoleFormModal({ open, onClose, teamId, role }: RoleFormModalProp
               className="border border-input rounded-md bg-background text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring"
             />
             {errors.roleName && <p className="text-sm text-destructive">{errors.roleName}</p>}
-          </div>
-
-          {/* Role Code */}
-          <div className="space-y-2">
-            <Label htmlFor="roleCode">{m.role_form_code_label()}</Label>
-            <Input
-              id="roleCode"
-              value={formData.roleCode}
-              onChange={(e) => setFormData({ ...formData, roleCode: e.target.value })}
-              placeholder={m.role_form_code_placeholder()}
-              aria-invalid={!!errors.roleCode}
-              disabled={isPending}
-              className="border border-input rounded-md bg-background text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring"
-            />
-            {errors.roleCode && <p className="text-sm text-destructive">{errors.roleCode}</p>}
-            <p className="text-xs text-muted-foreground">{m.role_form_code_help()}</p>
           </div>
 
           {/* Role Description */}

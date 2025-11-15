@@ -66,7 +66,7 @@ function mapApiUserToWorkspaceUser(apiUser: ApiWorkspaceUser): WorkspaceUser {
 export interface UseGetWorkspaceUsersOptions {
   /**
    * Query configuration - can be:
-   * - A preset name (e.g., 'CREATE_RECORD_FORM', 'BASIC_WITH_AVATAR')
+   * - A preset name (e.g., 'CREATE_RECORD_FORM', 'BASIC_WITH_AVATAR', 'FULL_DETAILS')
    * - A custom WorkspaceUsersQueries object
    * - undefined (fetches all fields)
    */
@@ -76,6 +76,13 @@ export interface UseGetWorkspaceUsersOptions {
    * React Query options
    */
   reactQueryOptions?: Omit<UseQueryOptions<WorkspaceUser[], Error>, 'queryKey' | 'queryFn'>;
+
+  /**
+   * Return raw API response instead of mapping to WorkspaceUser type
+   * Useful when you need full user details including workspaceMemberships
+   * @default false
+   */
+  returnRawData?: boolean;
 }
 
 /**

@@ -69,14 +69,18 @@ export function useDeleteRole(workspaceId: string, options?: UseDeleteRoleOption
         request as unknown as Record<string, unknown>,
       );
     },
-    onSuccess: (_, variables) => {
-      // Invalidate roles list for the team
+    ...options?.mutationOptions,
+    // Merge onSuccess callbacks to ensure cache invalidation always runs
+    onSuccess: (data, variables, context) => {
+      // Always invalidate cache first
       queryClient.invalidateQueries({
         queryKey: ['workspace-team-roles', workspaceId, variables.request.constraints.workspaceTeamId],
+        exact: false,
       });
-      // Also invalidate teams list as it may include role data
       queryClient.invalidateQueries({ queryKey: ['workspace-teams', workspaceId] });
+
+      // Then call user's onSuccess if provided
+      options?.mutationOptions?.onSuccess?.(data, variables, context);
     },
-    ...options?.mutationOptions,
   });
 }

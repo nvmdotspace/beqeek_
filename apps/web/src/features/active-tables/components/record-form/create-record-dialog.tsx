@@ -42,7 +42,27 @@ import {
 import { MultiSelectField as ReusableMultiSelectField } from '../settings/multi-select-field';
 import { Label } from '@workspace/ui/components/label';
 
-const MULTI_SELECT_FIELD_TYPES = new Set<string>([FIELD_TYPE_SELECT_LIST, FIELD_TYPE_CHECKBOX_LIST]);
+/**
+ * Type for field values in form data
+ * Covers all possible field value types based on FieldType
+ *
+ * - Text fields: string
+ * - Number fields: number
+ * - Date/Time fields: string (ISO 8601 format)
+ * - Checkbox fields: boolean
+ * - Single select fields: string (option value)
+ * - Multi-select fields: string[] (array of option values)
+ * - Reference fields: string | string[] (record IDs)
+ */
+type RecordFieldValue = string | number | boolean | string[];
+
+// Multi-select field types that use the ReusableMultiSelectField component
+// Only SELECT_LIST and CHECKBOX_LIST with static options - all other field types
+// (SELECT_ONE, SELECT_*_RECORD, SELECT_*_WORKSPACE_USER) are handled by FieldInput
+const MULTI_SELECT_FIELD_TYPES = new Set<string>([
+  FIELD_TYPE_SELECT_LIST, // Multi-select dropdown with static options
+  FIELD_TYPE_CHECKBOX_LIST, // Checkbox list with static options
+]);
 
 interface CreateRecordDialogProps {
   open: boolean;
@@ -82,10 +102,10 @@ export function CreateRecordDialog({
   const onSubmit = form.handleSubmit(async (data) => {
     try {
       // Clean up the data - remove undefined values
-      const cleanedData: Record<string, any> = {};
+      const cleanedData: Record<string, RecordFieldValue> = {};
       Object.entries(data).forEach(([key, value]) => {
         if (value !== undefined && value !== '') {
-          cleanedData[key] = value;
+          cleanedData[key] = value as RecordFieldValue;
         }
       });
 
@@ -236,15 +256,15 @@ export function CreateRecordDialog({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {visibleFields.map((field, index) => {
                 // Full width for rich text, long text, multi-select reference fields, and checkbox fields
-                const fullWidthTypes = [
+                const fullWidthTypes: readonly string[] = [
                   FIELD_TYPE_RICH_TEXT,
                   FIELD_TYPE_TEXT,
                   FIELD_TYPE_SELECT_LIST_RECORD,
                   FIELD_TYPE_SELECT_LIST_WORKSPACE_USER,
                   FIELD_TYPE_CHECKBOX_YES_NO, // Add checkbox for balanced layout
                 ];
-                const isFullWidth = fullWidthTypes.includes(field.type as any);
-                const isMultiSelectField = MULTI_SELECT_FIELD_TYPES.has(field.type as string);
+                const isFullWidth = fullWidthTypes.includes(field.type);
+                const isMultiSelectField = MULTI_SELECT_FIELD_TYPES.has(field.type);
 
                 if (isMultiSelectField) {
                   return (
@@ -357,8 +377,8 @@ export function CreateRecordDialog({
 /**
  * Generate default values for form fields
  */
-function getDefaultValues(table: Table): Record<string, any> {
-  const defaults: Record<string, any> = {};
+function getDefaultValues(table: Table): Record<string, RecordFieldValue> {
+  const defaults: Record<string, RecordFieldValue> = {};
 
   table.config.fields.forEach((field) => {
     // Skip auto-calculated fields
@@ -368,9 +388,9 @@ function getDefaultValues(table: Table): Record<string, any> {
 
     // Set default value if provided
     if (field.defaultValue !== undefined && field.defaultValue !== null) {
-      // For INTEGER/NUMERIC fields: ignore defaultValue = 0 to show empty input
+      // For INTEGER/NUMERIC fields: ignore defaultValue = '0' to show empty input
       const isNumberField = field.type === FIELD_TYPE_INTEGER || field.type === FIELD_TYPE_NUMERIC;
-      if (isNumberField && field.defaultValue === 0) {
+      if (isNumberField && field.defaultValue === '0') {
         // Skip this field - let it default to empty string below
       } else {
         defaults[field.name] = field.defaultValue;

@@ -44,14 +44,9 @@ export function useLookupUsername(username: string, options?: UseLookupUsernameO
     },
     enabled: trimmedUsername.length >= 2 && (options?.enabled ?? true),
     staleTime: 30000, // 30 seconds
-    retry: (failureCount, error) => {
-      const axiosError = error as AxiosError;
-      // Don't retry on 404 (user not found)
-      if (axiosError.response?.status === 404) {
-        return false;
-      }
-      // Retry other errors up to 2 times
-      return failureCount < 2;
-    },
+    gcTime: 5 * 60 * 1000, // 5 minutes
+    retry: false, // Disable retry completely - 404 is handled in queryFn, other errors should fail immediately
+    refetchOnWindowFocus: false, // Don't refetch when window regains focus
+    refetchOnReconnect: false, // Don't refetch on network reconnect
   });
 }

@@ -2,22 +2,13 @@ import { useMutation, useQueryClient, type UseMutationOptions } from '@tanstack/
 import { apiClient } from '@/shared/api/http-client';
 
 interface InviteUserRequest {
-  constraints: {
-    workspaceId: string;
-    workspaceTeamId?: string;
-    workspaceTeamRoleId?: string;
-  };
-  data: {
-    username: string;
-  };
+  workspaceId: string;
+  workspaceTeamId: string;
+  workspaceTeamRoleId: string;
+  userId: string;
 }
 
 interface InviteUserResponse {
-  id: string;
-  userId: string;
-  workspaceId: string;
-  workspaceTeamId?: string;
-  workspaceTeamRoleId?: string;
   message: string;
 }
 
@@ -26,7 +17,8 @@ interface UseInviteUserOptions {
 }
 
 /**
- * Hook to invite an existing user to a workspace with optional team and role assignment
+ * Hook to invite an existing user to a workspace with team and role assignment
+ * Matches Blade PHP API: POST /workspace/{workspaceId}/workspace/post/invitations/bulk
  *
  * @param workspaceId - Workspace ID
  * @param options - Mutation options
@@ -37,26 +29,35 @@ export function useInviteUser(workspaceId: string, options?: UseInviteUserOption
 
   return useMutation<InviteUserResponse, Error, InviteUserRequest>({
     mutationFn: async (request: InviteUserRequest) => {
+      // Match Blade PHP payload structure: { data: [{ workspaceTeamId, workspaceTeamRoleId, userId }] }
       const response = await apiClient.post<InviteUserResponse>(
-        `/api/workspace/${workspaceId}/set/workspace_users`,
-        request,
+        `/api/workspace/${workspaceId}/workspace/post/invitations/bulk`,
+        {
+          data: [
+            {
+              workspaceTeamId: request.workspaceTeamId,
+              workspaceTeamRoleId: request.workspaceTeamRoleId,
+              userId: request.userId,
+            },
+          ],
+        },
       );
       return response.data;
     },
-    onSuccess: (data, variables, context) => {
-      // Invalidate workspace users query to refresh the list
-      queryClient.invalidateQueries({ queryKey: ['workspace', workspaceId, 'users'] });
-
-      // If assigned to a team, invalidate team members query
-      if (variables.constraints.workspaceTeamId) {
-        queryClient.invalidateQueries({
-          queryKey: ['workspace', workspaceId, 'team', variables.constraints.workspaceTeamId, 'members'],
-        });
-      }
-
-      // Call user's onSuccess if provided
-      options?.mutationOptions?.onSuccess?.(data, variables, context);
-    },
     ...options?.mutationOptions,
+    // Merge onSuccess callbacks to ensure cache invalidation always runs
+    onSuccess: (data, variables, context, meta) => {
+      // Invalidate workspace users query to refresh the list
+      queryClient.invalidateQueries({ queryKey: ['workspace', workspaceId, 'users'], exact: false });
+
+      // Invalidate team members query
+      queryClient.invalidateQueries({
+        queryKey: ['workspace', workspaceId, 'team', variables.workspaceTeamId, 'members'],
+        exact: false,
+      });
+
+      // Call user's onSuccess if provided (pass all 4 params)
+      options?.mutationOptions?.onSuccess?.(data, variables, context, meta);
+    },
   });
 }

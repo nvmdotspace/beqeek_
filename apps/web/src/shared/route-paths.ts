@@ -90,7 +90,7 @@ export const ROUTES = {
     WORKFLOWS: '/$locale/workspaces/$workspaceId/workflows' as const,
 
     /** Team management: /$locale/workspaces/$workspaceId/team */
-    TEAM: '/$locale/workspaces/$workspaceId/team/' as const,
+    TEAM: '/$locale/workspaces/$workspaceId/team' as const,
 
     /** Team detail: /$locale/workspaces/$workspaceId/team/$teamId */
     TEAM_DETAIL: '/$locale/workspaces/$workspaceId/team/$teamId' as const,
