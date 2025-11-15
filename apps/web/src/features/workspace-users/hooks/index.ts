@@ -11,13 +11,8 @@ export {
   type WorkspaceUsersQueries,
   type GetWorkspaceUsersRequest,
   type UseGetWorkspaceUsersOptions,
+  type ApiWorkspaceUser, // Raw API response type
 } from './use-get-workspace-users';
-
-export {
-  useGetWorkspaceUsersRaw,
-  type ApiWorkspaceUser,
-  type UseGetWorkspaceUsersRawOptions,
-} from './use-get-workspace-users-raw';
 
 export {
   useWorkspaceUsersWithPrefetch,

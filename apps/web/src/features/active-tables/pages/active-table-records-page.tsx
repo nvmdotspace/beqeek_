@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { ArrowLeft, Plus, Search } from 'lucide-react';
 import { getRouteApi } from '@tanstack/react-router';
 
@@ -48,7 +48,7 @@ const route = getRouteApi(ROUTES.ACTIVE_TABLES.TABLE_RECORDS);
 interface RecordsSearchParams {
   view?: 'list' | 'kanban' | 'gantt';
   screen?: string;
-  filters?: string;
+  filters?: string; // JSON string of QuickFilterValue[]
   sort?: string;
   search?: string;
   page?: number;
@@ -81,8 +81,62 @@ export const ActiveTableRecordsPage = () => {
   // Initialize encryption hook
   const encryption = useTableEncryption(workspaceId ?? '', tableId, table?.config);
 
-  // Quick filters state
-  const [quickFilters, setQuickFilters] = useState<QuickFilterValue[]>([]);
+  // Quick filters state - initialize from URL
+  const [quickFilters, setQuickFilters] = useState<QuickFilterValue[]>(() => {
+    try {
+      const filtersParam = searchParams.filters;
+      return filtersParam ? JSON.parse(decodeURIComponent(filtersParam)) : [];
+    } catch {
+      return [];
+    }
+  });
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Sync filters with URL
+  useEffect(() => {
+    const filtersParam = quickFilters.length > 0 ? encodeURIComponent(JSON.stringify(quickFilters)) : undefined;
+
+    // Only update URL if filters actually changed
+    const currentFiltersParam = searchParams.filters;
+    if (filtersParam !== currentFiltersParam) {
+      navigate({
+        to: ROUTES.ACTIVE_TABLES.TABLE_RECORDS,
+        params: { locale, workspaceId, tableId },
+        search: {
+          ...searchParams,
+          filters: filtersParam,
+        },
+        replace: true, // Use replace to avoid adding to history
+      });
+    }
+  }, [quickFilters, navigate, locale, workspaceId, tableId, searchParams]);
+
+  // Convert quick filters to API filtering format with encryption
+  const apiFilters = useMemo(() => {
+    if (quickFilters.length === 0 && !searchQuery.trim()) {
+      return undefined;
+    }
+
+    const filtering: any = {};
+
+    // Add quick filters (encryption handled by the hook for E2E tables)
+    if (quickFilters.length > 0 && table?.config?.fields) {
+      filtering.record = {};
+      quickFilters.forEach((filter) => {
+        const field = table.config.fields.find((f) => f.name === filter.fieldName);
+        if (field) {
+          filtering.record[filter.fieldName] = filter.value;
+        }
+      });
+    }
+
+    // Add search query (if supported by API)
+    if (searchQuery.trim()) {
+      filtering.fulltext = searchQuery.trim();
+    }
+
+    return filtering;
+  }, [quickFilters, searchQuery, table?.config?.fields, table?.config?.e2eeEncryption, encryption.encryptionKey]);
 
   // Use infinite scroll hook for records with automatic decryption
   const {
@@ -98,6 +152,7 @@ export const ActiveTableRecordsPage = () => {
     direction: 'desc',
     enabled: !!table?.config,
     encryptionKey: encryption.encryptionKey,
+    filters: apiFilters,
   });
 
   // Initialize record update mutation for kanban DnD
@@ -108,46 +163,10 @@ export const ActiveTableRecordsPage = () => {
 
   const displayTable: Table | null = table ?? null;
 
-  const [searchQuery, setSearchQuery] = useState('');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
-  // Apply quick filters and search
-  const filteredRecords = useMemo(() => {
-    let filtered = records;
-
-    // Apply quick filters
-    if (quickFilters.length > 0) {
-      filtered = filtered.filter((record) => {
-        return quickFilters.every((filter) => {
-          const fieldValue = record.record?.[filter.fieldName] ?? record.data?.[filter.fieldName];
-
-          if (Array.isArray(filter.value)) {
-            return filter.value.includes(String(fieldValue));
-          }
-
-          return String(fieldValue) === String(filter.value);
-        });
-      });
-    }
-
-    // Apply search query
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter((record) => {
-        return Object.values(record.record).some((value) => {
-          if (typeof value === 'string') {
-            return value.toLowerCase().includes(query);
-          }
-          if (typeof value === 'number') {
-            return value.toString().includes(query);
-          }
-          return false;
-        });
-      });
-    }
-
-    return filtered;
-  }, [records, quickFilters, searchQuery]);
+  // Records are now filtered server-side, so we just use them directly
+  const filteredRecords = records;
 
   // Get current view configurations
   const kanbanConfigs = displayTable?.config?.kanbanConfigs || [];

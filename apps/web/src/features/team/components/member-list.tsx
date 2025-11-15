@@ -1,6 +1,6 @@
 import { getRouteApi } from '@tanstack/react-router';
 import { ROUTES } from '@/shared/route-paths';
-import { useGetWorkspaceUsersRaw } from '@/features/workspace-users/hooks/use-get-workspace-users-raw';
+import { useGetWorkspaceUsers } from '@/features/workspace-users/hooks';
 import { useGetTeams } from '../hooks/use-get-teams';
 import { Card, CardContent } from '@workspace/ui/components/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@workspace/ui/components/table';
@@ -38,8 +38,9 @@ export function MemberList({ teamId, isLoading: isLoadingProp }: MemberListProps
   const { workspaceId } = route.useParams();
 
   // Fetch all workspace users with memberships (RAW data to preserve workspaceMemberships)
-  const { data: rawUsers = [], isLoading: isLoadingUsers } = useGetWorkspaceUsersRaw(workspaceId, {
+  const { data: rawUsers = [], isLoading: isLoadingUsers } = useGetWorkspaceUsers(workspaceId, {
     query: 'FULL_DETAILS',
+    returnRaw: true, // Get full API response including workspaceMemberships
   });
 
   // Fetch teams to map team IDs to names (includes roles via WITH_ROLES query)

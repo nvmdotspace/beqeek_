@@ -18,6 +18,7 @@ import { useInfiniteQuery } from '@tanstack/react-query';
 import { useState, useEffect, useMemo } from 'react';
 import { fetchActiveTableRecords } from '../api/active-records-api';
 import { decryptRecords } from '@workspace/active-tables-core';
+import { CommonUtils } from '@workspace/encryption-core';
 import type { TableRecord, Table } from '@workspace/active-tables-core';
 import type { ActiveRecordsResponse } from '../types';
 
@@ -36,6 +37,8 @@ export interface UseInfiniteActiveTableRecordsOptions {
   enabled?: boolean;
   /** Encryption key for E2EE tables */
   encryptionKey?: string | null;
+  /** Filters to apply to records */
+  filters?: Record<string, unknown>;
 }
 
 /**
@@ -65,7 +68,7 @@ export function useInfiniteActiveTableRecords(
   table: Table | null,
   options?: UseInfiniteActiveTableRecordsOptions,
 ) {
-  const { pageSize: providedPageSize, direction = 'desc', enabled = true, encryptionKey } = options ?? {};
+  const { pageSize: providedPageSize, direction = 'desc', enabled = true, encryptionKey, filters } = options ?? {};
 
   const pageSize = useMemo(() => {
     if (providedPageSize !== undefined) return providedPageSize;
@@ -76,8 +79,51 @@ export function useInfiniteActiveTableRecords(
   const [isDecrypting, setIsDecrypting] = useState(false);
   const [decryptionError, setDecryptionError] = useState<Error | null>(null);
 
+  // Encrypt filters for E2E tables
+  const encryptedFilters = useMemo(() => {
+    if (!filters || !table) return filters;
+
+    const needsEncryption = table.config.e2eeEncryption || table.config.encryptionKey;
+    if (!needsEncryption) return filters;
+
+    // Encrypt filter values for E2E tables
+    const encrypted: Record<string, unknown> = {};
+
+    if (filters.record && typeof filters.record === 'object') {
+      const recordFilters: Record<string, unknown> = {};
+      Object.entries(filters.record).forEach(([fieldName, value]) => {
+        if (value !== '' && value !== undefined && value !== null) {
+          // Create a compatible TableDetail object for CommonUtils
+          const tableDetail = {
+            id: table.id,
+            name: table.name,
+            config: {
+              ...table.config,
+              fields:
+                table.config.fields?.map((field) => ({
+                  ...field,
+                  required: field.required ?? false, // Ensure required is boolean
+                })) ?? [],
+            },
+          };
+          recordFilters[fieldName] = CommonUtils.encryptTableData(tableDetail, fieldName, value);
+        }
+      });
+      encrypted.record = recordFilters;
+    }
+
+    // Copy other filter properties (like fulltext) without encryption
+    Object.entries(filters).forEach(([key, value]) => {
+      if (key !== 'record') {
+        encrypted[key] = value;
+      }
+    });
+
+    return encrypted;
+  }, [filters, table]);
+
   const query = useInfiniteQuery<ListRecordsResponse, Error>({
-    queryKey: ['active-table-records', workspaceId, tableId, pageSize, direction],
+    queryKey: ['active-table-records', workspaceId, tableId, pageSize, direction, encryptedFilters],
     queryFn: async ({ pageParam }) => {
       const response = await fetchActiveTableRecords({
         workspaceId,
@@ -86,6 +132,7 @@ export function useInfiniteActiveTableRecords(
         limit: pageSize,
         direction,
         next_id: pageParam as string | undefined,
+        filters: encryptedFilters,
       });
 
       return response;

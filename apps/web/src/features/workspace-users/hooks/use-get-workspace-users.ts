@@ -1,8 +1,10 @@
 /**
- * Hook for fetching workspace users
+ * Hook for fetching workspace users with flexible field selection
  *
  * API: POST /api/workspace/{workspaceId}/workspace/get/users
  * Used for user reference fields (SELECT_ONE_WORKSPACE_USER, SELECT_LIST_WORKSPACE_USER)
+ *
+ * Backend determines which fields to return based on `query.fields` parameter
  */
 
 import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
@@ -16,9 +18,9 @@ import {
 import type { WorkspaceUser } from '@workspace/active-tables-core';
 
 /**
- * API response user type (from backend)
+ * API response user type (from backend) - FULL details
  */
-interface ApiWorkspaceUser {
+export interface ApiWorkspaceUser {
   id: string;
   fullName: string;
   avatar?: string;
@@ -63,7 +65,7 @@ function mapApiUserToWorkspaceUser(apiUser: ApiWorkspaceUser): WorkspaceUser {
 /**
  * Options for useGetWorkspaceUsers hook
  */
-export interface UseGetWorkspaceUsersOptions {
+export interface UseGetWorkspaceUsersOptions<TRaw extends boolean = false> {
   /**
    * Query configuration - can be:
    * - A preset name (e.g., 'CREATE_RECORD_FORM', 'BASIC_WITH_AVATAR', 'FULL_DETAILS')
@@ -73,77 +75,102 @@ export interface UseGetWorkspaceUsersOptions {
   query?: WorkspaceUsersQueries | keyof typeof WORKSPACE_USERS_QUERY_PRESETS;
 
   /**
-   * React Query options
-   */
-  reactQueryOptions?: Omit<UseQueryOptions<WorkspaceUser[], Error>, 'queryKey' | 'queryFn'>;
-
-  /**
    * Return raw API response instead of mapping to WorkspaceUser type
    * Useful when you need full user details including workspaceMemberships
    * @default false
    */
-  returnRawData?: boolean;
+  returnRaw?: TRaw;
+
+  /**
+   * React Query options
+   */
+  reactQueryOptions?: Omit<
+    UseQueryOptions<TRaw extends true ? ApiWorkspaceUser[] : WorkspaceUser[], Error>,
+    'queryKey' | 'queryFn'
+  >;
 }
 
 /**
- * Hook for fetching workspace users with flexible field selection and filtering
+ * Hook for fetching workspace users (mapped to WorkspaceUser type)
  *
  * @param workspaceId - Current workspace ID
  * @param options - Query and React Query options
- * @returns Query result with users data
+ * @returns Query result with mapped WorkspaceUser data
  *
  * @example
  * ```tsx
- * // Use preset for create record form (minimal fields)
+ * // Standard usage - returns WorkspaceUser[] (id, name, avatar)
  * const { data: users } = useGetWorkspaceUsers(workspaceId, {
  *   query: 'CREATE_RECORD_FORM'
  * });
- *
- * // Use preset for basic user info with avatar
- * const { data: users } = useGetWorkspaceUsers(workspaceId, {
- *   query: 'BASIC_WITH_AVATAR'
- * });
- *
- * // Custom query with specific fields
- * const { data: users } = useGetWorkspaceUsers(workspaceId, {
- *   query: {
- *     fields: 'id,fullName,avatar',
- *     limit: 20,
- *     filtering: {
- *       workspaceTeamRole: { workspaceTeamId: 123 }
- *     }
- *   }
- * });
- *
- * // Fetch all fields (no filtering)
- * const { data: users } = useGetWorkspaceUsers(workspaceId);
  * ```
  */
-export function useGetWorkspaceUsers(workspaceId: string, options?: UseGetWorkspaceUsersOptions) {
-  const query = options?.query;
-  const reactQueryOptions = options?.reactQueryOptions;
-  const requestBody: GetWorkspaceUsersRequest = buildWorkspaceUsersQuery(query);
-  const queryKey = ['workspace-users', workspaceId, requestBody.queries];
+export function useGetWorkspaceUsers(
+  workspaceId: string,
+  options?: UseGetWorkspaceUsersOptions<false>,
+): ReturnType<typeof useQuery<WorkspaceUser[], Error>>;
 
-  return useQuery<WorkspaceUser[], Error>({
+/**
+ * Hook for fetching workspace users (raw API response)
+ *
+ * @param workspaceId - Current workspace ID
+ * @param options - Query and React Query options with returnRaw: true
+ * @returns Query result with raw ApiWorkspaceUser data
+ *
+ * @example
+ * ```tsx
+ * // Raw API data - returns ApiWorkspaceUser[] (all fields including workspaceMemberships)
+ * const { data: members } = useGetWorkspaceUsers(workspaceId, {
+ *   query: 'FULL_DETAILS',
+ *   returnRaw: true
+ * });
+ * ```
+ */
+export function useGetWorkspaceUsers(
+  workspaceId: string,
+  options: UseGetWorkspaceUsersOptions<true>,
+): ReturnType<typeof useQuery<ApiWorkspaceUser[], Error>>;
+
+/**
+ * Implementation
+ */
+export function useGetWorkspaceUsers(
+  workspaceId: string,
+  options?: UseGetWorkspaceUsersOptions<boolean>,
+): ReturnType<typeof useQuery<WorkspaceUser[], Error>> | ReturnType<typeof useQuery<ApiWorkspaceUser[], Error>> {
+  const query = options?.query;
+  const returnRaw = options?.returnRaw ?? false;
+  const requestBody: GetWorkspaceUsersRequest = buildWorkspaceUsersQuery(query);
+
+  // Use different cache keys for raw vs mapped data
+  const queryKey = returnRaw
+    ? ['workspace-users-raw', workspaceId, requestBody.queries]
+    : ['workspace-users', workspaceId, requestBody.queries];
+
+  // Single useQuery call to satisfy React Hooks rules
+  // The queryFn handles both raw and mapped data based on returnRaw flag
+  return useQuery({
     queryKey,
     queryFn: async () => {
       const client = createActiveTablesApiClient(workspaceId);
-
-      // API: POST /api/workspace/{workspaceId}/workspace/get/users
       const response = await client.post<GetWorkspaceUsersResponse>(
         '/workspace/get/users',
         requestBody as Record<string, unknown>,
       );
-
       const apiUsers = response.data.data ?? [];
-      const mappedUsers = apiUsers.map(mapApiUserToWorkspaceUser);
 
-      return mappedUsers;
+      // Return raw or mapped based on flag
+      if (returnRaw) {
+        return apiUsers;
+      }
+      return apiUsers.map(mapApiUserToWorkspaceUser);
     },
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
-    ...reactQueryOptions,
-  });
+    staleTime: 5 * 60 * 1000,
+    ...(options?.reactQueryOptions as Omit<
+      UseQueryOptions<WorkspaceUser[] | ApiWorkspaceUser[], Error>,
+      'queryKey' | 'queryFn'
+    >),
+  }) as ReturnType<typeof useQuery<WorkspaceUser[], Error>> | ReturnType<typeof useQuery<ApiWorkspaceUser[], Error>>;
 }
 
 /**
