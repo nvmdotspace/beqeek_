@@ -74,11 +74,11 @@ export function WorkflowFormsSelect() {
             </div>
           </div>
 
-          {/* Templates Grid */}
+          {/* Templates Grid - Compact 2-column layout for better readability */}
           {filteredTemplates.length === 0 ? (
             <EmptyState message="Không tìm thấy mẫu form nào" />
           ) : (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-3 sm:grid-cols-2">
               {filteredTemplates.map((template) => (
                 <FormTemplateCard
                   key={template.type}

@@ -1097,7 +1097,8 @@ const badgeVariants = cva(
 **Priority 4: Module Utilities**
 
 **Files to migrate:** 10. **`module-icons.ts`** - Replace hardcoded bg/text classes
-```tsx
+
+````tsx
 // BEFORE
 bg: 'bg-blue-100 dark:bg-blue-900/20',
 badge: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
@@ -1157,7 +1158,7 @@ badge: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
     "background_color": "#D1FAE5"     -- ❌ Hardcoded hex
   }
 ]
-```
+````
 
 **New Schema:**
 

@@ -64,7 +64,8 @@ export interface ContainerProps extends React.HTMLAttributes<HTMLDivElement>, Va
 }
 
 export const Container = React.forwardRef<HTMLDivElement, ContainerProps>(
-  ({ className, maxWidth, padding, center, as: Component = 'div', ...props }, ref) => {
+  ({ className, maxWidth, padding, center, as = 'div', ...props }, ref) => {
+    const Component = as as React.ElementType;
     return (
       <Component ref={ref} className={cn(containerVariants({ maxWidth, padding, center }), className)} {...props} />
     );

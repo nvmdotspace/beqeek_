@@ -71,7 +71,8 @@ export interface InlineProps extends React.HTMLAttributes<HTMLDivElement>, Varia
 }
 
 export const Inline = React.forwardRef<HTMLDivElement, InlineProps>(
-  ({ className, space, align, justify, wrap, as: Component = 'div', ...props }, ref) => {
+  ({ className, space, align, justify, wrap, as = 'div', ...props }, ref) => {
+    const Component = as as React.ElementType;
     return (
       <Component ref={ref} className={cn(inlineVariants({ space, align, justify, wrap }), className)} {...props} />
     );

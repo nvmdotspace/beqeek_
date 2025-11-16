@@ -11,6 +11,7 @@ import {
   HelpCircle,
   Home,
   LayoutGrid,
+  Link2,
   Search as SearchIcon,
   Settings,
   Star,
@@ -116,6 +117,13 @@ export const NavigationMenu = ({ isCollapsed = true, className }: NavigationMenu
                   href: `/${locale}/workspaces/${workspaceId}/workflow-forms`,
                   icon: FileText,
                   requiresPermission: 'workflow-forms',
+                },
+                {
+                  id: 'workflow-connectors',
+                  label: m.navigation_workflowConnectors(),
+                  href: `/${locale}/workspaces/${workspaceId}/workflow-connectors`,
+                  icon: Link2,
+                  requiresPermission: 'workflow-connectors',
                 },
                 {
                   id: 'analytics',

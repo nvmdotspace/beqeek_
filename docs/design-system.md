@@ -1,9 +1,9 @@
 # Beqeek Design System
 
-**Version**: 1.1.0
-**Last Updated**: 2025-11-13
+**Version**: 1.2.0
+**Last Updated**: 2025-11-17
 **Status**: Active
-**Latest Changes**: [Design Standardization Summary](./design-standardization-summary.md)
+**Latest Changes**: Added Layout Primitives documentation
 
 ## Table of Contents
 
@@ -12,11 +12,12 @@
 3. [Color System](#color-system)
 4. [Typography](#typography)
 5. [Spacing & Layout](#spacing--layout)
-6. [Components](#components)
-7. [Accessibility](#accessibility)
-8. [Best Practices](#best-practices)
-9. [Vietnamese Typography](#vietnamese-typography)
-10. [Design Review Process](#design-review-process)
+6. [Layout Primitives](#layout-primitives)
+7. [Components](#components)
+8. [Accessibility](#accessibility)
+9. [Best Practices](#best-practices)
+10. [Vietnamese Typography](#vietnamese-typography)
+11. [Design Review Process](#design-review-process)
 
 ---
 
@@ -30,6 +31,7 @@ Beqeek's design system is built on TailwindCSS v4, shadcn/ui, and Radix UI primi
 - **Type-safe components** with full TypeScript support
 - **Vietnamese typography** optimization
 - **Component-based consistency** enforcing design standards
+- **Layout primitives** with Atlassian-inspired 8px spacing system
 
 > **🎯 Quick Start**: New to the design system? See [Design Review Checklist](./design-review-checklist.md) for PR requirements.
 
@@ -407,6 +409,282 @@ Base radius: `--radius: 0.6rem` (≈10px)
   }
 }
 ```
+
+---
+
+## Layout Primitives
+
+Layout primitives are composable building blocks that provide consistent spacing, alignment, and responsive behavior using the **Atlassian-inspired 8px spacing system** and **12-column responsive grid**.
+
+**Location:** `@workspace/ui/components/primitives`
+
+**Full Documentation:** [`docs/layout-primitives-guide.md`](./layout-primitives-guide.md)
+
+### Quick Reference
+
+#### Available Primitives
+
+| Primitive     | Purpose                                | Import                                                             |
+| ------------- | -------------------------------------- | ------------------------------------------------------------------ |
+| `<Box>`       | Generic container with padding/styling | `import { Box } from '@workspace/ui/components/primitives';`       |
+| `<Stack>`     | Vertical layout with gaps              | `import { Stack } from '@workspace/ui/components/primitives';`     |
+| `<Inline>`    | Horizontal layout with gaps            | `import { Inline } from '@workspace/ui/components/primitives';`    |
+| `<Grid>`      | 12-column responsive grid              | `import { Grid } from '@workspace/ui/components/primitives';`      |
+| `<GridItem>`  | Grid child with column spans           | `import { GridItem } from '@workspace/ui/components/primitives';`  |
+| `<Container>` | Max-width centered container           | `import { Container } from '@workspace/ui/components/primitives';` |
+
+### Spacing Token Scale
+
+Following Atlassian's 8px baseline system where the number represents the percentage of the base unit:
+
+| Token        | REM      | PX   | % of Base | Use Case                         |
+| ------------ | -------- | ---- | --------- | -------------------------------- |
+| `space-025`  | 0.125rem | 2px  | 25%       | Hairline gaps, icon padding      |
+| `space-050`  | 0.25rem  | 4px  | 50%       | Tight spacing, badges            |
+| `space-075`  | 0.375rem | 6px  | 75%       | Compact UI elements              |
+| `space-100`  | 0.5rem   | 8px  | 100%      | **Base unit**, default gaps      |
+| `space-150`  | 0.75rem  | 12px | 150%      | Small component padding          |
+| `space-200`  | 1rem     | 16px | 200%      | Standard spacing, button padding |
+| `space-250`  | 1.25rem  | 20px | 250%      | Medium gaps                      |
+| `space-300`  | 1.5rem   | 24px | 300%      | Card padding, section gaps       |
+| `space-400`  | 2rem     | 32px | 400%      | Large component spacing          |
+| `space-500`  | 2.5rem   | 40px | 500%      | Section padding                  |
+| `space-600`  | 3rem     | 48px | 600%      | Major layout spacing             |
+| `space-800`  | 4rem     | 64px | 800%      | Page section gaps                |
+| `space-1000` | 5rem     | 80px | 1000%     | Hero sections, major dividers    |
+
+### Box Primitive
+
+Generic container with configurable padding, background, and borders.
+
+```tsx
+import { Box } from '@workspace/ui/components/primitives';
+
+// Card-like box
+<Box
+  padding="space-300"
+  backgroundColor="card"
+  borderRadius="lg"
+  border="default"
+>
+  <Content />
+</Box>
+
+// Alert box
+<Box padding="space-250" backgroundColor="warning" borderRadius="md" border="warning">
+  <AlertMessage />
+</Box>
+```
+
+**Props:**
+
+- `padding`: `space-025` | `space-050` | ... | `space-1000`
+- `backgroundColor`: `background` | `card` | `muted` | `accent` | `primary` | `secondary` | `destructive` | `success` | `warning` | `info`
+- `borderRadius`: `sm` | `md` | `lg` | `xl` | `2xl` | `full`
+- `border`: `default` | `muted` | `primary` | `success` | `warning` | `info` | `destructive`
+- `as`: Custom HTML element (default: `div`)
+
+### Stack Primitive
+
+Vertical layout with consistent gaps between children.
+
+```tsx
+import { Stack } from '@workspace/ui/components/primitives';
+
+// Vertical stack with gaps
+<Stack space="space-200" align="start">
+  <Header />
+  <Content />
+  <Footer />
+</Stack>
+
+// Form layout
+<Stack space="space-250">
+  <Label htmlFor="name">Name</Label>
+  <Input id="name" />
+  <Label htmlFor="email">Email</Label>
+  <Input id="email" type="email" />
+  <Button type="submit">Submit</Button>
+</Stack>
+```
+
+**Props:**
+
+- `space`: `space-025` | `space-050` | ... | `space-1000`
+- `align`: `start` | `center` | `end` | `stretch` | `baseline`
+- `justify`: `start` | `center` | `end` | `between` | `around` | `evenly`
+- `as`: Custom HTML element (default: `div`)
+
+### Inline Primitive
+
+Horizontal layout with consistent gaps between children.
+
+```tsx
+import { Inline } from '@workspace/ui/components/primitives';
+
+// Button group
+<Inline space="space-150" align="center">
+  <Button>Save</Button>
+  <Button variant="outline">Cancel</Button>
+</Inline>
+
+// Tag list with wrapping
+<Inline space="space-100" wrap>
+  <Badge>React</Badge>
+  <Badge>TypeScript</Badge>
+  <Badge>Tailwind</Badge>
+</Inline>
+
+// Header layout
+<Inline justify="between" align="center" className="w-full">
+  <Logo />
+  <Navigation />
+  <UserMenu />
+</Inline>
+```
+
+**Props:**
+
+- `space`: `space-025` | `space-050` | ... | `space-1000`
+- `align`: `start` | `center` | `end` | `stretch` | `baseline`
+- `justify`: `start` | `center` | `end` | `between` | `around` | `evenly`
+- `wrap`: `true` | `false`
+- `as`: Custom HTML element (default: `div`)
+
+### Grid Primitive
+
+12-column responsive grid system with flexible layouts.
+
+```tsx
+import { Grid, GridItem } from '@workspace/ui/components/primitives';
+
+// Main content with sidebar
+<Grid columns={12} gap="space-400">
+  <GridItem span={8}>
+    <MainContent />
+  </GridItem>
+  <GridItem span={4}>
+    <Sidebar />
+  </GridItem>
+</Grid>
+
+// Responsive card grid
+<Grid columns={12} gap="space-300">
+  <GridItem span={12} spanMd={6} spanLg={4}>
+    <Card />
+  </GridItem>
+  <GridItem span={12} spanMd={6} spanLg={4}>
+    <Card />
+  </GridItem>
+  <GridItem span={12} spanMd={6} spanLg={4}>
+    <Card />
+  </GridItem>
+</Grid>
+```
+
+**Grid Props:**
+
+- `columns`: `1` | `2` | `3` | ... | `12`
+- `gap`: `space-025` | ... | `space-1000` | `gutter` (responsive grid gutter)
+- `align`: `start` | `center` | `end` | `stretch` | `baseline`
+- `justify`: `start` | `center` | `end` | `stretch`
+
+**GridItem Props:**
+
+- `span`: `1` | `2` | ... | `12` | `full`
+- `spanSm`, `spanMd`, `spanLg`, `spanXl`: Responsive spans
+- `start`: `1` | `2` | ... | `12` | `auto` (column start position)
+
+### Container Primitive
+
+Max-width centered container with responsive padding.
+
+```tsx
+import { Container } from '@workspace/ui/components/primitives';
+
+// Standard page container
+<Container maxWidth="xl" padding="margin">
+  <Content />
+</Container>
+
+// Narrow article container
+<Container maxWidth="md" padding="space-600">
+  <Article />
+</Container>
+
+// Full-width container with gutter
+<Container maxWidth="full" padding="gutter">
+  <FullWidthContent />
+</Container>
+```
+
+**Props:**
+
+- `maxWidth`: `sm` | `md` | `lg` | `xl` | `2xl` | `full` | `none`
+- `padding`: `space-025` | ... | `space-1000` | `gutter` | `margin` (responsive grid margin)
+- `center`: `true` | `false` (default: `true`)
+
+### Composition Example
+
+Primitives work best when composed together:
+
+```tsx
+// Page layout with nested primitives
+<Container maxWidth="xl" padding="margin">
+  <Stack space="space-600">
+    {/* Header */}
+    <Inline justify="between" align="center">
+      <Heading level={1}>Dashboard</Heading>
+      <Button>New Item</Button>
+    </Inline>
+
+    {/* Content grid */}
+    <Grid columns={12} gap="space-400">
+      <GridItem span={12} spanLg={8}>
+        <Box padding="space-300" backgroundColor="card" borderRadius="lg" border="default">
+          <Stack space="space-300">
+            <Heading level={2}>Main Content</Heading>
+            <Text>Content goes here...</Text>
+          </Stack>
+        </Box>
+      </GridItem>
+      <GridItem span={12} spanLg={4}>
+        <Stack space="space-200">
+          <Box padding="space-200" backgroundColor="muted" borderRadius="md">
+            <Text>Sidebar widget 1</Text>
+          </Box>
+          <Box padding="space-200" backgroundColor="muted" borderRadius="md">
+            <Text>Sidebar widget 2</Text>
+          </Box>
+        </Stack>
+      </GridItem>
+    </Grid>
+  </Stack>
+</Container>
+```
+
+### Benefits
+
+**For Developers:**
+
+- ✅ Faster development with predefined spacing
+- ✅ Less CSS - reusable tokens replace custom values
+- ✅ Type-safe props with full TypeScript support
+- ✅ Auto-complete for spacing tokens
+
+**For Users:**
+
+- ✅ Visual consistency across entire application
+- ✅ Predictable layouts improve usability
+- ✅ Responsive design works on all devices
+- ✅ Accessible spacing aids navigation
+
+### Related Documentation
+
+- **Full Guide:** [`docs/layout-primitives-guide.md`](./layout-primitives-guide.md)
+- **Spacing System:** [`docs/atlassian-spacing-grid-system.md`](./atlassian-spacing-grid-system.md)
+- **Component Source:** `packages/ui/src/components/primitives/`
+- **Token Reference:** `packages/ui/src/styles/globals.css`
 
 ---
 

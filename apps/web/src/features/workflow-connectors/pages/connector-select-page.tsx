@@ -99,9 +99,9 @@ export function ConnectorSelectPage() {
         <SearchInput placeholder="Tìm kiếm connector..." onSearch={setSearchQuery} className="max-w-md" />
       </div>
 
-      {/* Grid */}
+      {/* Grid - Compact 2-column layout for better readability */}
       {filteredTypes.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {filteredTypes.map((type) => (
             <ConnectorCard key={type.type} connectorType={type} onClick={() => handleCardClick(type.type, type.name)} />
           ))}

@@ -426,6 +426,61 @@ className="bg-[var(--brand-primary-subtle)] border-[var(--brand-primary)]"
 <Card className="p-8">
 ```
 
+**Card Layout Patterns**:
+
+**Centered Vertical Layout** (Legacy - Not Recommended):
+
+```typescript
+// ❌ Avoid: Excessive height, centered alignment
+<CardContent className="p-4 space-y-3 text-center">
+  <div className="flex justify-center">
+    <img className="size-12" />
+  </div>
+  <Heading level={4} className="text-center">Title</Heading>
+  <Text className="line-clamp-2">Description</Text>
+</CardContent>
+```
+
+**Horizontal Icon-Prominent Layout** (Recommended):
+
+```typescript
+// ✅ Preferred: Compact, left-aligned, scannable
+<CardContent className="px-4 py-3">
+  <div className="flex items-start gap-3">
+    {/* Icon - 40×40px for balance */}
+    <div className="flex-shrink-0">
+      <img className="size-10" />
+    </div>
+
+    {/* Content - Left-aligned, stacked */}
+    <div className="flex-1 min-w-0 space-y-1">
+      <div className="text-base font-semibold truncate">Title</div>
+      <Text size="small" color="muted" className="line-clamp-2 leading-relaxed">
+        Description text optimized for Vietnamese typography
+      </Text>
+    </div>
+  </div>
+</CardContent>
+```
+
+**Benefits of Horizontal Layout**:
+
+- 45% height reduction (160px → 88px)
+- Better scannability (left-to-right reading)
+- Icon-prominent design (visual hierarchy)
+- Space-efficient grids (show 2-3 more items)
+- Vietnamese typography optimization
+
+**Grid Patterns**:
+
+```typescript
+// 2-column compact (recommended for selection grids)
+<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+
+// 3-column standard (use for dashboard cards)
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+```
+
 ### Tables
 
 **Standard Table Pattern**:

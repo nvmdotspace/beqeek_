@@ -66,7 +66,8 @@ export interface StackProps extends React.HTMLAttributes<HTMLDivElement>, Varian
 }
 
 export const Stack = React.forwardRef<HTMLDivElement, StackProps>(
-  ({ className, space, align, justify, as: Component = 'div', ...props }, ref) => {
+  ({ className, space, align, justify, as = 'div', ...props }, ref) => {
+    const Component = as as React.ElementType;
     return <Component ref={ref} className={cn(stackVariants({ space, align, justify }), className)} {...props} />;
   },
 );
