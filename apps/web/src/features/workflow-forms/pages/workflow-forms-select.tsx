@@ -20,7 +20,7 @@ import { EmptyState } from '../components/empty-state';
 
 import type { FormType } from '../types';
 
-const route = getRouteApi('/$locale/workspaces/$workspaceId/workflow-forms/select');
+const route = getRouteApi(ROUTES.WORKFLOW_FORMS.SELECT);
 
 export function WorkflowFormsSelect() {
   const { workspaceId, locale } = route.useParams();

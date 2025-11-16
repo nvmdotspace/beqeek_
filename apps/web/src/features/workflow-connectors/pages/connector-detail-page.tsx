@@ -26,7 +26,7 @@ import {
   AlertDialogTitle,
 } from '@workspace/ui/components/alert-dialog';
 
-const route = getRouteApi('/$locale/workspaces/$workspaceId/workflow-connectors/$connectorId/');
+const route = getRouteApi(ROUTES.WORKFLOW_CONNECTORS.DETAIL);
 
 export function ConnectorDetailPage() {
   const { workspaceId, locale, connectorId } = route.useParams();

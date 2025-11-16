@@ -47,7 +47,7 @@ interface ConnectorListItemProps {
   onDelete?: (connector: ConnectorInstance) => void;
 }
 
-const route = getRouteApi('/$locale/workspaces/$workspaceId/workflow-connectors/');
+const route = getRouteApi(ROUTES.WORKFLOW_CONNECTORS.LIST);
 
 export const ConnectorListItem = memo(
   ({ connector, workspaceId, locale, onEdit, onDelete }: ConnectorListItemProps) => {

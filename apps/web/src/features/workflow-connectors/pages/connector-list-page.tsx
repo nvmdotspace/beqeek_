@@ -19,7 +19,7 @@ import { StatBadge } from '@/features/workspace/components/stat-badge';
 import { Inline } from '@workspace/ui/components/primitives';
 import { CONNECTOR_TYPES, CONNECTOR_CONFIGS } from '@workspace/beqeek-shared/workflow-connectors';
 
-const route = getRouteApi('/$locale/workspaces/$workspaceId/workflow-connectors/');
+const route = getRouteApi(ROUTES.WORKFLOW_CONNECTORS.LIST);
 
 export function ConnectorListPage() {
   const { workspaceId, locale } = route.useParams();

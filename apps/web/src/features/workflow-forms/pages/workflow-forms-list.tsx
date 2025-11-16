@@ -23,8 +23,7 @@ import { FormListSkeleton } from '../components/form-list-skeleton';
 import { EmptyState } from '../components/empty-state';
 import type { FormType } from '../types';
 
-// Using the generated route path for index routes (with trailing slash)
-const route = getRouteApi('/$locale/workspaces/$workspaceId/workflow-forms/');
+const route = getRouteApi(ROUTES.WORKFLOW_FORMS.LIST);
 
 export function WorkflowFormsList() {
   const { workspaceId, locale } = route.useParams();

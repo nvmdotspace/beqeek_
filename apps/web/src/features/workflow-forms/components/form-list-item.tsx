@@ -25,7 +25,7 @@ import { ROUTES } from '@/shared/route-paths';
 
 import type { FormInstance, FormType } from '../types';
 
-const route = getRouteApi('/$locale/workspaces/$workspaceId/workflow-forms/');
+const route = getRouteApi(ROUTES.WORKFLOW_FORMS.LIST);
 
 // Form type configuration with colors and icons
 const getFormTypeConfig = (formType: FormType) => {

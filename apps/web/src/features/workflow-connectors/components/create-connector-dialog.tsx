@@ -81,56 +81,57 @@ export function CreateConnectorDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Tạo {connectorTypeName} Connector</DialogTitle>
-          <DialogDescription>Nhập tên định danh và mô tả cho connector mới</DialogDescription>
-        </DialogHeader>
-
+      <DialogContent className="sm:max-w-[500px]">
         <form
           onSubmit={(e) => {
             e.preventDefault();
             e.stopPropagation();
             form.handleSubmit();
           }}
-          className="space-y-4"
         >
-          {/* Name field */}
-          <form.Field name="name">
-            {(field) => (
-              <div className="space-y-2">
-                <Label htmlFor="connector-name">
-                  Tên định danh <span className="text-destructive">*</span>
-                </Label>
-                <Input
-                  id="connector-name"
-                  placeholder="Ví dụ: Email Marketing"
-                  value={field.state.value}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  onBlur={field.handleBlur}
-                  disabled={isLoading}
-                />
-              </div>
-            )}
-          </form.Field>
+          <DialogHeader>
+            <DialogTitle>Tạo {connectorTypeName} Connector</DialogTitle>
+            <DialogDescription>Nhập tên định danh và mô tả cho connector mới</DialogDescription>
+          </DialogHeader>
 
-          {/* Description field */}
-          <form.Field name="description">
-            {(field) => (
-              <div className="space-y-2">
-                <Label htmlFor="connector-description">Mô tả</Label>
-                <Textarea
-                  id="connector-description"
-                  placeholder="Mô tả mục đích sử dụng connector này..."
-                  value={field.state.value}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  onBlur={field.handleBlur}
-                  disabled={isLoading}
-                  rows={3}
-                />
-              </div>
-            )}
-          </form.Field>
+          <div className="space-y-4 py-4">
+            {/* Name field */}
+            <form.Field name="name">
+              {(field) => (
+                <div className="space-y-2">
+                  <Label htmlFor="connector-name">
+                    Tên định danh <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    id="connector-name"
+                    placeholder="Ví dụ: Email Marketing"
+                    value={field.state.value}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    onBlur={field.handleBlur}
+                    disabled={isLoading}
+                  />
+                </div>
+              )}
+            </form.Field>
+
+            {/* Description field */}
+            <form.Field name="description">
+              {(field) => (
+                <div className="space-y-2">
+                  <Label htmlFor="connector-description">Mô tả</Label>
+                  <Textarea
+                    id="connector-description"
+                    placeholder="Mô tả mục đích sử dụng connector này..."
+                    value={field.state.value}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    onBlur={field.handleBlur}
+                    disabled={isLoading}
+                    rows={3}
+                  />
+                </div>
+              )}
+            </form.Field>
+          </div>
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={handleClose} disabled={isLoading}>

@@ -27,7 +27,7 @@ import { FORM_CONFIGS } from '../constants';
 
 import type { FormType } from '../types';
 
-const route = getRouteApi('/$locale/workspaces/$workspaceId/workflow-forms/select');
+const route = getRouteApi(ROUTES.WORKFLOW_FORMS.SELECT);
 
 interface CreateFormDialogProps {
   open: boolean;

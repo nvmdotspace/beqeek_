@@ -15,7 +15,7 @@ import { useWorkflowForm, useUpdateWorkflowForm, useDeleteWorkflowForm } from '.
 import { useFormBuilderStore } from '../stores/form-builder-store';
 import { FormBuilderLayout } from '../components/form-builder-layout';
 
-const route = getRouteApi('/$locale/workspaces/$workspaceId/workflow-forms/$formId');
+const route = getRouteApi(ROUTES.WORKFLOW_FORMS.FORM_DETAIL);
 
 export function WorkflowFormDetail() {
   const { workspaceId, formId, locale } = route.useParams();
