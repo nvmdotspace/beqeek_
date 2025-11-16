@@ -30,6 +30,12 @@ export function getEncryptionTypeForField(fieldType: string): 'AES-256-CBC' | 'O
     fieldType === 'DATE' ||
     fieldType === 'DATETIME' ||
     fieldType === 'TIME' ||
+    fieldType === 'YEAR' ||
+    fieldType === 'MONTH' ||
+    fieldType === 'DAY' ||
+    fieldType === 'HOUR' ||
+    fieldType === 'MINUTE' ||
+    fieldType === 'SECOND' ||
     fieldType === 'CURRENCY' ||
     fieldType === 'PERCENTAGE' ||
     fieldType === 'RATING'
