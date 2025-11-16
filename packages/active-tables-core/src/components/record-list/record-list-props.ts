@@ -73,6 +73,18 @@ export interface RecordListProps extends BaseRecordListProps {
 
   /** Callback for retry on error */
   onRetry?: () => void;
+
+  /** Show actions menu (update/delete/custom) - default: true */
+  showActions?: boolean;
+
+  /** Callback when update action is clicked */
+  onUpdateRecord?: (recordId: string) => void;
+
+  /** Callback when delete action is clicked */
+  onDeleteRecord?: (recordId: string) => void;
+
+  /** Callback when custom action is clicked */
+  onCustomAction?: (actionId: string, recordId: string) => void;
 }
 
 /**
@@ -90,4 +102,16 @@ export interface LayoutProps extends BaseRecordListProps {
 
   /** Additional CSS class names */
   className?: string;
+
+  /** Show actions menu (update/delete/custom) - default: true */
+  showActions?: boolean;
+
+  /** Callback when update action is clicked */
+  onUpdateRecord?: (recordId: string) => void;
+
+  /** Callback when delete action is clicked */
+  onDeleteRecord?: (recordId: string) => void;
+
+  /** Callback when custom action is clicked */
+  onCustomAction?: (actionId: string, recordId: string) => void;
 }

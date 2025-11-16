@@ -1,0 +1,187 @@
+/**
+ * Connector Config Form Component
+ *
+ * Dynamic form that renders config fields based on connector type
+ */
+
+import { useForm } from '@tanstack/react-form';
+import { z } from 'zod';
+import { Card, CardContent, CardHeader, CardTitle } from '@workspace/ui/components/card';
+import { Button } from '@workspace/ui/components/button';
+import { Input } from '@workspace/ui/components/input';
+import { Checkbox } from '@workspace/ui/components/checkbox';
+import { Label } from '@workspace/ui/components/label';
+import { CONNECTOR_CONFIGS, type ConnectorType } from '@workspace/beqeek-shared/workflow-connectors';
+
+interface ConnectorConfigFormProps {
+  /** Connector type */
+  connectorType: ConnectorType;
+  /** Current config values */
+  config: Record<string, unknown>;
+  /** Whether connector uses OAuth */
+  isOAuth: boolean;
+  /** Submit handler */
+  onSubmit: (config: Record<string, unknown>) => void;
+  /** OAuth connect handler */
+  onOAuthConnect?: () => void;
+  /** Loading state */
+  isLoading?: boolean;
+}
+
+/**
+ * Generate Zod schema from connector config definition
+ */
+function generateSchema(connectorType: ConnectorType) {
+  const configDef = CONNECTOR_CONFIGS.find((c) => c.connectorType === connectorType);
+  if (!configDef) return z.object({});
+
+  const shape: Record<string, z.ZodTypeAny> = {};
+
+  configDef.configFields.forEach((field) => {
+    let fieldSchema: z.ZodTypeAny;
+
+    switch (field.type) {
+      case 'number':
+        fieldSchema = z.coerce.number();
+        break;
+      case 'checkbox':
+        fieldSchema = z.boolean().optional();
+        break;
+      default:
+        fieldSchema = z.string();
+    }
+
+    if (field.required) {
+      if (field.type === 'number') {
+        shape[field.name] = fieldSchema;
+      } else if (field.type === 'checkbox') {
+        shape[field.name] = fieldSchema;
+      } else {
+        shape[field.name] = (fieldSchema as z.ZodString).min(1, `${field.label} là bắt buộc`);
+      }
+    } else {
+      shape[field.name] = fieldSchema.optional();
+    }
+  });
+
+  return z.object(shape);
+}
+
+export function ConnectorConfigForm({
+  connectorType,
+  config,
+  isOAuth,
+  onSubmit,
+  onOAuthConnect,
+  isLoading = false,
+}: ConnectorConfigFormProps) {
+  const configDef = CONNECTOR_CONFIGS.find((c) => c.connectorType === connectorType);
+
+  const schema = generateSchema(connectorType);
+
+  const form = useForm({
+    defaultValues: config,
+    onSubmit: async ({ value }) => {
+      onSubmit(value);
+    },
+  });
+
+  if (!configDef) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <p className="text-sm text-muted-foreground">Không tìm thấy cấu hình cho loại connector này.</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle>Cấu hình kỹ thuật</CardTitle>
+          {isOAuth && onOAuthConnect && (
+            <Button type="button" variant="outline" size="sm" onClick={onOAuthConnect} disabled={isLoading}>
+              Kết nối OAuth
+            </Button>
+          )}
+        </div>
+      </CardHeader>
+      <CardContent>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            form.handleSubmit();
+          }}
+          className="space-y-4"
+        >
+          {configDef.configFields.map((field) => (
+            <form.Field key={field.name} name={field.name}>
+              {(fieldApi) => {
+                const isReadonly = field.readonly || false;
+                const value = fieldApi.state.value ?? '';
+
+                return (
+                  <div className="space-y-2">
+                    {field.type === 'checkbox' ? (
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`field-${field.name}`}
+                          checked={Boolean(value)}
+                          onCheckedChange={(checked) => fieldApi.handleChange(Boolean(checked))}
+                          disabled={isReadonly || isLoading}
+                        />
+                        <Label
+                          htmlFor={`field-${field.name}`}
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        >
+                          {field.label}
+                          {field.required && <span className="text-destructive ml-1">*</span>}
+                        </Label>
+                      </div>
+                    ) : (
+                      <>
+                        <Label htmlFor={`field-${field.name}`}>
+                          {field.label}
+                          {field.required && <span className="text-destructive ml-1">*</span>}
+                        </Label>
+                        <Input
+                          id={`field-${field.name}`}
+                          type={field.type === 'password' ? 'password' : field.type === 'number' ? 'number' : 'text'}
+                          value={isReadonly && field.secret ? '••••••••••••' : String(value)}
+                          onChange={(e) => {
+                            const val = field.type === 'number' ? Number(e.target.value) : e.target.value;
+                            fieldApi.handleChange(val);
+                          }}
+                          onBlur={fieldApi.handleBlur}
+                          disabled={isReadonly || isLoading}
+                          readOnly={isReadonly}
+                        />
+                      </>
+                    )}
+
+                    {fieldApi.state.meta.errors.length > 0 && (
+                      <p className="text-sm text-destructive">{fieldApi.state.meta.errors[0]}</p>
+                    )}
+                  </div>
+                );
+              }}
+            </form.Field>
+          ))}
+
+          <div className="flex justify-end pt-4">
+            <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
+              {([canSubmit, isSubmitting]) => (
+                <Button type="submit" disabled={!canSubmit || isSubmitting || isLoading}>
+                  {isLoading ? 'Đang lưu...' : 'Lưu cấu hình'}
+                </Button>
+              )}
+            </form.Subscribe>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
+  );
+}

@@ -134,6 +134,7 @@ export interface ActiveTableRecordPermissions {
   comment_access?: boolean;
   comment_update?: boolean;
   comment_delete?: boolean;
+  [key: `custom_${string}`]: boolean; // Support custom actions
 }
 
 export interface ActiveTableRecord {

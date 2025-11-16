@@ -20,6 +20,7 @@
     "@tanstack/react-query": "^5.71.10",
     "@tanstack/react-router": "^1.133.36",
     "@tanstack/react-table": "^8.21.3",
+    "@tanstack/zod-form-adapter": "^0.42.1",
     "@workspace/active-tables-core": "workspace:*",
     "@workspace/beqeek-shared": "workspace:*",
     "@workspace/comments": "workspace:*",
@@ -33,6 +34,7 @@
     "react-dom": "^19.1.1",
     "react-hook-form": "^7.66.0",
     "sonner": "^1.7.4",
+    "zod": "^4.1.12",
     "zustand": "^5.0.1"
   },
   "devDependencies": {

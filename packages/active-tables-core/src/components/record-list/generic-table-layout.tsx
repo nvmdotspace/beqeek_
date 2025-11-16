@@ -19,6 +19,7 @@ import type { LayoutProps } from './record-list-props.js';
 import type { TableRecord } from '../../types/record.js';
 import { FieldListRenderer } from '../fields/field-list-renderer.js';
 import { useRecordDecryption } from '../../hooks/use-encryption.js';
+import { RecordActionsMenu } from '../record-actions/record-actions-menu.js';
 
 // Mobile detection hook
 const useIsMobile = () => {
@@ -182,6 +183,10 @@ export function GenericTableLayout(props: LayoutProps) {
     messages,
     encryptionKey,
     className = '',
+    showActions = true,
+    onUpdateRecord,
+    onDeleteRecord,
+    onCustomAction,
   } = props;
 
   const { decryptRecord } = useRecordDecryption(tableMetadata, encryptionKey);
@@ -213,6 +218,9 @@ export function GenericTableLayout(props: LayoutProps) {
 
     return Array.from(fields);
   }, [config, isMobile]);
+
+  // Get table actions configuration (ensure proper type compatibility)
+  const tableActions = (tableMetadata.config?.actions || []) as any[];
 
   // Create table columns
   const columns = useMemo<ColumnDef<TableRecord>[]>(() => {
@@ -290,6 +298,29 @@ export function GenericTableLayout(props: LayoutProps) {
       });
     });
 
+    // Actions column (if enabled and has callbacks)
+    if (showActions && tableActions.length > 0 && (onUpdateRecord || onDeleteRecord || onCustomAction)) {
+      cols.push({
+        id: 'actions',
+        header: '',
+        cell: ({ row }) => (
+          <div onClick={(e) => e.stopPropagation()} className="flex justify-end">
+            <RecordActionsMenu
+              record={row.original}
+              actions={tableActions as any}
+              onUpdate={onUpdateRecord}
+              onDelete={onDeleteRecord}
+              onCustomAction={onCustomAction}
+            />
+          </div>
+        ),
+        size: 48,
+        minSize: 48,
+        maxSize: 48,
+        enableSorting: false,
+      });
+    }
+
     return cols;
   }, [
     visibleFields,
@@ -300,6 +331,11 @@ export function GenericTableLayout(props: LayoutProps) {
     currentUser,
     workspaceUsers,
     messages,
+    showActions,
+    tableActions,
+    onUpdateRecord,
+    onDeleteRecord,
+    onCustomAction,
   ]);
 
   // Create table instance
@@ -349,8 +385,10 @@ export function GenericTableLayout(props: LayoutProps) {
                   {headerGroup.headers.map((header) => (
                     <th
                       key={header.id}
-                      className="h-10 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]"
-                      style={{ width: header.getSize() }}
+                      className={`h-10 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] ${
+                        header.id === 'actions' ? 'w-12' : ''
+                      }`}
+                      style={header.id === 'actions' ? { width: '48px' } : { width: header.getSize() }}
                     >
                       {header.isPlaceholder ? null : (
                         <button

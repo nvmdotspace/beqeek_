@@ -83,6 +83,23 @@ export const ROUTES = {
   },
 
   /**
+   * Workflow Connectors feature routes
+   */
+  WORKFLOW_CONNECTORS: {
+    /** Connectors list: /$locale/workspaces/$workspaceId/workflow-connectors */
+    LIST: '/$locale/workspaces/$workspaceId/workflow-connectors' as const,
+
+    /** Connector type selection: /$locale/workspaces/$workspaceId/workflow-connectors/select */
+    SELECT: '/$locale/workspaces/$workspaceId/workflow-connectors/select' as const,
+
+    /** Connector detail: /$locale/workspaces/$workspaceId/workflow-connectors/$connectorId */
+    DETAIL: '/$locale/workspaces/$workspaceId/workflow-connectors/$connectorId' as const,
+
+    /** OAuth callback: /$locale/workspaces/$workspaceId/workflow-connectors/oauth-callback */
+    OAUTH_CALLBACK: '/$locale/workspaces/$workspaceId/workflow-connectors/oauth-callback' as const,
+  },
+
+  /**
    * Workspace feature routes
    */
   WORKSPACE: {
@@ -137,6 +154,7 @@ export function isValidRoutePath(path: string): boolean {
     ROUTES.NOT_FOUND,
     ...Object.values(ROUTES.ACTIVE_TABLES),
     ...Object.values(ROUTES.WORKFLOW_FORMS),
+    ...Object.values(ROUTES.WORKFLOW_CONNECTORS),
     ...Object.values(ROUTES.WORKSPACE),
   ]);
 
@@ -153,6 +171,9 @@ export const ROUTE_GROUPS = {
   /** All Workflow Forms routes */
   WORKFLOW_FORMS: Object.values(ROUTES.WORKFLOW_FORMS),
 
+  /** All Workflow Connectors routes */
+  WORKFLOW_CONNECTORS: Object.values(ROUTES.WORKFLOW_CONNECTORS),
+
   /** All Workspace feature routes */
   WORKSPACE: Object.values(ROUTES.WORKSPACE),
 
@@ -163,6 +184,7 @@ export const ROUTE_GROUPS = {
     ROUTES.SEARCH,
     ...Object.values(ROUTES.ACTIVE_TABLES),
     ...Object.values(ROUTES.WORKFLOW_FORMS),
+    ...Object.values(ROUTES.WORKFLOW_CONNECTORS),
     ...Object.values(ROUTES.WORKSPACE),
   ],
 

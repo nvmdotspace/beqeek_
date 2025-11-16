@@ -8,6 +8,7 @@ import { useTableEncryption } from '../hooks/use-table-encryption';
 import { useUpdateRecordField } from '../hooks/use-update-record';
 import { useListContext } from '../hooks/use-list-context';
 import { useScrollShortcuts } from '../hooks/use-scroll-shortcuts';
+import { useDeleteRecord } from '../hooks/use-delete-record';
 import { useWorkspaceUsersWithPrefetch } from '@/features/workspace-users/hooks/use-workspace-users-with-prefetch';
 import { useGetWorkspaceUsers } from '@/features/workspace-users/hooks/use-get-workspace-users';
 import { KanbanBoard, GanttChartView, RecordList, type TableRecord, type Table } from '@workspace/active-tables-core';
@@ -25,6 +26,7 @@ import { Heading, Text } from '@workspace/ui/components/typography';
 // Components
 import { ErrorCard } from '@/components/error-display';
 import { CreateRecordDialog } from '../components/record-form/create-record-dialog';
+import { UpdateRecordDialog } from '../components/record-form/update-record-dialog';
 import { InfiniteScrollTrigger } from '../components/infinite-scroll-trigger';
 import { RecordsLoadingSkeleton } from '../components/records-loading-skeleton';
 import { RecordsEndIndicator } from '../components/records-end-indicator';
@@ -200,6 +202,14 @@ export const ActiveTableRecordsPage = () => {
 
   // Initialize record update mutation for kanban DnD
   const updateRecordMutation = useUpdateRecordField(workspaceId ?? '', tableId ?? '', table ?? null);
+
+  // Initialize delete record hook
+  const { deleteRecord } = useDeleteRecord({
+    workspaceId: workspaceId ?? '',
+    tableId: tableId ?? '',
+    table: table ?? null,
+  });
+
   useScrollShortcuts({
     enabled: viewMode === 'list',
   });
@@ -207,6 +217,8 @@ export const ActiveTableRecordsPage = () => {
   const displayTable: Table | null = table ?? null;
 
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false);
+  const [recordToUpdate, setRecordToUpdate] = useState<TableRecord | null>(null);
 
   // Records are now filtered server-side, so we just use them directly
   const filteredRecords = records;
@@ -262,6 +274,25 @@ export const ActiveTableRecordsPage = () => {
       to: ROUTES.ACTIVE_TABLES.RECORD_DETAIL,
       params: { locale, workspaceId, tableId, recordId: id },
     });
+  };
+
+  const handleUpdateRecord = (recordId: string) => {
+    // Find the record to update
+    const record = filteredRecords.find((r) => r.id === recordId);
+    if (record) {
+      setRecordToUpdate(record);
+      setIsUpdateDialogOpen(true);
+    }
+  };
+
+  const handleDeleteRecord = (recordId: string) => {
+    deleteRecord(recordId);
+  };
+
+  const handleCustomAction = (actionId: string, recordId: string) => {
+    // TODO: Implement custom action execution
+    console.log('Custom action triggered:', { actionId, recordId });
+    // This will be implemented when custom actions API is ready
   };
 
   const handleRecordMove = (recordId: string, newStatus: string) => {
@@ -515,6 +546,9 @@ export const ActiveTableRecordsPage = () => {
                 config={displayTable.config.recordListConfig || { layout: RECORD_LIST_LAYOUT_GENERIC_TABLE }}
                 loading={shouldShowRecordListLoading}
                 onRecordClick={(record) => handleViewRecord(record)}
+                onUpdateRecord={handleUpdateRecord}
+                onDeleteRecord={handleDeleteRecord}
+                onCustomAction={handleCustomAction}
                 encryptionKey={encryption.encryptionKey || undefined}
                 workspaceUsers={workspaceUsers}
               />
@@ -596,6 +630,22 @@ export const ActiveTableRecordsPage = () => {
           workspaceId={workspaceId}
           tableId={tableId}
           onSuccess={handleCreateSuccess}
+        />
+      )}
+
+      {/* Update Record Dialog */}
+      {displayTable && recordToUpdate && (
+        <UpdateRecordDialog
+          open={isUpdateDialogOpen}
+          onOpenChange={setIsUpdateDialogOpen}
+          table={displayTable}
+          record={recordToUpdate}
+          workspaceId={workspaceId}
+          tableId={tableId}
+          onSuccess={() => {
+            // Optional: refresh or navigate after update
+            console.log('Record updated successfully');
+          }}
         />
       )}
     </div>

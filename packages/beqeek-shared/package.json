@@ -32,6 +32,10 @@
     "./types": {
       "import": "./dist/types/index.js",
       "types": "./dist/types/index.d.ts"
+    },
+    "./workflow-connectors": {
+      "import": "./dist/workflow-connectors/index.js",
+      "types": "./dist/workflow-connectors/index.d.ts"
     }
   },
   "files": [

@@ -15,6 +15,7 @@ import type { Table } from '../../types/common.js';
 import type { CurrentUser, WorkspaceUser } from '../../types/responses.js';
 import { FieldListRenderer } from '../fields/field-list-renderer.js';
 import { useRecordDecryption } from '../../hooks/use-encryption.js';
+import { RecordActionsMenu } from '../record-actions/record-actions-menu.js';
 
 export function HeadColumnLayout(props: LayoutProps) {
   const {
@@ -29,9 +30,16 @@ export function HeadColumnLayout(props: LayoutProps) {
     messages,
     encryptionKey,
     className = '',
+    showActions = true,
+    onUpdateRecord,
+    onDeleteRecord,
+    onCustomAction,
   } = props;
 
   const { decryptRecord } = useRecordDecryption(table, encryptionKey);
+
+  // Get table actions configuration
+  const tableActions = (table.config?.actions || []) as any[];
 
   // Get field config by name
   const getFieldConfig = useCallback(
@@ -102,6 +110,19 @@ export function HeadColumnLayout(props: LayoutProps) {
               data-[state=selected]:bg-accent data-[state=selected]:border-accent-foreground/20
             `}
           >
+            {/* Actions menu (top right) */}
+            {showActions && tableActions.length > 0 && (onUpdateRecord || onDeleteRecord || onCustomAction) && (
+              <div className="absolute top-2 right-2" onClick={(e) => e.stopPropagation()}>
+                <RecordActionsMenu
+                  record={record}
+                  actions={tableActions}
+                  onUpdate={onUpdateRecord}
+                  onDelete={onDeleteRecord}
+                  onCustomAction={onCustomAction}
+                />
+              </div>
+            )}
+
             {/* Selection checkbox */}
             {onSelectionChange && (
               <div className="flex items-start gap-3">

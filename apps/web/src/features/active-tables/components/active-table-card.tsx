@@ -42,7 +42,6 @@ export const ActiveTableCard = memo(
     const { isReady: isEncryptionReady } = useEncryption();
     const fieldCount = table.config?.fields?.length ?? 0;
     const isE2EE = Boolean(table.config?.e2eeEncryption);
-    const actionsCount = table.config?.actions?.length ?? 0;
     const quickFilterCount = table.config?.quickFilters?.length ?? 0;
     const updatedAtLabel =
       table.updatedAt && !Number.isNaN(Date.parse(table.updatedAt))

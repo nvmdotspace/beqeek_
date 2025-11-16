@@ -10,6 +10,7 @@
 
 /**
  * Permissions for a specific record
+ * Supports both standard actions and custom actions (custom_<actionId>)
  */
 export interface RecordPermissions {
   /** Can view/read the record */
@@ -20,6 +21,9 @@ export interface RecordPermissions {
 
   /** Can delete the record */
   delete?: boolean;
+
+  /** Custom action permissions (dynamic keys: custom_<actionId>) */
+  [key: `custom_${string}`]: boolean;
 }
 
 // ============================================
@@ -119,11 +123,13 @@ export function isEncryptedRecord(record: TableRecord): boolean {
 
 /**
  * Check if user has permission to perform action on record
+ * @param record - The record to check permissions for
+ * @param action - Standard action ('access', 'update', 'delete') or custom action key
  */
-export function hasPermission(record: TableRecord, action: 'access' | 'update' | 'delete'): boolean {
+export function hasPermission(record: TableRecord, action: string): boolean {
   if (!record.permissions) {
     return false; // No permissions = deny by default
   }
 
-  return record.permissions[action] ?? false;
+  return record.permissions[action as keyof RecordPermissions] ?? false;
 }

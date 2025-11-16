@@ -25,6 +25,8 @@ export * from './kanban/index.js';
 // Gantt chart (Phase 6)
 export * from './gantt/index.js';
 
-// TODO Phase 7+: Export filters, actions
+// Record actions (Phase 7)
+export * from './record-actions/index.js';
+
+// TODO Phase 7+: Export filters
 // export * from './filters';
-// export * from './actions';
