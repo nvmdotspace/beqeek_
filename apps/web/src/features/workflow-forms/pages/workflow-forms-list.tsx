@@ -13,6 +13,7 @@ import { Heading, Text } from '@workspace/ui/components/typography';
 import { Badge } from '@workspace/ui/components/badge';
 import { FilterChip } from '@workspace/ui/components/filter-chip';
 import { Search, Filter, FileText } from 'lucide-react';
+import { Box, Stack, Inline, Grid } from '@workspace/ui/components/primitives';
 
 import { ROUTES } from '@/shared/route-paths';
 import { useSidebarStore, selectCurrentWorkspace } from '@/stores/sidebar-store';
@@ -60,19 +61,21 @@ export function WorkflowFormsList() {
   const activeFilterCount = formTypeFilter !== 'all' ? 1 : 0;
 
   return (
-    <div className="space-y-6 p-6">
-      {/* Header Section - Matching Active Tables pattern */}
-      <div className="flex flex-col gap-6">
+    <Box padding="space-300">
+      <Stack space="space-300">
+        {/* Header Section - Matching Active Tables pattern */}
+        {/* TODO: Migrate to primitives when responsive gap support is added */}
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div className="space-y-1">
+          <Stack space="space-025">
             <Heading level={1}>Biểu mẫu</Heading>
             <Text size="small" color="muted">
               {currentWorkspace?.workspaceName
                 ? `Workspace • ${currentWorkspace.workspaceName}`
                 : 'Quản lý biểu mẫu workflow'}
             </Text>
-          </div>
+          </Stack>
 
+          {/* TODO: Migrate to primitives when responsive gap support is added */}
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <div className="relative w-full sm:w-72">
               <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -83,100 +86,106 @@ export function WorkflowFormsList() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="brand-primary"
-                size="sm"
-                onClick={() => navigate({ to: ROUTES.WORKFLOW_FORMS.SELECT, params: { locale, workspaceId } })}
-              >
-                Tạo Form
-              </Button>
-            </div>
+            <Button
+              variant="brand-primary"
+              size="sm"
+              onClick={() => navigate({ to: ROUTES.WORKFLOW_FORMS.SELECT, params: { locale, workspaceId } })}
+            >
+              Tạo Form
+            </Button>
           </div>
         </div>
 
         {/* Stats badges */}
-        <div className="flex items-center gap-3">
+        <Inline space="space-250" align="center" wrap className="gap-y-[var(--space-250)]">
           <Badge variant="outline" className="flex items-center gap-1.5">
             <FileText className="h-3.5 w-3.5" />
             <span>{totalForms} biểu mẫu</span>
           </Badge>
-        </div>
-      </div>
+        </Inline>
 
-      {/* Filter Section - Matching Active Tables pattern */}
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-          <Badge variant="outline" className="border-dashed">
-            {filteredForms.length} biểu mẫu
-          </Badge>
-          <div className="flex items-center gap-2 rounded-full border border-border/60 px-3 py-1 text-xs text-foreground">
-            <Filter className="h-3.5 w-3.5 text-muted-foreground" />
-            {activeFilterCount ? `${activeFilterCount} filter active` : 'No filters applied'}
-          </div>
-        </div>
-
-        <div className="rounded-xl border border-border/60 bg-card p-4 shadow-sm">
-          <div className="space-y-3">
-            {/* Form Type Filter */}
-            <div className="flex items-start gap-3">
-              <Text size="small" weight="medium" className="min-w-[100px] text-muted-foreground pt-1.5">
-                Loại form
-              </Text>
-              <div className="flex-1 flex flex-wrap items-center gap-1.5">
-                <FilterChip active={formTypeFilter === 'all'} onClick={() => setFormTypeFilter('all')}>
-                  Tất cả
-                </FilterChip>
-                <FilterChip active={formTypeFilter === 'BASIC'} onClick={() => setFormTypeFilter('BASIC')}>
-                  Cơ bản ({formTypeCounts.BASIC})
-                </FilterChip>
-                <FilterChip
-                  active={formTypeFilter === 'SUBSCRIPTION'}
-                  onClick={() => setFormTypeFilter('SUBSCRIPTION')}
-                >
-                  Đăng ký ({formTypeCounts.SUBSCRIPTION})
-                </FilterChip>
-                <FilterChip
-                  active={formTypeFilter === 'SURVEY'}
-                  onClick={() => setFormTypeFilter('SURVEY')}
-                  variant="warning"
-                >
-                  Khảo sát ({formTypeCounts.SURVEY})
-                </FilterChip>
-              </div>
+        {/* Filter Section - Matching Active Tables pattern */}
+        <Stack space="space-100">
+          <Inline space="space-050" wrap className="text-xs text-muted-foreground">
+            <Badge variant="outline" className="border-dashed">
+              {filteredForms.length} biểu mẫu
+            </Badge>
+            <div className="rounded-full border border-border/60 text-xs text-foreground">
+              <Box padding="space-025" className="px-3">
+                <Inline space="space-050" align="center">
+                  <Filter className="h-3.5 w-3.5 text-muted-foreground" />
+                  {activeFilterCount ? `${activeFilterCount} filter active` : 'No filters applied'}
+                </Inline>
+              </Box>
             </div>
-          </div>
-        </div>
-      </div>
+          </Inline>
 
-      {/* Forms Grid */}
-      {isLoading ? (
-        <FormListSkeleton count={6} />
-      ) : filteredForms.length === 0 ? (
-        <EmptyState
-          message={searchQuery ? 'Không tìm thấy form nào' : 'Chưa có form nào'}
-          action={
-            !searchQuery ? (
-              <Button
-                onClick={() =>
-                  navigate({
-                    to: ROUTES.WORKFLOW_FORMS.SELECT,
-                    params: { locale, workspaceId },
-                  })
-                }
-              >
-                Tạo form đầu tiên
-              </Button>
-            ) : undefined
-          }
-        />
-      ) : (
-        <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4">
-          {filteredForms.map((form) => (
-            <FormListItem key={form.id} form={form} />
-          ))}
-        </div>
-      )}
-    </div>
+          <Box padding="space-100" backgroundColor="card" borderRadius="xl" border="default" className="shadow-sm">
+            <Stack space="space-100">
+              {/* Form Type Filter */}
+              <Inline space="space-100" align="start">
+                <Text size="small" weight="medium" className="min-w-[100px] text-muted-foreground pt-1">
+                  Loại form
+                </Text>
+                <Inline space="space-075" wrap align="center" className="flex-1">
+                  <FilterChip active={formTypeFilter === 'all'} onClick={() => setFormTypeFilter('all')}>
+                    Tất cả
+                  </FilterChip>
+                  <FilterChip active={formTypeFilter === 'BASIC'} onClick={() => setFormTypeFilter('BASIC')}>
+                    Cơ bản ({formTypeCounts.BASIC})
+                  </FilterChip>
+                  <FilterChip
+                    active={formTypeFilter === 'SUBSCRIPTION'}
+                    onClick={() => setFormTypeFilter('SUBSCRIPTION')}
+                  >
+                    Đăng ký ({formTypeCounts.SUBSCRIPTION})
+                  </FilterChip>
+                  <FilterChip
+                    active={formTypeFilter === 'SURVEY'}
+                    onClick={() => setFormTypeFilter('SURVEY')}
+                    variant="warning"
+                  >
+                    Khảo sát ({formTypeCounts.SURVEY})
+                  </FilterChip>
+                </Inline>
+              </Inline>
+            </Stack>
+          </Box>
+        </Stack>
+
+        {/* Forms Grid */}
+        {isLoading ? (
+          <FormListSkeleton count={6} />
+        ) : filteredForms.length === 0 ? (
+          <EmptyState
+            message={searchQuery ? 'Không tìm thấy form nào' : 'Chưa có form nào'}
+            action={
+              !searchQuery ? (
+                <Button
+                  onClick={() =>
+                    navigate({
+                      to: ROUTES.WORKFLOW_FORMS.SELECT,
+                      params: { locale, workspaceId },
+                    })
+                  }
+                >
+                  Tạo form đầu tiên
+                </Button>
+              ) : undefined
+            }
+          />
+        ) : (
+          <Grid
+            columns={1}
+            gap="space-100"
+            className="sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4"
+          >
+            {filteredForms.map((form) => (
+              <FormListItem key={form.id} form={form} />
+            ))}
+          </Grid>
+        )}
+      </Stack>
+    </Box>
   );
 }

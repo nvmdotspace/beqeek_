@@ -11,6 +11,7 @@ import { Heading, Text } from '@workspace/ui/components/typography';
 import { Badge } from '@workspace/ui/components/badge';
 import { Input } from '@workspace/ui/components/input';
 import { Plus, Search, Users, Shield } from 'lucide-react';
+import { Box, Stack, Inline } from '@workspace/ui/components/primitives';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -101,19 +102,21 @@ export function TeamsPage() {
   const deletingTeam = teams.find((t) => t.id === deletingTeamId);
 
   return (
-    <div className="space-y-6 p-6">
-      {/* Header Section - Matching Active Tables pattern */}
-      <div className="flex flex-col gap-6">
+    <Box padding="space-300">
+      <Stack space="space-300">
+        {/* Header Section - Matching Active Tables pattern */}
+        {/* TODO: Migrate to primitives when responsive gap support is added */}
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div className="space-y-1">
+          <Stack space="space-025">
             <Heading level={1}>{m.team_page_title()}</Heading>
             <Text size="small" color="muted">
               {currentWorkspace?.workspaceName
                 ? `Workspace • ${currentWorkspace.workspaceName}`
                 : m.team_page_description()}
             </Text>
-          </div>
+          </Stack>
 
+          {/* TODO: Migrate to primitives when responsive gap support is added */}
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <div className="relative w-full sm:w-72">
               <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -124,17 +127,15 @@ export function TeamsPage() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <div className="flex items-center gap-2">
-              <Button variant="brand-primary" size="sm" onClick={handleCreateClick}>
-                <Plus className="h-4 w-4 mr-2" />
-                {m.team_create_button()}
-              </Button>
-            </div>
+            <Button variant="brand-primary" size="sm" onClick={handleCreateClick}>
+              <Plus className="h-4 w-4 mr-2" />
+              {m.team_create_button()}
+            </Button>
           </div>
         </div>
 
         {/* Stats badges */}
-        <div className="flex items-center gap-3">
+        <Inline space="space-250" align="center" wrap className="gap-y-[var(--space-250)]">
           <Badge variant="outline" className="flex items-center gap-1.5">
             <Users className="h-3.5 w-3.5" />
             <span>{totalTeams} đội nhóm</span>
@@ -143,49 +144,49 @@ export function TeamsPage() {
             <Shield className="h-3.5 w-3.5" />
             <span>{totalRoles} vai trò</span>
           </Badge>
-        </div>
-      </div>
+        </Inline>
 
-      {/* Summary */}
-      <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-        <Badge variant="outline" className="border-dashed">
-          {filteredTeams.length} đội nhóm
-        </Badge>
-      </div>
+        {/* Summary */}
+        <Inline space="space-050" wrap className="text-xs text-muted-foreground">
+          <Badge variant="outline" className="border-dashed">
+            {filteredTeams.length} đội nhóm
+          </Badge>
+        </Inline>
 
-      {/* Team List */}
-      <TeamList
-        teams={filteredTeams}
-        onEditTeam={handleEditTeam}
-        onDeleteTeam={handleDeleteClick}
-        isLoading={isLoading}
-      />
+        {/* Team List */}
+        <TeamList
+          teams={filteredTeams}
+          onEditTeam={handleEditTeam}
+          onDeleteTeam={handleDeleteClick}
+          isLoading={isLoading}
+        />
 
-      {/* Create/Edit Modal */}
-      <TeamFormModal open={isFormModalOpen} onClose={() => setIsFormModalOpen(false)} team={editingTeam} />
+        {/* Create/Edit Modal */}
+        <TeamFormModal open={isFormModalOpen} onClose={() => setIsFormModalOpen(false)} team={editingTeam} />
 
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={!!deletingTeamId} onOpenChange={(open) => !open && setDeletingTeamId(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{m.team_delete_title()}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {m.team_delete_description({ teamName: deletingTeam?.teamName || '' })}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleteTeam.isPending}>{m.common_cancel()}</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleConfirmDelete}
-              disabled={deleteTeam.isPending}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {deleteTeam.isPending ? m.common_deleting() : m.team_delete_confirm()}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </div>
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={!!deletingTeamId} onOpenChange={(open) => !open && setDeletingTeamId(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{m.team_delete_title()}</AlertDialogTitle>
+              <AlertDialogDescription>
+                {m.team_delete_description({ teamName: deletingTeam?.teamName || '' })}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={deleteTeam.isPending}>{m.common_cancel()}</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleConfirmDelete}
+                disabled={deleteTeam.isPending}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {deleteTeam.isPending ? m.common_deleting() : m.team_delete_confirm()}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </Stack>
+    </Box>
   );
 }
 

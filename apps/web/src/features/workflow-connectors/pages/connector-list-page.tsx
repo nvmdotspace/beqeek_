@@ -16,7 +16,7 @@ import { Heading, Text } from '@workspace/ui/components/typography';
 import { Badge } from '@workspace/ui/components/badge';
 import { FilterChip } from '@workspace/ui/components/filter-chip';
 import { StatBadge } from '@/features/workspace/components/stat-badge';
-import { Inline } from '@workspace/ui/components/primitives';
+import { Box, Stack, Inline, Grid } from '@workspace/ui/components/primitives';
 import { CONNECTOR_TYPES, CONNECTOR_CONFIGS } from '@workspace/beqeek-shared/workflow-connectors';
 
 const route = getRouteApi(ROUTES.WORKFLOW_CONNECTORS.LIST);
@@ -73,122 +73,131 @@ export function ConnectorListPage() {
   };
 
   return (
-    <div className="space-y-6 p-6">
-      {/* Header */}
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <div className="space-y-1">
-          <Heading level={1}>Connectors</Heading>
-          <Text size="small" color="muted">
-            Quản lý kết nối với các dịch vụ bên ngoài
-          </Text>
-        </div>
+    <Box padding="space-300">
+      <Stack space="space-300">
+        {/* Header */}
+        {/* TODO: Migrate to primitives when responsive gap support is added */}
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <Stack space="space-025">
+            <Heading level={1}>Connectors</Heading>
+            <Text size="small" color="muted">
+              Quản lý kết nối với các dịch vụ bên ngoài
+            </Text>
+          </Stack>
 
-        <div className="flex items-center gap-2">
           <Button variant="brand-primary" size="sm" onClick={handleCreateClick}>
             <Plus className="mr-2 size-4" />
             Create
           </Button>
         </div>
-      </div>
 
-      {/* Stats */}
-      <Inline space="space-250" align="center" wrap className="gap-y-[var(--space-250)]">
-        <StatBadge icon={Link2} value={totalConnectors} label="Connectors" color="accent-blue" loading={isLoading} />
-        <StatBadge
-          icon={CheckCircle2}
-          value={connectedConnectors}
-          label="Connected"
-          color="success"
-          loading={isLoading}
-        />
-        <StatBadge icon={XCircle} value={oauthConnectors} label="OAuth" color="accent-purple" loading={isLoading} />
-      </Inline>
+        {/* Stats */}
+        <Inline space="space-250" align="center" wrap className="gap-y-[var(--space-250)]">
+          <StatBadge icon={Link2} value={totalConnectors} label="Connectors" color="accent-blue" loading={isLoading} />
+          <StatBadge
+            icon={CheckCircle2}
+            value={connectedConnectors}
+            label="Connected"
+            color="success"
+            loading={isLoading}
+          />
+          <StatBadge icon={XCircle} value={oauthConnectors} label="OAuth" color="accent-purple" loading={isLoading} />
+        </Inline>
 
-      {/* Filters */}
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-          <Badge variant="outline" className="border-dashed">
-            {filteredConnectors.length} connector{filteredConnectors.length !== 1 ? 's' : ''}
-          </Badge>
-          <div className="flex items-center gap-2 rounded-full border border-border/60 px-3 py-1 text-xs text-foreground">
-            <Filter className="h-3.5 w-3.5 text-muted-foreground" />
-            {activeFilterCount
-              ? `${activeFilterCount} filter${activeFilterCount > 1 ? 's' : ''} applied`
-              : 'No filters applied'}
-          </div>
-        </div>
+        {/* Filters */}
+        <Stack space="space-100">
+          <Inline space="space-050" wrap className="text-xs text-muted-foreground">
+            <Badge variant="outline" className="border-dashed">
+              {filteredConnectors.length} connector{filteredConnectors.length !== 1 ? 's' : ''}
+            </Badge>
+            <div className="rounded-full border border-border/60 text-xs text-foreground">
+              <Box padding="space-025" className="px-3">
+                <Inline space="space-050" align="center">
+                  <Filter className="h-3.5 w-3.5 text-muted-foreground" />
+                  {activeFilterCount
+                    ? `${activeFilterCount} filter${activeFilterCount > 1 ? 's' : ''} applied`
+                    : 'No filters applied'}
+                </Inline>
+              </Box>
+            </div>
+          </Inline>
 
-        <div className="rounded-xl border border-border/60 bg-card p-4 shadow-sm">
-          <div className="space-y-3">
-            {/* Connector Type Filter */}
-            {availableTypes.length > 0 && (
-              <div className="flex items-start gap-3">
-                <Text size="small" weight="medium" className="min-w-[100px] text-muted-foreground pt-1.5">
-                  Type
+          <Box padding="space-100" backgroundColor="card" borderRadius="xl" border="default" className="shadow-sm">
+            <Stack space="space-100">
+              {/* Connector Type Filter */}
+              {availableTypes.length > 0 && (
+                <Inline space="space-100" align="start">
+                  <Text size="small" weight="medium" className="min-w-[100px] text-muted-foreground pt-1">
+                    Type
+                  </Text>
+                  <Inline space="space-075" wrap align="center" className="flex-1">
+                    <FilterChip active={typeFilter === 'all'} onClick={() => setTypeFilter('all')}>
+                      All
+                    </FilterChip>
+                    {availableTypes.map((type) => {
+                      const typeDef = CONNECTOR_TYPES.find((t) => t.type === type);
+                      return (
+                        <FilterChip key={type} active={typeFilter === type} onClick={() => setTypeFilter(type)}>
+                          {typeDef?.name || type}
+                        </FilterChip>
+                      );
+                    })}
+                  </Inline>
+                </Inline>
+              )}
+
+              {/* Connection Status Filter */}
+              <Inline space="space-100" align="start">
+                <Text size="small" weight="medium" className="min-w-[100px] text-muted-foreground pt-1">
+                  Status
                 </Text>
-                <div className="flex-1 flex flex-wrap items-center gap-1.5">
-                  <FilterChip active={typeFilter === 'all'} onClick={() => setTypeFilter('all')}>
+                <Inline space="space-075" wrap align="center" className="flex-1">
+                  <FilterChip active={connectionFilter === 'all'} onClick={() => setConnectionFilter('all')}>
                     All
                   </FilterChip>
-                  {availableTypes.map((type) => {
-                    const typeDef = CONNECTOR_TYPES.find((t) => t.type === type);
-                    return (
-                      <FilterChip key={type} active={typeFilter === type} onClick={() => setTypeFilter(type)}>
-                        {typeDef?.name || type}
-                      </FilterChip>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
+                  <FilterChip
+                    active={connectionFilter === 'connected'}
+                    onClick={() => setConnectionFilter('connected')}
+                    variant="success"
+                  >
+                    Connected
+                  </FilterChip>
+                  <FilterChip
+                    active={connectionFilter === 'not_connected'}
+                    onClick={() => setConnectionFilter('not_connected')}
+                  >
+                    Not connected
+                  </FilterChip>
+                </Inline>
+              </Inline>
+            </Stack>
+          </Box>
+        </Stack>
 
-            {/* Connection Status Filter */}
-            <div className="flex items-start gap-3">
-              <Text size="small" weight="medium" className="min-w-[100px] text-muted-foreground pt-1.5">
-                Status
-              </Text>
-              <div className="flex-1 flex flex-wrap items-center gap-1.5">
-                <FilterChip active={connectionFilter === 'all'} onClick={() => setConnectionFilter('all')}>
-                  All
-                </FilterChip>
-                <FilterChip
-                  active={connectionFilter === 'connected'}
-                  onClick={() => setConnectionFilter('connected')}
-                  variant="success"
-                >
-                  Connected
-                </FilterChip>
-                <FilterChip
-                  active={connectionFilter === 'not_connected'}
-                  onClick={() => setConnectionFilter('not_connected')}
-                >
-                  Not connected
-                </FilterChip>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* List content */}
-      {filteredConnectors.length > 0 ? (
-        <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4">
-          {filteredConnectors.map((connector) => (
-            <ConnectorListItem key={connector.id} connector={connector} workspaceId={workspaceId} locale={locale} />
-          ))}
-        </div>
-      ) : (
-        <EmptyState
-          message={
-            typeFilter === 'all' && connectionFilter === 'all' ? 'Chưa có connector nào' : 'Không tìm thấy connector'
-          }
-          description={
-            typeFilter === 'all' && connectionFilter === 'all'
-              ? 'Tạo connector đầu tiên để kết nối với các dịch vụ bên ngoài'
-              : 'Thay đổi bộ lọc để xem các connector khác'
-          }
-        />
-      )}
-    </div>
+        {/* List content */}
+        {filteredConnectors.length > 0 ? (
+          <Grid
+            columns={1}
+            gap="space-100"
+            className="sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4"
+          >
+            {filteredConnectors.map((connector) => (
+              <ConnectorListItem key={connector.id} connector={connector} workspaceId={workspaceId} locale={locale} />
+            ))}
+          </Grid>
+        ) : (
+          <EmptyState
+            message={
+              typeFilter === 'all' && connectionFilter === 'all' ? 'Chưa có connector nào' : 'Không tìm thấy connector'
+            }
+            description={
+              typeFilter === 'all' && connectionFilter === 'all'
+                ? 'Tạo connector đầu tiên để kết nối với các dịch vụ bên ngoài'
+                : 'Thay đổi bộ lọc để xem các connector khác'
+            }
+          />
+        )}
+      </Stack>
+    </Box>
   );
 }

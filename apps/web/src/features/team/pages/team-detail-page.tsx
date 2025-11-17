@@ -9,7 +9,9 @@ import { RoleFormModal } from '../components/role-form-modal';
 import { MemberList } from '../components/member-list';
 import { MemberFormModal } from '../components/member-form-modal';
 import { Button } from '@workspace/ui/components/button';
+import { Heading, Text } from '@workspace/ui/components/typography';
 import { ArrowLeft, Plus } from 'lucide-react';
+import { Box, Stack, Inline } from '@workspace/ui/components/primitives';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -93,80 +95,88 @@ export function TeamDetailPage() {
   const deletingRole = roles.find((r) => r.id === deletingRoleId);
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      {/* Header with Back Button */}
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={handleBackToTeams}>
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <div className="flex-1">
-          <h1 className="text-3xl font-bold">{m.team_detail_title()}</h1>
-          <p className="text-muted-foreground">{isTeamLoading ? m.common_loading() : team?.teamName}</p>
-        </div>
-      </div>
-
-      {/* Roles Section */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-semibold">{m.team_roles_section()}</h2>
-          <Button onClick={handleCreateRole}>
-            <Plus className="h-4 w-4 mr-2" />
-            {m.role_create_button()}
+    <Box padding="space-300" className="container mx-auto">
+      <Stack space="space-300">
+        {/* Header with Back Button */}
+        <Inline space="space-100" align="center">
+          <Button variant="ghost" size="icon" onClick={handleBackToTeams}>
+            <ArrowLeft className="h-5 w-5" />
           </Button>
-        </div>
-        <RoleList
-          roles={roles}
-          onEditRole={handleEditRole}
-          onDeleteRole={handleDeleteRole}
-          isLoading={isRolesLoading}
+          <Stack space="space-025" className="flex-1">
+            <Heading level={1}>{m.team_detail_title()}</Heading>
+            <Text size="small" color="muted">
+              {isTeamLoading ? m.common_loading() : team?.teamName}
+            </Text>
+          </Stack>
+        </Inline>
+
+        {/* Roles Section */}
+        <Stack space="space-100">
+          <Inline space="space-100" align="center" className="justify-between">
+            <Heading level={2}>{m.team_roles_section()}</Heading>
+            <Button onClick={handleCreateRole}>
+              <Plus className="h-4 w-4 mr-2" />
+              {m.role_create_button()}
+            </Button>
+          </Inline>
+          <RoleList
+            roles={roles}
+            onEditRole={handleEditRole}
+            onDeleteRole={handleDeleteRole}
+            isLoading={isRolesLoading}
+          />
+        </Stack>
+
+        {/* Members Section */}
+        <Stack space="space-100">
+          <Inline space="space-100" align="center" className="justify-between">
+            <Heading level={2}>{m.team_members_section()}</Heading>
+            <Button onClick={() => setIsMemberFormOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              {m.member_add_button()}
+            </Button>
+          </Inline>
+          <MemberList teamId={teamId} />
+        </Stack>
+
+        {/* Role Form Modal */}
+        <RoleFormModal
+          open={isRoleFormOpen}
+          onClose={() => setIsRoleFormOpen(false)}
+          teamId={teamId}
+          role={editingRole}
         />
-      </div>
 
-      {/* Members Section */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-semibold">{m.team_members_section()}</h2>
-          <Button onClick={() => setIsMemberFormOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            {m.member_add_button()}
-          </Button>
-        </div>
-        <MemberList teamId={teamId} />
-      </div>
+        {/* Member Form Modal */}
+        <MemberFormModal
+          open={isMemberFormOpen}
+          onClose={() => setIsMemberFormOpen(false)}
+          preselectedTeamId={teamId}
+        />
 
-      {/* Role Form Modal */}
-      <RoleFormModal
-        open={isRoleFormOpen}
-        onClose={() => setIsRoleFormOpen(false)}
-        teamId={teamId}
-        role={editingRole}
-      />
-
-      {/* Member Form Modal */}
-      <MemberFormModal open={isMemberFormOpen} onClose={() => setIsMemberFormOpen(false)} preselectedTeamId={teamId} />
-
-      {/* Delete Role Confirmation */}
-      <AlertDialog open={!!deletingRoleId} onOpenChange={(open) => !open && setDeletingRoleId(null)}>
-        <AlertDialogContent className="max-w-md">
-          <AlertDialogHeader>
-            <AlertDialogTitle>{m.role_delete_title()}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {m.role_delete_description({ roleName: deletingRole?.roleName || '' })}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleteRole.isPending}>{m.common_cancel()}</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleConfirmDeleteRole}
-              disabled={deleteRole.isPending}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {deleteRole.isPending ? m.common_deleting() : m.role_delete_confirm()}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </div>
+        {/* Delete Role Confirmation */}
+        <AlertDialog open={!!deletingRoleId} onOpenChange={(open) => !open && setDeletingRoleId(null)}>
+          <AlertDialogContent className="max-w-md">
+            <AlertDialogHeader>
+              <AlertDialogTitle>{m.role_delete_title()}</AlertDialogTitle>
+              <AlertDialogDescription>
+                {m.role_delete_description({ roleName: deletingRole?.roleName || '' })}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={deleteRole.isPending}>{m.common_cancel()}</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleConfirmDeleteRole}
+                disabled={deleteRole.isPending}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {deleteRole.isPending ? m.common_deleting() : m.role_delete_confirm()}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </Stack>
+    </Box>
   );
 }
 
