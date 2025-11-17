@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 
 import { Building2 } from 'lucide-react';
 
-import { Card, CardDescription, CardHeader, CardTitle } from '@workspace/ui/components/card';
+import { Card, CardHeader } from '@workspace/ui/components/card';
 import { Heading, Text } from '@workspace/ui/components/typography';
 // @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';

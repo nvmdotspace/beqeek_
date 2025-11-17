@@ -74,7 +74,7 @@ export function useUpdateRecordField(
 
       // Encrypt value if needed
       let encryptedValue = value;
-      let recordHashes: Record<string, string | string[]> = {};
+      const recordHashes: Record<string, string | string[]> = {};
 
       if (encryptKey) {
         // Create table detail object for encryption

@@ -17,7 +17,7 @@ import { Button } from '@workspace/ui/components/button';
 import { Badge } from '@workspace/ui/components/badge';
 import { Textarea } from '@workspace/ui/components/textarea';
 import { Text } from '@workspace/ui/components/typography';
-import { Stack, Inline } from '@workspace/ui/components/primitives';
+import { Inline } from '@workspace/ui/components/primitives';
 import { Pencil, Trash2, Check, X } from 'lucide-react';
 import type { RecordComment } from '../hooks/use-record-comments-with-permissions';
 

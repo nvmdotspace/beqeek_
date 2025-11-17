@@ -5,7 +5,7 @@
  */
 
 import { useMemo, useState } from 'react';
-import { Plus, Edit2, Trash2, AlertCircle } from 'lucide-react';
+import { Edit2, Trash2, AlertCircle } from 'lucide-react';
 import { Button } from '@workspace/ui/components/button';
 import { Badge } from '@workspace/ui/components/badge';
 import { ScrollArea } from '@workspace/ui/components/scroll-area';

@@ -5,7 +5,7 @@
  * This is the most complex settings section due to the matrix structure
  */
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { Label } from '@workspace/ui/components/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@workspace/ui/components/select';
 import { ScrollArea } from '@workspace/ui/components/scroll-area';
@@ -20,7 +20,7 @@ import {
   COMMENT_MODIFY_PERMISSIONS,
 } from '@workspace/beqeek-shared';
 import { SettingsSection } from '../settings-layout';
-import { useGetTeams, useGetRoles, type WorkspaceTeam, type WorkspaceTeamRole } from '@/features/team';
+import { useGetTeams, useGetRoles } from '@/features/team';
 // @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
 

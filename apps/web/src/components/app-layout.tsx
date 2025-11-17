@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 
 import { AppSidebar } from './app-sidebar';
 import { ThemeToggle } from './theme-toggle';
 import { Button } from '@workspace/ui/components/button';
-import { Menu, Settings, X, PanelLeftClose, PanelLeft } from 'lucide-react';
+import { Menu, Settings, PanelLeftClose, PanelLeft } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,7 +17,6 @@ import { useAuthStore } from '@/features/auth';
 import { useLogout } from '@/features/auth/hooks/use-logout';
 
 // @ts-expect-error - Paraglide generates JS without .d.ts files
-import { m } from '@/paraglide/generated/messages.js';
 import {
   useAppKeyboardShortcuts,
   useAccessibilityEnhancements,

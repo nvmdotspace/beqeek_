@@ -250,47 +250,45 @@ export const ActiveTablesPage = () => {
   return (
     <Box padding="space-300">
       <Stack space="space-300">
-        <Stack space="space-300">
+        {/* Header section with title, search, and buttons */}
+        {/* TODO: Migrate to primitives when responsive gap support is added */}
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <Stack space="space-025">
+            <Heading level={1}>{m.activeTables_page_title()}</Heading>
+            <Text size="small" color="muted">
+              {currentWorkspace?.workspaceName
+                ? `Workspace • ${currentWorkspace.workspaceName}`
+                : m.activeTables_page_subtitle()}
+            </Text>
+          </Stack>
+
           {/* TODO: Migrate to primitives when responsive gap support is added */}
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            <Stack space="space-025">
-              <Heading level={1}>{m.activeTables_page_title()}</Heading>
-              <Text size="small" color="muted">
-                {currentWorkspace?.workspaceName
-                  ? `Workspace • ${currentWorkspace.workspaceName}`
-                  : m.activeTables_page_subtitle()}
-              </Text>
-            </Stack>
-
-            {/* TODO: Migrate to primitives when responsive gap support is added */}
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-              <div className="relative w-full sm:w-72">
-                <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  placeholder={m.activeTables_page_searchPlaceholder()}
-                  className="h-10 rounded-lg border-border/60 pl-8"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-              <Inline space="space-050" align="center">
-                <div className="text-sm text-muted-foreground">
-                  Workspace •{' '}
-                  <span className="font-medium text-foreground">
-                    {currentWorkspace?.workspaceName || 'No workspace'}
-                  </span>
-                </div>
-                <Button variant="outline" size="icon" disabled={isTablesLoading} onClick={() => refetch()}>
-                  <RefreshCw className={cn('h-4 w-4', isFetching && 'animate-spin')} />
-                </Button>
-                <Button variant="brand-primary" size="sm" onClick={handleCreateTable} disabled={!workspaceId}>
-                  Create
-                </Button>
-              </Inline>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="relative w-full sm:w-72">
+              <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder={m.activeTables_page_searchPlaceholder()}
+                className="h-10 rounded-lg border-border/60 pl-8"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
             </div>
+            <Inline space="space-050" align="center">
+              <div className="text-sm text-muted-foreground">
+                Workspace •{' '}
+                <span className="font-medium text-foreground">{currentWorkspace?.workspaceName || 'No workspace'}</span>
+              </div>
+              <Button variant="outline" size="icon" disabled={isTablesLoading} onClick={() => refetch()}>
+                <RefreshCw className={cn('h-4 w-4', isFetching && 'animate-spin')} />
+              </Button>
+              <Button variant="brand-primary" size="sm" onClick={handleCreateTable} disabled={!workspaceId}>
+                Create
+              </Button>
+            </Inline>
           </div>
-        </Stack>
+        </div>
 
+        {/* Stat badges section */}
         <Inline space="space-250" align="center" wrap className="gap-y-[var(--space-250)]">
           <StatBadge
             icon={Database}
@@ -314,65 +312,65 @@ export const ActiveTablesPage = () => {
             loading={isTablesLoading}
           />
         </Inline>
-      </Stack>
 
-      {shouldShowEncryptionReminder ? (
-        <Alert className="border-warning bg-warning-subtle text-warning">
-          <KeyRound className="h-4 w-4" />
-          <AlertTitle>Encryption key vault not ready</AlertTitle>
-          <AlertDescription className="text-sm">
-            Restore your local encryption keys to unlock encrypted tables. Without the keys, you will not be able to
-            read or update secured fields.
-          </AlertDescription>
-        </Alert>
-      ) : null}
+        {/* Alert section */}
+        {shouldShowEncryptionReminder ? (
+          <Alert className="border-warning bg-warning-subtle text-warning">
+            <KeyRound className="h-4 w-4" />
+            <AlertTitle>Encryption key vault not ready</AlertTitle>
+            <AlertDescription className="text-sm">
+              Restore your local encryption keys to unlock encrypted tables. Without the keys, you will not be able to
+              read or update secured fields.
+            </AlertDescription>
+          </Alert>
+        ) : null}
 
-      <Stack space="space-100">
-        <Inline space="space-050" wrap className="text-xs text-muted-foreground">
-          <Badge variant="outline" className="border-dashed">
-            {m.activeTables_page_totalTables({ count: filteredTotalTables })}
-          </Badge>
-          <Badge variant="secondary" className="border-dashed">
-            {m.activeTables_page_totalWorkGroups({ count: workGroups.length })}
-          </Badge>
-          <div className="rounded-full border border-border/60 text-xs text-foreground">
-            <Box padding="space-025" className="px-3">
-              <Inline space="space-050" align="center">
-                <Filter className="h-3.5 w-3.5 text-muted-foreground" />
-                {activeFilterCount
-                  ? `${activeFilterCount} filter${activeFilterCount > 1 ? 's' : ''} active`
-                  : 'No filters applied'}
-              </Inline>
-            </Box>
-          </div>
-        </Inline>
-
-        <Box padding="space-100" backgroundColor="card" borderRadius="xl" border="default" className="shadow-sm">
-          {/* Workgroup Tabs Section - Level 2: Navigation with border-bottom accent */}
-          <Stack space="space-300">
-            <div className="flex flex-wrap items-center gap-0 border-b border-border">
-              <NavTab active={selectedWorkGroupId === 'all'} onClick={() => setSelectedWorkGroupId('all')} size="sm">
-                {m.activeTables_page_workGroupAll()}
-              </NavTab>
-              {workGroups.map((group) => (
-                <NavTab
-                  key={group.id}
-                  active={selectedWorkGroupId === group.id}
-                  onClick={() => setSelectedWorkGroupId(group.id)}
-                  size="sm"
-                >
-                  {group.name}
-                </NavTab>
-              ))}
+        {/* Filter section */}
+        <Stack space="space-100">
+          <Inline space="space-050" wrap className="text-xs text-muted-foreground">
+            <Badge variant="outline" className="border-dashed">
+              {m.activeTables_page_totalTables({ count: filteredTotalTables })}
+            </Badge>
+            <Badge variant="secondary" className="border-dashed">
+              {m.activeTables_page_totalWorkGroups({ count: workGroups.length })}
+            </Badge>
+            <div className="rounded-full border border-border/60 text-xs text-foreground">
+              <Box padding="space-025" className="px-3">
+                <Inline space="space-050" align="center">
+                  <Filter className="h-3.5 w-3.5 text-muted-foreground" />
+                  {activeFilterCount
+                    ? `${activeFilterCount} filter${activeFilterCount > 1 ? 's' : ''} active`
+                    : 'No filters applied'}
+                </Inline>
+              </Box>
             </div>
+          </Inline>
 
-            {/* Filter Rows Section */}
-            <div className="border-t border-border/40 pt-6">
+          <Box padding="space-100" backgroundColor="card" borderRadius="xl" border="default" className="shadow-sm">
+            {/* Workgroup Tabs Section - Level 2: Navigation with border-bottom accent */}
+            <Stack space="space-300">
+              <div className="flex flex-wrap items-center gap-0 border-b border-border">
+                <NavTab active={selectedWorkGroupId === 'all'} onClick={() => setSelectedWorkGroupId('all')} size="sm">
+                  {m.activeTables_page_workGroupAll()}
+                </NavTab>
+                {workGroups.map((group) => (
+                  <NavTab
+                    key={group.id}
+                    active={selectedWorkGroupId === group.id}
+                    onClick={() => setSelectedWorkGroupId(group.id)}
+                    size="sm"
+                  >
+                    {group.name}
+                  </NavTab>
+                ))}
+              </div>
+
+              {/* Filter Rows Section */}
               <Stack space="space-100">
                 {/* Status Filter */}
                 {statusOptions.length ? (
                   <Inline space="space-100" align="start">
-                    <Text size="small" weight="medium" className="min-w-[100px] text-muted-foreground pt-1.5">
+                    <Text size="small" weight="medium" className="min-w-[100px] text-muted-foreground pt-1">
                       Status
                     </Text>
                     <Inline space="space-075" wrap align="center" className="flex-1">
@@ -396,7 +394,7 @@ export const ActiveTablesPage = () => {
                           size="sm"
                           variant="ghost"
                           onClick={() => setShowAllStatusFilters(!showAllStatusFilters)}
-                          className="text-muted-foreground hover:text-foreground"
+                          className="h-7 text-xs text-muted-foreground hover:text-foreground"
                         >
                           {showAllStatusFilters
                             ? '− Less'
@@ -409,7 +407,7 @@ export const ActiveTablesPage = () => {
 
                 {/* Encryption Filter */}
                 <Inline space="space-100" align="start">
-                  <Text size="small" weight="medium" className="min-w-[100px] text-muted-foreground pt-1.5">
+                  <Text size="small" weight="medium" className="min-w-[100px] text-muted-foreground pt-1">
                     Encryption
                   </Text>
                   <Inline space="space-075" wrap align="center" className="flex-1">
@@ -434,7 +432,7 @@ export const ActiveTablesPage = () => {
 
                 {/* Automation Filter */}
                 <Inline space="space-100" align="start">
-                  <Text size="small" weight="medium" className="min-w-[100px] text-muted-foreground pt-1.5">
+                  <Text size="small" weight="medium" className="min-w-[100px] text-muted-foreground pt-1">
                     Automation
                   </Text>
                   <Inline space="space-075" wrap align="center" className="flex-1">
@@ -453,9 +451,9 @@ export const ActiveTablesPage = () => {
                   </Inline>
                 </Inline>
               </Stack>
-            </div>
-          </Stack>
-        </Box>
+            </Stack>
+          </Box>
+        </Stack>
 
         {isTablesLoading ? (
           <Grid columns={2} gap="space-300" className="xl:grid-cols-3">

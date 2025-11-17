@@ -5,7 +5,7 @@ import { Link } from '@tanstack/react-router';
 import type { Workspace } from '@/shared/api/types';
 import { ROUTES } from '@/shared/route-paths';
 
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@workspace/ui/components/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader } from '@workspace/ui/components/card';
 import { Badge } from '@workspace/ui/components/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@workspace/ui/components/avatar';
 import { Button } from '@workspace/ui/components/button';

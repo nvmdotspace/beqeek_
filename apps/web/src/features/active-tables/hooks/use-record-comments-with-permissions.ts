@@ -8,7 +8,7 @@
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import type { Table } from '@workspace/active-tables-core';
 import {
   ACTION_TYPE_COMMENT_CREATE,

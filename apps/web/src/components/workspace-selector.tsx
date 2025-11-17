@@ -23,7 +23,6 @@ import {
 import { useWorkspaces } from '@/features/workspace/hooks/use-workspaces';
 import { useAuthStore, selectIsAuthenticated } from '@/features/auth/stores/auth-store';
 import type { Workspace as ApiWorkspace } from '@/shared/api/types';
-import { initialsFromName } from '@/features/workspace/utils/initials';
 import { useCurrentLocale } from '@/hooks/use-current-locale';
 import { getWorkspaceLogo, getWorkspaceInitials } from '@/shared/utils/workspace-logo';
 

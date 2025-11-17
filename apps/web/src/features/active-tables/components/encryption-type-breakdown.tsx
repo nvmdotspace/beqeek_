@@ -12,7 +12,7 @@
 
 import { useMemo } from 'react';
 import { Shield, Lock, Hash, Unlock } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@workspace/ui/components/card';
+import { Card, CardContent, CardHeader } from '@workspace/ui/components/card';
 import { Badge } from '@workspace/ui/components/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@workspace/ui/components/tabs';
 import { Heading, Text } from '@workspace/ui/components/typography';

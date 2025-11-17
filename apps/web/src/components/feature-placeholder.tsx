@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { cn } from '@workspace/ui/lib/utils';
 import { Button } from '@workspace/ui/components/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@workspace/ui/components/card';
+import { Card, CardContent, CardHeader } from '@workspace/ui/components/card';
 import { Heading, Text } from '@workspace/ui/components/typography';
 
 interface FeaturePlaceholderProps {

@@ -9,7 +9,7 @@ import { MessageSquare, Send } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { Button } from '@workspace/ui/components/button';
 import { Textarea } from '@workspace/ui/components/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from '@workspace/ui/components/card';
+import { Card, CardContent, CardHeader } from '@workspace/ui/components/card';
 import { Avatar, AvatarFallback } from '@workspace/ui/components/avatar';
 import { Separator } from '@workspace/ui/components/separator';
 import { Heading, Text } from '@workspace/ui/components/typography';

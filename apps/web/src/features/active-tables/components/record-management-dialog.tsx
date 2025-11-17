@@ -14,7 +14,7 @@ import {
 } from '@workspace/ui/components/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@workspace/ui/components/select';
 import { Switch } from '@workspace/ui/components/switch';
-import { Card, CardContent, CardHeader, CardTitle } from '@workspace/ui/components/card';
+import { Card, CardContent, CardHeader } from '@workspace/ui/components/card';
 import { Heading, Text } from '@workspace/ui/components/typography';
 
 import type { ActiveTable, ActiveTableRecord, ActiveFieldConfig } from '../types';

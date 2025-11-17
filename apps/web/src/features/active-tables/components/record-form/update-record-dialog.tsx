@@ -37,8 +37,6 @@ import {
   FIELD_TYPE_TEXT,
   FIELD_TYPE_SELECT_LIST_RECORD,
   FIELD_TYPE_SELECT_LIST_WORKSPACE_USER,
-  FIELD_TYPE_INTEGER,
-  FIELD_TYPE_NUMERIC,
 } from '@workspace/beqeek-shared';
 import { MultiSelectField as ReusableMultiSelectField } from '../settings/multi-select-field';
 import { Label } from '@workspace/ui/components/label';

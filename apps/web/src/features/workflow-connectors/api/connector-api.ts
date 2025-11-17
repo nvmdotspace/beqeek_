@@ -6,11 +6,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/shared/api/http-client';
-import type {
-  ConnectorInstance,
-  CreateConnectorInput,
-  UpdateConnectorInput,
-} from '@workspace/beqeek-shared/workflow-connectors';
+import type { CreateConnectorInput, UpdateConnectorInput } from '@workspace/beqeek-shared/workflow-connectors';
 import type {
   ConnectorListResponse,
   ConnectorDetailResponse,

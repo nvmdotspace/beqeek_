@@ -10,7 +10,7 @@
  */
 
 import { Shield, ShieldCheck, ShieldX, AlertTriangle, Key, X } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@workspace/ui/components/card';
+import { Card, CardContent, CardHeader } from '@workspace/ui/components/card';
 import { Badge } from '@workspace/ui/components/badge';
 import { Button } from '@workspace/ui/components/button';
 import { Heading, Text } from '@workspace/ui/components/typography';

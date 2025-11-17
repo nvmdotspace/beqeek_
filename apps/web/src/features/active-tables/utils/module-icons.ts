@@ -5,7 +5,6 @@ import {
   DollarSign,
   TrendingUp,
   Package,
-  Database,
   Building2,
   GitBranch,
   FileText,

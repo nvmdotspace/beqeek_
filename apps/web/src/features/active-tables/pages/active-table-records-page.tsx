@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect, useCallback, useRef } from 'react';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 import { ArrowLeft, Plus, Search, FileText, Shield } from 'lucide-react';
 import { getRouteApi } from '@tanstack/react-router';
 
@@ -20,7 +20,6 @@ import { Badge } from '@workspace/ui/components/badge';
 import { Input } from '@workspace/ui/components/input';
 import { Skeleton } from '@workspace/ui/components/skeleton';
 import { Card, CardContent } from '@workspace/ui/components/card';
-import { TabsContent } from '@workspace/ui/components/tabs';
 import { Heading, Text } from '@workspace/ui/components/typography';
 import { Box, Stack, Inline } from '@workspace/ui/components/primitives';
 

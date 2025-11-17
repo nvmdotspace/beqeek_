@@ -14,7 +14,7 @@ import { getRouteApi } from '@tanstack/react-router';
 // @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
 import { useActiveTable, useActiveWorkGroups } from '../hooks/use-active-tables';
-import type { ActiveFieldConfig, ActiveTable, ActiveWorkGroup } from '../types';
+import type { ActiveTable, ActiveWorkGroup } from '../types';
 import { useTableEncryption } from '../hooks/use-table-encryption';
 import { FieldSummary } from '@workspace/active-tables-core';
 import { ROUTES } from '@/shared/route-paths';

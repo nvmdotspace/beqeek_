@@ -31,7 +31,7 @@ import { Button } from '@workspace/ui/components/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@workspace/ui/components/card';
 import { Skeleton } from '@workspace/ui/components/skeleton';
 import { Separator } from '@workspace/ui/components/separator';
-import { Heading, Text } from '@workspace/ui/components/typography';
+import { Heading } from '@workspace/ui/components/typography';
 import { Box, Stack, Inline, Grid } from '@workspace/ui/components/primitives';
 import { ErrorCard } from '@/components/error-display';
 import { ActivityTimeline } from '../components/activity-timeline';
