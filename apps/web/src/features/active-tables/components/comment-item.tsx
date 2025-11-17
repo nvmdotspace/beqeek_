@@ -17,6 +17,7 @@ import { Button } from '@workspace/ui/components/button';
 import { Badge } from '@workspace/ui/components/badge';
 import { Textarea } from '@workspace/ui/components/textarea';
 import { Text } from '@workspace/ui/components/typography';
+import { Stack, Inline } from '@workspace/ui/components/primitives';
 import { Pencil, Trash2, Check, X } from 'lucide-react';
 import type { RecordComment } from '../hooks/use-record-comments-with-permissions';
 
@@ -113,7 +114,7 @@ export function CommentItem({
   // Render edit mode
   if (isEditing) {
     return (
-      <div className="flex gap-3 p-4 bg-muted/30 rounded-lg">
+      <Inline space="space-075" className="p-4 bg-muted/30 rounded-lg">
         <Avatar className="h-8 w-8 flex-shrink-0">
           {userAvatar && <AvatarImage src={userAvatar} alt={userName} />}
           <AvatarFallback className="text-xs">{userInitials}</AvatarFallback>
@@ -131,24 +132,28 @@ export function CommentItem({
             autoFocus
           />
 
-          <div className="flex items-center gap-2 mt-3">
+          <Inline align="center" space="space-050" className="mt-3">
             <Button size="sm" onClick={handleSaveEdit} disabled={isUpdating || !editContent.trim()}>
-              <Check className="h-3.5 w-3.5 mr-1" />
-              {isUpdating ? (locale === 'vi' ? 'Đang lưu...' : 'Saving...') : locale === 'vi' ? 'Lưu' : 'Save'}
+              <Inline space="space-025" align="center">
+                <Check className="h-3.5 w-3.5" />
+                {isUpdating ? (locale === 'vi' ? 'Đang lưu...' : 'Saving...') : locale === 'vi' ? 'Lưu' : 'Save'}
+              </Inline>
             </Button>
             <Button variant="ghost" size="sm" onClick={handleCancelEdit} disabled={isUpdating}>
-              <X className="h-3.5 w-3.5 mr-1" />
-              {locale === 'vi' ? 'Hủy' : 'Cancel'}
+              <Inline space="space-025" align="center">
+                <X className="h-3.5 w-3.5" />
+                {locale === 'vi' ? 'Hủy' : 'Cancel'}
+              </Inline>
             </Button>
-          </div>
+          </Inline>
         </div>
-      </div>
+      </Inline>
     );
   }
 
   // Render view mode
   return (
-    <div className="flex gap-3 p-4 hover:bg-muted/30 rounded-lg group transition-colors">
+    <Inline space="space-075" className="p-4 hover:bg-muted/30 rounded-lg group transition-colors">
       <Avatar className="h-8 w-8 flex-shrink-0">
         {userAvatar && <AvatarImage src={userAvatar} alt={userName} />}
         <AvatarFallback className="text-xs">{userInitials}</AvatarFallback>
@@ -156,8 +161,8 @@ export function CommentItem({
 
       <div className="flex-1 min-w-0">
         {/* Header */}
-        <div className="flex items-center justify-between mb-1">
-          <div className="flex items-center gap-2">
+        <Inline align="center" justify="between" className="mb-1">
+          <Inline align="center" space="space-050">
             <span className="font-medium text-sm">{userName}</span>
             <span className="text-xs text-muted-foreground">{timeAgo}</span>
             {isEdited && (
@@ -165,11 +170,11 @@ export function CommentItem({
                 {locale === 'vi' ? 'Đã chỉnh sửa' : 'Edited'}
               </Badge>
             )}
-          </div>
+          </Inline>
 
           {/* Actions - show on hover if user has permissions */}
           {(canUpdate || canDelete) && (
-            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <Inline align="center" space="space-025" className="opacity-0 group-hover:opacity-100 transition-opacity">
               {canUpdate && onUpdate && (
                 <Button
                   variant="ghost"
@@ -193,15 +198,15 @@ export function CommentItem({
                   <Trash2 className="h-3.5 w-3.5" />
                 </Button>
               )}
-            </div>
+            </Inline>
           )}
-        </div>
+        </Inline>
 
         {/* Content - render as text */}
         <Text size="small" className="whitespace-pre-wrap">
           {comment.content}
         </Text>
       </div>
-    </div>
+    </Inline>
   );
 }

@@ -10,6 +10,7 @@ import { Label } from '@workspace/ui/components/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@workspace/ui/components/select';
 import { ScrollArea } from '@workspace/ui/components/scroll-area';
 import { Badge } from '@workspace/ui/components/badge';
+import { Stack, Inline } from '@workspace/ui/components/primitives';
 import { Info, Loader2 } from 'lucide-react';
 import {
   CREATE_PERMISSIONS,
@@ -231,9 +232,9 @@ export function PermissionsSettingsSection({
 
   return (
     <SettingsSection title={m.settings_permissions_title()} description={m.settings_permissions_description()}>
-      <div className="space-y-6">
+      <Stack space="space-300">
         {/* Team Selector */}
-        <div className="space-y-2">
+        <Stack space="space-050">
           <Label>{m.settings_permissions_selectTeam()}</Label>
           <Select value={selectedTeam} onValueChange={setSelectedTeam}>
             <SelectTrigger>
@@ -247,7 +248,7 @@ export function PermissionsSettingsSection({
               ))}
             </SelectContent>
           </Select>
-        </div>
+        </Stack>
 
         {/* Permissions Matrix */}
         {rolesLoading && selectedTeam ? (
@@ -260,38 +261,38 @@ export function PermissionsSettingsSection({
             <p className="text-sm text-muted-foreground">{m.settings_permissions_noRoles()}</p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <Stack space="space-100">
             <div className="rounded-lg border border-info/20 bg-info-subtle p-4">
-              <div className="flex items-start gap-2">
+              <Inline space="space-050" align="start">
                 <Info className="h-4 w-4 mt-0.5 text-info" />
-                <div>
+                <Stack space="space-025">
                   <p className="text-sm font-medium text-info">{m.settings_permissions_matrixTitle()}</p>
-                  <p className="mt-1 text-xs text-info">{m.settings_permissions_matrixDescription()}</p>
-                </div>
-              </div>
+                  <p className="text-xs text-info">{m.settings_permissions_matrixDescription()}</p>
+                </Stack>
+              </Inline>
             </div>
 
             <ScrollArea className="h-[600px] rounded-md border">
               <div className="p-4">
                 {roles.map((role) => (
                   <div key={role.id} className="mb-6 rounded-lg border bg-card p-4">
-                    <div className="mb-4 flex items-center gap-2">
+                    <Inline space="space-050" align="center" className="mb-4">
                       <Badge variant="default">{role.roleName}</Badge>
                       {role.isDefault && <Badge variant="outline">Default</Badge>}
                       <span className="text-sm text-muted-foreground">{m.settings_permissions_rolePermissions()}</span>
-                    </div>
+                    </Inline>
 
-                    <div className="space-y-3">
+                    <Stack space="space-075">
                       {actions.map((action) => {
                         const permissionOptions = getPermissionsForActionType(action.type);
                         const currentValue = getPermissionValue(selectedTeam, role.id, action.actionId);
 
                         return (
-                          <div key={action.actionId} className="flex items-center justify-between gap-4">
-                            <div className="flex-1">
+                          <Inline key={action.actionId} space="space-100" align="center" justify="between">
+                            <Stack space="space-025" className="flex-1">
                               <p className="text-sm font-medium">{action.name}</p>
                               <p className="text-xs text-muted-foreground">{action.type}</p>
-                            </div>
+                            </Stack>
                             <div className="w-[300px]">
                               <Select
                                 value={currentValue}
@@ -313,25 +314,25 @@ export function PermissionsSettingsSection({
                                 </SelectContent>
                               </Select>
                             </div>
-                          </div>
+                          </Inline>
                         );
                       })}
-                    </div>
+                    </Stack>
                   </div>
                 ))}
               </div>
             </ScrollArea>
-          </div>
+          </Stack>
         )}
 
         {/* Statistics */}
-        <div className="flex gap-4 text-sm text-muted-foreground">
+        <Inline space="space-100" className="text-sm text-muted-foreground">
           <span>{m.settings_permissions_statsTeams({ count: teams.length })}</span>
           <span>{m.settings_permissions_statsRoles({ count: roles.length })}</span>
           <span>{m.settings_permissions_statsActions({ count: actions.length })}</span>
           <span>{m.settings_permissions_statsConfigurations({ count: permissionsConfig.length })}</span>
-        </div>
-      </div>
+        </Inline>
+      </Stack>
     </SettingsSection>
   );
 }

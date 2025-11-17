@@ -11,6 +11,7 @@ import { Plus, Edit2, Trash2, Copy } from 'lucide-react';
 import { Button } from '@workspace/ui/components/button';
 import { Badge } from '@workspace/ui/components/badge';
 import { ScrollArea } from '@workspace/ui/components/scroll-area';
+import { Box, Stack, Inline } from '@workspace/ui/components/primitives';
 import { initDefaultActions } from '@workspace/beqeek-shared';
 import { toast } from 'sonner';
 import { SettingsSection } from '../settings-layout';
@@ -144,112 +145,125 @@ export function ActionsSettingsSection({ actions, onChange }: ActionsSettingsSec
       description={m.settings_actions_description()}
       actions={
         <Button onClick={handleAddAction} size="sm">
-          <Plus className="mr-2 h-4 w-4" />
-          {m.settings_actions_addButton()}
+          <Inline space="space-050" align="center">
+            <Plus className="h-4 w-4" />
+            {m.settings_actions_addButton()}
+          </Inline>
         </Button>
       }
     >
-      <div className="space-y-6">
+      <Stack space="space-300">
         {/* System Actions */}
-        <div className="space-y-3">
+        <Stack space="space-075">
           <h3 className="text-base font-semibold">{m.settings_actions_systemTitle()}</h3>
-          <div className="rounded-lg border bg-muted/30 p-4">
-            <div className="space-y-2">
+          <Box padding="space-100" borderRadius="lg" border="default" backgroundColor="muted" className="bg-muted/30">
+            <Stack space="space-050">
               {systemActions.map((action) => (
-                <div key={action.actionId} className="flex items-center gap-4 rounded-md bg-background p-3 text-sm">
-                  <div className="flex-1 space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">{action.name}</span>
-                      {getActionTypeBadge(action.type)}
-                    </div>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <span className="font-mono">{action.type}</span>
-                      <span>•</span>
-                      <span>{m.settings_actions_iconLabel({ icon: action.icon })}</span>
-                    </div>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleCopyActionId(action.actionId)}
-                    aria-label={m.settings_actions_copyActionId({ name: action.name })}
-                  >
-                    <Copy className="h-4 w-4" />
-                  </Button>
-                </div>
+                <Box
+                  key={action.actionId}
+                  padding="space-075"
+                  borderRadius="md"
+                  backgroundColor="background"
+                  className="text-sm"
+                >
+                  <Inline space="space-100" align="center">
+                    <Stack space="space-025" className="flex-1">
+                      <Inline space="space-050" align="center">
+                        <span className="font-medium">{action.name}</span>
+                        {getActionTypeBadge(action.type)}
+                      </Inline>
+                      <Inline space="space-050" align="center" className="text-xs text-muted-foreground">
+                        <span className="font-mono">{action.type}</span>
+                        <span>•</span>
+                        <span>{m.settings_actions_iconLabel({ icon: action.icon })}</span>
+                      </Inline>
+                    </Stack>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleCopyActionId(action.actionId)}
+                      aria-label={m.settings_actions_copyActionId({ name: action.name })}
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                  </Inline>
+                </Box>
               ))}
-            </div>
-          </div>
-        </div>
+            </Stack>
+          </Box>
+        </Stack>
 
         {/* Custom Actions */}
-        <div className="space-y-3">
+        <Stack space="space-075">
           <h3 className="text-base font-semibold">{m.settings_actions_customTitle()}</h3>
           {customActions.length === 0 ? (
-            <div className="rounded-lg border border-dashed p-12 text-center">
+            <Box padding="space-600" borderRadius="lg" border="default" className="border-dashed text-center">
               <p className="text-sm text-muted-foreground">{m.settings_actions_customEmpty()}</p>
-            </div>
+            </Box>
           ) : (
             <ScrollArea className="max-h-[400px] rounded-md border">
               <div className="divide-y">
                 {customActions.map((action, index) => (
-                  <div
+                  <Box
                     key={action.actionId || index}
-                    className="flex items-center gap-4 p-4 hover:bg-muted/50 transition-colors"
+                    padding="space-100"
+                    className="hover:bg-muted/50 transition-colors"
                   >
-                    <div className="flex-1 space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium">{action.name}</span>
-                        {getActionTypeBadge(action.type)}
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <span className="font-mono text-xs">{action.actionId}</span>
-                        <span>•</span>
-                        <span>{m.settings_actions_iconLabel({ icon: action.icon })}</span>
-                      </div>
-                    </div>
+                    <Inline space="space-100" align="center">
+                      <Stack space="space-025" className="flex-1">
+                        <Inline space="space-050" align="center">
+                          <span className="font-medium">{action.name}</span>
+                          {getActionTypeBadge(action.type)}
+                        </Inline>
+                        <Inline space="space-050" align="center" className="text-sm text-muted-foreground">
+                          <span className="font-mono text-xs">{action.actionId}</span>
+                          <span>•</span>
+                          <span>{m.settings_actions_iconLabel({ icon: action.icon })}</span>
+                        </Inline>
+                      </Stack>
 
-                    <div className="flex gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleCopyActionId(action.actionId)}
-                        aria-label={m.settings_actions_copyActionId({ name: action.name })}
-                      >
-                        <Copy className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleEditAction(index)}
-                        aria-label={m.settings_actions_editAction({ name: action.name })}
-                      >
-                        <Edit2 className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDeleteAction(index)}
-                        className="text-destructive hover:text-destructive"
-                        aria-label={m.settings_actions_deleteAction({ name: action.name })}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
+                      <Inline space="space-025">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleCopyActionId(action.actionId)}
+                          aria-label={m.settings_actions_copyActionId({ name: action.name })}
+                        >
+                          <Copy className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleEditAction(index)}
+                          aria-label={m.settings_actions_editAction({ name: action.name })}
+                        >
+                          <Edit2 className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDeleteAction(index)}
+                          className="text-destructive hover:text-destructive"
+                          aria-label={m.settings_actions_deleteAction({ name: action.name })}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </Inline>
+                    </Inline>
+                  </Box>
                 ))}
               </div>
             </ScrollArea>
           )}
-        </div>
+        </Stack>
 
         {/* Statistics */}
-        <div className="flex gap-4 text-sm text-muted-foreground">
+        <Inline space="space-100" className="text-sm text-muted-foreground">
           <span>{m.settings_actions_statsSystem({ count: systemActions.length })}</span>
           <span>{m.settings_actions_statsCustom({ count: customActions.length })}</span>
           <span>{m.settings_actions_statsTotal({ count: actions.length })}</span>
-        </div>
-      </div>
+        </Inline>
+      </Stack>
 
       {/* Action Form Modal */}
       <ActionFormModal

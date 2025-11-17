@@ -17,6 +17,7 @@
 
 import { Card, CardContent } from '@workspace/ui/components/card';
 import { Text, Heading } from '@workspace/ui/components/typography';
+import { Inline, Stack } from '@workspace/ui/components/primitives';
 import type { ConnectorTypeDefinition } from '@workspace/beqeek-shared/workflow-connectors';
 
 interface ConnectorCardCompactProps {
@@ -47,21 +48,21 @@ export function ConnectorCardCompact({ connectorType, onClick }: ConnectorCardCo
       aria-label={`Tạo ${connectorType.name} connector`}
     >
       <CardContent className="px-4 py-3 p-0">
-        <div className="flex items-start gap-3">
+        <Inline align="start" space="space-075">
           {/* Icon Container - Flex shrink 0 prevents squishing */}
           <div className="flex-shrink-0">
             {connectorType.logo ? (
               <img src={connectorType.logo} alt={connectorType.name} className="size-10 object-contain rounded-lg" />
             ) : (
               // Fallback for connectors without logos
-              <div className="size-10 rounded-lg bg-primary/20 flex items-center justify-center">
+              <Inline align="center" justify="center" className="size-10 rounded-lg bg-primary/20">
                 <div className="size-5 bg-primary/40 rounded" />
-              </div>
+              </Inline>
             )}
           </div>
 
           {/* Content Container - Flex 1 allows text to fill space, min-w-0 enables text truncation */}
-          <div className="flex-1 min-w-0 space-y-1">
+          <Stack space="space-025" className="flex-1 min-w-0">
             {/* Connector Name */}
             <Heading level={4} className="text-base font-semibold leading-tight truncate">
               {connectorType.name}
@@ -71,8 +72,8 @@ export function ConnectorCardCompact({ connectorType, onClick }: ConnectorCardCo
             <Text size="small" color="muted" className="line-clamp-2 leading-normal">
               {connectorType.description}
             </Text>
-          </div>
-        </div>
+          </Stack>
+        </Inline>
       </CardContent>
     </Card>
   );

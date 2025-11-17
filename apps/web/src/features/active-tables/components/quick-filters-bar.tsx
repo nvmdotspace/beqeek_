@@ -12,6 +12,7 @@ import { Button } from '@workspace/ui/components/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@workspace/ui/components/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@workspace/ui/components/popover';
 import { Checkbox } from '@workspace/ui/components/checkbox';
+import { Inline } from '@workspace/ui/components/primitives';
 import {
   Command,
   CommandInput,
@@ -188,34 +189,37 @@ export function QuickFiltersBar({
         ${className}
       `}
     >
+      {/* TODO: Migrate to primitives when responsive padding support is added */}
       <div className="px-3 sm:px-6 py-3">
         {/* Header with Clear All button */}
-        <div className="flex items-center justify-between mb-2">
-          <span id="quick-filters-heading" className="text-sm font-medium text-muted-foreground shrink-0">
-            Quick Filters:
-          </span>
+        <div className="mb-2">
+          <Inline justify="between" align="center">
+            <span id="quick-filters-heading" className="text-sm font-medium text-muted-foreground shrink-0">
+              Quick Filters:
+            </span>
 
-          {hasActiveFilters && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleClearAll}
-              aria-label={`Clear all ${filters.length} filters`}
-            >
-              Clear All ({filters.length})
-            </Button>
-          )}
+            {hasActiveFilters && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleClearAll}
+                aria-label={`Clear all ${filters.length} filters`}
+              >
+                Clear All ({filters.length})
+              </Button>
+            )}
 
-          {/* Screen reader live region */}
-          <div role="status" aria-live="polite" aria-atomic="true" className="sr-only">
-            {hasActiveFilters
-              ? `${filters.length} ${filters.length === 1 ? 'filter' : 'filters'} active`
-              : 'No filters active'}
-          </div>
+            {/* Screen reader live region */}
+            <div role="status" aria-live="polite" aria-atomic="true" className="sr-only">
+              {hasActiveFilters
+                ? `${filters.length} ${filters.length === 1 ? 'filter' : 'filters'} active`
+                : 'No filters active'}
+            </div>
+          </Inline>
         </div>
 
         {/* Filter controls */}
-        <div role="group" aria-labelledby="quick-filters-heading" className="flex items-center gap-2 flex-wrap">
+        <Inline space="space-050" wrap align="center" role="group" aria-labelledby="quick-filters-heading">
           {quickFilterFields.map((field) => {
             const currentValue = getFilterValue(field.name);
             const options = getFilterOptions(field, workspaceUsers);
@@ -228,7 +232,7 @@ export function QuickFiltersBar({
               const selectedCount = selectedValues.length;
 
               return (
-                <div key={field.name} className="flex items-center gap-1.5">
+                <Inline key={field.name} space="space-037" align="center">
                   <Popover>
                     <PopoverTrigger asChild>
                       <button
@@ -262,7 +266,7 @@ export function QuickFiltersBar({
                                   onSelect={() => toggleMultiSelectOption(field.name, String(option.value))}
                                   className="cursor-pointer"
                                 >
-                                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                                  <Inline space="space-050" align="center" className="min-w-0 flex-1">
                                     <Checkbox checked={isSelected} className="shrink-0" />
                                     {option.background_color && (
                                       <div
@@ -271,7 +275,7 @@ export function QuickFiltersBar({
                                       />
                                     )}
                                     <span className="truncate">{option.text}</span>
-                                  </div>
+                                  </Inline>
                                 </CommandItem>
                               );
                             })}
@@ -280,14 +284,14 @@ export function QuickFiltersBar({
                       </Command>
                     </PopoverContent>
                   </Popover>
-                </div>
+                </Inline>
               );
             } else {
               // For single-select
               const displayText = getFilterDisplayText(field, currentValue as string);
 
               return (
-                <div key={field.name} className="flex items-center gap-1.5">
+                <Inline key={field.name} space="space-037" align="center">
                   <Select
                     value={currentValue as string}
                     onValueChange={(value) => handleFilterChange(field.name, value)}
@@ -315,7 +319,7 @@ export function QuickFiltersBar({
                             value={String(option.value)}
                             className={isSelected ? 'bg-accent font-medium' : ''}
                           >
-                            <div className="flex items-center gap-2 min-w-0">
+                            <Inline space="space-050" align="center" className="min-w-0">
                               {option.background_color && (
                                 <div
                                   className="w-2 h-2 rounded-full shrink-0"
@@ -325,24 +329,26 @@ export function QuickFiltersBar({
                               <span className="truncate" title={option.text}>
                                 {option.text}
                               </span>
-                            </div>
+                            </Inline>
                           </SelectItem>
                         );
                       })}
                     </SelectContent>
                   </Select>
-                </div>
+                </Inline>
               );
             }
           })}
-        </div>
+        </Inline>
 
         {/* Active Filters Count Badge */}
         {hasActiveFilters && (
-          <div className="mt-2 flex items-center gap-1.5">
-            <Badge variant="outline" className="text-xs h-5">
-              {filters.length} {filters.length === 1 ? 'filter' : 'filters'} active
-            </Badge>
+          <div className="mt-2">
+            <Inline space="space-037" align="center">
+              <Badge variant="outline" className="text-xs h-5">
+                {filters.length} {filters.length === 1 ? 'filter' : 'filters'} active
+              </Badge>
+            </Inline>
           </div>
         )}
       </div>

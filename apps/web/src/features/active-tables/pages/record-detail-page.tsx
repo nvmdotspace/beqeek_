@@ -32,6 +32,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@workspace/ui/componen
 import { Skeleton } from '@workspace/ui/components/skeleton';
 import { Separator } from '@workspace/ui/components/separator';
 import { Heading, Text } from '@workspace/ui/components/typography';
+import { Box, Stack, Inline, Grid } from '@workspace/ui/components/primitives';
 import { ErrorCard } from '@/components/error-display';
 import { ActivityTimeline } from '../components/activity-timeline';
 import { RecordDetailSidebar } from '../components/record-detail-sidebar';
@@ -264,17 +265,22 @@ export function RecordDetailPage() {
   if (tableLoading || recordLoading) {
     return (
       <div className="h-full flex flex-col">
+        {/* TODO: Migrate to primitives when responsive padding support is added */}
         <div className="p-4 sm:p-6">
-          <Skeleton className="h-10 w-48 mb-6" />
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 space-y-4">
-              <Skeleton className="h-48 w-full" />
-              <Skeleton className="h-64 w-full" />
-            </div>
-            <div className="lg:col-span-1">
-              <Skeleton className="h-96 w-full" />
-            </div>
-          </div>
+          <Stack space="space-300">
+            <Skeleton className="h-10 w-48" />
+            <Grid columns={1} gap="space-300" className="lg:grid-cols-3">
+              <div className="lg:col-span-2">
+                <Stack space="space-100">
+                  <Skeleton className="h-48 w-full" />
+                  <Skeleton className="h-64 w-full" />
+                </Stack>
+              </div>
+              <div className="lg:col-span-1">
+                <Skeleton className="h-96 w-full" />
+              </div>
+            </Grid>
+          </Stack>
         </div>
       </div>
     );
@@ -284,32 +290,40 @@ export function RecordDetailPage() {
   if (tableError || recordError) {
     const error = tableError || recordError;
     return (
-      <div className="p-6 space-y-4">
-        <Button variant="ghost" onClick={handleBack} className="flex items-center gap-2">
-          <ArrowLeft className="h-4 w-4" />
-          {locale === 'vi' ? 'Quay lại danh sách' : 'Back to List'}
-        </Button>
-        {error && (
-          <ErrorCard error={error} onRetry={() => window.location.reload()} showDetails={import.meta.env.DEV} />
-        )}
-      </div>
+      <Box padding="space-300">
+        <Stack space="space-100">
+          <Button variant="ghost" onClick={handleBack}>
+            <Inline space="space-050" align="center">
+              <ArrowLeft className="h-4 w-4" />
+              {locale === 'vi' ? 'Quay lại danh sách' : 'Back to List'}
+            </Inline>
+          </Button>
+          {error && (
+            <ErrorCard error={error} onRetry={() => window.location.reload()} showDetails={import.meta.env.DEV} />
+          )}
+        </Stack>
+      </Box>
     );
   }
 
   // Record not found
   if (!record || !table) {
     return (
-      <div className="p-6 space-y-4">
-        <Button variant="ghost" onClick={handleBack} className="flex items-center gap-2">
-          <ArrowLeft className="h-4 w-4" />
-          {locale === 'vi' ? 'Quay lại danh sách' : 'Back to List'}
-        </Button>
-        <ErrorCard
-          error={new Error(locale === 'vi' ? 'Không tìm thấy bản ghi' : 'Record not found')}
-          onRetry={handleBack}
-          showDetails={false}
-        />
-      </div>
+      <Box padding="space-300">
+        <Stack space="space-100">
+          <Button variant="ghost" onClick={handleBack}>
+            <Inline space="space-050" align="center">
+              <ArrowLeft className="h-4 w-4" />
+              {locale === 'vi' ? 'Quay lại danh sách' : 'Back to List'}
+            </Inline>
+          </Button>
+          <ErrorCard
+            error={new Error(locale === 'vi' ? 'Không tìm thấy bản ghi' : 'Record not found')}
+            onRetry={handleBack}
+            showDetails={false}
+          />
+        </Stack>
+      </Box>
     );
   }
 
@@ -317,183 +331,102 @@ export function RecordDetailPage() {
     <div className="h-full flex flex-col bg-background">
       {/* Sticky Header */}
       <header className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
+        {/* TODO: Migrate to primitives when responsive padding support is added */}
         <div className="container max-w-7xl mx-auto px-4 sm:px-6 py-3">
-          <div className="flex items-center justify-between gap-3">
+          <Inline space="space-075" justify="between" align="center">
             {/* Back Button */}
-            <Button variant="ghost" size="sm" onClick={handleBack} className="flex items-center gap-2">
-              <ArrowLeft className="h-4 w-4" />
-              <span className="hidden sm:inline">{locale === 'vi' ? 'Quay lại' : 'Back to List'}</span>
-              <span className="sm:hidden">{locale === 'vi' ? 'Quay lại' : 'Back'}</span>
+            <Button variant="ghost" size="sm" onClick={handleBack}>
+              <Inline space="space-050" align="center">
+                <ArrowLeft className="h-4 w-4" />
+                <span className="hidden sm:inline">{locale === 'vi' ? 'Quay lại' : 'Back to List'}</span>
+                <span className="sm:hidden">{locale === 'vi' ? 'Quay lại' : 'Back'}</span>
+              </Inline>
             </Button>
-          </div>
+          </Inline>
         </div>
       </header>
 
       {/* Main Content */}
       <div className="flex-1 overflow-auto">
+        {/* TODO: Migrate to primitives when responsive padding and gap support is added */}
         <div className="container max-w-7xl mx-auto p-4 sm:p-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
             {/* Left Column: Main Content (2/3 width on desktop) */}
-            <div className="lg:col-span-2 space-y-6">
-              {/* Title Section */}
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="space-y-4">
-                    {/* Title Field (large, inline editable) */}
-                    {fieldSections.titleField && (
-                      <div>
-                        <Heading level={1} className="mb-1">
-                          <InlineEditableField
-                            field={fieldSections.titleField}
-                            value={record.data?.[fieldSections.titleField.name]}
-                            canEdit={canEditField(permissions, fieldSections.titleField)}
-                            onUpdate={handleUpdateField}
-                            isUpdating={isUpdating}
-                            editMode="double-click"
-                          />
-                        </Heading>
-                      </div>
-                    )}
-
-                    {/* Subline Fields (badges, labels) */}
-                    {fieldSections.sublineFields && fieldSections.sublineFields.length > 0 && (
-                      <div className="flex flex-wrap items-center gap-2">
-                        {fieldSections.sublineFields.map((field) => (
-                          <InlineEditableField
-                            key={field.name}
-                            field={field}
-                            value={record.data?.[field.name]}
-                            canEdit={canEditField(permissions, field)}
-                            onUpdate={handleUpdateField}
-                            isUpdating={isUpdating}
-                          />
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Layout-specific content */}
-              {fieldSections.layout === 'head-detail' ? (
-                <>
-                  {/* Head Detail Layout: Single Column */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>{locale === 'vi' ? 'Chi tiết' : 'Details'}</CardTitle>
-                    </CardHeader>
-                    <Separator />
-                    <CardContent className="pt-6">
-                      <div className="space-y-4">
-                        {/* Row Tail Fields (inline with labels on right) */}
-                        {fieldSections.rowTailFields.map((field) => (
-                          <div key={field.name} className="flex items-start justify-between gap-4 py-2">
-                            <label className="text-sm font-medium text-muted-foreground flex-shrink-0 pt-2">
-                              {field.label || field.name}
-                            </label>
-                            <div className="flex-1 text-right">
-                              <InlineEditableField
-                                field={field}
-                                value={record.data?.[field.name]}
-                                canEdit={canEditField(permissions, field)}
-                                onUpdate={handleUpdateField}
-                                isUpdating={isUpdating}
-                              />
-                            </div>
-                          </div>
-                        ))}
-
-                        {/* Content Fields (standard layout) */}
-                        {fieldSections.contentFields.map((field) => (
-                          <div key={field.name} className="grid gap-2">
-                            <label className="text-sm font-medium text-muted-foreground">
-                              {field.label || field.name}
-                            </label>
+            <div className="lg:col-span-2">
+              <Stack space="space-300">
+                {/* Title Section */}
+                <Card>
+                  <CardContent className="pt-6">
+                    <Stack space="space-100">
+                      {/* Title Field (large, inline editable) */}
+                      {fieldSections.titleField && (
+                        <div>
+                          <Heading level={1} className="mb-1">
                             <InlineEditableField
+                              field={fieldSections.titleField}
+                              value={record.data?.[fieldSections.titleField.name]}
+                              canEdit={canEditField(permissions, fieldSections.titleField)}
+                              onUpdate={handleUpdateField}
+                              isUpdating={isUpdating}
+                              editMode="double-click"
+                            />
+                          </Heading>
+                        </div>
+                      )}
+
+                      {/* Subline Fields (badges, labels) */}
+                      {fieldSections.sublineFields && fieldSections.sublineFields.length > 0 && (
+                        <Inline space="space-050" wrap align="center">
+                          {fieldSections.sublineFields.map((field) => (
+                            <InlineEditableField
+                              key={field.name}
                               field={field}
                               value={record.data?.[field.name]}
                               canEdit={canEditField(permissions, field)}
                               onUpdate={handleUpdateField}
                               isUpdating={isUpdating}
                             />
-                          </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </>
-              ) : (
-                <>
-                  {/* Two Column Layout */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Column 1 */}
-                    {fieldSections.column1Fields.length > 0 && (
-                      <Card>
-                        <CardHeader>
-                          <CardTitle>{locale === 'vi' ? 'Cột 1' : 'Column 1'}</CardTitle>
-                        </CardHeader>
-                        <Separator />
-                        <CardContent className="pt-6">
-                          <div className="space-y-4">
-                            {fieldSections.column1Fields.map((field) => (
-                              <div key={field.name} className="grid gap-2">
-                                <label className="text-sm font-medium text-muted-foreground">
-                                  {field.label || field.name}
-                                </label>
-                                <InlineEditableField
-                                  field={field}
-                                  value={record.data?.[field.name]}
-                                  canEdit={canEditField(permissions, field)}
-                                  onUpdate={handleUpdateField}
-                                  isUpdating={isUpdating}
-                                />
-                              </div>
-                            ))}
-                          </div>
-                        </CardContent>
-                      </Card>
-                    )}
+                          ))}
+                        </Inline>
+                      )}
+                    </Stack>
+                  </CardContent>
+                </Card>
 
-                    {/* Column 2 */}
-                    {fieldSections.column2Fields.length > 0 && (
-                      <Card>
-                        <CardHeader>
-                          <CardTitle>{locale === 'vi' ? 'Cột 2' : 'Column 2'}</CardTitle>
-                        </CardHeader>
-                        <Separator />
-                        <CardContent className="pt-6">
-                          <div className="space-y-4">
-                            {fieldSections.column2Fields.map((field) => (
-                              <div key={field.name} className="grid gap-2">
-                                <label className="text-sm font-medium text-muted-foreground">
-                                  {field.label || field.name}
-                                </label>
-                                <InlineEditableField
-                                  field={field}
-                                  value={record.data?.[field.name]}
-                                  onUpdate={handleUpdateField}
-                                  canEdit={canEditField(permissions, field)}
-                                  isUpdating={isUpdating}
-                                />
-                              </div>
-                            ))}
-                          </div>
-                        </CardContent>
-                      </Card>
-                    )}
-                  </div>
-
-                  {/* Additional content fields not in columns */}
-                  {fieldSections.contentFields.length > 0 && (
+                {/* Layout-specific content */}
+                {fieldSections.layout === 'head-detail' ? (
+                  <>
+                    {/* Head Detail Layout: Single Column */}
                     <Card>
                       <CardHeader>
-                        <CardTitle>{locale === 'vi' ? 'Thông tin khác' : 'Additional Information'}</CardTitle>
+                        <CardTitle>{locale === 'vi' ? 'Chi tiết' : 'Details'}</CardTitle>
                       </CardHeader>
                       <Separator />
                       <CardContent className="pt-6">
-                        <div className="space-y-4">
+                        <Stack space="space-100">
+                          {/* Row Tail Fields (inline with labels on right) */}
+                          {fieldSections.rowTailFields.map((field) => (
+                            <div key={field.name} className="py-[var(--space-050)]">
+                              <Inline space="space-100" justify="between" align="start">
+                                <label className="text-sm font-medium text-muted-foreground flex-shrink-0 pt-2">
+                                  {field.label || field.name}
+                                </label>
+                                <div className="flex-1 text-right">
+                                  <InlineEditableField
+                                    field={field}
+                                    value={record.data?.[field.name]}
+                                    canEdit={canEditField(permissions, field)}
+                                    onUpdate={handleUpdateField}
+                                    isUpdating={isUpdating}
+                                  />
+                                </div>
+                              </Inline>
+                            </div>
+                          ))}
+
+                          {/* Content Fields (standard layout) */}
                           {fieldSections.contentFields.map((field) => (
-                            <div key={field.name} className="grid gap-2">
+                            <Stack key={field.name} space="space-050">
                               <label className="text-sm font-medium text-muted-foreground">
                                 {field.label || field.name}
                               </label>
@@ -504,41 +437,132 @@ export function RecordDetailPage() {
                                 onUpdate={handleUpdateField}
                                 isUpdating={isUpdating}
                               />
-                            </div>
+                            </Stack>
                           ))}
-                        </div>
+                        </Stack>
                       </CardContent>
                     </Card>
-                  )}
-                </>
-              )}
+                  </>
+                ) : (
+                  <>
+                    {/* Two Column Layout */}
+                    <Grid columns={1} gap="space-100" className="md:grid-cols-2">
+                      {/* Column 1 */}
+                      {fieldSections.column1Fields.length > 0 && (
+                        <Card>
+                          <CardHeader>
+                            <CardTitle>{locale === 'vi' ? 'Cột 1' : 'Column 1'}</CardTitle>
+                          </CardHeader>
+                          <Separator />
+                          <CardContent className="pt-6">
+                            <Stack space="space-100">
+                              {fieldSections.column1Fields.map((field) => (
+                                <Stack key={field.name} space="space-050">
+                                  <label className="text-sm font-medium text-muted-foreground">
+                                    {field.label || field.name}
+                                  </label>
+                                  <InlineEditableField
+                                    field={field}
+                                    value={record.data?.[field.name]}
+                                    canEdit={canEditField(permissions, field)}
+                                    onUpdate={handleUpdateField}
+                                    isUpdating={isUpdating}
+                                  />
+                                </Stack>
+                              ))}
+                            </Stack>
+                          </CardContent>
+                        </Card>
+                      )}
 
-              {/* Activity Timeline */}
-              <ActivityTimeline
-                comments={comments}
-                permissions={effectiveCommentPermissions}
-                currentUserId={undefined} // TODO: Get from auth
-                workspaceUsers={workspaceUsers}
-                isLoading={commentsLoading}
-                onCommentAdd={handleAddComment}
-                onCommentUpdate={handleUpdateComment}
-                onCommentDelete={handleDeleteComment}
-                locale={locale}
-              />
+                      {/* Column 2 */}
+                      {fieldSections.column2Fields.length > 0 && (
+                        <Card>
+                          <CardHeader>
+                            <CardTitle>{locale === 'vi' ? 'Cột 2' : 'Column 2'}</CardTitle>
+                          </CardHeader>
+                          <Separator />
+                          <CardContent className="pt-6">
+                            <Stack space="space-100">
+                              {fieldSections.column2Fields.map((field) => (
+                                <Stack key={field.name} space="space-050">
+                                  <label className="text-sm font-medium text-muted-foreground">
+                                    {field.label || field.name}
+                                  </label>
+                                  <InlineEditableField
+                                    field={field}
+                                    value={record.data?.[field.name]}
+                                    onUpdate={handleUpdateField}
+                                    canEdit={canEditField(permissions, field)}
+                                    isUpdating={isUpdating}
+                                  />
+                                </Stack>
+                              ))}
+                            </Stack>
+                          </CardContent>
+                        </Card>
+                      )}
+                    </Grid>
+
+                    {/* Additional content fields not in columns */}
+                    {fieldSections.contentFields.length > 0 && (
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>{locale === 'vi' ? 'Thông tin khác' : 'Additional Information'}</CardTitle>
+                        </CardHeader>
+                        <Separator />
+                        <CardContent className="pt-6">
+                          <Stack space="space-100">
+                            {fieldSections.contentFields.map((field) => (
+                              <Stack key={field.name} space="space-050">
+                                <label className="text-sm font-medium text-muted-foreground">
+                                  {field.label || field.name}
+                                </label>
+                                <InlineEditableField
+                                  field={field}
+                                  value={record.data?.[field.name]}
+                                  canEdit={canEditField(permissions, field)}
+                                  onUpdate={handleUpdateField}
+                                  isUpdating={isUpdating}
+                                />
+                              </Stack>
+                            ))}
+                          </Stack>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </>
+                )}
+
+                {/* Activity Timeline */}
+                <ActivityTimeline
+                  comments={comments}
+                  permissions={effectiveCommentPermissions}
+                  currentUserId={undefined} // TODO: Get from auth
+                  workspaceUsers={workspaceUsers}
+                  isLoading={commentsLoading}
+                  onCommentAdd={handleAddComment}
+                  onCommentUpdate={handleUpdateComment}
+                  onCommentDelete={handleDeleteComment}
+                  locale={locale}
+                />
+              </Stack>
             </div>
 
             {/* Right Column: Sidebar (1/3 width on desktop, stacked on mobile) */}
             <div className="lg:col-span-1 order-first lg:order-last">
-              <div className="lg:sticky lg:top-20 space-y-4">
-                <RecordDetailSidebar
-                  table={table}
-                  record={record}
-                  permissions={permissions}
-                  workspaceUsers={workspaceUsers}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                  locale={locale}
-                />
+              <div className="lg:sticky lg:top-20">
+                <Stack space="space-100">
+                  <RecordDetailSidebar
+                    table={table}
+                    record={record}
+                    permissions={permissions}
+                    workspaceUsers={workspaceUsers}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                    locale={locale}
+                  />
+                </Stack>
               </div>
             </div>
           </div>

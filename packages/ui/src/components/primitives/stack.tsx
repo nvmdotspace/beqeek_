@@ -6,14 +6,12 @@ import { cn } from '../../lib/utils.js';
 /**
  * Stack primitive - Vertical layout with managed spacing between children
  *
- * @example
- * ```tsx
- * <Stack space="space-200" align="start">
- *   <Header />
- *   <Content />
- *   <Footer />
- * </Stack>
- * ```
+ * @example Basic usage
+ * <Stack space="space-200" align="start"><Header /><Content /><Footer /></Stack>
+ *
+ * @example Responsive spacing via className
+ * <Stack space="space-100" className="sm:gap-6">children</Stack>
+ * Mobile: 8px gap, Tablet+: 24px gap
  */
 
 const stackVariants = cva('flex flex-col', {
@@ -21,6 +19,7 @@ const stackVariants = cva('flex flex-col', {
     space: {
       none: 'gap-0',
       'space-025': 'gap-[var(--space-025)]',
+      'space-037': 'gap-[var(--space-037)]',
       'space-050': 'gap-[var(--space-050)]',
       'space-075': 'gap-[var(--space-075)]',
       'space-100': 'gap-[var(--space-100)]',

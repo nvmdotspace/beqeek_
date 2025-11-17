@@ -7,6 +7,7 @@
 import { Save, X, Loader2, AlertCircle } from 'lucide-react';
 import { Button } from '@workspace/ui/components/button';
 import { Alert, AlertDescription } from '@workspace/ui/components/alert';
+import { Stack, Inline } from '@workspace/ui/components/primitives';
 // @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
 import type { ValidationError } from '../../utils/settings-validation';
@@ -50,7 +51,7 @@ export function SettingsFooter({
   const canSave = isDirty && !hasErrors && !disabled;
 
   return (
-    <div className="space-y-3">
+    <Stack space="space-075">
       {/* Validation Errors */}
       {hasErrors && (
         <Alert variant="destructive">
@@ -67,7 +68,7 @@ export function SettingsFooter({
       )}
 
       {/* Action Buttons */}
-      <div className="flex items-center justify-between">
+      <Inline align="center" justify="between">
         <div className="text-sm text-muted-foreground">
           {hasErrors && <span className="text-destructive">Cannot save - validation errors present</span>}
           {!hasErrors && isDirty && !isSaving && <span>{m.settings_header_unsaved()}</span>}
@@ -75,7 +76,7 @@ export function SettingsFooter({
           {!hasErrors && !isDirty && !isSaving && <span>{m.settings_save_success()}</span>}
         </div>
 
-        <div className="flex gap-2">
+        <Inline space="space-050">
           <Button
             variant="outline"
             size="sm"
@@ -83,8 +84,10 @@ export function SettingsFooter({
             disabled={disabled || isSaving}
             aria-label={m.settings_footer_cancel()}
           >
-            <X className="mr-2 h-4 w-4" />
-            {m.settings_footer_cancel()}
+            <Inline space="space-050" align="center">
+              <X className="h-4 w-4" />
+              {m.settings_footer_cancel()}
+            </Inline>
           </Button>
 
           <Button
@@ -95,19 +98,19 @@ export function SettingsFooter({
             aria-label={m.settings_footer_save()}
           >
             {isSaving ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <Inline space="space-050" align="center">
+                <Loader2 className="h-4 w-4 animate-spin" />
                 {m.settings_footer_saving()}
-              </>
+              </Inline>
             ) : (
-              <>
-                <Save className="mr-2 h-4 w-4" />
+              <Inline space="space-050" align="center">
+                <Save className="h-4 w-4" />
                 {m.settings_footer_save()}
-              </>
+              </Inline>
             )}
           </Button>
-        </div>
-      </div>
-    </div>
+        </Inline>
+      </Inline>
+    </Stack>
   );
 }

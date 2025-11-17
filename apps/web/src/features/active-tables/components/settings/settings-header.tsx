@@ -9,6 +9,7 @@ import { getRouteApi } from '@tanstack/react-router';
 import { Button } from '@workspace/ui/components/button';
 import { Badge } from '@workspace/ui/components/badge';
 import { Heading, Text } from '@workspace/ui/components/typography';
+import { Stack, Inline } from '@workspace/ui/components/primitives';
 // @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
 import { ROUTES } from '@/shared/route-paths';
@@ -44,9 +45,9 @@ export function SettingsHeader({ tableName, description, isDirty }: SettingsHead
   };
 
   return (
-    <div className="flex items-start justify-between">
-      <div className="space-y-1">
-        <div className="flex items-center gap-3">
+    <Inline align="start" justify="between">
+      <Stack space="space-025">
+        <Inline space="space-075" align="center">
           <Button
             variant="ghost"
             size="icon"
@@ -56,7 +57,7 @@ export function SettingsHeader({ tableName, description, isDirty }: SettingsHead
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <div className="flex items-center gap-2">
+          <Inline space="space-050" align="center">
             <Settings2 className="h-6 w-6 text-muted-foreground" aria-hidden="true" />
             <Heading level={1}>{m.settings_header_title({ tableName })}</Heading>
             {isDirty && (
@@ -64,8 +65,8 @@ export function SettingsHeader({ tableName, description, isDirty }: SettingsHead
                 {m.settings_header_unsaved()}
               </Badge>
             )}
-          </div>
-        </div>
+          </Inline>
+        </Inline>
         {description && (
           <Text className="ml-14" color="muted">
             {description}
@@ -76,7 +77,7 @@ export function SettingsHeader({ tableName, description, isDirty }: SettingsHead
             {m.settings_general_description()}
           </Text>
         )}
-      </div>
-    </div>
+      </Stack>
+    </Inline>
   );
 }

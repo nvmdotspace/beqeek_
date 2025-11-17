@@ -21,6 +21,7 @@ import {
 } from '@workspace/ui/components/dialog';
 import { QUICK_FILTER_VALID_FIELD_TYPES, generateUUIDv7, type FieldType } from '@workspace/beqeek-shared';
 import { SettingsSection } from '../settings-layout';
+import { Stack, Inline } from '@workspace/ui/components/primitives';
 // @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
 
@@ -123,12 +124,14 @@ export function QuickFiltersSection({ quickFilters, fields, onChange }: QuickFil
       description={m.settings_quickFilters_description()}
       actions={
         <Button onClick={handleAddFilter} size="sm" disabled={availableFields.length === 0}>
-          <Plus className="mr-2 h-4 w-4" />
-          {m.settings_quickFilters_addButton()}
+          <Inline space="space-050" align="center">
+            <Plus className="h-4 w-4" />
+            {m.settings_quickFilters_addButton()}
+          </Inline>
         </Button>
       }
     >
-      <div className="space-y-4">
+      <Stack space="space-100">
         {quickFilters.length === 0 ? (
           <div className="rounded-lg border border-dashed p-12 text-center">
             <p className="text-sm text-muted-foreground">
@@ -144,19 +147,21 @@ export function QuickFiltersSection({ quickFilters, fields, onChange }: QuickFil
               {quickFilters.map((filter, index) => {
                 const field = fields.find((f) => f.name === filter.fieldName);
                 return (
-                  <div
+                  <Inline
                     key={filter.filterId || `${filter.fieldName}-${index}`}
-                    className="flex items-center gap-4 p-4 hover:bg-muted/50 transition-colors"
+                    align="center"
+                    space="space-100"
+                    className="p-4 hover:bg-muted/50 transition-colors"
                   >
-                    <div className="flex-1 space-y-1">
-                      <div className="flex items-center gap-2">
+                    <Stack space="space-025" className="flex-1">
+                      <Inline align="center" space="space-050">
                         <span className="font-medium">{filter.fieldLabel || filter.fieldName}</span>
                         {field && getFieldTypeBadge(field.type)}
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      </Inline>
+                      <Inline align="center" space="space-050" className="text-sm text-muted-foreground">
                         <span className="font-mono text-xs">{filter.fieldName}</span>
-                      </div>
-                    </div>
+                      </Inline>
+                    </Stack>
 
                     <Button
                       variant="ghost"
@@ -169,7 +174,7 @@ export function QuickFiltersSection({ quickFilters, fields, onChange }: QuickFil
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
-                  </div>
+                  </Inline>
                 );
               })}
             </div>
@@ -177,8 +182,8 @@ export function QuickFiltersSection({ quickFilters, fields, onChange }: QuickFil
         )}
 
         {/* Statistics and Info */}
-        <div className="space-y-2">
-          <div className="flex gap-4 text-sm text-muted-foreground">
+        <Stack space="space-050">
+          <Inline space="space-100" className="text-sm text-muted-foreground">
             <span>
               {m.settings_quickFilters_statsActive()}: {quickFilters.length}
             </span>
@@ -188,14 +193,14 @@ export function QuickFiltersSection({ quickFilters, fields, onChange }: QuickFil
             <span>
               {m.settings_quickFilters_statsAvailable()}: {availableFields.length}
             </span>
-          </div>
+          </Inline>
 
           <div className="rounded-lg border border-info/20 bg-info-subtle p-4">
             <p className="text-sm font-medium text-info">{m.settings_quickFilters_infoTitle()}</p>
             <p className="mt-1 text-xs text-info">{m.settings_quickFilters_infoDescription()}</p>
           </div>
-        </div>
-      </div>
+        </Stack>
+      </Stack>
 
       {/* Add Filter Modal */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
@@ -205,8 +210,8 @@ export function QuickFiltersSection({ quickFilters, fields, onChange }: QuickFil
             <DialogDescription>{m.settings_quickFilters_dialogDescription()}</DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
+          <Stack space="space-100" className="py-4">
+            <Stack space="space-050">
               <Label htmlFor="filter-field">
                 {m.settings_quickFilters_fieldLabel()} <span className="text-destructive">{m.common_required()}</span>
               </Label>
@@ -223,8 +228,8 @@ export function QuickFiltersSection({ quickFilters, fields, onChange }: QuickFil
                 </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground">{m.settings_quickFilters_fieldHelp()}</p>
-            </div>
-          </div>
+            </Stack>
+          </Stack>
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)}>

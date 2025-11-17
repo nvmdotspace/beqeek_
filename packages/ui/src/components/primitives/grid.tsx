@@ -38,6 +38,7 @@ const gridVariants = cva('grid', {
     gap: {
       none: 'gap-0',
       'space-025': 'gap-[var(--space-025)]',
+      'space-037': 'gap-[var(--space-037)]',
       'space-050': 'gap-[var(--space-050)]',
       'space-075': 'gap-[var(--space-075)]',
       'space-100': 'gap-[var(--space-100)]',

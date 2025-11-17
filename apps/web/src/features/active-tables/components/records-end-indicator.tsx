@@ -15,6 +15,7 @@
 
 import { CheckCircle, ArrowUp } from 'lucide-react';
 import { Button } from '@workspace/ui/components/button';
+import { Stack, Inline } from '@workspace/ui/components/primitives';
 
 export interface RecordsEndIndicatorProps {
   /**
@@ -75,15 +76,11 @@ export function RecordsEndIndicator({
   };
 
   return (
-    <div
-      className={`flex flex-col items-center justify-center gap-3 py-8 ${className}`}
-      role="status"
-      aria-live="polite"
-    >
+    <Stack space="space-075" align="center" className={`py-8 ${className}`} role="status" aria-live="polite">
       {/* Success icon */}
-      <div className="flex items-center justify-center">
+      <Inline align="center" justify="center">
         <CheckCircle className="h-8 w-8 text-muted-foreground/50" />
-      </div>
+      </Inline>
 
       {/* Message */}
       <div className="text-center">
@@ -95,21 +92,17 @@ export function RecordsEndIndicator({
 
       {/* Back to top button */}
       {showBackToTop && (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleBackToTop}
-          className="mt-2 gap-2"
-          aria-label="Scroll back to top"
-        >
-          <ArrowUp className="h-4 w-4" />
-          Back to top
+        <Button variant="outline" size="sm" onClick={handleBackToTop} className="mt-2" aria-label="Scroll back to top">
+          <Inline space="space-050" align="center">
+            <ArrowUp className="h-4 w-4" />
+            Back to top
+          </Inline>
         </Button>
       )}
 
       {/* Divider */}
       <div className="mt-4 h-px w-32 bg-border" />
-    </div>
+    </Stack>
   );
 }
 
@@ -132,15 +125,11 @@ export function RecordsEndIndicatorCompact({
   };
 
   return (
-    <div
-      className={`flex flex-col items-center justify-center gap-2 py-6 ${className}`}
-      role="status"
-      aria-live="polite"
-    >
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+    <Stack space="space-050" align="center" className={`py-6 ${className}`} role="status" aria-live="polite">
+      <Inline space="space-050" align="center" className="text-sm text-muted-foreground">
         <CheckCircle className="h-4 w-4" />
         <span>{message}</span>
-      </div>
+      </Inline>
 
       <p className="text-xs text-muted-foreground/70">
         {recordCount} {recordCount === 1 ? 'record' : 'records'}
@@ -151,13 +140,15 @@ export function RecordsEndIndicatorCompact({
           variant="ghost"
           size="sm"
           onClick={handleBackToTop}
-          className="mt-1 h-8 gap-1 text-xs"
+          className="mt-1 h-8 text-xs"
           aria-label="Scroll back to top"
         >
-          <ArrowUp className="h-3 w-3" />
-          Top
+          <Inline space="space-025" align="center">
+            <ArrowUp className="h-3 w-3" />
+            Top
+          </Inline>
         </Button>
       )}
-    </div>
+    </Stack>
   );
 }

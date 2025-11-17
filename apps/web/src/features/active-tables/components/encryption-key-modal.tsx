@@ -23,6 +23,7 @@ import { Input } from '@workspace/ui/components/input';
 import { Label } from '@workspace/ui/components/label';
 import { Alert, AlertTitle, AlertDescription } from '@workspace/ui/components/alert';
 import { Text } from '@workspace/ui/components/typography';
+import { Box, Stack, Inline } from '@workspace/ui/components/primitives';
 import { isValidEncryptionKey, validateEncryptionKey } from '@workspace/active-tables-core';
 import type { ActiveTable } from '../types';
 
@@ -84,46 +85,50 @@ export function EncryptionKeyModal({ isOpen, onClose, table, workspaceId, onKeyS
     <Dialog open={isOpen} onOpenChange={handleCancel}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Key className="h-5 w-5" />
-            Enter Encryption Key
+          <DialogTitle>
+            <Inline space="space-050" align="center">
+              <Key className="h-5 w-5" />
+              Enter Encryption Key
+            </Inline>
           </DialogTitle>
           <DialogDescription>
             This table uses end-to-end encryption. Enter your 32-character encryption key to access encrypted data.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <Stack space="space-100">
           {/* Table Info */}
-          <div className="rounded-lg bg-muted p-3 space-y-2">
-            <div className="flex justify-between">
-              <Text size="small" color="muted">
-                Table:
-              </Text>
-              <Text size="small" className="font-medium">
-                {table.name}
-              </Text>
-            </div>
-            <div className="flex justify-between">
-              <Text size="small" color="muted">
-                Table ID:
-              </Text>
-              <Text size="small" className="font-mono text-xs">
-                {table.id}
-              </Text>
-            </div>
-            <div className="flex justify-between">
-              <Text size="small" color="muted">
-                Workspace:
-              </Text>
-              <Text size="small" className="font-mono text-xs">
-                {workspaceId}
-              </Text>
-            </div>
-          </div>
+          <Box padding="space-075" borderRadius="lg" backgroundColor="muted">
+            <Stack space="space-050">
+              <Inline justify="between">
+                <Text size="small" color="muted">
+                  Table:
+                </Text>
+                <Text size="small" className="font-medium">
+                  {table.name}
+                </Text>
+              </Inline>
+              <Inline justify="between">
+                <Text size="small" color="muted">
+                  Table ID:
+                </Text>
+                <Text size="small" className="font-mono text-xs">
+                  {table.id}
+                </Text>
+              </Inline>
+              <Inline justify="between">
+                <Text size="small" color="muted">
+                  Workspace:
+                </Text>
+                <Text size="small" className="font-mono text-xs">
+                  {workspaceId}
+                </Text>
+              </Inline>
+            </Stack>
+          </Box>
 
           {/* Key Input */}
-          <div className="space-y-2">
+          <Stack space="space-050">
             <Label htmlFor="encryption-key">Encryption Key</Label>
             <Input
               id="encryption-key"
@@ -136,7 +141,7 @@ export function EncryptionKeyModal({ isOpen, onClose, table, workspaceId, onKeyS
               autoComplete="off"
               autoFocus
             />
-            <div className="flex justify-between">
+            <Inline justify="between">
               <Text
                 size="small"
                 className={keyInput.length === 32 ? 'text-success' : ''}
@@ -149,8 +154,8 @@ export function EncryptionKeyModal({ isOpen, onClose, table, workspaceId, onKeyS
                   {validationError}
                 </Text>
               )}
-            </div>
-          </div>
+            </Inline>
+          </Stack>
 
           {/* Security Warning */}
           <Alert>
@@ -165,15 +170,17 @@ export function EncryptionKeyModal({ isOpen, onClose, table, workspaceId, onKeyS
               </ul>
             </AlertDescription>
           </Alert>
-        </div>
+        </Stack>
 
         <DialogFooter>
           <Button variant="outline" onClick={handleCancel} disabled={isSaving}>
             Cancel
           </Button>
           <Button onClick={handleSaveKey} disabled={keyInput.length !== 32 || isSaving}>
-            <Check className="mr-2 h-4 w-4" />
-            {isSaving ? 'Validating...' : 'Validate & Save Key'}
+            <Inline space="space-050" align="center">
+              <Check className="h-4 w-4" />
+              {isSaving ? 'Validating...' : 'Validate & Save Key'}
+            </Inline>
           </Button>
         </DialogFooter>
       </DialogContent>

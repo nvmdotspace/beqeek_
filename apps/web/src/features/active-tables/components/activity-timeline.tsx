@@ -8,6 +8,7 @@
 import { Card, CardHeader, CardTitle, CardContent } from '@workspace/ui/components/card';
 import { ScrollArea } from '@workspace/ui/components/scroll-area';
 import { Separator } from '@workspace/ui/components/separator';
+import { Inline } from '@workspace/ui/components/primitives';
 import { MessageSquare } from 'lucide-react';
 import { CommentSection } from '@workspace/comments';
 import type { Comment, CommentUser } from '@workspace/comments/types';
@@ -114,10 +115,12 @@ export function ActivityTimeline({
   return (
     <Card className={className}>
       <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-base font-medium">
-          <MessageSquare className="h-4 w-4" />
-          <span>{labels.comments}</span>
-          <span className="text-xs text-muted-foreground font-normal">({comments.length})</span>
+        <CardTitle className="text-base font-medium">
+          <Inline space="space-050" align="center">
+            <MessageSquare className="h-4 w-4" />
+            <span>{labels.comments}</span>
+            <span className="text-xs text-muted-foreground font-normal">({comments.length})</span>
+          </Inline>
         </CardTitle>
       </CardHeader>
 

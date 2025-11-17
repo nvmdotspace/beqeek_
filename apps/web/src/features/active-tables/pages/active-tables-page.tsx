@@ -26,7 +26,7 @@ import type { ActiveTable } from '../types';
 import { useEncryption } from '../hooks/use-encryption-stub';
 import { ErrorCard } from '@/components/error-display';
 import { StatBadge } from '@/features/workspace/components/stat-badge';
-import { Inline } from '@workspace/ui/components/primitives';
+import { Box, Stack, Inline, Grid } from '@workspace/ui/components/primitives';
 
 const formatStatusLabel = (tableType?: string) => {
   if (!tableType) return 'standard';
@@ -248,42 +248,48 @@ export const ActiveTablesPage = () => {
   const filteredTotalTables = filteredGroups.reduce((count, entry) => count + entry.tables.length, 0);
 
   return (
-    <div className="space-y-6 p-6">
-      <div className="flex flex-col gap-6">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div className="space-y-1">
-            <Heading level={1}>{m.activeTables_page_title()}</Heading>
-            <Text size="small" color="muted">
-              {currentWorkspace?.workspaceName
-                ? `Workspace • ${currentWorkspace.workspaceName}`
-                : m.activeTables_page_subtitle()}
-            </Text>
-          </div>
+    <Box padding="space-300">
+      <Stack space="space-300">
+        <Stack space="space-300">
+          {/* TODO: Migrate to primitives when responsive gap support is added */}
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <Stack space="space-025">
+              <Heading level={1}>{m.activeTables_page_title()}</Heading>
+              <Text size="small" color="muted">
+                {currentWorkspace?.workspaceName
+                  ? `Workspace • ${currentWorkspace.workspaceName}`
+                  : m.activeTables_page_subtitle()}
+              </Text>
+            </Stack>
 
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <div className="relative w-full sm:w-72">
-              <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder={m.activeTables_page_searchPlaceholder()}
-                className="h-10 rounded-lg border-border/60 pl-8"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="text-sm text-muted-foreground">
-                Workspace •{' '}
-                <span className="font-medium text-foreground">{currentWorkspace?.workspaceName || 'No workspace'}</span>
+            {/* TODO: Migrate to primitives when responsive gap support is added */}
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <div className="relative w-full sm:w-72">
+                <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  placeholder={m.activeTables_page_searchPlaceholder()}
+                  className="h-10 rounded-lg border-border/60 pl-8"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
               </div>
-              <Button variant="outline" size="icon" disabled={isTablesLoading} onClick={() => refetch()}>
-                <RefreshCw className={cn('h-4 w-4', isFetching && 'animate-spin')} />
-              </Button>
-              <Button variant="brand-primary" size="sm" onClick={handleCreateTable} disabled={!workspaceId}>
-                Create
-              </Button>
+              <Inline space="space-050" align="center">
+                <div className="text-sm text-muted-foreground">
+                  Workspace •{' '}
+                  <span className="font-medium text-foreground">
+                    {currentWorkspace?.workspaceName || 'No workspace'}
+                  </span>
+                </div>
+                <Button variant="outline" size="icon" disabled={isTablesLoading} onClick={() => refetch()}>
+                  <RefreshCw className={cn('h-4 w-4', isFetching && 'animate-spin')} />
+                </Button>
+                <Button variant="brand-primary" size="sm" onClick={handleCreateTable} disabled={!workspaceId}>
+                  Create
+                </Button>
+              </Inline>
             </div>
           </div>
-        </div>
+        </Stack>
 
         <Inline space="space-250" align="center" wrap className="gap-y-[var(--space-250)]">
           <StatBadge
@@ -308,7 +314,7 @@ export const ActiveTablesPage = () => {
             loading={isTablesLoading}
           />
         </Inline>
-      </div>
+      </Stack>
 
       {shouldShowEncryptionReminder ? (
         <Alert className="border-warning bg-warning-subtle text-warning">
@@ -321,25 +327,29 @@ export const ActiveTablesPage = () => {
         </Alert>
       ) : null}
 
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+      <Stack space="space-100">
+        <Inline space="space-050" wrap className="text-xs text-muted-foreground">
           <Badge variant="outline" className="border-dashed">
             {m.activeTables_page_totalTables({ count: filteredTotalTables })}
           </Badge>
           <Badge variant="secondary" className="border-dashed">
             {m.activeTables_page_totalWorkGroups({ count: workGroups.length })}
           </Badge>
-          <div className="flex items-center gap-2 rounded-full border border-border/60 px-3 py-1 text-xs text-foreground">
-            <Filter className="h-3.5 w-3.5 text-muted-foreground" />
-            {activeFilterCount
-              ? `${activeFilterCount} filter${activeFilterCount > 1 ? 's' : ''} active`
-              : 'No filters applied'}
+          <div className="rounded-full border border-border/60 text-xs text-foreground">
+            <Box padding="space-025" className="px-3">
+              <Inline space="space-050" align="center">
+                <Filter className="h-3.5 w-3.5 text-muted-foreground" />
+                {activeFilterCount
+                  ? `${activeFilterCount} filter${activeFilterCount > 1 ? 's' : ''} active`
+                  : 'No filters applied'}
+              </Inline>
+            </Box>
           </div>
-        </div>
+        </Inline>
 
-        <div className="rounded-xl border border-border/60 bg-card p-4 shadow-sm">
+        <Box padding="space-100" backgroundColor="card" borderRadius="xl" border="default" className="shadow-sm">
           {/* Workgroup Tabs Section - Level 2: Navigation with border-bottom accent */}
-          <div className="mb-4">
+          <Stack space="space-300">
             <div className="flex flex-wrap items-center gap-0 border-b border-border">
               <NavTab active={selectedWorkGroupId === 'all'} onClick={() => setSelectedWorkGroupId('all')} size="sm">
                 {m.activeTables_page_workGroupAll()}
@@ -355,150 +365,164 @@ export const ActiveTablesPage = () => {
                 </NavTab>
               ))}
             </div>
-          </div>
 
-          {/* Filter Rows Section */}
-          <div className="space-y-3 pt-4 border-t border-border/40">
-            {/* Status Filter */}
-            {statusOptions.length ? (
-              <div className="flex items-start gap-3">
-                <Text size="small" weight="medium" className="min-w-[100px] text-muted-foreground pt-1.5">
-                  Status
-                </Text>
-                <div className="flex-1 flex flex-wrap items-center gap-1.5">
-                  <FilterChip active={statusFilter === 'all'} onClick={() => setStatusFilter('all')}>
-                    All
-                  </FilterChip>
-                  {statusOptions
-                    .filter((status) => showAllStatusFilters || priorityStatusFilters.includes(status))
-                    .map((status) => (
-                      <FilterChip
-                        key={status}
-                        active={statusFilter === status}
-                        onClick={() => setStatusFilter(status)}
-                        className="capitalize"
-                      >
-                        {status}
-                      </FilterChip>
-                    ))}
-                  {statusOptions.length > priorityStatusFilters.length && (
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => setShowAllStatusFilters(!showAllStatusFilters)}
-                      className="text-muted-foreground hover:text-foreground"
-                    >
-                      {showAllStatusFilters
-                        ? '− Less'
-                        : `+ More (${statusOptions.length - priorityStatusFilters.filter((pf) => statusOptions.includes(pf)).length})`}
-                    </Button>
-                  )}
-                </div>
-              </div>
-            ) : null}
-
-            {/* Encryption Filter */}
-            <div className="flex items-start gap-3">
-              <Text size="small" weight="medium" className="min-w-[100px] text-muted-foreground pt-1.5">
-                Encryption
-              </Text>
-              <div className="flex-1 flex flex-wrap items-center gap-1.5">
-                <FilterChip active={encryptionFilter === 'all'} onClick={() => setEncryptionFilter('all')}>
-                  All
-                </FilterChip>
-                <FilterChip
-                  active={encryptionFilter === 'encrypted'}
-                  onClick={() => setEncryptionFilter('encrypted')}
-                  variant="success"
-                >
-                  E2EE
-                </FilterChip>
-                <FilterChip active={encryptionFilter === 'standard'} onClick={() => setEncryptionFilter('standard')}>
-                  Server-side
-                </FilterChip>
-              </div>
-            </div>
-
-            {/* Automation Filter */}
-            <div className="flex items-start gap-3">
-              <Text size="small" weight="medium" className="min-w-[100px] text-muted-foreground pt-1.5">
-                Automation
-              </Text>
-              <div className="flex-1 flex flex-wrap items-center gap-1.5">
-                <FilterChip active={automationFilter === 'all'} onClick={() => setAutomationFilter('all')}>
-                  All
-                </FilterChip>
-                <FilterChip active={automationFilter === 'automated'} onClick={() => setAutomationFilter('automated')}>
-                  With workflows
-                </FilterChip>
-                <FilterChip active={automationFilter === 'manual'} onClick={() => setAutomationFilter('manual')}>
-                  Manual only
-                </FilterChip>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {isTablesLoading ? (
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {Array.from({ length: 6 }).map((_, index) => (
-            <Skeleton key={index} className="h-64 w-full rounded-xl" />
-          ))}
-        </div>
-      ) : null}
-
-      {!isTablesLoading && error ? (
-        <ErrorCard error={error} onRetry={() => refetch()} showDetails={import.meta.env.DEV} />
-      ) : null}
-
-      {!isTablesLoading && !error && !hasAnyTables ? <ActiveTablesEmptyState onCreate={handleCreateTable} /> : null}
-
-      {!isTablesLoading && !error && hasAnyTables ? (
-        <div className="space-y-8">
-          {filteredGroups.map(({ group, tables }) => (
-            <section key={group.id} className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <Heading level={2}>{group.name}</Heading>
-                  {group.description ? (
-                    <Text size="small" color="muted">
-                      {group.description}
+            {/* Filter Rows Section */}
+            <div className="border-t border-border/40 pt-6">
+              <Stack space="space-100">
+                {/* Status Filter */}
+                {statusOptions.length ? (
+                  <Inline space="space-100" align="start">
+                    <Text size="small" weight="medium" className="min-w-[100px] text-muted-foreground pt-1.5">
+                      Status
                     </Text>
-                  ) : null}
-                </div>
-                <Badge variant="outline" className="bg-background">
-                  {m.activeTables_page_groupTableCount({ count: tables.length })}
-                </Badge>
-              </div>
-              <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4">
-                {tables.map((table) => (
-                  <ActiveTableCard
-                    key={table.id}
-                    table={table}
-                    onOpen={handleOpenTable}
-                    onConfigure={handleConfigureTable}
-                    onOpenRecords={handleOpenRecords}
-                    onOpenComments={handleOpenComments}
-                    onOpenAutomations={handleOpenAutomations}
-                    onDelete={handleDeleteTable}
-                  />
-                ))}
-              </div>
-            </section>
-          ))}
-        </div>
-      ) : null}
+                    <Inline space="space-075" wrap align="center" className="flex-1">
+                      <FilterChip active={statusFilter === 'all'} onClick={() => setStatusFilter('all')}>
+                        All
+                      </FilterChip>
+                      {statusOptions
+                        .filter((status) => showAllStatusFilters || priorityStatusFilters.includes(status))
+                        .map((status) => (
+                          <FilterChip
+                            key={status}
+                            active={statusFilter === status}
+                            onClick={() => setStatusFilter(status)}
+                            className="capitalize"
+                          >
+                            {status}
+                          </FilterChip>
+                        ))}
+                      {statusOptions.length > priorityStatusFilters.length && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => setShowAllStatusFilters(!showAllStatusFilters)}
+                          className="text-muted-foreground hover:text-foreground"
+                        >
+                          {showAllStatusFilters
+                            ? '− Less'
+                            : `+ More (${statusOptions.length - priorityStatusFilters.filter((pf) => statusOptions.includes(pf)).length})`}
+                        </Button>
+                      )}
+                    </Inline>
+                  </Inline>
+                ) : null}
 
-      <TableManagementDialog
-        open={isTableDialogOpen}
-        onOpenChange={setIsTableDialogOpen}
-        table={editingTable}
-        workGroups={workGroups}
-        onSave={handleSaveTable}
-        isLoading={isCreating || isUpdating}
-      />
-    </div>
+                {/* Encryption Filter */}
+                <Inline space="space-100" align="start">
+                  <Text size="small" weight="medium" className="min-w-[100px] text-muted-foreground pt-1.5">
+                    Encryption
+                  </Text>
+                  <Inline space="space-075" wrap align="center" className="flex-1">
+                    <FilterChip active={encryptionFilter === 'all'} onClick={() => setEncryptionFilter('all')}>
+                      All
+                    </FilterChip>
+                    <FilterChip
+                      active={encryptionFilter === 'encrypted'}
+                      onClick={() => setEncryptionFilter('encrypted')}
+                      variant="success"
+                    >
+                      E2EE
+                    </FilterChip>
+                    <FilterChip
+                      active={encryptionFilter === 'standard'}
+                      onClick={() => setEncryptionFilter('standard')}
+                    >
+                      Server-side
+                    </FilterChip>
+                  </Inline>
+                </Inline>
+
+                {/* Automation Filter */}
+                <Inline space="space-100" align="start">
+                  <Text size="small" weight="medium" className="min-w-[100px] text-muted-foreground pt-1.5">
+                    Automation
+                  </Text>
+                  <Inline space="space-075" wrap align="center" className="flex-1">
+                    <FilterChip active={automationFilter === 'all'} onClick={() => setAutomationFilter('all')}>
+                      All
+                    </FilterChip>
+                    <FilterChip
+                      active={automationFilter === 'automated'}
+                      onClick={() => setAutomationFilter('automated')}
+                    >
+                      With workflows
+                    </FilterChip>
+                    <FilterChip active={automationFilter === 'manual'} onClick={() => setAutomationFilter('manual')}>
+                      Manual only
+                    </FilterChip>
+                  </Inline>
+                </Inline>
+              </Stack>
+            </div>
+          </Stack>
+        </Box>
+
+        {isTablesLoading ? (
+          <Grid columns={2} gap="space-300" className="xl:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <Skeleton key={index} className="h-64 w-full rounded-xl" />
+            ))}
+          </Grid>
+        ) : null}
+
+        {!isTablesLoading && error ? (
+          <ErrorCard error={error} onRetry={() => refetch()} showDetails={import.meta.env.DEV} />
+        ) : null}
+
+        {!isTablesLoading && !error && !hasAnyTables ? <ActiveTablesEmptyState onCreate={handleCreateTable} /> : null}
+
+        {!isTablesLoading && !error && hasAnyTables ? (
+          <Stack space="space-400">
+            {filteredGroups.map(({ group, tables }) => (
+              <section key={group.id}>
+                <Stack space="space-100">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Heading level={2}>{group.name}</Heading>
+                      {group.description ? (
+                        <Text size="small" color="muted">
+                          {group.description}
+                        </Text>
+                      ) : null}
+                    </div>
+                    <Badge variant="outline" className="bg-background">
+                      {m.activeTables_page_groupTableCount({ count: tables.length })}
+                    </Badge>
+                  </div>
+                  <Grid
+                    columns={1}
+                    gap="space-100"
+                    className="sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4"
+                  >
+                    {tables.map((table) => (
+                      <ActiveTableCard
+                        key={table.id}
+                        table={table}
+                        onOpen={handleOpenTable}
+                        onConfigure={handleConfigureTable}
+                        onOpenRecords={handleOpenRecords}
+                        onOpenComments={handleOpenComments}
+                        onOpenAutomations={handleOpenAutomations}
+                        onDelete={handleDeleteTable}
+                      />
+                    ))}
+                  </Grid>
+                </Stack>
+              </section>
+            ))}
+          </Stack>
+        ) : null}
+
+        <TableManagementDialog
+          open={isTableDialogOpen}
+          onOpenChange={setIsTableDialogOpen}
+          table={editingTable}
+          workGroups={workGroups}
+          onSave={handleSaveTable}
+          isLoading={isCreating || isUpdating}
+        />
+      </Stack>
+    </Box>
   );
 };
 

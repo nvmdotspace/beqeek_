@@ -15,6 +15,7 @@ import { Button } from '@workspace/ui/components/button';
 import { Card, CardContent } from '@workspace/ui/components/card';
 import { Textarea } from '@workspace/ui/components/textarea';
 import { Text } from '@workspace/ui/components/typography';
+import { Inline } from '@workspace/ui/components/primitives';
 import { Keyboard } from 'lucide-react';
 
 export interface RichCommentEditorProps {
@@ -122,9 +123,9 @@ export function RichCommentEditor({
 
         {/* Toolbar - only show when expanded or has content */}
         {(isExpanded || !isEmpty) && (
-          <div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
+          <Inline align="center" justify="between" className="mt-3 pt-3 border-t border-border">
             {/* Keyboard hint */}
-            <div className="flex items-center gap-2">
+            <Inline align="center" space="space-050">
               <Keyboard className="h-3 w-3 text-muted-foreground" />
               <Text size="small" color="muted" className="text-xs hidden sm:inline">
                 Ctrl+Enter to submit, Esc to cancel
@@ -132,18 +133,18 @@ export function RichCommentEditor({
               <Text size="small" color="muted" className="text-xs sm:hidden">
                 Ctrl+Enter to submit
               </Text>
-            </div>
+            </Inline>
 
             {/* Actions */}
-            <div className="flex items-center gap-2">
+            <Inline align="center" space="space-050">
               <Button variant="ghost" size="sm" onClick={handleCancel} disabled={isSubmitting || isEmpty}>
                 Cancel
               </Button>
               <Button size="sm" onClick={handleSubmit} disabled={isSubmitting || isEmpty}>
                 {isSubmitting ? 'Adding...' : 'Add Comment'}
               </Button>
-            </div>
-          </div>
+            </Inline>
+          </Inline>
         )}
       </CardContent>
     </Card>

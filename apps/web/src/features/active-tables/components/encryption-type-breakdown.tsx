@@ -16,6 +16,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@workspace/ui/componen
 import { Badge } from '@workspace/ui/components/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@workspace/ui/components/tabs';
 import { Heading, Text } from '@workspace/ui/components/typography';
+import { Box, Stack, Inline } from '@workspace/ui/components/primitives';
 import { getEncryptionTypeForField } from '@workspace/active-tables-core';
 import type { ActiveFieldConfig } from '../types';
 
@@ -86,142 +87,169 @@ export function EncryptionTypeBreakdown({ fields, hashedKeywordFields, isE2EEEna
         <Tabs defaultValue="aes" className="w-full">
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="aes" className="text-xs">
-              <Shield className="mr-1 h-3.5 w-3.5" />
-              AES ({fieldsByType.aes.length})
+              <Inline space="space-025" align="center">
+                <Shield className="h-3.5 w-3.5" />
+                AES ({fieldsByType.aes.length})
+              </Inline>
             </TabsTrigger>
             <TabsTrigger value="ope" className="text-xs">
-              <Lock className="mr-1 h-3.5 w-3.5" />
-              OPE ({fieldsByType.ope.length})
+              <Inline space="space-025" align="center">
+                <Lock className="h-3.5 w-3.5" />
+                OPE ({fieldsByType.ope.length})
+              </Inline>
             </TabsTrigger>
             <TabsTrigger value="hmac" className="text-xs">
-              <Hash className="mr-1 h-3.5 w-3.5" />
-              HMAC ({fieldsByType.hmac.length})
+              <Inline space="space-025" align="center">
+                <Hash className="h-3.5 w-3.5" />
+                HMAC ({fieldsByType.hmac.length})
+              </Inline>
             </TabsTrigger>
             <TabsTrigger value="none" className="text-xs">
-              <Unlock className="mr-1 h-3.5 w-3.5" />
-              None ({fieldsByType.none.length})
+              <Inline space="space-025" align="center">
+                <Unlock className="h-3.5 w-3.5" />
+                None ({fieldsByType.none.length})
+              </Inline>
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="aes" className="space-y-3 mt-4">
-            <div className="rounded-lg bg-muted p-3">
-              <Heading level={4} className="mb-1">
-                AES-256-CBC Encryption
-              </Heading>
-              <Text size="small" color="muted" className="text-xs">
-                Strong encryption for text fields. Provides full confidentiality but prevents server-side searching.
-              </Text>
-            </div>
-            {fieldsByType.aes.length > 0 ? (
-              <div className="flex flex-wrap gap-2">
-                {fieldsByType.aes.map((field) => (
-                  <Badge key={field.name} variant="outline" className="flex items-center gap-1">
-                    <Shield className="h-3 w-3" />
-                    {field.label}
-                  </Badge>
-                ))}
-              </div>
-            ) : (
-              <Text size="small" color="muted">
-                No fields using AES-256-CBC encryption
-              </Text>
-            )}
+          <TabsContent value="aes" className="mt-4">
+            <Stack space="space-075">
+              <Box padding="space-075" borderRadius="lg" backgroundColor="muted">
+                <Stack space="space-025">
+                  <Heading level={4}>AES-256-CBC Encryption</Heading>
+                  <Text size="small" color="muted" className="text-xs">
+                    Strong encryption for text fields. Provides full confidentiality but prevents server-side searching.
+                  </Text>
+                </Stack>
+              </Box>
+              {fieldsByType.aes.length > 0 ? (
+                <Inline space="space-050" wrap>
+                  {fieldsByType.aes.map((field) => (
+                    <Badge key={field.name} variant="outline">
+                      <Inline space="space-025" align="center">
+                        <Shield className="h-3 w-3" />
+                        {field.label}
+                      </Inline>
+                    </Badge>
+                  ))}
+                </Inline>
+              ) : (
+                <Text size="small" color="muted">
+                  No fields using AES-256-CBC encryption
+                </Text>
+              )}
+            </Stack>
           </TabsContent>
 
-          <TabsContent value="ope" className="space-y-3 mt-4">
-            <div className="rounded-lg bg-muted p-3">
-              <Heading level={4} className="mb-1">
-                Order-Preserving Encryption (OPE)
-              </Heading>
-              <Text size="small" color="muted" className="text-xs">
-                Encryption that preserves numeric/date ordering. Enables range queries and sorting on encrypted data.
-              </Text>
-            </div>
-            {fieldsByType.ope.length > 0 ? (
-              <div className="flex flex-wrap gap-2">
-                {fieldsByType.ope.map((field) => (
-                  <Badge key={field.name} variant="outline" className="flex items-center gap-1">
-                    <Lock className="h-3 w-3" />
-                    {field.label}
-                  </Badge>
-                ))}
-              </div>
-            ) : (
-              <Text size="small" color="muted">
-                No fields using OPE encryption
-              </Text>
-            )}
+          <TabsContent value="ope" className="mt-4">
+            <Stack space="space-075">
+              <Box padding="space-075" borderRadius="lg" backgroundColor="muted">
+                <Stack space="space-025">
+                  <Heading level={4}>Order-Preserving Encryption (OPE)</Heading>
+                  <Text size="small" color="muted" className="text-xs">
+                    Encryption that preserves numeric/date ordering. Enables range queries and sorting on encrypted
+                    data.
+                  </Text>
+                </Stack>
+              </Box>
+              {fieldsByType.ope.length > 0 ? (
+                <Inline space="space-050" wrap>
+                  {fieldsByType.ope.map((field) => (
+                    <Badge key={field.name} variant="outline">
+                      <Inline space="space-025" align="center">
+                        <Lock className="h-3 w-3" />
+                        {field.label}
+                      </Inline>
+                    </Badge>
+                  ))}
+                </Inline>
+              ) : (
+                <Text size="small" color="muted">
+                  No fields using OPE encryption
+                </Text>
+              )}
+            </Stack>
           </TabsContent>
 
-          <TabsContent value="hmac" className="space-y-3 mt-4">
-            <div className="rounded-lg bg-muted p-3">
-              <Heading level={4} className="mb-1">
-                HMAC-SHA256 Hashing
-              </Heading>
-              <Text size="small" color="muted" className="text-xs">
-                One-way hashing for select fields. Enables exact-match filtering without revealing values.
-              </Text>
-            </div>
-            {fieldsByType.hmac.length > 0 ? (
-              <div className="flex flex-wrap gap-2">
-                {fieldsByType.hmac.map((field) => (
-                  <Badge key={field.name} variant="outline" className="flex items-center gap-1">
-                    <Hash className="h-3 w-3" />
-                    {field.label}
-                  </Badge>
-                ))}
-              </div>
-            ) : (
-              <Text size="small" color="muted">
-                No fields using HMAC hashing
-              </Text>
-            )}
+          <TabsContent value="hmac" className="mt-4">
+            <Stack space="space-075">
+              <Box padding="space-075" borderRadius="lg" backgroundColor="muted">
+                <Stack space="space-025">
+                  <Heading level={4}>HMAC-SHA256 Hashing</Heading>
+                  <Text size="small" color="muted" className="text-xs">
+                    One-way hashing for select fields. Enables exact-match filtering without revealing values.
+                  </Text>
+                </Stack>
+              </Box>
+              {fieldsByType.hmac.length > 0 ? (
+                <Inline space="space-050" wrap>
+                  {fieldsByType.hmac.map((field) => (
+                    <Badge key={field.name} variant="outline">
+                      <Inline space="space-025" align="center">
+                        <Hash className="h-3 w-3" />
+                        {field.label}
+                      </Inline>
+                    </Badge>
+                  ))}
+                </Inline>
+              ) : (
+                <Text size="small" color="muted">
+                  No fields using HMAC hashing
+                </Text>
+              )}
+            </Stack>
           </TabsContent>
 
-          <TabsContent value="none" className="space-y-3 mt-4">
-            <div className="rounded-lg bg-muted p-3">
-              <Heading level={4} className="mb-1">
-                No Encryption
-              </Heading>
-              <Text size="small" color="muted" className="text-xs">
-                Fields that are not encrypted client-side (e.g., file attachments, user references).
-              </Text>
-            </div>
-            {fieldsByType.none.length > 0 ? (
-              <div className="flex flex-wrap gap-2">
-                {fieldsByType.none.map((field) => (
-                  <Badge key={field.name} variant="secondary" className="flex items-center gap-1">
-                    <Unlock className="h-3 w-3" />
-                    {field.label}
-                  </Badge>
-                ))}
-              </div>
-            ) : (
-              <Text size="small" color="muted">
-                All fields are encrypted
-              </Text>
-            )}
+          <TabsContent value="none" className="mt-4">
+            <Stack space="space-075">
+              <Box padding="space-075" borderRadius="lg" backgroundColor="muted">
+                <Stack space="space-025">
+                  <Heading level={4}>No Encryption</Heading>
+                  <Text size="small" color="muted" className="text-xs">
+                    Fields that are not encrypted client-side (e.g., file attachments, user references).
+                  </Text>
+                </Stack>
+              </Box>
+              {fieldsByType.none.length > 0 ? (
+                <Inline space="space-050" wrap>
+                  {fieldsByType.none.map((field) => (
+                    <Badge key={field.name} variant="secondary">
+                      <Inline space="space-025" align="center">
+                        <Unlock className="h-3 w-3" />
+                        {field.label}
+                      </Inline>
+                    </Badge>
+                  ))}
+                </Inline>
+              ) : (
+                <Text size="small" color="muted">
+                  All fields are encrypted
+                </Text>
+              )}
+            </Stack>
           </TabsContent>
         </Tabs>
 
         {/* Hashed Keyword Fields */}
         {hashedKeywordFields.length > 0 && (
-          <div className="mt-6 space-y-2">
-            <Heading level={4}>Searchable Fields (Hashed Keywords)</Heading>
-            <Text size="small" color="muted" className="text-xs">
-              These encrypted fields support full-text search through hashed keywords:
-            </Text>
-            <div className="flex flex-wrap gap-2">
-              {hashedKeywordFields.map((fieldName) => {
-                const field = fields.find((f) => f.name === fieldName);
-                return (
-                  <Badge key={fieldName} variant="outline">
-                    {field?.label || fieldName}
-                  </Badge>
-                );
-              })}
-            </div>
-          </div>
+          <Box className="mt-6">
+            <Stack space="space-050">
+              <Heading level={4}>Searchable Fields (Hashed Keywords)</Heading>
+              <Text size="small" color="muted" className="text-xs">
+                These encrypted fields support full-text search through hashed keywords:
+              </Text>
+              <Inline space="space-050" wrap>
+                {hashedKeywordFields.map((fieldName) => {
+                  const field = fields.find((f) => f.name === fieldName);
+                  return (
+                    <Badge key={fieldName} variant="outline">
+                      {field?.label || fieldName}
+                    </Badge>
+                  );
+                })}
+              </Inline>
+            </Stack>
+          </Box>
         )}
       </CardContent>
     </Card>

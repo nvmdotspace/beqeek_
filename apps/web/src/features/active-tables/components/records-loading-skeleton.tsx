@@ -14,6 +14,7 @@
  */
 
 import { Skeleton } from '@workspace/ui/components/skeleton';
+import { Stack, Inline } from '@workspace/ui/components/primitives';
 
 export interface RecordsLoadingSkeletonProps {
   /**
@@ -81,10 +82,10 @@ export function RecordsLoadingSkeleton({
       </div>
 
       {/* Loading indicator text */}
-      <div className="flex items-center justify-center gap-2 py-4 text-sm text-muted-foreground">
+      <Inline align="center" justify="center" space="space-050" className="py-4 text-sm text-muted-foreground">
         <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
         <span>{message}</span>
-      </div>
+      </Inline>
     </div>
   );
 }
@@ -98,26 +99,26 @@ export function RecordsLoadingSkeletonCompact({
   className = '',
 }: Omit<RecordsLoadingSkeletonProps, 'columnCount'>) {
   return (
-    <div className={`space-y-3 ${className}`} role="status" aria-busy="true">
+    <Stack space="space-075" className={className} role="status" aria-busy="true">
       {/* Screen reader announcement */}
       <span className="sr-only">{message}</span>
 
       {/* Skeleton cards */}
       {Array.from({ length: rowCount }).map((_, index) => (
         <div key={index} className="bg-card text-card-foreground rounded-lg border border-border p-3">
-          <div className="space-y-2">
+          <Stack space="space-050">
             <Skeleton className="h-5 w-3/4" />
             <Skeleton className="h-4 w-1/2" />
             <Skeleton className="h-4 w-2/3" />
-          </div>
+          </Stack>
         </div>
       ))}
 
       {/* Loading indicator text */}
-      <div className="flex items-center justify-center gap-2 py-2 text-sm text-muted-foreground">
+      <Inline align="center" justify="center" space="space-050" className="py-2 text-sm text-muted-foreground">
         <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
         <span>{message}</span>
-      </div>
-    </div>
+      </Inline>
+    </Stack>
   );
 }

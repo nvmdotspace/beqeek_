@@ -6,12 +6,16 @@ import { cn } from '../../lib/utils.js';
 /**
  * Box primitive - Generic container with configurable padding
  *
- * @example
- * ```tsx
- * <Box padding="space-300" backgroundColor="background">
- *   <Content />
- * </Box>
- * ```
+ * @example Basic usage
+ * <Box padding="space-300" backgroundColor="background"><Content /></Box>
+ *
+ * @example Responsive padding via className
+ * <Box padding="space-100" className="sm:p-6">content</Box>
+ * Mobile: 8px padding, Tablet+: 24px padding
+ *
+ * @example Responsive directional padding
+ * <Box className="px-3 sm:px-6 py-3">content</Box>
+ * Horizontal: 12px mobile, 24px tablet+ | Vertical: 12px all breakpoints
  */
 
 const boxVariants = cva('', {
@@ -19,6 +23,7 @@ const boxVariants = cva('', {
     padding: {
       none: 'p-0',
       'space-025': 'p-[var(--space-025)]',
+      'space-037': 'p-[var(--space-037)]',
       'space-050': 'p-[var(--space-050)]',
       'space-075': 'p-[var(--space-075)]',
       'space-100': 'p-[var(--space-100)]',

@@ -6,14 +6,16 @@ import { cn } from '../../lib/utils.js';
 /**
  * Inline primitive - Horizontal layout with managed spacing between children
  *
- * @example
- * ```tsx
- * <Inline space="space-150" align="center" wrap>
- *   <Button />
- *   <Button />
- *   <Button />
- * </Inline>
- * ```
+ * @example Basic usage
+ * <Inline space="space-150" align="center" wrap><Button /><Button /><Button /></Inline>
+ *
+ * @example Responsive spacing via className
+ * <Inline space="space-050" className="sm:gap-3 lg:gap-4">children</Inline>
+ * Mobile: 4px gap, Tablet: 12px gap, Desktop: 16px gap
+ *
+ * @example Responsive direction change
+ * <Inline space="space-075" className="flex-col sm:flex-row">children</Inline>
+ * Mobile: vertical stack, Tablet+: horizontal row
  */
 
 const inlineVariants = cva('flex', {
@@ -21,6 +23,7 @@ const inlineVariants = cva('flex', {
     space: {
       none: 'gap-0',
       'space-025': 'gap-[var(--space-025)]',
+      'space-037': 'gap-[var(--space-037)]',
       'space-050': 'gap-[var(--space-050)]',
       'space-075': 'gap-[var(--space-075)]',
       'space-100': 'gap-[var(--space-100)]',

@@ -291,8 +291,9 @@
 
   --space-0: 0rem; /* 0px - Reset spacing */
   --space-025: 0.125rem; /* 2px - Hairline gaps, icon padding */
+  --space-037: 0.375rem; /* 6px - Tight icon spacing (gap-1.5) */
   --space-050: 0.25rem; /* 4px - Tight spacing, badges */
-  --space-075: 0.375rem; /* 6px - Compact UI elements */
+  --space-075: 0.375rem; /* 6px - Compact UI elements (gap-3) */
   --space-100: 0.5rem; /* 8px - BASE UNIT, default gaps */
   --space-150: 0.75rem; /* 12px - Small component padding */
   --space-200: 1rem; /* 16px - Standard spacing, button padding */

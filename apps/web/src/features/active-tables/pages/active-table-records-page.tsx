@@ -22,6 +22,7 @@ import { Skeleton } from '@workspace/ui/components/skeleton';
 import { Card, CardContent } from '@workspace/ui/components/card';
 import { TabsContent } from '@workspace/ui/components/tabs';
 import { Heading, Text } from '@workspace/ui/components/typography';
+import { Box, Stack, Inline } from '@workspace/ui/components/primitives';
 
 // Components
 import { ErrorCard } from '@/components/error-display';
@@ -37,10 +38,10 @@ import { ViewModeSelector, type ViewMode } from '../components/view-mode-selecto
 import { ViewConfigSelector } from '../components/view-config-selector';
 
 const LoadingState = () => (
-  <div className="space-y-4">
+  <Stack space="space-100">
     <Skeleton className="h-12 w-full rounded-xl" />
     <Skeleton className="h-64 w-full rounded-xl" />
-  </div>
+  </Stack>
 );
 
 // Type-safe route API for records route
@@ -341,314 +342,352 @@ export const ActiveTableRecordsPage = () => {
 
   if (isInitialPageLoading) {
     return (
-      <div className="space-y-6 p-6">
-        <Button variant="ghost" onClick={handleBack} className="flex items-center gap-2">
-          <ArrowLeft className="h-4 w-4" />
-          Back to Table
-        </Button>
-        <LoadingState />
-      </div>
+      <Box padding="space-300">
+        <Stack space="space-300">
+          <Inline space="space-050" as="button">
+            <Button variant="ghost" onClick={handleBack}>
+              <Inline space="space-050" align="center">
+                <ArrowLeft className="h-4 w-4" />
+                Back to Table
+              </Inline>
+            </Button>
+          </Inline>
+          <LoadingState />
+        </Stack>
+      </Box>
     );
   }
 
   // Error state
   if (tableError) {
     return (
-      <div className="space-y-6 p-6">
-        <Button variant="ghost" onClick={handleBack} className="flex items-center gap-2">
-          <ArrowLeft className="h-4 w-4" />
-          Back to Table
-        </Button>
-        <ErrorCard
-          error={tableError}
-          onRetry={() => window.location.reload()}
-          onBack={handleBack}
-          showDetails={import.meta.env.DEV}
-        />
-      </div>
+      <Box padding="space-300">
+        <Stack space="space-300">
+          <Button variant="ghost" onClick={handleBack}>
+            <Inline space="space-050" align="center">
+              <ArrowLeft className="h-4 w-4" />
+              Back to Table
+            </Inline>
+          </Button>
+          <ErrorCard
+            error={tableError}
+            onRetry={() => window.location.reload()}
+            onBack={handleBack}
+            showDetails={import.meta.env.DEV}
+          />
+        </Stack>
+      </Box>
     );
   }
 
   if (!displayTable) {
     return (
-      <div className="space-y-6 p-6">
-        <Button variant="ghost" onClick={handleBack} className="flex items-center gap-2">
-          <ArrowLeft className="h-4 w-4" />
-          Back to List
-        </Button>
-        <Card className="border-destructive/40 bg-destructive/10">
-          <CardContent className="p-6">
-            <p className="text-destructive">Table not found</p>
-          </CardContent>
-        </Card>
-      </div>
+      <Box padding="space-300">
+        <Stack space="space-300">
+          <Button variant="ghost" onClick={handleBack}>
+            <Inline space="space-050" align="center">
+              <ArrowLeft className="h-4 w-4" />
+              Back to List
+            </Inline>
+          </Button>
+          <Card className="border-destructive/40 bg-destructive/10">
+            <CardContent>
+              <Box padding="space-300">
+                <p className="text-destructive">Table not found</p>
+              </Box>
+            </CardContent>
+          </Card>
+        </Stack>
+      </Box>
     );
   }
 
   if (recordsError) {
     return (
-      <div className="space-y-6 p-6">
-        <Button variant="ghost" onClick={handleBack} className="flex items-center gap-2">
-          <ArrowLeft className="h-4 w-4" />
-          Back to Table
-        </Button>
-        <ErrorCard
-          error={recordsError}
-          onRetry={() => window.location.reload()}
-          onBack={handleBack}
-          showDetails={import.meta.env.DEV}
-        />
-      </div>
+      <Box padding="space-300">
+        <Stack space="space-300">
+          <Button variant="ghost" onClick={handleBack}>
+            <Inline space="space-050" align="center">
+              <ArrowLeft className="h-4 w-4" />
+              Back to Table
+            </Inline>
+          </Button>
+          <ErrorCard
+            error={recordsError}
+            onRetry={() => window.location.reload()}
+            onBack={handleBack}
+            showDetails={import.meta.env.DEV}
+          />
+        </Stack>
+      </Box>
     );
   }
 
   return (
-    <div className="space-y-6 p-6">
-      {/* ARIA Live Region for Screen Readers */}
-      <RecordsLiveAnnouncer
-        isLoading={recordsLoading}
-        isFetchingNextPage={isFetchingNextPage}
-        hasNextPage={hasNextPage}
-        error={recordsError}
-        recordCount={filteredRecords.length}
-      />
-
-      {/* Header Section - Matching Active Tables pattern */}
-      <div className="flex flex-col gap-6">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <Button variant="ghost" size="icon" onClick={handleBack} className="h-8 w-8">
-                <ArrowLeft className="h-4 w-4" />
-              </Button>
-              <Heading level={1}>{displayTable.name || 'Records'}</Heading>
-            </div>
-            <Text size="small" color="muted">
-              {displayTable.description || 'Quản lý bản ghi'}
-            </Text>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Button onClick={handleCreateRecord} size="sm">
-              <Plus className="h-4 w-4 mr-2" />
-              Tạo bản ghi
-            </Button>
-          </div>
-        </div>
-
-        {/* Stats badges */}
-        <div className="flex items-center gap-3 flex-wrap">
-          <Badge variant="outline" className="flex items-center gap-1.5">
-            <FileText className="h-3.5 w-3.5" />
-            <span>{filteredRecords.length} bản ghi</span>
-          </Badge>
-          {encryption.isE2EEEnabled && (
-            <Badge
-              variant="outline"
-              className={
-                encryption.keyValidationStatus === 'valid'
-                  ? 'border-success text-success flex items-center gap-1.5'
-                  : 'border-warning text-warning flex items-center gap-1.5'
-              }
-            >
-              <Shield className="h-3.5 w-3.5" />
-              <span>{encryption.keyValidationStatus === 'valid' ? 'E2EE Active' : 'E2EE (Key Required)'}</span>
-            </Badge>
-          )}
-        </div>
-      </div>
-
-      {/* Encryption Warning */}
-      {encryption.isE2EEEnabled && encryption.keyValidationStatus !== 'valid' && (
-        <Card className="border-warning bg-warning-subtle">
-          <CardContent className="p-4">
-            <p className="text-sm text-warning">
-              Encryption key is required to view encrypted data. Please go back to the table detail page to enter your
-              encryption key.
-            </p>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Quick Filters Bar */}
-      {displayTable && (
-        <QuickFiltersBar
-          table={displayTable}
-          filters={quickFilters}
-          onFilterChange={setQuickFilters}
-          workspaceUsers={workspaceUsers}
+    <Box padding="space-300">
+      <Stack space="space-300">
+        {/* ARIA Live Region for Screen Readers */}
+        <RecordsLiveAnnouncer
+          isLoading={recordsLoading}
+          isFetchingNextPage={isFetchingNextPage}
+          hasNextPage={hasNextPage}
+          error={recordsError}
+          recordCount={filteredRecords.length}
         />
-      )}
 
-      {/* View Controls - Matching Active Tables pattern */}
-      <div className="rounded-xl border border-border/60 bg-card p-4 shadow-sm">
-        <div className="flex flex-col gap-3">
-          {/* View Mode Selector + Search */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-            <ViewModeSelector table={displayTable} currentMode={viewMode} onModeChange={handleViewModeChange} />
+        {/* Header Section - Matching Active Tables pattern */}
+        <Stack space="space-300">
+          {/* TODO: Migrate to primitives when responsive gap support is added */}
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <Stack space="space-025">
+              <Inline space="space-050" align="center">
+                <Button variant="ghost" size="icon" onClick={handleBack} className="h-8 w-8">
+                  <ArrowLeft className="h-4 w-4" />
+                </Button>
+                <Heading level={1}>{displayTable.name || 'Records'}</Heading>
+              </Inline>
+              <Text size="small" color="muted">
+                {displayTable.description || 'Quản lý bản ghi'}
+              </Text>
+            </Stack>
 
-            <div className="relative w-full sm:w-72">
-              <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder="Tìm kiếm bản ghi..."
-                value={localSearchInput}
-                onChange={(e) => setLocalSearchInput(e.target.value)}
-                onBlur={(e) => commitSearch(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    commitSearch(e.currentTarget.value);
-                  }
-                }}
-                className="h-10 rounded-lg border-border/60 pl-8"
-              />
-            </div>
+            <Inline space="space-050">
+              <Button onClick={handleCreateRecord} size="sm">
+                <Inline space="space-050" align="center">
+                  <Plus className="h-4 w-4" />
+                  Tạo bản ghi
+                </Inline>
+              </Button>
+            </Inline>
           </div>
 
-          {/* View Config Selector (Kanban/Gantt only) */}
-          {viewMode === 'kanban' && kanbanConfigs.length > 1 && (
-            <ViewConfigSelector
-              type="kanban"
-              configs={kanbanConfigs}
-              currentConfigId={currentKanbanConfig?.kanbanScreenId || ''}
-              onConfigChange={handleScreenConfigChange}
-            />
-          )}
-
-          {viewMode === 'gantt' && ganttConfigs.length > 1 && (
-            <ViewConfigSelector
-              type="gantt"
-              configs={ganttConfigs}
-              currentConfigId={currentGanttConfig?.ganttScreenId || ''}
-              onConfigChange={handleScreenConfigChange}
-            />
-          )}
-        </div>
-      </div>
-
-      {/* Content Area */}
-      <div className="space-y-4">
-        {/* List View */}
-        {viewMode === 'list' && (
-          <>
-            <div className="relative">
-              {showFilterOverlay && (
-                <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center rounded-lg">
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary border-t-transparent"></div>
-                    <span className="text-sm">Đang tải...</span>
-                  </div>
-                </div>
-              )}
-              <RecordList
-                table={displayTable}
-                records={filteredRecords}
-                config={displayTable.config.recordListConfig || { layout: RECORD_LIST_LAYOUT_GENERIC_TABLE }}
-                loading={shouldShowRecordListLoading}
-                onRecordClick={(record) => handleViewRecord(record)}
-                onUpdateRecord={handleUpdateRecord}
-                onDeleteRecord={handleDeleteRecord}
-                onCustomAction={handleCustomAction}
-                encryptionKey={encryption.encryptionKey || undefined}
-                workspaceUsers={workspaceUsers}
-              />
-            </div>
-
-            {/* Infinite scroll components */}
-            {recordsError && (
-              <RecordsErrorBanner
-                error={recordsError}
-                onRetry={() => fetchNextPage()}
-                isRetrying={isFetchingNextPage}
-              />
+          {/* Stats badges */}
+          <Inline space="space-075" wrap>
+            <Badge variant="outline">
+              <Inline space="space-050" align="center">
+                <FileText className="h-3.5 w-3.5" />
+                <span>{filteredRecords.length} bản ghi</span>
+              </Inline>
+            </Badge>
+            {encryption.isE2EEEnabled && (
+              <Badge
+                variant="outline"
+                className={
+                  encryption.keyValidationStatus === 'valid'
+                    ? 'border-success text-success'
+                    : 'border-warning text-warning'
+                }
+              >
+                <Inline space="space-050" align="center">
+                  <Shield className="h-3.5 w-3.5" />
+                  <span>{encryption.keyValidationStatus === 'valid' ? 'E2EE Active' : 'E2EE (Key Required)'}</span>
+                </Inline>
+              </Badge>
             )}
+          </Inline>
+        </Stack>
 
-            {isFetchingNextPage && (
-              <RecordsLoadingSkeleton rowCount={3} columnCount={displayTable.config?.fields?.length || 5} />
-            )}
-
-            {!recordsError && hasNextPage && !isFetchingNextPage && (
-              <InfiniteScrollTrigger onLoadMore={fetchNextPage} hasMore={hasNextPage} isLoading={isFetchingNextPage} />
-            )}
-
-            {!hasNextPage && filteredRecords.length > 0 && (
-              <RecordsEndIndicator
-                recordCount={filteredRecords.length}
-                onBackToTop={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-              />
-            )}
-          </>
-        )}
-
-        {/* Kanban View */}
-        {viewMode === 'kanban' && currentKanbanConfig && displayTable.config && (
-          <KanbanBoard
-            table={displayTable}
-            records={filteredRecords}
-            config={currentKanbanConfig}
-            onRecordMove={handleRecordMove}
-            onRecordClick={handleViewRecord}
-            workspaceUsers={workspaceUsers}
-            className="gap-2 sm:gap-4"
-            messages={{
-              loading: 'Loading...',
-              dropHere: 'Drop cards here',
-              error: 'Error',
-              records: 'records',
-            }}
-          />
-        )}
-
-        {/* Gantt View */}
-        {viewMode === 'gantt' && currentGanttConfig && displayTable.config && (
-          <Card>
-            <CardContent className="p-4">
-              <GanttChartView
-                table={displayTable}
-                records={filteredRecords}
-                config={currentGanttConfig}
-                onTaskClick={handleViewRecord}
-                showProgress={true}
-                showToday={true}
-                className="min-h-[400px] sm:min-h-[500px]"
-                messages={{
-                  loading: 'Loading timeline...',
-                  noRecordsFound: 'No tasks to display',
-                }}
-              />
+        {/* Encryption Warning */}
+        {encryption.isE2EEEnabled && encryption.keyValidationStatus !== 'valid' && (
+          <Card className="border-warning bg-warning-subtle">
+            <CardContent>
+              <Box padding="space-100">
+                <p className="text-sm text-warning">
+                  Encryption key is required to view encrypted data. Please go back to the table detail page to enter
+                  your encryption key.
+                </p>
+              </Box>
             </CardContent>
           </Card>
         )}
-      </div>
 
-      {/* Create Record Dialog */}
-      {displayTable && (
-        <CreateRecordDialog
-          open={isCreateDialogOpen}
-          onOpenChange={setIsCreateDialogOpen}
-          table={displayTable}
-          workspaceId={workspaceId}
-          tableId={tableId}
-          onSuccess={handleCreateSuccess}
-        />
-      )}
+        {/* Quick Filters Bar */}
+        {displayTable && (
+          <QuickFiltersBar
+            table={displayTable}
+            filters={quickFilters}
+            onFilterChange={setQuickFilters}
+            workspaceUsers={workspaceUsers}
+          />
+        )}
 
-      {/* Update Record Dialog */}
-      {displayTable && recordToUpdate && (
-        <UpdateRecordDialog
-          open={isUpdateDialogOpen}
-          onOpenChange={setIsUpdateDialogOpen}
-          table={displayTable}
-          record={recordToUpdate}
-          workspaceId={workspaceId}
-          tableId={tableId}
-          onSuccess={() => {
-            // Optional: refresh or navigate after update
-            console.log('Record updated successfully');
-          }}
-        />
-      )}
-    </div>
+        {/* View Controls - Matching Active Tables pattern */}
+        <Box padding="space-100" backgroundColor="card" borderRadius="xl" border="default" className="shadow-sm">
+          <Stack space="space-075">
+            {/* View Mode Selector + Search */}
+            {/* TODO: Migrate to primitives when responsive gap support is added */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+              <ViewModeSelector table={displayTable} currentMode={viewMode} onModeChange={handleViewModeChange} />
+
+              <div className="relative w-full sm:w-72">
+                <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder="Tìm kiếm bản ghi..."
+                  value={localSearchInput}
+                  onChange={(e) => setLocalSearchInput(e.target.value)}
+                  onBlur={(e) => commitSearch(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      commitSearch(e.currentTarget.value);
+                    }
+                  }}
+                  className="h-10 rounded-lg border-border/60 pl-8"
+                />
+              </div>
+            </div>
+
+            {/* View Config Selector (Kanban/Gantt only) */}
+            {viewMode === 'kanban' && kanbanConfigs.length > 1 && (
+              <ViewConfigSelector
+                type="kanban"
+                configs={kanbanConfigs}
+                currentConfigId={currentKanbanConfig?.kanbanScreenId || ''}
+                onConfigChange={handleScreenConfigChange}
+              />
+            )}
+
+            {viewMode === 'gantt' && ganttConfigs.length > 1 && (
+              <ViewConfigSelector
+                type="gantt"
+                configs={ganttConfigs}
+                currentConfigId={currentGanttConfig?.ganttScreenId || ''}
+                onConfigChange={handleScreenConfigChange}
+              />
+            )}
+          </Stack>
+        </Box>
+
+        {/* Content Area */}
+        <Stack space="space-100">
+          {/* List View */}
+          {viewMode === 'list' && (
+            <>
+              <div className="relative">
+                {showFilterOverlay && (
+                  <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center rounded-lg">
+                    <Inline space="space-050" align="center" className="text-muted-foreground">
+                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary border-t-transparent"></div>
+                      <span className="text-sm">Đang tải...</span>
+                    </Inline>
+                  </div>
+                )}
+                <RecordList
+                  table={displayTable}
+                  records={filteredRecords}
+                  config={displayTable.config.recordListConfig || { layout: RECORD_LIST_LAYOUT_GENERIC_TABLE }}
+                  loading={shouldShowRecordListLoading}
+                  onRecordClick={(record) => handleViewRecord(record)}
+                  onUpdateRecord={handleUpdateRecord}
+                  onDeleteRecord={handleDeleteRecord}
+                  onCustomAction={handleCustomAction}
+                  encryptionKey={encryption.encryptionKey || undefined}
+                  workspaceUsers={workspaceUsers}
+                />
+              </div>
+
+              {/* Infinite scroll components */}
+              {recordsError && (
+                <RecordsErrorBanner
+                  error={recordsError}
+                  onRetry={() => fetchNextPage()}
+                  isRetrying={isFetchingNextPage}
+                />
+              )}
+
+              {isFetchingNextPage && (
+                <RecordsLoadingSkeleton rowCount={3} columnCount={displayTable.config?.fields?.length || 5} />
+              )}
+
+              {!recordsError && hasNextPage && !isFetchingNextPage && (
+                <InfiniteScrollTrigger
+                  onLoadMore={fetchNextPage}
+                  hasMore={hasNextPage}
+                  isLoading={isFetchingNextPage}
+                />
+              )}
+
+              {!hasNextPage && filteredRecords.length > 0 && (
+                <RecordsEndIndicator
+                  recordCount={filteredRecords.length}
+                  onBackToTop={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                />
+              )}
+            </>
+          )}
+
+          {/* Kanban View */}
+          {viewMode === 'kanban' && currentKanbanConfig && displayTable.config && (
+            <KanbanBoard
+              table={displayTable}
+              records={filteredRecords}
+              config={currentKanbanConfig}
+              onRecordMove={handleRecordMove}
+              onRecordClick={handleViewRecord}
+              workspaceUsers={workspaceUsers}
+              className="gap-2 sm:gap-4"
+              messages={{
+                loading: 'Loading...',
+                dropHere: 'Drop cards here',
+                error: 'Error',
+                records: 'records',
+              }}
+            />
+          )}
+
+          {/* Gantt View */}
+          {viewMode === 'gantt' && currentGanttConfig && displayTable.config && (
+            <Card>
+              <CardContent>
+                <Box padding="space-100">
+                  <GanttChartView
+                    table={displayTable}
+                    records={filteredRecords}
+                    config={currentGanttConfig}
+                    onTaskClick={handleViewRecord}
+                    showProgress={true}
+                    showToday={true}
+                    className="min-h-[400px] sm:min-h-[500px]"
+                    messages={{
+                      loading: 'Loading timeline...',
+                      noRecordsFound: 'No tasks to display',
+                    }}
+                  />
+                </Box>
+              </CardContent>
+            </Card>
+          )}
+        </Stack>
+
+        {/* Create Record Dialog */}
+        {displayTable && (
+          <CreateRecordDialog
+            open={isCreateDialogOpen}
+            onOpenChange={setIsCreateDialogOpen}
+            table={displayTable}
+            workspaceId={workspaceId}
+            tableId={tableId}
+            onSuccess={handleCreateSuccess}
+          />
+        )}
+
+        {/* Update Record Dialog */}
+        {displayTable && recordToUpdate && (
+          <UpdateRecordDialog
+            open={isUpdateDialogOpen}
+            onOpenChange={setIsUpdateDialogOpen}
+            table={displayTable}
+            record={recordToUpdate}
+            workspaceId={workspaceId}
+            tableId={tableId}
+            onSuccess={() => {
+              // Optional: refresh or navigate after update
+              console.log('Record updated successfully');
+            }}
+          />
+        )}
+      </Stack>
+    </Box>
   );
 };
 

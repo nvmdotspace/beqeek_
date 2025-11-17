@@ -6,6 +6,7 @@
 
 import { List, KanbanSquare, GanttChart } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger } from '@workspace/ui/components/tabs';
+import { Inline } from '@workspace/ui/components/primitives';
 import type { Table } from '@workspace/active-tables-core';
 
 export type ViewMode = 'list' | 'kanban' | 'gantt';
@@ -30,21 +31,27 @@ export function ViewModeSelector({ table, currentMode, onModeChange, className =
     <Tabs value={currentMode} onValueChange={(v) => onModeChange(v as ViewMode)} className={className}>
       <TabsList className="w-full sm:w-auto">
         <TabsTrigger value="list" className="flex-1 sm:flex-initial text-xs sm:text-sm">
-          <List className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
-          <span className="hidden sm:inline">List</span>
+          <Inline align="center" className="sm:gap-2">
+            <List className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="hidden sm:inline">List</span>
+          </Inline>
         </TabsTrigger>
 
         {hasKanbanConfigs && (
           <TabsTrigger value="kanban" className="flex-1 sm:flex-initial text-xs sm:text-sm">
-            <KanbanSquare className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
-            <span className="hidden sm:inline">Kanban</span>
+            <Inline align="center" className="sm:gap-2">
+              <KanbanSquare className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Kanban</span>
+            </Inline>
           </TabsTrigger>
         )}
 
         {hasGanttConfigs && (
           <TabsTrigger value="gantt" className="flex-1 sm:flex-initial text-xs sm:text-sm">
-            <GanttChart className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
-            <span className="hidden sm:inline">Gantt</span>
+            <Inline align="center" className="sm:gap-2">
+              <GanttChart className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Gantt</span>
+            </Inline>
           </TabsTrigger>
         )}
       </TabsList>

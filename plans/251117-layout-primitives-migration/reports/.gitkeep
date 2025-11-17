@@ -1,0 +1,26 @@
+# Migration Reports Directory
+
+This directory will contain:
+
+## Phase Reports
+- `phase-01-migration-report.md` - Pilot migration results
+- `phase-02-migration-report.md` - Active Tables core results
+- `phase-03-migration-report.md` - Active Tables settings results
+- `phase-04-migration-report.md` - Workflow features results
+- `phase-05-migration-report.md` - Remaining features results
+
+## Performance Reports
+- `lighthouse-baseline/` - Pre-migration Lighthouse audits
+- `lighthouse-current/` - Post-migration Lighthouse audits
+- `performance-comparison.md` - Before/after metrics
+- `bundle-size-analysis.md` - Bundle size changes
+
+## Testing Reports
+- `percy-baseline/` - Percy baseline snapshots
+- `percy-results/` - Percy visual regression results
+- `qa-test-results.md` - QA testing checklist results
+
+## Final Documentation
+- `FINAL-REPORT.md` - Comprehensive migration summary
+- `pattern-library.md` - Documented migration patterns
+- `exceptions.md` - Files excluded from migration (with reasons)

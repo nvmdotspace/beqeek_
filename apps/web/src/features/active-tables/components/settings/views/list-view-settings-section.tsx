@@ -13,6 +13,7 @@ import { Badge } from '@workspace/ui/components/badge';
 import { RECORD_LIST_LAYOUT_GENERIC_TABLE, RECORD_LIST_LAYOUT_HEAD_COLUMN } from '@workspace/beqeek-shared';
 import { SettingsSection } from '../settings-layout';
 import { MultiSelectField } from '../multi-select-field';
+import { Stack, Inline } from '@workspace/ui/components/primitives';
 // @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
 
@@ -88,9 +89,9 @@ export function ListViewSettingsSection({ config, fields, onChange }: ListViewSe
 
   return (
     <SettingsSection title={m.settings_listView_title()} description={m.settings_listView_description()}>
-      <div className="space-y-6">
+      <Stack space="space-150">
         {/* Layout Selector */}
-        <div className="space-y-2">
+        <Stack space="space-050">
           <Label>{m.settings_listView_layoutType()}</Label>
           <Select value={layout} onValueChange={(value) => handleLayoutChange(value as RecordListConfig['layout'])}>
             <SelectTrigger>
@@ -112,19 +113,19 @@ export function ListViewSettingsSection({ config, fields, onChange }: ListViewSe
               ? m.settings_listView_layoutGenericTableHelp()
               : m.settings_listView_layoutHeadColumnHelp()}
           </p>
-        </div>
+        </Stack>
 
         {/* Generic Table Layout */}
         {layout === RECORD_LIST_LAYOUT_GENERIC_TABLE && (
-          <div className="space-y-4 rounded-lg border p-4 bg-muted/30">
-            <div className="flex items-center gap-2">
+          <Stack space="space-100" className="rounded-lg border p-4 bg-muted/30">
+            <Inline align="center" space="space-050">
               <Badge>{m.settings_listView_layoutGenericTable()}</Badge>
               <span className="text-sm text-muted-foreground">
                 {m.settings_listView_genericTableBadgeDescription()}
               </span>
-            </div>
+            </Inline>
 
-            <div className="space-y-2">
+            <Stack space="space-050">
               <Label htmlFor="display-fields">{m.settings_listView_displayFields()}</Label>
               <MultiSelectField
                 id="display-fields"
@@ -137,20 +138,20 @@ export function ListViewSettingsSection({ config, fields, onChange }: ListViewSe
                 placeholder={m.settings_listView_displayFieldsPlaceholder()}
               />
               <p className="text-xs text-muted-foreground">{m.settings_listView_displayFieldsHelp()}</p>
-            </div>
-          </div>
+            </Stack>
+          </Stack>
         )}
 
         {/* Head Column Layout */}
         {layout === RECORD_LIST_LAYOUT_HEAD_COLUMN && (
-          <div className="space-y-4 rounded-lg border p-4 bg-muted/30">
-            <div className="flex items-center gap-2">
+          <Stack space="space-100" className="rounded-lg border p-4 bg-muted/30">
+            <Inline align="center" space="space-050">
               <Badge>{m.settings_listView_layoutHeadColumn()}</Badge>
               <span className="text-sm text-muted-foreground">{m.settings_listView_headColumnBadgeDescription()}</span>
-            </div>
+            </Inline>
 
             {/* Title Field */}
-            <div className="space-y-2">
+            <Stack space="space-050">
               <Label htmlFor="title-field">
                 {m.settings_listView_titleField()} <span className="text-destructive">{m.common_required()}</span>
               </Label>
@@ -175,10 +176,10 @@ export function ListViewSettingsSection({ config, fields, onChange }: ListViewSe
                 </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground">{m.settings_listView_titleFieldHelp()}</p>
-            </div>
+            </Stack>
 
             {/* Sub Line Fields */}
-            <div className="space-y-2">
+            <Stack space="space-050">
               <Label htmlFor="subline-fields">{m.settings_listView_subLineFields()}</Label>
               <MultiSelectField
                 id="subline-fields"
@@ -191,10 +192,10 @@ export function ListViewSettingsSection({ config, fields, onChange }: ListViewSe
                 placeholder={m.settings_listView_subLineFieldsPlaceholder()}
               />
               <p className="text-xs text-muted-foreground">{m.settings_listView_subLineFieldsHelp()}</p>
-            </div>
+            </Stack>
 
             {/* Tail Fields */}
-            <div className="space-y-2">
+            <Stack space="space-050">
               <Label htmlFor="tail-fields">{m.settings_listView_tailFields()}</Label>
               <MultiSelectField
                 id="tail-fields"
@@ -207,8 +208,8 @@ export function ListViewSettingsSection({ config, fields, onChange }: ListViewSe
                 placeholder={m.settings_listView_tailFieldsPlaceholder()}
               />
               <p className="text-xs text-muted-foreground">{m.settings_listView_tailFieldsHelp()}</p>
-            </div>
-          </div>
+            </Stack>
+          </Stack>
         )}
 
         {/* Preview Info */}
@@ -216,7 +217,7 @@ export function ListViewSettingsSection({ config, fields, onChange }: ListViewSe
           <p className="text-sm font-medium text-info">{m.settings_listView_previewTitle()}</p>
           <p className="mt-1 text-xs text-info-subtle-foreground">{m.settings_listView_previewDescription()}</p>
         </div>
-      </div>
+      </Stack>
     </SettingsSection>
   );
 }

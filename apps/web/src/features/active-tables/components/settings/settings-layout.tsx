@@ -8,6 +8,7 @@ import { type ReactNode } from 'react';
 import { Card } from '@workspace/ui/components/card';
 import { Separator } from '@workspace/ui/components/separator';
 import { Heading, Text } from '@workspace/ui/components/typography';
+import { Stack, Inline } from '@workspace/ui/components/primitives';
 
 export interface SettingsLayoutProps {
   /** Header component */
@@ -47,7 +48,7 @@ export function SettingsLayout({ header, tabs, children, footer }: SettingsLayou
       {/* Additional Content Area (if needed) */}
       {children && (
         <div className="flex-1 overflow-y-auto py-6">
-          <div className="space-y-6">{children}</div>
+          <Stack space="space-300">{children}</Stack>
         </div>
       )}
 
@@ -83,17 +84,17 @@ export function SettingsSection({ title, description, children, actions, classNa
   return (
     <Card className={className}>
       <div className="p-6">
-        <div className="mb-4 flex items-start justify-between">
-          <div className="space-y-0.5">
+        <Inline align="start" justify="between" className="mb-4">
+          <Stack className="gap-0.5">
             <Heading level={3}>{title}</Heading>
             {description && (
               <Text size="small" color="muted">
                 {description}
               </Text>
             )}
-          </div>
-          {actions && <div className="flex gap-2">{actions}</div>}
-        </div>
+          </Stack>
+          {actions && <Inline space="space-050">{actions}</Inline>}
+        </Inline>
         {children}
       </div>
     </Card>

@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ScrollArea } from '@workspace/ui/components/scroll-area';
 import { Separator } from '@workspace/ui/components/separator';
 import { Heading, Text } from '@workspace/ui/components/typography';
+import { Box, Stack, Inline } from '@workspace/ui/components/primitives';
 import { toast } from 'sonner';
 
 import {
@@ -220,107 +221,140 @@ export const PermissionsMatrix = ({ workspaceId, table }: PermissionsMatrixProps
 
   return (
     <Card>
-      <CardHeader className="flex flex-col gap-2">
-        <div className="flex items-center gap-2">
-          <Shield className="h-4 w-4" />
-          <Heading level={3}>{m.activeTables_permissions_title()}</Heading>
-        </div>
-        <Text size="small" color="muted">
-          {m.activeTables_permissions_description()}
-        </Text>
+      <CardHeader>
+        <Stack space="space-050">
+          <Inline space="space-050" align="center">
+            <Shield className="h-4 w-4" />
+            <Heading level={3}>{m.activeTables_permissions_title()}</Heading>
+          </Inline>
+          <Text size="small" color="muted">
+            {m.activeTables_permissions_description()}
+          </Text>
+        </Stack>
       </CardHeader>
       <Separator />
-      <CardContent className="space-y-4">
-        {isLoading ? (
-          <div className="flex h-40 items-center justify-center text-sm text-muted-foreground">
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            {m.activeTables_comments_loading()}
-          </div>
-        ) : error ? (
-          <div className="rounded-md border border-destructive/50 bg-destructive/10 p-4 text-sm text-destructive">
-            {error.message}
-          </div>
-        ) : totalRoles === 0 ? (
-          <div className="rounded-md border border-dashed border-border/60 bg-muted/20 p-6 text-sm text-muted-foreground">
-            {m.activeTables_permissions_noTeams()}
-          </div>
-        ) : (
-          <ScrollArea className="max-h-[420px] pr-2">
-            <table className="w-full min-w-[720px] divide-y divide-border/60 text-sm">
-              <thead className="bg-muted/40 text-xs font-semibold uppercase text-muted-foreground">
-                <tr>
-                  <th className="px-3 py-3 text-left">{m.activeTables_permissions_team()}</th>
-                  <th className="px-3 py-3 text-left">{m.activeTables_permissions_role()}</th>
-                  <th className="px-3 py-3 text-left">{m.activeTables_permissions_comments_create()}</th>
-                  <th className="px-3 py-3 text-left">{m.activeTables_permissions_comments_access()}</th>
-                  <th className="px-3 py-3 text-left">{m.activeTables_permissions_comments_update()}</th>
-                  <th className="px-3 py-3 text-left">{m.activeTables_permissions_comments_delete()}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/50">
-                {teams.flatMap((team) =>
-                  (team.teamRoles ?? []).map((role) => {
-                    const key = createSelectionKey(team.id, role.id);
-                    const value = selections.get(key) ?? defaultSelection;
-                    return (
-                      <tr key={key} className="hover:bg-muted/20">
-                        <td className="px-3 py-3 text-sm font-medium text-foreground">{team.teamName}</td>
-                        <td className="px-3 py-3 text-sm text-muted-foreground">{role.roleName}</td>
-                        {COMMENT_ACTION_TYPES.map((action) => {
-                          const options =
-                            action === 'comment_create'
-                              ? COMMENT_CREATE_PERMISSIONS
-                              : action === 'comment_access'
-                                ? COMMENT_ACCESS_PERMISSIONS
-                                : COMMENT_MODIFY_PERMISSIONS;
-                          return (
-                            <td key={`${key}-${action}`} className="px-3 py-3">
-                              <Select
-                                value={value[action]}
-                                onValueChange={(selected) => handleSelect(team.id, role.id, action, selected)}
-                              >
-                                <SelectTrigger className="h-9 w-full text-xs">
-                                  <SelectValue placeholder={m.activeTables_permissions_option_not_allowed()} />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {options.map((option) => (
-                                    <SelectItem key={option} value={option} className="text-xs">
-                                      {translateOption(option)}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </td>
-                          );
-                        })}
-                      </tr>
-                    );
-                  }),
-                )}
-              </tbody>
-            </table>
-          </ScrollArea>
-        )}
+      <CardContent>
+        <Stack space="space-100">
+          {isLoading ? (
+            <div className="flex h-40 items-center justify-center text-sm text-muted-foreground">
+              <Inline space="space-050" align="center">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                {m.activeTables_comments_loading()}
+              </Inline>
+            </div>
+          ) : error ? (
+            <Box
+              padding="space-100"
+              className="rounded-md border border-destructive/50 bg-destructive/10 text-sm text-destructive"
+            >
+              {error.message}
+            </Box>
+          ) : totalRoles === 0 ? (
+            <Box
+              padding="space-300"
+              className="rounded-md border border-dashed border-border/60 bg-muted/20 text-sm text-muted-foreground"
+            >
+              {m.activeTables_permissions_noTeams()}
+            </Box>
+          ) : (
+            <ScrollArea className="max-h-[420px] pr-2">
+              <table className="w-full min-w-[720px] divide-y divide-border/60 text-sm">
+                <thead className="bg-muted/40 text-xs font-semibold uppercase text-muted-foreground">
+                  <tr>
+                    <th className="px-[var(--space-075)] py-[var(--space-075)] text-left">
+                      {m.activeTables_permissions_team()}
+                    </th>
+                    <th className="px-[var(--space-075)] py-[var(--space-075)] text-left">
+                      {m.activeTables_permissions_role()}
+                    </th>
+                    <th className="px-[var(--space-075)] py-[var(--space-075)] text-left">
+                      {m.activeTables_permissions_comments_create()}
+                    </th>
+                    <th className="px-[var(--space-075)] py-[var(--space-075)] text-left">
+                      {m.activeTables_permissions_comments_access()}
+                    </th>
+                    <th className="px-[var(--space-075)] py-[var(--space-075)] text-left">
+                      {m.activeTables_permissions_comments_update()}
+                    </th>
+                    <th className="px-[var(--space-075)] py-[var(--space-075)] text-left">
+                      {m.activeTables_permissions_comments_delete()}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/50">
+                  {teams.flatMap((team) =>
+                    (team.teamRoles ?? []).map((role) => {
+                      const key = createSelectionKey(team.id, role.id);
+                      const value = selections.get(key) ?? defaultSelection;
+                      return (
+                        <tr key={key} className="hover:bg-muted/20">
+                          <td className="px-[var(--space-075)] py-[var(--space-075)] text-sm font-medium text-foreground">
+                            {team.teamName}
+                          </td>
+                          <td className="px-[var(--space-075)] py-[var(--space-075)] text-sm text-muted-foreground">
+                            {role.roleName}
+                          </td>
+                          {COMMENT_ACTION_TYPES.map((action) => {
+                            const options =
+                              action === 'comment_create'
+                                ? COMMENT_CREATE_PERMISSIONS
+                                : action === 'comment_access'
+                                  ? COMMENT_ACCESS_PERMISSIONS
+                                  : COMMENT_MODIFY_PERMISSIONS;
+                            return (
+                              <td key={`${key}-${action}`} className="px-[var(--space-075)] py-[var(--space-075)]">
+                                <Select
+                                  value={value[action]}
+                                  onValueChange={(selected) => handleSelect(team.id, role.id, action, selected)}
+                                >
+                                  <SelectTrigger className="h-9 w-full text-xs">
+                                    <SelectValue placeholder={m.activeTables_permissions_option_not_allowed()} />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {options.map((option) => (
+                                      <SelectItem key={option} value={option} className="text-xs">
+                                        {translateOption(option)}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      );
+                    }),
+                  )}
+                </tbody>
+              </table>
+            </ScrollArea>
+          )}
 
-        <div className="flex flex-wrap items-center gap-2">
-          <Button onClick={() => mutation.mutate()} disabled={mutation.isPending || !hasChanges || teams.length === 0}>
-            {mutation.isPending ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                {m.activeTables_permissions_save()}
-              </>
-            ) : (
-              <>
-                <Save className="mr-2 h-4 w-4" />
-                {m.activeTables_permissions_save()}
-              </>
-            )}
-          </Button>
-          <Button variant="outline" onClick={handleReset} disabled={!hasChanges || mutation.isPending}>
-            <RotateCcw className="mr-2 h-4 w-4" />
-            {m.activeTables_permissions_reset()}
-          </Button>
-        </div>
+          <Inline space="space-050" wrap align="center">
+            <Button
+              onClick={() => mutation.mutate()}
+              disabled={mutation.isPending || !hasChanges || teams.length === 0}
+            >
+              {mutation.isPending ? (
+                <Inline space="space-050" align="center">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  {m.activeTables_permissions_save()}
+                </Inline>
+              ) : (
+                <Inline space="space-050" align="center">
+                  <Save className="h-4 w-4" />
+                  {m.activeTables_permissions_save()}
+                </Inline>
+              )}
+            </Button>
+            <Button variant="outline" onClick={handleReset} disabled={!hasChanges || mutation.isPending}>
+              <Inline space="space-050" align="center">
+                <RotateCcw className="h-4 w-4" />
+                {m.activeTables_permissions_reset()}
+              </Inline>
+            </Button>
+          </Inline>
+        </Stack>
       </CardContent>
     </Card>
   );

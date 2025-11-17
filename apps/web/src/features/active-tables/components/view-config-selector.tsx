@@ -7,6 +7,7 @@
 
 import { Tabs, TabsList, TabsTrigger } from '@workspace/ui/components/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@workspace/ui/components/select';
+import { Stack } from '@workspace/ui/components/primitives';
 import type { KanbanConfig, GanttConfig } from '@workspace/active-tables-core';
 
 export type ViewConfigType = 'kanban' | 'gantt';
@@ -99,10 +100,10 @@ export function ViewConfigSelector({
 
             return (
               <SelectItem key={id} value={id}>
-                <div className="flex flex-col gap-0.5">
+                <Stack className="gap-0.5">
                   <span className="font-medium">{name}</span>
                   {description && <span className="text-[10px] text-muted-foreground line-clamp-1">{description}</span>}
-                </div>
+                </Stack>
               </SelectItem>
             );
           })}

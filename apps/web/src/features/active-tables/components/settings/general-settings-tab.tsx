@@ -6,6 +6,7 @@ import { Label } from '@workspace/ui/components/label';
 import { Input } from '@workspace/ui/components/input';
 import { Button } from '@workspace/ui/components/button';
 import { Badge } from '@workspace/ui/components/badge';
+import { Stack, Inline } from '@workspace/ui/components/primitives';
 
 import type { ActiveTable } from '../../types';
 import { useTableEncryption } from '../../hooks/use-table-encryption';
@@ -76,118 +77,128 @@ export const GeneralSettingsTab = ({ table, workspaceId }: GeneralSettingsTabPro
   };
 
   return (
-    <div className="space-y-6">
+    <Stack space="space-300">
       {/* Table Information */}
       <Card>
         <CardHeader>
           <CardTitle>Cấu hình chung (General Configuration)</CardTitle>
           <CardDescription>Basic table information and configuration</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Table ID (Read-only) */}
-          <div className="space-y-2">
-            <Label htmlFor="table-id" className="text-sm font-medium">
-              ID Bảng
-            </Label>
-            <div className="flex gap-2">
-              <Input id="table-id" value={table.id} readOnly className="flex-1 bg-muted font-mono text-sm" />
-              <Button variant="outline" size="icon" onClick={handleCopyId} className="shrink-0">
-                {copiedId ? <Check className="h-4 w-4 text-success" /> : <Copy className="h-4 w-4" />}
-              </Button>
-            </div>
-          </div>
-
-          {/* Encryption Key - Always show */}
-          <div className="space-y-2">
-            <Label htmlFor="encryption-key" className="text-sm font-medium">
-              Khóa mã hóa
-            </Label>
-            <div className="flex gap-2">
-              <div className="relative flex-1">
-                <Input
-                  id="encryption-key"
-                  type={showKey ? 'text' : 'password'}
-                  value={displayKey}
-                  readOnly
-                  className="pr-10 bg-muted font-mono text-sm"
-                  placeholder={displayKey ? undefined : 'No encryption key configured'}
-                />
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setShowKey(!showKey)}
-                  className="absolute right-0 top-0 h-full"
-                  disabled={!displayKey}
-                >
-                  {showKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+        <CardContent>
+          <Stack space="space-100">
+            {/* Table ID (Read-only) */}
+            <Stack space="space-050">
+              <Label htmlFor="table-id" className="text-sm font-medium">
+                ID Bảng
+              </Label>
+              <Inline space="space-050">
+                <Input id="table-id" value={table.id} readOnly className="flex-1 bg-muted font-mono text-sm" />
+                <Button variant="outline" size="icon" onClick={handleCopyId} className="shrink-0">
+                  {copiedId ? <Check className="h-4 w-4 text-success" /> : <Copy className="h-4 w-4" />}
                 </Button>
-              </div>
-              <Button variant="outline" size="icon" onClick={handleCopyKey} disabled={!displayKey} className="shrink-0">
-                {copiedKey ? <Check className="h-4 w-4 text-success" /> : <Copy className="h-4 w-4" />}
-              </Button>
-            </div>
+              </Inline>
+            </Stack>
 
-            {/* Update Key Section - Show input when no key exists */}
-            {!displayKey && (
-              <div className="mt-2 space-y-2">
-                <div className="flex gap-2">
+            {/* Encryption Key - Always show */}
+            <Stack space="space-050">
+              <Label htmlFor="encryption-key" className="text-sm font-medium">
+                Khóa mã hóa
+              </Label>
+              <Inline space="space-050">
+                <div className="relative flex-1">
                   <Input
+                    id="encryption-key"
                     type={showKey ? 'text' : 'password'}
-                    value={keyInput}
-                    onChange={(e) => setKeyInput(e.target.value)}
-                    placeholder="Enter 32-character encryption key"
-                    className="flex-1 font-mono text-sm"
+                    value={displayKey}
+                    readOnly
+                    className="pr-10 bg-muted font-mono text-sm"
+                    placeholder={displayKey ? undefined : 'No encryption key configured'}
                   />
-                  <Button onClick={handleSaveKey} size="sm" variant="default">
-                    <Save className="h-4 w-4 mr-2" />
-                    Lưu
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setShowKey(!showKey)}
+                    className="absolute right-0 top-0 h-full"
+                    disabled={!displayKey}
+                  >
+                    {showKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </Button>
                 </div>
-                <p className="text-xs text-muted-foreground">Enter encryption key to enable data decryption</p>
-              </div>
-            )}
-          </div>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={handleCopyKey}
+                  disabled={!displayKey}
+                  className="shrink-0"
+                >
+                  {copiedKey ? <Check className="h-4 w-4 text-success" /> : <Copy className="h-4 w-4" />}
+                </Button>
+              </Inline>
 
-          {/* Record Limit */}
-          <div className="space-y-2">
-            <Label htmlFor="record-limit" className="text-sm font-medium">
-              Giới hạn bản ghi (Tối đa 1000) *
-            </Label>
-            <Input
-              id="record-limit"
-              type="number"
-              value={table.config.tableLimit || 1000}
-              readOnly
-              className="bg-muted"
-            />
-          </div>
+              {/* Update Key Section - Show input when no key exists */}
+              {!displayKey && (
+                <Stack space="space-050" className="mt-2">
+                  <Inline space="space-050">
+                    <Input
+                      type={showKey ? 'text' : 'password'}
+                      value={keyInput}
+                      onChange={(e) => setKeyInput(e.target.value)}
+                      placeholder="Enter 32-character encryption key"
+                      className="flex-1 font-mono text-sm"
+                    />
+                    <Button onClick={handleSaveKey} size="sm" variant="default">
+                      <Inline space="space-050" align="center">
+                        <Save className="h-4 w-4" />
+                        Lưu
+                      </Inline>
+                    </Button>
+                  </Inline>
+                  <p className="text-xs text-muted-foreground">Enter encryption key to enable data decryption</p>
+                </Stack>
+              )}
+            </Stack>
 
-          {/* Default Sort */}
-          <div className="space-y-2">
-            <Label htmlFor="default-sort" className="text-sm font-medium">
-              Chiều sắp xếp mặc định *
-            </Label>
-            <Input id="default-sort" value={table.config.defaultSort || 'Cũ nhất'} readOnly className="bg-muted" />
-          </div>
+            {/* Record Limit */}
+            <Stack space="space-050">
+              <Label htmlFor="record-limit" className="text-sm font-medium">
+                Giới hạn bản ghi (Tối đa 1000) *
+              </Label>
+              <Input
+                id="record-limit"
+                type="number"
+                value={table.config.tableLimit || 1000}
+                readOnly
+                className="bg-muted"
+              />
+            </Stack>
 
-          {/* Searchable Fields */}
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">Trường dữ liệu tìm kiếm *</Label>
-            {hashedKeywordFields.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No searchable fields configured</p>
-            ) : (
-              <div className="flex flex-wrap gap-2">
-                {hashedKeywordFields.map((fieldName) => {
-                  const field = fields.find((f) => f.name === fieldName);
-                  return (
-                    <Badge key={fieldName} variant="outline" className="px-3 py-1.5 text-sm">
-                      × {field?.label || fieldName} ({field?.type || 'SHORT_TEXT'})
-                    </Badge>
-                  );
-                })}
-              </div>
-            )}
-          </div>
+            {/* Default Sort */}
+            <Stack space="space-050">
+              <Label htmlFor="default-sort" className="text-sm font-medium">
+                Chiều sắp xếp mặc định *
+              </Label>
+              <Input id="default-sort" value={table.config.defaultSort || 'Cũ nhất'} readOnly className="bg-muted" />
+            </Stack>
+
+            {/* Searchable Fields */}
+            <Stack space="space-050">
+              <Label className="text-sm font-medium">Trường dữ liệu tìm kiếm *</Label>
+              {hashedKeywordFields.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No searchable fields configured</p>
+              ) : (
+                <Inline space="space-050" wrap>
+                  {hashedKeywordFields.map((fieldName) => {
+                    const field = fields.find((f) => f.name === fieldName);
+                    return (
+                      <Badge key={fieldName} variant="outline" className="px-3 py-1.5 text-sm">
+                        × {field?.label || fieldName} ({field?.type || 'SHORT_TEXT'})
+                      </Badge>
+                    );
+                  })}
+                </Inline>
+              )}
+            </Stack>
+          </Stack>
         </CardContent>
       </Card>
 
@@ -198,23 +209,29 @@ export const GeneralSettingsTab = ({ table, workspaceId }: GeneralSettingsTabPro
             <CardTitle>Metadata</CardTitle>
             <CardDescription>Creation and update information</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            {table.createdAt && (
-              <div className="space-y-2">
-                <Label>Created At</Label>
-                <div className="text-sm text-muted-foreground">{new Date(table.createdAt).toLocaleString('vi-VN')}</div>
-              </div>
-            )}
+          <CardContent>
+            <Stack space="space-100">
+              {table.createdAt && (
+                <Stack space="space-050">
+                  <Label>Created At</Label>
+                  <div className="text-sm text-muted-foreground">
+                    {new Date(table.createdAt).toLocaleString('vi-VN')}
+                  </div>
+                </Stack>
+              )}
 
-            {table.updatedAt && (
-              <div className="space-y-2">
-                <Label>Last Updated</Label>
-                <div className="text-sm text-muted-foreground">{new Date(table.updatedAt).toLocaleString('vi-VN')}</div>
-              </div>
-            )}
+              {table.updatedAt && (
+                <Stack space="space-050">
+                  <Label>Last Updated</Label>
+                  <div className="text-sm text-muted-foreground">
+                    {new Date(table.updatedAt).toLocaleString('vi-VN')}
+                  </div>
+                </Stack>
+              )}
+            </Stack>
           </CardContent>
         </Card>
       )}
-    </div>
+    </Stack>
   );
 };

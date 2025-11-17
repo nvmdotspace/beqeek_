@@ -16,6 +16,7 @@
 import { AlertCircle, RefreshCw, X } from 'lucide-react';
 import { Button } from '@workspace/ui/components/button';
 import { Alert, AlertDescription, AlertTitle } from '@workspace/ui/components/alert';
+import { Box, Stack, Inline } from '@workspace/ui/components/primitives';
 
 export interface RecordsErrorBannerProps {
   /**
@@ -71,39 +72,45 @@ export function RecordsErrorBanner({
   const errorMessage = typeof error === 'string' ? error : error.message || 'An error occurred';
 
   return (
-    <div className={`w-full py-4 ${className}`} role="alert" aria-live="assertive">
+    <Box className={`w-full py-4 ${className}`} role="alert" aria-live="assertive">
       <Alert variant="destructive" className="relative">
         <AlertCircle className="h-4 w-4" />
         <AlertTitle>Failed to load more records</AlertTitle>
-        <AlertDescription className="mt-2 flex flex-col gap-3">
-          <p className="text-sm">{errorMessage}</p>
+        <AlertDescription>
+          <Stack space="space-075" className="mt-2">
+            <p className="text-sm">{errorMessage}</p>
 
-          <div className="flex items-center gap-2">
-            {/* Retry button */}
-            {onRetry && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={onRetry}
-                disabled={isRetrying}
-                className="gap-2 bg-background hover:bg-accent"
-              >
-                <RefreshCw className={`h-3 w-3 ${isRetrying ? 'animate-spin' : ''}`} />
-                {isRetrying ? 'Retrying...' : 'Try again'}
-              </Button>
-            )}
+            <Inline space="space-050" align="center">
+              {/* Retry button */}
+              {onRetry && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={onRetry}
+                  disabled={isRetrying}
+                  className="bg-background hover:bg-accent"
+                >
+                  <Inline space="space-050" align="center">
+                    <RefreshCw className={`h-3 w-3 ${isRetrying ? 'animate-spin' : ''}`} />
+                    {isRetrying ? 'Retrying...' : 'Try again'}
+                  </Inline>
+                </Button>
+              )}
 
-            {/* Dismiss button */}
-            {onDismiss && (
-              <Button variant="ghost" size="sm" onClick={onDismiss} className="gap-2" aria-label="Dismiss error">
-                <X className="h-3 w-3" />
-                Dismiss
-              </Button>
-            )}
-          </div>
+              {/* Dismiss button */}
+              {onDismiss && (
+                <Button variant="ghost" size="sm" onClick={onDismiss} aria-label="Dismiss error">
+                  <Inline space="space-050" align="center">
+                    <X className="h-3 w-3" />
+                    Dismiss
+                  </Inline>
+                </Button>
+              )}
+            </Inline>
+          </Stack>
         </AlertDescription>
       </Alert>
-    </div>
+    </Box>
   );
 }
 
@@ -122,15 +129,15 @@ export function RecordsErrorBannerCompact({
   const errorMessage = typeof error === 'string' ? error : error.message || 'An error occurred';
 
   return (
-    <div className={`w-full px-3 py-3 ${className}`} role="alert" aria-live="assertive">
-      <div className="rounded-lg border border-destructive bg-destructive/10 p-3">
-        <div className="flex items-start gap-2">
+    <Box padding="space-075" className={`w-full ${className}`} role="alert" aria-live="assertive">
+      <Box padding="space-075" border="default" borderRadius="lg" className="border-destructive bg-destructive/10">
+        <Inline space="space-050" align="start">
           <AlertCircle className="h-4 w-4 flex-shrink-0 text-destructive" />
-          <div className="flex-1 space-y-2">
+          <Stack space="space-050" className="flex-1">
             <p className="text-xs font-medium text-destructive">Failed to load more</p>
             <p className="text-xs text-destructive/80">{errorMessage}</p>
 
-            <div className="flex items-center gap-2">
+            <Inline space="space-050" align="center">
               {onRetry && (
                 <button
                   onClick={onRetry}
@@ -152,10 +159,10 @@ export function RecordsErrorBannerCompact({
                   Dismiss
                 </button>
               )}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+            </Inline>
+          </Stack>
+        </Inline>
+      </Box>
+    </Box>
   );
 }

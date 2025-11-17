@@ -17,6 +17,7 @@ import {
 } from '@workspace/beqeek-shared';
 import { SettingsSection } from '../settings-layout';
 import { GanttFormModal } from './gantt-form-modal';
+import { Stack, Inline } from '@workspace/ui/components/primitives';
 // @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
 
@@ -111,12 +112,14 @@ export function GanttSettingsSection({ ganttConfigs, fields, onChange }: GanttSe
       description={m.settings_gantt_description()}
       actions={
         <Button onClick={handleAddConfig} size="sm" disabled={!canCreateGantt}>
-          <Plus className="mr-2 h-4 w-4" />
-          {m.settings_gantt_addButton()}
+          <Inline space="space-050" align="center">
+            <Plus className="h-4 w-4" />
+            {m.settings_gantt_addButton()}
+          </Inline>
         </Button>
       }
     >
-      <div className="space-y-4">
+      <Stack space="space-100">
         {!canCreateGantt && (
           <div className="rounded-lg border border-warning/20 bg-warning-subtle p-4">
             <p className="text-sm font-medium text-warning">{m.settings_gantt_missingFieldsTitle()}</p>
@@ -144,17 +147,19 @@ export function GanttSettingsSection({ ganttConfigs, fields, onChange }: GanttSe
                   : null;
 
                 return (
-                  <div
+                  <Inline
                     key={config.ganttScreenId || index}
-                    className="flex items-start gap-4 p-4 hover:bg-muted/50 transition-colors"
+                    align="start"
+                    space="space-100"
+                    className="p-4 hover:bg-muted/50 transition-colors"
                   >
-                    <div className="flex-1 space-y-2">
-                      <div className="flex items-center gap-2">
+                    <Stack space="space-050" className="flex-1">
+                      <Inline align="center" space="space-050">
                         <span className="font-medium">{config.screenName}</span>
                         <Badge variant="secondary" className="text-xs">
                           {m.settings_gantt_chartBadge({ chartNumber: index + 1 })}
                         </Badge>
-                      </div>
+                      </Inline>
 
                       {config.screenDescription && (
                         <p className="text-sm text-muted-foreground">{config.screenDescription}</p>
@@ -186,9 +191,9 @@ export function GanttSettingsSection({ ganttConfigs, fields, onChange }: GanttSe
                           </div>
                         )}
                       </div>
-                    </div>
+                    </Stack>
 
-                    <div className="flex gap-1">
+                    <Inline space="space-025">
                       <Button
                         variant="ghost"
                         size="icon"
@@ -206,8 +211,8 @@ export function GanttSettingsSection({ ganttConfigs, fields, onChange }: GanttSe
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
-                    </div>
-                  </div>
+                    </Inline>
+                  </Inline>
                 );
               })}
             </div>
@@ -215,24 +220,24 @@ export function GanttSettingsSection({ ganttConfigs, fields, onChange }: GanttSe
         )}
 
         {/* Statistics */}
-        <div className="flex gap-4 text-sm text-muted-foreground">
+        <Inline space="space-100" className="text-sm text-muted-foreground">
           <span>{m.settings_gantt_statsTotal({ count: ganttConfigs.length })}</span>
           <span>{m.settings_gantt_statsDateFields({ count: eligibleDateFields.length })}</span>
           <span>{m.settings_gantt_statsProgressFields({ count: eligibleProgressFields.length })}</span>
           <span>{m.settings_gantt_statsDependencyFields({ count: eligibleDependencyFields.length })}</span>
-        </div>
+        </Inline>
 
         {/* Info */}
         <div className="rounded-lg border border-info/20 bg-info-subtle p-4">
           <p className="text-sm font-medium text-info">{m.settings_gantt_featuresTitle()}</p>
-          <ul className="mt-2 space-y-1 text-xs text-info">
+          <Stack space="space-025" className="mt-2 text-xs text-info">
             <li>• {m.settings_gantt_feature1()}</li>
             <li>• {m.settings_gantt_feature2()}</li>
             <li>• {m.settings_gantt_feature3()}</li>
             <li>• {m.settings_gantt_feature4()}</li>
-          </ul>
+          </Stack>
         </div>
-      </div>
+      </Stack>
 
       {/* Gantt Form Modal */}
       <GanttFormModal

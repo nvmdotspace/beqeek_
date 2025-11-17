@@ -1,6 +1,7 @@
 import { Badge } from '@workspace/ui/components/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@workspace/ui/components/card';
 import { Label } from '@workspace/ui/components/label';
+import { Stack, Inline } from '@workspace/ui/components/primitives';
 
 import type { ActiveTable } from '../../types';
 
@@ -22,7 +23,7 @@ export const FieldsSettingsTab = ({ table }: FieldsSettingsTabProps) => {
   const hashedKeywordFields = table.config.hashedKeywordFields || [];
 
   return (
-    <div className="space-y-6">
+    <Stack space="space-300">
       {/* Table Fields */}
       <Card>
         <CardHeader>
@@ -33,34 +34,37 @@ export const FieldsSettingsTab = ({ table }: FieldsSettingsTabProps) => {
           {fields.length === 0 ? (
             <p className="text-center text-sm text-muted-foreground py-8">No fields configured</p>
           ) : (
-            <div className="space-y-3">
+            <Stack space="space-075">
               {fields.map((field, index) => (
-                <div
+                <Inline
                   key={field.name || index}
-                  className="flex items-start justify-between rounded-lg border p-4 hover:bg-muted/50 transition-colors"
+                  space="space-100"
+                  align="start"
+                  justify="between"
+                  className="rounded-lg border p-4 hover:bg-muted/50 transition-colors"
                 >
-                  <div className="space-y-1 flex-1">
-                    <div className="flex items-center gap-2">
+                  <Stack space="space-025" className="flex-1">
+                    <Inline space="space-050" align="center">
                       <Label className="text-sm font-semibold">{field.label}</Label>
                       {field.required && (
                         <Badge variant="destructive" className="text-xs">
                           Required
                         </Badge>
                       )}
-                    </div>
+                    </Inline>
                     <p className="text-sm text-muted-foreground">
                       Field name: <code className="text-xs bg-muted px-1 py-0.5 rounded">{field.name}</code>
                     </p>
                     {field.placeholder && (
                       <p className="text-xs text-muted-foreground">Placeholder: {field.placeholder}</p>
                     )}
-                  </div>
+                  </Stack>
                   <Badge variant="secondary" className="ml-4 shrink-0">
                     {field.type}
                   </Badge>
-                </div>
+                </Inline>
               ))}
-            </div>
+            </Stack>
           )}
         </CardContent>
       </Card>
@@ -75,7 +79,7 @@ export const FieldsSettingsTab = ({ table }: FieldsSettingsTabProps) => {
           {hashedKeywordFields.length === 0 ? (
             <p className="text-center text-sm text-muted-foreground py-8">No searchable fields configured</p>
           ) : (
-            <div className="flex flex-wrap gap-2">
+            <Inline space="space-050" wrap>
               {hashedKeywordFields.map((fieldName) => {
                 const field = fields.find((f) => f.name === fieldName);
                 return (
@@ -85,7 +89,7 @@ export const FieldsSettingsTab = ({ table }: FieldsSettingsTabProps) => {
                   </Badge>
                 );
               })}
-            </div>
+            </Inline>
           )}
         </CardContent>
       </Card>
@@ -98,7 +102,7 @@ export const FieldsSettingsTab = ({ table }: FieldsSettingsTabProps) => {
             <CardDescription>Fields available for quick filtering</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-wrap gap-2">
+            <Inline space="space-050" wrap>
               {table.config.quickFilters.map((filter, index) => {
                 const field = fields.find((f) => f.name === filter.fieldName);
                 return (
@@ -107,10 +111,10 @@ export const FieldsSettingsTab = ({ table }: FieldsSettingsTabProps) => {
                   </Badge>
                 );
               })}
-            </div>
+            </Inline>
           </CardContent>
         </Card>
       )}
-    </div>
+    </Stack>
   );
 };
