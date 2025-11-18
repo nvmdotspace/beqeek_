@@ -118,9 +118,6 @@ export const ROUTES = {
     /** Analytics: /$locale/workspaces/$workspaceId/analytics */
     ANALYTICS: '/$locale/workspaces/$workspaceId/analytics' as const,
 
-    /** Documents (future feature): /$locale/workspaces/$workspaceId/documents */
-    DOCUMENTS: '/$locale/workspaces/$workspaceId/documents' as const,
-
     /** Starred items: /$locale/workspaces/$workspaceId/starred */
     STARRED: '/$locale/workspaces/$workspaceId/starred' as const,
 

@@ -9,6 +9,8 @@ import { useState } from 'react';
 import { getRouteApi } from '@tanstack/react-router';
 import { Button } from '@workspace/ui/components/button';
 import { Input } from '@workspace/ui/components/input';
+import { Heading } from '@workspace/ui/components/typography';
+import { Box, Stack, Inline, Grid } from '@workspace/ui/components/primitives';
 import { Search } from 'lucide-react';
 
 import { ROUTES } from '@/shared/route-paths';
@@ -38,11 +40,11 @@ export function WorkflowFormsSelect() {
     <div className="h-full flex flex-col">
       {/* Header */}
       <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between">
-            <div className="flex items-center gap-4">
-              <h1 className="text-2xl font-semibold tracking-tight">Chọn Mẫu Form</h1>
-            </div>
+        <Box padding="space-200" className="px-6">
+          <div className="flex items-center justify-between">
+            <Inline space="space-100" align="center">
+              <Heading level={1}>Chọn Mẫu Form</Heading>
+            </Inline>
             <Button
               variant="outline"
               onClick={() =>
@@ -55,14 +57,14 @@ export function WorkflowFormsSelect() {
               Xem danh sách
             </Button>
           </div>
-        </div>
+        </Box>
       </div>
 
       {/* Content */}
       <div className="flex-1 overflow-auto">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Search Bar */}
-          <div className="mb-8">
+        <Box padding="space-300" className="px-6">
+          <Stack space="space-300">
+            {/* Search Bar */}
             <div className="relative max-w-md">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -72,23 +74,23 @@ export function WorkflowFormsSelect() {
                 className="pl-9"
               />
             </div>
-          </div>
 
-          {/* Templates Grid - Compact 2-column layout for better readability */}
-          {filteredTemplates.length === 0 ? (
-            <EmptyState message="Không tìm thấy mẫu form nào" />
-          ) : (
-            <div className="grid gap-3 sm:grid-cols-2">
-              {filteredTemplates.map((template) => (
-                <FormTemplateCard
-                  key={template.type}
-                  template={template}
-                  onSelect={() => setSelectedTemplate(template.type)}
-                />
-              ))}
-            </div>
-          )}
-        </div>
+            {/* Templates Grid - Compact 2-column layout for better readability */}
+            {filteredTemplates.length === 0 ? (
+              <EmptyState message="Không tìm thấy mẫu form nào" />
+            ) : (
+              <Grid columns={1} gap="space-050" className="sm:grid-cols-2">
+                {filteredTemplates.map((template) => (
+                  <FormTemplateCard
+                    key={template.type}
+                    template={template}
+                    onSelect={() => setSelectedTemplate(template.type)}
+                  />
+                ))}
+              </Grid>
+            )}
+          </Stack>
+        </Box>
       </div>
 
       <CreateFormDialog

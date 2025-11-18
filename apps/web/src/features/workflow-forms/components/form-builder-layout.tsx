@@ -8,6 +8,8 @@
 import { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { Button } from '@workspace/ui/components/button';
+import { Heading } from '@workspace/ui/components/typography';
+import { Box, Inline } from '@workspace/ui/components/primitives';
 import { ArrowLeft, Settings } from 'lucide-react';
 
 import { ConfigPanel } from './config-panel';
@@ -35,27 +37,29 @@ export function FormBuilderLayout({ form, onSave, onDelete, isSaving, isDeleting
   return (
     <div className="h-screen flex flex-col">
       {/* Header */}
-      <div className="border-b bg-background p-4">
-        <div className="container mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={handleBack}>
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <h1 className="text-2xl font-bold">{form.name}</h1>
-          </div>
+      <div className="border-b bg-background">
+        <Box padding="space-200" className="px-6">
+          <div className="flex items-center justify-between">
+            <Inline space="space-100" align="center">
+              <Button variant="ghost" size="icon" onClick={handleBack}>
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              <Heading level={1}>{form.name}</Heading>
+            </Inline>
 
-          <div className="flex items-center gap-2">
-            <Button onClick={onSave} disabled={isSaving}>
-              {isSaving ? 'Đang lưu...' : 'Lưu'}
-            </Button>
-            <Button variant="destructive" onClick={onDelete} disabled={isDeleting}>
-              {isDeleting ? 'Đang xóa...' : 'Xóa'}
-            </Button>
-            <Button variant="outline" size="icon" onClick={() => setShowSettings(true)}>
-              <Settings className="h-5 w-5" />
-            </Button>
+            <Inline space="space-050">
+              <Button onClick={onSave} disabled={isSaving}>
+                {isSaving ? 'Đang lưu...' : 'Lưu'}
+              </Button>
+              <Button variant="destructive" onClick={onDelete} disabled={isDeleting}>
+                {isDeleting ? 'Đang xóa...' : 'Xóa'}
+              </Button>
+              <Button variant="outline" size="icon" onClick={() => setShowSettings(true)}>
+                <Settings className="h-5 w-5" />
+              </Button>
+            </Inline>
           </div>
-        </div>
+        </Box>
       </div>
 
       {/* Two-panel layout */}

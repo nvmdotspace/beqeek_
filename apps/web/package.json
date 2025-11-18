@@ -22,7 +22,6 @@
     "@tanstack/react-table": "^8.21.3",
     "@tanstack/zod-form-adapter": "^0.42.1",
     "@workspace/active-tables-core": "workspace:*",
-    "@workspace/beqeek-editor": "workspace:*",
     "@workspace/beqeek-shared": "workspace:*",
     "@workspace/comments": "workspace:*",
     "@workspace/encryption-core": "workspace:*",

@@ -72,7 +72,9 @@ export default defineConfig({
             if (id.includes('date-fns')) return 'date-fns';
             if (id.includes('axios')) return 'axios';
             if (id.includes('crypto-js')) return 'crypto-js';
-            if (id.includes('zustand')) return 'zustand';
+
+            // DON'T split zustand - causes circular dependency with stores
+            // if (id.includes('zustand')) return 'zustand';
 
             // Còn lại vào vendor (nên nhỏ hơn nhiều)
             return 'vendor';

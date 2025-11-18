@@ -75,7 +75,7 @@ export function useRecordById(
     gcTime: 5 * 60 * 1000, // 5 minutes
     refetchOnWindowFocus: true,
     refetchInterval,
-    retry: 2,
+    // Use global retry logic from query-client.ts
   });
 
   // Decrypt record if needed (async operation)

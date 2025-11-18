@@ -289,16 +289,3 @@ export const useSidebarStore = create<SidebarStore>()(
     { name: 'sidebar-store' },
   ),
 );
-
-// Selectors for optimized re-renders
-export const selectCurrentWorkspace = (state: SidebarStore) => state.currentWorkspace;
-export const selectAvailableWorkspaces = (state: SidebarStore) => state.availableWorkspaces;
-export const selectActiveSection = (state: SidebarStore) => state.activeSection;
-export const selectBadgeCounts = (state: SidebarStore) => state.badgeCounts;
-export const selectRecentItems = (state: SidebarStore) => state.recentItems;
-export const selectIsCollapsed = (state: SidebarStore) => state.isCollapsed;
-export const selectIsMobile = (state: SidebarStore) => state.isMobile;
-export const selectIsTablet = (state: SidebarStore) => state.isTablet;
-export const selectIsSidebarOpen = (state: SidebarStore) => state.isSidebarOpen;
-export const selectCanViewSection = (state: SidebarStore) => state.canViewSection;
-export const selectCanCreateItem = (state: SidebarStore) => state.canCreateItem;

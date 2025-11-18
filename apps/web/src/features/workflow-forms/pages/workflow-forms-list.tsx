@@ -16,7 +16,7 @@ import { Search, Filter, FileText } from 'lucide-react';
 import { Box, Stack, Inline, Grid } from '@workspace/ui/components/primitives';
 
 import { ROUTES } from '@/shared/route-paths';
-import { useSidebarStore, selectCurrentWorkspace } from '@/stores/sidebar-store';
+import { useSidebarStore } from '@/stores/sidebar-store';
 
 import { useWorkflowForms } from '../hooks';
 import { FormListItem } from '../components/form-list-item';
@@ -29,7 +29,7 @@ const route = getRouteApi(ROUTES.WORKFLOW_FORMS.LIST);
 export function WorkflowFormsList() {
   const { workspaceId, locale } = route.useParams();
   const navigate = route.useNavigate();
-  const currentWorkspace = useSidebarStore(selectCurrentWorkspace);
+  const currentWorkspace = useSidebarStore((state) => state.currentWorkspace);
   const [searchQuery, setSearchQuery] = useState('');
   const [formTypeFilter, setFormTypeFilter] = useState<FormType | 'all'>('all');
 

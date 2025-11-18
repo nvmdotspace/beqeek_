@@ -153,7 +153,7 @@ export function useInfiniteActiveTableRecords(
     staleTime: 30 * 1000, // 30 seconds
     gcTime: 5 * 60 * 1000, // 5 minutes
     refetchOnWindowFocus: false,
-    retry: 2,
+    // Remove hardcoded retry - use global retry logic from query-client.ts
   });
 
   // Flatten pages into single array of records

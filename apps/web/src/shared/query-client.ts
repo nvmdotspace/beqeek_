@@ -1,22 +1,41 @@
 import { QueryClient } from '@tanstack/react-query';
 
+import { ApiError } from './api/api-error';
+
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: (failureCount, error: unknown) => {
-        try {
-          // Don't retry on client errors (4xx)
-          // Lazy check for status field on error
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const status = (error as any)?.status;
-          // Don't retry on 4xx errors (400-499)
-          if (status && status >= 400 && status < 500) {
+        // Check if error is ApiError instance
+        if (error instanceof ApiError) {
+          // Never retry client errors (4xx) - these are validation/auth errors
+          if (error.isClientError()) {
             return false;
           }
-        } catch (error) {
-          console.warn('Query retry check failed:', error);
+          // Never retry network errors with status 0
+          if (error.isNetworkError()) {
+            return false;
+          }
+          // Retry server errors (5xx) up to 2 times
+          if (error.isServerError()) {
+            return failureCount < 2;
+          }
         }
-        // Retry up to 3 times for network errors and 5xx errors
+
+        // For other error types, check status property as fallback
+        const status = (error as { status?: number })?.status;
+        if (status !== undefined) {
+          // Don't retry 4xx errors
+          if (status >= 400 && status < 500) {
+            return false;
+          }
+          // Retry 5xx errors up to 2 times
+          if (status >= 500) {
+            return failureCount < 2;
+          }
+        }
+
+        // For unknown errors, retry up to 2 times
         return failureCount < 2;
       },
     },

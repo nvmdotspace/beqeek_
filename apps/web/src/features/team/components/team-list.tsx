@@ -1,6 +1,8 @@
 import { WorkspaceTeam } from '../types/team';
 import { TeamCard } from './team-card';
 import { EmptyTeamList } from './empty-team-list';
+import { Grid } from '@workspace/ui/components/primitives';
+import { Skeleton } from '@workspace/ui/components/skeleton';
 
 interface TeamListProps {
   teams: WorkspaceTeam[];
@@ -12,12 +14,16 @@ interface TeamListProps {
 export function TeamList({ teams, onEditTeam, onDeleteTeam, isLoading }: TeamListProps) {
   if (isLoading) {
     return (
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <Grid
+        columns={1}
+        gap="space-100"
+        className="sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4"
+      >
         {/* Skeleton loader */}
-        {[...Array(3)].map((_, i) => (
-          <div key={i} className="h-48 rounded-lg border bg-card animate-pulse" />
+        {[...Array(6)].map((_, i) => (
+          <Skeleton key={i} className="h-48 w-full rounded-xl" />
         ))}
-      </div>
+      </Grid>
     );
   }
 
@@ -26,10 +32,14 @@ export function TeamList({ teams, onEditTeam, onDeleteTeam, isLoading }: TeamLis
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <Grid
+      columns={1}
+      gap="space-100"
+      className="sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4"
+    >
       {teams.map((team) => (
         <TeamCard key={team.id} team={team} onEdit={onEditTeam} onDelete={onDeleteTeam} />
       ))}
-    </div>
+    </Grid>
   );
 }

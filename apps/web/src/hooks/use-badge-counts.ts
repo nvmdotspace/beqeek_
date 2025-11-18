@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useQueryWithAuth } from './use-query-with-auth';
 import { useAuthStore, selectIsAuthenticated } from '@/features/auth';
-import { useSidebarStore, selectCurrentWorkspace } from '@/stores/sidebar-store';
+import { useSidebarStore } from '@/stores/sidebar-store';
 
 // Mock API functions - these should be replaced with actual API calls
 const fetchTablesCount = async (_workspaceId: string): Promise<number> => {
@@ -51,7 +51,7 @@ export const badgeCountsQueryKey = (workspaceId?: string) => ['badge-counts', wo
 
 export const useBadgeCounts = () => {
   const isAuthenticated = useAuthStore(selectIsAuthenticated);
-  const currentWorkspace = useSidebarStore(selectCurrentWorkspace);
+  const currentWorkspace = useSidebarStore((state) => state.currentWorkspace);
   const updateBadgeCounts = useSidebarStore((state) => state.updateBadgeCounts);
 
   const workspaceId = currentWorkspace?.id;

@@ -20,13 +20,7 @@ import {
 } from 'lucide-react';
 // @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
-import {
-  useSidebarStore,
-  selectCurrentWorkspace,
-  selectBadgeCounts,
-  selectCanViewSection,
-  selectActiveSection,
-} from '@/stores/sidebar-store';
+import { useSidebarStore } from '@/stores/sidebar-store';
 import { useCurrentLocale } from '@/hooks/use-current-locale';
 
 interface NavigationMenuProps {
@@ -34,12 +28,22 @@ interface NavigationMenuProps {
   className?: string;
 }
 
+interface BadgeCounts {
+  tables: number;
+  workflows: number;
+  notifications: number;
+  teamMembers: number;
+  messages: number;
+  calendar: number;
+  projects: number;
+}
+
 interface NavigationItem {
   id: string;
   label: string;
   href?: string;
   icon: React.ComponentType<{ className?: string }>;
-  badge?: keyof ReturnType<typeof selectBadgeCounts>;
+  badge?: keyof BadgeCounts;
   requiresPermission?: string;
   children?: NavigationItem[];
   isSection?: boolean;
@@ -48,11 +52,11 @@ interface NavigationItem {
 export const NavigationMenu = ({ isCollapsed = true, className }: NavigationMenuProps) => {
   const location = useLocation();
   const locale = useCurrentLocale();
-  const currentWorkspace = useSidebarStore(selectCurrentWorkspace);
-  const badgeCounts = useSidebarStore(selectBadgeCounts);
-  const canViewSection = useSidebarStore(selectCanViewSection);
-  const activeSection = useSidebarStore(selectActiveSection);
-  const { toggleSection } = useSidebarStore();
+  const currentWorkspace = useSidebarStore((state) => state.currentWorkspace);
+  const badgeCounts = useSidebarStore((state) => state.badgeCounts);
+  const canViewSection = useSidebarStore((state) => state.canViewSection);
+  const activeSection = useSidebarStore((state) => state.activeSection);
+  const toggleSection = useSidebarStore((state) => state.toggleSection);
   const setActiveSection = useSidebarStore((state) => state.setActiveSection);
 
   const navigationStructure: NavigationItem[] = useMemo(() => {
@@ -92,7 +96,7 @@ export const NavigationMenu = ({ isCollapsed = true, className }: NavigationMenu
                   label: m.navigation_tables(),
                   href: `/${locale}/workspaces/${workspaceId}/tables`,
                   icon: LayoutGrid,
-                  badge: 'tables' as keyof ReturnType<typeof selectBadgeCounts>,
+                  badge: 'tables' as keyof BadgeCounts,
                   requiresPermission: 'tables',
                 },
                 {
@@ -100,7 +104,7 @@ export const NavigationMenu = ({ isCollapsed = true, className }: NavigationMenu
                   label: m.navigation_workflow(),
                   href: `/${locale}/workspaces/${workspaceId}/workflows`,
                   icon: Workflow,
-                  badge: 'workflows' as keyof ReturnType<typeof selectBadgeCounts>,
+                  badge: 'workflows' as keyof BadgeCounts,
                   requiresPermission: 'workflow',
                 },
                 {
@@ -108,7 +112,7 @@ export const NavigationMenu = ({ isCollapsed = true, className }: NavigationMenu
                   label: m.navigation_team(),
                   href: `/${locale}/workspaces/${workspaceId}/team`,
                   icon: Users,
-                  badge: 'teamMembers' as keyof ReturnType<typeof selectBadgeCounts>,
+                  badge: 'teamMembers' as keyof BadgeCounts,
                   requiresPermission: 'team',
                 },
                 {
@@ -146,12 +150,6 @@ export const NavigationMenu = ({ isCollapsed = true, className }: NavigationMenu
               icon: ChevronDown,
               isSection: true,
               children: [
-                {
-                  id: 'documents',
-                  label: m.navigation_documents(),
-                  href: `/${locale}/workspaces/${workspaceId}/documents`,
-                  icon: FileText,
-                },
                 {
                   id: 'starred',
                   label: m.navigation_starred(),

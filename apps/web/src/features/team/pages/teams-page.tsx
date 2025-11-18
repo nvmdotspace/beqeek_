@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { getRouteApi } from '@tanstack/react-router';
 import { ROUTES } from '@/shared/route-paths';
-import { useSidebarStore, selectCurrentWorkspace } from '@/stores/sidebar-store';
+import { useSidebarStore } from '@/stores/sidebar-store';
 import { useGetTeams } from '../hooks/use-get-teams';
 import { useDeleteTeam } from '../hooks/use-delete-team';
 import { TeamList } from '../components/team-list';
@@ -30,7 +30,7 @@ const route = getRouteApi(ROUTES.WORKSPACE.TEAM);
 
 export function TeamsPage() {
   const { workspaceId } = route.useParams();
-  const currentWorkspace = useSidebarStore(selectCurrentWorkspace);
+  const currentWorkspace = useSidebarStore((state) => state.currentWorkspace);
   const [searchQuery, setSearchQuery] = useState('');
 
   // Fetch teams

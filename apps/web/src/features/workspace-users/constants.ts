@@ -29,7 +29,7 @@ export const STANDARD_WORKSPACE_USERS_QUERY = (_workspaceId: string) =>
     gcTime: 10 * 60 * 1000, // 10 minutes - keep in cache for background prefetch
     refetchOnWindowFocus: true, // Refresh on tab switch (user may have changed roles elsewhere)
     refetchOnMount: false, // Don't refetch if data exists and is fresh
-    retry: 2, // Retry failed requests twice
+    // Use global retry logic from query-client.ts
     retryDelay: (attemptIndex: number) => Math.min(1000 * 2 ** attemptIndex, 30000),
   }) as const;
 

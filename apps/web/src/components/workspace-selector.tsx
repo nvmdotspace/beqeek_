@@ -14,12 +14,7 @@ import {
 import { ChevronDown, Plus, Zap } from 'lucide-react';
 // @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
-import {
-  useSidebarStore,
-  selectCurrentWorkspace,
-  selectAvailableWorkspaces,
-  type Workspace,
-} from '@/stores/sidebar-store';
+import { useSidebarStore, type Workspace } from '@/stores/sidebar-store';
 import { useWorkspaces } from '@/features/workspace/hooks/use-workspaces';
 import { useAuthStore, selectIsAuthenticated } from '@/features/auth/stores/auth-store';
 import type { Workspace as ApiWorkspace } from '@/shared/api/types';
@@ -54,9 +49,10 @@ export const WorkspaceSelector = ({
   const { data: workspacesData, isLoading } = useWorkspaces();
   const isAuthenticated = useAuthStore(selectIsAuthenticated);
 
-  const currentWorkspace = useSidebarStore(selectCurrentWorkspace);
-  const availableWorkspaces = useSidebarStore(selectAvailableWorkspaces);
-  const { setCurrentWorkspace, setAvailableWorkspaces } = useSidebarStore();
+  const currentWorkspace = useSidebarStore((state) => state.currentWorkspace);
+  const availableWorkspaces = useSidebarStore((state) => state.availableWorkspaces);
+  const setCurrentWorkspace = useSidebarStore((state) => state.setCurrentWorkspace);
+  const setAvailableWorkspaces = useSidebarStore((state) => state.setAvailableWorkspaces);
 
   // Update available workspaces when data changes
   useEffect(() => {

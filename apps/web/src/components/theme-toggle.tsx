@@ -1,6 +1,6 @@
 import { Sun, Moon } from 'lucide-react';
 import { Button } from '@workspace/ui/components/button';
-import { useThemeStore } from '@/stores';
+import { useThemeStore } from '@/stores/theme-store';
 
 /**
  * Theme Toggle Component

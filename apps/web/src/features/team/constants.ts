@@ -20,7 +20,7 @@ export const STANDARD_WORKSPACE_TEAMS_QUERY = (_workspaceId: string) =>
     gcTime: 10 * 60 * 1000, // 10 minutes - keep in cache
     refetchOnWindowFocus: true,
     refetchOnMount: false,
-    retry: 2,
+    // Use global retry logic from query-client.ts
     retryDelay: (attemptIndex: number) => Math.min(1000 * 2 ** attemptIndex, 30000),
   }) as const;
 
@@ -33,7 +33,7 @@ export const STANDARD_WORKSPACE_ROLES_QUERY = (_workspaceId: string, _teamId: st
     gcTime: 10 * 60 * 1000, // 10 minutes - keep in cache
     refetchOnWindowFocus: true,
     refetchOnMount: false,
-    retry: 2,
+    // Use global retry logic from query-client.ts
     retryDelay: (attemptIndex: number) => Math.min(1000 * 2 ** attemptIndex, 30000),
   }) as const;
 

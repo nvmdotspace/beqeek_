@@ -10,7 +10,7 @@ import { useTableManagement } from '../hooks/use-table-management';
 // @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
 import { getRouteApi } from '@tanstack/react-router';
-import { useSidebarStore, selectCurrentWorkspace } from '@/stores/sidebar-store';
+import { useSidebarStore } from '@/stores/sidebar-store';
 import { ROUTES } from '@/shared/route-paths';
 
 import { Button } from '@workspace/ui/components/button';
@@ -41,7 +41,7 @@ export const ActiveTablesPage = () => {
   const { workspaceId, locale } = route.useParams();
 
   // Also sync with Zustand store for backward compatibility
-  const currentWorkspace = useSidebarStore(selectCurrentWorkspace);
+  const currentWorkspace = useSidebarStore((state) => state.currentWorkspace);
 
   const [selectedWorkGroupId, setSelectedWorkGroupId] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');

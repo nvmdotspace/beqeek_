@@ -4,13 +4,7 @@ import { Button } from '@workspace/ui/components/button';
 import { Input } from '@workspace/ui/components/input';
 import { X, Search } from 'lucide-react';
 import { useBadgeCounts } from '@/hooks/use-badge-counts';
-import {
-  useSidebarStore,
-  selectIsCollapsed,
-  selectIsMobile,
-  selectIsTablet,
-  selectIsSidebarOpen,
-} from '@/stores/sidebar-store';
+import { useSidebarStore } from '@/stores/sidebar-store';
 import { useAuthStore, selectIsAuthenticated } from '@/features/auth/stores/auth-store';
 import { WorkspaceSelector } from './workspace-selector';
 import { NavigationMenu } from './navigation-menu';
@@ -24,12 +18,14 @@ interface AppSidebarProps {
 export const AppSidebar = ({ onCloseMobile }: AppSidebarProps) => {
   const isAuthenticated = useAuthStore(selectIsAuthenticated);
 
-  const isCollapsed = useSidebarStore(selectIsCollapsed);
-  const isMobile = useSidebarStore(selectIsMobile);
-  const isTablet = useSidebarStore(selectIsTablet);
-  const isSidebarOpen = useSidebarStore(selectIsSidebarOpen);
-
-  const { setCollapsed, setMobile, setTablet, setSidebarOpen } = useSidebarStore();
+  const isCollapsed = useSidebarStore((state) => state.isCollapsed);
+  const isMobile = useSidebarStore((state) => state.isMobile);
+  const isTablet = useSidebarStore((state) => state.isTablet);
+  const isSidebarOpen = useSidebarStore((state) => state.isSidebarOpen);
+  const setCollapsed = useSidebarStore((state) => state.setCollapsed);
+  const setMobile = useSidebarStore((state) => state.setMobile);
+  const setTablet = useSidebarStore((state) => state.setTablet);
+  const setSidebarOpen = useSidebarStore((state) => state.setSidebarOpen);
 
   // Initialize real-time badge counts
   useBadgeCounts();
