@@ -98,6 +98,9 @@ importers:
       '@workspace/active-tables-core':
         specifier: workspace:*
         version: link:../../packages/active-tables-core
+      '@workspace/beqeek-editor':
+        specifier: workspace:*
+        version: link:../../packages/beqeek-editor
       '@workspace/beqeek-shared':
         specifier: workspace:*
         version: link:../../packages/beqeek-shared
