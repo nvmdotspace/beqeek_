@@ -34,16 +34,19 @@ export function HeadDetailLayout({
   // Get field configurations
   const getField = (fieldName: string) => table.config.fields.find((f) => f.name === fieldName);
 
+  // Get record data (supports both record.data and direct field access)
+  const recordData = (record as any).data || record;
+
   // Title field
   const titleField = getField(config.titleField);
-  const titleValue = (record as any)[config.titleField];
+  const titleValue = recordData[config.titleField];
   const isTitleEditing = useIsFieldEditing(record.id, config.titleField);
 
   // Sub-line fields (displayed as badges below title)
   const subLineFields = config.subLineFields
     .map((fieldName) => ({
       field: getField(fieldName),
-      value: (record as any)[fieldName],
+      value: recordData[fieldName],
       name: fieldName,
     }))
     .filter((item) => item.field != null);
@@ -52,7 +55,7 @@ export function HeadDetailLayout({
   const tailFields = config.tailFields
     .map((fieldName) => ({
       field: getField(fieldName),
-      value: (record as any)[fieldName],
+      value: recordData[fieldName],
       name: fieldName,
     }))
     .filter((item) => item.field != null);

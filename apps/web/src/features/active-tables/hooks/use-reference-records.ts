@@ -3,12 +3,16 @@
  *
  * Fetches records from referenced tables for displaying in reference fields
  * Returns records grouped by table ID for easy lookup
+ * Handles decryption for encrypted tables
  */
 
 import { useQueries } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { fetchActiveTableRecords } from '../api/active-records-api';
+import { getActiveTable } from '../api/active-tables-api';
+import { decryptRecord } from '@workspace/active-tables-core';
 import type { Table, TableRecord, FieldConfig } from '@workspace/active-tables-core';
+import type { ActiveTableRecord } from '../types';
 import {
   FIELD_TYPE_SELECT_ONE_RECORD,
   FIELD_TYPE_SELECT_LIST_RECORD,
@@ -46,6 +50,7 @@ export interface UseReferenceRecordsOptions {
 
 /**
  * Fetch reference records from all tables referenced in the table config
+ * Handles decryption for encrypted tables
  *
  * @example
  * ```tsx
@@ -66,18 +71,65 @@ export function useReferenceRecords(workspaceId: string, table: Table | null, op
   // Extract referenced table IDs
   const referencedTableIds = useMemo(() => getReferencedTableIds(table), [table]);
 
-  // Fetch records for each referenced table
+  // Fetch table configs and records for each referenced table
   const queries = useQueries({
     queries: referencedTableIds.map((tableId) => ({
       queryKey: ['reference-records', workspaceId, tableId],
       queryFn: async () => {
-        const response = await fetchActiveTableRecords({
-          workspaceId,
-          tableId,
-          limit,
-          offset: 0,
-        });
-        return { tableId, records: response.data };
+        // Fetch both table config and records
+        const [tableResponse, recordsResponse] = await Promise.all([
+          getActiveTable(workspaceId, tableId),
+          fetchActiveTableRecords({ workspaceId, tableId, limit, offset: 0 }),
+        ]);
+
+        const refTable = tableResponse.data;
+        const rawRecords = recordsResponse.data;
+
+        // Decrypt records if needed
+        const encryptionKey = refTable.config.encryptionKey || null;
+        const needsDecryption = refTable.config.e2eeEncryption || encryptionKey;
+
+        let decryptedRecords: ActiveTableRecord[];
+
+        if (needsDecryption && encryptionKey) {
+          // Decrypt all records
+          decryptedRecords = await Promise.all(
+            rawRecords.map(async (r) => {
+              try {
+                const record: TableRecord = {
+                  id: r.id,
+                  record: r.record,
+                  data: r.record,
+                  createdBy: r.createdBy,
+                  updatedBy: r.updatedBy,
+                  createdAt: r.createdAt,
+                  updatedAt: r.updatedAt,
+                  valueUpdatedAt: r.valueUpdatedAt,
+                  relatedUserIds: r.relatedUserIds,
+                  assignedUserIds: r.assignedUserIds,
+                  record_hashes: r.record_hashes,
+                  hashed_keywords: r.hashed_keywords,
+                  permissions: r.permissions,
+                };
+
+                const decrypted = await decryptRecord(record, refTable.config.fields, encryptionKey);
+
+                // Return as ActiveTableRecord with decrypted data
+                return {
+                  ...r,
+                  record: decrypted.record,
+                };
+              } catch (error) {
+                console.error(`[useReferenceRecords] Decryption failed for record ${r.id}:`, error);
+                return r; // Return encrypted record on error
+              }
+            }),
+          );
+        } else {
+          decryptedRecords = rawRecords;
+        }
+
+        return { tableId, records: decryptedRecords };
       },
       enabled: enabled && !!workspaceId && !!tableId,
       staleTime: 5 * 60 * 1000, // 5 minutes
@@ -96,7 +148,7 @@ export function useReferenceRecords(workspaceId: string, table: Table | null, op
         records[tableId] = tableRecords.map((r) => ({
           id: r.id,
           record: r.record,
-          data: r.record,
+          data: r.record, // Sync data with record
           createdBy: r.createdBy,
           updatedBy: r.updatedBy,
           createdAt: r.createdAt,
