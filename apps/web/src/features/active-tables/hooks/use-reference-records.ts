@@ -83,7 +83,9 @@ function collectReferenceFieldMap(
     } else {
       // For SELECT_ONE_RECORD and SELECT_LIST_RECORD: collect referenced IDs
       records.forEach((record) => {
-        const recordData = (record as any).data || record.record || record;
+        // Get record data from various possible locations
+        const recordData: Record<string, unknown> =
+          record.data || record.record || (record as unknown as Record<string, unknown>);
         const value = recordData[field.name];
 
         if (value != null) {
@@ -166,7 +168,13 @@ export function useReferenceRecords(workspaceId: string, table: Table | null, op
         const recordIdsArray = Array.from(info.recordIds);
 
         // Build filtering based on field type
-        let filtering: any = undefined;
+        let filtering:
+          | {
+              record: {
+                [key: string]: string[];
+              };
+            }
+          | undefined = undefined;
         let group: string | undefined = undefined;
 
         if (recordIdsArray.length > 0) {

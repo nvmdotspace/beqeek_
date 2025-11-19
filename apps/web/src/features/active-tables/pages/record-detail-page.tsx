@@ -6,8 +6,13 @@
 import { useState, useMemo } from 'react';
 import { getRouteApi } from '@tanstack/react-router';
 import { RecordDetail } from '@workspace/active-tables-core';
-import { COMMENTS_POSITION_HIDDEN, REFERENCE_FIELD_TYPES, type RecordDetailConfig } from '@workspace/beqeek-shared';
-import type { Table } from '@workspace/active-tables-core';
+import {
+  COMMENTS_POSITION_HIDDEN,
+  REFERENCE_FIELD_TYPES,
+  type RecordDetailConfig,
+  type ReferenceFieldType,
+} from '@workspace/beqeek-shared';
+import type { Table, FieldConfig } from '@workspace/active-tables-core';
 import { ROUTES } from '@/shared/route-paths';
 import { useActiveTable } from '../hooks/use-active-tables';
 import { useRecordById } from '../hooks/use-record-by-id';
@@ -67,8 +72,11 @@ function configHasReferenceFields(config: RecordDetailConfig | null | undefined,
 
   // Check if any field is a reference type
   return visibleFields.some((fieldName) => {
-    const field = table.config.fields.find((f: { name: string }) => f.name === fieldName);
-    return field && REFERENCE_FIELD_TYPES.includes((field as any).type);
+    const field = table.config.fields.find((f: FieldConfig) => f.name === fieldName);
+    if (!field) return false;
+
+    // Type-safe check using readonly array includes
+    return (REFERENCE_FIELD_TYPES as readonly string[]).includes(field.type);
   });
 }
 
