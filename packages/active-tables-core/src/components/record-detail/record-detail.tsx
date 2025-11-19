@@ -62,7 +62,7 @@ export function RecordDetail({
   const headDetailConfig = {
     titleField: layoutConfig.headTitleField || layoutConfig.titleField || table.config.fields[0]?.name || '',
     subLineFields: layoutConfig.headSubLineFields || layoutConfig.subLineFields || [],
-    tailFields: layoutConfig.rowTailFields || layoutConfig.tailFields || table.config.fields.map((f) => f.name),
+    tailFields: layoutConfig.tailFields || table.config.fields.map((f) => f.name),
   };
 
   // Build two-column config
