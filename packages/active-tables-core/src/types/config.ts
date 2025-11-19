@@ -132,19 +132,25 @@ export interface RecordDetailConfig {
   /** Comments position: 'right-panel' | 'right' | 'bottom' | 'none' */
   commentsPosition: string;
 
-  /** Field name for title */
+  /** Field name for title (head-detail layout) */
   titleField: string;
 
-  /** Field names for subline (below title) */
+  /** Field names for subline (below title, head-detail layout) */
   subLineFields: string[];
 
-  /** Field names for tail fields (single column layout) */
+  /** Field names for tail fields (head-detail layout) */
   tailFields: string[];
 
-  /** Field names for column 1 (two column layout) */
+  /** Field name for title in head section (two-column layout) */
+  headTitleField?: string;
+
+  /** Field names for subline in head section (two-column layout) */
+  headSubLineFields?: string[];
+
+  /** Field names for column 1 (two-column layout) */
   column1Fields?: string[];
 
-  /** Field names for column 2 (two column layout) */
+  /** Field names for column 2 (two-column layout) */
   column2Fields?: string[];
 }
 

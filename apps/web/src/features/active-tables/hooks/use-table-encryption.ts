@@ -44,18 +44,29 @@ export function useTableEncryption(
   const isE2EEEnabled = config?.e2eeEncryption ?? false;
   const encryptionAuthKey = config?.encryptionAuthKey ?? null;
 
-  // Load key from localStorage on mount
+  // Load key from localStorage on mount (E2EE) or config (server-side)
   useEffect(() => {
-    if (!workspaceId || !tableId || !isE2EEEnabled) {
+    if (!workspaceId || !tableId) {
       setIsKeyLoaded(false);
       setEncryptionKey(null);
       return;
     }
 
-    const key = getEncryptionKey(workspaceId, tableId);
-    setEncryptionKey(key);
-    setIsKeyLoaded(true);
-  }, [workspaceId, tableId, isE2EEEnabled]);
+    if (isE2EEEnabled) {
+      // E2EE: Load from localStorage
+      const key = getEncryptionKey(workspaceId, tableId);
+      setEncryptionKey(key);
+      setIsKeyLoaded(true);
+    } else if (config?.encryptionKey) {
+      // Server-side encryption: Use key from config
+      setEncryptionKey(config.encryptionKey);
+      setIsKeyLoaded(true);
+    } else {
+      // No encryption
+      setEncryptionKey(null);
+      setIsKeyLoaded(false);
+    }
+  }, [workspaceId, tableId, isE2EEEnabled, config?.encryptionKey]);
 
   // Validate key against authKey
   const isKeyValid = useMemo(() => {
