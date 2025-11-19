@@ -30,13 +30,12 @@ import { ShortcutsHelpDialog } from '../components/shortcuts-help-dialog';
 const route = getRouteApi(ROUTES.ACTIVE_TABLES.RECORD_DETAIL);
 
 /**
- * Helper: Check if RecordDetailConfig contains any reference fields
- * Returns true if any configured field is a reference type
+ * Helper: Extract all visible field names from RecordDetailConfig
+ * Returns array of field names that are displayed in the UI
  */
-function configHasReferenceFields(config: RecordDetailConfig | null | undefined, table: Table | null): boolean {
-  if (!config || !table) return false;
+function getVisibleFieldNames(config: RecordDetailConfig | null | undefined): string[] {
+  if (!config) return [];
 
-  // Collect all field names from config
   const fieldNames = new Set<string>();
 
   // Add common fields
@@ -54,8 +53,20 @@ function configHasReferenceFields(config: RecordDetailConfig | null | undefined,
     config.column2Fields?.forEach((f) => fieldNames.add(f));
   }
 
+  return Array.from(fieldNames);
+}
+
+/**
+ * Helper: Check if any visible fields are reference types
+ * Returns true if any configured field is a reference type
+ */
+function configHasReferenceFields(config: RecordDetailConfig | null | undefined, table: Table | null): boolean {
+  if (!config || !table) return false;
+
+  const visibleFields = getVisibleFieldNames(config);
+
   // Check if any field is a reference type
-  return Array.from(fieldNames).some((fieldName) => {
+  return visibleFields.some((fieldName) => {
     const field = table.config.fields.find((f: { name: string }) => f.name === fieldName);
     return field && REFERENCE_FIELD_TYPES.includes((field as any).type);
   });
@@ -116,8 +127,13 @@ export default function RecordDetailPage() {
     },
   });
 
+  // Extract visible field names from config
+  const visibleFields = useMemo(
+    () => getVisibleFieldNames(recordDetailConfig as RecordDetailConfig | undefined),
+    [recordDetailConfig],
+  );
+
   // Check if config needs reference data
-  // Cast to strict type for the helper function
   const needsReferenceData = useMemo(
     () => configHasReferenceFields(recordDetailConfig as RecordDetailConfig | undefined, table),
     [recordDetailConfig, table],
@@ -126,9 +142,11 @@ export default function RecordDetailPage() {
   // Fetch reference records only if config contains reference fields
   // (SELECT_ONE_RECORD, SELECT_LIST_RECORD, FIRST_REFERENCE_RECORD)
   // Pass current record so hook can build proper filtering for FIRST_REFERENCE_RECORD
+  // Pass visibleFields to only fetch references for displayed fields
   const { referenceRecords } = useReferenceRecords(workspaceId ?? '', table, {
     records: record ? [record] : [],
     enabled: needsReferenceData, // ✅ Only fetch if config needs it
+    visibleFields: visibleFields, // ✅ Only fetch for visible fields
   });
 
   // Determine if comments should be shown based on config

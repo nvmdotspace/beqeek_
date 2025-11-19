@@ -37,8 +37,14 @@ interface ReferenceFieldInfo {
 /**
  * Collect reference field information from table config and current records
  * Similar to RecordView.collectReferenceFieldMap from spec
+ *
+ * @param visibleFields - Optional array of field names to limit collection to visible fields only
  */
-function collectReferenceFieldMap(table: Table | null, records: TableRecord[]): Map<string, ReferenceFieldInfo> {
+function collectReferenceFieldMap(
+  table: Table | null,
+  records: TableRecord[],
+  visibleFields?: string[],
+): Map<string, ReferenceFieldInfo> {
   if (!table || !table.config.fields || !records.length) return new Map();
 
   const fieldMap = new Map<string, ReferenceFieldInfo>();
@@ -50,6 +56,9 @@ function collectReferenceFieldMap(table: Table | null, records: TableRecord[]): 
       field.type === FIELD_TYPE_FIRST_REFERENCE_RECORD;
 
     if (!isReferenceField || !field.referenceTableId) return;
+
+    // ✅ Skip if visibleFields is provided and this field is not in the list
+    if (visibleFields && !visibleFields.includes(field.name)) return;
 
     const tableId = field.referenceTableId;
 
@@ -102,6 +111,8 @@ export interface UseReferenceRecordsOptions {
   limit?: number;
   /** Current records being displayed (for filtering) */
   records?: TableRecord[];
+  /** Only fetch references for these field names (optimization) */
+  visibleFields?: string[];
 }
 
 /**
@@ -127,10 +138,14 @@ export interface UseReferenceRecordsOptions {
  * ```
  */
 export function useReferenceRecords(workspaceId: string, table: Table | null, options?: UseReferenceRecordsOptions) {
-  const { enabled = true, limit = 1000, records = [] } = options || {};
+  const { enabled = true, limit = 1000, records = [], visibleFields } = options || {};
 
   // Collect reference field mapping from table config and current records
-  const referenceFieldMap = useMemo(() => collectReferenceFieldMap(table, records), [table, records]);
+  // Only collect fields that are actually visible in the UI
+  const referenceFieldMap = useMemo(
+    () => collectReferenceFieldMap(table, records, visibleFields),
+    [table, records, visibleFields],
+  );
 
   // Convert map to array for useQueries
   const referenceQueries = useMemo(() => {
