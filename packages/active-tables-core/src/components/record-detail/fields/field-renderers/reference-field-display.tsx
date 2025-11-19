@@ -59,7 +59,9 @@ export function ReferenceFieldDisplay({ value, field, referenceRecords }: Refere
       return <Text className="text-muted-foreground">-</Text>;
     }
 
-    const label = record.data?.[labelField] || recordId;
+    // Try multiple data access patterns
+    const recordData = (record as any).data || (record as any).record || record;
+    const label = recordData[labelField] || recordId;
 
     return (
       <Badge variant="outline" className="cursor-pointer hover:bg-accent/50">

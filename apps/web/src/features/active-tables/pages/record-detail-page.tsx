@@ -79,8 +79,11 @@ export default function RecordDetailPage() {
     },
   });
 
-  // Fetch reference records for lookup
-  const { referenceRecords } = useReferenceRecords(workspaceId ?? '', table);
+  // Fetch reference records for lookup (SELECT_ONE_RECORD, SELECT_LIST_RECORD, FIRST_REFERENCE_RECORD)
+  // Pass current record so hook can build proper filtering for FIRST_REFERENCE_RECORD
+  const { referenceRecords } = useReferenceRecords(workspaceId ?? '', table, {
+    records: record ? [record] : [],
+  });
 
   // Fetch comments
   const {
@@ -160,6 +163,7 @@ export default function RecordDetailPage() {
       <RecordHeader
         record={record}
         table={table}
+        referenceRecords={referenceRecords}
         onDelete={permissions?.delete ? handleDelete : undefined}
         onBack={() => navigate({ to: ROUTES.ACTIVE_TABLES.TABLE_RECORDS, params: { locale, workspaceId, tableId } })}
       />
@@ -167,7 +171,7 @@ export default function RecordDetailPage() {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6 max-w-7xl">
         {/* Breadcrumb */}
-        <RecordBreadcrumb table={table} record={record} />
+        <RecordBreadcrumb table={table} record={record} referenceRecords={referenceRecords} />
 
         <div className="grid grid-cols-12 gap-6 mt-4">
           {/* Record Detail - Main Content */}

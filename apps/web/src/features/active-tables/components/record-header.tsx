@@ -32,16 +32,39 @@ import { useState } from 'react';
 interface RecordHeaderProps {
   record: TableRecord;
   table: Table;
+  referenceRecords?: Record<string, TableRecord[]>;
   onDelete?: () => Promise<void>;
   onBack: () => void;
 }
 
-export function RecordHeader({ record, table, onDelete, onBack }: RecordHeaderProps) {
+export function RecordHeader({ record, table, referenceRecords, onDelete, onBack }: RecordHeaderProps) {
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Get record title from titleField or first field
-  const titleField = table.config.recordDetailConfig?.titleField || table.config.fields[0]?.name;
-  const recordTitle = titleField && record.data ? String((record.data as any)[titleField] || 'Untitled') : 'Untitled';
+  // Get record title from layout-specific field
+  // head-detail should use titleField, but API may return headTitleField
+  // two-column-detail uses headTitleField
+  const config = table.config.recordDetailConfig;
+  const titleFieldName =
+    config?.headTitleField || // Try headTitleField first (actual API response)
+    config?.titleField || // Fallback to titleField (spec)
+    table.config.fields[0]?.name; // Final fallback to first field
+
+  const recordData = (record as any).data || record.record || record;
+  let titleValue = titleFieldName ? recordData[titleFieldName] : null;
+
+  // Check if titleField is a reference field and lookup the actual value
+  const titleField = table.config.fields.find((f) => f.name === titleFieldName);
+  if (titleField?.referenceTableId && titleValue && referenceRecords) {
+    const refRecords = referenceRecords[titleField.referenceTableId] || [];
+    const refRecord = refRecords.find((r) => r.id === String(titleValue));
+    if (refRecord) {
+      const labelField = titleField.referenceLabelField || 'name';
+      const refData = (refRecord as any).data || refRecord.record || refRecord;
+      titleValue = refData[labelField] || titleValue;
+    }
+  }
+
+  const recordTitle = titleValue != null && titleValue !== '' ? String(titleValue) : record.id;
 
   const handleDelete = async () => {
     if (!onDelete) return;
