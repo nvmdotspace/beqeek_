@@ -77,80 +77,8 @@ export function HeadDetailLayout({
 
   return (
     <Stack className={cn('w-full', className)} space="space-400">
-      {/* Title Section */}
-      <Box className="border-b border-border pb-4">
-        <Stack space="space-200">
-          {/* Title Field */}
-          {titleField && (
-            <div>
-              {isTitleEditing ? (
-                <InlineEditField
-                  field={titleField}
-                  value={titleValue}
-                  onSave={(value) => handleFieldSave(config.titleField, value)}
-                  onCancel={cancelEdit}
-                  autoFocus
-                />
-              ) : (
-                <Heading
-                  level={1}
-                  className={cn(
-                    canEdit(config.titleField) &&
-                      'cursor-pointer hover:bg-accent/50 rounded px-2 -mx-2 transition-colors',
-                  )}
-                  onDoubleClick={() => {
-                    if (canEdit(config.titleField)) {
-                      startEdit(record.id, config.titleField);
-                    }
-                  }}
-                >
-                  {titleValue != null ? String(titleValue) : 'Untitled'}
-                </Heading>
-              )}
-            </div>
-          )}
-
-          {/* Sub-line Fields (badges) */}
-          {subLineFields.length > 0 && (
-            <Inline space="space-100" wrap>
-              {subLineFields.map(({ field, value, name }) => {
-                if (!field) return null;
-
-                const isEditing = useIsFieldEditing(record.id, name);
-
-                if (isEditing) {
-                  return (
-                    <InlineEditField
-                      key={name}
-                      field={field}
-                      value={value}
-                      onSave={(newValue) => handleFieldSave(name, newValue)}
-                      onCancel={cancelEdit}
-                      autoFocus
-                    />
-                  );
-                }
-
-                return (
-                  <FieldDisplay
-                    key={name}
-                    field={field}
-                    value={value}
-                    referenceRecords={referenceRecords}
-                    userRecords={userRecords}
-                    editable={canEdit(name)}
-                    onDoubleClick={() => {
-                      if (canEdit(name)) {
-                        startEdit(record.id, name);
-                      }
-                    }}
-                  />
-                );
-              })}
-            </Inline>
-          )}
-        </Stack>
-      </Box>
+      {/* NOTE: Title and subline fields are now displayed in RecordHeader (sticky header)
+          This component only shows tailFields (body content) per recordDetailConfig spec */}
 
       {/* Tail Fields (main content) */}
       <Stack space="space-300">

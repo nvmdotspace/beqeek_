@@ -15,24 +15,23 @@ import {
   RECORD_DETAIL_LAYOUT_TWO_COLUMN,
   COMMENTS_POSITION_RIGHT_PANEL,
   COMMENTS_POSITION_HIDDEN,
+  type RecordDetailConfig as BeqeekRecordDetailConfig,
+  type RecordDetailHeadConfig,
+  type RecordDetailTwoColumnConfig,
+  isHeadDetailLayout,
+  isTwoColumnLayout,
 } from '@workspace/beqeek-shared';
+
 import { SettingsSection } from '../settings-layout';
 import { MultiSelectField } from '../multi-select-field';
+
+// Bottom position constant (not in beqeek-shared yet)
+const COMMENTS_POSITION_BOTTOM = 'bottom' as const;
 // @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
 
-export interface RecordDetailConfig {
-  layout: 'head-detail' | 'two-column-detail';
-  commentsPosition: 'right-panel' | 'hidden';
-  // Common fields
-  headTitleField?: string;
-  headSubLineFields?: string[];
-  // For head-detail layout
-  rowTailFields?: string[];
-  // For two-column-detail layout
-  column1Fields?: string[];
-  column2Fields?: string[];
-}
+// Type alias for the settings UI - uses beqeek-shared types
+export type RecordDetailConfig = BeqeekRecordDetailConfig;
 
 export interface DetailViewSettingsSectionProps {
   /** Current detail view config */
@@ -50,14 +49,16 @@ export interface DetailViewSettingsSectionProps {
  */
 export function DetailViewSettingsSection({ config, fields, onChange }: DetailViewSettingsSectionProps) {
   const [layout, setLayout] = useState<RecordDetailConfig['layout']>(config.layout || RECORD_DETAIL_LAYOUT_HEAD_DETAIL);
-  const [commentsPosition, setCommentsPosition] = useState<RecordDetailConfig['commentsPosition']>(
+  const [commentsPosition, setCommentsPosition] = useState<'right-panel' | 'bottom' | 'hidden'>(
     config.commentsPosition || COMMENTS_POSITION_RIGHT_PANEL,
   );
   const [headTitleField, setHeadTitleField] = useState(config.headTitleField || '');
   const [headSubLineFields, setHeadSubLineFields] = useState<string[]>(config.headSubLineFields || []);
-  const [rowTailFields, setRowTailFields] = useState<string[]>(config.rowTailFields || []);
-  const [column1Fields, setColumn1Fields] = useState<string[]>(config.column1Fields || []);
-  const [column2Fields, setColumn2Fields] = useState<string[]>(config.column2Fields || []);
+
+  // Layout-specific fields
+  const [rowTailFields, setRowTailFields] = useState<string[]>(isHeadDetailLayout(config) ? config.rowTailFields : []);
+  const [column1Fields, setColumn1Fields] = useState<string[]>(isTwoColumnLayout(config) ? config.column1Fields : []);
+  const [column2Fields, setColumn2Fields] = useState<string[]>(isTwoColumnLayout(config) ? config.column2Fields : []);
 
   // Update local state when config prop changes
   useEffect(() => {
@@ -65,37 +66,66 @@ export function DetailViewSettingsSection({ config, fields, onChange }: DetailVi
     setCommentsPosition(config.commentsPosition || COMMENTS_POSITION_RIGHT_PANEL);
     setHeadTitleField(config.headTitleField || '');
     setHeadSubLineFields(config.headSubLineFields || []);
-    setRowTailFields(config.rowTailFields || []);
-    setColumn1Fields(config.column1Fields || []);
-    setColumn2Fields(config.column2Fields || []);
-  }, [config]);
 
-  // Notify parent of changes
-  const handleChange = (updates: Partial<RecordDetailConfig>) => {
-    onChange({ ...config, ...updates });
-  };
+    if (isHeadDetailLayout(config)) {
+      setRowTailFields(config.rowTailFields || []);
+    } else if (isTwoColumnLayout(config)) {
+      setColumn1Fields(config.column1Fields || []);
+      setColumn2Fields(config.column2Fields || []);
+    }
+  }, [config]);
 
   const handleLayoutChange = (newLayout: RecordDetailConfig['layout']) => {
     setLayout(newLayout);
 
     if (newLayout === RECORD_DETAIL_LAYOUT_HEAD_DETAIL) {
-      handleChange({
+      const newConfig: RecordDetailHeadConfig = {
         layout: newLayout,
+        commentsPosition: commentsPosition,
         headTitleField: headTitleField || fields[0]?.name || '',
-        headSubLineFields,
-        rowTailFields: rowTailFields.length > 0 ? rowTailFields : [],
-        column1Fields: undefined,
-        column2Fields: undefined,
-      });
+        headSubLineFields: headSubLineFields || [],
+        rowTailFields: rowTailFields || [],
+      };
+      onChange(newConfig);
     } else {
-      handleChange({
+      const newConfig: RecordDetailTwoColumnConfig = {
         layout: newLayout,
+        commentsPosition: commentsPosition,
         headTitleField: headTitleField || fields[0]?.name || '',
-        headSubLineFields,
-        column1Fields: column1Fields.length > 0 ? column1Fields : [],
-        column2Fields: column2Fields.length > 0 ? column2Fields : [],
-        rowTailFields: undefined,
-      });
+        headSubLineFields: headSubLineFields || [],
+        column1Fields: column1Fields || [],
+        column2Fields: column2Fields || [],
+      };
+      onChange(newConfig);
+    }
+  };
+
+  // Helper to create type-safe config updates
+  const createUpdatedConfig = (updates: {
+    commentsPosition?: 'right-panel' | 'bottom' | 'hidden';
+    headTitleField?: string;
+    headSubLineFields?: string[];
+    rowTailFields?: string[];
+    column1Fields?: string[];
+    column2Fields?: string[];
+  }): RecordDetailConfig => {
+    if (layout === RECORD_DETAIL_LAYOUT_HEAD_DETAIL) {
+      return {
+        layout: RECORD_DETAIL_LAYOUT_HEAD_DETAIL,
+        commentsPosition: updates.commentsPosition ?? commentsPosition,
+        headTitleField: updates.headTitleField ?? headTitleField,
+        headSubLineFields: updates.headSubLineFields ?? headSubLineFields,
+        rowTailFields: updates.rowTailFields ?? rowTailFields,
+      };
+    } else {
+      return {
+        layout: RECORD_DETAIL_LAYOUT_TWO_COLUMN,
+        commentsPosition: updates.commentsPosition ?? commentsPosition,
+        headTitleField: updates.headTitleField ?? headTitleField,
+        headSubLineFields: updates.headSubLineFields ?? headSubLineFields,
+        column1Fields: updates.column1Fields ?? column1Fields,
+        column2Fields: updates.column2Fields ?? column2Fields,
+      };
     }
   };
 
@@ -135,8 +165,9 @@ export function DetailViewSettingsSection({ config, fields, onChange }: DetailVi
           <Select
             value={commentsPosition}
             onValueChange={(value) => {
-              setCommentsPosition(value as RecordDetailConfig['commentsPosition']);
-              handleChange({ commentsPosition: value as RecordDetailConfig['commentsPosition'] });
+              const newValue = value as 'right-panel' | 'bottom' | 'hidden';
+              setCommentsPosition(newValue);
+              onChange(createUpdatedConfig({ commentsPosition: newValue }));
             }}
           >
             <SelectTrigger>
@@ -176,7 +207,7 @@ export function DetailViewSettingsSection({ config, fields, onChange }: DetailVi
               value={headTitleField}
               onValueChange={(value) => {
                 setHeadTitleField(value);
-                handleChange({ headTitleField: value });
+                onChange(createUpdatedConfig({ headTitleField: value }));
               }}
             >
               <SelectTrigger>
@@ -202,7 +233,7 @@ export function DetailViewSettingsSection({ config, fields, onChange }: DetailVi
               value={headSubLineFields}
               onChange={(values) => {
                 setHeadSubLineFields(values);
-                handleChange({ headSubLineFields: values });
+                onChange(createUpdatedConfig({ headSubLineFields: values }));
               }}
               placeholder={m.settings_detailView_subLineFieldsPlaceholder()}
             />
@@ -228,7 +259,7 @@ export function DetailViewSettingsSection({ config, fields, onChange }: DetailVi
                 value={rowTailFields}
                 onChange={(values) => {
                   setRowTailFields(values);
-                  handleChange({ rowTailFields: values });
+                  onChange(createUpdatedConfig({ rowTailFields: values }));
                 }}
                 placeholder={m.settings_detailView_rowTailFieldsPlaceholder()}
               />
@@ -254,7 +285,7 @@ export function DetailViewSettingsSection({ config, fields, onChange }: DetailVi
                 value={column1Fields}
                 onChange={(values) => {
                   setColumn1Fields(values);
-                  handleChange({ column1Fields: values });
+                  onChange(createUpdatedConfig({ column1Fields: values }));
                 }}
                 placeholder={m.settings_detailView_leftColumnFieldsPlaceholder()}
               />
@@ -270,7 +301,7 @@ export function DetailViewSettingsSection({ config, fields, onChange }: DetailVi
                 value={column2Fields}
                 onChange={(values) => {
                   setColumn2Fields(values);
-                  handleChange({ column2Fields: values });
+                  onChange(createUpdatedConfig({ column2Fields: values }));
                 }}
                 placeholder={m.settings_detailView_rightColumnFieldsPlaceholder()}
               />

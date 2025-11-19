@@ -6,8 +6,9 @@
 import { ArrowLeft, MoreVertical, Trash2, Copy, Share2 } from 'lucide-react';
 import type { TableRecord, Table } from '@workspace/active-tables-core';
 import { Inline } from '@workspace/ui/components/primitives/inline';
+import { Stack } from '@workspace/ui/components/primitives/stack';
 import { Box } from '@workspace/ui/components/primitives/box';
-import { Heading } from '@workspace/ui/components/typography';
+import { Heading, Text } from '@workspace/ui/components/typography';
 import { Button } from '@workspace/ui/components/button';
 import {
   DropdownMenu,
@@ -29,6 +30,14 @@ import {
 } from '@workspace/ui/components/alert-dialog';
 import { useState } from 'react';
 
+/**
+ * Safely get record data from various data structures
+ * Handles: record.data, record.record, or direct field access
+ */
+function getRecordData(record: TableRecord): Record<string, unknown> {
+  return record.data || record.record || (record as unknown as Record<string, unknown>);
+}
+
 interface RecordHeaderProps {
   record: TableRecord;
   table: Table;
@@ -49,7 +58,7 @@ export function RecordHeader({ record, table, referenceRecords, onDelete, onBack
     config?.titleField || // Fallback to titleField (spec)
     table.config.fields[0]?.name; // Final fallback to first field
 
-  const recordData = (record as any).data || record.record || record;
+  const recordData = getRecordData(record);
   let titleValue = titleFieldName ? recordData[titleFieldName] : null;
 
   // Check if titleField is a reference field and lookup the actual value
@@ -59,12 +68,45 @@ export function RecordHeader({ record, table, referenceRecords, onDelete, onBack
     const refRecord = refRecords.find((r) => r.id === String(titleValue));
     if (refRecord) {
       const labelField = titleField.referenceLabelField || 'name';
-      const refData = (refRecord as any).data || refRecord.record || refRecord;
+      const refData = getRecordData(refRecord);
       titleValue = refData[labelField] || titleValue;
     }
   }
 
   const recordTitle = titleValue != null && titleValue !== '' ? String(titleValue) : record.id;
+
+  // Get subline fields for metadata display
+  const subLineFieldNames = config?.headSubLineFields || config?.subLineFields || [];
+  const subLineValues = subLineFieldNames
+    .map((fieldName) => {
+      const field = table.config.fields.find((f) => f.name === fieldName);
+      if (!field) return null;
+
+      let value = recordData[fieldName];
+
+      // Handle reference fields
+      if (field.referenceTableId && value && referenceRecords) {
+        const refRecords = referenceRecords[field.referenceTableId] || [];
+        const refRecord = refRecords.find((r) => r.id === String(value));
+        if (refRecord) {
+          const labelField = field.referenceLabelField || 'name';
+          const refData = getRecordData(refRecord);
+          value = refData[labelField] || value;
+        } else {
+          // Reference record not found - try to use field's own data
+          // This happens when reference data hasn't loaded yet
+          console.warn(`[RecordHeader] Reference record not found for ${fieldName}:`, {
+            fieldName,
+            value,
+            referenceTableId: field.referenceTableId,
+            availableRefs: Object.keys(referenceRecords),
+          });
+        }
+      }
+
+      return value != null && value !== '' ? String(value) : null;
+    })
+    .filter((v): v is string => v != null);
 
   const handleDelete = async () => {
     if (!onDelete) return;
@@ -98,15 +140,29 @@ export function RecordHeader({ record, table, referenceRecords, onDelete, onBack
   return (
     <Box className="border-b border-border bg-card sticky top-0 z-10">
       <div className="container mx-auto px-4 py-3 max-w-7xl">
-        <Inline justify="between" align="center">
-          {/* Left: Back button + Title */}
-          <Inline space="space-200" align="center" className="flex-1 min-w-0">
-            <Button variant="ghost" size="icon" onClick={onBack} aria-label="Go back">
+        <Inline justify="between" align="start">
+          {/* Left: Back button + Title + Metadata */}
+          <Inline space="space-200" align="start" className="flex-1 min-w-0">
+            <Button variant="ghost" size="icon" onClick={onBack} aria-label="Go back" className="mt-0.5">
               <ArrowLeft className="size-4" />
             </Button>
-            <Heading level={1} className="text-lg font-semibold truncate">
-              {recordTitle}
-            </Heading>
+            <Stack space="space-050" className="flex-1 min-w-0">
+              {/* Title */}
+              <Heading level={1} className="text-lg font-semibold truncate">
+                {recordTitle}
+              </Heading>
+              {/* Subline metadata */}
+              {subLineValues.length > 0 && (
+                <Inline space="space-100" wrap className="text-sm text-muted-foreground">
+                  {subLineValues.map((value, index) => (
+                    <span key={index} className="flex items-center gap-1">
+                      {index > 0 && <span>·</span>}
+                      <Text size="small">{value}</Text>
+                    </span>
+                  ))}
+                </Inline>
+              )}
+            </Stack>
           </Inline>
 
           {/* Right: Action buttons */}

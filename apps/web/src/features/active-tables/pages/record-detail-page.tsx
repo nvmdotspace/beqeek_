@@ -6,6 +6,8 @@
 import { useState, useMemo } from 'react';
 import { getRouteApi } from '@tanstack/react-router';
 import { RecordDetail } from '@workspace/active-tables-core';
+import { COMMENTS_POSITION_HIDDEN, REFERENCE_FIELD_TYPES, type RecordDetailConfig } from '@workspace/beqeek-shared';
+import type { Table } from '@workspace/active-tables-core';
 import { ROUTES } from '@/shared/route-paths';
 import { useActiveTable } from '../hooks/use-active-tables';
 import { useRecordById } from '../hooks/use-record-by-id';
@@ -28,6 +30,38 @@ import { ShortcutsHelpDialog } from '../components/shortcuts-help-dialog';
 const route = getRouteApi(ROUTES.ACTIVE_TABLES.RECORD_DETAIL);
 
 /**
+ * Helper: Check if RecordDetailConfig contains any reference fields
+ * Returns true if any configured field is a reference type
+ */
+function configHasReferenceFields(config: RecordDetailConfig | null | undefined, table: Table | null): boolean {
+  if (!config || !table) return false;
+
+  // Collect all field names from config
+  const fieldNames = new Set<string>();
+
+  // Add common fields
+  if (config.headTitleField) fieldNames.add(config.headTitleField);
+  config.headSubLineFields?.forEach((f) => fieldNames.add(f));
+
+  // Add layout-specific fields
+  if ('rowTailFields' in config) {
+    config.rowTailFields?.forEach((f) => fieldNames.add(f));
+  }
+  if ('column1Fields' in config) {
+    config.column1Fields?.forEach((f) => fieldNames.add(f));
+  }
+  if ('column2Fields' in config) {
+    config.column2Fields?.forEach((f) => fieldNames.add(f));
+  }
+
+  // Check if any field is a reference type
+  return Array.from(fieldNames).some((fieldName) => {
+    const field = table.config.fields.find((f: { name: string }) => f.name === fieldName);
+    return field && REFERENCE_FIELD_TYPES.includes((field as any).type);
+  });
+}
+
+/**
  * Record Detail Page Component
  * Handles data fetching, encryption, and renders RecordDetail component
  */
@@ -36,16 +70,19 @@ export default function RecordDetailPage() {
   const navigate = route.useNavigate();
   const [showShortcutsHelp, setShowShortcutsHelp] = useState(false);
 
-  // Fetch table configuration (giống active-table-records-page.tsx)
+  // Step 1: Fetch table configuration first
   const tableQuery = useActiveTable(workspaceId, tableId);
   const table = tableQuery.data?.data ?? null;
   const tableLoading = tableQuery.isLoading;
   const tableError = tableQuery.error;
 
-  // Get encryption key (giống active-table-records-page.tsx)
+  // Step 2: Get recordDetailConfig from table
+  const recordDetailConfig = table?.config?.recordDetailConfig;
+
+  // Step 3: Check encryption requirements
   const encryption = useTableEncryption(workspaceId ?? '', tableId ?? '', table?.config);
 
-  // Fetch single record (giống active-table-records-page.tsx)
+  // Step 4: Fetch single record (only after table config is loaded)
   const {
     record,
     isLoading: recordLoading,
@@ -79,18 +116,32 @@ export default function RecordDetailPage() {
     },
   });
 
-  // Fetch reference records for lookup (SELECT_ONE_RECORD, SELECT_LIST_RECORD, FIRST_REFERENCE_RECORD)
+  // Check if config needs reference data
+  // Cast to strict type for the helper function
+  const needsReferenceData = useMemo(
+    () => configHasReferenceFields(recordDetailConfig as RecordDetailConfig | undefined, table),
+    [recordDetailConfig, table],
+  );
+
+  // Fetch reference records only if config contains reference fields
+  // (SELECT_ONE_RECORD, SELECT_LIST_RECORD, FIRST_REFERENCE_RECORD)
   // Pass current record so hook can build proper filtering for FIRST_REFERENCE_RECORD
   const { referenceRecords } = useReferenceRecords(workspaceId ?? '', table, {
     records: record ? [record] : [],
+    enabled: needsReferenceData, // ✅ Only fetch if config needs it
   });
 
-  // Fetch comments
+  // Determine if comments should be shown based on config
+  const shouldShowComments = recordDetailConfig?.commentsPosition !== COMMENTS_POSITION_HIDDEN;
+
+  // Fetch comments (only if needed)
   const {
     comments,
     addComment,
     isLoading: isLoadingComments,
-  } = useRecordComments(workspaceId ?? '', tableId ?? '', recordId);
+  } = useRecordComments(workspaceId ?? '', tableId ?? '', recordId, {
+    enabled: shouldShowComments,
+  });
 
   // Keyboard shortcuts
   useRecordShortcuts({
@@ -171,11 +222,57 @@ export default function RecordDetailPage() {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6 max-w-7xl">
         {/* Breadcrumb */}
-        <RecordBreadcrumb table={table} record={record} referenceRecords={referenceRecords} />
+        <div className="mb-4">
+          <RecordBreadcrumb table={table} />
+        </div>
 
-        <div className="grid grid-cols-12 gap-6 mt-4">
-          {/* Record Detail - Main Content */}
-          <div className="col-span-12 lg:col-span-8">
+        {/* Conditional Layout based on commentsPosition config */}
+        {shouldShowComments ? (
+          // Layout with Comments Panel (right-panel)
+          <div className="grid grid-cols-12 gap-6">
+            {/* Record Detail - Main Content (8 columns) */}
+            <div className="col-span-12 lg:col-span-8">
+              <div className="bg-card rounded-lg border p-6">
+                <RecordDetail
+                  record={record}
+                  table={table}
+                  onFieldChange={permissions?.update ? handleFieldChange : undefined}
+                  onDelete={permissions?.delete ? handleDelete : undefined}
+                  onRecordClick={handleRecordClick}
+                  readOnly={!permissions?.update}
+                  showComments={false} // Comments in sidebar
+                  showTimeline={true}
+                  showRelatedRecords={true}
+                  referenceRecords={referenceRecords}
+                  userRecords={userRecordsMap}
+                />
+              </div>
+            </div>
+
+            {/* Comments Panel - Sidebar (4 columns) */}
+            <div className="col-span-12 lg:col-span-4">
+              <div className="sticky top-20">
+                <CommentsPanel
+                  recordId={recordId}
+                  comments={comments.map((c) => {
+                    const user = workspaceUsers?.find((u) => u.id === c.userId);
+                    return {
+                      id: c.id,
+                      content: c.content,
+                      userId: c.userId,
+                      userName: user?.name || 'Unknown User',
+                      createdAt: c.createdAt,
+                    };
+                  })}
+                  onCommentAdd={addComment}
+                  loading={isLoadingComments}
+                />
+              </div>
+            </div>
+          </div>
+        ) : (
+          // Full-width Layout (commentsPosition: hidden)
+          <div className="bg-card rounded-lg border p-6">
             <RecordDetail
               record={record}
               table={table}
@@ -183,35 +280,14 @@ export default function RecordDetailPage() {
               onDelete={permissions?.delete ? handleDelete : undefined}
               onRecordClick={handleRecordClick}
               readOnly={!permissions?.update}
-              showComments={false} // Shown in sidebar
+              showComments={false} // Hidden by config
               showTimeline={true}
               showRelatedRecords={true}
               referenceRecords={referenceRecords}
               userRecords={userRecordsMap}
             />
           </div>
-
-          {/* Comments Panel - Sidebar */}
-          <div className="col-span-12 lg:col-span-4">
-            <div className="sticky top-20">
-              <CommentsPanel
-                recordId={recordId}
-                comments={comments.map((c) => {
-                  const user = workspaceUsers?.find((u) => u.id === c.userId);
-                  return {
-                    id: c.id,
-                    content: c.content,
-                    userId: c.userId,
-                    userName: user?.name || 'Unknown User',
-                    createdAt: c.createdAt,
-                  };
-                })}
-                onCommentAdd={addComment}
-                loading={isLoadingComments}
-              />
-            </div>
-          </div>
-        </div>
+        )}
       </main>
 
       {/* Shortcuts Help Dialog */}

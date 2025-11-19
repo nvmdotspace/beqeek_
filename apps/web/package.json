@@ -57,6 +57,8 @@
     "@workspace/typescript-config": "workspace:*",
     "eslint": "^9.36.0",
     "jsdom": "^27.2.0",
+    "pngjs": "^7.0.0",
+    "potrace-js": "^0.0.6",
     "rollup-plugin-visualizer": "^6.0.5",
     "tailwindcss": "^4.1.13",
     "typescript": "^5.9.2",

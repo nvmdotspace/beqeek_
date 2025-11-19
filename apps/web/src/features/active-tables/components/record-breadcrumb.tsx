@@ -13,44 +13,11 @@ const route = getRouteApi(ROUTES.ACTIVE_TABLES.RECORD_DETAIL);
 
 interface RecordBreadcrumbProps {
   table: Table;
-  record: TableRecord;
-  referenceRecords?: Record<string, TableRecord[]>;
 }
 
-export function RecordBreadcrumb({ table, record, referenceRecords }: RecordBreadcrumbProps) {
+export function RecordBreadcrumb({ table }: RecordBreadcrumbProps) {
   const { locale, workspaceId } = route.useParams();
   const navigate = route.useNavigate();
-
-  // Get record title from layout-specific field
-  // head-detail should use titleField, but API may return headTitleField
-  // two-column-detail uses headTitleField
-  const config = table.config.recordDetailConfig;
-  const titleFieldName =
-    config?.headTitleField || // Try headTitleField first (actual API response)
-    config?.titleField || // Fallback to titleField (spec)
-    table.config.fields[0]?.name; // Final fallback to first field
-
-  const recordData = (record as any).data || record.record || record;
-  let titleValue = titleFieldName ? recordData[titleFieldName] : null;
-
-  // Check if titleField is a reference field and lookup the actual value
-  const titleField = table.config.fields.find((f) => f.name === titleFieldName);
-  if (titleField?.referenceTableId && titleValue && referenceRecords) {
-    const refRecords = referenceRecords[titleField.referenceTableId] || [];
-    const refRecord = refRecords.find((r) => r.id === String(titleValue));
-    if (refRecord) {
-      const labelField = titleField.referenceLabelField || 'name';
-      const refData = (refRecord as any).data || refRecord.record || refRecord;
-      titleValue = refData[labelField] || titleValue;
-    }
-  }
-
-  const recordTitle = titleValue != null && titleValue !== '' ? String(titleValue) : record.id;
-
-  const truncateTitle = (title: string, maxLength: number = 30) => {
-    if (title.length <= maxLength) return title;
-    return title.substring(0, maxLength) + '...';
-  };
 
   return (
     <nav aria-label="Breadcrumb" className="py-2">
@@ -66,24 +33,9 @@ export function RecordBreadcrumb({ table, record, referenceRecords }: RecordBrea
 
         <ChevronRight className="size-3.5 text-muted-foreground" />
 
-        {/* Table */}
-        <button
-          onClick={() =>
-            navigate({
-              to: ROUTES.ACTIVE_TABLES.TABLE_RECORDS,
-              params: { locale, workspaceId, tableId: table.id },
-            })
-          }
-          className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <Text size="small">{truncateTitle(table.name)}</Text>
-        </button>
-
-        <ChevronRight className="size-3.5 text-muted-foreground" />
-
-        {/* Record */}
+        {/* Current Table */}
         <Text size="small" className="text-foreground font-medium" aria-current="page">
-          {truncateTitle(recordTitle)}
+          {table.name}
         </Text>
       </Inline>
     </nav>

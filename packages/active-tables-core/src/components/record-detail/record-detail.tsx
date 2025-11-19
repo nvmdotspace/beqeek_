@@ -59,10 +59,11 @@ export function RecordDetail({
 
   // Build head-detail config
   // Note: API may return headTitleField instead of titleField for head-detail layout
+  // Also support rowTailFields (settings UI naming) vs tailFields (component naming)
   const headDetailConfig = {
     titleField: layoutConfig.headTitleField || layoutConfig.titleField || table.config.fields[0]?.name || '',
     subLineFields: layoutConfig.headSubLineFields || layoutConfig.subLineFields || [],
-    tailFields: layoutConfig.tailFields || table.config.fields.map((f) => f.name),
+    tailFields: layoutConfig.rowTailFields || layoutConfig.tailFields || [],
   };
 
   // Build two-column config
