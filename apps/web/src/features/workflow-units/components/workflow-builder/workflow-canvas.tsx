@@ -143,7 +143,7 @@ export const WorkflowCanvas = () => {
   };
 
   return (
-    <div ref={reactFlowWrapper} className="h-full w-full" onDrop={onDrop} onDragOver={onDragOver}>
+    <div id="workflow-canvas" ref={reactFlowWrapper} className="h-full w-full" onDrop={onDrop} onDragOver={onDragOver}>
       <ReactFlow
         nodes={nodes}
         edges={edges}

@@ -73,6 +73,10 @@ export default defineConfig({
             if (id.includes('axios')) return 'axios';
             if (id.includes('crypto-js')) return 'crypto-js';
 
+            // Monaco Editor - tách riêng vì lớn
+            if (id.includes('monaco-editor')) return 'monaco-editor';
+            if (id.includes('monaco-yaml')) return 'monaco-yaml';
+
             // DON'T split zustand - causes circular dependency with stores
             // if (id.includes('zustand')) return 'zustand';
 
@@ -82,5 +86,8 @@ export default defineConfig({
         },
       },
     },
+  },
+  optimizeDeps: {
+    include: ['monaco-editor', 'monaco-yaml'],
   },
 });

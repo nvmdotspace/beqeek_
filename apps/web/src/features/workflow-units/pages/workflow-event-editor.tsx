@@ -4,12 +4,14 @@ import { Grid, GridItem } from '@workspace/ui/components/primitives';
 import { WorkflowCanvas } from '../components/workflow-builder/workflow-canvas';
 import { NodePalette } from '../components/workflow-builder/node-palette';
 import { NodeConfigPanel } from '../components/workflow-builder/node-config-panel';
+import { YamlEditor } from '../components/workflow-builder/yaml-editor';
 import { EventListSidebar } from '../components/event-list-sidebar';
 import { CanvasHeader } from '../components/workflow-builder/canvas-header';
 import { CreateEventDialog } from '../components/dialogs/create-event-dialog';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { useWorkflowEvent } from '../hooks/use-workflow-event';
 import { useWorkflowEditorStore } from '../stores/workflow-editor-store';
+import { useModeSync } from '../hooks/use-mode-sync';
 
 const route = getRouteApi('/$locale/workspaces/$workspaceId/workflow-units/$unitId/events/$eventId/edit');
 
@@ -22,8 +24,11 @@ export default function WorkflowEventEditorPage() {
   const { workspaceId, unitId, eventId } = route.useParams();
   const [showCreateDialog, setShowCreateDialog] = useState(false);
 
-  const { currentEventId, setCurrentEventId, loadEvent } = useWorkflowEditorStore();
+  const { currentEventId, setCurrentEventId, loadEvent, mode } = useWorkflowEditorStore();
   const { data: event } = useWorkflowEvent(workspaceId, eventId);
+
+  // Bidirectional sync between Visual and YAML modes
+  useModeSync();
 
   // Sync currentEventId with URL params when route changes
   useEffect(() => {
@@ -50,22 +55,28 @@ export default function WorkflowEventEditorPage() {
           {/* Canvas Header */}
           <CanvasHeader workspaceId={workspaceId} />
 
-          <Grid columns={12} className="flex-1">
-            {/* Node Palette - Left Sidebar */}
-            <GridItem span={2} className="border-r border-border overflow-hidden">
-              <NodePalette />
-            </GridItem>
+          {mode === 'visual' ? (
+            <Grid columns={12} className="flex-1">
+              {/* Node Palette - Left Sidebar */}
+              <GridItem span={2} className="border-r border-border overflow-hidden">
+                <NodePalette />
+              </GridItem>
 
-            {/* Canvas - Center */}
-            <GridItem span={7} className="relative overflow-hidden">
-              <WorkflowCanvas />
-            </GridItem>
+              {/* Canvas - Center */}
+              <GridItem span={7} className="relative overflow-hidden">
+                <WorkflowCanvas />
+              </GridItem>
 
-            {/* Config Panel - Right Sidebar */}
-            <GridItem span={3} className="border-l border-border overflow-hidden">
-              <NodeConfigPanel />
-            </GridItem>
-          </Grid>
+              {/* Config Panel - Right Sidebar */}
+              <GridItem span={3} className="border-l border-border overflow-hidden">
+                <NodeConfigPanel />
+              </GridItem>
+            </Grid>
+          ) : (
+            <div className="flex-1 overflow-hidden">
+              <YamlEditor workspaceId={workspaceId} />
+            </div>
+          )}
         </div>
       </div>
 

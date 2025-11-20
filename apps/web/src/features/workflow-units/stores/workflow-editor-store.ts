@@ -20,6 +20,12 @@ interface WorkflowEditorState {
   updateNodes: (nodes: Node[]) => void;
   updateEdges: (edges: Edge[]) => void;
 
+  // YAML editor state
+  yamlContent: string;
+  yamlError: string | null;
+  setYamlContent: (content: string) => void;
+  setYamlError: (error: string | null) => void;
+
   // Selection
   selectedNodeIds: string[];
   setSelectedNodeIds: (ids: string[]) => void;
@@ -50,6 +56,8 @@ const initialState = {
   mode: 'visual' as EditorMode,
   nodes: [],
   edges: [],
+  yamlContent: '',
+  yamlError: null,
   selectedNodeIds: [],
   zoom: 1,
   currentEventId: null,
@@ -72,6 +80,9 @@ export const useWorkflowEditorStore = create<WorkflowEditorState>()(
         updateNodes: (nodes) => set({ nodes, isDirty: true }),
         updateEdges: (edges) => set({ edges, isDirty: true }),
 
+        setYamlContent: (yamlContent) => set({ yamlContent, isDirty: true }),
+        setYamlError: (yamlError) => set({ yamlError }),
+
         setSelectedNodeIds: (selectedNodeIds) => set({ selectedNodeIds }),
 
         setZoom: (zoom) => set({ zoom }),
@@ -82,14 +93,19 @@ export const useWorkflowEditorStore = create<WorkflowEditorState>()(
           try {
             set({ isLoading: true, parseError: null });
 
+            // Set currentEvent FIRST so error alert can display
+            set({
+              currentEvent: event,
+              currentEventId: event.id,
+            });
+
             // Parse YAML and load into canvas
             if (event.yaml && event.yaml !== '{}') {
               const { nodes, edges } = yamlToReactFlow(event.yaml);
               set({
                 nodes,
                 edges,
-                currentEvent: event,
-                currentEventId: event.id,
+                yamlContent: event.yaml,
                 isLoading: false,
                 isDirty: false,
                 parseError: null,
@@ -99,15 +115,17 @@ export const useWorkflowEditorStore = create<WorkflowEditorState>()(
               set({
                 nodes: [],
                 edges: [],
-                currentEvent: event,
-                currentEventId: event.id,
+                yamlContent: '',
                 isLoading: false,
                 isDirty: false,
                 parseError: null,
               });
             }
           } catch (error) {
+            // currentEvent already set, so error alert will display
             set({
+              nodes: [],
+              edges: [],
               parseError: error instanceof Error ? error.message : 'Failed to parse workflow YAML',
               isLoading: false,
             });
