@@ -100,6 +100,23 @@ export const ROUTES = {
   },
 
   /**
+   * Workflow Units feature routes
+   */
+  WORKFLOW_UNITS: {
+    /** Workflow units list: /$locale/workspaces/$workspaceId/workflow-units */
+    LIST: '/$locale/workspaces/$workspaceId/workflow-units' as const,
+
+    /** Workflow unit detail: /$locale/workspaces/$workspaceId/workflow-units/$unitId */
+    DETAIL: '/$locale/workspaces/$workspaceId/workflow-units/$unitId' as const,
+
+    /** Event editor: /$locale/workspaces/$workspaceId/workflow-units/$unitId/events/$eventId/edit */
+    EVENT_EDITOR: '/$locale/workspaces/$workspaceId/workflow-units/$unitId/events/$eventId/edit' as const,
+
+    /** Event console: /$locale/workspaces/$workspaceId/workflow-units/$unitId/events/$eventId/console */
+    EVENT_CONSOLE: '/$locale/workspaces/$workspaceId/workflow-units/$unitId/events/$eventId/console' as const,
+  },
+
+  /**
    * Workspace feature routes
    */
   WORKSPACE: {
@@ -152,6 +169,7 @@ export function isValidRoutePath(path: string): boolean {
     ...Object.values(ROUTES.ACTIVE_TABLES),
     ...Object.values(ROUTES.WORKFLOW_FORMS),
     ...Object.values(ROUTES.WORKFLOW_CONNECTORS),
+    ...Object.values(ROUTES.WORKFLOW_UNITS),
     ...Object.values(ROUTES.WORKSPACE),
   ]);
 
@@ -171,6 +189,9 @@ export const ROUTE_GROUPS = {
   /** All Workflow Connectors routes */
   WORKFLOW_CONNECTORS: Object.values(ROUTES.WORKFLOW_CONNECTORS),
 
+  /** All Workflow Units routes */
+  WORKFLOW_UNITS: Object.values(ROUTES.WORKFLOW_UNITS),
+
   /** All Workspace feature routes */
   WORKSPACE: Object.values(ROUTES.WORKSPACE),
 
@@ -182,6 +203,7 @@ export const ROUTE_GROUPS = {
     ...Object.values(ROUTES.ACTIVE_TABLES),
     ...Object.values(ROUTES.WORKFLOW_FORMS),
     ...Object.values(ROUTES.WORKFLOW_CONNECTORS),
+    ...Object.values(ROUTES.WORKFLOW_UNITS),
     ...Object.values(ROUTES.WORKSPACE),
   ],
 

@@ -100,9 +100,9 @@ export const NavigationMenu = ({ isCollapsed = true, className }: NavigationMenu
                   requiresPermission: 'tables',
                 },
                 {
-                  id: 'workflow',
-                  label: m.navigation_workflow(),
-                  href: `/${locale}/workspaces/${workspaceId}/workflows`,
+                  id: 'workflow-units',
+                  label: 'Workflow Units',
+                  href: `/${locale}/workspaces/${workspaceId}/workflow-units`,
                   icon: Workflow,
                   badge: 'workflows' as keyof BadgeCounts,
                   requiresPermission: 'workflow',

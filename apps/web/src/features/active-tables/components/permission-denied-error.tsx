@@ -2,7 +2,7 @@
  * PermissionDeniedError - Error state when user lacks permission to view record
  */
 
-import { Lock, ArrowLeft, Home } from 'lucide-react';
+import { Lock, ArrowLeft } from 'lucide-react';
 import { getRouteApi } from '@tanstack/react-router';
 import { Stack } from '@workspace/ui/components/primitives/stack';
 import { Inline } from '@workspace/ui/components/primitives/inline';

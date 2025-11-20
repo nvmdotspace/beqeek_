@@ -7,7 +7,7 @@ import { getRouteApi } from '@tanstack/react-router';
 import { Inline } from '@workspace/ui/components/primitives/inline';
 import { Text } from '@workspace/ui/components/typography';
 import { ROUTES } from '@/shared/route-paths';
-import type { Table, TableRecord } from '@workspace/active-tables-core';
+import type { Table } from '@workspace/active-tables-core';
 
 const route = getRouteApi(ROUTES.ACTIVE_TABLES.RECORD_DETAIL);
 

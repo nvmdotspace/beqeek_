@@ -6,12 +6,7 @@
 import { useState, useMemo } from 'react';
 import { getRouteApi } from '@tanstack/react-router';
 import { RecordDetail } from '@workspace/active-tables-core';
-import {
-  COMMENTS_POSITION_HIDDEN,
-  REFERENCE_FIELD_TYPES,
-  type RecordDetailConfig,
-  type ReferenceFieldType,
-} from '@workspace/beqeek-shared';
+import { COMMENTS_POSITION_HIDDEN, REFERENCE_FIELD_TYPES, type RecordDetailConfig } from '@workspace/beqeek-shared';
 import type { Table, FieldConfig } from '@workspace/active-tables-core';
 import { ROUTES } from '@/shared/route-paths';
 import { useActiveTable } from '../hooks/use-active-tables';

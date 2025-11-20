@@ -2,7 +2,7 @@
  * RecordNotFound - Error state when table or record is not found
  */
 
-import { AlertCircle, ArrowLeft, FileQuestion, TableIcon } from 'lucide-react';
+import { ArrowLeft, FileQuestion, TableIcon } from 'lucide-react';
 import { getRouteApi } from '@tanstack/react-router';
 import { Stack } from '@workspace/ui/components/primitives/stack';
 import { Inline } from '@workspace/ui/components/primitives/inline';
