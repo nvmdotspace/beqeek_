@@ -50,8 +50,8 @@ steps:
       expect((firstNode?.data as Record<string, unknown> | undefined)?.label).toBe('First Step');
 
       // Check edge structure
-      expect(result.edges[0].source).toBe('step_1');
-      expect(result.edges[0].target).toBe('step_2');
+      expect(result.edges[0]?.source).toBe('step_1');
+      expect(result.edges[0]?.target).toBe('step_2');
     });
 
     it('should throw YAMLParseError for invalid YAML', () => {

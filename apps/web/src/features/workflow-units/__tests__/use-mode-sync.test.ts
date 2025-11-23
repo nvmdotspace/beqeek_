@@ -11,10 +11,14 @@ import { useWorkflowEditorStore } from '../stores/workflow-editor-store';
 const mockEvent = {
   id: 'event_1',
   eventName: 'Test Event',
-  eventSourceType: 'WEBHOOK',
-  eventSourceParams: { secret: 'test123' },
+  eventSourceType: 'WEBHOOK' as const,
+  eventSourceParams: { webhookId: 'webhook_123' },
   eventActive: true,
   yaml: '',
+  workflowUnit: 'unit_1',
+  responseId: 'response_123',
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
 };
 
 describe('useModeSync', () => {

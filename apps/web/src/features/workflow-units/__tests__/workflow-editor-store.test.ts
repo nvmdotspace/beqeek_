@@ -53,7 +53,7 @@ describe('workflow-editor-store', () => {
       });
 
       const state = useWorkflowEditorStore.getState();
-      expect(state.nodes[0].position).toEqual({ x: 200, y: 300 });
+      expect(state.nodes[0]?.position).toEqual({ x: 200, y: 300 });
     });
 
     it('should replace all nodes via setNodes', () => {
@@ -72,7 +72,7 @@ describe('workflow-editor-store', () => {
 
       const state = useWorkflowEditorStore.getState();
       expect(state.nodes).toHaveLength(1);
-      expect(state.nodes[0].id).toBe('node_3');
+      expect(state.nodes[0]?.id).toBe('node_3');
     });
   });
 
@@ -224,7 +224,7 @@ describe('workflow-editor-store', () => {
 
       const state = useWorkflowEditorStore.getState();
       expect(state.nodes).toHaveLength(1);
-      expect(state.nodes[0].id).toBe('node_2');
+      expect(state.nodes[0]?.id).toBe('node_2');
       // Edge should also be removed (node_1 was source)
       expect(state.edges).toHaveLength(0);
     });

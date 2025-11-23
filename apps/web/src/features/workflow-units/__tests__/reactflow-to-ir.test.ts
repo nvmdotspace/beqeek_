@@ -79,7 +79,7 @@ describe('reactflow-to-ir', () => {
       ];
 
       const result = reactFlowToIR(nodes, [], defaultTrigger);
-      expect(result.steps[0].position).toEqual({ x: 101, y: 200 });
+      expect(result.steps[0]?.position).toEqual({ x: 101, y: 200 });
     });
 
     it('should use node id as name if label not provided', () => {
@@ -93,7 +93,7 @@ describe('reactflow-to-ir', () => {
       ];
 
       const result = reactFlowToIR(nodes, [], defaultTrigger);
-      expect(result.steps[0].name).toBe('node_1');
+      expect(result.steps[0]?.name).toBe('node_1');
     });
 
     it('should default config to empty object', () => {
@@ -107,7 +107,7 @@ describe('reactflow-to-ir', () => {
       ];
 
       const result = reactFlowToIR(nodes, [], defaultTrigger);
-      expect(result.steps[0].config).toEqual({});
+      expect(result.steps[0]?.config).toEqual({});
     });
 
     it('should throw error for node missing type', () => {
@@ -140,7 +140,7 @@ describe('reactflow-to-ir', () => {
       ];
 
       const result = reactFlowToIR(nodes, edges, defaultTrigger);
-      expect(result.steps[0].depends_on).toBeUndefined();
+      expect(result.steps[0]?.depends_on).toBeUndefined();
     });
 
     it('should include trigger configuration', () => {

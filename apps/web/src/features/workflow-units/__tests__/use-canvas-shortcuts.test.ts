@@ -81,7 +81,7 @@ describe('useCanvasShortcuts', () => {
       const state = useWorkflowEditorStore.getState();
       expect(state.clipboard).not.toBeNull();
       expect(state.clipboard?.nodes).toHaveLength(1);
-      expect(state.clipboard?.nodes[0].id).toBe('node_1');
+      expect(state.clipboard?.nodes[0]?.id).toBe('node_1');
     });
 
     it('should not copy when no nodes selected', () => {
@@ -118,8 +118,8 @@ describe('useCanvasShortcuts', () => {
       expect(state.nodes.length).toBe(initialNodeCount + 1);
       // Pasted node should have offset position
       const pastedNode = state.nodes[state.nodes.length - 1];
-      expect(pastedNode.position.x).toBe(150); // 100 + 50
-      expect(pastedNode.position.y).toBe(150); // 100 + 50
+      expect(pastedNode?.position?.x).toBe(150); // 100 + 50
+      expect(pastedNode?.position?.y).toBe(150); // 100 + 50
     });
 
     it('should not paste when clipboard is empty', () => {
@@ -151,7 +151,7 @@ describe('useCanvasShortcuts', () => {
 
       const state = useWorkflowEditorStore.getState();
       expect(state.nodes).toHaveLength(1);
-      expect(state.nodes[0].id).toBe('node_2');
+      expect(state.nodes[0]?.id).toBe('node_2');
     });
 
     it('should do nothing when no nodes selected', () => {

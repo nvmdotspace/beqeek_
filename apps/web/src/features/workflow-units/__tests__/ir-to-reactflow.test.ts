@@ -100,7 +100,7 @@ describe('ir-to-reactflow', () => {
       };
 
       const result = irToReactFlow(ir);
-      expect(result.nodes[0].position).toEqual({ x: 250, y: 350 });
+      expect(result.nodes[0]?.position).toEqual({ x: 250, y: 350 });
     });
 
     it('should auto-calculate positions when not provided', () => {
@@ -115,10 +115,10 @@ describe('ir-to-reactflow', () => {
 
       const result = irToReactFlow(ir);
       // Each node should have a position
-      expect(result.nodes[0].position).toBeDefined();
-      expect(result.nodes[1].position).toBeDefined();
+      expect(result.nodes[0]?.position).toBeDefined();
+      expect(result.nodes[1]?.position).toBeDefined();
       // Second node should be below first
-      expect(result.nodes[1].position.y).toBeGreaterThan(result.nodes[0].position.y);
+      expect(result.nodes[1]?.position?.y).toBeGreaterThan(result.nodes[0]?.position?.y ?? 0);
     });
 
     it('should return trigger configuration', () => {
@@ -151,16 +151,16 @@ describe('ir-to-reactflow', () => {
       const positions = Array.from({ length: 9 }, (_, i) => calculateGridPosition(i, 9));
 
       // First row (indices 0, 1, 2)
-      expect(positions[0].y).toBe(positions[1].y);
-      expect(positions[1].y).toBe(positions[2].y);
+      expect(positions[0]?.y).toBe(positions[1]?.y);
+      expect(positions[1]?.y).toBe(positions[2]?.y);
 
       // Second row (indices 3, 4, 5)
-      expect(positions[3].y).toBe(positions[4].y);
-      expect(positions[3].y).toBeGreaterThan(positions[0].y);
+      expect(positions[3]?.y).toBe(positions[4]?.y);
+      expect(positions[3]?.y).toBeGreaterThan(positions[0]?.y ?? 0);
 
       // Columns
-      expect(positions[0].x).toBeLessThan(positions[1].x);
-      expect(positions[1].x).toBeLessThan(positions[2].x);
+      expect(positions[0]?.x).toBeLessThan(positions[1]?.x ?? 0);
+      expect(positions[1]?.x).toBeLessThan(positions[2]?.x ?? 0);
     });
 
     it('should handle single item', () => {
