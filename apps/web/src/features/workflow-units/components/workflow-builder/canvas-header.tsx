@@ -2,6 +2,7 @@
  * CanvasHeader Component
  *
  * Displays current event info, dirty state, and manual save button above workflow canvas.
+ * Now includes EventSelector for n8n-style maximized canvas layout.
  */
 
 import { Badge } from '@workspace/ui/components/badge';
@@ -15,14 +16,17 @@ import { reactFlowToYAML } from '../../utils/yaml-converter';
 import { autoLayoutNodes } from '../../utils/auto-layout';
 import { exportWorkflowToPng } from '../../utils/export-utils';
 import { EditorModeToggle } from './editor-mode-toggle';
+import { EventSelector } from './event-selector';
 import { toast } from 'sonner';
 import { useCallback, useEffect, useState } from 'react';
 
 interface CanvasHeaderProps {
   workspaceId: string;
+  unitId: string;
+  onCreateEvent: () => void;
 }
 
-export function CanvasHeader({ workspaceId }: CanvasHeaderProps) {
+export function CanvasHeader({ workspaceId, unitId, onCreateEvent }: CanvasHeaderProps) {
   const { currentEvent, nodes, edges, isDirty, parseError, mode, setIsDirty, setNodes, setMode } =
     useWorkflowEditorStore();
   const [isExporting, setIsExporting] = useState(false);
@@ -152,13 +156,18 @@ export function CanvasHeader({ workspaceId }: CanvasHeaderProps) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [canUndo, canRedo, undo, redo, handleAutoLayout, mode, setMode, isDirty, handleManualSave]);
 
-  // Empty state - no event selected
+  // Empty state - no event selected (still show EventSelector)
   if (!currentEvent) {
     return (
       <div className="border-b bg-background p-4">
-        <div className="flex items-center justify-center gap-2 text-muted-foreground">
-          <FileQuestion className="h-5 w-5" />
-          <span className="text-sm">Select an event from the sidebar to start editing</span>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <EventSelector workspaceId={workspaceId} unitId={unitId} onCreateEvent={onCreateEvent} />
+          </div>
+          <div className="flex items-center gap-2 text-muted-foreground" role="status">
+            <FileQuestion className="h-5 w-5" aria-hidden="true" />
+            <span className="text-sm">Select an event to start editing</span>
+          </div>
         </div>
       </div>
     );
@@ -168,8 +177,8 @@ export function CanvasHeader({ workspaceId }: CanvasHeaderProps) {
   if (parseError) {
     return (
       <div className="border-b bg-background p-4">
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
+        <Alert variant="destructive" role="alert">
+          <AlertCircle className="h-4 w-4" aria-hidden="true" />
           <AlertDescription>
             <strong>Failed to load workflow:</strong> {parseError}
           </AlertDescription>
@@ -181,17 +190,12 @@ export function CanvasHeader({ workspaceId }: CanvasHeaderProps) {
   return (
     <div className="border-b bg-background p-4">
       <div className="flex items-center justify-between">
-        {/* Event Info */}
+        {/* Event Selector + Mode Toggle */}
         <div className="flex items-center gap-3">
-          <h2 className="font-semibold text-lg">{currentEvent.eventName}</h2>
+          <EventSelector workspaceId={workspaceId} unitId={unitId} onCreateEvent={onCreateEvent} />
           <Badge variant={currentEvent.eventActive ? 'default' : 'secondary'}>
             {currentEvent.eventActive ? 'Active' : 'Inactive'}
           </Badge>
-          {currentEvent.eventSourceType && (
-            <Badge variant="outline" className="capitalize">
-              {currentEvent.eventSourceType.replace('_', ' ').toLowerCase()}
-            </Badge>
-          )}
           <Separator orientation="vertical" className="h-6" />
           <EditorModeToggle />
         </div>
@@ -199,12 +203,26 @@ export function CanvasHeader({ workspaceId }: CanvasHeaderProps) {
         {/* Toolbar Actions */}
         <div className="flex items-center gap-3">
           {/* Undo/Redo */}
-          <div className="flex items-center gap-1">
-            <Button variant="ghost" size="sm" onClick={() => undo()} disabled={!canUndo} title="Undo (Cmd+Z)">
-              <Undo2 className="h-4 w-4" />
+          <div className="flex items-center gap-1" role="group" aria-label="History controls">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => undo()}
+              disabled={!canUndo}
+              title="Undo (Cmd+Z)"
+              aria-label="Undo last action"
+            >
+              <Undo2 className="h-4 w-4" aria-hidden="true" />
             </Button>
-            <Button variant="ghost" size="sm" onClick={() => redo()} disabled={!canRedo} title="Redo (Cmd+Shift+Z)">
-              <Redo2 className="h-4 w-4" />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => redo()}
+              disabled={!canRedo}
+              title="Redo (Cmd+Shift+Z)"
+              aria-label="Redo last action"
+            >
+              <Redo2 className="h-4 w-4" aria-hidden="true" />
             </Button>
           </div>
 
@@ -217,8 +235,9 @@ export function CanvasHeader({ workspaceId }: CanvasHeaderProps) {
             onClick={handleAutoLayout}
             disabled={nodes.length === 0}
             title="Auto-layout nodes (Cmd+Shift+L)"
+            aria-label="Auto-layout nodes"
           >
-            <Network className="h-4 w-4 mr-2" />
+            <Network className="h-4 w-4 mr-2" aria-hidden="true" />
             Auto-Layout
           </Button>
 
@@ -229,17 +248,27 @@ export function CanvasHeader({ workspaceId }: CanvasHeaderProps) {
             onClick={handleExport}
             disabled={nodes.length === 0 || isExporting}
             title="Export workflow as PNG"
+            aria-label="Export workflow as PNG"
           >
-            <Download className="h-4 w-4 mr-2" />
+            <Download className="h-4 w-4 mr-2" aria-hidden="true" />
             {isExporting ? 'Exporting...' : 'Export PNG'}
           </Button>
 
           <Separator orientation="vertical" className="h-6" />
 
           {/* Save Button + Dirty State */}
-          {isDirty && <span className="text-sm text-muted-foreground">Unsaved changes</span>}
-          <Button onClick={handleManualSave} disabled={!isDirty || updateEvent.isPending} size="sm">
-            <Save className="h-4 w-4 mr-2" />
+          {isDirty && (
+            <span className="text-sm text-muted-foreground" role="status" aria-live="polite">
+              Unsaved changes
+            </span>
+          )}
+          <Button
+            onClick={handleManualSave}
+            disabled={!isDirty || updateEvent.isPending}
+            size="sm"
+            aria-label={updateEvent.isPending ? 'Saving workflow' : 'Save workflow'}
+          >
+            <Save className="h-4 w-4 mr-2" aria-hidden="true" />
             {updateEvent.isPending ? 'Saving...' : 'Save Workflow'}
           </Button>
         </div>

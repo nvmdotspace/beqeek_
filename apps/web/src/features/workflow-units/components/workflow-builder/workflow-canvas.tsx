@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useMemo, useRef, useEffect } from 'react';
 import {
   ReactFlow,
   Background,
@@ -13,6 +13,7 @@ import {
   type OnEdgesChange,
   type OnConnect,
   type NodeSelectionChange,
+  type ColorMode,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { Button } from '@workspace/ui/components/button';
@@ -20,9 +21,12 @@ import { Save, Play } from 'lucide-react';
 import { NODE_TYPES } from './nodes';
 import { useWorkflowEditorStore } from '../../stores/workflow-editor-store';
 import { isValidConnection } from '../../utils/connection-validator';
+import { useTheme } from '@/providers/theme-provider';
+import { useCanvasShortcuts } from '../../hooks/use-canvas-shortcuts';
 
 export const WorkflowCanvas = () => {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
+  const { resolvedTheme } = useTheme();
 
   const {
     nodes: storeNodes,
@@ -34,6 +38,18 @@ export const WorkflowCanvas = () => {
 
   const [nodes, setNodes, onNodesChange] = useNodesState(storeNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(storeEdges);
+
+  // Initialize canvas keyboard shortcuts (Cmd+A, Cmd+C, Cmd+V, Delete, Escape)
+  useCanvasShortcuts();
+
+  // Sync local state with store when store changes (e.g., from paste/delete actions)
+  useEffect(() => {
+    setNodes(storeNodes);
+  }, [storeNodes, setNodes]);
+
+  useEffect(() => {
+    setEdges(storeEdges);
+  }, [storeEdges, setEdges]);
 
   // Sync React Flow state with Zustand store
   const handleNodesChange: OnNodesChange = useCallback(
@@ -142,8 +158,19 @@ export const WorkflowCanvas = () => {
     }
   };
 
+  // Map resolved theme to React Flow ColorMode
+  const colorMode: ColorMode = resolvedTheme === 'dark' ? 'dark' : 'light';
+
   return (
-    <div id="workflow-canvas" ref={reactFlowWrapper} className="h-full w-full" onDrop={onDrop} onDragOver={onDragOver}>
+    <div
+      id="workflow-canvas"
+      ref={reactFlowWrapper}
+      className="h-full w-full"
+      onDrop={onDrop}
+      onDragOver={onDragOver}
+      role="application"
+      aria-label="Workflow canvas. Use keyboard shortcuts: Delete to remove selected, Ctrl+A to select all, Ctrl+C to copy, Ctrl+V to paste, Escape to deselect."
+    >
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -151,6 +178,7 @@ export const WorkflowCanvas = () => {
         onEdgesChange={handleEdgesChange}
         onConnect={handleConnect}
         nodeTypes={nodeTypes}
+        colorMode={colorMode}
         fitView
         attributionPosition="bottom-right"
         deleteKeyCode="Delete"
@@ -161,20 +189,23 @@ export const WorkflowCanvas = () => {
         <MiniMap
           nodeColor={(node) => {
             // Use CSS custom properties from design tokens
-            if (node.type?.startsWith('trigger_')) return 'hsl(217 91% 60%)'; // accent-blue
-            if (node.type?.startsWith('log')) return 'hsl(142 76% 36%)'; // accent-green
-            return 'hsl(173 80% 40%)'; // accent-teal (logic)
+            if (node.type?.startsWith('trigger_')) return 'var(--accent-blue)';
+            if (node.type?.startsWith('log')) return 'var(--accent-green)';
+            return 'var(--accent-teal)'; // logic nodes
           }}
-          maskColor="rgba(0, 0, 0, 0.1)"
+          maskColor={resolvedTheme === 'dark' ? 'rgba(0, 0, 0, 0.6)' : 'rgba(0, 0, 0, 0.1)'}
+          style={{
+            backgroundColor: 'var(--background)',
+          }}
         />
 
-        <Panel position="top-right" className="flex gap-2">
-          <Button size="sm" variant="outline" onClick={handleSave}>
-            <Save className="size-4 mr-2" />
+        <Panel position="top-right" className="flex gap-2" role="toolbar" aria-label="Canvas actions">
+          <Button size="sm" variant="outline" onClick={handleSave} aria-label="Save workflow">
+            <Save className="size-4 mr-2" aria-hidden="true" />
             Save
           </Button>
-          <Button size="sm" variant="outline" onClick={handleTest}>
-            <Play className="size-4 mr-2" />
+          <Button size="sm" variant="outline" onClick={handleTest} aria-label="Test workflow">
+            <Play className="size-4 mr-2" aria-hidden="true" />
             Test
           </Button>
         </Panel>

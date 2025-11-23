@@ -1,11 +1,9 @@
 import { useState, useEffect } from 'react';
 import { getRouteApi } from '@tanstack/react-router';
-import { Grid, GridItem } from '@workspace/ui/components/primitives';
 import { WorkflowCanvas } from '../components/workflow-builder/workflow-canvas';
 import { NodePalette } from '../components/workflow-builder/node-palette';
-import { NodeConfigPanel } from '../components/workflow-builder/node-config-panel';
+import { NodeConfigDrawer } from '../components/workflow-builder/node-config-drawer';
 import { YamlEditor } from '../components/workflow-builder/yaml-editor';
-import { EventListSidebar } from '../components/event-list-sidebar';
 import { CanvasHeader } from '../components/workflow-builder/canvas-header';
 import { CreateEventDialog } from '../components/dialogs/create-event-dialog';
 import { ErrorBoundary } from '@/components/error-boundary';
@@ -18,7 +16,12 @@ const route = getRouteApi('/$locale/workspaces/$workspaceId/workflow-units/$unit
 /**
  * Workflow Event Editor Page
  * Visual workflow builder with React Flow
- * Layout: Event List (left) | Node Palette | Canvas (center) | Config Panel (right)
+ *
+ * Optimized layout:
+ * - Event selector in header (replaces EventListSidebar)
+ * - Node Palette sidebar (left) for drag-and-drop nodes
+ * - Canvas (center) - maximized width
+ * - Config drawer slides from right when node selected
  */
 export default function WorkflowEventEditorPage() {
   const { workspaceId, unitId, eventId } = route.useParams();
@@ -46,32 +49,27 @@ export default function WorkflowEventEditorPage() {
 
   return (
     <ErrorBoundary>
-      <div className="h-screen flex">
-        {/* Event List Sidebar - Far Left */}
-        <EventListSidebar workspaceId={workspaceId} unitId={unitId} onCreateEvent={() => setShowCreateDialog(true)} />
+      <div className="h-screen flex flex-col">
+        {/* Canvas Header with Event Selector */}
+        <CanvasHeader workspaceId={workspaceId} unitId={unitId} onCreateEvent={() => setShowCreateDialog(true)} />
 
         {/* Main Editor Area */}
-        <div className="flex-1 flex flex-col">
-          {/* Canvas Header */}
-          <CanvasHeader workspaceId={workspaceId} />
-
+        <div className="flex-1 flex overflow-hidden">
           {mode === 'visual' ? (
-            <Grid columns={12} className="flex-1">
+            <>
               {/* Node Palette - Left Sidebar */}
-              <GridItem span={2} className="border-r border-border overflow-hidden">
+              <div className="w-64 border-r border-border flex-shrink-0 overflow-hidden">
                 <NodePalette />
-              </GridItem>
+              </div>
 
-              {/* Canvas - Center */}
-              <GridItem span={7} className="relative overflow-hidden">
+              {/* Canvas - Center (flex-1 takes remaining space) */}
+              <div className="flex-1 relative overflow-hidden">
                 <WorkflowCanvas />
-              </GridItem>
+              </div>
 
-              {/* Config Panel - Right Sidebar */}
-              <GridItem span={3} className="border-l border-border overflow-hidden">
-                <NodeConfigPanel />
-              </GridItem>
-            </Grid>
+              {/* Node Config Drawer (slides from right when node selected) */}
+              <NodeConfigDrawer />
+            </>
           ) : (
             <div className="flex-1 overflow-hidden">
               <YamlEditor workspaceId={workspaceId} />

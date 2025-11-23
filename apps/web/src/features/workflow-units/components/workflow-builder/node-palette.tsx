@@ -19,11 +19,24 @@ const NodePaletteItem = ({ definition }: NodePaletteItemProps) => {
     event.dataTransfer.effectAllowed = 'move';
   };
 
+  // Handle keyboard activation for accessibility
+  const onKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      // Create a custom event that the canvas can listen for
+      const customEvent = new CustomEvent('workflow:add-node', {
+        detail: { type: definition.type },
+        bubbles: true,
+      });
+      event.currentTarget.dispatchEvent(customEvent);
+    }
+  };
+
   // Category colors (design tokens)
   const categoryColors = {
-    trigger: 'hover:bg-accent-blue-subtle border-accent-blue-subtle',
-    action: 'hover:bg-accent-green-subtle border-accent-green-subtle',
-    logic: 'hover:bg-accent-teal-subtle border-accent-teal-subtle',
+    trigger: 'hover:bg-accent-blue-subtle border-accent-blue-subtle focus:ring-accent-blue',
+    action: 'hover:bg-accent-green-subtle border-accent-green-subtle focus:ring-accent-green',
+    logic: 'hover:bg-accent-teal-subtle border-accent-teal-subtle focus:ring-accent-teal',
   };
 
   return (
@@ -32,20 +45,29 @@ const NodePaletteItem = ({ definition }: NodePaletteItemProps) => {
       backgroundColor="card"
       borderRadius="md"
       border="default"
-      className={cn('cursor-move transition-all', categoryColors[definition.category])}
+      className={cn(
+        'cursor-move transition-all',
+        'focus:outline-none focus:ring-2 focus:ring-offset-2',
+        categoryColors[definition.category],
+      )}
       draggable
       onDragStart={onDragStart}
+      onKeyDown={onKeyDown}
       role="button"
       tabIndex={0}
-      aria-label={`Drag ${definition.label} node`}
+      aria-label={`Add ${definition.label} node to canvas. Drag or press Enter to add.`}
+      aria-describedby={`desc-${definition.type}`}
       title={definition.description}
     >
       <Inline space="space-100" align="center">
-        {IconComponent && <IconComponent className="size-4 text-muted-foreground flex-shrink-0" />}
+        {IconComponent && <IconComponent className="size-4 text-muted-foreground flex-shrink-0" aria-hidden="true" />}
         <Text size="small" className="line-clamp-1">
           {definition.label}
         </Text>
       </Inline>
+      <span id={`desc-${definition.type}`} className="sr-only">
+        {definition.description}
+      </span>
     </Box>
   );
 };
@@ -57,48 +79,60 @@ export const NodePalette = () => {
   const logic = NODE_DEFINITIONS.filter((d) => d.category === 'logic');
 
   return (
-    <Box padding="space-300" backgroundColor="background" className="h-full overflow-y-auto">
+    <Box
+      padding="space-300"
+      backgroundColor="background"
+      className="h-full overflow-y-auto"
+      role="region"
+      aria-label="Node palette - drag or press Enter on a node to add it to the canvas"
+    >
       <Stack space="space-400">
         {/* Header */}
-        <Heading level={4} className="text-base">
+        <Heading level={4} className="text-base" id="node-palette-heading">
           Node Palette
         </Heading>
 
         {/* Triggers Section */}
-        <Stack space="space-200">
-          <Text weight="semibold" size="small" color="muted">
-            Triggers
-          </Text>
-          <Stack space="space-150">
-            {triggers.map((def) => (
-              <NodePaletteItem key={def.type} definition={def} />
-            ))}
+        <section aria-labelledby="triggers-heading">
+          <Stack space="space-200">
+            <Text weight="semibold" size="small" color="muted" id="triggers-heading">
+              Triggers
+            </Text>
+            <Stack space="space-150" role="group" aria-label="Trigger nodes">
+              {triggers.map((def) => (
+                <NodePaletteItem key={def.type} definition={def} />
+              ))}
+            </Stack>
           </Stack>
-        </Stack>
+        </section>
 
         {/* Actions Section */}
-        <Stack space="space-200">
-          <Text weight="semibold" size="small" color="muted">
-            Actions
-          </Text>
-          <Stack space="space-150">
-            {actions.map((def) => (
-              <NodePaletteItem key={def.type} definition={def} />
-            ))}
+        <section aria-labelledby="actions-heading">
+          <Stack space="space-200">
+            <Text weight="semibold" size="small" color="muted" id="actions-heading">
+              Actions
+            </Text>
+            <Stack space="space-150" role="group" aria-label="Action nodes">
+              {actions.map((def) => (
+                <NodePaletteItem key={def.type} definition={def} />
+              ))}
+            </Stack>
           </Stack>
-        </Stack>
+        </section>
 
         {/* Logic Section */}
-        <Stack space="space-200">
-          <Text weight="semibold" size="small" color="muted">
-            Logic
-          </Text>
-          <Stack space="space-150">
-            {logic.map((def) => (
-              <NodePaletteItem key={def.type} definition={def} />
-            ))}
+        <section aria-labelledby="logic-heading">
+          <Stack space="space-200">
+            <Text weight="semibold" size="small" color="muted" id="logic-heading">
+              Logic
+            </Text>
+            <Stack space="space-150" role="group" aria-label="Logic nodes">
+              {logic.map((def) => (
+                <NodePaletteItem key={def.type} definition={def} />
+              ))}
+            </Stack>
           </Stack>
-        </Stack>
+        </section>
       </Stack>
     </Box>
   );

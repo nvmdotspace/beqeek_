@@ -42,7 +42,7 @@ const LOG_LEVEL_ICONS: Record<LogLevel, React.ElementType> = {
 const LOG_LEVEL_COLORS: Record<LogLevel, string> = {
   debug: 'text-muted-foreground',
   info: 'text-primary',
-  warn: 'text-amber-600 dark:text-amber-400', // TODO: Add design token for warning
+  warn: 'text-warning', // Uses --warning design token
   error: 'text-destructive',
 };
 
@@ -185,7 +185,7 @@ export function ConsoleViewer({
             <div
               className={cn(
                 'h-2 w-2 rounded-full',
-                isConnected ? 'bg-green-500' : isConnecting ? 'bg-amber-500 animate-pulse' : 'bg-destructive',
+                isConnected ? 'bg-success' : isConnecting ? 'bg-warning animate-pulse' : 'bg-destructive',
               )}
               aria-label={isConnected ? 'Connected' : isConnecting ? 'Connecting' : 'Disconnected'}
             />

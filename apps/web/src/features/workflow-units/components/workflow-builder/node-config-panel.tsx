@@ -16,12 +16,12 @@ export const NodeConfigPanel = () => {
 
   if (!selectedNode) {
     return (
-      <Box padding="space-300" className="h-full">
+      <Box padding="space-300" className="h-full" role="region" aria-label="Node configuration panel">
         <Stack space="space-300">
-          <Heading level={4} className="text-base">
+          <Heading level={4} className="text-base" id="config-panel-heading">
             Node Configuration
           </Heading>
-          <Text color="muted" size="small">
+          <Text color="muted" size="small" role="status">
             Select a node to view and edit its configuration
           </Text>
         </Stack>
@@ -32,9 +32,14 @@ export const NodeConfigPanel = () => {
   const nodeDef = NODE_DEFINITIONS.find((d) => d.type === selectedNode.type);
 
   return (
-    <Box padding="space-300" className="h-full overflow-y-auto">
+    <Box
+      padding="space-300"
+      className="h-full overflow-y-auto"
+      role="region"
+      aria-label={`Configuration for ${nodeDef?.label || selectedNode.type} node`}
+    >
       <Stack space="space-300">
-        <Heading level={4} className="text-base">
+        <Heading level={4} className="text-base" id="config-panel-heading">
           Node Configuration
         </Heading>
 
@@ -51,8 +56,8 @@ export const NodeConfigPanel = () => {
         </Stack>
 
         {/* Placeholder alert */}
-        <Alert>
-          <Info className="size-4" />
+        <Alert role="note">
+          <Info className="size-4" aria-hidden="true" />
           <AlertDescription>
             <Text size="small">Configuration forms will be implemented in future phases based on node type.</Text>
           </AlertDescription>
@@ -60,7 +65,7 @@ export const NodeConfigPanel = () => {
 
         {/* Display current node data */}
         <Stack space="space-150">
-          <Text weight="semibold" size="small">
+          <Text weight="semibold" size="small" id="node-data-label">
             Current Data:
           </Text>
           <Box
@@ -68,8 +73,11 @@ export const NodeConfigPanel = () => {
             backgroundColor="muted"
             borderRadius="md"
             className="font-mono text-xs overflow-auto max-h-96"
+            role="region"
+            aria-labelledby="node-data-label"
+            tabIndex={0}
           >
-            <pre>{JSON.stringify(selectedNode.data, null, 2)}</pre>
+            <pre aria-label="Node configuration data in JSON format">{JSON.stringify(selectedNode.data, null, 2)}</pre>
           </Box>
         </Stack>
       </Stack>

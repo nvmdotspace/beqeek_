@@ -16,14 +16,14 @@ export function EditorModeToggle() {
   };
 
   return (
-    <Tabs value={mode} onValueChange={handleModeChange}>
-      <TabsList className="grid w-[200px] grid-cols-2">
-        <TabsTrigger value="visual" className="gap-2">
-          <Workflow className="h-4 w-4" />
+    <Tabs value={mode} onValueChange={handleModeChange} aria-label="Editor mode">
+      <TabsList className="grid w-[200px] grid-cols-2" aria-label="Switch between Visual and YAML editor">
+        <TabsTrigger value="visual" className="gap-2" aria-label="Visual editor mode">
+          <Workflow className="h-4 w-4" aria-hidden="true" />
           Visual
         </TabsTrigger>
-        <TabsTrigger value="yaml" className="gap-2">
-          <Code2 className="h-4 w-4" />
+        <TabsTrigger value="yaml" className="gap-2" aria-label="YAML code editor mode">
+          <Code2 className="h-4 w-4" aria-hidden="true" />
           YAML
         </TabsTrigger>
       </TabsList>
