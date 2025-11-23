@@ -4,10 +4,10 @@ import { Heading, Text } from '@workspace/ui/components/typography';
 import { Button } from '@workspace/ui/components/button';
 
 interface HeroSectionProps {
-  onOpenModal: () => void;
+  onSignup: () => void;
 }
 
-export function HeroSection({ onOpenModal }: HeroSectionProps) {
+export function HeroSection({ onSignup }: HeroSectionProps) {
   return (
     <section className="relative pt-32 pb-20 lg:pt-40 lg:pb-24 overflow-hidden">
       <Container maxWidth="xl" padding="margin" className="relative z-10">
@@ -40,7 +40,7 @@ export function HeroSection({ onOpenModal }: HeroSectionProps) {
             {/* CTA Button */}
             <div className="flex flex-col sm:flex-row gap-4">
               <Button
-                onClick={onOpenModal}
+                onClick={onSignup}
                 size="lg"
                 className="h-12 px-8 rounded-full bg-accent-blue text-white font-bold hover:bg-accent-blue/90 shadow-lg shadow-accent-blue/20"
               >

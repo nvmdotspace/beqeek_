@@ -124,17 +124,62 @@ deploy_local() {
     pnpm --filter web preview
 }
 
+# Deploy product-page with Docker
+deploy_product_page() {
+    log_info "Starting Product Page Docker deployment..."
+
+    if ! command_exists docker; then
+        log_error "Docker is not installed. Please install Docker first."
+        exit 1
+    fi
+
+    # Build and run product-page container
+    log_info "Building product-page Docker image..."
+    docker build -f Dockerfile.product-page -t beqeek-product-page .
+
+    docker stop beqeek-product-page 2>/dev/null || true
+    docker rm beqeek-product-page 2>/dev/null || true
+    docker run -d --name beqeek-product-page -p 83:80 --restart unless-stopped beqeek-product-page
+
+    sleep 5
+    if curl -f http://localhost:83/health >/dev/null 2>&1; then
+        log_success "Product Page deployment successful! Running at http://localhost:83"
+    else
+        log_error "Health check failed. Check container logs with: docker logs beqeek-product-page"
+        exit 1
+    fi
+}
+
+# Local preview for product-page
+preview_product_page() {
+    log_info "Starting product-page local preview..."
+
+    log_info "Building product-page..."
+    pnpm --filter product-page build
+
+    log_success "Local preview will be available at http://localhost:4173"
+    log_info "Press Ctrl+C to stop the server"
+
+    pnpm --filter product-page preview
+}
+
 # Show usage
 show_usage() {
-    echo "Usage: $0 [docker|local]"
+    echo "Usage: $0 [docker|local|product-page|product-page-local]"
     echo ""
     echo "Options:"
-    echo "  docker  - Deploy using Docker (recommended)"
-    echo "  local   - Start local preview server"
+    echo "  docker              - Deploy web app using Docker (recommended)"
+    echo "  local               - Start web app local preview server"
+    echo "  product-page        - Deploy product landing page with Docker"
+    echo "  product-page-local  - Start product landing page local preview"
+    echo "  all                 - Deploy both web and product-page with Docker"
     echo ""
     echo "Examples:"
-    echo "  $0 docker   # Deploy with Docker"
-    echo "  $0 local    # Start local preview"
+    echo "  $0 docker              # Deploy web app with Docker"
+    echo "  $0 local               # Start web app local preview"
+    echo "  $0 product-page        # Deploy product landing page"
+    echo "  $0 product-page-local  # Preview product landing page locally"
+    echo "  $0 all                 # Deploy all services"
 }
 
 # Main script
@@ -157,6 +202,25 @@ main() {
             check_prerequisites
             install_deps
             deploy_local
+            ;;
+        "product-page")
+            check_prerequisites
+            install_deps
+            deploy_product_page
+            ;;
+        "product-page-local")
+            check_prerequisites
+            install_deps
+            preview_product_page
+            ;;
+        "all")
+            check_prerequisites
+            install_deps
+            deploy_docker
+            deploy_product_page
+            log_success "All services deployed successfully!"
+            log_info "Web App: http://localhost:82"
+            log_info "Product Page: http://localhost:83"
             ;;
         "-h"|"--help"|"help")
             show_usage

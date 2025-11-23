@@ -42,12 +42,24 @@ pnpm --filter web preview
 ### Docker Deployment
 
 ```bash
-# Quick start with Docker Compose
-docker-compose up -d
+# Quick start with Docker Compose (all services)
+docker compose up -d
 
 # Or use deployment script
 chmod +x deploy.sh
+
+# Deploy web app only
 ./deploy.sh docker
+
+# Deploy product landing page only
+./deploy.sh product-page
+
+# Deploy all services
+./deploy.sh all
+
+# Services:
+# - Web App: http://localhost:82
+# - Product Page: http://localhost:83
 ```
 
 ## Tech Stack
@@ -71,19 +83,26 @@ chmod +x deploy.sh
 ```
 beqeek/
 ├── apps/
-│   └── web/                    # Main React application
+│   ├── web/                    # Main React application
+│   │   ├── src/
+│   │   │   ├── features/       # Feature modules (12+)
+│   │   │   │   ├── active-tables/  # Core workflow tables
+│   │   │   │   ├── auth/
+│   │   │   │   ├── workspace/
+│   │   │   │   └── ...
+│   │   │   ├── routes/         # TanStack Router (file-based)
+│   │   │   ├── components/     # Shared components
+│   │   │   ├── stores/         # Zustand stores
+│   │   │   ├── shared/         # API clients, utilities
+│   │   │   └── hooks/          # Custom React hooks
+│   │   └── vite.config.ts
+│   │
+│   └── product-page/           # Product landing page (SSG)
 │       ├── src/
-│       │   ├── features/       # Feature modules (12+)
-│       │   │   ├── active-tables/  # Core workflow tables
-│       │   │   ├── auth/
-│       │   │   ├── workspace/
-│       │   │   └── ...
-│       │   ├── routes/         # TanStack Router (file-based)
-│       │   ├── components/     # Shared components
-│       │   ├── stores/         # Zustand stores
-│       │   ├── shared/         # API clients, utilities
-│       │   └── hooks/          # Custom React hooks
-│       └── vite.config.ts
+│       │   ├── components/     # Landing page sections
+│       │   ├── pages/          # React Router pages
+│       │   └── styles/         # TailwindCSS styles
+│       └── vite.config.ts      # vite-react-ssg config
 │
 ├── packages/
 │   ├── ui/                     # Component library (shadcn/ui)
