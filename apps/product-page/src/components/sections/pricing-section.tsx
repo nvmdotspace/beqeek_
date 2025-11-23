@@ -1,4 +1,7 @@
 import { Check } from 'lucide-react';
+import { Container } from '@workspace/ui/components/primitives';
+import { Heading, Text } from '@workspace/ui/components/typography';
+import { Button } from '@workspace/ui/components/button';
 
 interface PricingSectionProps {
   onOpenModal: () => void;
@@ -52,27 +55,32 @@ export function PricingSection({ onOpenModal }: PricingSectionProps) {
   ];
 
   return (
-    <section id="pricing" className="py-24 relative overflow-hidden bg-[hsl(222_37%_10%)]/30">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+    <section id="pricing" className="py-24 relative overflow-hidden bg-card/30">
+      <Container maxWidth="xl" padding="margin" className="relative z-10">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Bảng Giá</h2>
+          <Heading level={2} className="text-3xl md:text-4xl mb-4 text-white">
+            Bảng Giá
+          </Heading>
         </div>
 
         <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto items-start">
           {plans.map((plan, index) => (
             <div key={index} className={`glass p-8 rounded-2xl border ${plan.borderStyle} transition-all`}>
-              <h3 className="text-lg font-semibold text-white mb-2">{plan.name}</h3>
+              <Heading level={4} className="text-lg mb-2 text-white">
+                {plan.name}
+              </Heading>
               <div className="text-3xl font-bold text-white mb-1">
                 {plan.price}
-                {plan.period && <span className="text-sm font-normal text-slate-500">{plan.period}</span>}
+                {plan.period && (
+                  <Text as="span" size="small" color="muted" className="font-normal">
+                    {plan.period}
+                  </Text>
+                )}
               </div>
-              <button
-                onClick={onOpenModal}
-                className={`block w-full py-2.5 rounded-lg text-white font-medium text-center transition-all my-8 ${plan.buttonStyle}`}
-              >
+              <Button onClick={onOpenModal} className={`w-full my-8 text-white ${plan.buttonStyle}`}>
                 {plan.buttonText}
-              </button>
-              <ul className={`space-y-3 text-sm ${plan.textStyle || 'text-slate-400'}`}>
+              </Button>
+              <ul className={`space-y-3 text-sm ${plan.textStyle || 'text-muted-foreground'}`}>
                 {plan.features.map((feature, featureIndex) => (
                   <li key={featureIndex} className="flex items-center">
                     <Check className={`h-4 w-4 ${plan.checkColor} mr-3 flex-shrink-0`} />
@@ -83,7 +91,7 @@ export function PricingSection({ onOpenModal }: PricingSectionProps) {
             </div>
           ))}
         </div>
-      </div>
+      </Container>
     </section>
   );
 }

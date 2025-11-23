@@ -1,4 +1,6 @@
 import { TrendingUp, PiggyBank, Network } from 'lucide-react';
+import { Container } from '@workspace/ui/components/primitives';
+import { Heading, Text } from '@workspace/ui/components/typography';
 
 export function BenefitsSection() {
   const benefits = [
@@ -28,10 +30,12 @@ export function BenefitsSection() {
   ];
 
   return (
-    <section id="benefits" className="py-24 bg-[hsl(222_37%_10%)]/30 border-y border-white/5">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="benefits" className="py-24 bg-card/30 border-y border-white/5">
+      <Container maxWidth="xl" padding="margin">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Lợi Ích Khi Sử Dụng BEQEEK</h2>
+          <Heading level={2} className="text-3xl md:text-4xl mb-4 text-white">
+            Lợi Ích Khi Sử Dụng BEQEEK
+          </Heading>
         </div>
         <div className="grid md:grid-cols-3 gap-8">
           {benefits.map((benefit, index) => (
@@ -44,12 +48,14 @@ export function BenefitsSection() {
               >
                 {benefit.icon}
               </div>
-              <h3 className="text-xl font-bold text-white mb-3">{benefit.title}</h3>
-              <p className="text-slate-400">{benefit.description}</p>
+              <Heading level={4} className="text-xl mb-3 text-white">
+                {benefit.title}
+              </Heading>
+              <Text color="muted">{benefit.description}</Text>
             </div>
           ))}
         </div>
-      </div>
+      </Container>
     </section>
   );
 }

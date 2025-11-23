@@ -1,12 +1,19 @@
 import { Wrench, Lock, Plug, Mail, Table, MessageCircle, Store } from 'lucide-react';
+import { Container } from '@workspace/ui/components/primitives';
+import { Heading, Text } from '@workspace/ui/components/typography';
 
 export function FeaturesSection() {
   return (
     <section id="features" className="py-24 relative">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <Container maxWidth="xl" padding="margin">
+        {/* Section Header */}
         <div className="text-center mb-20">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Đặc Điểm Nổi Bật</h2>
-          <p className="text-slate-400 text-lg max-w-2xl mx-auto">Giải pháp toàn diện cho doanh nghiệp của bạn.</p>
+          <Heading level={2} className="text-3xl md:text-4xl mb-4 text-white">
+            Đặc Điểm Nổi Bật
+          </Heading>
+          <Text size="large" color="muted" className="max-w-2xl mx-auto">
+            Giải pháp toàn diện cho doanh nghiệp của bạn.
+          </Text>
         </div>
 
         {/* Feature 1: Tùy Chỉnh */}
@@ -16,49 +23,55 @@ export function FeaturesSection() {
             <div className="glass p-6 rounded-2xl border border-white/10 relative">
               {/* Visual: Kanban as example of custom setup */}
               <div className="flex gap-4 overflow-hidden">
-                <div className="w-1/2 bg-[hsl(222_27%_14%)] rounded-lg p-3 border border-white/5">
+                <div className="w-1/2 bg-secondary rounded-lg p-3 border border-white/5">
                   <div className="h-1 w-full bg-accent-red rounded-full mb-3" />
-                  <div className="text-xs font-bold text-white mb-3">Quan trọng &amp; Khẩn cấp</div>
-                  <div className="bg-[hsl(222_47%_7%)] p-3 rounded border border-white/5 mb-2">
+                  <Text as="div" size="small" weight="bold" className="mb-3 text-white">
+                    Quan trọng &amp; Khẩn cấp
+                  </Text>
+                  <div className="bg-background p-3 rounded border border-white/5 mb-2">
                     <div className="h-2 w-3/4 bg-slate-700 rounded mb-2" />
                   </div>
                 </div>
-                <div className="w-1/2 bg-[hsl(222_27%_14%)] rounded-lg p-3 border border-white/5 opacity-50">
+                <div className="w-1/2 bg-secondary rounded-lg p-3 border border-white/5 opacity-50">
                   <div className="h-1 w-full bg-accent-green rounded-full mb-3" />
-                  <div className="text-xs font-bold text-white mb-3">Quan trọng &amp; Không gấp</div>
+                  <Text as="div" size="small" weight="bold" className="mb-3 text-white">
+                    Quan trọng &amp; Không gấp
+                  </Text>
                 </div>
               </div>
             </div>
           </div>
           <div className="order-1 md:order-2">
-            <div className="w-12 h-12 rounded-xl bg-accent-red/10 flex items-center justify-center text-accent-red mb-6">
-              <Wrench className="h-5 w-5" />
-            </div>
-            <h3 className="text-2xl font-bold text-white mb-4">Tùy Chỉnh Tự Thiết Lập</h3>
-            <p className="text-slate-400 mb-6 leading-relaxed">
+            <FeatureIcon icon={<Wrench className="h-5 w-5" />} color="accent-red" />
+            <Heading level={3} className="text-2xl mb-4 text-white">
+              Tùy Chỉnh Tự Thiết Lập
+            </Heading>
+            <Text color="muted" className="mb-6 leading-relaxed">
               Thiết kế và cấu hình phần mềm theo nhu cầu cụ thể của doanh nghiệp bạn mà không cần lập trình viên chuyên
               nghiệp.
-            </p>
+            </Text>
           </div>
         </div>
 
         {/* Feature 2: Bảo Mật */}
         <div className="grid md:grid-cols-2 gap-16 items-center mb-24">
           <div>
-            <div className="w-12 h-12 rounded-xl bg-accent-blue/10 flex items-center justify-center text-accent-blue mb-6">
-              <Lock className="h-5 w-5" />
-            </div>
-            <h3 className="text-2xl font-bold text-white mb-4">Bảo Mật Mã Hóa Đầu Cuối</h3>
-            <p className="text-slate-400 mb-6 leading-relaxed">
+            <FeatureIcon icon={<Lock className="h-5 w-5" />} color="accent-blue" />
+            <Heading level={3} className="text-2xl mb-4 text-white">
+              Bảo Mật Mã Hóa Đầu Cuối
+            </Heading>
+            <Text color="muted" className="mb-6 leading-relaxed">
               Dữ liệu của bạn được bảo vệ tối đa với công nghệ mã hóa end-to-end, đảm bảo an toàn và riêng tư.
-            </p>
+            </Text>
           </div>
           <div className="relative">
             <div className="absolute -inset-4 bg-gradient-to-r from-accent-blue/10 to-accent-teal/10 rounded-3xl blur-xl" />
             <div className="glass p-6 rounded-2xl border border-white/10 relative flex items-center justify-center h-48">
               <Lock className="h-16 w-16 text-accent-blue/50" />
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-2xl font-bold text-white">E2EE</div>
+                <Text as="div" size="large" weight="bold" className="text-2xl text-white">
+                  E2EE
+                </Text>
               </div>
             </div>
           </div>
@@ -86,24 +99,32 @@ export function FeaturesSection() {
             </div>
           </div>
           <div className="order-1 md:order-2">
-            <div className="w-12 h-12 rounded-xl bg-accent-purple/10 flex items-center justify-center text-accent-purple mb-6">
-              <Plug className="h-5 w-5" />
-            </div>
-            <h3 className="text-2xl font-bold text-white mb-4">Kết Nối API Mở</h3>
-            <p className="text-slate-400 mb-6 leading-relaxed">
+            <FeatureIcon icon={<Plug className="h-5 w-5" />} color="accent-purple" />
+            <Heading level={3} className="text-2xl mb-4 text-white">
+              Kết Nối API Mở
+            </Heading>
+            <Text color="muted" className="mb-6 leading-relaxed">
               BEQEEK có thể kết nối đến các đối tác và hệ thống phần mềm khác thông qua API mở, giúp tích hợp mượt mà và
               mở rộng hệ sinh thái.
-            </p>
+            </Text>
           </div>
         </div>
-      </div>
+      </Container>
     </section>
+  );
+}
+
+function FeatureIcon({ icon, color }: { icon: React.ReactNode; color: string }) {
+  return (
+    <div className={`w-12 h-12 rounded-xl bg-${color}/10 flex items-center justify-center text-${color} mb-6`}>
+      {icon}
+    </div>
   );
 }
 
 function MarqueeItem({ icon, label }: { icon: React.ReactNode; label: string }) {
   return (
-    <div className="flex items-center gap-2 text-slate-400 font-semibold">
+    <div className="flex items-center gap-2 text-muted-foreground font-semibold">
       {icon}
       <span>{label}</span>
     </div>

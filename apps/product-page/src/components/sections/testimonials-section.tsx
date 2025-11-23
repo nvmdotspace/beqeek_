@@ -1,4 +1,6 @@
 import { Quote } from 'lucide-react';
+import { Container } from '@workspace/ui/components/primitives';
+import { Heading, Text } from '@workspace/ui/components/typography';
 
 export function TestimonialsSection() {
   const testimonials = [
@@ -19,18 +21,24 @@ export function TestimonialsSection() {
 
   return (
     <section className="py-24 relative">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-3xl md:text-4xl font-bold text-white mb-16 text-center">Khách Hàng Nói Gì Về BEQEEK</h2>
+      <Container maxWidth="xl" padding="margin">
+        <Heading level={2} className="text-3xl md:text-4xl mb-16 text-center text-white">
+          Khách Hàng Nói Gì Về BEQEEK
+        </Heading>
         <div className="grid md:grid-cols-3 gap-8">
           {testimonials.map((testimonial, index) => (
             <div key={index} className="glass p-8 rounded-2xl border border-white/5 relative">
               <Quote className="h-10 w-10 text-accent-blue/20 absolute top-6 left-6" />
-              <p className="text-slate-300 mb-6 relative z-10 pt-8">&ldquo;{testimonial.quote}&rdquo;</p>
-              <div className="font-bold text-white">- {testimonial.author}</div>
+              <Text as="p" className="text-slate-300 mb-6 relative z-10 pt-8">
+                &ldquo;{testimonial.quote}&rdquo;
+              </Text>
+              <Text as="div" weight="bold" className="text-white">
+                - {testimonial.author}
+              </Text>
             </div>
           ))}
         </div>
-      </div>
+      </Container>
     </section>
   );
 }
