@@ -69,12 +69,6 @@ export interface GanttConfig {
   dependencyField?: string;
 }
 
-/**
- * Configuration for Record List view (table/card layout)
- * Supports two layout patterns:
- * 1. generic-table: Uses displayFields array
- * 2. head-column: Uses titleField, subLineFields, tailFields
- */
 /** Field ordering configuration for custom layouts */
 export interface FieldOrderConfig {
   /** Field name */
@@ -93,6 +87,15 @@ export interface FieldOrderConfig {
   hideOnMobile?: boolean;
 }
 
+/**
+ * Configuration for Record List view (table/card layout)
+ * Supports two layout patterns:
+ * 1. generic-table: Uses displayFields array
+ * 2. head-column: Uses titleField, subLineFields, tailFields
+ *
+ * Note: This is a loose type for backward compatibility with existing components.
+ * For new code, prefer the strict types from @workspace/beqeek-shared
+ */
 export interface RecordListConfig {
   /** Layout type: 'generic-table' | 'table' | 'head-column' | 'card' | 'compact' */
   layout: string;
@@ -124,27 +127,39 @@ export interface RecordListConfig {
 
 /**
  * Configuration for Record Detail view
+ *
+ * Note: This is a loose type for backward compatibility with existing components.
+ * For new code, prefer the strict types from @workspace/beqeek-shared
  */
 export interface RecordDetailConfig {
   /** Layout type: 'head-detail' | 'single-column' | 'two-column' | 'two-columns' */
   layout: string;
 
-  /** Comments position: 'right-panel' | 'right' | 'bottom' | 'none' */
+  /** Comments position: 'right-panel' | 'right' | 'bottom' | 'none' | 'hidden' */
   commentsPosition: string;
 
-  /** Field name for title */
-  titleField: string;
+  /** Field name for title (head-detail layout) */
+  titleField?: string;
 
-  /** Field names for subline (below title) */
-  subLineFields: string[];
+  /** Field names for subline (below title, head-detail layout) */
+  subLineFields?: string[];
 
-  /** Field names for tail fields (single column layout) */
-  tailFields: string[];
+  /** Field names for tail fields (head-detail layout) */
+  tailFields?: string[];
 
-  /** Field names for column 1 (two column layout) */
+  /** Field name for title in head section (two-column layout) */
+  headTitleField?: string;
+
+  /** Field names for subline in head section (two-column layout) */
+  headSubLineFields?: string[];
+
+  /** Field names for row tail fields (settings UI naming, alias for tailFields) */
+  rowTailFields?: string[];
+
+  /** Field names for column 1 (two-column layout) */
   column1Fields?: string[];
 
-  /** Field names for column 2 (two column layout) */
+  /** Field names for column 2 (two-column layout) */
   column2Fields?: string[];
 }
 

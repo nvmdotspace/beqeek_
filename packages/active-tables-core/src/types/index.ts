@@ -25,5 +25,8 @@ export * from './responses.js';
 // Message types
 export * from './messages.js';
 
+// Record detail types
+export * from './record-detail.js';
+
 // Note: Legacy types from existing-types.ts are now split into separate files above
 // If you need backward compatibility, import from specific files

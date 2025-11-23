@@ -80,7 +80,6 @@ export const NavigationMenu = ({ isCollapsed = true, className }: NavigationMenu
         label: m.navigation_notifications(),
         href: `/${locale}/notifications`,
         icon: Bell,
-        badge: 'notifications',
       },
       // Workspace Features (require workspace selection)
       ...(currentWorkspace && workspaceId
@@ -96,15 +95,13 @@ export const NavigationMenu = ({ isCollapsed = true, className }: NavigationMenu
                   label: m.navigation_tables(),
                   href: `/${locale}/workspaces/${workspaceId}/tables`,
                   icon: LayoutGrid,
-                  badge: 'tables' as keyof BadgeCounts,
                   requiresPermission: 'tables',
                 },
                 {
-                  id: 'workflow',
-                  label: m.navigation_workflow(),
-                  href: `/${locale}/workspaces/${workspaceId}/workflows`,
+                  id: 'workflow-units',
+                  label: 'Workflow Units',
+                  href: `/${locale}/workspaces/${workspaceId}/workflow-units`,
                   icon: Workflow,
-                  badge: 'workflows' as keyof BadgeCounts,
                   requiresPermission: 'workflow',
                 },
                 {
@@ -112,7 +109,6 @@ export const NavigationMenu = ({ isCollapsed = true, className }: NavigationMenu
                   label: m.navigation_team(),
                   href: `/${locale}/workspaces/${workspaceId}/team`,
                   icon: Users,
-                  badge: 'teamMembers' as keyof BadgeCounts,
                   requiresPermission: 'team',
                 },
                 {

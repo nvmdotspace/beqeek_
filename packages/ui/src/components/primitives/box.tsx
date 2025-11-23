@@ -83,7 +83,7 @@ export interface BoxProps extends React.HTMLAttributes<HTMLDivElement>, VariantP
    * HTML element to render as
    * @default 'div'
    */
-  as?: keyof JSX.IntrinsicElements;
+  as?: React.ElementType;
 }
 
 export const Box = React.forwardRef<HTMLDivElement, BoxProps>(

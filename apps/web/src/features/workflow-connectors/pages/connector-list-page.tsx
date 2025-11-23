@@ -15,6 +15,7 @@ import { Button } from '@workspace/ui/components/button';
 import { Heading, Text } from '@workspace/ui/components/typography';
 import { Badge } from '@workspace/ui/components/badge';
 import { FilterChip } from '@workspace/ui/components/filter-chip';
+import { Skeleton } from '@workspace/ui/components/skeleton';
 import { StatBadge } from '@/features/workspace/components/stat-badge';
 import { Box, Stack, Inline, Grid } from '@workspace/ui/components/primitives';
 import { CONNECTOR_TYPES, CONNECTOR_CONFIGS } from '@workspace/beqeek-shared/workflow-connectors';
@@ -175,7 +176,17 @@ export function ConnectorListPage() {
         </Stack>
 
         {/* List content */}
-        {filteredConnectors.length > 0 ? (
+        {isLoading ? (
+          <Grid
+            columns={1}
+            gap="space-100"
+            className="sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4"
+          >
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Skeleton key={i} className="h-32 w-full rounded-xl" />
+            ))}
+          </Grid>
+        ) : filteredConnectors.length > 0 ? (
           <Grid
             columns={1}
             gap="space-100"
