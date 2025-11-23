@@ -6,10 +6,17 @@
  * - Prefetch hook for performance optimization
  * - User mapping utilities for fast lookups
  * - Query constants for consistent cache keys
+ * - Profile management components
  */
 
 // Hooks
 export * from './hooks';
+
+// Utils
+export * from './utils';
+
+// Components
+export * from './components';
 
 // Constants
 export {

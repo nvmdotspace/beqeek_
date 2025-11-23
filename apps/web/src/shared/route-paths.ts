@@ -143,6 +143,9 @@ export const ROUTES = {
 
     /** Archived items: /$locale/workspaces/$workspaceId/archived */
     ARCHIVED: '/$locale/workspaces/$workspaceId/archived' as const,
+
+    /** User profile: /$locale/workspaces/$workspaceId/profile */
+    PROFILE: '/$locale/workspaces/$workspaceId/profile' as const,
   },
 } as const;
 
