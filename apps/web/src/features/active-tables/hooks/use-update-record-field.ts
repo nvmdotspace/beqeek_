@@ -7,8 +7,9 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { updateActiveTableRecord } from '../api/active-records-api';
-import { CommonUtils } from '@workspace/encryption-core';
+import { buildEncryptedUpdatePayload } from '@/shared/utils/field-encryption';
 import type { Table, FieldConfig } from '@workspace/active-tables-core';
+import type { FieldType } from '@workspace/beqeek-shared';
 import type { ActiveTableRecordPermissions } from '../types';
 
 export interface UpdateFieldOptions {
@@ -59,7 +60,7 @@ export function useUpdateRecordField(
         throw new Error(`Field ${fieldName} not found in table config`);
       }
 
-      // Determine encryption key
+      // Determine encryption key (same logic as use-update-record.ts)
       let encryptKey: string | null = null;
       if (table.config.e2eeEncryption) {
         // E2EE mode: use provided encryption key
@@ -72,42 +73,25 @@ export function useUpdateRecordField(
         encryptKey = table.config.encryptionKey;
       }
 
-      // Encrypt value if needed
-      let encryptedValue = value;
-      const recordHashes: Record<string, string | string[]> = {};
-
-      if (encryptKey) {
-        // Create table detail object for encryption
-        const tableDetail = {
-          ...table,
-          config: {
-            ...table.config,
-            encryptionKey: encryptKey,
-          },
-        };
-
-        // Encrypt the value based on field type
-        encryptedValue = CommonUtils.encryptTableData(tableDetail as any, fieldName, value);
-
-        // Generate hash for searchable fields (text fields)
-        if (typeof value === 'string' && value.trim()) {
-          const hashedKeywords = CommonUtils.hashKeyword(value, encryptKey);
-          if (hashedKeywords.length > 0) {
-            recordHashes[fieldName] = hashedKeywords;
-          }
-        }
+      if (!encryptKey) {
+        throw new Error('Table encryption key not found. Cannot encrypt data.');
       }
 
-      // Prepare update request
-      const updateRequest = {
-        record: {
-          [fieldName]: encryptedValue,
-        },
-        record_hashes: Object.keys(recordHashes).length > 0 ? recordHashes : undefined,
-      };
+      // Use buildEncryptedUpdatePayload (same as use-update-record.ts)
+      // This ensures consistent payload format:
+      // - record: encrypted field value
+      // - hashed_keywords: array of keyword hashes (for searchable text fields)
+      // - record_hashes: single hash of the value (for equality checks)
+      const payload = buildEncryptedUpdatePayload(
+        fieldName,
+        value,
+        fieldConfig as { type: FieldType },
+        encryptKey,
+        table.config.hashedKeywordFields || [],
+      );
 
       // Send update
-      await updateActiveTableRecord(workspaceId, tableId, recordId, updateRequest);
+      await updateActiveTableRecord(workspaceId, tableId, recordId, payload);
 
       return { fieldName, value };
     },
