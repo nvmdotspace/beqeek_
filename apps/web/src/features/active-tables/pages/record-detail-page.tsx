@@ -147,7 +147,7 @@ export default function RecordDetailPage() {
   // (SELECT_ONE_RECORD, SELECT_LIST_RECORD, FIRST_REFERENCE_RECORD)
   // Pass current record so hook can build proper filtering for FIRST_REFERENCE_RECORD
   // Pass visibleFields to only fetch references for displayed fields
-  const { referenceRecords } = useReferenceRecords(workspaceId ?? '', table, {
+  const { referenceRecords, isLoading: isLoadingReferenceRecords } = useReferenceRecords(workspaceId ?? '', table, {
     records: record ? [record] : [],
     enabled: needsReferenceData, // ✅ Only fetch if config needs it
     visibleFields: visibleFields, // ✅ Only fetch for visible fields
@@ -182,7 +182,7 @@ export default function RecordDetailPage() {
   }, [workspaceUsers]);
 
   // Create inline edit context for reference/user fields
-  // Pass visibleFields and referenceRecords to avoid duplicate API calls
+  // Pass visibleFields, referenceRecords, and loading state to avoid duplicate API calls
   const inlineEditContext = useInlineEditContext({
     workspaceId: workspaceId ?? '',
     table,
@@ -191,6 +191,7 @@ export default function RecordDetailPage() {
     encryptionKey: encryption.encryptionKey,
     visibleFields, // ✅ Only fetch for visible fields (optimization)
     referenceRecords, // ✅ Reuse data from useReferenceRecords (avoid duplicate fetches)
+    isLoadingReferenceRecords, // ✅ Wait for useReferenceRecords to complete before fetching locally
   });
 
   // ============================================

@@ -37,6 +37,11 @@ interface UseInlineEditContextOptions {
     string,
     Array<{ id: string; data?: Record<string, unknown>; record?: Record<string, unknown> }>
   >;
+  /**
+   * Loading state from useReferenceRecords
+   * When true, skip local fetching to avoid duplicate API calls
+   */
+  isLoadingReferenceRecords?: boolean;
 }
 
 /**
@@ -64,6 +69,7 @@ export function useInlineEditContext({
   encryptionKey: _encryptionKey,
   visibleFields,
   referenceRecords: preloadedReferenceRecords,
+  isLoadingReferenceRecords = false,
 }: UseInlineEditContextOptions): InlineEditContext | undefined {
   // Get reference fields from table config - filter by visibleFields if provided
   const referenceFields = useMemo(() => {
@@ -125,9 +131,14 @@ export function useInlineEditContext({
   >({});
 
   // Load initial records for reference fields
-  // OPTIMIZATION: Skip if preloadedReferenceRecords is provided (from useReferenceRecords)
+  // OPTIMIZATION: Skip if preloadedReferenceRecords is provided OR still loading (from useReferenceRecords)
   useEffect(() => {
-    // Skip fetching if we have preloaded data
+    // Skip fetching if:
+    // 1. We already have preloaded data from useReferenceRecords
+    // 2. useReferenceRecords is still loading (to avoid race condition/duplicate fetches)
+    if (isLoadingReferenceRecords) {
+      return;
+    }
     if (preloadedReferenceRecords && Object.keys(preloadedReferenceRecords).length > 0) {
       return;
     }
@@ -174,7 +185,15 @@ export function useInlineEditContext({
     };
 
     loadInitialRecords();
-  }, [record, table, referenceFields, referencedTables, workspaceId, preloadedReferenceRecords]);
+  }, [
+    record,
+    table,
+    referenceFields,
+    referencedTables,
+    workspaceId,
+    preloadedReferenceRecords,
+    isLoadingReferenceRecords,
+  ]);
 
   // Create getFetchRecords function
   const getFetchRecords = useCallback(
