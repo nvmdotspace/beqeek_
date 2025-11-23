@@ -61,7 +61,7 @@ export interface StackProps extends React.HTMLAttributes<HTMLDivElement>, Varian
    * HTML element to render as
    * @default 'div'
    */
-  as?: keyof JSX.IntrinsicElements;
+  as?: React.ElementType;
 }
 
 export const Stack = React.forwardRef<HTMLDivElement, StackProps>(

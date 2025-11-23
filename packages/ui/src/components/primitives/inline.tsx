@@ -70,7 +70,7 @@ export interface InlineProps extends React.HTMLAttributes<HTMLDivElement>, Varia
    * HTML element to render as
    * @default 'div'
    */
-  as?: keyof JSX.IntrinsicElements;
+  as?: React.ElementType;
 }
 
 export const Inline = React.forwardRef<HTMLDivElement, InlineProps>(

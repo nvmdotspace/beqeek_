@@ -80,7 +80,7 @@ export interface GridProps extends React.HTMLAttributes<HTMLDivElement>, Variant
    * HTML element to render as
    * @default 'div'
    */
-  as?: keyof JSX.IntrinsicElements;
+  as?: React.ElementType;
 }
 
 export const Grid = React.forwardRef<HTMLDivElement, GridProps>(
@@ -206,7 +206,7 @@ export interface GridItemProps extends React.HTMLAttributes<HTMLDivElement>, Var
    * HTML element to render as
    * @default 'div'
    */
-  as?: keyof JSX.IntrinsicElements;
+  as?: React.ElementType;
 }
 
 export const GridItem = React.forwardRef<HTMLDivElement, GridItemProps>(

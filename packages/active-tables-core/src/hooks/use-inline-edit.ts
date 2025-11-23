@@ -6,9 +6,16 @@
 
 import { useState, useCallback } from 'react';
 import type { TableRecord } from '../types/record.js';
-import type { InlineEditState } from '../components/record-detail/record-detail-props.js';
 import { validateFieldValue } from '../utils/field-validation.js';
 import type { FieldConfig } from '../types/field.js';
+
+export interface InlineEditState {
+  isEditing: boolean;
+  editingField: string | null;
+  editedValues: Record<string, unknown>;
+  errors: Record<string, string>;
+  isSaving: boolean;
+}
 
 export interface UseInlineEditOptions {
   /** Initial record data */
@@ -61,8 +68,8 @@ export function useInlineEdit(options: UseInlineEditOptions): UseInlineEditRetur
   // Start editing a field
   const startEditing = useCallback(
     (fieldName: string) => {
-      const recordData = record.data || record.record;
-      setState((prev) => ({
+      const recordData = (record as any).data || (record as any).record || record;
+      setState((prev: InlineEditState) => ({
         ...prev,
         isEditing: true,
         editingField: fieldName,
@@ -92,7 +99,7 @@ export function useInlineEdit(options: UseInlineEditOptions): UseInlineEditRetur
         error = validationResult.valid ? '' : validationResult.error || '';
       }
 
-      setState((prev) => ({
+      setState((prev: InlineEditState) => ({
         ...prev,
         editedValues: {
           ...prev.editedValues,
@@ -117,7 +124,7 @@ export function useInlineEdit(options: UseInlineEditOptions): UseInlineEditRetur
 
     // Check if there are changes
     if (Object.keys(state.editedValues).length === 0) {
-      setState((prev) => ({
+      setState((prev: InlineEditState) => ({
         ...prev,
         isEditing: false,
         editingField: null,
@@ -125,7 +132,7 @@ export function useInlineEdit(options: UseInlineEditOptions): UseInlineEditRetur
       return;
     }
 
-    setState((prev) => ({ ...prev, isSaving: true }));
+    setState((prev: InlineEditState) => ({ ...prev, isSaving: true }));
 
     try {
       if (onSave) {
@@ -142,7 +149,7 @@ export function useInlineEdit(options: UseInlineEditOptions): UseInlineEditRetur
       });
     } catch (error) {
       // Keep editing state on error
-      setState((prev) => ({
+      setState((prev: InlineEditState) => ({
         ...prev,
         isSaving: false,
       }));
@@ -175,7 +182,7 @@ export function useInlineEdit(options: UseInlineEditOptions): UseInlineEditRetur
       if (fieldName in state.editedValues) {
         return state.editedValues[fieldName];
       }
-      const recordData = record.data || record.record;
+      const recordData = (record as any).data || (record as any).record || record;
       return recordData[fieldName];
     },
     [state.editedValues, record],

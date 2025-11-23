@@ -8,17 +8,27 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import type { RecordComment } from '@workspace/active-tables-core';
 
+interface UseRecordCommentsOptions {
+  /** Whether to fetch comments (default: true) */
+  enabled?: boolean;
+}
+
 /**
  * Hook to manage record comments
  * Returns empty comments array until API is implemented
  */
-export function useRecordComments(workspaceId: string, tableId: string, recordId: string) {
+export function useRecordComments(
+  workspaceId: string,
+  tableId: string,
+  recordId: string,
+  options?: UseRecordCommentsOptions,
+) {
   const queryClient = useQueryClient();
 
   const { data: comments = [], isLoading } = useQuery({
     queryKey: ['record-comments', workspaceId, tableId, recordId],
     queryFn: () => fetchRecordComments(workspaceId, tableId, recordId),
-    enabled: !!workspaceId && !!tableId && !!recordId,
+    enabled: (options?.enabled ?? true) && !!workspaceId && !!tableId && !!recordId,
   });
 
   const addCommentMutation = useMutation({

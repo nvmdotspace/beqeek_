@@ -1,0 +1,90 @@
+import { useState, useEffect } from 'react';
+import { getRouteApi } from '@tanstack/react-router';
+import { WorkflowCanvas } from '../components/workflow-builder/workflow-canvas';
+import { NodePalette } from '../components/workflow-builder/node-palette';
+import { NodeConfigDrawer } from '../components/workflow-builder/node-config-drawer';
+import { YamlEditor } from '../components/workflow-builder/yaml-editor';
+import { CanvasHeader } from '../components/workflow-builder/canvas-header';
+import { CreateEventDialog } from '../components/dialogs/create-event-dialog';
+import { ErrorBoundary } from '@/components/error-boundary';
+import { useWorkflowEvent } from '../hooks/use-workflow-event';
+import { useWorkflowEditorStore } from '../stores/workflow-editor-store';
+import { useModeSync } from '../hooks/use-mode-sync';
+
+const route = getRouteApi('/$locale/workspaces/$workspaceId/workflow-units/$unitId/events/$eventId/edit');
+
+/**
+ * Workflow Event Editor Page
+ * Visual workflow builder with React Flow
+ *
+ * Optimized layout:
+ * - Event selector in header (replaces EventListSidebar)
+ * - Node Palette sidebar (left) for drag-and-drop nodes
+ * - Canvas (center) - maximized width
+ * - Config drawer slides from right when node selected
+ */
+export default function WorkflowEventEditorPage() {
+  const { workspaceId, unitId, eventId } = route.useParams();
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+
+  const { currentEventId, setCurrentEventId, loadEvent, mode } = useWorkflowEditorStore();
+  const { data: event } = useWorkflowEvent(workspaceId, eventId);
+
+  // Bidirectional sync between Visual and YAML modes
+  useModeSync();
+
+  // Sync currentEventId with URL params when route changes
+  useEffect(() => {
+    if (eventId && eventId !== currentEventId) {
+      setCurrentEventId(eventId);
+    }
+  }, [eventId, currentEventId, setCurrentEventId]);
+
+  // Load event into canvas when event data is available
+  useEffect(() => {
+    if (event && eventId === event.id) {
+      loadEvent(event);
+    }
+  }, [event, eventId, loadEvent]);
+
+  return (
+    <ErrorBoundary>
+      <div className="h-screen flex flex-col">
+        {/* Canvas Header with Event Selector */}
+        <CanvasHeader workspaceId={workspaceId} unitId={unitId} onCreateEvent={() => setShowCreateDialog(true)} />
+
+        {/* Main Editor Area */}
+        <div className="flex-1 flex overflow-hidden">
+          {mode === 'visual' ? (
+            <>
+              {/* Node Palette - Left Sidebar */}
+              <div className="w-64 border-r border-border flex-shrink-0 overflow-hidden">
+                <NodePalette />
+              </div>
+
+              {/* Canvas - Center (flex-1 takes remaining space) */}
+              <div className="flex-1 relative overflow-hidden">
+                <WorkflowCanvas />
+              </div>
+
+              {/* Node Config Drawer (slides from right when node selected) */}
+              <NodeConfigDrawer />
+            </>
+          ) : (
+            <div className="flex-1 overflow-hidden">
+              <YamlEditor workspaceId={workspaceId} />
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Create Event Dialog */}
+      <CreateEventDialog
+        open={showCreateDialog}
+        onOpenChange={setShowCreateDialog}
+        workspaceId={workspaceId}
+        unitId={unitId}
+      />
+    </ErrorBoundary>
+  );
+}

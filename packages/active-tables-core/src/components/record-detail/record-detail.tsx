@@ -1,141 +1,167 @@
 /**
- * RecordDetail Component
- *
- * Main component that routes to appropriate detail layout based on config
- * Supports: head-detail (single column) and two-column layouts
+ * RecordDetail - Main record detail view component
+ * @module active-tables-core/components/record-detail
  */
 
-import { useMemo } from 'react';
-import type { RecordDetailProps } from './record-detail-props.js';
-import { LoadingState, ErrorState } from '../states/index.js';
-import { HeadDetailLayout } from './head-detail-layout.js';
-import { TwoColumnDetailLayout } from './two-column-detail-layout.js';
-import { CommentsPanel } from './comments-panel.js';
+import React from 'react';
+import { Stack } from '@workspace/ui/components/primitives/stack';
+import { Grid, GridItem } from '@workspace/ui/components/primitives/grid';
+import { cn } from '@workspace/ui/lib/utils';
+import type { RecordDetailProps } from '../../types/record-detail.js';
+import { HeadDetailLayout } from './layouts/head-detail-layout.js';
+import { TwoColumnDetailLayout } from './layouts/two-column-layout.js';
+import { ActivityTimeline } from './activity-timeline.js';
+import { RelatedRecords } from './related-records.js';
+import {
+  RECORD_DETAIL_LAYOUT_HEAD_DETAIL,
+  RECORD_DETAIL_LAYOUT_TWO_COLUMN,
+  COMMENTS_POSITION_RIGHT_PANEL,
+  COMMENTS_POSITION_HIDDEN,
+} from '@workspace/beqeek-shared/constants';
 
 /**
- * RecordDetail - Main detail component with layout routing
+ * Main record detail component
+ * Orchestrates layout rendering, field display, inline editing, and side panels
  */
-export function RecordDetail(props: RecordDetailProps) {
-  const {
+export function RecordDetail({
+  record,
+  table,
+  layout,
+  commentsPosition,
+  onFieldChange,
+  onDelete,
+  onRecordClick,
+  readOnly = false,
+  showComments = true,
+  showTimeline = true,
+  showRelatedRecords = true,
+  referenceRecords = {},
+  userRecords = {},
+  className,
+}: RecordDetailProps) {
+  // Determine layout from config if not provided
+  const effectiveLayout = layout || table.config.recordDetailConfig?.layout || RECORD_DETAIL_LAYOUT_HEAD_DETAIL;
+
+  // Determine comments position from config if not provided
+  const effectiveCommentsPosition =
+    commentsPosition || table.config.recordDetailConfig?.commentsPosition || COMMENTS_POSITION_RIGHT_PANEL;
+
+  // Get layout configuration
+  const layoutConfig = table.config.recordDetailConfig;
+
+  if (!layoutConfig) {
+    return (
+      <div className={cn('p-4 text-center text-muted-foreground', className)}>
+        Record detail layout configuration is missing
+      </div>
+    );
+  }
+
+  // Build head-detail config
+  // Note: API may return headTitleField instead of titleField for head-detail layout
+  // Also support rowTailFields (settings UI naming) vs tailFields (component naming)
+  const headDetailConfig = {
+    titleField: layoutConfig.headTitleField || layoutConfig.titleField || table.config.fields[0]?.name || '',
+    subLineFields: layoutConfig.headSubLineFields || layoutConfig.subLineFields || [],
+    tailFields: layoutConfig.rowTailFields || layoutConfig.tailFields || [],
+  };
+
+  // Build two-column config
+  const twoColumnConfig = {
+    headTitleField: layoutConfig.headTitleField || table.config.fields[0]?.name || '',
+    headSubLineFields: layoutConfig.headSubLineFields || [],
+    column1Fields: layoutConfig.column1Fields || [],
+    column2Fields: layoutConfig.column2Fields || [],
+  };
+
+  // Prepare common layout props
+  const layoutProps = {
     record,
-    config,
-    loading = false,
-    error = null,
-    comments = [],
-    commentsLoading = false,
-    onCommentAdd,
-    onCommentUpdate,
-    onCommentDelete,
-    currentUser,
-    workspaceUsers,
-    messages,
-    onRetry,
-    className = '',
-  } = props;
+    table,
+    referenceRecords,
+    userRecords,
+    onFieldChange,
+    readOnly,
+  };
 
-  // Prepare comments panel (if configured)
-  const commentsPanel = useMemo(() => {
-    if (config.commentsPosition === 'none' || !config.commentsPosition) {
-      return null;
+  // Render layout based on type
+  const renderLayout = () => {
+    if (effectiveLayout === RECORD_DETAIL_LAYOUT_TWO_COLUMN) {
+      return <TwoColumnDetailLayout {...layoutProps} config={twoColumnConfig} />;
     }
 
+    return <HeadDetailLayout {...layoutProps} config={headDetailConfig} />;
+  };
+
+  // Comments panel should go here when integrated with web app
+  // For now, it's a placeholder that web app will provide
+  const commentsPanel = null; // Will be passed from web app
+
+  // Render with or without comments sidebar
+  if (effectiveCommentsPosition === COMMENTS_POSITION_RIGHT_PANEL && showComments) {
     return (
-      <CommentsPanel
-        comments={comments}
-        currentUser={currentUser}
-        workspaceUsers={workspaceUsers}
-        loading={commentsLoading}
-        onCommentAdd={onCommentAdd}
-        onCommentUpdate={onCommentUpdate}
-        onCommentDelete={onCommentDelete}
-        messages={messages}
-      />
-    );
-  }, [
-    config.commentsPosition,
-    comments,
-    currentUser,
-    workspaceUsers,
-    commentsLoading,
-    onCommentAdd,
-    onCommentUpdate,
-    onCommentDelete,
-    messages,
-  ]);
+      <Grid columns={12} gap="space-400" className={cn('w-full', className)}>
+        {/* Main content */}
+        <GridItem span={12} spanLg={8}>
+          <Stack space="space-500">
+            {/* Layout */}
+            {renderLayout()}
 
-  // Determine layout component
-  const LayoutComponent = useMemo(() => {
-    const layoutType = config.layout.toLowerCase();
+            {/* Activity Timeline */}
+            {showTimeline && (
+              <ActivityTimeline
+                recordId={record.id}
+                events={[]} // Will be provided by web app hook
+                loading={false}
+              />
+            )}
 
-    switch (layoutType) {
-      case 'head-detail':
-      case 'single-column':
-        return HeadDetailLayout;
+            {/* Related Records */}
+            {showRelatedRecords && (
+              <RelatedRecords
+                record={record}
+                table={table}
+                referenceRecords={referenceRecords}
+                onRecordClick={onRecordClick}
+              />
+            )}
+          </Stack>
+        </GridItem>
 
-      case 'two-column':
-      case 'two-columns':
-        return TwoColumnDetailLayout;
-
-      default:
-        console.warn(`Unknown layout type: ${config.layout}, falling back to head-detail layout`);
-        return HeadDetailLayout;
-    }
-  }, [config.layout]);
-
-  // Loading state
-  if (loading) {
-    return (
-      <div className={className}>
-        <LoadingState message={messages?.loading || 'Loading record...'} type="skeleton" />
-      </div>
+        {/* Comments sidebar */}
+        <GridItem span={12} spanLg={4}>
+          {commentsPanel || (
+            <div className="text-sm text-muted-foreground">Comments panel will be provided by web app</div>
+          )}
+        </GridItem>
+      </Grid>
     );
   }
 
-  // Error state
-  if (error) {
-    const errorMessage = typeof error === 'string' ? error : error.message;
-    return (
-      <div className={className}>
-        <ErrorState
-          message={messages?.error || 'Failed to load record'}
-          details={errorMessage}
-          onRetry={onRetry}
-          retryText={messages?.retry || 'Retry'}
-        />
-      </div>
-    );
-  }
-
-  // No record
-  if (!record) {
-    return (
-      <div className={className}>
-        <ErrorState
-          message={messages?.recordNotFound || 'Record not found'}
-          details={messages?.recordNotFoundDescription || 'This record may have been deleted'}
-        />
-      </div>
-    );
-  }
-
-  // Render layout with comments panel
-  const detailContent = <LayoutComponent {...props} commentsPanel={commentsPanel} />;
-
-  // Wrap with comments panel if positioned right
-  if (config.commentsPosition === 'right-panel' || config.commentsPosition === 'right') {
-    return (
-      <div className={`flex gap-6 ${className}`}>
-        <div className="flex-1">{detailContent}</div>
-        <div className="w-96 flex-shrink-0">{commentsPanel}</div>
-      </div>
-    );
-  }
-
-  // Bottom comments or no comments
+  // No comments sidebar - full width layout
   return (
-    <div className={className}>
-      {detailContent}
-      {config.commentsPosition === 'bottom' && commentsPanel && <div className="mt-6">{commentsPanel}</div>}
-    </div>
+    <Stack space="space-500" className={cn('w-full', className)}>
+      {/* Layout */}
+      {renderLayout()}
+
+      {/* Activity Timeline */}
+      {showTimeline && (
+        <ActivityTimeline
+          recordId={record.id}
+          events={[]} // Will be provided by web app hook
+          loading={false}
+        />
+      )}
+
+      {/* Related Records */}
+      {showRelatedRecords && (
+        <RelatedRecords
+          record={record}
+          table={table}
+          referenceRecords={referenceRecords}
+          onRecordClick={onRecordClick}
+        />
+      )}
+    </Stack>
   );
 }

@@ -1,78 +1,102 @@
 /**
- * Record Detail Page (Redesigned)
- *
- * Jira-inspired layout with:
- * - Efficient single-record API fetch with filtering[id][eq]
- * - Two-column responsive layout (main content + sidebar)
- * - Inline field editing with permissions
- * - Rich text comments with Lexical editor
- * - Activity timeline with tabs (Comments/History/All)
- * - Metadata sidebar with quick actions
- * - Full E2EE + server-side encryption support
- *
- * @see docs/specs/doc-get-active-records.md - API specification
- * @see docs/technical/encryption-modes-corrected.md - Encryption handling
+ * RecordDetailPage - Route-connected page for displaying record details
+ * Integrates RecordDetail component from @workspace/active-tables-core with web app data layer
  */
 
-import { useCallback, useMemo } from 'react';
-import { ArrowLeft } from 'lucide-react';
+import { useState, useMemo } from 'react';
 import { getRouteApi } from '@tanstack/react-router';
-
-// Hooks
-import { useRecordById } from '../hooks/use-record-by-id';
-import { useActiveTable } from '../hooks/use-active-tables';
-import { useTableEncryption } from '../hooks/use-table-encryption';
-import { useRecordCommentsWithPermissions } from '../hooks/use-record-comments-with-permissions';
-import { useUpdateRecordField, canEditField } from '../hooks/use-update-record-field';
-import { useGetWorkspaceUsers } from '@/features/workspace-users/hooks/use-get-workspace-users';
-
-// Components
-import { Button } from '@workspace/ui/components/button';
-import { Card, CardHeader, CardTitle, CardContent } from '@workspace/ui/components/card';
-import { Skeleton } from '@workspace/ui/components/skeleton';
-import { Separator } from '@workspace/ui/components/separator';
-import { Heading } from '@workspace/ui/components/typography';
-import { Box, Stack, Inline, Grid } from '@workspace/ui/components/primitives';
-import { ErrorCard } from '@/components/error-display';
-import { ActivityTimeline } from '../components/activity-timeline';
-import { RecordDetailSidebar } from '../components/record-detail-sidebar';
-import { InlineEditableField } from '../components/inline-editable-field';
-
-// Utils
+import { RecordDetail } from '@workspace/active-tables-core';
+import { COMMENTS_POSITION_HIDDEN, REFERENCE_FIELD_TYPES, type RecordDetailConfig } from '@workspace/beqeek-shared';
+import type { Table, FieldConfig } from '@workspace/active-tables-core';
 import { ROUTES } from '@/shared/route-paths';
-import type { FieldConfig } from '@workspace/active-tables-core';
+import { useActiveTable } from '../hooks/use-active-tables';
+import { useRecordById } from '../hooks/use-record-by-id';
+import { useTableEncryption } from '../hooks/use-table-encryption';
+import { useUpdateRecordField } from '../hooks/use-update-record-field';
+import { useDeleteRecord } from '../hooks/use-delete-record';
+import { useReferenceRecords } from '../hooks/use-reference-records';
+import { useGetWorkspaceUsers } from '@/features/workspace-users/hooks/use-get-workspace-users';
+import { useRecordComments } from '../hooks/use-record-comments';
+import { useRecordShortcuts } from '../hooks/use-record-shortcuts';
+import { RecordHeader } from '../components/record-header';
+import { RecordLoadingSkeleton } from '../components/record-loading-skeleton';
+import { RecordNotFound } from '../components/record-not-found';
+import { EncryptionKeyPrompt } from '../components/encryption-key-prompt';
+import { PermissionDeniedError } from '../components/permission-denied-error';
+import { CommentsPanel } from '../components/comments-panel';
+import { RecordBreadcrumb } from '../components/record-breadcrumb';
+import { ShortcutsHelpDialog } from '../components/shortcuts-help-dialog';
 
-// Type-safe route API
 const route = getRouteApi(ROUTES.ACTIVE_TABLES.RECORD_DETAIL);
 
-// Local type definition matching the settings configuration
-type RecordDetailConfigWithHead = {
-  layout: 'head-detail' | 'two-column-detail';
-  commentsPosition: 'right-panel' | 'bottom' | 'hidden';
-  headTitleField: string;
-  headSubLineFields: string[];
-  rowTailFields?: string[];
-  column1Fields?: string[];
-  column2Fields?: string[];
-};
+/**
+ * Helper: Extract all visible field names from RecordDetailConfig
+ * Returns array of field names that are displayed in the UI
+ */
+function getVisibleFieldNames(config: RecordDetailConfig | null | undefined): string[] {
+  if (!config) return [];
+
+  const fieldNames = new Set<string>();
+
+  // Add common fields
+  if (config.headTitleField) fieldNames.add(config.headTitleField);
+  config.headSubLineFields?.forEach((f) => fieldNames.add(f));
+
+  // Add layout-specific fields
+  if ('rowTailFields' in config) {
+    config.rowTailFields?.forEach((f) => fieldNames.add(f));
+  }
+  if ('column1Fields' in config) {
+    config.column1Fields?.forEach((f) => fieldNames.add(f));
+  }
+  if ('column2Fields' in config) {
+    config.column2Fields?.forEach((f) => fieldNames.add(f));
+  }
+
+  return Array.from(fieldNames);
+}
 
 /**
- * Redesigned Record Detail Page
+ * Helper: Check if any visible fields are reference types
+ * Returns true if any configured field is a reference type
  */
-export function RecordDetailPage() {
-  const navigate = route.useNavigate();
-  const { recordId, tableId, workspaceId, locale } = route.useParams();
+function configHasReferenceFields(config: RecordDetailConfig | null | undefined, table: Table | null): boolean {
+  if (!config || !table) return false;
 
-  // Fetch table config
+  const visibleFields = getVisibleFieldNames(config);
+
+  // Check if any field is a reference type
+  return visibleFields.some((fieldName) => {
+    const field = table.config.fields.find((f: FieldConfig) => f.name === fieldName);
+    if (!field) return false;
+
+    // Type-safe check using readonly array includes
+    return (REFERENCE_FIELD_TYPES as readonly string[]).includes(field.type);
+  });
+}
+
+/**
+ * Record Detail Page Component
+ * Handles data fetching, encryption, and renders RecordDetail component
+ */
+export default function RecordDetailPage() {
+  const { locale, workspaceId, tableId, recordId } = route.useParams();
+  const navigate = route.useNavigate();
+  const [showShortcutsHelp, setShowShortcutsHelp] = useState(false);
+
+  // Step 1: Fetch table configuration first
   const tableQuery = useActiveTable(workspaceId, tableId);
   const table = tableQuery.data?.data ?? null;
   const tableLoading = tableQuery.isLoading;
   const tableError = tableQuery.error;
 
-  // Get encryption key
+  // Step 2: Get recordDetailConfig from table
+  const recordDetailConfig = table?.config?.recordDetailConfig;
+
+  // Step 3: Check encryption requirements
   const encryption = useTableEncryption(workspaceId ?? '', tableId ?? '', table?.config);
 
-  // Fetch single record (efficient)
+  // Step 4: Fetch single record (only after table config is loaded)
   const {
     record,
     isLoading: recordLoading,
@@ -83,491 +107,212 @@ export function RecordDetailPage() {
     encryptionKey: encryption.encryptionKey,
   });
 
-  // Fetch workspace users
+  // Fetch workspace users (dùng useGetWorkspaceUsers giống active-table-records-page.tsx)
   const { data: workspaceUsers } = useGetWorkspaceUsers(workspaceId ?? '', {
     query: 'BASIC_WITH_AVATAR',
   });
 
-  // Fetch comments with permissions
-  const {
-    comments,
-    permissions: commentPermissions,
-    isLoading: commentsLoading,
-    addComment: addCommentAsync,
-    updateComment: updateCommentAsync,
-    deleteComment: deleteCommentAsync,
-  } = useRecordCommentsWithPermissions(
-    workspaceId,
-    tableId,
-    recordId,
-    table,
-    undefined, // TODO: Pass current user when available
-  );
-
-  // Override comment permissions with API response if available
-  const effectiveCommentPermissions = useMemo(() => {
-    if (permissions?.comment_create !== undefined) {
-      // Use permissions from API response
-      return {
-        canCreate: permissions.comment_create ?? false,
-        canAccess: true, // If we can view the record, we can view comments
-        canUpdate: () => true, // TODO: Check from API
-        canDelete: () => true, // TODO: Check from API
-      };
-    }
-    // Fallback to calculated permissions
-    return commentPermissions;
-  }, [permissions, commentPermissions]);
-
-  // Wrap comment mutations for components
-  const handleAddComment = useCallback(
-    async (content: string) => {
-      await addCommentAsync(content);
-    },
-    [addCommentAsync],
-  );
-
-  const handleUpdateComment = useCallback(
-    async (commentId: string, content: string) => {
-      await updateCommentAsync(commentId, content);
-    },
-    [updateCommentAsync],
-  );
-
-  const handleDeleteComment = useCallback(
-    async (commentId: string) => {
-      await deleteCommentAsync(commentId);
-    },
-    [deleteCommentAsync],
-  );
-
-  // Field update handler
-  const { updateFieldAsync, isUpdating } = useUpdateRecordField(workspaceId, tableId, recordId, table, {
+  // Update record field mutation
+  const { updateFieldAsync } = useUpdateRecordField(workspaceId ?? '', tableId ?? '', recordId, table, {
     encryptionKey: encryption.encryptionKey,
+  });
+
+  // Delete record mutation
+  const { deleteRecord: deleteRecordFn } = useDeleteRecord({
+    workspaceId: workspaceId ?? '',
+    tableId: tableId ?? '',
+    table: table ?? null,
     onSuccess: () => {
-      void refetchRecord();
+      navigate({
+        to: ROUTES.ACTIVE_TABLES.TABLE_RECORDS,
+        params: { locale, workspaceId, tableId },
+      });
     },
   });
 
-  // Wrap the mutation for components
-  const handleUpdateField = useCallback(
-    async (fieldName: string, value: unknown) => {
-      await updateFieldAsync({ fieldName, value });
-    },
-    [updateFieldAsync],
+  // Extract visible field names from config
+  const visibleFields = useMemo(
+    () => getVisibleFieldNames(recordDetailConfig as RecordDetailConfig | undefined),
+    [recordDetailConfig],
   );
 
-  // Navigation
-  const handleBack = useCallback(() => {
-    navigate({
-      to: ROUTES.ACTIVE_TABLES.TABLE_RECORDS,
-      params: { locale, workspaceId, tableId },
+  // Check if config needs reference data
+  const needsReferenceData = useMemo(
+    () => configHasReferenceFields(recordDetailConfig as RecordDetailConfig | undefined, table),
+    [recordDetailConfig, table],
+  );
+
+  // Fetch reference records only if config contains reference fields
+  // (SELECT_ONE_RECORD, SELECT_LIST_RECORD, FIRST_REFERENCE_RECORD)
+  // Pass current record so hook can build proper filtering for FIRST_REFERENCE_RECORD
+  // Pass visibleFields to only fetch references for displayed fields
+  const { referenceRecords } = useReferenceRecords(workspaceId ?? '', table, {
+    records: record ? [record] : [],
+    enabled: needsReferenceData, // ✅ Only fetch if config needs it
+    visibleFields: visibleFields, // ✅ Only fetch for visible fields
+  });
+
+  // Determine if comments should be shown based on config
+  const shouldShowComments = recordDetailConfig?.commentsPosition !== COMMENTS_POSITION_HIDDEN;
+
+  // Fetch comments (only if needed)
+  const {
+    comments,
+    addComment,
+    isLoading: isLoadingComments,
+  } = useRecordComments(workspaceId ?? '', tableId ?? '', recordId, {
+    enabled: shouldShowComments,
+  });
+
+  // Keyboard shortcuts
+  useRecordShortcuts({
+    onEscape: () => navigate({ to: ROUTES.ACTIVE_TABLES.TABLE_RECORDS, params: { locale, workspaceId, tableId } }),
+    onShowHelp: () => setShowShortcutsHelp(true),
+  });
+
+  // Convert workspaceUsers array to Record format for RecordDetail component
+  const userRecordsMap = useMemo(() => {
+    if (!workspaceUsers) return undefined;
+    const map: Record<string, any> = {};
+    workspaceUsers.forEach((user) => {
+      map[user.id] = user;
     });
-  }, [navigate, locale, workspaceId, tableId]);
+    return map;
+  }, [workspaceUsers]);
 
-  // Quick actions
-  const handleEdit = useCallback(() => {
-    // TODO: Navigate to edit mode or open edit dialog
-    console.log('[handleEdit] Not implemented yet');
-  }, []);
-
-  const handleDelete = useCallback(async () => {
-    // TODO: Implement delete functionality
-    console.log('[handleDelete] Not implemented yet');
-  }, []);
-
-  // Group fields by section (based on config or default grouping)
-  const fieldSections = useMemo(() => {
-    if (!table || !record) {
-      return {
-        layout: 'head-detail' as const,
-        titleField: undefined,
-        sublineFields: [],
-        rowTailFields: [],
-        column1Fields: [],
-        column2Fields: [],
-        contentFields: [],
-      };
-    }
-
-    const config = table.config.recordDetailConfig as unknown as RecordDetailConfigWithHead | undefined;
-    const allFields = table.config.fields || [];
-
-    // If no config, use default layout with first field as title
-    if (!config) {
-      const titleField = allFields[0];
-      const contentFields = allFields.slice(1);
-
-      return {
-        layout: 'head-detail' as const,
-        titleField,
-        sublineFields: [],
-        rowTailFields: [],
-        column1Fields: [],
-        column2Fields: [],
-        contentFields,
-      };
-    }
-
-    // Title field (shown at top)
-    const titleField = allFields.find((f) => f.name === config.headTitleField);
-
-    // Subline fields (shown below title)
-    const sublineFields = (config.headSubLineFields || [])
-      .map((fieldName: string) => allFields.find((f) => f.name === fieldName))
-      .filter(Boolean) as FieldConfig[];
-
-    let excludedFieldNames: string[] = [config.headTitleField, ...(config.headSubLineFields || [])];
-
-    // Layout-specific fields
-    if (config.layout === 'two-column-detail') {
-      // Two-column layout: use column1Fields and column2Fields
-      const column1Fields = (config.column1Fields || [])
-        .map((fieldName: string) => allFields.find((f) => f.name === fieldName))
-        .filter(Boolean) as FieldConfig[];
-
-      const column2Fields = (config.column2Fields || [])
-        .map((fieldName: string) => allFields.find((f) => f.name === fieldName))
-        .filter(Boolean) as FieldConfig[];
-
-      excludedFieldNames = [...excludedFieldNames, ...(config.column1Fields || []), ...(config.column2Fields || [])];
-
-      return {
-        layout: 'two-column-detail' as const,
-        titleField,
-        sublineFields,
-        rowTailFields: [],
-        column1Fields,
-        column2Fields,
-        contentFields: allFields.filter((f) => !excludedFieldNames.includes(f.name)),
-      };
-    } else {
-      // Head-detail layout (single column): use rowTailFields
-      const rowTailFields = (config.rowTailFields || [])
-        .map((fieldName: string) => allFields.find((f) => f.name === fieldName))
-        .filter(Boolean) as FieldConfig[];
-
-      excludedFieldNames = [...excludedFieldNames, ...(config.rowTailFields || [])];
-
-      return {
-        layout: 'head-detail' as const,
-        titleField,
-        sublineFields,
-        rowTailFields,
-        column1Fields: [],
-        column2Fields: [],
-        contentFields: allFields.filter((f) => !excludedFieldNames.includes(f.name)),
-      };
-    }
-  }, [table, record]);
-
-  // Loading state
-  if (tableLoading || recordLoading) {
-    return (
-      <div className="h-full flex flex-col">
-        {/* TODO: Migrate to primitives when responsive padding support is added */}
-        <div className="p-4 sm:p-6">
-          <Stack space="space-300">
-            <Skeleton className="h-10 w-48" />
-            <Grid columns={1} gap="space-300" className="lg:grid-cols-3">
-              <div className="lg:col-span-2">
-                <Stack space="space-100">
-                  <Skeleton className="h-48 w-full" />
-                  <Skeleton className="h-64 w-full" />
-                </Stack>
-              </div>
-              <div className="lg:col-span-1">
-                <Skeleton className="h-96 w-full" />
-              </div>
-            </Grid>
-          </Stack>
-        </div>
-      </div>
-    );
+  // Loading state - table config
+  if (tableLoading) {
+    return <RecordLoadingSkeleton />;
   }
 
-  // Error state
-  if (tableError || recordError) {
-    const error = tableError || recordError;
-    return (
-      <Box padding="space-300">
-        <Stack space="space-100">
-          <Button variant="ghost" onClick={handleBack}>
-            <Inline space="space-050" align="center">
-              <ArrowLeft className="h-4 w-4" />
-              {locale === 'vi' ? 'Quay lại danh sách' : 'Back to List'}
-            </Inline>
-          </Button>
-          {error && (
-            <ErrorCard error={error} onRetry={() => window.location.reload()} showDetails={import.meta.env.DEV} />
-          )}
-        </Stack>
-      </Box>
-    );
+  // Error state - table not found
+  if (tableError || !table) {
+    return <RecordNotFound type="table" />;
   }
 
-  // Record not found
-  if (!record || !table) {
-    return (
-      <Box padding="space-300">
-        <Stack space="space-100">
-          <Button variant="ghost" onClick={handleBack}>
-            <Inline space="space-050" align="center">
-              <ArrowLeft className="h-4 w-4" />
-              {locale === 'vi' ? 'Quay lại danh sách' : 'Back to List'}
-            </Inline>
-          </Button>
-          <ErrorCard
-            error={new Error(locale === 'vi' ? 'Không tìm thấy bản ghi' : 'Record not found')}
-            onRetry={handleBack}
-            showDetails={false}
-          />
-        </Stack>
-      </Box>
-    );
+  // E2EE encryption key required
+  if (encryption.isE2EEEnabled && encryption.keyValidationStatus !== 'valid') {
+    return <EncryptionKeyPrompt tableId={tableId} tableName={table.name} onKeySubmit={encryption.saveKey} />;
   }
+
+  // Loading state - record data
+  if (recordLoading) {
+    return <RecordLoadingSkeleton />;
+  }
+
+  // Error state - record not found
+  if (recordError || !record) {
+    return <RecordNotFound type="record" />;
+  }
+
+  // Permission check - no access
+  if (!permissions?.access) {
+    return <PermissionDeniedError />;
+  }
+
+  // Handle field change - encryption handled by hook
+  const handleFieldChange = async (fieldName: string, value: unknown) => {
+    await updateFieldAsync({ fieldName, value });
+  };
+
+  // Handle delete record
+  const handleDelete = async () => {
+    // Delete function doesn't return a promise, but make it async for consistency
+    deleteRecordFn(recordId);
+  };
+
+  // Handle record navigation (for related records)
+  const handleRecordClick = (clickedRecordId: string) => {
+    navigate({
+      to: ROUTES.ACTIVE_TABLES.RECORD_DETAIL,
+      params: { locale, workspaceId, tableId, recordId: clickedRecordId },
+    });
+  };
 
   return (
-    <div className="h-full flex flex-col bg-background">
-      {/* Sticky Header */}
-      <header className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
-        {/* TODO: Migrate to primitives when responsive padding support is added */}
-        <div className="container max-w-7xl mx-auto px-4 sm:px-6 py-3">
-          <Inline space="space-075" justify="between" align="center">
-            {/* Back Button */}
-            <Button variant="ghost" size="sm" onClick={handleBack}>
-              <Inline space="space-050" align="center">
-                <ArrowLeft className="h-4 w-4" />
-                <span className="hidden sm:inline">{locale === 'vi' ? 'Quay lại' : 'Back to List'}</span>
-                <span className="sm:hidden">{locale === 'vi' ? 'Quay lại' : 'Back'}</span>
-              </Inline>
-            </Button>
-          </Inline>
-        </div>
-      </header>
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <RecordHeader
+        record={record}
+        table={table}
+        referenceRecords={referenceRecords}
+        onDelete={permissions?.delete ? handleDelete : undefined}
+        onBack={() => navigate({ to: ROUTES.ACTIVE_TABLES.TABLE_RECORDS, params: { locale, workspaceId, tableId } })}
+      />
 
       {/* Main Content */}
-      <div className="flex-1 overflow-auto">
-        {/* TODO: Migrate to primitives when responsive padding and gap support is added */}
-        <div className="container max-w-7xl mx-auto p-4 sm:p-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
-            {/* Left Column: Main Content (2/3 width on desktop) */}
-            <div className="lg:col-span-2">
-              <Stack space="space-300">
-                {/* Title Section */}
-                <Card>
-                  <CardContent className="pt-6">
-                    <Stack space="space-100">
-                      {/* Title Field (large, inline editable) */}
-                      {fieldSections.titleField && (
-                        <div>
-                          <Heading level={1} className="mb-1">
-                            <InlineEditableField
-                              field={fieldSections.titleField}
-                              value={record.data?.[fieldSections.titleField.name]}
-                              canEdit={canEditField(permissions, fieldSections.titleField)}
-                              onUpdate={handleUpdateField}
-                              isUpdating={isUpdating}
-                              editMode="double-click"
-                            />
-                          </Heading>
-                        </div>
-                      )}
+      <main className="container mx-auto px-4 py-6 max-w-7xl">
+        {/* Breadcrumb */}
+        <div className="mb-4">
+          <RecordBreadcrumb table={table} />
+        </div>
 
-                      {/* Subline Fields (badges, labels) */}
-                      {fieldSections.sublineFields && fieldSections.sublineFields.length > 0 && (
-                        <Inline space="space-050" wrap align="center">
-                          {fieldSections.sublineFields.map((field) => (
-                            <InlineEditableField
-                              key={field.name}
-                              field={field}
-                              value={record.data?.[field.name]}
-                              canEdit={canEditField(permissions, field)}
-                              onUpdate={handleUpdateField}
-                              isUpdating={isUpdating}
-                            />
-                          ))}
-                        </Inline>
-                      )}
-                    </Stack>
-                  </CardContent>
-                </Card>
-
-                {/* Layout-specific content */}
-                {fieldSections.layout === 'head-detail' ? (
-                  <>
-                    {/* Head Detail Layout: Single Column */}
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>{locale === 'vi' ? 'Chi tiết' : 'Details'}</CardTitle>
-                      </CardHeader>
-                      <Separator />
-                      <CardContent className="pt-6">
-                        <Stack space="space-100">
-                          {/* Row Tail Fields (inline with labels on right) */}
-                          {fieldSections.rowTailFields.map((field) => (
-                            <div key={field.name} className="py-[var(--space-050)]">
-                              <Inline space="space-100" justify="between" align="start">
-                                <label className="text-sm font-medium text-muted-foreground flex-shrink-0 pt-2">
-                                  {field.label || field.name}
-                                </label>
-                                <div className="flex-1 text-right">
-                                  <InlineEditableField
-                                    field={field}
-                                    value={record.data?.[field.name]}
-                                    canEdit={canEditField(permissions, field)}
-                                    onUpdate={handleUpdateField}
-                                    isUpdating={isUpdating}
-                                  />
-                                </div>
-                              </Inline>
-                            </div>
-                          ))}
-
-                          {/* Content Fields (standard layout) */}
-                          {fieldSections.contentFields.map((field) => (
-                            <Stack key={field.name} space="space-050">
-                              <label className="text-sm font-medium text-muted-foreground">
-                                {field.label || field.name}
-                              </label>
-                              <InlineEditableField
-                                field={field}
-                                value={record.data?.[field.name]}
-                                canEdit={canEditField(permissions, field)}
-                                onUpdate={handleUpdateField}
-                                isUpdating={isUpdating}
-                              />
-                            </Stack>
-                          ))}
-                        </Stack>
-                      </CardContent>
-                    </Card>
-                  </>
-                ) : (
-                  <>
-                    {/* Two Column Layout */}
-                    <Grid columns={1} gap="space-100" className="md:grid-cols-2">
-                      {/* Column 1 */}
-                      {fieldSections.column1Fields.length > 0 && (
-                        <Card>
-                          <CardHeader>
-                            <CardTitle>{locale === 'vi' ? 'Cột 1' : 'Column 1'}</CardTitle>
-                          </CardHeader>
-                          <Separator />
-                          <CardContent className="pt-6">
-                            <Stack space="space-100">
-                              {fieldSections.column1Fields.map((field) => (
-                                <Stack key={field.name} space="space-050">
-                                  <label className="text-sm font-medium text-muted-foreground">
-                                    {field.label || field.name}
-                                  </label>
-                                  <InlineEditableField
-                                    field={field}
-                                    value={record.data?.[field.name]}
-                                    canEdit={canEditField(permissions, field)}
-                                    onUpdate={handleUpdateField}
-                                    isUpdating={isUpdating}
-                                  />
-                                </Stack>
-                              ))}
-                            </Stack>
-                          </CardContent>
-                        </Card>
-                      )}
-
-                      {/* Column 2 */}
-                      {fieldSections.column2Fields.length > 0 && (
-                        <Card>
-                          <CardHeader>
-                            <CardTitle>{locale === 'vi' ? 'Cột 2' : 'Column 2'}</CardTitle>
-                          </CardHeader>
-                          <Separator />
-                          <CardContent className="pt-6">
-                            <Stack space="space-100">
-                              {fieldSections.column2Fields.map((field) => (
-                                <Stack key={field.name} space="space-050">
-                                  <label className="text-sm font-medium text-muted-foreground">
-                                    {field.label || field.name}
-                                  </label>
-                                  <InlineEditableField
-                                    field={field}
-                                    value={record.data?.[field.name]}
-                                    onUpdate={handleUpdateField}
-                                    canEdit={canEditField(permissions, field)}
-                                    isUpdating={isUpdating}
-                                  />
-                                </Stack>
-                              ))}
-                            </Stack>
-                          </CardContent>
-                        </Card>
-                      )}
-                    </Grid>
-
-                    {/* Additional content fields not in columns */}
-                    {fieldSections.contentFields.length > 0 && (
-                      <Card>
-                        <CardHeader>
-                          <CardTitle>{locale === 'vi' ? 'Thông tin khác' : 'Additional Information'}</CardTitle>
-                        </CardHeader>
-                        <Separator />
-                        <CardContent className="pt-6">
-                          <Stack space="space-100">
-                            {fieldSections.contentFields.map((field) => (
-                              <Stack key={field.name} space="space-050">
-                                <label className="text-sm font-medium text-muted-foreground">
-                                  {field.label || field.name}
-                                </label>
-                                <InlineEditableField
-                                  field={field}
-                                  value={record.data?.[field.name]}
-                                  canEdit={canEditField(permissions, field)}
-                                  onUpdate={handleUpdateField}
-                                  isUpdating={isUpdating}
-                                />
-                              </Stack>
-                            ))}
-                          </Stack>
-                        </CardContent>
-                      </Card>
-                    )}
-                  </>
-                )}
-
-                {/* Activity Timeline */}
-                <ActivityTimeline
-                  comments={comments}
-                  permissions={effectiveCommentPermissions}
-                  currentUserId={undefined} // TODO: Get from auth
-                  workspaceUsers={workspaceUsers}
-                  isLoading={commentsLoading}
-                  onCommentAdd={handleAddComment}
-                  onCommentUpdate={handleUpdateComment}
-                  onCommentDelete={handleDeleteComment}
-                  locale={locale}
+        {/* Conditional Layout based on commentsPosition config */}
+        {shouldShowComments ? (
+          // Layout with Comments Panel (right-panel)
+          <div className="grid grid-cols-12 gap-6">
+            {/* Record Detail - Main Content (8 columns) */}
+            <div className="col-span-12 lg:col-span-8">
+              <div className="bg-card rounded-lg border p-6">
+                <RecordDetail
+                  record={record}
+                  table={table}
+                  onFieldChange={permissions?.update ? handleFieldChange : undefined}
+                  onDelete={permissions?.delete ? handleDelete : undefined}
+                  onRecordClick={handleRecordClick}
+                  readOnly={!permissions?.update}
+                  showComments={false} // Comments in sidebar
+                  showTimeline={true}
+                  showRelatedRecords={true}
+                  referenceRecords={referenceRecords}
+                  userRecords={userRecordsMap}
                 />
-              </Stack>
+              </div>
             </div>
 
-            {/* Right Column: Sidebar (1/3 width on desktop, stacked on mobile) */}
-            <div className="lg:col-span-1 order-first lg:order-last">
-              <div className="lg:sticky lg:top-20">
-                <Stack space="space-100">
-                  <RecordDetailSidebar
-                    table={table}
-                    record={record}
-                    permissions={permissions}
-                    workspaceUsers={workspaceUsers}
-                    onEdit={handleEdit}
-                    onDelete={handleDelete}
-                    locale={locale}
-                  />
-                </Stack>
+            {/* Comments Panel - Sidebar (4 columns) */}
+            <div className="col-span-12 lg:col-span-4">
+              <div className="sticky top-20">
+                <CommentsPanel
+                  recordId={recordId}
+                  comments={comments.map((c) => {
+                    const user = workspaceUsers?.find((u) => u.id === c.userId);
+                    return {
+                      id: c.id,
+                      content: c.content,
+                      userId: c.userId,
+                      userName: user?.name || 'Unknown User',
+                      createdAt: c.createdAt,
+                    };
+                  })}
+                  onCommentAdd={addComment}
+                  loading={isLoadingComments}
+                />
               </div>
             </div>
           </div>
-        </div>
-      </div>
+        ) : (
+          // Full-width Layout (commentsPosition: hidden)
+          <div className="bg-card rounded-lg border p-6">
+            <RecordDetail
+              record={record}
+              table={table}
+              onFieldChange={permissions?.update ? handleFieldChange : undefined}
+              onDelete={permissions?.delete ? handleDelete : undefined}
+              onRecordClick={handleRecordClick}
+              readOnly={!permissions?.update}
+              showComments={false} // Hidden by config
+              showTimeline={true}
+              showRelatedRecords={true}
+              referenceRecords={referenceRecords}
+              userRecords={userRecordsMap}
+            />
+          </div>
+        )}
+      </main>
+
+      {/* Shortcuts Help Dialog */}
+      <ShortcutsHelpDialog open={showShortcutsHelp} onOpenChange={setShowShortcutsHelp} />
     </div>
   );
 }

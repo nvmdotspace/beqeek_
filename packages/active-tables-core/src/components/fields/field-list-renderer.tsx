@@ -9,6 +9,7 @@ import type { FieldConfig } from '../../types/field.js';
 import type { Table } from '../../types/common.js';
 import type { CurrentUser, WorkspaceUser } from '../../types/responses.js';
 import type { ActiveTablesMessages } from '../../types/messages.js';
+import { FIELD_TYPE_RICH_TEXT } from '../../types/field.js';
 import { FieldBadge } from '../common/index.js';
 
 interface FieldListRendererProps {
@@ -247,6 +248,19 @@ export function FieldListRenderer(props: FieldListRendererProps) {
   // Email fields
   if (fieldType === 'EMAIL') {
     return <EmailFieldList value={value} disableTruncate={disableTruncate} />;
+  }
+
+  // Rich text fields - strip HTML tags for list display
+  if (fieldType === FIELD_TYPE_RICH_TEXT) {
+    const plainText = typeof value === 'string' ? value.replace(/<[^>]*>/g, '').trim() : String(value);
+    return (
+      <span
+        className={disableTruncate ? 'text-sm' : 'text-sm truncate max-w-[200px] inline-block'}
+        title={disableTruncate ? undefined : plainText}
+      >
+        {plainText || '—'}
+      </span>
+    );
   }
 
   // Default text rendering with truncation for long values
