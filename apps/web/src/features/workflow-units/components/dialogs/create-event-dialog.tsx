@@ -97,47 +97,50 @@ export function CreateEventDialog({ open, onOpenChange, workspaceId, unitId }: C
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>Create Workflow Event</DialogTitle>
-          <DialogDescription>
-            Create a new event to trigger your workflow. Configure the event name and trigger settings.
-          </DialogDescription>
+          <DialogDescription className="text-sm">Create a new event to trigger your workflow</DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Basic Info */}
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="event-name">Event Name *</Label>
-              <Input
-                id="event-name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Daily customer sync"
-                required
-                maxLength={100}
-                disabled={createEvent.isPending}
-              />
-            </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Event Name */}
+          <div className="space-y-1.5">
+            <Label htmlFor="event-name" className="text-sm font-medium">
+              Event Name *
+            </Label>
+            <Input
+              id="event-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Daily customer sync"
+              required
+              maxLength={100}
+              disabled={createEvent.isPending}
+              className="h-9"
+            />
+          </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="event-description">Description (optional)</Label>
-              <Textarea
-                id="event-description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Syncs customer data from CRM to database every day at 9 AM"
-                rows={3}
-                maxLength={500}
-                disabled={createEvent.isPending}
-              />
-            </div>
+          {/* Description */}
+          <div className="space-y-1.5">
+            <Label htmlFor="event-description" className="text-sm font-medium">
+              Description (optional)
+            </Label>
+            <Textarea
+              id="event-description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Syncs customer data from CRM to database every day at 9 AM"
+              rows={2}
+              maxLength={500}
+              disabled={createEvent.isPending}
+              className="text-sm resize-none"
+            />
           </div>
 
           {/* Trigger Configuration */}
-          <div className="border-t pt-6">
-            <h3 className="text-sm font-semibold mb-4">Trigger Configuration</h3>
+          <div className="border-t pt-4 space-y-3">
+            <h3 className="text-sm font-semibold">Trigger Configuration</h3>
             <TriggerConfigForm
               workspaceId={workspaceId}
               triggerType={triggerType}
@@ -147,16 +150,17 @@ export function CreateEventDialog({ open, onOpenChange, workspaceId, unitId }: C
             />
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="gap-2 sm:gap-2">
             <Button
               type="button"
               variant="outline"
+              size="sm"
               onClick={() => handleOpenChange(false)}
               disabled={createEvent.isPending}
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={!name.trim() || createEvent.isPending}>
+            <Button type="submit" size="sm" disabled={!name.trim() || createEvent.isPending}>
               {createEvent.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Create Event
             </Button>

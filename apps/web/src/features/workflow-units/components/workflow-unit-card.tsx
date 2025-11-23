@@ -1,9 +1,20 @@
-import { Card, CardHeader, CardTitle, CardDescription, CardFooter } from '@workspace/ui/components/card';
+import { memo, useMemo } from 'react';
+import { Boxes, Calendar, MoreVertical, Edit, Trash2, Play, Settings } from 'lucide-react';
+import { Card, CardContent } from '@workspace/ui/components/card';
+import { Badge } from '@workspace/ui/components/badge';
 import { Button } from '@workspace/ui/components/button';
-import { Inline } from '@workspace/ui/components/primitives';
-import { Edit, Trash } from 'lucide-react';
+import { Text, Heading } from '@workspace/ui/components/typography';
+import { Box, Stack, Inline } from '@workspace/ui/components/primitives';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@workspace/ui/components/dropdown-menu';
 import { useNavigate } from '@tanstack/react-router';
 import { ROUTES } from '@/shared/route-paths';
+import { cn } from '@workspace/ui/lib/utils';
 import type { WorkflowUnit } from '../api/types';
 
 interface WorkflowUnitCardProps {
@@ -14,8 +25,16 @@ interface WorkflowUnitCardProps {
   onDelete: (unit: WorkflowUnit) => void;
 }
 
-export function WorkflowUnitCard({ unit, workspaceId, locale, onEdit, onDelete }: WorkflowUnitCardProps) {
+export const WorkflowUnitCard = memo(({ unit, workspaceId, locale, onEdit, onDelete }: WorkflowUnitCardProps) => {
   const navigate = useNavigate();
+
+  const updatedAtLabel = useMemo(() => {
+    if (!unit.updatedAt || Number.isNaN(Date.parse(unit.updatedAt))) return null;
+    return new Intl.DateTimeFormat(locale, {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    }).format(new Date(unit.updatedAt));
+  }, [unit.updatedAt, locale]);
 
   const handleCardClick = () => {
     navigate({
@@ -34,35 +53,117 @@ export function WorkflowUnitCard({ unit, workspaceId, locale, onEdit, onDelete }
     onDelete(unit);
   };
 
+  const handleManageEvents = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigate({
+      to: ROUTES.WORKFLOW_UNITS.DETAIL,
+      params: { locale, workspaceId, unitId: unit.id },
+    });
+  };
+
   return (
     <Card
-      className="cursor-pointer transition-all hover:shadow-md"
+      className={cn(
+        'group relative overflow-hidden',
+        'border-border/60 shadow-sm',
+        'transition-all duration-200',
+        'hover:shadow-md hover:border-border',
+        'cursor-pointer',
+      )}
       onClick={handleCardClick}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          handleCardClick();
-        }
-      }}
     >
-      <CardHeader>
-        <CardTitle className="line-clamp-2">{unit.name}</CardTitle>
-        {unit.description && <CardDescription className="line-clamp-2">{unit.description}</CardDescription>}
-      </CardHeader>
-      <CardFooter>
-        <Inline space="space-150" justify="end" className="w-full">
-          <Button variant="ghost" size="sm" onClick={handleEdit} aria-label={`Edit ${unit.name}`}>
-            <Edit className="size-4 mr-2" />
-            Edit
-          </Button>
-          <Button variant="ghost" size="sm" onClick={handleDelete} aria-label={`Delete ${unit.name}`}>
-            <Trash className="size-4 mr-2" />
-            Delete
-          </Button>
-        </Inline>
-      </CardFooter>
+      <CardContent>
+        <Box padding="space-100" className="sm:p-5">
+          <Inline align="start" justify="between" className="gap-2.5 sm:gap-3">
+            <Inline space="space-075" align="start" className="flex-1 min-w-0 sm:gap-3">
+              {/* Unit Icon */}
+              <div
+                className={cn(
+                  'flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-lg',
+                  'bg-accent-blue-subtle',
+                )}
+              >
+                <Boxes className={cn('h-4 w-4 sm:h-4.5 sm:w-4.5', 'text-accent-blue')} />
+              </div>
+
+              <div className="flex-1 min-w-0">
+                <Stack space="space-050">
+                  {/* Title */}
+                  <Heading level={4} className="text-base leading-tight line-clamp-2 break-words">
+                    {unit.name}
+                  </Heading>
+
+                  {/* Badges row */}
+                  <Inline space="space-037" wrap align="center">
+                    <Badge
+                      variant="outline"
+                      className={cn(
+                        'text-[10px] capitalize font-medium whitespace-nowrap',
+                        'border-accent-blue/30 text-accent-blue',
+                      )}
+                    >
+                      Workflow Unit
+                    </Badge>
+                  </Inline>
+                </Stack>
+              </div>
+            </Inline>
+
+            {/* Dropdown Menu */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <MoreVertical className="h-4 w-4" />
+                  <span className="sr-only">Open menu</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem onClick={handleManageEvents}>
+                  <Settings className="mr-2 h-4 w-4" />
+                  Manage Events
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleEdit}>
+                  <Edit className="mr-2 h-4 w-4" />
+                  Edit Unit
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleDelete} className="text-destructive focus:text-destructive">
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </Inline>
+
+          <Stack space="space-075" className="mt-3">
+            {/* Description */}
+            {unit.description && (
+              <Text size="small" color="muted" className="line-clamp-2 break-words">
+                {unit.description}
+              </Text>
+            )}
+
+            {/* Metadata */}
+            <Inline space="space-050" wrap align="center" className="text-xs text-muted-foreground">
+              {updatedAtLabel && (
+                <>
+                  <Calendar className="h-3 w-3" />
+                  <Text size="small" color="muted" className="text-xs">
+                    {updatedAtLabel}
+                  </Text>
+                </>
+              )}
+            </Inline>
+          </Stack>
+        </Box>
+      </CardContent>
     </Card>
   );
-}
+});
+
+WorkflowUnitCard.displayName = 'WorkflowUnitCard';
