@@ -1,6 +1,9 @@
 /**
  * Rich Text Field Display - Renders RICH_TEXT field type with HTML content
  * @module active-tables-core/components/record-detail/fields/field-renderers
+ *
+ * Uses Lexical-specific CSS classes for consistent styling between edit and display modes.
+ * Requires importing: import '@workspace/active-tables-core/lexical-styles.css'
  */
 
 import { Text } from '@workspace/ui/components/typography/text';
@@ -12,6 +15,7 @@ interface RichTextFieldDisplayProps {
 /**
  * Display component for rich text fields with HTML content
  * Uses dangerouslySetInnerHTML to render formatted content
+ * Uses .lexical-display-content class for consistent Lexical styling
  *
  * @example
  * <RichTextFieldDisplay value="<p>Hello <strong>world</strong></p>" />
@@ -28,10 +32,5 @@ export function RichTextFieldDisplay({ value }: RichTextFieldDisplayProps) {
   // Note: For production, consider using a library like DOMPurify
   const sanitizedContent = htmlContent.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
 
-  return (
-    <div
-      className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-a:text-primary"
-      dangerouslySetInnerHTML={{ __html: sanitizedContent }}
-    />
-  );
+  return <div className="lexical-display-content" dangerouslySetInnerHTML={{ __html: sanitizedContent }} />;
 }

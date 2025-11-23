@@ -57,6 +57,8 @@ export interface FieldRendererProps extends BaseFieldRendererProps {
   referencedTableName?: string;
   /** Week 2: Initial records for displaying pre-selected values (for reference fields) */
   initialRecords?: AsyncRecordSelectRecord[];
+  /** Hide the field label (useful when label is rendered externally) */
+  hideLabel?: boolean;
 }
 
 /**

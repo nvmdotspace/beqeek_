@@ -16,7 +16,6 @@ import { Avatar, AvatarFallback, AvatarImage } from '@workspace/ui/components/av
 import { useAuthStore } from '@/features/auth';
 import { useLogout } from '@/features/auth/hooks/use-logout';
 
-// @ts-expect-error - Paraglide generates JS without .d.ts files
 import {
   useAppKeyboardShortcuts,
   useAccessibilityEnhancements,

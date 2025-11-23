@@ -30,6 +30,7 @@ export function TwoColumnDetailLayout({
   onFieldChange,
   readOnly = false,
   className,
+  inlineEditContext,
 }: TwoColumnDetailLayoutProps) {
   const { startEdit, cancelEdit } = useDetailViewStore();
 
@@ -109,6 +110,11 @@ export function TwoColumnDetailLayout({
             onSave={(newValue) => handleFieldSave(fieldName, newValue)}
             onCancel={cancelEdit}
             autoFocus
+            table={table}
+            workspaceUsers={inlineEditContext?.workspaceUsers}
+            fetchRecords={inlineEditContext?.getFetchRecords?.(fieldName)}
+            initialRecords={inlineEditContext?.getInitialRecords?.(fieldName)}
+            referencedTableName={field.referencedTableName}
           />
         ) : (
           <FieldDisplay
@@ -143,6 +149,11 @@ export function TwoColumnDetailLayout({
                   onSave={(value) => handleFieldSave(config.headTitleField, value)}
                   onCancel={cancelEdit}
                   autoFocus
+                  table={table}
+                  workspaceUsers={inlineEditContext?.workspaceUsers}
+                  fetchRecords={inlineEditContext?.getFetchRecords?.(config.headTitleField)}
+                  initialRecords={inlineEditContext?.getInitialRecords?.(config.headTitleField)}
+                  referencedTableName={titleField.referencedTableName}
                 />
               ) : (
                 <Heading
@@ -180,6 +191,11 @@ export function TwoColumnDetailLayout({
                       onSave={(newValue) => handleFieldSave(name, newValue)}
                       onCancel={cancelEdit}
                       autoFocus
+                      table={table}
+                      workspaceUsers={inlineEditContext?.workspaceUsers}
+                      fetchRecords={inlineEditContext?.getFetchRecords?.(name)}
+                      initialRecords={inlineEditContext?.getInitialRecords?.(name)}
+                      referencedTableName={field.referencedTableName}
                     />
                   );
                 }

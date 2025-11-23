@@ -27,7 +27,7 @@ function orderValues(valueSet: Set<string>, options?: OptionMeta[]) {
 }
 
 export function CheckboxListField(props: FieldRendererProps) {
-  const { field, value, onChange, disabled = false, error, className, messages } = props;
+  const { field, value, onChange, disabled = false, error, className, messages, hideLabel = false } = props;
 
   const rawValues = useMemo(() => (Array.isArray(value) ? value : value ? [value] : []), [value]);
   const selectedValues = useMemo(() => rawValues.map((val) => String(val)), [rawValues]);
@@ -69,7 +69,7 @@ export function CheckboxListField(props: FieldRendererProps) {
   );
 
   return (
-    <FieldWrapper fieldId={fieldId} label={field.label} required={field.required} error={error}>
+    <FieldWrapper fieldId={fieldId} label={hideLabel ? undefined : field.label} required={field.required} error={error}>
       {options.length === 0 ? (
         <div className="rounded-xl border border-dashed border-muted-foreground/40 bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
           {noOptionsMessage}

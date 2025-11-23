@@ -12,7 +12,7 @@ import { validateFieldValue } from '../../utils/field-validation.js';
 import { format, parse } from 'date-fns';
 
 export function DateTimeField(props: FieldRendererProps) {
-  const { field, value, onChange, mode, disabled = false, error, className } = props;
+  const { field, value, onChange, mode, disabled = false, error, className, hideLabel = false } = props;
 
   const stringValue = (value as string) ?? '';
 
@@ -35,7 +35,7 @@ export function DateTimeField(props: FieldRendererProps) {
   const fieldId = `field-${field.name}`;
 
   return (
-    <FieldWrapper fieldId={fieldId} label={field.label} required={field.required} error={error}>
+    <FieldWrapper fieldId={fieldId} label={hideLabel ? undefined : field.label} required={field.required} error={error}>
       <Input
         type="datetime-local"
         id={fieldId}

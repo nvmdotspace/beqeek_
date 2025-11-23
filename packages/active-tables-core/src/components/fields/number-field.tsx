@@ -14,7 +14,7 @@ import { FieldWrapper } from '../common/field-wrapper.js';
 import { FIELD_TYPES } from '../../types/field.js';
 
 export function NumberField(props: FieldRendererProps) {
-  const { field, value, onChange, mode, disabled = false, error, className } = props;
+  const { field, value, onChange, mode, disabled = false, error, className, hideLabel = false } = props;
 
   const isNumeric = field.type === FIELD_TYPES.NUMERIC;
   const decimalPlaces = field.decimalPlaces ?? (isNumeric ? 2 : 0);
@@ -170,7 +170,7 @@ export function NumberField(props: FieldRendererProps) {
       : 'Ví dụ: 1.234');
 
   return (
-    <FieldWrapper fieldId={fieldId} label={field.label} required={field.required} error={error}>
+    <FieldWrapper fieldId={fieldId} label={hideLabel ? undefined : field.label} required={field.required} error={error}>
       <Input
         type="text"
         inputMode="decimal"

@@ -37,6 +37,7 @@ export function RecordDetail({
   showRelatedRecords = true,
   referenceRecords = {},
   userRecords = {},
+  inlineEditContext,
   className,
 }: RecordDetailProps) {
   // Determine layout from config if not provided
@@ -82,6 +83,7 @@ export function RecordDetail({
     userRecords,
     onFieldChange,
     readOnly,
+    inlineEditContext,
   };
 
   // Render layout based on type

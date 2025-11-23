@@ -18,6 +18,7 @@ import { useReferenceRecords } from '../hooks/use-reference-records';
 import { useGetWorkspaceUsers } from '@/features/workspace-users/hooks/use-get-workspace-users';
 import { useRecordComments } from '../hooks/use-record-comments';
 import { useRecordShortcuts } from '../hooks/use-record-shortcuts';
+import { useInlineEditContext } from '../hooks/use-inline-edit-context';
 import { RecordHeader } from '../components/record-header';
 import { RecordLoadingSkeleton } from '../components/record-loading-skeleton';
 import { RecordNotFound } from '../components/record-not-found';
@@ -180,6 +181,15 @@ export default function RecordDetailPage() {
     return map;
   }, [workspaceUsers]);
 
+  // Create inline edit context for reference/user fields
+  const inlineEditContext = useInlineEditContext({
+    workspaceId: workspaceId ?? '',
+    table,
+    record,
+    workspaceUsers,
+    encryptionKey: encryption.encryptionKey,
+  });
+
   // Loading state - table config
   if (tableLoading) {
     return <RecordLoadingSkeleton />;
@@ -266,6 +276,7 @@ export default function RecordDetailPage() {
                   showRelatedRecords={true}
                   referenceRecords={referenceRecords}
                   userRecords={userRecordsMap}
+                  inlineEditContext={inlineEditContext}
                 />
               </div>
             </div>
@@ -306,6 +317,7 @@ export default function RecordDetailPage() {
               showRelatedRecords={true}
               referenceRecords={referenceRecords}
               userRecords={userRecordsMap}
+              inlineEditContext={inlineEditContext}
             />
           </div>
         )}

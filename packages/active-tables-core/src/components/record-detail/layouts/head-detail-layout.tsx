@@ -28,6 +28,7 @@ export function HeadDetailLayout({
   onFieldChange,
   readOnly = false,
   className,
+  inlineEditContext,
 }: HeadDetailLayoutProps) {
   const { startEdit, cancelEdit } = useDetailViewStore();
 
@@ -107,6 +108,11 @@ export function HeadDetailLayout({
                   onSave={(newValue) => handleFieldSave(name, newValue)}
                   onCancel={cancelEdit}
                   autoFocus
+                  table={table}
+                  workspaceUsers={inlineEditContext?.workspaceUsers}
+                  fetchRecords={inlineEditContext?.getFetchRecords?.(name)}
+                  initialRecords={inlineEditContext?.getInitialRecords?.(name)}
+                  referencedTableName={field.referencedTableName}
                 />
               ) : (
                 <FieldDisplay

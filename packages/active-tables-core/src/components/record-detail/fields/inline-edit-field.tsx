@@ -1,5 +1,6 @@
 /**
  * InlineEditField - Inline editing wrapper with save/cancel buttons
+ * Uses FieldRenderer for consistent field editing across the app
  * @module active-tables-core/components/record-detail/fields
  */
 
@@ -8,35 +9,15 @@ import { Stack } from '@workspace/ui/components/primitives/stack';
 import { Inline } from '@workspace/ui/components/primitives/inline';
 import { Button } from '@workspace/ui/components/button';
 import { Check, X } from 'lucide-react';
-import { cn } from '@workspace/ui/lib/utils';
 import type { InlineEditFieldProps } from '../../../types/record-detail.js';
 import { validateFieldValue } from '../../../utils/field-validation.js';
-
-// Import field input components (to be created)
-import { TextFieldInput } from './field-inputs/text-field-input.js';
-import { NumberFieldInput } from './field-inputs/number-field-input.js';
-import { DateFieldInput } from './field-inputs/date-field-input.js';
-import { SelectFieldInput } from './field-inputs/select-field-input.js';
-import { CheckboxFieldInput } from './field-inputs/checkbox-field-input.js';
-
-import {
-  FIELD_TYPE_SHORT_TEXT,
-  FIELD_TYPE_TEXT,
-  FIELD_TYPE_EMAIL,
-  FIELD_TYPE_URL,
-  FIELD_TYPE_INTEGER,
-  FIELD_TYPE_NUMERIC,
-  FIELD_TYPE_DATE,
-  FIELD_TYPE_DATETIME,
-  FIELD_TYPE_TIME,
-  FIELD_TYPE_CHECKBOX_YES_NO,
-  FIELD_TYPE_SELECT_ONE,
-  FIELD_TYPE_SELECT_LIST,
-} from '@workspace/beqeek-shared/constants';
+import { FieldRenderer } from '../../fields/field-renderer.js';
+import { FIELD_TYPE_TEXT } from '@workspace/beqeek-shared/constants';
 
 /**
  * Inline edit field component
  * Shows appropriate input with save/cancel buttons
+ * Uses FieldRenderer for consistent editing experience
  */
 export function InlineEditField({
   field,
@@ -46,6 +27,12 @@ export function InlineEditField({
   autoFocus = false,
   validateOnChange = false,
   className,
+  // New props for FieldRenderer
+  table,
+  workspaceUsers,
+  fetchRecords,
+  initialRecords,
+  referencedTableName,
 }: InlineEditFieldProps) {
   const [currentValue, setCurrentValue] = useState(value);
   const [error, setError] = useState<string | null>(null);
@@ -107,45 +94,31 @@ export function InlineEditField({
     }
   };
 
-  // Render appropriate input based on field type
+  // Render input using FieldRenderer for consistent editing
   const renderInput = () => {
-    const commonProps = {
-      value: currentValue,
-      onChange: handleChange,
-      onKeyDown: handleKeyDown,
-      autoFocus,
-      disabled: isSaving,
-      'aria-invalid': error != null,
-      'aria-describedby': error ? 'inline-edit-error' : undefined,
-    };
-
-    switch (field.type) {
-      case FIELD_TYPE_SHORT_TEXT:
-      case FIELD_TYPE_TEXT:
-      case FIELD_TYPE_EMAIL:
-      case FIELD_TYPE_URL:
-        return <TextFieldInput {...commonProps} field={field} />;
-
-      case FIELD_TYPE_INTEGER:
-      case FIELD_TYPE_NUMERIC:
-        return <NumberFieldInput {...commonProps} field={field} />;
-
-      case FIELD_TYPE_DATE:
-      case FIELD_TYPE_DATETIME:
-      case FIELD_TYPE_TIME:
-        return <DateFieldInput {...commonProps} field={field} />;
-
-      case FIELD_TYPE_CHECKBOX_YES_NO:
-        return <CheckboxFieldInput {...commonProps} field={field} />;
-
-      case FIELD_TYPE_SELECT_ONE:
-      case FIELD_TYPE_SELECT_LIST:
-        return <SelectFieldInput {...commonProps} field={field} />;
-
-      default:
-        // Fallback to text input for unsupported types
-        return <TextFieldInput {...commonProps} field={field} />;
+    // If no table provided, cannot use FieldRenderer properly
+    if (!table) {
+      return <div className="text-muted-foreground text-sm">Table configuration required for editing</div>;
     }
+
+    return (
+      <div onKeyDown={handleKeyDown}>
+        <FieldRenderer
+          field={field}
+          value={currentValue}
+          onChange={handleChange}
+          mode="edit"
+          disabled={isSaving}
+          error={error || undefined}
+          table={table}
+          workspaceUsers={workspaceUsers}
+          fetchRecords={fetchRecords}
+          initialRecords={initialRecords}
+          referencedTableName={referencedTableName || field.referencedTableName}
+          hideLabel
+        />
+      </div>
+    );
   };
 
   return (

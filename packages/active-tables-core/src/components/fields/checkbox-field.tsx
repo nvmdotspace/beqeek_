@@ -11,7 +11,7 @@ import type { FieldRendererProps } from './field-renderer-props.js';
 import { FieldWrapper } from '../common/field-wrapper.js';
 
 export function CheckboxField(props: FieldRendererProps) {
-  const { field, value, onChange, disabled = false, error, className } = props;
+  const { field, value, onChange, disabled = false, error, className, hideLabel = false } = props;
 
   const booleanValue = Boolean(value);
   const fieldId = `field-${field.name}`;
@@ -55,10 +55,12 @@ export function CheckboxField(props: FieldRendererProps) {
           aria-invalid={!!error}
           aria-describedby={error ? `${fieldId}-error` : undefined}
         />
-        <span>
-          {field.label}
-          {field.required && <span className="text-destructive ml-1">*</span>}
-        </span>
+        {!hideLabel && (
+          <span>
+            {field.label}
+            {field.required && <span className="text-destructive ml-1">*</span>}
+          </span>
+        )}
       </label>
     </FieldWrapper>
   );

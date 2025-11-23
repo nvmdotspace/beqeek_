@@ -11,7 +11,7 @@ import { FieldWrapper } from '../common/field-wrapper.js';
 import { validateFieldValue } from '../../utils/field-validation.js';
 
 export function TextareaField(props: FieldRendererProps) {
-  const { field, value, onChange, mode, disabled = false, error, className } = props;
+  const { field, value, onChange, mode, disabled = false, error, className, hideLabel = false } = props;
 
   const stringValue = (value as string) ?? '';
 
@@ -34,7 +34,7 @@ export function TextareaField(props: FieldRendererProps) {
   const fieldId = `field-${field.name}`;
 
   return (
-    <FieldWrapper fieldId={fieldId} label={field.label} required={field.required} error={error}>
+    <FieldWrapper fieldId={fieldId} label={hideLabel ? undefined : field.label} required={field.required} error={error}>
       <Textarea
         id={fieldId}
         name={field.name}
