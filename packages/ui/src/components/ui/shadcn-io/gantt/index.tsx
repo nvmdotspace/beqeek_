@@ -553,7 +553,8 @@ export const GanttColumn: FC<GanttColumnProps> = ({ index, isColumnSecondary }) 
       onMouseLeave={handleMouseLeave}
       ref={mouseRef}
     >
-      {!dragging && hovering && gantt.onAddItem ? <GanttAddFeatureHelper top={top} /> : null}
+      {/* TODO: Re-enable when create feature is implemented */}
+      {/* {!dragging && hovering && gantt.onAddItem ? <GanttAddFeatureHelper top={top} /> : null} */}
     </div>
   );
 };

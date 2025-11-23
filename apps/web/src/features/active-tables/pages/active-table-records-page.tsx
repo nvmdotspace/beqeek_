@@ -5,7 +5,7 @@ import { getRouteApi } from '@tanstack/react-router';
 import { useActiveTable } from '../hooks/use-active-tables';
 import { useInfiniteActiveTableRecords } from '../hooks/use-infinite-active-table-records';
 import { useTableEncryption } from '../hooks/use-table-encryption';
-import { useUpdateRecordField } from '../hooks/use-update-record';
+import { useUpdateRecordField, useBatchUpdateRecord } from '../hooks/use-update-record';
 import { useListContext } from '../hooks/use-list-context';
 import { useScrollShortcuts } from '../hooks/use-scroll-shortcuts';
 import { useDeleteRecord } from '../hooks/use-delete-record';
@@ -14,6 +14,7 @@ import { useGetWorkspaceUsers } from '@/features/workspace-users/hooks/use-get-w
 import { KanbanBoard, GanttChartView, RecordList, type TableRecord, type Table } from '@workspace/active-tables-core';
 import { ROUTES } from '@/shared/route-paths';
 import { RECORD_LIST_LAYOUT_GENERIC_TABLE } from '@workspace/beqeek-shared';
+import { toast } from 'sonner';
 
 import { Button } from '@workspace/ui/components/button';
 import { Badge } from '@workspace/ui/components/badge';
@@ -203,6 +204,9 @@ export const ActiveTableRecordsPage = () => {
   // Initialize record update mutation for kanban DnD
   const updateRecordMutation = useUpdateRecordField(workspaceId ?? '', tableId ?? '', table ?? null);
 
+  // Initialize batch update mutation for gantt date changes (updates 2 fields: startDate & endDate)
+  const batchUpdateMutation = useBatchUpdateRecord(workspaceId ?? '', tableId ?? '', table ?? null);
+
   // Initialize delete record hook
   const { deleteRecord } = useDeleteRecord({
     workspaceId: workspaceId ?? '',
@@ -317,6 +321,45 @@ export const ActiveTableRecordsPage = () => {
     );
   };
 
+  /**
+   * Handle Gantt task date change (drag & drop)
+   * Updates startDateField and endDateField from currentGanttConfig
+   */
+  const handleGanttDateChange = (recordId: string, startDate: Date, endDate: Date) => {
+    if (!table || !currentGanttConfig) return;
+
+    // Check E2EE encryption key validity
+    if (table.config.e2eeEncryption && !encryption.isKeyValid) return;
+
+    const { startDateField, endDateField } = currentGanttConfig;
+
+    // Validate config has required fields
+    if (!startDateField || !endDateField) {
+      console.error('[Gantt API] ❌ Missing startDateField or endDateField in config');
+      return;
+    }
+
+    // Batch update both date fields
+    batchUpdateMutation.mutate(
+      {
+        recordId,
+        updates: {
+          [startDateField]: startDate.toISOString(),
+          [endDateField]: endDate.toISOString(),
+        },
+      },
+      {
+        onSuccess: () => {
+          toast.success('Đã cập nhật thời gian thành công');
+        },
+        onError: (error) => {
+          console.error('[Gantt API] ❌ Failed to update record dates:', error);
+          toast.error('Không thể cập nhật thời gian. Vui lòng thử lại.');
+        },
+      },
+    );
+  };
+
   const handleViewModeChange = (mode: ViewMode) => {
     navigate({
       to: ROUTES.ACTIVE_TABLES.TABLE_RECORDS,
@@ -343,14 +386,12 @@ export const ActiveTableRecordsPage = () => {
     return (
       <Box padding="space-300">
         <Stack space="space-300">
-          <Inline space="space-050" as="button">
-            <Button variant="ghost" onClick={handleBack}>
-              <Inline space="space-050" align="center">
-                <ArrowLeft className="h-4 w-4" />
-                Back to Table
-              </Inline>
-            </Button>
-          </Inline>
+          <Button variant="ghost" onClick={handleBack}>
+            <Inline space="space-050" align="center">
+              <ArrowLeft className="h-4 w-4" />
+              Back to Table
+            </Inline>
+          </Button>
           <LoadingState />
         </Stack>
       </Box>
@@ -617,44 +658,67 @@ export const ActiveTableRecordsPage = () => {
 
           {/* Kanban View */}
           {viewMode === 'kanban' && currentKanbanConfig && displayTable.config && (
-            <KanbanBoard
-              table={displayTable}
-              records={filteredRecords}
-              config={currentKanbanConfig}
-              onRecordMove={handleRecordMove}
-              onRecordClick={handleViewRecord}
-              workspaceUsers={workspaceUsers}
-              className="gap-2 sm:gap-4"
-              messages={{
-                loading: 'Loading...',
-                dropHere: 'Drop cards here',
-                error: 'Error',
-                records: 'records',
-              }}
-            />
+            <div className="relative">
+              {showFilterOverlay && (
+                <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center rounded-lg">
+                  <Inline space="space-050" align="center" className="text-muted-foreground">
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary border-t-transparent"></div>
+                    <span className="text-sm">Đang tải...</span>
+                  </Inline>
+                </div>
+              )}
+              <KanbanBoard
+                table={displayTable}
+                records={filteredRecords}
+                config={currentKanbanConfig}
+                onRecordMove={handleRecordMove}
+                onRecordClick={handleViewRecord}
+                workspaceUsers={workspaceUsers}
+                loading={shouldShowRecordListLoading}
+                className="gap-2 sm:gap-4"
+                messages={{
+                  loading: 'Đang tải...',
+                  dropHere: 'Thả thẻ vào đây',
+                  error: 'Lỗi',
+                  records: 'bản ghi',
+                }}
+              />
+            </div>
           )}
 
           {/* Gantt View */}
           {viewMode === 'gantt' && currentGanttConfig && displayTable.config && (
-            <Card>
-              <CardContent>
-                <Box padding="space-100">
-                  <GanttChartView
-                    table={displayTable}
-                    records={filteredRecords}
-                    config={currentGanttConfig}
-                    onTaskClick={handleViewRecord}
-                    showProgress={true}
-                    showToday={true}
-                    className="min-h-[400px] sm:min-h-[500px]"
-                    messages={{
-                      loading: 'Loading timeline...',
-                      noRecordsFound: 'No tasks to display',
-                    }}
-                  />
-                </Box>
-              </CardContent>
-            </Card>
+            <div className="relative">
+              {showFilterOverlay && (
+                <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center rounded-lg">
+                  <Inline space="space-050" align="center" className="text-muted-foreground">
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary border-t-transparent"></div>
+                    <span className="text-sm">Đang tải...</span>
+                  </Inline>
+                </div>
+              )}
+              <Card>
+                <CardContent>
+                  <Box padding="space-100">
+                    <GanttChartView
+                      table={displayTable}
+                      records={filteredRecords}
+                      config={currentGanttConfig}
+                      onTaskClick={handleViewRecord}
+                      onTaskDateChange={handleGanttDateChange}
+                      loading={shouldShowRecordListLoading}
+                      showProgress={true}
+                      showToday={true}
+                      className="min-h-[400px] sm:min-h-[500px]"
+                      messages={{
+                        loading: 'Đang tải timeline...',
+                        noRecordsFound: 'Không có công việc để hiển thị',
+                      }}
+                    />
+                  </Box>
+                </CardContent>
+              </Card>
+            </div>
           )}
         </Stack>
 
