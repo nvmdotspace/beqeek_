@@ -15,7 +15,17 @@ import { validateFieldValue } from '../../utils/field-validation.js';
 import { UserSelect } from './user-select.js';
 
 export function UserField(props: FieldRendererProps) {
-  const { field, value, onChange, mode, disabled = false, error, className, workspaceUsers = [] } = props;
+  const {
+    field,
+    value,
+    onChange,
+    mode,
+    disabled = false,
+    error,
+    className,
+    workspaceUsers = [],
+    hideLabel = false,
+  } = props;
 
   const isMultiple = field.type === FIELD_TYPES.SELECT_LIST_WORKSPACE_USER;
 
@@ -71,7 +81,7 @@ export function UserField(props: FieldRendererProps) {
   }));
 
   return (
-    <FieldWrapper fieldId={fieldId} label={field.label} required={field.required} error={error}>
+    <FieldWrapper fieldId={fieldId} label={hideLabel ? undefined : field.label} required={field.required} error={error}>
       <UserSelect
         value={normalizedValue as string | string[]}
         onChange={handleUserSelectChange}

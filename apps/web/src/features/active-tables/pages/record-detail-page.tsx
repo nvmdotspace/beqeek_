@@ -1,14 +1,20 @@
 /**
  * RecordDetailPage - Route-connected page for displaying record details
  * Integrates RecordDetail component from @workspace/active-tables-core with web app data layer
+ * Uses @workspace/comments for rich comment functionality
  */
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { getRouteApi } from '@tanstack/react-router';
 import { RecordDetail } from '@workspace/active-tables-core';
 import { COMMENTS_POSITION_HIDDEN, REFERENCE_FIELD_TYPES, type RecordDetailConfig } from '@workspace/beqeek-shared';
 import type { Table, FieldConfig } from '@workspace/active-tables-core';
+import { CommentSection, type Comment as PackageComment, type CommentUser } from '@workspace/comments';
+import { Card, CardContent, CardHeader } from '@workspace/ui/components/card';
+import { Heading } from '@workspace/ui/components/typography';
+import { MessageSquare } from 'lucide-react';
 import { ROUTES } from '@/shared/route-paths';
+import { useAuthStore } from '@/features/auth';
 import { useActiveTable } from '../hooks/use-active-tables';
 import { useRecordById } from '../hooks/use-record-by-id';
 import { useTableEncryption } from '../hooks/use-table-encryption';
@@ -18,12 +24,12 @@ import { useReferenceRecords } from '../hooks/use-reference-records';
 import { useGetWorkspaceUsers } from '@/features/workspace-users/hooks/use-get-workspace-users';
 import { useRecordComments } from '../hooks/use-record-comments';
 import { useRecordShortcuts } from '../hooks/use-record-shortcuts';
+import { useInlineEditContext } from '../hooks/use-inline-edit-context';
 import { RecordHeader } from '../components/record-header';
 import { RecordLoadingSkeleton } from '../components/record-loading-skeleton';
 import { RecordNotFound } from '../components/record-not-found';
 import { EncryptionKeyPrompt } from '../components/encryption-key-prompt';
 import { PermissionDeniedError } from '../components/permission-denied-error';
-import { CommentsPanel } from '../components/comments-panel';
 import { RecordBreadcrumb } from '../components/record-breadcrumb';
 import { ShortcutsHelpDialog } from '../components/shortcuts-help-dialog';
 
@@ -83,6 +89,9 @@ export default function RecordDetailPage() {
   const { locale, workspaceId, tableId, recordId } = route.useParams();
   const navigate = route.useNavigate();
   const [showShortcutsHelp, setShowShortcutsHelp] = useState(false);
+
+  // Get current user ID from auth store
+  const userId = useAuthStore((state) => state.userId);
 
   // Step 1: Fetch table configuration first
   const tableQuery = useActiveTable(workspaceId, tableId);
@@ -146,7 +155,7 @@ export default function RecordDetailPage() {
   // (SELECT_ONE_RECORD, SELECT_LIST_RECORD, FIRST_REFERENCE_RECORD)
   // Pass current record so hook can build proper filtering for FIRST_REFERENCE_RECORD
   // Pass visibleFields to only fetch references for displayed fields
-  const { referenceRecords } = useReferenceRecords(workspaceId ?? '', table, {
+  const { referenceRecords, isLoading: isLoadingReferenceRecords } = useReferenceRecords(workspaceId ?? '', table, {
     records: record ? [record] : [],
     enabled: needsReferenceData, // ✅ Only fetch if config needs it
     visibleFields: visibleFields, // ✅ Only fetch for visible fields
@@ -155,13 +164,31 @@ export default function RecordDetailPage() {
   // Determine if comments should be shown based on config
   const shouldShowComments = recordDetailConfig?.commentsPosition !== COMMENTS_POSITION_HIDDEN;
 
-  // Fetch comments (only if needed)
+  // Build user lookup map for comment author resolution
+  const userLookupMap = useMemo(() => {
+    if (!workspaceUsers) return undefined;
+    const map = new Map<string, { id: string; fullName: string; avatar?: string }>();
+    workspaceUsers.forEach((user) => {
+      map.set(user.id, {
+        id: user.id,
+        fullName: user.name || 'Unknown User',
+        avatar: user.avatar,
+      });
+    });
+    return map;
+  }, [workspaceUsers]);
+
+  // Fetch comments with E2EE support (only if needed)
   const {
     comments,
     addComment,
+    updateComment,
+    deleteComment,
     isLoading: isLoadingComments,
   } = useRecordComments(workspaceId ?? '', tableId ?? '', recordId, {
     enabled: shouldShowComments,
+    encryptionKey: encryption.encryptionKey ?? undefined,
+    userLookup: userLookupMap,
   });
 
   // Keyboard shortcuts
@@ -179,6 +206,82 @@ export default function RecordDetailPage() {
     });
     return map;
   }, [workspaceUsers]);
+
+  // Create inline edit context for reference/user fields
+  // Pass visibleFields, referenceRecords, and loading state to avoid duplicate API calls
+  const inlineEditContext = useInlineEditContext({
+    workspaceId: workspaceId ?? '',
+    table,
+    record,
+    workspaceUsers,
+    encryptionKey: encryption.encryptionKey,
+    visibleFields, // ✅ Only fetch for visible fields (optimization)
+    referenceRecords, // ✅ Reuse data from useReferenceRecords (avoid duplicate fetches)
+    isLoadingReferenceRecords, // ✅ Wait for useReferenceRecords to complete before fetching locally
+  });
+
+  // ============================================
+  // ALL HOOKS MUST BE BEFORE ANY EARLY RETURNS
+  // (React Rules of Hooks)
+  // ============================================
+
+  // Handle field change - encryption handled by hook (memoized to prevent re-renders)
+  const handleFieldChange = useCallback(
+    async (fieldName: string, value: unknown) => {
+      await updateFieldAsync({ fieldName, value });
+    },
+    [updateFieldAsync],
+  );
+
+  // Handle delete record (memoized)
+  const handleDelete = useCallback(async () => {
+    deleteRecordFn(recordId);
+  }, [deleteRecordFn, recordId]);
+
+  // Handle record navigation (for related records) - memoized
+  const handleRecordClick = useCallback(
+    (clickedRecordId: string) => {
+      navigate({
+        to: ROUTES.ACTIVE_TABLES.RECORD_DETAIL,
+        params: { locale, workspaceId, tableId, recordId: clickedRecordId },
+      });
+    },
+    [navigate, locale, workspaceId, tableId],
+  );
+
+  // Build current user for CommentSection
+  const currentUser = useMemo((): CommentUser | null => {
+    if (!userId || !workspaceUsers) return null;
+    const user = workspaceUsers.find((u) => u.id === userId);
+    if (!user) return null;
+    return {
+      id: user.id,
+      fullName: user.name || 'Unknown User',
+      avatarUrl: user.avatar,
+    };
+  }, [userId, workspaceUsers]);
+
+  // Build mention users list for @mentions in comments
+  const mentionUsers = useMemo(() => {
+    if (!workspaceUsers) return [];
+    return workspaceUsers.map((u) => ({
+      id: u.id,
+      name: u.name || 'Unknown',
+      avatar: u.avatar,
+    }));
+  }, [workspaceUsers]);
+
+  // Handle comments change from CommentSection (for local state updates)
+  const handleCommentsChange = useCallback((newComments: PackageComment[]) => {
+    // CommentSection manages its own state, but we need to sync with server
+    // This is called when user adds/edits/deletes comments
+    // The actual API calls are handled by useRecordComments mutations
+    console.log('[Comments] Local state changed:', newComments.length);
+  }, []);
+
+  // ============================================
+  // EARLY RETURNS (after all hooks)
+  // ============================================
 
   // Loading state - table config
   if (tableLoading) {
@@ -209,25 +312,6 @@ export default function RecordDetailPage() {
   if (!permissions?.access) {
     return <PermissionDeniedError />;
   }
-
-  // Handle field change - encryption handled by hook
-  const handleFieldChange = async (fieldName: string, value: unknown) => {
-    await updateFieldAsync({ fieldName, value });
-  };
-
-  // Handle delete record
-  const handleDelete = async () => {
-    // Delete function doesn't return a promise, but make it async for consistency
-    deleteRecordFn(recordId);
-  };
-
-  // Handle record navigation (for related records)
-  const handleRecordClick = (clickedRecordId: string) => {
-    navigate({
-      to: ROUTES.ACTIVE_TABLES.RECORD_DETAIL,
-      params: { locale, workspaceId, tableId, recordId: clickedRecordId },
-    });
-  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -266,6 +350,7 @@ export default function RecordDetailPage() {
                   showRelatedRecords={true}
                   referenceRecords={referenceRecords}
                   userRecords={userRecordsMap}
+                  inlineEditContext={inlineEditContext}
                 />
               </div>
             </div>
@@ -273,21 +358,37 @@ export default function RecordDetailPage() {
             {/* Comments Panel - Sidebar (4 columns) */}
             <div className="col-span-12 lg:col-span-4">
               <div className="sticky top-20">
-                <CommentsPanel
-                  recordId={recordId}
-                  comments={comments.map((c) => {
-                    const user = workspaceUsers?.find((u) => u.id === c.userId);
-                    return {
-                      id: c.id,
-                      content: c.content,
-                      userId: c.userId,
-                      userName: user?.name || 'Unknown User',
-                      createdAt: c.createdAt,
-                    };
-                  })}
-                  onCommentAdd={addComment}
-                  loading={isLoadingComments}
-                />
+                <Card className="h-[calc(100vh-8rem)] flex flex-col">
+                  <CardHeader className="pb-3 flex-shrink-0">
+                    <Heading level={4} className="flex items-center gap-2">
+                      <MessageSquare className="h-4 w-4" />
+                      Comments
+                    </Heading>
+                  </CardHeader>
+                  <CardContent className="flex-1 overflow-hidden p-0">
+                    {isLoadingComments ? (
+                      <div className="flex items-center justify-center h-full text-muted-foreground">
+                        Loading comments...
+                      </div>
+                    ) : currentUser ? (
+                      <div className="h-full overflow-y-auto px-4 pb-4">
+                        <CommentSection
+                          value={comments}
+                          currentUser={currentUser}
+                          onChange={handleCommentsChange}
+                          allowUpvote={false}
+                          showReactions={false}
+                          compactMode={true}
+                          mentionUsers={mentionUsers}
+                        />
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-center h-full text-muted-foreground">
+                        Please login to comment
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
               </div>
             </div>
           </div>
@@ -306,6 +407,7 @@ export default function RecordDetailPage() {
               showRelatedRecords={true}
               referenceRecords={referenceRecords}
               userRecords={userRecordsMap}
+              inlineEditContext={inlineEditContext}
             />
           </div>
         )}

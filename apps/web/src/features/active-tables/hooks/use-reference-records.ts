@@ -11,7 +11,7 @@
  * - FIRST_REFERENCE_RECORD: Reverse lookup with group parameter
  */
 
-import { useQueries } from '@tanstack/react-query';
+import { useQueries, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { fetchActiveTableRecords } from '../api/active-records-api';
 import { getActiveTable } from '../api/active-tables-api';
@@ -23,6 +23,7 @@ import {
   FIELD_TYPE_SELECT_LIST_RECORD,
   FIELD_TYPE_FIRST_REFERENCE_RECORD,
 } from '@workspace/beqeek-shared';
+import { activeTableQueryKey } from './use-active-tables';
 
 /**
  * Reference field mapping info
@@ -141,6 +142,7 @@ export interface UseReferenceRecordsOptions {
  */
 export function useReferenceRecords(workspaceId: string, table: Table | null, options?: UseReferenceRecordsOptions) {
   const { enabled = true, limit = 1000, records = [], visibleFields } = options || {};
+  const queryClient = useQueryClient();
 
   // Collect reference field mapping from table config and current records
   // Only collect fields that are actually visible in the UI
@@ -197,18 +199,23 @@ export function useReferenceRecords(workspaceId: string, table: Table | null, op
           }
         }
 
-        // Fetch both table config and records
-        const [tableResponse, recordsResponse] = await Promise.all([
-          getActiveTable(workspaceId, info.tableId),
-          fetchActiveTableRecords({
-            workspaceId,
-            tableId: info.tableId,
-            limit,
-            offset: 0,
-            filters: filtering,
-            group: group || undefined, // Add group parameter for FIRST_REFERENCE_RECORD
-          }),
-        ]);
+        // Fetch table config using shared query key (allows React Query to dedupe)
+        // Use fetchQuery to get from cache if available
+        const tableResponse = await queryClient.fetchQuery({
+          queryKey: activeTableQueryKey(workspaceId, info.tableId),
+          queryFn: () => getActiveTable(workspaceId, info.tableId),
+          staleTime: 5 * 60 * 1000, // 5 minutes
+        });
+
+        // Fetch records separately
+        const recordsResponse = await fetchActiveTableRecords({
+          workspaceId,
+          tableId: info.tableId,
+          limit,
+          offset: 0,
+          filters: filtering,
+          group: group || undefined, // Add group parameter for FIRST_REFERENCE_RECORD
+        });
 
         const refTable = tableResponse.data;
         const rawRecords = recordsResponse.data;
@@ -265,13 +272,17 @@ export function useReferenceRecords(workspaceId: string, table: Table | null, op
     })),
   });
 
+  // Extract stable data from queries to use as memo dependency
+  // This prevents re-renders when query status changes but data hasn't changed
+  const queryDataArray = queries.map((q) => q.data);
+
   // Convert to Record<tableId, TableRecord[]> format
   const referenceRecords = useMemo(() => {
     const records: Record<string, TableRecord[]> = {};
 
-    queries.forEach((query) => {
-      if (query.data) {
-        const { tableId, records: tableRecords } = query.data;
+    queryDataArray.forEach((data) => {
+      if (data) {
+        const { tableId, records: tableRecords } = data;
         // Convert ActiveTableRecord[] to TableRecord[]
         records[tableId] = tableRecords.map((r) => ({
           id: r.id,
@@ -292,7 +303,9 @@ export function useReferenceRecords(workspaceId: string, table: Table | null, op
     });
 
     return records;
-  }, [queries]);
+    // Use JSON.stringify to do deep comparison of data content
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(queryDataArray)]);
 
   const isLoading = queries.some((q) => q.isLoading);
   const error = queries.find((q) => q.error)?.error || null;

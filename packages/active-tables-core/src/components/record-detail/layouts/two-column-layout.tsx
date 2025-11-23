@@ -13,7 +13,7 @@ import { cn } from '@workspace/ui/lib/utils';
 import type { TwoColumnDetailLayoutProps } from '../../../types/record-detail.js';
 import type { FieldConfig } from '../../../types/field.js';
 import { FieldDisplay } from '../fields/field-display.js';
-import { useDetailViewStore, useIsFieldEditing } from '../../../stores/detail-view-store.js';
+import { useDetailViewStore } from '../../../stores/detail-view-store.js';
 import { InlineEditField } from '../fields/inline-edit-field.js';
 
 /**
@@ -30,8 +30,14 @@ export function TwoColumnDetailLayout({
   onFieldChange,
   readOnly = false,
   className,
+  inlineEditContext,
 }: TwoColumnDetailLayoutProps) {
   const { startEdit, cancelEdit } = useDetailViewStore();
+
+  // Get editing state once at top level (NOT in loop) - performance optimization
+  const editingFieldName = useDetailViewStore((state) =>
+    state.editingRecordId === record.id ? state.editingFieldName : null,
+  );
 
   // Get field configurations
   const getField = (fieldName: string) => table.config.fields.find((f) => f.name === fieldName);
@@ -42,7 +48,7 @@ export function TwoColumnDetailLayout({
   // Head section fields
   const titleField = getField(config.headTitleField || '');
   const titleValue = recordData[config.headTitleField || ''];
-  const isTitleEditing = useIsFieldEditing(record.id, config.headTitleField || '');
+  const isTitleEditing = editingFieldName === (config.headTitleField || '');
 
   const subLineFields = (config.headSubLineFields || [])
     .map((fieldName) => ({
@@ -85,9 +91,9 @@ export function TwoColumnDetailLayout({
     return true;
   };
 
-  // Render a field group
+  // Render a field group - uses pre-computed editingFieldName instead of hook
   const renderField = (fieldName: string, field: FieldConfig, value: unknown) => {
-    const isEditing = useIsFieldEditing(record.id, fieldName);
+    const isEditing = editingFieldName === fieldName;
 
     return (
       <Stack key={fieldName} space="space-050">
@@ -109,6 +115,11 @@ export function TwoColumnDetailLayout({
             onSave={(newValue) => handleFieldSave(fieldName, newValue)}
             onCancel={cancelEdit}
             autoFocus
+            table={table}
+            workspaceUsers={inlineEditContext?.workspaceUsers}
+            fetchRecords={inlineEditContext?.getFetchRecords?.(fieldName)}
+            initialRecords={inlineEditContext?.getInitialRecords?.(fieldName)}
+            referencedTableName={field.referencedTableName}
           />
         ) : (
           <FieldDisplay
@@ -143,6 +154,11 @@ export function TwoColumnDetailLayout({
                   onSave={(value) => handleFieldSave(config.headTitleField, value)}
                   onCancel={cancelEdit}
                   autoFocus
+                  table={table}
+                  workspaceUsers={inlineEditContext?.workspaceUsers}
+                  fetchRecords={inlineEditContext?.getFetchRecords?.(config.headTitleField)}
+                  initialRecords={inlineEditContext?.getInitialRecords?.(config.headTitleField)}
+                  referencedTableName={titleField.referencedTableName}
                 />
               ) : (
                 <Heading
@@ -169,7 +185,8 @@ export function TwoColumnDetailLayout({
               {subLineFields.map(({ field, value, name }) => {
                 if (!field) return null;
 
-                const isEditing = useIsFieldEditing(record.id, name);
+                // Use pre-computed editing state instead of hook in loop
+                const isEditing = editingFieldName === name;
 
                 if (isEditing) {
                   return (
@@ -180,6 +197,11 @@ export function TwoColumnDetailLayout({
                       onSave={(newValue) => handleFieldSave(name, newValue)}
                       onCancel={cancelEdit}
                       autoFocus
+                      table={table}
+                      workspaceUsers={inlineEditContext?.workspaceUsers}
+                      fetchRecords={inlineEditContext?.getFetchRecords?.(name)}
+                      initialRecords={inlineEditContext?.getInitialRecords?.(name)}
+                      referencedTableName={field.referencedTableName}
                     />
                   );
                 }

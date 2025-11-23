@@ -385,15 +385,7 @@ export const ActiveTableRecordsPage = () => {
   if (isInitialPageLoading) {
     return (
       <Box padding="space-300">
-        <Stack space="space-300">
-          <Button variant="ghost" onClick={handleBack}>
-            <Inline space="space-050" align="center">
-              <ArrowLeft className="h-4 w-4" />
-              Back to Table
-            </Inline>
-          </Button>
-          <LoadingState />
-        </Stack>
+        <LoadingState />
       </Box>
     );
   }

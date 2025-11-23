@@ -9,7 +9,12 @@ import type { FieldConfig } from '../../types/field.js';
 import type { Table } from '../../types/common.js';
 import type { CurrentUser, WorkspaceUser } from '../../types/responses.js';
 import type { ActiveTablesMessages } from '../../types/messages.js';
-import { FIELD_TYPE_RICH_TEXT } from '../../types/field.js';
+import {
+  FIELD_TYPE_RICH_TEXT,
+  FIELD_TYPE_CHECKBOX_YES_NO,
+  FIELD_TYPE_INTEGER,
+  FIELD_TYPE_NUMERIC,
+} from '../../types/field.js';
 import { FieldBadge } from '../common/index.js';
 
 interface FieldListRendererProps {
@@ -88,6 +93,32 @@ function SelectFieldList({ field, value }: { field: FieldConfig; value: unknown 
       {option?.text || String(value)}
     </FieldBadge>
   );
+}
+
+/**
+ * Simplified number field renderer for list views
+ * Formats with Vietnamese locale (dot for thousands, comma for decimal)
+ */
+function NumberFieldList({ field, value }: { field: FieldConfig; value: unknown }) {
+  const numValue = typeof value === 'number' ? value : parseFloat(String(value));
+
+  if (isNaN(numValue)) {
+    return <span className="text-muted-foreground/50">—</span>;
+  }
+
+  // Determine decimal places based on field type
+  let decimalPlaces = 0;
+  if (field.type === FIELD_TYPE_NUMERIC) {
+    decimalPlaces = field.decimalPlaces ?? 2;
+  }
+
+  // Format number with Vietnamese locale
+  const formatted = numValue.toLocaleString('vi-VN', {
+    minimumFractionDigits: decimalPlaces,
+    maximumFractionDigits: decimalPlaces,
+  });
+
+  return <span className="text-sm tabular-nums">{formatted}</span>;
 }
 
 /**
@@ -225,6 +256,20 @@ export function FieldListRenderer(props: FieldListRendererProps) {
     return <WorkspaceUserFieldList value={value} workspaceUsers={workspaceUsers} />;
   }
 
+  // CHECKBOX_YES_NO field (boolean yes/no)
+  if (fieldType === FIELD_TYPE_CHECKBOX_YES_NO) {
+    const isChecked = Boolean(value);
+    const locale = typeof document !== 'undefined' ? document.documentElement.lang || 'vi' : 'vi';
+    const yesText = locale === 'vi' ? 'Có' : 'Yes';
+    const noText = locale === 'vi' ? 'Không' : 'No';
+
+    return (
+      <FieldBadge variant={isChecked ? 'success' : 'secondary'} size="compact">
+        {isChecked ? yesText : noText}
+      </FieldBadge>
+    );
+  }
+
   // Select fields
   if (
     fieldType === 'SELECT_ONE' ||
@@ -233,6 +278,11 @@ export function FieldListRenderer(props: FieldListRendererProps) {
     fieldType === 'CHECKBOX_LIST'
   ) {
     return <SelectFieldList field={field} value={value} />;
+  }
+
+  // Number fields (INTEGER, NUMERIC)
+  if (fieldType === FIELD_TYPE_INTEGER || fieldType === FIELD_TYPE_NUMERIC) {
+    return <NumberFieldList field={field} value={value} />;
   }
 
   // Date fields

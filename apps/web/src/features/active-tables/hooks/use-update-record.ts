@@ -376,37 +376,52 @@ export function useBatchUpdateRecord(workspaceId: string, tableId: string, table
       console.error('Failed to batch update record:', err);
     },
 
-    onSuccess: (data, { recordId }) => {
+    onSuccess: (data, { recordId }, context) => {
       if (!table) return;
 
-      // Update cache with server response if it contains updated timestamp
-      if (data?.data?.updatedAt) {
-        queryClient.setQueriesData(
-          {
-            queryKey: ['active-table-records', workspaceId, tableId],
-            exact: false,
-          },
-          (old: RecordsResponse | undefined) => {
-            if (!old?.data) return old;
+      // For encrypted tables, optimistic updates don't fully work because:
+      // 1. useInfiniteActiveTableRecords has separate decryptedRecords state
+      // 2. setQueriesData changes cache but doesn't trigger re-decrypt useEffect
+      // Solution: Invalidate queries to trigger full refetch + decrypt cycle
+      //
+      // For non-encrypted tables, optimistic update works correctly via onMutate
+      const needsEncryption = table.config.e2eeEncryption || table.config.encryptionKey;
 
-            return {
-              ...old,
-              data: old.data.map((record: TableRecord) => {
-                if (record.id === recordId) {
-                  return {
-                    ...record,
-                    updatedAt: data.data!.updatedAt,
-                  };
-                }
-                return record;
-              }),
-            };
-          },
-        );
+      if (needsEncryption) {
+        // Invalidate to trigger refetch and re-decryption
+        // This is acceptable for batch updates (dialog form submissions)
+        // where user already waits for dialog to close
+        void queryClient.invalidateQueries({
+          queryKey: ['active-table-records', workspaceId, tableId],
+          exact: false,
+        });
+      } else {
+        // Non-encrypted: Update cache with server response timestamp
+        if (data?.data?.updatedAt) {
+          queryClient.setQueriesData(
+            {
+              queryKey: ['active-table-records', workspaceId, tableId],
+              exact: false,
+            },
+            (old: RecordsResponse | undefined) => {
+              if (!old?.data) return old;
+
+              return {
+                ...old,
+                data: old.data.map((record: TableRecord) => {
+                  if (record.id === recordId) {
+                    return {
+                      ...record,
+                      updatedAt: data.data!.updatedAt,
+                    };
+                  }
+                  return record;
+                }),
+              };
+            },
+          );
+        }
       }
-
-      // DO NOT invalidate - would trigger expensive refetch
-      // Batch updates should also rely on optimistic updates
     },
   });
 }

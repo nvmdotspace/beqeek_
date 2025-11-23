@@ -1,123 +1,324 @@
 /**
  * useRecordComments Hook
  *
- * Manages comments for a specific record
- * Currently stubbed - will integrate with API when endpoints are available
+ * Manages comments for a specific record with E2EE encryption support
+ * Integrates with active-comments-api.ts for real API calls
  */
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import type { RecordComment } from '@workspace/active-tables-core';
+import { useCallback, useMemo } from 'react';
+import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { CommonUtils, AES256 } from '@workspace/encryption-core';
+import type { Comment as PackageComment, CommentUser } from '@workspace/comments';
 
-interface UseRecordCommentsOptions {
+import * as commentsApi from '../api/active-comments-api';
+import type { Comment as ServerComment } from '../api/active-comments-api';
+
+// ============================================
+// Types
+// ============================================
+
+/** User lookup map for resolving user IDs to user info */
+export type UserLookupMap = Map<string, { id: string; fullName: string; avatar?: string }>;
+
+export interface UseRecordCommentsOptions {
   /** Whether to fetch comments (default: true) */
   enabled?: boolean;
+  /** Encryption key for E2EE tables */
+  encryptionKey?: string;
+  /** Page size for pagination */
+  pageSize?: number;
+  /** User lookup map for resolving createdBy user IDs */
+  userLookup?: UserLookupMap;
+}
+
+export interface CommentsState {
+  /** All loaded comments converted to @workspace/comments format */
+  comments: PackageComment[];
+  /** Is loading initial data */
+  isLoading: boolean;
+  /** Is loading more pages */
+  isFetchingNextPage: boolean;
+  /** Has more pages to load */
+  hasNextPage: boolean;
+  /** Fetch next page */
+  fetchNextPage: () => void;
+  /** Add new comment */
+  addComment: (text: string, parentId?: string) => Promise<void>;
+  /** Update existing comment */
+  updateComment: (commentId: string, text: string) => Promise<void>;
+  /** Delete comment */
+  deleteComment: (commentId: string) => Promise<void>;
+  /** Current user for comments */
+  currentUser: CommentUser | null;
+}
+
+// ============================================
+// Encryption Helpers
+// ============================================
+
+/**
+ * Encrypt comment content for E2EE tables
+ */
+function encryptContent(content: string, encryptionKey?: string): string {
+  if (!encryptionKey) return content;
+  return AES256.encrypt(content, encryptionKey);
 }
 
 /**
- * Hook to manage record comments
- * Returns empty comments array until API is implemented
+ * Decrypt comment content from E2EE tables
+ */
+function decryptContent(encryptedContent: string, encryptionKey?: string): string {
+  if (!encryptionKey) return encryptedContent;
+  try {
+    return AES256.decrypt(encryptedContent, encryptionKey);
+  } catch {
+    // Return as-is if decryption fails (might be unencrypted)
+    return encryptedContent;
+  }
+}
+
+/**
+ * Generate hashed keywords for searchable encryption
+ */
+function generateHashedKeywords(content: string, encryptionKey?: string): Record<string, string[]> | undefined {
+  if (!encryptionKey) return undefined;
+  return {
+    commentContent: CommonUtils.hashKeyword(content, encryptionKey),
+  };
+}
+
+// ============================================
+// Data Conversion
+// ============================================
+
+/**
+ * Convert server comment to @workspace/comments format
+ * Handles both string userId and object { id, fullName, avatar } formats
+ */
+function serverToPackageComment(
+  serverComment: ServerComment,
+  encryptionKey?: string,
+  userLookup?: UserLookupMap,
+): PackageComment {
+  const decryptedContent = decryptContent(serverComment.commentContent, encryptionKey);
+
+  // Handle createdBy as string (userId) or object { id, fullName, avatar }
+  let userId: string;
+  let fullName: string;
+  let avatarUrl: string | undefined;
+
+  if (typeof serverComment.createdBy === 'string') {
+    // createdBy is a userId string - lookup user info
+    userId = serverComment.createdBy;
+    const userInfo = userLookup?.get(userId);
+    fullName = userInfo?.fullName || 'Unknown User';
+    avatarUrl = userInfo?.avatar;
+  } else if (serverComment.createdBy && typeof serverComment.createdBy === 'object') {
+    // createdBy is an object with user details
+    userId = serverComment.createdBy.id || 'unknown';
+    fullName = serverComment.createdBy.fullName || 'Unknown User';
+    avatarUrl = serverComment.createdBy.avatar;
+  } else {
+    // Fallback for undefined/null
+    userId = 'unknown';
+    fullName = 'Unknown User';
+    avatarUrl = undefined;
+  }
+
+  return {
+    id: serverComment.id,
+    user: {
+      id: userId,
+      fullName,
+      avatarUrl,
+    },
+    parentId: serverComment.parentId,
+    text: decryptedContent || '',
+    createdAt: serverComment.createdAt ? new Date(serverComment.createdAt) : new Date(),
+    replies: [], // Will be populated by buildCommentTree
+    actions: {},
+    selectedActions: [],
+  };
+}
+
+/**
+ * Build nested comment tree from flat list
+ */
+function buildCommentTree(flatComments: PackageComment[]): PackageComment[] {
+  const commentMap = new Map<string, PackageComment>();
+  const rootComments: PackageComment[] = [];
+
+  // First pass: index all comments
+  flatComments.forEach((comment) => {
+    commentMap.set(comment.id, { ...comment, replies: [] });
+  });
+
+  // Second pass: build tree
+  flatComments.forEach((comment) => {
+    const mappedComment = commentMap.get(comment.id)!;
+    if (comment.parentId && commentMap.has(comment.parentId)) {
+      const parent = commentMap.get(comment.parentId)!;
+      parent.replies = [...(parent.replies || []), mappedComment];
+    } else {
+      rootComments.push(mappedComment);
+    }
+  });
+
+  return rootComments;
+}
+
+// ============================================
+// Main Hook
+// ============================================
+
+/**
+ * Hook to manage record comments with real API and E2EE support
  */
 export function useRecordComments(
   workspaceId: string,
   tableId: string,
   recordId: string,
-  options?: UseRecordCommentsOptions,
-) {
+  options: UseRecordCommentsOptions = {},
+): CommentsState {
+  const { enabled = true, encryptionKey, pageSize = 20, userLookup } = options;
   const queryClient = useQueryClient();
 
-  const { data: comments = [], isLoading } = useQuery({
-    queryKey: ['record-comments', workspaceId, tableId, recordId],
-    queryFn: () => fetchRecordComments(workspaceId, tableId, recordId),
-    enabled: (options?.enabled ?? true) && !!workspaceId && !!tableId && !!recordId,
+  const queryKey = ['record-comments', workspaceId, tableId, recordId];
+
+  // ============================================
+  // Fetch Comments (Infinite Query)
+  // ============================================
+
+  const { data, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage } = useInfiniteQuery({
+    queryKey,
+    queryFn: async ({ pageParam }) => {
+      const response = await commentsApi.fetchComments(workspaceId, tableId, recordId, {
+        paging: 'cursor',
+        next_id: pageParam,
+        direction: 'desc',
+        limit: pageSize,
+      });
+      return response;
+    },
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage) => lastPage.next_id ?? undefined,
+    enabled: enabled && !!workspaceId && !!tableId && !!recordId,
   });
 
+  // ============================================
+  // Convert & Flatten Comments
+  // ============================================
+
+  const comments = useMemo((): PackageComment[] => {
+    if (!data?.pages) return [];
+
+    // Flatten all pages and convert to package format
+    const allServerComments = data.pages.flatMap((page) => page.data);
+    const packageComments = allServerComments.map((c) => serverToPackageComment(c, encryptionKey, userLookup));
+
+    // Build nested tree structure
+    return buildCommentTree(packageComments);
+  }, [data?.pages, encryptionKey, userLookup]);
+
+  // ============================================
+  // Mutations
+  // ============================================
+
   const addCommentMutation = useMutation({
-    mutationFn: (content: string) => createRecordComment(workspaceId, tableId, recordId, content),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ['record-comments', workspaceId, tableId, recordId],
+    mutationFn: async ({ text, parentId }: { text: string; parentId?: string }) => {
+      const encryptedContent = encryptContent(text, encryptionKey);
+      const hashedKeywords = generateHashedKeywords(text, encryptionKey);
+
+      return commentsApi.createComment(workspaceId, tableId, recordId, {
+        commentContent: encryptedContent,
+        parentId,
+        hashed_keywords: hashedKeywords,
       });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey });
     },
   });
 
   const updateCommentMutation = useMutation({
-    mutationFn: ({ commentId, content }: { commentId: string; content: string }) =>
-      updateRecordComment(workspaceId, tableId, recordId, commentId, content),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ['record-comments', workspaceId, tableId, recordId],
+    mutationFn: async ({ commentId, text }: { commentId: string; text: string }) => {
+      const encryptedContent = encryptContent(text, encryptionKey);
+      const hashedKeywords = generateHashedKeywords(text, encryptionKey);
+
+      return commentsApi.updateComment(workspaceId, tableId, recordId, commentId, {
+        commentContent: encryptedContent,
+        hashed_keywords: hashedKeywords,
       });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey });
     },
   });
 
   const deleteCommentMutation = useMutation({
-    mutationFn: (commentId: string) => deleteRecordComment(workspaceId, tableId, recordId, commentId),
+    mutationFn: async (commentId: string) => {
+      return commentsApi.deleteComment(workspaceId, tableId, recordId, commentId);
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ['record-comments', workspaceId, tableId, recordId],
-      });
+      queryClient.invalidateQueries({ queryKey });
     },
   });
+
+  // ============================================
+  // Action Handlers
+  // ============================================
+
+  const addComment = useCallback(
+    async (text: string, parentId?: string) => {
+      await addCommentMutation.mutateAsync({ text, parentId });
+    },
+    [addCommentMutation],
+  );
+
+  const updateComment = useCallback(
+    async (commentId: string, text: string) => {
+      await updateCommentMutation.mutateAsync({ commentId, text });
+    },
+    [updateCommentMutation],
+  );
+
+  const deleteComment = useCallback(
+    async (commentId: string) => {
+      await deleteCommentMutation.mutateAsync(commentId);
+    },
+    [deleteCommentMutation],
+  );
+
+  const handleFetchNextPage = useCallback(() => {
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  // ============================================
+  // Return State
+  // ============================================
 
   return {
     comments,
     isLoading,
-    addComment: async (content: string) => {
-      console.log('[Comments] Adding comment (stub):', content);
-      return addCommentMutation.mutateAsync(content);
-    },
-    updateComment: async (commentId: string, content: string) => {
-      console.log('[Comments] Updating comment (stub):', commentId, content);
-      return updateCommentMutation.mutateAsync({ commentId, content });
-    },
-    deleteComment: async (commentId: string) => {
-      console.log('[Comments] Deleting comment (stub):', commentId);
-      return deleteCommentMutation.mutateAsync(commentId);
-    },
+    isFetchingNextPage,
+    hasNextPage: hasNextPage ?? false,
+    fetchNextPage: handleFetchNextPage,
+    addComment,
+    updateComment,
+    deleteComment,
+    currentUser: null, // Will be set by parent component
   };
 }
 
 // ============================================
-// Stub API Functions
-// TODO: Implement when API endpoints are available
+// Query Key Export (for external invalidation)
 // ============================================
 
-async function fetchRecordComments(
-  _workspaceId: string,
-  _tableId: string,
-  _recordId: string,
-): Promise<RecordComment[]> {
-  // Return empty array for now
-  return [];
-}
-
-async function createRecordComment(
-  _workspaceId: string,
-  _tableId: string,
-  _recordId: string,
-  _content: string,
-): Promise<RecordComment> {
-  // Stub implementation
-  throw new Error('Comments API not yet implemented');
-}
-
-async function updateRecordComment(
-  _workspaceId: string,
-  _tableId: string,
-  _recordId: string,
-  _commentId: string,
-  _content: string,
-): Promise<void> {
-  // Stub implementation
-  throw new Error('Comments API not yet implemented');
-}
-
-async function deleteRecordComment(
-  _workspaceId: string,
-  _tableId: string,
-  _recordId: string,
-  _commentId: string,
-): Promise<void> {
-  // Stub implementation
-  throw new Error('Comments API not yet implemented');
-}
+export const getCommentsQueryKey = (workspaceId: string, tableId: string, recordId: string) => [
+  'record-comments',
+  workspaceId,
+  tableId,
+  recordId,
+];

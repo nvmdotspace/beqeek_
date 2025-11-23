@@ -17,6 +17,10 @@ export interface CommentSectionProps {
   currentUser: CommentUser;
   onChange: (comments: Comment[]) => void;
   allowUpvote?: boolean;
+  /** Show emoji reactions on comments (default: true) */
+  showReactions?: boolean;
+  /** Compact mode hides disabled toolbar features (default: false) */
+  compactMode?: boolean;
   onVoteChange?: (commentId: string, upvoted: boolean) => void;
   onImageUpload?: (file: File) => Promise<string>;
   mentionUsers?: MentionUser[];
@@ -29,6 +33,8 @@ export function CommentSection({
   currentUser,
   onChange,
   allowUpvote,
+  showReactions = true,
+  compactMode = false,
   onVoteChange,
   onImageUpload,
   mentionUsers,
@@ -129,6 +135,7 @@ export function CommentSection({
         onImageUpload={onImageUpload}
         mentionUsers={mentionUsers}
         onMentionSearch={onMentionSearch}
+        compactMode={compactMode}
       />
 
       {/* Comments List */}
@@ -139,6 +146,7 @@ export function CommentSection({
             comment={comment}
             currentUser={currentUser}
             allowUpvote={allowUpvote}
+            showReactions={showReactions}
             onReply={(replyText) => handleReply(comment.id, replyText)}
             onChange={(change) => handleCommentChange(comment.id, change)}
             onDelete={() => handleCommentDelete(comment.id)}

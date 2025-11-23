@@ -47,7 +47,7 @@ const TIME_COMPONENT_RANGES: Record<
 };
 
 export function TimeComponentField(props: FieldRendererProps) {
-  const { field, value, onChange, mode, disabled = false, error, className } = props;
+  const { field, value, onChange, mode, disabled = false, error, className, hideLabel = false } = props;
 
   const config = TIME_COMPONENT_RANGES[field.type];
   if (!config) {
@@ -96,7 +96,7 @@ export function TimeComponentField(props: FieldRendererProps) {
   const placeholder = field.placeholder || config.placeholder;
 
   return (
-    <FieldWrapper fieldId={fieldId} label={field.label} required={field.required} error={error}>
+    <FieldWrapper fieldId={fieldId} label={hideLabel ? undefined : field.label} required={field.required} error={error}>
       <Input
         type="text"
         inputMode="numeric"

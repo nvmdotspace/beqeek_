@@ -7,6 +7,7 @@ import type { TableRecord } from './record.js';
 import type { Table } from './common.js';
 import type { FieldConfig } from './field.js';
 import type { WorkspaceUser } from './responses.js';
+import type { AsyncRecordSelectRecord } from '../components/fields/field-renderer-props.js';
 
 /**
  * Layout types for record detail view
@@ -45,6 +46,9 @@ export interface RecordDetailProps {
   referenceRecords?: Record<string, TableRecord[]>;
   userRecords?: Record<string, WorkspaceUser>;
 
+  // Inline edit context for reference/user fields
+  inlineEditContext?: InlineEditContext;
+
   // Styling
   className?: string;
 }
@@ -75,6 +79,16 @@ export interface InlineEditFieldProps {
   autoFocus?: boolean;
   validateOnChange?: boolean;
   className?: string;
+  /** Table metadata for FieldRenderer */
+  table?: Table;
+  /** Workspace users for user selection fields */
+  workspaceUsers?: WorkspaceUser[];
+  /** Function to fetch records for reference fields */
+  fetchRecords?: (query: string, page: number) => Promise<{ records: AsyncRecordSelectRecord[]; hasMore: boolean }>;
+  /** Initial records for displaying pre-selected values */
+  initialRecords?: AsyncRecordSelectRecord[];
+  /** Referenced table name for display */
+  referencedTableName?: string;
 }
 
 /**
@@ -146,6 +160,19 @@ export interface TwoColumnConfig {
 }
 
 /**
+ * Inline edit context for reference/user fields
+ */
+export interface InlineEditContext {
+  workspaceUsers?: WorkspaceUser[];
+  /** Function to create fetchRecords for a specific field */
+  getFetchRecords?: (
+    fieldName: string,
+  ) => ((query: string, page: number) => Promise<{ records: AsyncRecordSelectRecord[]; hasMore: boolean }>) | undefined;
+  /** Function to get initial records for a specific field */
+  getInitialRecords?: (fieldName: string) => AsyncRecordSelectRecord[] | undefined;
+}
+
+/**
  * Props for HeadDetailLayout component
  */
 export interface HeadDetailLayoutProps {
@@ -157,6 +184,8 @@ export interface HeadDetailLayoutProps {
   onFieldChange?: (fieldName: string, value: unknown) => Promise<void>;
   readOnly?: boolean;
   className?: string;
+  /** Context for inline editing reference/user fields */
+  inlineEditContext?: InlineEditContext;
 }
 
 /**
@@ -171,4 +200,6 @@ export interface TwoColumnDetailLayoutProps {
   onFieldChange?: (fieldName: string, value: unknown) => Promise<void>;
   readOnly?: boolean;
   className?: string;
+  /** Context for inline editing reference/user fields */
+  inlineEditContext?: InlineEditContext;
 }

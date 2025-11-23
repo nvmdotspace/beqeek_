@@ -45,6 +45,7 @@ export function ReferenceField(props: ReferenceFieldProps) {
     fetchRecords,
     referencedTableName,
     initialRecords,
+    hideLabel = false,
   } = props;
 
   const isMultiple = field.type === FIELD_TYPES.SELECT_LIST_RECORD;
@@ -109,7 +110,12 @@ export function ReferenceField(props: ReferenceFieldProps) {
 
   if (loading && !fetchRecords) {
     return (
-      <FieldWrapper fieldId={fieldId} label={field.label} required={field.required} error={error}>
+      <FieldWrapper
+        fieldId={fieldId}
+        label={hideLabel ? undefined : field.label}
+        required={field.required}
+        error={error}
+      >
         <div className="text-sm text-muted-foreground italic">{props.messages?.loading || 'Loading...'}</div>
       </FieldWrapper>
     );
@@ -118,7 +124,12 @@ export function ReferenceField(props: ReferenceFieldProps) {
   // Week 2: Use AsyncRecordSelect if fetchRecords is provided
   if (fetchRecords) {
     return (
-      <FieldWrapper fieldId={fieldId} label={field.label} required={field.required} error={error}>
+      <FieldWrapper
+        fieldId={fieldId}
+        label={hideLabel ? undefined : field.label}
+        required={field.required}
+        error={error}
+      >
         <AsyncRecordSelect
           value={normalizedValue as string | string[]}
           onChange={handleAsyncChange}
@@ -137,7 +148,7 @@ export function ReferenceField(props: ReferenceFieldProps) {
 
   // Week 1: Legacy mode with native select (fallback)
   return (
-    <FieldWrapper fieldId={fieldId} label={field.label} required={field.required} error={error}>
+    <FieldWrapper fieldId={fieldId} label={hideLabel ? undefined : field.label} required={field.required} error={error}>
       <select
         id={fieldId}
         name={field.name}

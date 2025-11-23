@@ -5,11 +5,14 @@ export interface Comment {
   parentId?: string;
   commentContent: string;
   hashed_keywords?: Record<string, unknown>;
-  createdBy: {
-    id: string;
-    fullName: string;
-    avatar?: string;
-  };
+  /** Can be string (userId) or object { id, fullName, avatar } depending on API version */
+  createdBy:
+    | string
+    | {
+        id: string;
+        fullName: string;
+        avatar?: string;
+      };
   createdAt: string;
   updatedAt?: string;
 }

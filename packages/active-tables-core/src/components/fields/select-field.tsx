@@ -27,7 +27,7 @@ interface OptionMeta {
 }
 
 export function SelectField(props: FieldRendererProps) {
-  const { field, value, onChange, disabled = false, error, className, messages } = props;
+  const { field, value, onChange, disabled = false, error, className, messages, hideLabel = false } = props;
 
   const stringValue = value ? String(value) : '';
   const options = (field.options as OptionMeta[] | undefined) ?? [];
@@ -49,7 +49,12 @@ export function SelectField(props: FieldRendererProps) {
 
   if (options.length === 0) {
     return (
-      <FieldWrapper fieldId={fieldId} label={field.label} required={field.required} error={error}>
+      <FieldWrapper
+        fieldId={fieldId}
+        label={hideLabel ? undefined : field.label}
+        required={field.required}
+        error={error}
+      >
         <div className="rounded-xl border border-dashed border-muted-foreground/40 bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
           {noOptionsMessage}
         </div>
@@ -59,7 +64,7 @@ export function SelectField(props: FieldRendererProps) {
   }
 
   return (
-    <FieldWrapper fieldId={fieldId} label={field.label} required={field.required} error={error}>
+    <FieldWrapper fieldId={fieldId} label={hideLabel ? undefined : field.label} required={field.required} error={error}>
       <Select value={stringValue || undefined} onValueChange={handleChange} disabled={disabled}>
         <SelectTrigger
           aria-invalid={!!error}

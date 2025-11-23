@@ -29,7 +29,7 @@ interface OptionMeta {
 }
 
 export function MultiSelectField(props: FieldRendererProps) {
-  const { field, value, onChange, mode, disabled = false, error, className } = props;
+  const { field, value, onChange, mode, disabled = false, error, className, hideLabel = false } = props;
 
   // Normalize value to array
   const selectedValues = (Array.isArray(value) ? value : value ? [value] : []) as string[];
@@ -88,7 +88,7 @@ export function MultiSelectField(props: FieldRendererProps) {
   const fieldId = `field-${field.name}`;
 
   return (
-    <FieldWrapper fieldId={fieldId} label={field.label} required={field.required} error={error}>
+    <FieldWrapper fieldId={fieldId} label={hideLabel ? undefined : field.label} required={field.required} error={error}>
       <div ref={dropdownRef} className="relative">
         {/* Selected values display */}
         <div

@@ -3,6 +3,7 @@
  * Shows title, breadcrumb, and action buttons
  */
 
+import { memo, useState, useMemo, useCallback } from 'react';
 import { ArrowLeft, MoreVertical, Trash2, Copy, Share2 } from 'lucide-react';
 import type { TableRecord, Table } from '@workspace/active-tables-core';
 import { Inline } from '@workspace/ui/components/primitives/inline';
@@ -28,7 +29,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@workspace/ui/components/alert-dialog';
-import { useState } from 'react';
 
 /**
  * Safely get record data from various data structures
@@ -46,69 +46,74 @@ interface RecordHeaderProps {
   onBack: () => void;
 }
 
-export function RecordHeader({ record, table, referenceRecords, onDelete, onBack }: RecordHeaderProps) {
+function RecordHeaderInner({ record, table, referenceRecords, onDelete, onBack }: RecordHeaderProps) {
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Get record title from layout-specific field
-  // head-detail should use titleField, but API may return headTitleField
-  // two-column-detail uses headTitleField
+  // Memoize config extraction
   const config = table.config.recordDetailConfig;
-  const titleFieldName =
-    config?.headTitleField || // Try headTitleField first (actual API response)
-    config?.titleField || // Fallback to titleField (spec)
-    table.config.fields[0]?.name; // Final fallback to first field
 
-  const recordData = getRecordData(record);
-  let titleValue = titleFieldName ? recordData[titleFieldName] : null;
+  // Memoize title computation to prevent re-renders
+  const titleComputed = useMemo(() => {
+    // Get record title from layout-specific field
+    // head-detail should use titleField, but API may return headTitleField
+    // two-column-detail uses headTitleField
+    const fieldName =
+      config?.headTitleField || // Try headTitleField first (actual API response)
+      config?.titleField || // Fallback to titleField (spec)
+      table.config.fields[0]?.name; // Final fallback to first field
 
-  // Check if titleField is a reference field and lookup the actual value
-  const titleField = table.config.fields.find((f) => f.name === titleFieldName);
-  if (titleField?.referenceTableId && titleValue && referenceRecords) {
-    const refRecords = referenceRecords[titleField.referenceTableId] || [];
-    const refRecord = refRecords.find((r) => r.id === String(titleValue));
-    if (refRecord) {
-      const labelField = titleField.referenceLabelField || 'name';
-      const refData = getRecordData(refRecord);
-      titleValue = refData[labelField] || titleValue;
-    }
-  }
+    const recordData = getRecordData(record);
+    let titleValue = fieldName ? recordData[fieldName] : null;
 
-  const recordTitle = titleValue != null && titleValue !== '' ? String(titleValue) : record.id;
-
-  // Get subline fields for metadata display
-  const subLineFieldNames = config?.headSubLineFields || config?.subLineFields || [];
-  const subLineValues = subLineFieldNames
-    .map((fieldName) => {
-      const field = table.config.fields.find((f) => f.name === fieldName);
-      if (!field) return null;
-
-      let value = recordData[fieldName];
-
-      // Handle reference fields
-      if (field.referenceTableId && value && referenceRecords) {
-        const refRecords = referenceRecords[field.referenceTableId] || [];
-        const refRecord = refRecords.find((r) => r.id === String(value));
-        if (refRecord) {
-          const labelField = field.referenceLabelField || 'name';
-          const refData = getRecordData(refRecord);
-          value = refData[labelField] || value;
-        } else {
-          // Reference record not found - try to use field's own data
-          // This happens when reference data hasn't loaded yet
-          console.warn(`[RecordHeader] Reference record not found for ${fieldName}:`, {
-            fieldName,
-            value,
-            referenceTableId: field.referenceTableId,
-            availableRefs: Object.keys(referenceRecords),
-          });
-        }
+    // Check if titleField is a reference field and lookup the actual value
+    const titleField = table.config.fields.find((f) => f.name === fieldName);
+    if (titleField?.referenceTableId && titleValue && referenceRecords) {
+      const refRecords = referenceRecords[titleField.referenceTableId] || [];
+      const refRecord = refRecords.find((r) => r.id === String(titleValue));
+      if (refRecord) {
+        const labelField = titleField.referenceLabelField || 'name';
+        const refData = getRecordData(refRecord);
+        titleValue = refData[labelField] || titleValue;
       }
+      // Note: Don't log warnings for missing reference records - it's expected during loading
+    }
 
-      return value != null && value !== '' ? String(value) : null;
-    })
-    .filter((v): v is string => v != null);
+    return titleValue != null && titleValue !== '' ? String(titleValue) : record.id;
+  }, [config, table.config.fields, record, referenceRecords]);
 
-  const handleDelete = async () => {
+  const recordTitle = titleComputed;
+
+  // Memoize subline values computation to prevent re-renders
+  const subLineValues = useMemo(() => {
+    const subLineFieldNames = config?.headSubLineFields || config?.subLineFields || [];
+    const recordData = getRecordData(record);
+
+    return subLineFieldNames
+      .map((fieldName) => {
+        const field = table.config.fields.find((f) => f.name === fieldName);
+        if (!field) return null;
+
+        let value = recordData[fieldName];
+
+        // Handle reference fields
+        if (field.referenceTableId && value && referenceRecords) {
+          const refRecords = referenceRecords[field.referenceTableId] || [];
+          const refRecord = refRecords.find((r) => r.id === String(value));
+          if (refRecord) {
+            const labelField = field.referenceLabelField || 'name';
+            const refData = getRecordData(refRecord);
+            value = refData[labelField] || value;
+          }
+          // Note: Don't log warnings for missing reference records - it's expected during loading
+        }
+
+        return value != null && value !== '' ? String(value) : null;
+      })
+      .filter((v): v is string => v != null);
+  }, [config, table.config.fields, record, referenceRecords]);
+
+  // Memoize handlers
+  const handleDelete = useCallback(async () => {
     if (!onDelete) return;
     setIsDeleting(true);
     try {
@@ -118,15 +123,15 @@ export function RecordHeader({ record, table, referenceRecords, onDelete, onBack
     } finally {
       setIsDeleting(false);
     }
-  };
+  }, [onDelete]);
 
-  const handleCopyLink = () => {
+  const handleCopyLink = useCallback(() => {
     const url = window.location.href;
     navigator.clipboard.writeText(url);
     // TODO: Show toast notification
-  };
+  }, []);
 
-  const handleShare = () => {
+  const handleShare = useCallback(() => {
     if (navigator.share) {
       navigator.share({
         title: recordTitle,
@@ -135,7 +140,7 @@ export function RecordHeader({ record, table, referenceRecords, onDelete, onBack
     } else {
       handleCopyLink();
     }
-  };
+  }, [recordTitle, handleCopyLink]);
 
   return (
     <Box className="border-b border-border bg-card sticky top-0 z-10">
@@ -223,3 +228,9 @@ export function RecordHeader({ record, table, referenceRecords, onDelete, onBack
     </Box>
   );
 }
+
+/**
+ * Memoized RecordHeader component to prevent unnecessary re-renders
+ * when parent component re-renders with same props
+ */
+export const RecordHeader = memo(RecordHeaderInner);

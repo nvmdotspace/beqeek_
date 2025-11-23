@@ -37,9 +37,15 @@ interface LexicalEditorProps {
  */
 function InitialContentPlugin({ html, lastHtmlRef }: { html: string; lastHtmlRef: MutableRefObject<string> }) {
   const [editor] = useLexicalComposerContext();
+  const hasInitialized = useRef(false);
 
   useEffect(() => {
-    if (!html || lastHtmlRef.current === html) return;
+    // Skip if no content or already processed this exact content
+    if (!html) return;
+
+    // On first mount, always load the initial content
+    // After that, only update if html changes
+    if (hasInitialized.current && lastHtmlRef.current === html) return;
 
     editor.update(() => {
       const parser = new DOMParser();
@@ -58,6 +64,7 @@ function InitialContentPlugin({ html, lastHtmlRef }: { html: string; lastHtmlRef
       }
 
       lastHtmlRef.current = html;
+      hasInitialized.current = true;
     });
   }, [editor, html, lastHtmlRef]);
 
