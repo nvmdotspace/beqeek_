@@ -11,7 +11,7 @@ import { Inline } from '@workspace/ui/components/primitives/inline';
 import { cn } from '@workspace/ui/lib/utils';
 import type { HeadDetailLayoutProps } from '../../../types/record-detail.js';
 import { FieldDisplay } from '../fields/field-display.js';
-import { useDetailViewStore, useIsFieldEditing } from '../../../stores/detail-view-store.js';
+import { useDetailViewStore } from '../../../stores/detail-view-store.js';
 import { InlineEditField } from '../fields/inline-edit-field.js';
 
 /**
@@ -32,6 +32,11 @@ export function HeadDetailLayout({
 }: HeadDetailLayoutProps) {
   const { startEdit, cancelEdit } = useDetailViewStore();
 
+  // Get editing state once at top level (NOT in loop) - performance optimization
+  const editingFieldName = useDetailViewStore((state) =>
+    state.editingRecordId === record.id ? state.editingFieldName : null,
+  );
+
   // Get field configurations
   const getField = (fieldName: string) => table.config.fields.find((f) => f.name === fieldName);
 
@@ -41,7 +46,7 @@ export function HeadDetailLayout({
   // Title field
   const titleField = getField(config.titleField);
   const titleValue = recordData[config.titleField];
-  const isTitleEditing = useIsFieldEditing(record.id, config.titleField);
+  const isTitleEditing = editingFieldName === config.titleField;
 
   // Sub-line fields (displayed as badges below title)
   const subLineFields = config.subLineFields
@@ -86,7 +91,8 @@ export function HeadDetailLayout({
         {tailFields.map(({ field, value, name }) => {
           if (!field) return null;
 
-          const isEditing = useIsFieldEditing(record.id, name);
+          // Use pre-computed editing state instead of hook in loop
+          const isEditing = editingFieldName === name;
 
           return (
             <Stack key={name} space="space-050">

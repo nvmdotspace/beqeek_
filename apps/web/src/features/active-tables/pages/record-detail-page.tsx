@@ -3,7 +3,7 @@
  * Integrates RecordDetail component from @workspace/active-tables-core with web app data layer
  */
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { getRouteApi } from '@tanstack/react-router';
 import { RecordDetail } from '@workspace/active-tables-core';
 import { COMMENTS_POSITION_HIDDEN, REFERENCE_FIELD_TYPES, type RecordDetailConfig } from '@workspace/beqeek-shared';
@@ -182,13 +182,63 @@ export default function RecordDetailPage() {
   }, [workspaceUsers]);
 
   // Create inline edit context for reference/user fields
+  // Pass visibleFields and referenceRecords to avoid duplicate API calls
   const inlineEditContext = useInlineEditContext({
     workspaceId: workspaceId ?? '',
     table,
     record,
     workspaceUsers,
     encryptionKey: encryption.encryptionKey,
+    visibleFields, // ✅ Only fetch for visible fields (optimization)
+    referenceRecords, // ✅ Reuse data from useReferenceRecords (avoid duplicate fetches)
   });
+
+  // ============================================
+  // ALL HOOKS MUST BE BEFORE ANY EARLY RETURNS
+  // (React Rules of Hooks)
+  // ============================================
+
+  // Handle field change - encryption handled by hook (memoized to prevent re-renders)
+  const handleFieldChange = useCallback(
+    async (fieldName: string, value: unknown) => {
+      await updateFieldAsync({ fieldName, value });
+    },
+    [updateFieldAsync],
+  );
+
+  // Handle delete record (memoized)
+  const handleDelete = useCallback(async () => {
+    deleteRecordFn(recordId);
+  }, [deleteRecordFn, recordId]);
+
+  // Handle record navigation (for related records) - memoized
+  const handleRecordClick = useCallback(
+    (clickedRecordId: string) => {
+      navigate({
+        to: ROUTES.ACTIVE_TABLES.RECORD_DETAIL,
+        params: { locale, workspaceId, tableId, recordId: clickedRecordId },
+      });
+    },
+    [navigate, locale, workspaceId, tableId],
+  );
+
+  // Memoize comments mapping to prevent CommentsPanel re-renders
+  const mappedComments = useMemo(() => {
+    return comments.map((c) => {
+      const user = workspaceUsers?.find((u) => u.id === c.userId);
+      return {
+        id: c.id,
+        content: c.content,
+        userId: c.userId,
+        userName: user?.name || 'Unknown User',
+        createdAt: c.createdAt,
+      };
+    });
+  }, [comments, workspaceUsers]);
+
+  // ============================================
+  // EARLY RETURNS (after all hooks)
+  // ============================================
 
   // Loading state - table config
   if (tableLoading) {
@@ -219,25 +269,6 @@ export default function RecordDetailPage() {
   if (!permissions?.access) {
     return <PermissionDeniedError />;
   }
-
-  // Handle field change - encryption handled by hook
-  const handleFieldChange = async (fieldName: string, value: unknown) => {
-    await updateFieldAsync({ fieldName, value });
-  };
-
-  // Handle delete record
-  const handleDelete = async () => {
-    // Delete function doesn't return a promise, but make it async for consistency
-    deleteRecordFn(recordId);
-  };
-
-  // Handle record navigation (for related records)
-  const handleRecordClick = (clickedRecordId: string) => {
-    navigate({
-      to: ROUTES.ACTIVE_TABLES.RECORD_DETAIL,
-      params: { locale, workspaceId, tableId, recordId: clickedRecordId },
-    });
-  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -286,16 +317,7 @@ export default function RecordDetailPage() {
               <div className="sticky top-20">
                 <CommentsPanel
                   recordId={recordId}
-                  comments={comments.map((c) => {
-                    const user = workspaceUsers?.find((u) => u.id === c.userId);
-                    return {
-                      id: c.id,
-                      content: c.content,
-                      userId: c.userId,
-                      userName: user?.name || 'Unknown User',
-                      createdAt: c.createdAt,
-                    };
-                  })}
+                  comments={mappedComments}
                   onCommentAdd={addComment}
                   loading={isLoadingComments}
                 />

@@ -2,9 +2,12 @@
  * FieldDisplay - Read-only field value renderer
  * Dispatches to appropriate field renderer based on field type
  * @module active-tables-core/components/record-detail/fields
+ *
+ * Performance: Wrapped with React.memo to prevent unnecessary re-renders
+ * when parent components update but field props remain unchanged.
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 import { cn } from '@workspace/ui/lib/utils';
 import type { FieldDisplayProps } from '../../../types/record-detail.js';
 import {
@@ -55,8 +58,12 @@ import { UserFieldDisplay } from './field-renderers/user-field-display.js';
 /**
  * Main field display component
  * Renders field value in read-only mode with appropriate formatting
+ *
+ * Memoized to prevent re-renders when:
+ * - Parent re-renders but field/value unchanged
+ * - Sibling fields update in the same form
  */
-export function FieldDisplay({
+function FieldDisplayInner({
   field,
   value,
   referenceRecords,
@@ -228,3 +235,9 @@ export function FieldDisplay({
       );
   }
 }
+
+/**
+ * Memoized FieldDisplay component
+ * Only re-renders when props actually change (shallow comparison)
+ */
+export const FieldDisplay = memo(FieldDisplayInner);

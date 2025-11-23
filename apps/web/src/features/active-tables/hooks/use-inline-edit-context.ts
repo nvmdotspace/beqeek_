@@ -6,8 +6,8 @@
  */
 
 import { useMemo, useCallback, useState, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import type { Table, FieldConfig } from '@workspace/active-tables-core';
+import { useQueries } from '@tanstack/react-query';
+import type { Table } from '@workspace/active-tables-core';
 import type { InlineEditContext } from '@workspace/active-tables-core';
 import type { WorkspaceUser } from '@workspace/active-tables-core';
 import {
@@ -18,6 +18,7 @@ import {
 } from '@workspace/beqeek-shared';
 import { createFetchRecordsFunction, createFetchRecordsByIdsFunction } from './use-list-table-records';
 import { getActiveTable } from '../api/active-tables-api';
+import { activeTableQueryKey } from './use-active-tables';
 
 interface UseInlineEditContextOptions {
   workspaceId: string;
@@ -25,6 +26,17 @@ interface UseInlineEditContextOptions {
   record: { id: string; data?: Record<string, unknown>; record?: Record<string, unknown> } | null;
   workspaceUsers?: WorkspaceUser[];
   encryptionKey?: string | null;
+  /** Only fetch references for these field names (optimization) */
+  visibleFields?: string[];
+  /**
+   * Pre-fetched reference records from useReferenceRecords
+   * If provided, skips fetching initial records (optimization)
+   * Accepts TableRecord[] or simpler { id: string }[] format
+   */
+  referenceRecords?: Record<
+    string,
+    Array<{ id: string; data?: Record<string, unknown>; record?: Record<string, unknown> }>
+  >;
 }
 
 /**
@@ -37,7 +49,7 @@ function isRecordReferenceField(type: string): boolean {
 /**
  * Check if field type is a user reference field
  */
-function isUserReferenceField(type: string): boolean {
+function _isUserReferenceField(type: string): boolean {
   return type === FIELD_TYPE_SELECT_ONE_WORKSPACE_USER || type === FIELD_TYPE_SELECT_LIST_WORKSPACE_USER;
 }
 
@@ -49,13 +61,22 @@ export function useInlineEditContext({
   table,
   record,
   workspaceUsers,
-  encryptionKey,
+  encryptionKey: _encryptionKey,
+  visibleFields,
+  referenceRecords: preloadedReferenceRecords,
 }: UseInlineEditContextOptions): InlineEditContext | undefined {
-  // Get all reference fields from table config
+  // Get reference fields from table config - filter by visibleFields if provided
   const referenceFields = useMemo(() => {
     if (!table) return [];
-    return table.config.fields.filter((f) => isRecordReferenceField(f.type));
-  }, [table]);
+    const allReferenceFields = table.config.fields.filter((f) => isRecordReferenceField(f.type));
+
+    // If visibleFields provided, only include fields that are visible
+    if (visibleFields && visibleFields.length > 0) {
+      return allReferenceFields.filter((f) => visibleFields.includes(f.name));
+    }
+
+    return allReferenceFields;
+  }, [table, visibleFields]);
 
   // Get unique referenced table IDs
   const referencedTableIds = useMemo(() => {
@@ -67,30 +88,36 @@ export function useInlineEditContext({
     return Array.from(ids);
   }, [referenceFields]);
 
-  // Fetch referenced table metadata for all referenced tables
-  const referencedTablesQueries = useQuery({
-    queryKey: ['referenced-tables', workspaceId, referencedTableIds],
-    queryFn: async () => {
-      const results: Record<string, Table> = {};
-      await Promise.all(
-        referencedTableIds.map(async (tableId) => {
-          try {
-            const response = await getActiveTable(workspaceId, tableId);
-            if (response.data) {
-              results[tableId] = response.data;
-            }
-          } catch (error) {
-            console.error(`[useInlineEditContext] Failed to fetch table ${tableId}:`, error);
-          }
-        }),
-      );
-      return results;
-    },
-    enabled: referencedTableIds.length > 0 && !!workspaceId,
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+  // Fetch referenced table metadata using shared query key pattern
+  // This allows React Query to dedupe calls with useReferenceRecords
+  const referencedTablesQueries = useQueries({
+    queries: referencedTableIds.map((tableId) => ({
+      queryKey: activeTableQueryKey(workspaceId, tableId), // Shared key with useActiveTable
+      queryFn: async () => {
+        const response = await getActiveTable(workspaceId, tableId);
+        return response;
+      },
+      enabled: !!workspaceId && !!tableId,
+      staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    })),
   });
 
-  const referencedTables = referencedTablesQueries.data || {};
+  // Extract stable data from queries to prevent re-renders on status changes
+  const queryDataArray = referencedTablesQueries.map((q) => q?.data?.data);
+
+  // Convert queries array to Record<tableId, Table>
+  const referencedTables = useMemo(() => {
+    const results: Record<string, Table> = {};
+    referencedTableIds.forEach((tableId, index) => {
+      const tableData = queryDataArray[index];
+      if (tableData) {
+        results[tableId] = tableData;
+      }
+    });
+    return results;
+    // Use JSON.stringify for stable dependency - only recompute when data changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [referencedTableIds, JSON.stringify(queryDataArray)]);
 
   // Store initial records for each field (pre-selected values)
   const [initialRecordsMap, setInitialRecordsMap] = useState<
@@ -98,7 +125,13 @@ export function useInlineEditContext({
   >({});
 
   // Load initial records for reference fields
+  // OPTIMIZATION: Skip if preloadedReferenceRecords is provided (from useReferenceRecords)
   useEffect(() => {
+    // Skip fetching if we have preloaded data
+    if (preloadedReferenceRecords && Object.keys(preloadedReferenceRecords).length > 0) {
+      return;
+    }
+
     const loadInitialRecords = async () => {
       if (!record || !table || referenceFields.length === 0) return;
 
@@ -141,7 +174,7 @@ export function useInlineEditContext({
     };
 
     loadInitialRecords();
-  }, [record, table, referenceFields, referencedTables, workspaceId]);
+  }, [record, table, referenceFields, referencedTables, workspaceId, preloadedReferenceRecords]);
 
   // Create getFetchRecords function
   const getFetchRecords = useCallback(
@@ -169,11 +202,24 @@ export function useInlineEditContext({
   );
 
   // Create getInitialRecords function
+  // Uses preloaded data from useReferenceRecords if available, otherwise from local state
   const getInitialRecords = useCallback(
     (fieldName: string) => {
+      // First, try to get from preloaded reference records
+      if (preloadedReferenceRecords) {
+        // Find the field to get its referenced table ID
+        const field = table?.config.fields.find((f) => f.name === fieldName);
+        if (field) {
+          const refTableId = field.referenceTableId || field.referencedTableId;
+          if (refTableId && preloadedReferenceRecords[refTableId]) {
+            return preloadedReferenceRecords[refTableId];
+          }
+        }
+      }
+      // Fallback to local state
       return initialRecordsMap[fieldName];
     },
-    [initialRecordsMap],
+    [initialRecordsMap, preloadedReferenceRecords, table],
   );
 
   // Return undefined if no table
