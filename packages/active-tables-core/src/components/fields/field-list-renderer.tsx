@@ -9,7 +9,7 @@ import type { FieldConfig } from '../../types/field.js';
 import type { Table } from '../../types/common.js';
 import type { CurrentUser, WorkspaceUser } from '../../types/responses.js';
 import type { ActiveTablesMessages } from '../../types/messages.js';
-import { FIELD_TYPE_RICH_TEXT } from '../../types/field.js';
+import { FIELD_TYPE_RICH_TEXT, FIELD_TYPE_CHECKBOX_YES_NO } from '../../types/field.js';
 import { FieldBadge } from '../common/index.js';
 
 interface FieldListRendererProps {
@@ -223,6 +223,20 @@ export function FieldListRenderer(props: FieldListRendererProps) {
   // Workspace user fields
   if (fieldType === 'SELECT_ONE_WORKSPACE_USER' || fieldType === 'SELECT_LIST_WORKSPACE_USER') {
     return <WorkspaceUserFieldList value={value} workspaceUsers={workspaceUsers} />;
+  }
+
+  // CHECKBOX_YES_NO field (boolean yes/no)
+  if (fieldType === FIELD_TYPE_CHECKBOX_YES_NO) {
+    const isChecked = Boolean(value);
+    const locale = typeof document !== 'undefined' ? document.documentElement.lang || 'vi' : 'vi';
+    const yesText = locale === 'vi' ? 'Có' : 'Yes';
+    const noText = locale === 'vi' ? 'Không' : 'No';
+
+    return (
+      <FieldBadge variant={isChecked ? 'success' : 'secondary'} size="compact">
+        {isChecked ? yesText : noText}
+      </FieldBadge>
+    );
   }
 
   // Select fields

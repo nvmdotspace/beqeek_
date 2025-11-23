@@ -8,7 +8,7 @@
 interface FieldBadgeProps {
   children: React.ReactNode;
   className?: string;
-  variant?: 'default' | 'secondary' | 'destructive' | 'outline';
+  variant?: 'default' | 'secondary' | 'destructive' | 'outline' | 'success';
   size?: 'base' | 'compact';
   style?: React.CSSProperties;
 }
@@ -28,6 +28,7 @@ export function FieldBadge({
     secondary: 'bg-muted text-muted-foreground',
     destructive: 'bg-destructive/15 text-destructive',
     outline: 'border-border bg-background text-foreground',
+    success: 'bg-success/15 text-success border-success/30',
   };
 
   const sizeClasses = {
