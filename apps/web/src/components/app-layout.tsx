@@ -13,10 +13,14 @@ import {
 } from '@workspace/ui/components/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@workspace/ui/components/avatar';
 
+import { Link } from '@tanstack/react-router';
+
 import { useAuthStore } from '@/features/auth';
 import { useLogout } from '@/features/auth/hooks/use-logout';
+import { useCurrentUser } from '@/features/user';
+import { getUserInitials } from '@/features/workspace-users/utils/user-initials';
+import { useLanguageStore } from '@/stores/language-store';
 
-// @ts-expect-error - Paraglide generates JS without .d.ts files
 import {
   useAppKeyboardShortcuts,
   useAccessibilityEnhancements,
@@ -34,6 +38,8 @@ interface AppLayoutProps {
 export const AppLayout = ({ children, showSidebar = true, pageTitle, pageIcon }: AppLayoutProps) => {
   const userId = useAuthStore((state) => state.userId);
   const logout = useLogout();
+  const { user: currentUser, workspaceId } = useCurrentUser();
+  const locale = useLanguageStore((state) => state.locale);
 
   // Get sidebar state and actions
   const isCollapsed = useSidebarStore((state) => state.isCollapsed);
@@ -123,21 +129,51 @@ export const AppLayout = ({ children, showSidebar = true, pageTitle, pageIcon }:
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full cursor-pointer">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src="/avatars/01.png" alt={userId || ''} />
-                    <AvatarFallback>{userId?.[0]?.toUpperCase() || 'U'}</AvatarFallback>
+                    <AvatarImage
+                      src={currentUser?.thumbnailAvatar || currentUser?.avatar || undefined}
+                      alt={currentUser?.fullName || ''}
+                    />
+                    <AvatarFallback>{getUserInitials(currentUser?.fullName)}</AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56" align="end" forceMount>
                 <div className="flex items-center justify-start gap-2 p-2">
                   <div className="flex flex-col space-y-1 leading-none">
-                    <p className="font-medium">{'User'}</p>
+                    <p className="font-medium">{currentUser?.fullName || 'User'}</p>
+                    {currentUser?.email && (
+                      <p className="text-xs text-muted-foreground truncate">{currentUser.email}</p>
+                    )}
                   </div>
                 </div>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>Profile</DropdownMenuItem>
-                <DropdownMenuItem>Settings</DropdownMenuItem>
-                <DropdownMenuItem>Billing</DropdownMenuItem>
+                {workspaceId && (
+                  <>
+                    <DropdownMenuItem asChild>
+                      <Link to="/$locale/workspaces/$workspaceId/profile" params={{ locale, workspaceId }}>
+                        Profile
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link
+                        to="/$locale/workspaces/$workspaceId/profile"
+                        params={{ locale, workspaceId }}
+                        search={{ tab: 'settings' }}
+                      >
+                        Settings
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link
+                        to="/$locale/workspaces/$workspaceId/profile"
+                        params={{ locale, workspaceId }}
+                        search={{ tab: 'billing' }}
+                      >
+                        Billing
+                      </Link>
+                    </DropdownMenuItem>
+                  </>
+                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => window.open('/keyboard-shortcuts', '_blank')}>
                   Keyboard Shortcuts

@@ -28,3 +28,9 @@ export {
   getUsersByIds,
   hasUser,
 } from './use-user-mapping';
+
+export { useCurrentWorkspaceUser } from './use-current-workspace-user';
+
+export { useUpdateUserProfile } from './use-update-user-profile';
+
+export { useUploadAvatar } from './use-upload-avatar';
