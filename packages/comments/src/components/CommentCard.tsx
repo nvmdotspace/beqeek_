@@ -29,6 +29,8 @@ export interface CommentCardProps {
   comment: Comment;
   currentUser: CommentUser;
   allowUpvote?: boolean;
+  /** Show emoji reactions (default: true) */
+  showReactions?: boolean;
   onReply: (replyText: string) => void;
   onChange: (change: CommentChange) => void;
   onDelete: () => void;
@@ -43,6 +45,7 @@ export function CommentCard({
   comment,
   currentUser,
   allowUpvote,
+  showReactions = true,
   onReply,
   onChange,
   onDelete,
@@ -178,7 +181,7 @@ export function CommentCard({
           )}
 
           {/* Emoji Reactions */}
-          {!isEditing && (
+          {!isEditing && showReactions && (
             <div className="mt-2">
               <EmojiReactions
                 value={comment.selectedActions || []}
@@ -270,6 +273,7 @@ export function CommentCard({
                       comment={reply}
                       currentUser={currentUser}
                       allowUpvote={allowUpvote}
+                      showReactions={showReactions}
                       onReply={onReply}
                       onChange={onChange}
                       onDelete={onDelete}

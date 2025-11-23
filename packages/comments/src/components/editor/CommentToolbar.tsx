@@ -31,10 +31,17 @@ import { TOGGLE_LINK_COMMAND } from '@lexical/link';
 export interface CommentToolbarProps {
   onImageUpload?: (file: File) => Promise<string>;
   onMentionTrigger?: () => void;
+  /** Compact mode hides disabled/placeholder features (Font size, Color, Align) */
+  compactMode?: boolean;
   className?: string;
 }
 
-export function CommentToolbar({ onImageUpload, onMentionTrigger, className }: CommentToolbarProps) {
+export function CommentToolbar({
+  onImageUpload,
+  onMentionTrigger,
+  compactMode = false,
+  className,
+}: CommentToolbarProps) {
   const [editor] = useLexicalComposerContext();
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
   const [isBold, setIsBold] = useState(false);
@@ -103,7 +110,7 @@ export function CommentToolbar({ onImageUpload, onMentionTrigger, className }: C
   );
 
   return (
-    <div className={`flex items-center gap-1 ${className || ''}`}>
+    <div className={`flex items-center gap-1 flex-wrap ${className || ''}`}>
       {/* Bold */}
       <Button
         variant="ghost"
@@ -164,22 +171,27 @@ export function CommentToolbar({ onImageUpload, onMentionTrigger, className }: C
         <LinkIcon className="h-4 w-4" />
       </Button>
 
-      <Separator orientation="vertical" className="h-6 mx-1" />
+      {/* Separator and disabled features - hidden in compact mode */}
+      {!compactMode && (
+        <>
+          <Separator orientation="vertical" className="h-6 mx-1" />
 
-      {/* Font Size */}
-      <Button variant="ghost" size="icon" className="h-8 w-8" title="Font size" type="button" disabled>
-        <Type className="h-4 w-4 text-muted-foreground" />
-      </Button>
+          {/* Font Size */}
+          <Button variant="ghost" size="icon" className="h-8 w-8" title="Font size" type="button" disabled>
+            <Type className="h-4 w-4 text-muted-foreground" />
+          </Button>
 
-      {/* Color */}
-      <Button variant="ghost" size="icon" className="h-8 w-8" title="Text color" type="button" disabled>
-        <Palette className="h-4 w-4 text-muted-foreground" />
-      </Button>
+          {/* Color */}
+          <Button variant="ghost" size="icon" className="h-8 w-8" title="Text color" type="button" disabled>
+            <Palette className="h-4 w-4 text-muted-foreground" />
+          </Button>
 
-      {/* Text Align */}
-      <Button variant="ghost" size="icon" className="h-8 w-8" title="Text align" type="button" disabled>
-        <AlignLeft className="h-4 w-4 text-muted-foreground" />
-      </Button>
+          {/* Text Align */}
+          <Button variant="ghost" size="icon" className="h-8 w-8" title="Text align" type="button" disabled>
+            <AlignLeft className="h-4 w-4 text-muted-foreground" />
+          </Button>
+        </>
+      )}
 
       <Separator orientation="vertical" className="h-6 mx-1" />
 

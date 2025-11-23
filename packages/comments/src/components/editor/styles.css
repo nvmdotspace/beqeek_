@@ -23,6 +23,11 @@
   line-height: 1.5;
 }
 
+.editor-paragraph {
+  margin: 0;
+  position: relative;
+}
+
 .editor-placeholder {
   color: var(--muted-foreground);
   overflow: hidden;
