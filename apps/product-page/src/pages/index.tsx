@@ -1,0 +1,35 @@
+import { useState } from 'react';
+import { Navbar } from '@/components/layout/navbar';
+import { Footer } from '@/components/layout/footer';
+import { BackgroundEffects } from '@/components/layout/background-effects';
+import { HeroSection } from '@/components/sections/hero-section';
+import { FeaturesSection } from '@/components/sections/features-section';
+import { BenefitsSection } from '@/components/sections/benefits-section';
+import { TestimonialsSection } from '@/components/sections/testimonials-section';
+import { PricingSection } from '@/components/sections/pricing-section';
+import { SignupModal } from '@/components/modal/signup-modal';
+
+export default function LandingPage() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
+
+  return (
+    <div className="min-h-screen bg-[hsl(222_47%_7%)] text-white antialiased selection:bg-accent-blue/30 selection:text-blue-200">
+      <BackgroundEffects />
+      <Navbar onOpenModal={openModal} />
+
+      <main>
+        <HeroSection onOpenModal={openModal} />
+        <FeaturesSection />
+        <BenefitsSection />
+        <TestimonialsSection />
+        <PricingSection onOpenModal={openModal} />
+      </main>
+
+      <Footer />
+      <SignupModal isOpen={isModalOpen} onClose={closeModal} />
+    </div>
+  );
+}
