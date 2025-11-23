@@ -1,0 +1,192 @@
+@import 'tailwindcss';
+
+@source "../../../../packages/ui/src/**/*.{js,ts,jsx,tsx}";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --font-sans: 'Plus Jakarta Sans', var(--font-geist-sans), system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono);
+}
+
+:root {
+  /* ========================================
+     LANDING PAGE COLOR TOKENS
+     ======================================== */
+  --background: hsl(222 47% 7%);
+  --foreground: hsl(210 40% 98%);
+  --card: hsl(222 37% 10%);
+  --card-foreground: hsl(210 40% 98%);
+  --popover: hsl(222 37% 10%);
+  --popover-foreground: hsl(210 40% 98%);
+  --primary: hsl(210 40% 98%);
+  --primary-foreground: hsl(222 47% 7%);
+  --secondary: hsl(222 27% 14%);
+  --secondary-foreground: hsl(210 40% 98%);
+  --muted: hsl(222 27% 14%);
+  --muted-foreground: hsl(215 20% 65%);
+  --accent: hsl(222 27% 14%);
+  --accent-foreground: hsl(210 40% 98%);
+  --destructive: hsl(0 84.2% 60.2%);
+  --destructive-foreground: hsl(210 40% 98%);
+  --border: rgba(255, 255, 255, 0.08);
+  --input: rgba(255, 255, 255, 0.08);
+  --ring: hsl(217 91% 60%);
+  --radius: 0.6rem;
+
+  /* Accent colors for landing */
+  --accent-blue: hsl(217 91% 60%);
+  --accent-blue-foreground: hsl(210 40% 98%);
+  --accent-purple: hsl(271 81% 56%);
+  --accent-purple-foreground: hsl(210 40% 98%);
+  --accent-teal: hsl(173 80% 40%);
+  --accent-teal-foreground: hsl(210 40% 98%);
+  --accent-green: hsl(142 76% 36%);
+  --accent-green-foreground: hsl(210 40% 98%);
+  --accent-orange: hsl(24 94% 50%);
+  --accent-orange-foreground: hsl(210 40% 98%);
+  --accent-red: hsl(0 84.2% 60.2%);
+  --accent-red-foreground: hsl(210 40% 98%);
+
+  /* Landing specific */
+  --landing-bg: hsl(222 47% 7%);
+  --landing-surface: hsl(222 37% 10%);
+  --landing-surface-highlight: hsl(222 27% 14%);
+  --landing-border: rgba(255, 255, 255, 0.08);
+  --landing-border-hover: rgba(255, 255, 255, 0.15);
+}
+
+@theme inline {
+  /* Color Tokens */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Accent Color Tokens */
+  --color-accent-blue: var(--accent-blue);
+  --color-accent-blue-foreground: var(--accent-blue-foreground);
+  --color-accent-purple: var(--accent-purple);
+  --color-accent-purple-foreground: var(--accent-purple-foreground);
+  --color-accent-teal: var(--accent-teal);
+  --color-accent-teal-foreground: var(--accent-teal-foreground);
+  --color-accent-green: var(--accent-green);
+  --color-accent-green-foreground: var(--accent-green-foreground);
+  --color-accent-orange: var(--accent-orange);
+  --color-accent-orange-foreground: var(--accent-orange-foreground);
+  --color-accent-red: var(--accent-red);
+  --color-accent-red-foreground: var(--accent-red-foreground);
+
+  /* Radius Tokens */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+/* Force dark mode color scheme */
+html {
+  color-scheme: dark;
+}
+
+body {
+  background-color: var(--landing-bg);
+  color: var(--foreground);
+  overflow-x: hidden;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--landing-bg);
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(215 19% 35%);
+  border-radius: 3px;
+}
+
+/* Glassmorphism */
+.glass {
+  background: rgba(17, 22, 35, 0.6);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--landing-border);
+}
+.glass:hover {
+  background: rgba(26, 32, 47, 0.8);
+  border-color: var(--landing-border-hover);
+}
+
+/* Text glow effect */
+.text-glow {
+  text-shadow: 0 0 30px rgba(59, 130, 246, 0.4);
+}
+
+/* Grid background pattern */
+.bg-grid {
+  background-size: 40px 40px;
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+}
+
+/* Marquee mask */
+.marquee-container {
+  mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+}
+
+/* Animations */
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-pulse-slow {
+  animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-scroll {
+  animation: scroll 20s linear infinite;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+}

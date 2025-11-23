@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BEQEEK - Phần Mềm SaaS Tùy Chỉnh Hiện Đại</title>
+    <meta name="description"
+        content="Vận hành quy trình kinh doanh, tự động hoá mượt mà. Sản phẩm phần mềm tùy chỉnh, tự thiết lập theo nhu cầu, bảo mật cao.">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        background: '#0B0F19', // Deepest slate
+                        surface: '#111623', // Slightly lighter
+                        surfaceHighlight: '#1A202F',
+                        primary: {
+                            DEFAULT: '#3b82f6',
+                            glow: '#60a5fa',
+                        },
+                        accent: {
+                            purple: '#8b5cf6',
+                            teal: '#14b8a6',
+                            red: '#ef4444',
+                            orange: '#f97316',
+                        }
+                    },
+                    backgroundImage: {
+                        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+                        'hero-glow': 'conic-gradient(from 180deg at 50% 50%, #2a8af6 0deg, #a853ba 180deg, #e92a67 360deg)',
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'scroll': 'scroll 20s linear infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        scroll: {
+                            '0%': { transform: 'translateX(0)' },
+                            '100%': { transform: 'translateX(-100%)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #0B0F19;
+            color: #f8fafc;
+            overflow-x: hidden;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0B0F19;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 3px;
+        }
+
+        /* Glassmorphism Utilities */
+        .glass {
+            background: rgba(17, 22, 35, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-hover:hover {
+            background: rgba(26, 32, 47, 0.8);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .text-glow {
+            text-shadow: 0 0 30px rgba(59, 130, 246, 0.4);
+        }
+
+        /* Grid Background */
+        .bg-grid {
+            background-size: 40px 40px;
+            background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+        }
+
+        /* Marquee */
+        .marquee-container {
+            mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+        }
+    </style>
+</head>
+
+<body class="antialiased selection:bg-blue-500/30 selection:text-blue-200">
+
+    <!-- Background Ambient Glows -->
+    <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        <div
+            class="absolute top-[-10%] right-[-5%] w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[120px] mix-blend-screen">
+        </div>
+        <div
+            class="absolute bottom-[10%] left-[-10%] w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[120px] mix-blend-screen">
+        </div>
+        <div class="absolute inset-0 bg-grid z-0"></div>
+    </div>
+
+    <!-- Navbar -->
+    <header class="fixed w-full top-0 z-50 glass border-b-0 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex items-center gap-3 cursor-pointer">
+                    <div
+                        class="relative flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-500/25">
+                        <span class="text-lg font-bold">B</span>
+                    </div>
+                    <span class="text-lg font-bold text-white tracking-tight">BEQEEK</span>
+                </div>
+
+                <!-- Desktop Nav -->
+                <nav class="hidden md:flex items-center space-x-1">
+                    <a href="#features"
+                        class="px-4 py-2 text-sm font-medium text-slate-400 hover:text-white transition-colors rounded-full hover:bg-white/5">Đặc
+                        Điểm</a>
+                    <a href="#benefits"
+                        class="px-4 py-2 text-sm font-medium text-slate-400 hover:text-white transition-colors rounded-full hover:bg-white/5">Lợi
+                        Ích</a>
+                    <a href="#pricing"
+                        class="px-4 py-2 text-sm font-medium text-slate-400 hover:text-white transition-colors rounded-full hover:bg-white/5">Giá</a>
+                </nav>
+
+                <!-- CTA -->
+                <div class="flex items-center gap-4">
+                    <a href="#" onclick="openModal()"
+                        class="hidden md:inline-flex items-center justify-center px-5 py-2 text-sm font-medium rounded-full text-white bg-white/5 border border-white/10 hover:bg-white/10 transition-all backdrop-blur-sm">
+                        Đăng Nhập
+                    </a>
+                    <a href="#" onclick="openModal()"
+                        class="inline-flex items-center justify-center px-5 py-2 text-sm font-semibold rounded-full text-white bg-blue-600 hover:bg-blue-500 shadow-[0_0_20px_-5px_rgba(59,130,246,0.5)] transition-all hover:shadow-[0_0_25px_-5px_rgba(59,130,246,0.6)]">
+                        Đăng Ký
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="relative pt-32 pb-20 lg:pt-40 lg:pb-24 overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                <!-- Text Content (Left) -->
+                <div>
+                    <div
+                        class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-medium mb-6 backdrop-blur-md">
+                        <span class="relative flex h-2 w-2">
+                            <span
+                                class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                        </span>
+                        SaaS Tùy Chỉnh Hiện Đại
+                    </div>
+
+                    <h1 class="text-4xl md:text-6xl font-bold text-white tracking-tight mb-6 leading-[1.15]">
+                        Vận Hành Quy Trình Kinh Doanh, <br>
+                        <span
+                            class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-teal-400 text-glow">
+                            Tự Động Hoá Mượt Mà
+                        </span>
+                    </h1>
+
+                    <p class="text-lg text-slate-400 mb-8 leading-relaxed max-w-lg">
+                        Sản phẩm phần mềm tùy chỉnh, tự thiết lập theo nhu cầu, bảo mật cao và quản lý hàng trăm nghiệp
+                        vụ doanh nghiệp một cách dễ dàng.
+                    </p>
+
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <a href="#" onclick="openModal()"
+                            class="h-12 px-8 rounded-full bg-blue-600 text-white font-bold text-base flex items-center justify-center hover:bg-blue-500 transition-all shadow-lg shadow-blue-600/20">
+                            Đăng ký dùng thử miễn phí
+                            <i class="fas fa-arrow-right ml-2 text-sm"></i>
+                        </a>
+                    </div>
+
+                    <!-- System Metrics -->
+                    <div class="mt-10 pt-8 border-t border-white/5">
+                        <div class="grid grid-cols-3 gap-4">
+                            <div>
+                                <div class="text-2xl font-bold text-white">99.9%</div>
+                                <div class="text-xs text-slate-500 uppercase tracking-wide">Uptime SLA</div>
+                            </div>
+                            <div>
+                                <div class="text-2xl font-bold text-white">E2EE</div>
+                                <div class="text-xs text-slate-500 uppercase tracking-wide">Mã Hoá</div>
+                            </div>
+                            <div>
+                                <div class="text-2xl font-bold text-white">Global</div>
+                                <div class="text-xs text-slate-500 uppercase tracking-wide">Hạ Tầng</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Image Content (Right) -->
+                <div class="relative perspective-container group">
+                    <div
+                        class="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-30 transition duration-1000">
+                    </div>
+                    <div
+                        class="relative rounded-2xl bg-[#0B0F19] border border-white/10 shadow-2xl overflow-hidden transform transition-transform duration-700 hover:scale-[1.02]">
+                        <!-- Browser Chrome -->
+                        <div class="h-8 bg-[#111623] border-b border-white/5 flex items-center px-4 gap-2">
+                            <div class="flex gap-1.5">
+                                <div class="w-2.5 h-2.5 rounded-full bg-red-500/20 border border-red-500/50"></div>
+                                <div class="w-2.5 h-2.5 rounded-full bg-yellow-500/20 border border-yellow-500/50">
+                                </div>
+                                <div class="w-2.5 h-2.5 rounded-full bg-green-500/20 border border-green-500/50"></div>
+                            </div>
+                            <div
+                                class="ml-4 px-3 py-0.5 rounded bg-black/30 text-[10px] text-slate-500 font-mono border border-white/5 flex-1 text-center">
+                                app.beqeek.com/dashboard
+                            </div>
+                        </div>
+                        <!-- Dashboard Image -->
+                        <img src="./assets/saas_multiview_dashboard.png" alt="BEQEEK Multiview Dashboard"
+                            class="w-full h-auto">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-24 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-20">
+                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Đặc Điểm Nổi Bật</h2>
+                <p class="text-slate-400 text-lg max-w-2xl mx-auto">Giải pháp toàn diện cho doanh nghiệp của bạn.</p>
+            </div>
+
+            <!-- Feature 1: Tùy Chỉnh -->
+            <div class="grid md:grid-cols-2 gap-16 items-center mb-24">
+                <div class="order-2 md:order-1 relative">
+                    <div
+                        class="absolute -inset-4 bg-gradient-to-r from-red-500/10 to-orange-500/10 rounded-3xl blur-xl">
+                    </div>
+                    <div class="glass p-6 rounded-2xl border border-white/10 relative">
+                        <!-- Visual: Kanban as example of custom setup -->
+                        <div class="flex gap-4 overflow-hidden">
+                            <div class="w-1/2 bg-surfaceHighlight rounded-lg p-3 border border-white/5">
+                                <div class="h-1 w-full bg-red-500 rounded-full mb-3"></div>
+                                <div class="text-xs font-bold text-white mb-3">Quan trọng & Khẩn cấp</div>
+                                <div class="bg-[#0B0F19] p-3 rounded border border-white/5 mb-2">
+                                    <div class="h-2 w-3/4 bg-slate-700 rounded mb-2"></div>
+                                </div>
+                            </div>
+                            <div class="w-1/2 bg-surfaceHighlight rounded-lg p-3 border border-white/5 opacity-50">
+                                <div class="h-1 w-full bg-green-500 rounded-full mb-3"></div>
+                                <div class="text-xs font-bold text-white mb-3">Quan trọng & Không gấp</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="order-1 md:order-2">
+                    <div class="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center text-red-500 mb-6">
+                        <i class="fas fa-tools text-xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-4">Tùy Chỉnh Tự Thiết Lập</h3>
+                    <p class="text-slate-400 mb-6 leading-relaxed">
+                        Thiết kế và cấu hình phần mềm theo nhu cầu cụ thể của doanh nghiệp bạn mà không cần lập trình
+                        viên chuyên nghiệp.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Feature 2: Bảo Mật -->
+            <div class="grid md:grid-cols-2 gap-16 items-center mb-24">
+                <div>
+                    <div
+                        class="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500 mb-6">
+                        <i class="fas fa-lock text-xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-4">Bảo Mật Mã Hóa Đầu Cuối</h3>
+                    <p class="text-slate-400 mb-6 leading-relaxed">
+                        Dữ liệu của bạn được bảo vệ tối đa với công nghệ mã hóa end-to-end, đảm bảo an toàn và riêng tư.
+                    </p>
+                </div>
+                <div class="relative">
+                    <div class="absolute -inset-4 bg-gradient-to-r from-blue-500/10 to-teal-500/10 rounded-3xl blur-xl">
+                    </div>
+                    <div
+                        class="glass p-6 rounded-2xl border border-white/10 relative flex items-center justify-center h-48">
+                        <i class="fas fa-shield-alt text-6xl text-blue-500/50"></i>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <div class="text-2xl font-bold text-white">E2EE</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature 3: API -->
+            <div class="grid md:grid-cols-2 gap-16 items-center">
+                <div class="order-2 md:order-1 relative">
+                    <div
+                        class="absolute -inset-4 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-3xl blur-xl">
+                    </div>
+                    <div class="glass p-6 rounded-2xl border border-white/10 relative">
+                        <!-- Marquee for API -->
+                        <div class="marquee-container relative overflow-hidden h-24 flex items-center">
+                            <div class="flex gap-8 animate-scroll whitespace-nowrap items-center">
+                                <div class="text-slate-400 font-semibold"><i
+                                        class="fas fa-envelope text-orange-500"></i> SMTP</div>
+                                <div class="text-slate-400 font-semibold"><i class="fas fa-table text-green-500"></i>
+                                    Google Sheets</div>
+                                <div class="text-slate-400 font-semibold"><i
+                                        class="fas fa-comment-dots text-blue-500"></i> Zalo OA</div>
+                                <div class="text-slate-400 font-semibold"><i class="fas fa-store text-blue-400"></i>
+                                    KiotViet</div>
+                                <!-- Duplicate -->
+                                <div class="text-slate-400 font-semibold"><i
+                                        class="fas fa-envelope text-orange-500"></i> SMTP</div>
+                                <div class="text-slate-400 font-semibold"><i class="fas fa-table text-green-500"></i>
+                                    Google Sheets</div>
+                                <div class="text-slate-400 font-semibold"><i
+                                        class="fas fa-comment-dots text-blue-500"></i> Zalo OA</div>
+                                <div class="text-slate-400 font-semibold"><i class="fas fa-store text-blue-400"></i>
+                                    KiotViet</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="order-1 md:order-2">
+                    <div
+                        class="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-500 mb-6">
+                        <i class="fas fa-plug text-xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-4">Kết Nối API Mở</h3>
+                    <p class="text-slate-400 mb-6 leading-relaxed">
+                        BEQEEK có thể kết nối đến các đối tác và hệ thống phần mềm khác thông qua API mở, giúp tích hợp
+                        mượt mà và mở rộng hệ sinh thái.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Benefits Section -->
+    <section id="benefits" class="py-24 bg-surface/30 border-y border-white/5">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Lợi Ích Khi Sử Dụng BEQEEK</h2>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="glass p-8 rounded-2xl border border-white/5 hover:border-white/10 transition-all">
+                    <div
+                        class="w-12 h-12 rounded-lg bg-green-500/10 flex items-center justify-center text-green-500 mb-6">
+                        <i class="fas fa-chart-line text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Tăng Hiệu Quả Kinh Doanh</h3>
+                    <p class="text-slate-400">Tối ưu hóa quy trình làm việc, giảm thời gian xử lý và tăng năng suất cho
+                        đội ngũ của bạn.</p>
+                </div>
+                <div class="glass p-8 rounded-2xl border border-white/5 hover:border-white/10 transition-all">
+                    <div
+                        class="w-12 h-12 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500 mb-6">
+                        <i class="fas fa-piggy-bank text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Tiết Kiệm Chi Phí</h3>
+                    <p class="text-slate-400">Không cần đầu tư vào phần mềm tùy chỉnh đắt đỏ, BEQEEK mang đến giải pháp
+                        linh hoạt với chi phí hợp lý.</p>
+                </div>
+                <div class="glass p-8 rounded-2xl border border-white/5 hover:border-white/10 transition-all">
+                    <div
+                        class="w-12 h-12 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-500 mb-6">
+                        <i class="fas fa-sitemap text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Quản Lý Hàng Trăm Nghiệp Vụ</h3>
+                    <p class="text-slate-400">Tự tạo ra các ứng dụng cho hàng trăm quy trình kinh doanh khác nhau, từ
+                        bán hàng đến nhân sự và hơn thế nữa.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="py-24 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl md:text-4xl font-bold text-white mb-16 text-center">Khách Hàng Nói Gì Về BEQEEK</h2>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="glass p-8 rounded-2xl border border-white/5 relative">
+                    <i class="fas fa-quote-left text-4xl text-blue-500/20 absolute top-6 left-6"></i>
+                    <p class="text-slate-300 mb-6 relative z-10 pt-8">"BEQEEK đã thay đổi cách chúng tôi quản lý doanh
+                        nghiệp. Tùy chỉnh dễ dàng và bảo mật tuyệt vời!"</p>
+                    <div class="font-bold text-white">- Trần Lan</div>
+                </div>
+                <div class="glass p-8 rounded-2xl border border-white/5 relative">
+                    <i class="fas fa-quote-left text-4xl text-blue-500/20 absolute top-6 left-6"></i>
+                    <p class="text-slate-300 mb-6 relative z-10 pt-8">"Bảo mật end-to-end mang lại sự yên tâm cho dữ
+                        liệu nhạy cảm của chúng tôi."</p>
+                    <div class="font-bold text-white">- Lê Minh Quân</div>
+                </div>
+                <div class="glass p-8 rounded-2xl border border-white/5 relative">
+                    <i class="fas fa-quote-left text-4xl text-blue-500/20 absolute top-6 left-6"></i>
+                    <p class="text-slate-300 mb-6 relative z-10 pt-8">"Tích hợp API mở đã giúp chúng tôi kết nối nhanh
+                        chóng với các hệ thống khác, tiết kiệm hàng tháng phát triển."</p>
+                    <div class="font-bold text-white">- Phạm Thị Dung</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing -->
+    <section id="pricing" class="py-24 relative overflow-hidden bg-surface/30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Bảng Giá</h2>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto items-start">
+                <!-- Free -->
+                <div class="glass p-8 rounded-2xl border border-green-500/50 hover:border-green-500 transition-all">
+                    <h3 class="text-lg font-semibold text-white mb-2">Miễn Phí</h3>
+                    <div class="text-3xl font-bold text-white mb-1">0 VNĐ<span
+                            class="text-sm font-normal text-slate-500">/tháng</span></div>
+                    <a href="#" onclick="openModal()"
+                        class="block w-full py-2.5 rounded-lg bg-white/5 text-white font-medium text-center hover:bg-white/10 transition-all my-8">Thử
+                        Ngay</a>
+                    <ul class="space-y-3 text-sm text-slate-400">
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-3"></i>Thử nghiệm 7 ngày
+                        </li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-3"></i>Tùy chỉnh cơ bản
+                        </li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-3"></i>Bảo mật end-to-end
+                        </li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-3"></i>Quản lý 10 nghiệp
+                            vụ</li>
+                    </ul>
+                </div>
+
+                <!-- Basic -->
+                <div class="glass p-8 rounded-2xl border border-white/5 hover:border-white/10 transition-all">
+                    <h3 class="text-lg font-semibold text-white mb-2">Cơ Bản</h3>
+                    <div class="text-3xl font-bold text-white mb-1">630.000 VNĐ<span
+                            class="text-sm font-normal text-slate-500">/tháng</span></div>
+                    <a href="#" onclick="openModal()"
+                        class="block w-full py-2.5 rounded-lg bg-blue-600 text-white font-medium text-center hover:bg-blue-500 transition-all my-8 shadow-lg shadow-blue-600/25">Chọn
+                        Gói</a>
+                    <ul class="space-y-3 text-sm text-slate-300">
+                        <li class="flex items-center"><i class="fas fa-check text-blue-400 mr-3"></i>Tùy chỉnh cơ bản
+                        </li>
+                        <li class="flex items-center"><i class="fas fa-check text-blue-400 mr-3"></i>Bảo mật end-to-end
+                        </li>
+                        <li class="flex items-center"><i class="fas fa-check text-blue-400 mr-3"></i>Quản lý 50 nghiệp
+                            vụ</li>
+                        <li class="flex items-center"><i class="fas fa-check text-blue-400 mr-3"></i>10 người dùng
+                            (33k/tháng)</li>
+                        <li class="flex items-center"><i class="fas fa-check text-blue-400 mr-3"></i>1 wCPU luồng tự
+                            động hoá (300k/tháng)</li>
+                    </ul>
+                </div>
+
+                <!-- Advanced -->
+                <div class="glass p-8 rounded-2xl border border-white/5 hover:border-white/10 transition-all">
+                    <h3 class="text-lg font-semibold text-white mb-2">Nâng cao</h3>
+                    <div class="text-3xl font-bold text-white mb-1">Liên Hệ</div>
+                    <a href="#" onclick="openModal()"
+                        class="block w-full py-2.5 rounded-lg bg-white/5 text-white font-medium text-center hover:bg-white/10 transition-all my-8">Liên
+                        Hệ</a>
+                    <ul class="space-y-3 text-sm text-slate-400">
+                        <li class="flex items-center"><i class="fas fa-check text-blue-500 mr-3"></i>Tùy chỉnh nâng cao
+                        </li>
+                        <li class="flex items-center"><i class="fas fa-check text-blue-500 mr-3"></i>Bảo mật end-to-end
+                        </li>
+                        <li class="flex items-center"><i class="fas fa-check text-blue-500 mr-3"></i>Quản lý toàn diện
+                        </li>
+                        <li class="flex items-center"><i class="fas fa-check text-blue-500 mr-3"></i>10 người dùng
+                            (33k/tháng)</li>
+                        <li class="flex items-center"><i class="fas fa-check text-blue-500 mr-3"></i>1 wCPU luồng tự
+                            động hoá (300k/tháng)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-white/5 bg-[#05080f] py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+                <div class="flex items-center gap-3">
+                    <div class="h-8 w-8 rounded-lg bg-slate-800 flex items-center justify-center text-white font-bold">B
+                    </div>
+                    <span class="text-xl font-bold text-white">BEQEEK</span>
+                </div>
+                <div class="text-slate-500 text-sm">
+                    &copy; 2025 BEQEEK. Tất cả quyền được bảo lưu. <br>
+                    Liên hệ: support@beqeek.com
+                </div>
+                <div class="flex gap-6">
+                    <a href="#" class="text-slate-500 hover:text-white transition-colors"><i
+                            class="fab fa-twitter text-xl"></i></a>
+                    <a href="#" class="text-slate-500 hover:text-white transition-colors"><i
+                            class="fab fa-github text-xl"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modal -->
+    <div id="signupModal" class="fixed inset-0 z-[100] hidden" aria-labelledby="modal-title" role="dialog"
+        aria-modal="true">
+        <div class="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity" onclick="closeModal()"></div>
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div
+                class="relative bg-[#111623] rounded-2xl border border-white/10 w-full max-w-2xl shadow-2xl transform transition-all overflow-hidden">
+                <div class="flex justify-between items-center p-6 border-b border-white/5">
+                    <h3 class="text-lg font-semibold text-white">Đăng Ký / Chọn Gói</h3>
+                    <button type="button" class="text-slate-400 hover:text-white transition-colors"
+                        onclick="closeModal()">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                <div class="h-[600px] bg-[#0B0F19]">
+                    <iframe id="iframe-placeholder"
+                        src="https://app.o1erp.com/platform/forms/732878538910205325/019952f6-f3f5-57-7a-a6c362a6933141a3"
+                        class="w-full h-full border-0"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openModal() {
+            document.getElementById('signupModal').classList.remove('hidden');
+            fetch('https://app.o1erp.com/api/workspace/732878538910205325/webhook/post/workflows/01995753-6941-93-70-be12f8844a6a01a1', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ event: 'open_signup_modal', client: navigator.userAgent, timestamp: new Date().toISOString() })
+            }).catch(console.error);
+        }
+
+        function closeModal() {
+            document.getElementById('signupModal').classList.add('hidden');
+        }
+    </script>
+    <!-- Clarity Tracking -->
+    <script type="text/javascript">
+        (function (c, l, a, r, i, t, y) {
+            c[a] = c[a] || function () { (c[a].q = c[a].q || []).push(arguments) };
+            t = l.createElement(r); t.async = 1; t.src = "https://www.clarity.ms/tag/" + i;
+            y = l.getElementsByTagName(r)[0]; y.parentNode.insertBefore(t, y);
+        })(window, document, "clarity", "script", "tc90lf31v5");
+    </script>
+</body>
+
+</html>
