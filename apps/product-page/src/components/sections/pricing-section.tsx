@@ -4,10 +4,10 @@ import { Heading, Text } from '@workspace/ui/components/typography';
 import { Button } from '@workspace/ui/components/button';
 
 interface PricingSectionProps {
-  onOpenModal: () => void;
+  onSignup: () => void;
 }
 
-export function PricingSection({ onOpenModal }: PricingSectionProps) {
+export function PricingSection({ onSignup }: PricingSectionProps) {
   const plans = [
     {
       name: 'Miễn Phí',
@@ -77,7 +77,7 @@ export function PricingSection({ onOpenModal }: PricingSectionProps) {
                   </Text>
                 )}
               </div>
-              <Button onClick={onOpenModal} className={`w-full my-8 text-white ${plan.buttonStyle}`}>
+              <Button onClick={onSignup} className={`w-full my-8 text-white ${plan.buttonStyle}`}>
                 {plan.buttonText}
               </Button>
               <ul className={`space-y-3 text-sm ${plan.textStyle || 'text-muted-foreground'}`}>

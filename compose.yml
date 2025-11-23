@@ -6,12 +6,32 @@ services:
       context: .
       dockerfile: Dockerfile.web
     ports:
-      - "82:80"  # Expose on 3000 for development, internal 80 for nginx
+      - '82:80' # Expose on 82 for web app
     environment:
       - NODE_ENV=production
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      test: ['CMD', 'curl', '-f', 'http://localhost/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - beqeek-network
+
+  # Product landing page (SSG)
+  product-page:
+    image: beqeek-product-page:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.product-page
+    ports:
+      - '83:80' # Expose on 83 for product landing page
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost/health']
       interval: 30s
       timeout: 10s
       retries: 3
