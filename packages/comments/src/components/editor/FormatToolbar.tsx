@@ -4,7 +4,10 @@
  */
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import { INSERT_UNORDERED_LIST_COMMAND } from '@lexical/list';
 import { $getSelection, $isRangeSelection, FORMAT_TEXT_COMMAND } from 'lexical';
+import { $createCodeNode } from '@lexical/code';
+import { $setBlocksType } from '@lexical/selection';
 import { Bold, Italic, Underline, Strikethrough, Link as LinkIcon, List, Code, FileCode2 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 
@@ -51,6 +54,19 @@ export function FormatToolbar({ compactMode = false, className }: FormatToolbarP
 
   const handleInsertLink = useCallback(() => {
     editor.dispatchCommand(TOGGLE_LINK_COMMAND, 'https://');
+  }, [editor]);
+
+  const handleInsertBulletList = useCallback(() => {
+    editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined);
+  }, [editor]);
+
+  const handleInsertCodeBlock = useCallback(() => {
+    editor.update(() => {
+      const selection = $getSelection();
+      if ($isRangeSelection(selection)) {
+        $setBlocksType(selection, () => $createCodeNode());
+      }
+    });
   }, [editor]);
 
   return (
@@ -106,7 +122,14 @@ export function FormatToolbar({ compactMode = false, className }: FormatToolbarP
       <Separator orientation="vertical" className="h-5 mx-1" />
 
       {/* Bulleted List */}
-      <Button variant="ghost" size="icon" className="h-7 w-7 rounded" title="Bulleted list" type="button">
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={handleInsertBulletList}
+        className="h-7 w-7 rounded"
+        title="Bulleted list"
+        type="button"
+      >
         <List className="h-4 w-4" />
       </Button>
 
@@ -139,7 +162,14 @@ export function FormatToolbar({ compactMode = false, className }: FormatToolbarP
       </Button>
 
       {/* Code Block */}
-      <Button variant="ghost" size="icon" className="h-7 w-7 rounded" title="Code block" type="button">
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={handleInsertCodeBlock}
+        className="h-7 w-7 rounded"
+        title="Code block"
+        type="button"
+      >
         <FileCode2 className="h-4 w-4" />
       </Button>
     </div>

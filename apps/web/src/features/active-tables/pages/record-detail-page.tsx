@@ -13,6 +13,7 @@ import { CommentSection, type Comment as PackageComment, type CommentUser } from
 import { Card, CardContent, CardHeader } from '@workspace/ui/components/card';
 import { Heading } from '@workspace/ui/components/typography';
 import { MessageSquare } from 'lucide-react';
+import { toast } from 'sonner';
 import { ROUTES } from '@/shared/route-paths';
 import { useAuthStore } from '@/features/auth';
 import { useActiveTable } from '../hooks/use-active-tables';
@@ -184,6 +185,7 @@ export default function RecordDetailPage() {
     addComment,
     updateComment,
     deleteComment,
+    fetchCommentForEdit,
     isLoading: isLoadingComments,
   } = useRecordComments(workspaceId ?? '', tableId ?? '', recordId, {
     enabled: shouldShowComments,
@@ -271,12 +273,15 @@ export default function RecordDetailPage() {
     }));
   }, [workspaceUsers]);
 
-  // Handle comments change from CommentSection (for local state updates)
-  const handleCommentsChange = useCallback((newComments: PackageComment[]) => {
-    // CommentSection manages its own state, but we need to sync with server
-    // This is called when user adds/edits/deletes comments
-    // The actual API calls are handled by useRecordComments mutations
-    console.log('[Comments] Local state changed:', newComments.length);
+  // Handle comments change from CommentSection (for local state updates - fallback only)
+  const handleCommentsChange = useCallback((_newComments: PackageComment[]) => {
+    // This is only called when API callbacks are not provided
+    // Since we provide onAddComment, onUpdateComment, onDeleteComment, this is mostly unused
+  }, []);
+
+  // Handle comment errors
+  const handleCommentError = useCallback((errorMessage: string) => {
+    toast.error(errorMessage);
   }, []);
 
   // ============================================
@@ -380,6 +385,11 @@ export default function RecordDetailPage() {
                           showReactions={false}
                           compactMode={true}
                           mentionUsers={mentionUsers}
+                          onAddComment={addComment}
+                          onUpdateComment={updateComment}
+                          onDeleteComment={deleteComment}
+                          onFetchComment={fetchCommentForEdit}
+                          onError={handleCommentError}
                         />
                       </div>
                     ) : (

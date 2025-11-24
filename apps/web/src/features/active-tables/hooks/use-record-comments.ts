@@ -48,6 +48,8 @@ export interface CommentsState {
   updateComment: (commentId: string, text: string) => Promise<void>;
   /** Delete comment */
   deleteComment: (commentId: string) => Promise<void>;
+  /** Fetch single comment content for editing */
+  fetchCommentForEdit: (commentId: string) => Promise<string | null>;
   /** Current user for comments */
   currentUser: CommentUser | null;
 }
@@ -289,6 +291,22 @@ export function useRecordComments(
     [deleteCommentMutation],
   );
 
+  // Fetch single comment for editing (get fresh content from server)
+  const fetchCommentForEdit = useCallback(
+    async (commentId: string): Promise<string | null> => {
+      try {
+        const response = await commentsApi.fetchComment(workspaceId, tableId, recordId, commentId);
+        const serverComment = response.data;
+        // Decrypt content if needed
+        return decryptContent(serverComment.commentContent, encryptionKey);
+      } catch (error) {
+        console.error('[Comments] Failed to fetch comment for edit:', error);
+        return null;
+      }
+    },
+    [workspaceId, tableId, recordId, encryptionKey],
+  );
+
   const handleFetchNextPage = useCallback(() => {
     if (hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
@@ -308,6 +326,7 @@ export function useRecordComments(
     addComment,
     updateComment,
     deleteComment,
+    fetchCommentForEdit,
     currentUser: null, // Will be set by parent component
   };
 }

@@ -15,6 +15,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@workspace/ui/components/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@workspace/ui/components/alert-dialog';
 
 import type { Comment, CommentChange } from '../types/comment.js';
 import type { CommentUser } from '../types/user.js';
@@ -39,6 +49,8 @@ export interface CommentCardProps {
   mentionUsers?: MentionUser[];
   onMentionSearch?: (query: string) => Promise<MentionUser[]>;
   depth?: number;
+  /** Async callback to fetch fresh comment content before editing */
+  onFetchComment?: (commentId: string) => Promise<string | null>;
 }
 
 export function CommentCard({
@@ -54,9 +66,12 @@ export function CommentCard({
   mentionUsers,
   onMentionSearch,
   depth = 0,
+  onFetchComment,
 }: CommentCardProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [isReplying, setIsReplying] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isFetchingForEdit, setIsFetchingForEdit] = useState(false);
   const [editedText, setEditedText] = useState(comment.text);
   const [replyText, setReplyText] = useState('');
   const [showReplies, setShowReplies] = useState(true);
@@ -71,6 +86,25 @@ export function CommentCard({
       .join('')
       .toUpperCase()
       .slice(0, 2);
+  };
+
+  const handleStartEdit = async () => {
+    // If API callback provided, fetch fresh content before editing
+    if (onFetchComment) {
+      setIsFetchingForEdit(true);
+      try {
+        const freshContent = await onFetchComment(comment.id);
+        if (freshContent !== null) {
+          setEditedText(freshContent);
+        }
+      } finally {
+        setIsFetchingForEdit(false);
+      }
+    } else {
+      // Fallback to local state
+      setEditedText(comment.text);
+    }
+    setIsEditing(true);
   };
 
   const handleSaveEdit = () => {
@@ -144,11 +178,11 @@ export function CommentCard({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => setIsEditing(true)}>
+                  <DropdownMenuItem onClick={handleStartEdit} disabled={isFetchingForEdit}>
                     <Pencil className="h-4 w-4 mr-2" />
-                    Edit
+                    {isFetchingForEdit ? 'Loading...' : 'Edit'}
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={onDelete} className="text-destructive">
+                  <DropdownMenuItem onClick={() => setIsDeleteDialogOpen(true)} className="text-destructive">
                     <Trash2 className="h-4 w-4 mr-2" />
                     Delete
                   </DropdownMenuItem>
@@ -282,6 +316,7 @@ export function CommentCard({
                       mentionUsers={mentionUsers}
                       onMentionSearch={onMentionSearch}
                       depth={depth + 1}
+                      onFetchComment={onFetchComment}
                     />
                   ))}
                 </div>
@@ -290,6 +325,30 @@ export function CommentCard({
           )}
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent className="max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete comment?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this comment? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                onDelete();
+                setIsDeleteDialogOpen(false);
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -3,6 +3,7 @@
  * Google Chat style: collapsible formatting toolbar + always-visible action bar
  */
 
+import { CodeHighlightNode, CodeNode } from '@lexical/code';
 import { AutoLinkNode, LinkNode } from '@lexical/link';
 import { ListItemNode, ListNode } from '@lexical/list';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
@@ -30,6 +31,7 @@ import type { MentionUser } from './plugins/MentionsPlugin.js';
 import { ImageNode } from './nodes/ImageNode.js';
 import { MentionNode } from './nodes/MentionNode.js';
 import { FormatToolbar } from './FormatToolbar.js';
+import { EmojiPlugin } from './plugins/EmojiPlugin.js';
 import { ImagesPlugin } from './plugins/ImagesPlugin.js';
 import { MentionsPlugin } from './plugins/MentionsPlugin.js';
 import { FloatingLinkEditorPlugin } from './plugins/FloatingLinkEditorPlugin.js';
@@ -51,6 +53,8 @@ export interface CommentEditorProps {
   /** Compact mode hides disabled toolbar features */
   compactMode?: boolean;
   className?: string;
+  /** Whether the comment is being submitted (shows loading state) */
+  isSubmitting?: boolean;
 }
 
 export function CommentEditor({
@@ -67,10 +71,11 @@ export function CommentEditor({
   onMentionSearch,
   compactMode = false,
   className,
+  isSubmitting = false,
 }: CommentEditorProps) {
   const [showFormatToolbar, setShowFormatToolbar] = useState(false);
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
-  const [editorRef, setEditorRef] = useState<any>(null);
+  const [emojiToInsert, setEmojiToInsert] = useState<string | null>(null);
   const [hasContent, setHasContent] = useState(false);
 
   const initialConfig = {
@@ -91,6 +96,8 @@ export function CommentEditor({
       TableRowNode,
       ImageNode,
       MentionNode,
+      CodeNode,
+      CodeHighlightNode,
     ],
     editorState: value
       ? (editor: any) => {
@@ -105,7 +112,6 @@ export function CommentEditor({
 
   const handleEditorChange = useCallback(
     (editorState: EditorState, editor: any) => {
-      setEditorRef(editor);
       editorState.read(() => {
         const htmlString = $generateHtmlFromNodes(editor, null);
         onChange(htmlString);
@@ -136,20 +142,14 @@ export function CommentEditor({
     input.click();
   }, [onImageUpload]);
 
-  const insertEmoji = useCallback(
-    (emoji: string) => {
-      if (editorRef) {
-        editorRef.update(() => {
-          const selection = (window as any).lexical?.$getSelection?.();
-          if (selection) {
-            selection.insertText(emoji);
-          }
-        });
-      }
-      setEmojiPickerOpen(false);
-    },
-    [editorRef],
-  );
+  const handleEmojiSelect = useCallback((emoji: string) => {
+    setEmojiToInsert(emoji);
+    setEmojiPickerOpen(false);
+  }, []);
+
+  const handleEmojiInserted = useCallback(() => {
+    setEmojiToInsert(null);
+  }, []);
 
   return (
     <div className={cn('comment-editor border border-input rounded-lg bg-background overflow-hidden', className)}>
@@ -185,6 +185,7 @@ export function CommentEditor({
             <FloatingLinkEditorPlugin />
             <ImagesPlugin onImageUpload={onImageUpload} />
             <MentionsPlugin users={mentionUsers} onSearch={onMentionSearch} />
+            <EmojiPlugin emojiToInsert={emojiToInsert} onEmojiInserted={handleEmojiInserted} />
           </div>
 
           {/* Bottom Action Bar (always visible, Google Chat style) */}
@@ -222,7 +223,7 @@ export function CommentEditor({
                       <button
                         key={emoji}
                         type="button"
-                        onClick={() => insertEmoji(emoji)}
+                        onClick={() => handleEmojiSelect(emoji)}
                         className="h-8 w-8 flex items-center justify-center text-lg hover:bg-accent rounded cursor-pointer"
                       >
                         {emoji}
@@ -267,16 +268,20 @@ export function CommentEditor({
                 type="button"
                 size="icon"
                 onClick={onSubmit}
-                disabled={!hasContent}
+                disabled={!hasContent || isSubmitting}
                 className={cn(
                   'h-8 w-8 rounded-full transition-colors',
-                  hasContent
+                  hasContent && !isSubmitting
                     ? 'bg-primary text-primary-foreground hover:bg-primary/90'
                     : 'bg-muted text-muted-foreground cursor-not-allowed',
                 )}
-                title={submitText}
+                title={isSubmitting ? 'Sending...' : submitText}
               >
-                <SendHorizontal className="h-4 w-4" />
+                {isSubmitting ? (
+                  <div className="h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <SendHorizontal className="h-4 w-4" />
+                )}
               </Button>
             </div>
           </div>
