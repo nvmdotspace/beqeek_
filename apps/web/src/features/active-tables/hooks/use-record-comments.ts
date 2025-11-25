@@ -230,7 +230,7 @@ export function useRecordComments(
       const response = await commentsApi.fetchComments(workspaceId, tableId, recordId, {
         paging: 'cursor',
         next_id: pageParam,
-        direction: 'desc',
+        direction: 'asc',
         limit: pageSize,
       });
       return response;

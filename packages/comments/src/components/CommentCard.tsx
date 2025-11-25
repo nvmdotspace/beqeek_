@@ -216,9 +216,7 @@ export function CommentCard({
               />
             </div>
           ) : (
-            <div className="prose prose-sm max-w-none">
-              <CommentPreview source={comment.text} />
-            </div>
+            <CommentPreview source={comment.text} className="text-sm" />
           )}
 
           {/* Emoji Reactions */}
