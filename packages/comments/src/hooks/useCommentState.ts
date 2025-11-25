@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { Comment, CommentUser, ACTIONS_TYPE, CommentChange } from '../types/index.js';
-import { generateCommentId, updateCommentInTree, deleteCommentFromTree, addReplyToComment } from '../utils/index.js';
+import { generateCommentId, updateCommentInList, deleteCommentFromList } from '../utils/index.js';
 
 export interface UseCommentStateOptions {
   initialComments?: Comment[];
@@ -8,7 +8,7 @@ export interface UseCommentStateOptions {
 }
 
 /**
- * Hook to manage comment state
+ * Hook to manage comment state (FLAT structure with multi-reply)
  */
 export function useCommentState(options: UseCommentStateOptions = {}) {
   const { initialComments = [], onCommentsChange } = options;
@@ -24,41 +24,32 @@ export function useCommentState(options: UseCommentStateOptions = {}) {
   );
 
   /**
-   * Add a new root comment
+   * Add a new comment (optionally replying to other comments)
    */
   const addComment = useCallback(
-    (text: string, currentUser: CommentUser) => {
+    (text: string, currentUser: CommentUser, replyToIds?: string[]) => {
       const newComment: Comment = {
         id: generateCommentId(),
         user: currentUser,
         text,
         createdAt: new Date(),
-        replies: [],
+        replyToIds: replyToIds || [],
+        parentId: replyToIds?.[0], // Backward compat
       };
-      updateComments([newComment, ...comments]);
+      updateComments([...comments, newComment]);
       return newComment;
     },
     [comments, updateComments],
   );
 
   /**
-   * Add a reply to an existing comment
+   * Add a reply to an existing comment (single reply - backward compat)
    */
   const addReply = useCallback(
     (parentId: string, text: string, currentUser: CommentUser) => {
-      const reply: Comment = {
-        id: generateCommentId(),
-        user: currentUser,
-        parentId,
-        text,
-        createdAt: new Date(),
-        replies: [],
-      };
-      const updatedComments = addReplyToComment(comments, parentId, reply);
-      updateComments(updatedComments);
-      return reply;
+      return addComment(text, currentUser, [parentId]);
     },
-    [comments, updateComments],
+    [addComment],
   );
 
   /**
@@ -66,7 +57,7 @@ export function useCommentState(options: UseCommentStateOptions = {}) {
    */
   const updateComment = useCallback(
     (commentId: string, changes: CommentChange) => {
-      const updatedComments = updateCommentInTree(comments, commentId, changes);
+      const updatedComments = updateCommentInList(comments, commentId, changes);
       updateComments(updatedComments);
     },
     [comments, updateComments],
@@ -77,7 +68,7 @@ export function useCommentState(options: UseCommentStateOptions = {}) {
    */
   const deleteComment = useCallback(
     (commentId: string) => {
-      const updatedComments = deleteCommentFromTree(comments, commentId);
+      const updatedComments = deleteCommentFromList(comments, commentId);
       updateComments(updatedComments);
     },
     [comments, updateComments],

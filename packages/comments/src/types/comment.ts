@@ -36,18 +36,25 @@ export const ACTIONS = [
 
 /**
  * Comment data structure
+ * Supports flat conversation design with multi-reply
  */
 export type Comment = {
   /** Unique comment identifier */
   id: string;
   /** Comment author */
   user: CommentUser;
-  /** Parent comment ID for nested replies */
+  /**
+   * @deprecated Use replyToIds instead. Kept for backward compatibility.
+   * Single parent comment ID (first element of replyToIds)
+   */
   parentId?: string;
+  /**
+   * IDs of comments this is replying to (multi-reply support)
+   * Empty array means top-level comment
+   */
+  replyToIds: string[];
   /** Comment text content (supports plain text or MDX) */
   text: string;
-  /** Nested replies to this comment */
-  replies?: Comment[];
   /** Comment creation timestamp */
   createdAt: Date;
   /** Reaction counts by type */

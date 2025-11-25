@@ -14,6 +14,12 @@ export type { CommentPreviewProps } from './CommentPreview.js';
 export { EmojiReactions } from './EmojiReactions.js';
 export type { EmojiReactionsProps } from './EmojiReactions.js';
 
+export { ReplyIndicator } from './ReplyIndicator.js';
+export type { ReplyIndicatorProps } from './ReplyIndicator.js';
+
+export { ReplyReferenceBadge } from './ReplyReferenceBadge.js';
+export type { ReplyReferenceBadgeProps } from './ReplyReferenceBadge.js';
+
 export { CommentEditor } from './editor/CommentEditor.js';
 export type { CommentEditorProps } from './editor/CommentEditor.js';
 

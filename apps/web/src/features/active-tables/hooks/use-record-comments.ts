@@ -2,7 +2,7 @@
  * useRecordComments Hook
  *
  * Manages comments for a specific record with E2EE encryption support
- * Integrates with active-comments-api.ts for real API calls
+ * Uses FLAT conversation design with multi-reply support
  */
 
 import { useCallback, useMemo } from 'react';
@@ -33,7 +33,7 @@ export interface UseRecordCommentsOptions {
 }
 
 export interface CommentsState {
-  /** All loaded comments converted to @workspace/comments format */
+  /** All loaded comments converted to @workspace/comments format (FLAT - no nesting) */
   comments: PackageComment[];
   /** Is loading initial data */
   isLoading: boolean;
@@ -43,8 +43,12 @@ export interface CommentsState {
   hasNextPage: boolean;
   /** Fetch next page */
   fetchNextPage: () => void;
-  /** Add new comment */
-  addComment: (text: string, parentId?: string) => Promise<void>;
+  /**
+   * Add new comment
+   * @param text - Comment content
+   * @param replyToIds - Array of comment IDs being replied to (multi-reply support)
+   */
+  addComment: (text: string, replyToIds?: string[]) => Promise<void>;
   /** Update existing comment */
   updateComment: (commentId: string, text: string) => Promise<void>;
   /** Delete comment */
@@ -129,7 +133,7 @@ function extractMentionedUserIds(content: string): string[] {
 
 /**
  * Convert server comment to @workspace/comments format
- * Handles both string userId and object { id, fullName, avatar } formats
+ * Now returns FLAT structure with replyToIds array (no nesting)
  */
 function serverToPackageComment(
   serverComment: ServerComment,
@@ -161,8 +165,8 @@ function serverToPackageComment(
     avatarUrl = undefined;
   }
 
-  // Server returns replyTo as array, convert to parentId (take first non-empty value)
-  const parentId = serverComment.replyTo?.find((id) => id && id.trim() !== '') || undefined;
+  // Server returns replyTo as array - keep as replyToIds for multi-reply
+  const replyToIds = serverComment.replyTo?.filter((id) => id && id.trim() !== '') || [];
 
   return {
     id: serverComment.id,
@@ -171,39 +175,15 @@ function serverToPackageComment(
       fullName,
       avatarUrl,
     },
-    parentId,
+    // Multi-reply support
+    replyToIds,
+    // Backward compat: parentId is first element
+    parentId: replyToIds[0],
     text: decryptedContent || '',
     createdAt: serverComment.createdAt ? new Date(serverComment.createdAt) : new Date(),
-    replies: [], // Will be populated by buildCommentTree
     actions: {},
     selectedActions: [],
   };
-}
-
-/**
- * Build nested comment tree from flat list
- */
-function buildCommentTree(flatComments: PackageComment[]): PackageComment[] {
-  const commentMap = new Map<string, PackageComment>();
-  const rootComments: PackageComment[] = [];
-
-  // First pass: index all comments
-  flatComments.forEach((comment) => {
-    commentMap.set(comment.id, { ...comment, replies: [] });
-  });
-
-  // Second pass: build tree
-  flatComments.forEach((comment) => {
-    const mappedComment = commentMap.get(comment.id)!;
-    if (comment.parentId && commentMap.has(comment.parentId)) {
-      const parent = commentMap.get(comment.parentId)!;
-      parent.replies = [...(parent.replies || []), mappedComment];
-    } else {
-      rootComments.push(mappedComment);
-    }
-  });
-
-  return rootComments;
 }
 
 // ============================================
@@ -212,6 +192,7 @@ function buildCommentTree(flatComments: PackageComment[]): PackageComment[] {
 
 /**
  * Hook to manage record comments with real API and E2EE support
+ * Returns FLAT comment list (no nesting) with multi-reply support
  */
 export function useRecordComments(
   workspaceId: string,
@@ -245,7 +226,7 @@ export function useRecordComments(
   });
 
   // ============================================
-  // Convert & Flatten Comments
+  // Convert Comments - FLAT (no tree building)
   // ============================================
 
   const comments = useMemo((): PackageComment[] => {
@@ -253,10 +234,9 @@ export function useRecordComments(
 
     // Flatten all pages and convert to package format
     const allServerComments = data.pages.flatMap((page) => page.data);
-    const packageComments = allServerComments.map((c) => serverToPackageComment(c, encryptionKey, userLookup));
 
-    // Build nested tree structure
-    return buildCommentTree(packageComments);
+    // Return FLAT list (no tree building) - each comment has replyToIds
+    return allServerComments.map((c) => serverToPackageComment(c, encryptionKey, userLookup));
   }, [data?.pages, encryptionKey, userLookup]);
 
   // ============================================
@@ -264,7 +244,7 @@ export function useRecordComments(
   // ============================================
 
   const addCommentMutation = useMutation({
-    mutationFn: async ({ text, parentId }: { text: string; parentId?: string }) => {
+    mutationFn: async ({ text, replyToIds }: { text: string; replyToIds?: string[] }) => {
       // Extract mentioned user IDs before encryption
       const taggedUserIds = extractMentionedUserIds(text);
       const encryptedContent = encryptContent(text, encryptionKey);
@@ -272,8 +252,8 @@ export function useRecordComments(
 
       return commentsApi.createComment(workspaceId, tableId, recordId, {
         commentContent: encryptedContent,
-        // Server expects replyTo as array, not parentId
-        replyTo: parentId ? [parentId] : undefined,
+        // Send full replyToIds array for multi-reply support
+        replyTo: replyToIds?.length ? replyToIds : undefined,
         taggedUserIds: taggedUserIds.length > 0 ? taggedUserIds : undefined,
         hashed_keywords: hashedKeywords,
       });
@@ -315,8 +295,8 @@ export function useRecordComments(
   // ============================================
 
   const addComment = useCallback(
-    async (text: string, parentId?: string) => {
-      await addCommentMutation.mutateAsync({ text, parentId });
+    async (text: string, replyToIds?: string[]) => {
+      await addCommentMutation.mutateAsync({ text, replyToIds });
     },
     [addCommentMutation],
   );

@@ -1,4 +1,4 @@
-import { Comment, CommentUser } from '../types/index.js';
+import { Comment, CommentUser, CommentChange } from '../types/index.js';
 
 /**
  * Generate a random ID for comments
@@ -20,102 +20,50 @@ export function isCommentAuthor(comment: Comment, user: CommentUser): boolean {
 }
 
 /**
- * Find a comment by ID in a nested comment tree
+ * Find a comment by ID in a flat comment list
  */
 export function findCommentById(comments: Comment[], id: string): Comment | null {
-  for (const comment of comments) {
-    if (comment.id === id) {
-      return comment;
-    }
-    if (comment.replies && comment.replies.length > 0) {
-      const found = findCommentById(comment.replies, id);
-      if (found) return found;
-    }
-  }
-  return null;
+  return comments.find((comment) => comment.id === id) || null;
 }
 
 /**
- * Count total comments including replies
+ * Count total comments (flat list - just return length)
  */
 export function countComments(comments: Comment[]): number {
-  let count = comments.length;
-  for (const comment of comments) {
-    if (comment.replies && comment.replies.length > 0) {
-      count += countComments(comment.replies);
-    }
-  }
-  return count;
+  return comments.length;
 }
 
 /**
- * Flatten nested comments into a single array
+ * Get comments that reply to a specific comment
  */
-export function flattenComments(comments: Comment[]): Comment[] {
-  const result: Comment[] = [];
-  for (const comment of comments) {
-    result.push(comment);
-    if (comment.replies && comment.replies.length > 0) {
-      result.push(...flattenComments(comment.replies));
-    }
-  }
-  return result;
+export function getRepliesTo(comments: Comment[], commentId: string): Comment[] {
+  return comments.filter((c) => c.replyToIds?.includes(commentId));
 }
 
 /**
- * Update a comment in a nested tree
+ * Get comments being replied to (parent comments)
  */
-export function updateCommentInTree(comments: Comment[], id: string, updates: Partial<Comment>): Comment[] {
+export function getReplyTargets(comments: Comment[], replyToIds: string[]): Comment[] {
+  return comments.filter((c) => replyToIds.includes(c.id));
+}
+
+/**
+ * Update a comment in a flat list
+ */
+export function updateCommentInList(comments: Comment[], id: string, updates: CommentChange): Comment[] {
   return comments.map((comment) => {
     if (comment.id === id) {
       return { ...comment, ...updates };
     }
-    if (comment.replies && comment.replies.length > 0) {
-      return {
-        ...comment,
-        replies: updateCommentInTree(comment.replies, id, updates),
-      };
-    }
     return comment;
   });
 }
 
 /**
- * Delete a comment from a nested tree
+ * Delete a comment from a flat list
  */
-export function deleteCommentFromTree(comments: Comment[], id: string): Comment[] {
-  return comments
-    .filter((comment) => comment.id !== id)
-    .map((comment) => {
-      if (comment.replies && comment.replies.length > 0) {
-        return {
-          ...comment,
-          replies: deleteCommentFromTree(comment.replies, id),
-        };
-      }
-      return comment;
-    });
-}
-
-/**
- * Add a reply to a comment
- */
-export function addReplyToComment(comments: Comment[], parentId: string, reply: Comment): Comment[] {
-  return comments.map((comment) => {
-    if (comment.id === parentId) {
-      return {
-        ...comment,
-        replies: [reply, ...(comment.replies || [])],
-      };
-    }
-    if (comment.replies && comment.replies.length > 0) {
-      return {
-        ...comment,
-        replies: addReplyToComment(comment.replies, parentId, reply),
-      };
-    }
-    return comment;
-  });
+export function deleteCommentFromList(comments: Comment[], id: string): Comment[] {
+  return comments.filter((comment) => comment.id !== id);
 }
 
 /**
@@ -134,4 +82,21 @@ export function scrollToComment(commentId: string): void {
   if (element) {
     element.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
+}
+
+/**
+ * Get preview text from comment (truncated)
+ */
+export function getCommentPreview(comment: Comment, maxLength = 50): string {
+  // Strip HTML tags for preview
+  const plainText = comment.text.replace(/<[^>]*>/g, '').trim();
+  if (plainText.length <= maxLength) return plainText;
+  return plainText.substring(0, maxLength) + '...';
+}
+
+/**
+ * Check if comment has any replies
+ */
+export function hasReplies(comments: Comment[], commentId: string): boolean {
+  return comments.some((c) => c.replyToIds?.includes(commentId));
 }

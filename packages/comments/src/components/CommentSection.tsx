@@ -1,9 +1,9 @@
 /**
  * CommentSection component
- * Displays a list of comments with reply functionality and pagination
+ * Displays a flat list of comments with multi-reply functionality and pagination
  */
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Loader2 } from 'lucide-react';
 
 import { Button } from '@workspace/ui/components/button';
@@ -14,6 +14,7 @@ import type { MentionUser } from './editor/plugins/MentionsPlugin.js';
 
 import { CommentCard } from './CommentCard.js';
 import { CommentEditor } from './editor/CommentEditor.js';
+import { ReplyIndicator } from './ReplyIndicator.js';
 
 export interface CommentSectionProps {
   value: Comment[];
@@ -29,8 +30,12 @@ export interface CommentSectionProps {
   mentionUsers?: MentionUser[];
   onMentionSearch?: (query: string) => Promise<MentionUser[]>;
   className?: string;
-  /** Async callback when adding a new comment (for API integration) */
-  onAddComment?: (text: string, parentId?: string) => Promise<void>;
+  /**
+   * Async callback when adding a new comment (for API integration)
+   * @param text - Comment content
+   * @param replyToIds - Array of comment IDs being replied to (multi-reply support)
+   */
+  onAddComment?: (text: string, replyToIds?: string[]) => Promise<void>;
   /** Async callback when updating a comment (for API integration) */
   onUpdateComment?: (commentId: string, text: string) => Promise<void>;
   /** Async callback when deleting a comment (for API integration) */
@@ -39,6 +44,8 @@ export interface CommentSectionProps {
   onFetchComment?: (commentId: string) => Promise<string | null>;
   /** Callback when an error occurs (for displaying error messages) */
   onError?: (error: string) => void;
+  /** Callback when jumping to a comment reference */
+  onJumpToComment?: (commentId: string) => void;
   // Pagination props
   /** Whether there are more comments to load */
   hasNextPage?: boolean;
@@ -65,6 +72,7 @@ export function CommentSection({
   onDeleteComment,
   onFetchComment,
   onError,
+  onJumpToComment,
   hasNextPage,
   isFetchingNextPage,
   onLoadMore,
@@ -72,14 +80,16 @@ export function CommentSection({
   const [newCommentText, setNewCommentText] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editorKey, setEditorKey] = useState(0);
+  // Multi-reply state: IDs of comments being replied to
+  const [replyingToIds, setReplyingToIds] = useState<string[]>([]);
+  // Highlighted comment for jump-to animation
+  const [highlightedId, setHighlightedId] = useState<string | null>(null);
 
   // Extract error message from API error
   const getErrorMessage = (error: unknown): string => {
     if (error instanceof Error) {
-      // Try to parse JSON error message
       try {
         const parsed = JSON.parse(error.message);
-        // Handle 4xx errors - use message field
         if (parsed.message) return parsed.message;
         if (parsed['$']) return parsed['$'];
         if (parsed['*']) return parsed['*'];
@@ -88,20 +98,62 @@ export function CommentSection({
         return error.message;
       }
     }
-    // 5xx or unknown errors
     return 'An unexpected error occurred. Please try again.';
   };
+
+  // Toggle reply selection (multi-reply)
+  const handleToggleReply = useCallback((commentId: string) => {
+    setReplyingToIds((prev) => {
+      if (prev.includes(commentId)) {
+        // Already selected - remove it
+        return prev.filter((id) => id !== commentId);
+      }
+      // Add to selection
+      return [...prev, commentId];
+    });
+  }, []);
+
+  // Remove single reply target
+  const handleRemoveReplyTarget = useCallback((commentId: string) => {
+    setReplyingToIds((prev) => prev.filter((id) => id !== commentId));
+  }, []);
+
+  // Clear all reply targets
+  const handleClearReplyTargets = useCallback(() => {
+    setReplyingToIds([]);
+  }, []);
+
+  // Jump to comment with highlight
+  const handleJumpToComment = useCallback(
+    (commentId: string) => {
+      // Use external handler if provided
+      if (onJumpToComment) {
+        onJumpToComment(commentId);
+        return;
+      }
+
+      // Default implementation
+      setHighlightedId(commentId);
+      const element = document.getElementById(`comment-${commentId}`);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      setTimeout(() => setHighlightedId(null), 2000);
+    },
+    [onJumpToComment],
+  );
 
   const handleSubmitNewComment = async () => {
     if (!newCommentText.trim() || isSubmitting) return;
 
     setIsSubmitting(true);
     try {
-      // If API callback provided, use it
       if (onAddComment) {
-        await onAddComment(newCommentText);
+        // Pass replyToIds array (multi-reply)
+        await onAddComment(newCommentText, replyingToIds.length > 0 ? replyingToIds : undefined);
         setNewCommentText('');
-        setEditorKey((prev) => prev + 1); // Force editor remount to clear content
+        setReplyingToIds([]); // Clear reply targets
+        setEditorKey((prev) => prev + 1);
         return;
       }
 
@@ -111,7 +163,8 @@ export function CommentSection({
         user: currentUser,
         text: newCommentText,
         createdAt: new Date(),
-        replies: [],
+        replyToIds: [...replyingToIds],
+        parentId: replyingToIds[0], // Backward compat
         actions: {},
         selectedActions: [],
         allowUpvote,
@@ -119,7 +172,8 @@ export function CommentSection({
 
       onChange([...value, newComment]);
       setNewCommentText('');
-      setEditorKey((prev) => prev + 1); // Force editor remount to clear content
+      setReplyingToIds([]);
+      setEditorKey((prev) => prev + 1);
     } catch (error) {
       const message = getErrorMessage(error);
       onError?.(message);
@@ -128,67 +182,15 @@ export function CommentSection({
     }
   };
 
-  const handleReply = async (commentId: string, replyText: string) => {
+  const handleCommentChange = async (commentId: string, change: Record<string, unknown>) => {
     try {
-      // If API callback provided, use it
-      if (onAddComment) {
-        await onAddComment(replyText, commentId);
-        return;
-      }
-
-      // Fallback to local state management
-      const updatedComments = value.map((comment) => {
-        if (comment.id === commentId) {
-          const reply: Comment = {
-            id: Date.now().toString(),
-            user: currentUser,
-            parentId: commentId,
-            text: replyText,
-            createdAt: new Date(),
-            replies: [],
-            actions: {},
-            selectedActions: [],
-            allowUpvote,
-          };
-          return {
-            ...comment,
-            replies: [...(comment.replies || []), reply],
-          };
-        }
-        return comment;
-      });
-      onChange(updatedComments);
-    } catch (error) {
-      const message = getErrorMessage(error);
-      onError?.(message);
-    }
-  };
-
-  const handleCommentChange = async (commentId: string, change: any) => {
-    try {
-      // If API callback provided and text is being updated, use it
       if (onUpdateComment && change.text !== undefined) {
-        await onUpdateComment(commentId, change.text);
+        await onUpdateComment(commentId, change.text as string);
         return;
       }
 
-      // Fallback to local state management
-      const updateComment = (comments: Comment[]): Comment[] => {
-        return comments.map((comment) => {
-          if (comment.id === commentId) {
-            return { ...comment, ...change };
-          }
-          if (comment.replies && comment.replies.length > 0) {
-            return {
-              ...comment,
-              replies: updateComment(comment.replies),
-            };
-          }
-          return comment;
-        });
-      };
-
-      onChange(updateComment(value));
+      // Fallback to local state management (flat list - no nesting)
+      onChange(value.map((comment) => (comment.id === commentId ? { ...comment, ...change } : comment)));
     } catch (error) {
       const message = getErrorMessage(error);
       onError?.(message);
@@ -197,44 +199,45 @@ export function CommentSection({
 
   const handleCommentDelete = async (commentId: string) => {
     try {
-      // If API callback provided, use it
       if (onDeleteComment) {
         await onDeleteComment(commentId);
         return;
       }
 
-      // Fallback to local state management
-      const deleteComment = (comments: Comment[]): Comment[] => {
-        return comments
-          .filter((comment) => comment.id !== commentId)
-          .map((comment) => {
-            if (comment.replies && comment.replies.length > 0) {
-              return {
-                ...comment,
-                replies: deleteComment(comment.replies),
-              };
-            }
-            return comment;
-          });
-      };
-
-      onChange(deleteComment(value));
+      // Fallback to local state (flat list)
+      onChange(value.filter((comment) => comment.id !== commentId));
+      // Also remove from reply targets if present
+      setReplyingToIds((prev) => prev.filter((id) => id !== commentId));
     } catch (error) {
       const message = getErrorMessage(error);
       onError?.(message);
     }
   };
 
+  // Placeholder text based on reply state
+  const editorPlaceholder =
+    replyingToIds.length > 0
+      ? `Replying to ${replyingToIds.length} message${replyingToIds.length > 1 ? 's' : ''}...`
+      : 'Write a comment...';
+
   return (
     <div className={`comment-section space-y-4 ${className || ''}`}>
+      {/* Reply Indicator - shows selected comments above editor */}
+      <ReplyIndicator
+        replyingToIds={replyingToIds}
+        comments={value}
+        onRemove={handleRemoveReplyTarget}
+        onClearAll={handleClearReplyTargets}
+      />
+
       {/* New Comment Editor */}
       <CommentEditor
         key={editorKey}
         value={newCommentText}
         onChange={setNewCommentText}
         currentUser={currentUser}
-        placeholder="Write a comment..."
-        submitText="Comment"
+        placeholder={editorPlaceholder}
+        submitText={replyingToIds.length > 0 ? 'Reply' : 'Comment'}
         onSubmit={handleSubmitNewComment}
         onImageUpload={onImageUpload}
         mentionUsers={mentionUsers}
@@ -243,16 +246,19 @@ export function CommentSection({
         isSubmitting={isSubmitting}
       />
 
-      {/* Comments List */}
-      <div className="space-y-4">
+      {/* Comments List - FLAT (no nesting) */}
+      <div className="space-y-1">
         {value.map((comment) => (
           <CommentCard
             key={comment.id}
             comment={comment}
+            allComments={value}
             currentUser={currentUser}
             allowUpvote={allowUpvote}
             showReactions={showReactions}
-            onReply={(replyText) => handleReply(comment.id, replyText)}
+            isSelected={replyingToIds.includes(comment.id)}
+            isHighlighted={highlightedId === comment.id}
+            onToggleReply={() => handleToggleReply(comment.id)}
             onChange={(change) => handleCommentChange(comment.id, change)}
             onDelete={() => handleCommentDelete(comment.id)}
             onVoteChange={(upvoted) => onVoteChange?.(comment.id, upvoted)}
@@ -260,6 +266,7 @@ export function CommentSection({
             mentionUsers={mentionUsers}
             onMentionSearch={onMentionSearch}
             onFetchComment={onFetchComment}
+            onJumpToComment={handleJumpToComment}
           />
         ))}
 
