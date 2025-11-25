@@ -89,6 +89,36 @@ function generateHashedKeywords(content: string, encryptionKey?: string): Record
   };
 }
 
+/**
+ * Extract mentioned user IDs from content
+ * Parses Slack-like format: <@userId|name> or HTML-escaped &lt;@userId|name&gt;
+ * Returns array of unique user IDs
+ */
+function extractMentionedUserIds(content: string): string[] {
+  const userIds: string[] = [];
+
+  // Match unescaped format: <@userId|name>
+  const unescapedRegex = /<@([^|]+)\|[^>]+>/g;
+  let match;
+  while ((match = unescapedRegex.exec(content)) !== null) {
+    const userId = match[1];
+    if (userId && !userIds.includes(userId)) {
+      userIds.push(userId);
+    }
+  }
+
+  // Match HTML-escaped format: &lt;@userId|name&gt;
+  const escapedRegex = /&lt;@([^|]+)\|[^&]+&gt;/g;
+  while ((match = escapedRegex.exec(content)) !== null) {
+    const userId = match[1];
+    if (userId && !userIds.includes(userId)) {
+      userIds.push(userId);
+    }
+  }
+
+  return userIds;
+}
+
 // ============================================
 // Data Conversion
 // ============================================
@@ -127,6 +157,9 @@ function serverToPackageComment(
     avatarUrl = undefined;
   }
 
+  // Server returns replyTo as array, convert to parentId (take first non-empty value)
+  const parentId = serverComment.replyTo?.find((id) => id && id.trim() !== '') || undefined;
+
   return {
     id: serverComment.id,
     user: {
@@ -134,7 +167,7 @@ function serverToPackageComment(
       fullName,
       avatarUrl,
     },
-    parentId: serverComment.parentId,
+    parentId,
     text: decryptedContent || '',
     createdAt: serverComment.createdAt ? new Date(serverComment.createdAt) : new Date(),
     replies: [], // Will be populated by buildCommentTree
@@ -182,7 +215,7 @@ export function useRecordComments(
   recordId: string,
   options: UseRecordCommentsOptions = {},
 ): CommentsState {
-  const { enabled = true, encryptionKey, pageSize = 20, userLookup } = options;
+  const { enabled = true, encryptionKey, pageSize = 50, userLookup } = options;
   const queryClient = useQueryClient();
 
   const queryKey = ['record-comments', workspaceId, tableId, recordId];
@@ -228,12 +261,16 @@ export function useRecordComments(
 
   const addCommentMutation = useMutation({
     mutationFn: async ({ text, parentId }: { text: string; parentId?: string }) => {
+      // Extract mentioned user IDs before encryption
+      const taggedUserIds = extractMentionedUserIds(text);
       const encryptedContent = encryptContent(text, encryptionKey);
       const hashedKeywords = generateHashedKeywords(text, encryptionKey);
 
       return commentsApi.createComment(workspaceId, tableId, recordId, {
         commentContent: encryptedContent,
-        parentId,
+        // Server expects replyTo as array, not parentId
+        replyTo: parentId ? [parentId] : undefined,
+        taggedUserIds: taggedUserIds.length > 0 ? taggedUserIds : undefined,
         hashed_keywords: hashedKeywords,
       });
     },
@@ -244,11 +281,14 @@ export function useRecordComments(
 
   const updateCommentMutation = useMutation({
     mutationFn: async ({ commentId, text }: { commentId: string; text: string }) => {
+      // Extract mentioned user IDs before encryption
+      const taggedUserIds = extractMentionedUserIds(text);
       const encryptedContent = encryptContent(text, encryptionKey);
       const hashedKeywords = generateHashedKeywords(text, encryptionKey);
 
       return commentsApi.updateComment(workspaceId, tableId, recordId, commentId, {
         commentContent: encryptedContent,
+        taggedUserIds: taggedUserIds.length > 0 ? taggedUserIds : undefined,
         hashed_keywords: hashedKeywords,
       });
     },

@@ -170,25 +170,32 @@ export function CommentCard({
             <span className="text-xs text-muted-foreground">
               {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
             </span>
-            {isOwner && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 ml-auto">
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={handleStartEdit} disabled={isFetchingForEdit}>
-                    <Pencil className="h-4 w-4 mr-2" />
-                    {isFetchingForEdit ? 'Loading...' : 'Edit'}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setIsDeleteDialogOpen(true)} className="text-destructive">
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Delete
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
+            {/* Dropdown menu always visible (Copy link for all, Edit/Delete for owner) */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-6 w-6 p-0 ml-auto">
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={handleCopyLink}>
+                  <Copy className="h-4 w-4 mr-2" />
+                  Copy link
+                </DropdownMenuItem>
+                {isOwner && (
+                  <>
+                    <DropdownMenuItem onClick={handleStartEdit} disabled={isFetchingForEdit}>
+                      <Pencil className="h-4 w-4 mr-2" />
+                      {isFetchingForEdit ? 'Loading...' : 'Edit'}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setIsDeleteDialogOpen(true)} className="text-destructive">
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           {/* Comment Content */}
@@ -239,9 +246,9 @@ export function CommentCard({
             </div>
           )}
 
-          {/* Comment Actions */}
-          {!isEditing && (
-            <div className="flex items-center gap-4 mt-2">
+          {/* Comment Actions - only show if there are actions to display */}
+          {!isEditing && (allowUpvote || depth === 0) && (
+            <div className="flex items-center gap-2 mt-2">
               {allowUpvote && (
                 <Button
                   variant="ghost"
@@ -253,14 +260,13 @@ export function CommentCard({
                   {upvoteCount > 0 && <span className="text-xs">{upvoteCount}</span>}
                 </Button>
               )}
-              <Button variant="ghost" size="sm" className="h-7 px-2" onClick={() => setIsReplying(!isReplying)}>
-                <MessageCircle className="h-4 w-4 mr-1" />
-                <span className="text-xs">Reply</span>
-              </Button>
-              <Button variant="ghost" size="sm" className="h-7 px-2" onClick={handleCopyLink}>
-                <Copy className="h-4 w-4 mr-1" />
-                <span className="text-xs">Copy link</span>
-              </Button>
+              {/* Hide reply button for nested comments (depth > 0) */}
+              {depth === 0 && (
+                <Button variant="ghost" size="sm" className="h-7 px-2" onClick={() => setIsReplying(!isReplying)}>
+                  <MessageCircle className="h-4 w-4 mr-1" />
+                  <span className="text-xs">Reply</span>
+                </Button>
+              )}
             </div>
           )}
 

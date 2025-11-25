@@ -1,9 +1,12 @@
 /**
  * CommentSection component
- * Displays a list of comments with reply functionality
+ * Displays a list of comments with reply functionality and pagination
  */
 
 import { useState } from 'react';
+import { Loader2 } from 'lucide-react';
+
+import { Button } from '@workspace/ui/components/button';
 
 import type { Comment } from '../types/comment.js';
 import type { CommentUser } from '../types/user.js';
@@ -36,6 +39,13 @@ export interface CommentSectionProps {
   onFetchComment?: (commentId: string) => Promise<string | null>;
   /** Callback when an error occurs (for displaying error messages) */
   onError?: (error: string) => void;
+  // Pagination props
+  /** Whether there are more comments to load */
+  hasNextPage?: boolean;
+  /** Whether currently fetching next page */
+  isFetchingNextPage?: boolean;
+  /** Callback to load more comments */
+  onLoadMore?: () => void;
 }
 
 export function CommentSection({
@@ -55,6 +65,9 @@ export function CommentSection({
   onDeleteComment,
   onFetchComment,
   onError,
+  hasNextPage,
+  isFetchingNextPage,
+  onLoadMore,
 }: CommentSectionProps) {
   const [newCommentText, setNewCommentText] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -249,9 +262,31 @@ export function CommentSection({
             onFetchComment={onFetchComment}
           />
         ))}
+
+        {/* Load More Button */}
+        {hasNextPage && onLoadMore && (
+          <div className="flex justify-center pt-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onLoadMore}
+              disabled={isFetchingNextPage}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              {isFetchingNextPage ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Loading...
+                </>
+              ) : (
+                'Load more comments'
+              )}
+            </Button>
+          </div>
+        )}
       </div>
 
-      {value.length === 0 && (
+      {value.length === 0 && !isFetchingNextPage && (
         <div className="text-center text-muted-foreground py-8">No comments yet. Be the first to comment!</div>
       )}
     </div>

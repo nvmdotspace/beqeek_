@@ -187,6 +187,9 @@ export default function RecordDetailPage() {
     deleteComment,
     fetchCommentForEdit,
     isLoading: isLoadingComments,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
   } = useRecordComments(workspaceId ?? '', tableId ?? '', recordId, {
     enabled: shouldShowComments,
     encryptionKey: encryption.encryptionKey ?? undefined,
@@ -269,7 +272,7 @@ export default function RecordDetailPage() {
     return workspaceUsers.map((u) => ({
       id: u.id,
       name: u.name || 'Unknown',
-      avatar: u.avatar,
+      avatarUrl: u.avatar, // MentionUser interface expects avatarUrl
     }));
   }, [workspaceUsers]);
 
@@ -390,6 +393,9 @@ export default function RecordDetailPage() {
                           onDeleteComment={deleteComment}
                           onFetchComment={fetchCommentForEdit}
                           onError={handleCommentError}
+                          hasNextPage={hasNextPage}
+                          isFetchingNextPage={isFetchingNextPage}
+                          onLoadMore={fetchNextPage}
                         />
                       </div>
                     ) : (

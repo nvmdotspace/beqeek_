@@ -215,28 +215,29 @@
   background: var(--popover);
   border: 1px solid var(--border);
   border-radius: 8px;
-  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   display: block;
   margin-top: 25px;
-  min-width: 180px;
+  min-width: 200px;
   z-index: 50;
+  overflow: hidden;
 }
 
 .typeahead-popover ul {
-  padding: 0;
+  padding: 4px;
   list-style: none;
   margin: 0;
-  max-height: 200px;
-  overflow-y: scroll;
+  max-height: 240px;
+  overflow-y: auto;
 }
 
 .typeahead-popover ul::-webkit-scrollbar {
-  display: none;
+  width: 4px;
 }
 
-.typeahead-popover ul {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+.typeahead-popover ul::-webkit-scrollbar-thumb {
+  background-color: var(--muted-foreground);
+  border-radius: 4px;
 }
 
 .typeahead-popover ul li {
@@ -245,10 +246,12 @@
   font-size: 14px;
   outline: none;
   cursor: pointer;
-  border-radius: 0;
+  border-radius: 6px;
   display: flex;
   align-items: center;
-  padding: 8px;
+  padding: 8px 12px;
+  gap: 10px;
+  transition: background-color 0.1s ease;
 }
 
 .typeahead-popover li.selected {
@@ -263,11 +266,30 @@
   display: flex;
   line-height: 20px;
   flex-grow: 1;
-  min-width: 150px;
+  font-weight: 500;
+}
+
+/* User avatar in typeahead */
+.typeahead-popover li img {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
 }
 
 .mentions-menu {
-  width: 250px;
+  width: 280px;
+}
+
+/* Section header in mentions menu */
+.mentions-menu .mentions-section-header {
+  padding: 8px 12px 4px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+  letter-spacing: 0.5px;
 }
 
 /* Floating Link Editor */

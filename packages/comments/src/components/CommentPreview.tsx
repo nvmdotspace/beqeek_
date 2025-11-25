@@ -1,6 +1,7 @@
 /**
  * CommentPreview component
  * Renders HTML content safely with proper styling
+ * Parses Slack-like mentions: <@userId|name> -> @name with styling
  */
 
 import DOMPurify from 'isomorphic-dompurify';
@@ -11,9 +12,21 @@ export interface CommentPreviewProps {
   className?: string;
 }
 
+/**
+ * Convert Slack-like mentions to display format.
+ * Handles both Lexical mentions and plain text mentions.
+ */
+function processMentions(html: string): string {
+  // Convert all &lt;@userId|name&gt; to @name display format
+  // This works for both:
+  // 1. Inside Lexical spans (content needs to be converted to display format)
+  // 2. Plain text mentions (legacy content)
+  return html.replace(/&lt;@([^|]+)\|([^&]+)&gt;/g, '@$2');
+}
+
 export function CommentPreview({ source, className }: CommentPreviewProps) {
   const sanitizedHtml = useMemo(() => {
-    return DOMPurify.sanitize(source, {
+    const sanitized = DOMPurify.sanitize(source, {
       ALLOWED_TAGS: [
         'p',
         'br',
@@ -66,6 +79,9 @@ export function CommentPreview({ source, className }: CommentPreviewProps) {
       ALLOWED_URI_REGEXP:
         /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|sms|cid|xmpp|data):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
     });
+
+    // Process mentions after sanitization
+    return processMentions(sanitized);
   }, [source]);
 
   return <div className={`comment-preview ${className || ''}`} dangerouslySetInnerHTML={{ __html: sanitizedHtml }} />;

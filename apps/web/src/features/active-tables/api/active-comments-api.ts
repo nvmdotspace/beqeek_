@@ -2,7 +2,8 @@ import { apiRequest } from '@/shared/api/http-client';
 
 export interface Comment {
   id: string;
-  parentId?: string;
+  /** Array of comment IDs this comment replies to (server returns replyTo, not parentId) */
+  replyTo?: string[];
   commentContent: string;
   hashed_keywords?: Record<string, unknown>;
   /** Can be string (userId) or object { id, fullName, avatar } depending on API version */
@@ -34,14 +35,17 @@ export interface CommentQueryParams {
 
 export interface CreateCommentRequest {
   commentContent: string;
-  parentId?: string;
-  mentions?: string[];
+  /** Array of comment IDs to reply to (server expects replyTo, not parentId) */
+  replyTo?: string[];
+  /** Array of user IDs that are mentioned in the comment */
+  taggedUserIds?: string[];
   hashed_keywords?: Record<string, unknown>;
 }
 
 export interface UpdateCommentRequest {
   commentContent: string;
-  mentions?: string[];
+  /** Array of user IDs that are mentioned in the comment */
+  taggedUserIds?: string[];
   hashed_keywords?: Record<string, unknown>;
 }
 
