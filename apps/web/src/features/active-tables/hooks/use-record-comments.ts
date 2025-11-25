@@ -8,6 +8,7 @@
 import { useCallback, useMemo } from 'react';
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { CommonUtils, AES256 } from '@workspace/encryption-core';
+import { stripHtmlTags } from '@workspace/beqeek-shared';
 import type { Comment as PackageComment, CommentUser } from '@workspace/comments';
 
 import * as commentsApi from '../api/active-comments-api';
@@ -81,11 +82,14 @@ function decryptContent(encryptedContent: string, encryptionKey?: string): strin
 
 /**
  * Generate hashed keywords for searchable encryption
+ * Strips HTML tags before hashing to only index actual content
  */
 function generateHashedKeywords(content: string, encryptionKey?: string): Record<string, string[]> | undefined {
   if (!encryptionKey) return undefined;
+  // Strip HTML tags to only hash actual text content, not markup
+  const plainText = stripHtmlTags(content);
   return {
-    commentContent: CommonUtils.hashKeyword(content, encryptionKey),
+    commentContent: CommonUtils.hashKeyword(plainText, encryptionKey),
   };
 }
 

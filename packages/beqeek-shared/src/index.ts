@@ -40,3 +40,4 @@ export * from './types/index.js';
 // Export utilities
 export * from './utils/uuid-generator.js';
 export * from './utils/default-actions.js';
+export * from './utils/html-utils.js';
