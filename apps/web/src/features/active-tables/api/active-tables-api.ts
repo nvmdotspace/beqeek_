@@ -20,10 +20,25 @@ export const getActiveWorkGroups = (workspaceId: string) =>
     method: 'POST',
   });
 
-export const getActiveTables = (workspaceId: string) =>
+/**
+ * Filtering options for getActiveTables
+ * Supports id:in filtering similar to active records API
+ * Format: { "id:in": ["id1", "id2"] } or { "id:eq": "id1" }
+ */
+export interface GetActiveTablesFiltering {
+  'id:in'?: string[];
+  'id:eq'?: string;
+}
+
+export interface GetActiveTablesOptions {
+  filtering?: GetActiveTablesFiltering;
+}
+
+export const getActiveTables = (workspaceId: string, options?: GetActiveTablesOptions) =>
   apiRequest<ActiveTablesResponse>({
     url: tablesEndpoint(workspaceId),
     method: 'POST',
+    data: options?.filtering ? { filtering: options.filtering } : undefined,
   });
 
 export const getActiveTable = (workspaceId: string, tableId: string) =>
