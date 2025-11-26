@@ -215,7 +215,7 @@ export function useRecordComments(
       const response = await commentsApi.fetchComments(workspaceId, tableId, recordId, {
         paging: 'cursor',
         next_id: pageParam,
-        direction: 'asc',
+        direction: 'desc',
         limit: pageSize,
       });
       return response;
