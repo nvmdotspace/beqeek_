@@ -26,18 +26,33 @@ export type SerializedMentionNode = Spread<
 
 function convertMentionElement(domNode: HTMLElement): DOMConversionOutput | null {
   const textContent = domNode.textContent;
+  const mentionName = domNode.getAttribute('data-mention-name');
+  const userId = domNode.getAttribute('data-user-id');
+
+  if (mentionName) {
+    // Use data attributes if available
+    const node = $createMentionNode(mentionName, userId ?? undefined);
+    return { node };
+  }
 
   if (textContent !== null) {
-    const node = $createMentionNode(textContent);
-    return {
-      node,
-    };
+    // Try to parse Slack-like format: <@userId|name>
+    const match = textContent.match(/^<@([^|]+)\|([^>]+)>$/);
+    if (match) {
+      const parsedUserId = match[1];
+      const parsedName = match[2];
+      if (parsedName) {
+        const node = $createMentionNode(parsedName, parsedUserId);
+        return { node };
+      }
+    }
+    // Fallback to just the text
+    const node = $createMentionNode(textContent.replace(/^@/, ''));
+    return { node };
   }
 
   return null;
 }
-
-const mentionStyle = 'background-color: rgba(24, 119, 232, 0.2)';
 
 export class MentionNode extends TextNode {
   __mention: string;
@@ -79,8 +94,9 @@ export class MentionNode extends TextNode {
 
   createDOM(config: EditorConfig): HTMLElement {
     const dom = super.createDOM(config);
-    dom.style.cssText = mentionStyle;
     dom.className = 'mention';
+    // Display as @name instead of <@userId|name>
+    dom.textContent = `@${this.__mention}`;
     return dom;
   }
 
@@ -91,7 +107,9 @@ export class MentionNode extends TextNode {
     if (this.__userId) {
       element.setAttribute('data-user-id', this.__userId);
     }
-    element.textContent = this.__text;
+    // Export as Slack-like format: <@userId|name>
+    element.textContent = this.__userId ? `<@${this.__userId}|${this.__mention}>` : `@${this.__mention}`;
+    element.className = 'mention';
     return { element };
   }
 
@@ -114,16 +132,22 @@ export class MentionNode extends TextNode {
   }
 
   canInsertTextBefore(): boolean {
-    return false;
+    return true; // Allow cursor to move before mention
   }
 
   canInsertTextAfter(): boolean {
-    return false;
+    return true; // Allow cursor to move after mention
   }
 }
 
+/**
+ * Create a mention node with Slack-like format
+ * Text content will be `<@userId|name>` for storage, but display as `@name`
+ */
 export function $createMentionNode(mentionName: string, userId?: string): MentionNode {
-  const mentionNode = new MentionNode(mentionName, userId);
+  // Store as Slack-like format: <@userId|name>
+  const textContent = userId ? `<@${userId}|${mentionName}>` : `@${mentionName}`;
+  const mentionNode = new MentionNode(mentionName, userId, textContent);
   mentionNode.setMode('segmented').toggleDirectionless();
   return $applyNodeReplacement(mentionNode);
 }

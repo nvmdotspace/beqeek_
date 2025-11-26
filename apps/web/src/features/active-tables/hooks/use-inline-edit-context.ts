@@ -6,7 +6,6 @@
  */
 
 import { useMemo, useCallback, useState, useEffect } from 'react';
-import { useQueries } from '@tanstack/react-query';
 import type { Table } from '@workspace/active-tables-core';
 import type { InlineEditContext } from '@workspace/active-tables-core';
 import type { WorkspaceUser } from '@workspace/active-tables-core';
@@ -17,8 +16,7 @@ import {
   FIELD_TYPE_SELECT_LIST_WORKSPACE_USER,
 } from '@workspace/beqeek-shared';
 import { createFetchRecordsFunction, createFetchRecordsByIdsFunction } from './use-list-table-records';
-import { getActiveTable } from '../api/active-tables-api';
-import { activeTableQueryKey } from './use-active-tables';
+import { useActiveTables } from './use-active-tables';
 
 interface UseInlineEditContextOptions {
   workspaceId: string;
@@ -94,36 +92,23 @@ export function useInlineEditContext({
     return Array.from(ids);
   }, [referenceFields]);
 
-  // Fetch referenced table metadata using shared query key pattern
-  // This allows React Query to dedupe calls with useReferenceRecords
-  const referencedTablesQueries = useQueries({
-    queries: referencedTableIds.map((tableId) => ({
-      queryKey: activeTableQueryKey(workspaceId, tableId), // Shared key with useActiveTable
-      queryFn: async () => {
-        const response = await getActiveTable(workspaceId, tableId);
-        return response;
-      },
-      enabled: !!workspaceId && !!tableId,
-      staleTime: 5 * 60 * 1000, // Cache for 5 minutes
-    })),
+  // ✅ OPTIMIZATION: Batch fetch all referenced tables in ONE API call using id:in filter
+  // Instead of calling getActiveTable for each table individually
+  const { data: tablesResponse } = useActiveTables(workspaceId, {
+    tableIds: referencedTableIds,
+    enabled: !!workspaceId && referencedTableIds.length > 0,
   });
 
-  // Extract stable data from queries to prevent re-renders on status changes
-  const queryDataArray = referencedTablesQueries.map((q) => q?.data?.data);
-
-  // Convert queries array to Record<tableId, Table>
+  // Convert response array to Record<tableId, Table>
   const referencedTables = useMemo(() => {
     const results: Record<string, Table> = {};
-    referencedTableIds.forEach((tableId, index) => {
-      const tableData = queryDataArray[index];
-      if (tableData) {
-        results[tableId] = tableData;
-      }
-    });
+    if (tablesResponse?.data) {
+      tablesResponse.data.forEach((tableData) => {
+        results[tableData.id] = tableData;
+      });
+    }
     return results;
-    // Use JSON.stringify for stable dependency - only recompute when data changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [referencedTableIds, JSON.stringify(queryDataArray)]);
+  }, [tablesResponse?.data]);
 
   // Store initial records for each field (pre-selected values)
   const [initialRecordsMap, setInitialRecordsMap] = useState<

@@ -1,10 +1,10 @@
 /**
  * CommentCard component
- * Displays individual comment with reactions, replies, and actions
+ * Displays individual comment with reactions and reply reference (flat design - no nesting)
  */
 
 import { formatDistanceToNow } from 'date-fns';
-import { ChevronDown, ChevronUp, Copy, MessageCircle, MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
+import { Copy, MessageCircle, MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@workspace/ui/components/avatar';
@@ -25,6 +25,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@workspace/ui/components/alert-dialog';
+import { cn } from '@workspace/ui/lib/utils';
 
 import type { Comment, CommentChange } from '../types/comment.js';
 import type { CommentUser } from '../types/user.js';
@@ -33,51 +34,59 @@ import type { MentionUser } from './editor/plugins/MentionsPlugin.js';
 import { CommentEditor } from './editor/CommentEditor.js';
 import { CommentPreview } from './CommentPreview.js';
 import { EmojiReactions } from './EmojiReactions.js';
+import { ReplyReferenceBadge } from './ReplyReferenceBadge.js';
 import { ACTIONS_TYPE } from '../types/comment.js';
 
 export interface CommentCardProps {
   comment: Comment;
+  /** All comments for reference lookup */
+  allComments: Comment[];
   currentUser: CommentUser;
   allowUpvote?: boolean;
   /** Show emoji reactions (default: true) */
   showReactions?: boolean;
-  onReply: (replyText: string) => void;
+  /** Whether this comment is selected for reply */
+  isSelected?: boolean;
+  /** Whether this comment is highlighted (jump-to target) */
+  isHighlighted?: boolean;
+  /** Toggle reply selection (for multi-reply) */
+  onToggleReply: () => void;
   onChange: (change: CommentChange) => void;
   onDelete: () => void;
   onVoteChange?: (upvoted: boolean) => void;
   onImageUpload?: (file: File) => Promise<string>;
   mentionUsers?: MentionUser[];
   onMentionSearch?: (query: string) => Promise<MentionUser[]>;
-  depth?: number;
   /** Async callback to fetch fresh comment content before editing */
   onFetchComment?: (commentId: string) => Promise<string | null>;
+  /** Callback when clicking on a reply reference */
+  onJumpToComment?: (commentId: string) => void;
 }
 
 export function CommentCard({
   comment,
+  allComments,
   currentUser,
   allowUpvote,
   showReactions = true,
-  onReply,
+  isSelected = false,
+  isHighlighted = false,
+  onToggleReply,
   onChange,
   onDelete,
   onVoteChange,
   onImageUpload,
   mentionUsers,
   onMentionSearch,
-  depth = 0,
   onFetchComment,
+  onJumpToComment,
 }: CommentCardProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const [isReplying, setIsReplying] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isFetchingForEdit, setIsFetchingForEdit] = useState(false);
   const [editedText, setEditedText] = useState(comment.text);
-  const [replyText, setReplyText] = useState('');
-  const [showReplies, setShowReplies] = useState(true);
 
   const isOwner = comment.user.id === currentUser.id;
-  const hasReplies = comment.replies && comment.replies.length > 0;
 
   const getInitials = (name: string) => {
     return name
@@ -89,7 +98,6 @@ export function CommentCard({
   };
 
   const handleStartEdit = async () => {
-    // If API callback provided, fetch fresh content before editing
     if (onFetchComment) {
       setIsFetchingForEdit(true);
       try {
@@ -101,7 +109,6 @@ export function CommentCard({
         setIsFetchingForEdit(false);
       }
     } else {
-      // Fallback to local state
       setEditedText(comment.text);
     }
     setIsEditing(true);
@@ -115,19 +122,6 @@ export function CommentCard({
   const handleCancelEdit = () => {
     setEditedText(comment.text);
     setIsEditing(false);
-  };
-
-  const handleSubmitReply = () => {
-    if (replyText.trim()) {
-      onReply(replyText);
-      setReplyText('');
-      setIsReplying(false);
-    }
-  };
-
-  const handleCancelReply = () => {
-    setReplyText('');
-    setIsReplying(false);
   };
 
   const handleCopyLink = () => {
@@ -156,7 +150,14 @@ export function CommentCard({
   const isUpvoted = comment.selectedActions?.includes(ACTIONS_TYPE.UPVOTE);
 
   return (
-    <div id={`comment-${comment.id}`} className={depth > 0 ? 'ml-12 mt-4' : ''}>
+    <div
+      id={`comment-${comment.id}`}
+      className={cn(
+        'group rounded-lg p-3 transition-all duration-300',
+        isSelected && 'bg-primary/5 ring-1 ring-primary/30',
+        isHighlighted && 'bg-primary/10 ring-2 ring-primary/50 animate-pulse',
+      )}
+    >
       <div className="flex gap-3">
         <Avatar className="h-8 w-8 flex-shrink-0">
           <AvatarImage src={comment.user.avatarUrl} alt={comment.user.fullName} />
@@ -170,26 +171,44 @@ export function CommentCard({
             <span className="text-xs text-muted-foreground">
               {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
             </span>
-            {isOwner && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 ml-auto">
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={handleStartEdit} disabled={isFetchingForEdit}>
-                    <Pencil className="h-4 w-4 mr-2" />
-                    {isFetchingForEdit ? 'Loading...' : 'Edit'}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setIsDeleteDialogOpen(true)} className="text-destructive">
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Delete
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
+            {/* Dropdown menu */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 w-6 p-0 ml-auto opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={handleCopyLink}>
+                  <Copy className="h-4 w-4 mr-2" />
+                  Copy link
+                </DropdownMenuItem>
+                {isOwner && (
+                  <>
+                    <DropdownMenuItem onClick={handleStartEdit} disabled={isFetchingForEdit}>
+                      <Pencil className="h-4 w-4 mr-2" />
+                      {isFetchingForEdit ? 'Loading...' : 'Edit'}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setIsDeleteDialogOpen(true)} className="text-destructive">
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
+
+          {/* Reply Reference Badge - shows what this comment is replying to */}
+          <ReplyReferenceBadge
+            replyToIds={comment.replyToIds || []}
+            comments={allComments}
+            onJumpToComment={onJumpToComment}
+          />
 
           {/* Comment Content */}
           {isEditing ? (
@@ -209,9 +228,7 @@ export function CommentCard({
               />
             </div>
           ) : (
-            <div className="prose prose-sm max-w-none">
-              <CommentPreview source={comment.text} />
-            </div>
+            <CommentPreview source={comment.text} className="text-sm" />
           )}
 
           {/* Emoji Reactions */}
@@ -241,86 +258,31 @@ export function CommentCard({
 
           {/* Comment Actions */}
           {!isEditing && (
-            <div className="flex items-center gap-4 mt-2">
+            <div className="flex items-center gap-2 mt-2">
               {allowUpvote && (
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={`h-7 px-2 ${isUpvoted ? 'text-primary' : ''}`}
+                  className={cn('h-7 px-2', isUpvoted && 'text-primary')}
                   onClick={handleUpvote}
                 >
-                  {isUpvoted ? <ChevronUp className="h-4 w-4 mr-1" /> : <ChevronDown className="h-4 w-4 mr-1" />}
-                  {upvoteCount > 0 && <span className="text-xs">{upvoteCount}</span>}
+                  {upvoteCount > 0 && <span className="text-xs mr-1">{upvoteCount}</span>}
+                  Upvote
                 </Button>
               )}
-              <Button variant="ghost" size="sm" className="h-7 px-2" onClick={() => setIsReplying(!isReplying)}>
-                <MessageCircle className="h-4 w-4 mr-1" />
-                <span className="text-xs">Reply</span>
-              </Button>
-              <Button variant="ghost" size="sm" className="h-7 px-2" onClick={handleCopyLink}>
-                <Copy className="h-4 w-4 mr-1" />
-                <span className="text-xs">Copy link</span>
-              </Button>
-            </div>
-          )}
-
-          {/* Reply Editor */}
-          {isReplying && (
-            <div className="mt-3">
-              <CommentEditor
-                value={replyText}
-                onChange={setReplyText}
-                currentUser={currentUser}
-                placeholder="Write a reply..."
-                submitText="Reply"
-                onSubmit={handleSubmitReply}
-                onCancel={handleCancelReply}
-                showCancel={true}
-                onImageUpload={onImageUpload}
-                mentionUsers={mentionUsers}
-                onMentionSearch={onMentionSearch}
-              />
-            </div>
-          )}
-
-          {/* Replies */}
-          {hasReplies && (
-            <div className="mt-4">
-              <Button variant="ghost" size="sm" className="h-7 px-2 mb-2" onClick={() => setShowReplies(!showReplies)}>
-                {showReplies ? (
-                  <>
-                    <ChevronUp className="h-4 w-4 mr-1" />
-                    Hide {comment.replies!.length} {comment.replies!.length === 1 ? 'reply' : 'replies'}
-                  </>
-                ) : (
-                  <>
-                    <ChevronDown className="h-4 w-4 mr-1" />
-                    Show {comment.replies!.length} {comment.replies!.length === 1 ? 'reply' : 'replies'}
-                  </>
+              {/* Reply button - toggles selection for multi-reply */}
+              <Button
+                variant="ghost"
+                size="sm"
+                className={cn(
+                  'h-7 px-2 text-muted-foreground hover:text-foreground',
+                  isSelected && 'text-primary bg-primary/10',
                 )}
+                onClick={onToggleReply}
+              >
+                <MessageCircle className="h-3.5 w-3.5 mr-1" />
+                <span className="text-xs">{isSelected ? 'Selected' : 'Reply'}</span>
               </Button>
-              {showReplies && (
-                <div className="space-y-4">
-                  {comment.replies!.map((reply) => (
-                    <CommentCard
-                      key={reply.id}
-                      comment={reply}
-                      currentUser={currentUser}
-                      allowUpvote={allowUpvote}
-                      showReactions={showReactions}
-                      onReply={onReply}
-                      onChange={onChange}
-                      onDelete={onDelete}
-                      onVoteChange={onVoteChange}
-                      onImageUpload={onImageUpload}
-                      mentionUsers={mentionUsers}
-                      onMentionSearch={onMentionSearch}
-                      depth={depth + 1}
-                      onFetchComment={onFetchComment}
-                    />
-                  ))}
-                </div>
-              )}
             </div>
           )}
         </div>

@@ -17,8 +17,8 @@ import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { HeadingNode, QuoteNode } from '@lexical/rich-text';
 import { TableCellNode, TableNode, TableRowNode } from '@lexical/table';
 import { $generateHtmlFromNodes, $generateNodesFromDOM } from '@lexical/html';
-import { $getRoot, $insertNodes, EditorState } from 'lexical';
-import { useCallback, useState } from 'react';
+import { $getRoot, $getSelection, $insertNodes, $isRangeSelection, EditorState, LexicalEditor } from 'lexical';
+import { useCallback, useState, useRef } from 'react';
 
 import { Button } from '@workspace/ui/components/button';
 import { cn } from '@workspace/ui/lib/utils';
@@ -29,6 +29,7 @@ import type { CommentUser } from '../../types/user.js';
 import type { MentionUser } from './plugins/MentionsPlugin.js';
 
 import { ImageNode } from './nodes/ImageNode.js';
+import { EnterKeyPlugin } from './plugins/EnterKeyPlugin.js';
 import { MentionNode } from './nodes/MentionNode.js';
 import { FormatToolbar } from './FormatToolbar.js';
 import { EmojiPlugin } from './plugins/EmojiPlugin.js';
@@ -77,6 +78,7 @@ export function CommentEditor({
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
   const [emojiToInsert, setEmojiToInsert] = useState<string | null>(null);
   const [hasContent, setHasContent] = useState(false);
+  const editorRef = useRef<LexicalEditor | null>(null);
 
   const initialConfig = {
     namespace: 'CommentEditor',
@@ -111,7 +113,10 @@ export function CommentEditor({
   };
 
   const handleEditorChange = useCallback(
-    (editorState: EditorState, editor: any) => {
+    (editorState: EditorState, editor: LexicalEditor) => {
+      // Store editor reference for external actions (like @ button)
+      editorRef.current = editor;
+
       editorState.read(() => {
         const htmlString = $generateHtmlFromNodes(editor, null);
         onChange(htmlString);
@@ -123,6 +128,22 @@ export function CommentEditor({
     },
     [onChange],
   );
+
+  // Insert @ to trigger mention typeahead
+  const handleMentionTrigger = useCallback(() => {
+    const editor = editorRef.current;
+    if (!editor) return;
+
+    editor.update(() => {
+      const selection = $getSelection();
+      if ($isRangeSelection(selection)) {
+        selection.insertText('@');
+      }
+    });
+
+    // Focus the editor
+    editor.focus();
+  }, []);
 
   const handleImageUpload = useCallback(() => {
     const input = document.createElement('input');
@@ -150,6 +171,13 @@ export function CommentEditor({
   const handleEmojiInserted = useCallback(() => {
     setEmojiToInsert(null);
   }, []);
+
+  // Handle Enter key to submit (only if has content and not submitting)
+  const handleEnterKey = useCallback(() => {
+    if (hasContent && !isSubmitting && onSubmit) {
+      onSubmit();
+    }
+  }, [hasContent, isSubmitting, onSubmit]);
 
   return (
     <div className={cn('comment-editor border border-input rounded-lg bg-background overflow-hidden', className)}>
@@ -186,6 +214,7 @@ export function CommentEditor({
             <ImagesPlugin onImageUpload={onImageUpload} />
             <MentionsPlugin users={mentionUsers} onSearch={onMentionSearch} />
             <EmojiPlugin emojiToInsert={emojiToInsert} onEmojiInserted={handleEmojiInserted} />
+            <EnterKeyPlugin onEnter={handleEnterKey} />
           </div>
 
           {/* Bottom Action Bar (always visible, Google Chat style) */}
@@ -250,6 +279,7 @@ export function CommentEditor({
                 type="button"
                 variant="ghost"
                 size="icon"
+                onClick={handleMentionTrigger}
                 className="h-8 w-8 rounded-full"
                 title="Mention someone (@)"
               >

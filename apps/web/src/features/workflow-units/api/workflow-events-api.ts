@@ -84,9 +84,24 @@ export const workflowEventsApi = {
 
   /**
    * Get list of active tables (helper for ACTIVE_TABLE trigger)
+   * Supports filtering similar to active records API
+   *
+   * @param workspaceId - Workspace ID
+   * @param options - Optional filtering options
+   * @param options.filtering - Filter object (e.g., { "id:in": ['id1', 'id2'] })
    */
-  async getActiveTables(workspaceId: string): Promise<ActiveTable[]> {
-    const response = await apiClient.post<ActiveTable[]>(`${getBasePath(workspaceId)}/get/active_tables`);
+  async getActiveTables(
+    workspaceId: string,
+    options?: {
+      filtering?: {
+        'id:in'?: string[];
+        'id:eq'?: string;
+      };
+    },
+  ): Promise<ActiveTable[]> {
+    const response = await apiClient.post<ActiveTable[]>(`${getBasePath(workspaceId)}/get/active_tables`, {
+      ...(options?.filtering && { filtering: options.filtering }),
+    });
     return response.data;
   },
 

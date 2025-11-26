@@ -86,7 +86,8 @@ function checkForAtSignMentions(
 function getPossibleQueryMatch(
   text: string,
 ): null | { leadOffset: number; matchingString: string; replaceableString: string } {
-  return checkForAtSignMentions(text, 1);
+  // Use minMatchLength=0 to show dropdown immediately when @ is typed
+  return checkForAtSignMentions(text, 0);
 }
 
 class MentionTypeaheadOption extends MenuOption {
@@ -131,13 +132,26 @@ function MentionsTypeaheadMenuItem({
       onMouseEnter={onMouseEnter}
       onClick={onClick}
     >
-      {option.avatarUrl && (
-        <img
-          src={option.avatarUrl}
-          alt={option.name}
-          className="w-6 h-6 rounded-full mr-2"
-          style={{ display: 'inline-block' }}
-        />
+      {option.avatarUrl ? (
+        <img src={option.avatarUrl} alt={option.name} />
+      ) : (
+        <div
+          style={{
+            width: 28,
+            height: 28,
+            borderRadius: '50%',
+            backgroundColor: 'var(--muted)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 12,
+            fontWeight: 600,
+            color: 'var(--muted-foreground)',
+            flexShrink: 0,
+          }}
+        >
+          {option.name.charAt(0).toUpperCase()}
+        </div>
       )}
       <span className="text">{option.name}</span>
     </li>
@@ -183,7 +197,10 @@ export function MentionsPlugin({ users = [], onSearch }: MentionsPluginProps): R
         if (nodeToReplace) {
           nodeToReplace.replace(mentionNode);
         }
-        mentionNode.select();
+        // Insert a space after the mention and move cursor there
+        const spaceNode = $createTextNode(' ');
+        mentionNode.insertAfter(spaceNode);
+        spaceNode.select(); // Move cursor to after the space
         closeMenu();
       });
     },
@@ -206,6 +223,7 @@ export function MentionsPlugin({ users = [], onSearch }: MentionsPluginProps): R
         anchorElementRef.current && options.length
           ? ReactDOM.createPortal(
               <div className="typeahead-popover mentions-menu">
+                <div className="mentions-section-header">Members</div>
                 <ul>
                   {options.map((option, i: number) => (
                     <MentionsTypeaheadMenuItem

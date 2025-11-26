@@ -11,19 +11,18 @@
  * - FIRST_REFERENCE_RECORD: Reverse lookup with group parameter
  */
 
-import { useQueries, useQueryClient } from '@tanstack/react-query';
+import { useQueries } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { fetchActiveTableRecords } from '../api/active-records-api';
-import { getActiveTable } from '../api/active-tables-api';
 import { decryptRecord } from '@workspace/active-tables-core';
 import type { Table, TableRecord, FieldConfig } from '@workspace/active-tables-core';
-import type { ActiveTableRecord } from '../types';
+import type { ActiveTableRecord, ActiveTable } from '../types';
 import {
   FIELD_TYPE_SELECT_ONE_RECORD,
   FIELD_TYPE_SELECT_LIST_RECORD,
   FIELD_TYPE_FIRST_REFERENCE_RECORD,
 } from '@workspace/beqeek-shared';
-import { activeTableQueryKey } from './use-active-tables';
+import { useActiveTables } from './use-active-tables';
 
 /**
  * Reference field mapping info
@@ -142,7 +141,6 @@ export interface UseReferenceRecordsOptions {
  */
 export function useReferenceRecords(workspaceId: string, table: Table | null, options?: UseReferenceRecordsOptions) {
   const { enabled = true, limit = 1000, records = [], visibleFields } = options || {};
-  const queryClient = useQueryClient();
 
   // Collect reference field mapping from table config and current records
   // Only collect fields that are actually visible in the UI
@@ -156,7 +154,30 @@ export function useReferenceRecords(workspaceId: string, table: Table | null, op
     return Array.from(referenceFieldMap.values());
   }, [referenceFieldMap]);
 
-  // Fetch table configs and records for each referenced table
+  // Collect all unique tableIds for batch fetching
+  const referenceTableIds = useMemo(() => {
+    return referenceQueries.map((info) => info.tableId);
+  }, [referenceQueries]);
+
+  // ✅ OPTIMIZATION: Batch fetch all reference tables in ONE API call using id:in filter
+  // Instead of calling getActiveTable for each table individually
+  const { data: tablesResponse, isLoading: isLoadingTables } = useActiveTables(workspaceId, {
+    tableIds: referenceTableIds,
+    enabled: enabled && !!workspaceId && referenceTableIds.length > 0,
+  });
+
+  // Build table lookup map from batch response
+  const tableLookup = useMemo(() => {
+    const map = new Map<string, ActiveTable>();
+    if (tablesResponse?.data) {
+      tablesResponse.data.forEach((t) => {
+        map.set(t.id, t);
+      });
+    }
+    return map;
+  }, [tablesResponse?.data]);
+
+  // Fetch records for each referenced table (only after tables are loaded)
   const queries = useQueries({
     queries: referenceQueries.map((info) => ({
       queryKey: [
@@ -199,15 +220,14 @@ export function useReferenceRecords(workspaceId: string, table: Table | null, op
           }
         }
 
-        // Fetch table config using shared query key (allows React Query to dedupe)
-        // Use fetchQuery to get from cache if available
-        const tableResponse = await queryClient.fetchQuery({
-          queryKey: activeTableQueryKey(workspaceId, info.tableId),
-          queryFn: () => getActiveTable(workspaceId, info.tableId),
-          staleTime: 5 * 60 * 1000, // 5 minutes
-        });
+        // ✅ Use table from batch lookup (already fetched via useActiveTables)
+        const refTable = tableLookup.get(info.tableId);
+        if (!refTable) {
+          console.warn(`[useReferenceRecords] Table ${info.tableId} not found in batch response`);
+          return { tableId: info.tableId, records: [] };
+        }
 
-        // Fetch records separately
+        // Fetch records
         const recordsResponse = await fetchActiveTableRecords({
           workspaceId,
           tableId: info.tableId,
@@ -217,7 +237,6 @@ export function useReferenceRecords(workspaceId: string, table: Table | null, op
           group: group || undefined, // Add group parameter for FIRST_REFERENCE_RECORD
         });
 
-        const refTable = tableResponse.data;
         const rawRecords = recordsResponse.data;
 
         // Decrypt records if needed
@@ -266,7 +285,14 @@ export function useReferenceRecords(workspaceId: string, table: Table | null, op
 
         return { tableId: info.tableId, records: decryptedRecords };
       },
-      enabled: enabled && !!workspaceId && !!info.tableId && info.recordIds.size > 0,
+      // ✅ Only enable after tables are loaded (wait for batch fetch)
+      enabled:
+        enabled &&
+        !!workspaceId &&
+        !!info.tableId &&
+        info.recordIds.size > 0 &&
+        !isLoadingTables &&
+        tableLookup.has(info.tableId),
       staleTime: 5 * 60 * 1000, // 5 minutes
       gcTime: 10 * 60 * 1000, // 10 minutes
     })),
@@ -307,7 +333,8 @@ export function useReferenceRecords(workspaceId: string, table: Table | null, op
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(queryDataArray)]);
 
-  const isLoading = queries.some((q) => q.isLoading);
+  // Include tables loading state in isLoading
+  const isLoading = isLoadingTables || queries.some((q) => q.isLoading);
   const error = queries.find((q) => q.error)?.error || null;
 
   return {
