@@ -8,10 +8,10 @@ import {
   DropdownMenuTrigger,
 } from '@workspace/ui/components/dropdown-menu';
 
-import { useTheme } from '@/providers/theme-provider';
+import { useThemeStore } from '@/stores/theme-store';
 
 export const ModeToggle = () => {
-  const { setTheme } = useTheme();
+  const setTheme = useThemeStore((state) => state.setTheme);
 
   return (
     <DropdownMenu>

@@ -24,12 +24,12 @@ import { NODE_TYPES } from './nodes';
 import { EDGE_TYPES, DEFAULT_EDGE_OPTIONS } from './edges';
 import { useWorkflowEditorStore } from '../../stores/workflow-editor-store';
 import { isValidConnection } from '../../utils/connection-validator';
-import { useTheme } from '@/providers/theme-provider';
+import { useThemeStore } from '@/stores/theme-store';
 import { useCanvasShortcuts } from '../../hooks/use-canvas-shortcuts';
 
 export const WorkflowCanvas = () => {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
-  const { resolvedTheme } = useTheme();
+  const resolvedTheme = useThemeStore((state) => state.resolvedTheme);
 
   const {
     nodes: storeNodes,

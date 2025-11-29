@@ -7,7 +7,7 @@
 import { useRef, useCallback } from 'react';
 import Editor, { Monaco } from '@monaco-editor/react';
 import type { editor } from 'monaco-editor';
-import { useTheme } from '@/providers/theme-provider';
+import { useThemeStore } from '@/stores/theme-store';
 import { cn } from '@workspace/ui/lib/utils';
 
 interface JsonEditorProps {
@@ -27,7 +27,7 @@ export function JsonEditor({
   className,
   readOnly = false,
 }: JsonEditorProps) {
-  const { resolvedTheme } = useTheme();
+  const resolvedTheme = useThemeStore((state) => state.resolvedTheme);
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
   const monacoTheme = resolvedTheme === 'dark' ? 'vs-dark' : 'vs-light';
 

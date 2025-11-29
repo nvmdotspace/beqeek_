@@ -2,9 +2,11 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 type Theme = 'light' | 'dark' | 'system';
+type ResolvedTheme = 'light' | 'dark';
 
 interface ThemeStore {
   theme: Theme;
+  resolvedTheme: ResolvedTheme;
   setTheme: (theme: Theme) => void;
   toggleTheme: () => void;
 }
@@ -20,15 +22,17 @@ export const useThemeStore = create<ThemeStore>()(
   persist(
     (set, get) => ({
       theme: 'system',
+      resolvedTheme: getResolvedTheme('system'),
 
       setTheme: (theme: Theme) => {
-        set({ theme });
-        applyTheme(theme);
+        const resolved = getResolvedTheme(theme);
+        set({ theme, resolvedTheme: resolved });
+        applyTheme(resolved);
       },
 
       toggleTheme: () => {
-        const currentTheme = get().theme;
-        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        const currentResolved = get().resolvedTheme;
+        const newTheme = currentResolved === 'dark' ? 'light' : 'dark';
         get().setTheme(newTheme);
       },
     }),
@@ -37,7 +41,9 @@ export const useThemeStore = create<ThemeStore>()(
       onRehydrateStorage: () => (state) => {
         // Apply theme after rehydration
         if (state) {
-          applyTheme(state.theme);
+          const resolved = getResolvedTheme(state.theme);
+          useThemeStore.setState({ resolvedTheme: resolved });
+          applyTheme(resolved);
         }
       },
     },
@@ -45,21 +51,22 @@ export const useThemeStore = create<ThemeStore>()(
 );
 
 /**
+ * Get resolved theme (handles 'system' preference)
+ */
+function getResolvedTheme(theme: Theme): ResolvedTheme {
+  if (theme === 'system') {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  return theme;
+}
+
+/**
  * Apply theme to document root
  */
-function applyTheme(theme: Theme) {
+function applyTheme(theme: ResolvedTheme) {
   const root = document.documentElement;
-
-  if (theme === 'system') {
-    // Use system preference
-    const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    root.classList.remove('light', 'dark');
-    root.classList.add(systemTheme);
-  } else {
-    // Use explicit theme
-    root.classList.remove('light', 'dark');
-    root.classList.add(theme);
-  }
+  root.classList.remove('light', 'dark');
+  root.classList.add(theme);
 }
 
 /**
@@ -85,14 +92,17 @@ export function initializeTheme() {
     // Fallback to system theme if localStorage read fails
   }
 
-  applyTheme(theme);
+  const resolved = getResolvedTheme(theme);
+  applyTheme(resolved);
 
   // Listen for system theme changes when using 'system' mode
   const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
   const handleSystemThemeChange = () => {
     const currentTheme = useThemeStore.getState().theme;
     if (currentTheme === 'system') {
-      applyTheme('system');
+      const newResolved = getResolvedTheme('system');
+      useThemeStore.setState({ resolvedTheme: newResolved });
+      applyTheme(newResolved);
     }
   };
 
