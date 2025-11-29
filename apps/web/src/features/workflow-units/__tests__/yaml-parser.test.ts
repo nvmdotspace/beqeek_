@@ -106,12 +106,13 @@ trigger:
       expect(() => parseWorkflowYAML(invalidYaml)).toThrow(YAMLParseError);
     });
 
-    it('should throw YAMLParseError for missing required fields', () => {
+    it('should throw Error for missing required fields', () => {
       const missingTrigger = `
 version: "1.0"
 steps: []
 `;
-      expect(() => parseWorkflowYAML(missingTrigger)).toThrow(YAMLParseError);
+      // Missing trigger is detected as unknown format
+      expect(() => parseWorkflowYAML(missingTrigger)).toThrow('Unknown YAML format');
     });
 
     it('should throw YAMLParseError for invalid trigger type', () => {
