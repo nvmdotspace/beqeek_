@@ -7,6 +7,8 @@
 import { useState } from 'react';
 import { useForm } from '@tanstack/react-form';
 import { z } from 'zod';
+// @ts-expect-error - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 import {
   Dialog,
   DialogContent,
@@ -21,10 +23,12 @@ import { Textarea } from '@workspace/ui/components/textarea';
 import { Label } from '@workspace/ui/components/label';
 import type { ConnectorType } from '@workspace/beqeek-shared/workflow-connectors';
 
-const createConnectorSchema = z.object({
-  name: z.string().min(1, 'Tên connector là bắt buộc').max(100, 'Tên không được quá 100 ký tự'),
-  description: z.string().max(500, 'Mô tả không được quá 500 ký tự').optional(),
-});
+// Schema validation is created dynamically to support i18n
+const createConnectorSchema = () =>
+  z.object({
+    name: z.string().min(1, m.connectors_create_nameRequired()).max(100, m.connectors_create_nameMaxLength()),
+    description: z.string().max(500, m.connectors_create_descMaxLength()).optional(),
+  });
 
 interface CreateConnectorDialogProps {
   /** Whether dialog is open */
@@ -58,7 +62,7 @@ export function CreateConnectorDialog({
     },
     onSubmit: async ({ value }) => {
       // Manual validation
-      const validation = createConnectorSchema.safeParse(value);
+      const validation = createConnectorSchema().safeParse(value);
       if (!validation.success) {
         return;
       }
@@ -90,8 +94,8 @@ export function CreateConnectorDialog({
           }}
         >
           <DialogHeader>
-            <DialogTitle>Tạo {connectorTypeName} Connector</DialogTitle>
-            <DialogDescription>Nhập tên định danh và mô tả cho connector mới</DialogDescription>
+            <DialogTitle>{m.connectors_create_title({ type: connectorTypeName })}</DialogTitle>
+            <DialogDescription>{m.connectors_create_subtitle()}</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
@@ -100,11 +104,11 @@ export function CreateConnectorDialog({
               {(field) => (
                 <div className="space-y-2">
                   <Label htmlFor="connector-name">
-                    Tên định danh <span className="text-destructive">*</span>
+                    {m.connectors_create_nameLabel()} <span className="text-destructive">*</span>
                   </Label>
                   <Input
                     id="connector-name"
-                    placeholder="Ví dụ: Email Marketing"
+                    placeholder={m.connectors_create_namePlaceholder()}
                     value={field.state.value}
                     onChange={(e) => field.handleChange(e.target.value)}
                     onBlur={field.handleBlur}
@@ -118,10 +122,10 @@ export function CreateConnectorDialog({
             <form.Field name="description">
               {(field) => (
                 <div className="space-y-2">
-                  <Label htmlFor="connector-description">Mô tả</Label>
+                  <Label htmlFor="connector-description">{m.connectors_create_descLabel()}</Label>
                   <Textarea
                     id="connector-description"
-                    placeholder="Mô tả mục đích sử dụng connector này..."
+                    placeholder={m.connectors_create_descPlaceholder()}
                     value={field.state.value}
                     onChange={(e) => field.handleChange(e.target.value)}
                     onBlur={field.handleBlur}
@@ -135,12 +139,12 @@ export function CreateConnectorDialog({
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={handleClose} disabled={isLoading}>
-              Hủy
+              {m.connectors_create_cancel()}
             </Button>
             <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
               {([canSubmit, isSubmitting]) => (
                 <Button type="submit" disabled={!canSubmit || isSubmitting || isLoading}>
-                  {isLoading ? 'Đang tạo...' : 'Tạo Connector'}
+                  {isLoading ? m.connectors_create_creating() : m.connectors_create_submit()}
                 </Button>
               )}
             </form.Subscribe>

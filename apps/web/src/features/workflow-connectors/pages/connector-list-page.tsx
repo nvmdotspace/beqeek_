@@ -7,6 +7,8 @@
 import { useState, useMemo } from 'react';
 import { getRouteApi } from '@tanstack/react-router';
 import { Plus, Link2, CheckCircle2, XCircle, Filter } from 'lucide-react';
+// @ts-expect-error - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 import { ROUTES } from '@/shared/route-paths';
 import { useConnectors } from '../api/connector-api';
 import { ConnectorListItem } from '../components/connector-list-item';
@@ -80,44 +82,58 @@ export function ConnectorListPage() {
         {/* TODO: Migrate to primitives when responsive gap support is added */}
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <Stack space="space-025">
-            <Heading level={1}>Connectors</Heading>
+            <Heading level={1}>{m.connectors_page_title()}</Heading>
             <Text size="small" color="muted">
-              Quản lý kết nối với các dịch vụ bên ngoài
+              {m.connectors_page_subtitle()}
             </Text>
           </Stack>
 
           <Button variant="brand-primary" size="sm" onClick={handleCreateClick}>
             <Plus className="mr-2 size-4" />
-            Create
+            {m.connectors_page_create()}
           </Button>
         </div>
 
         {/* Stats */}
         <Inline space="space-250" align="center" wrap className="gap-y-[var(--space-250)]">
-          <StatBadge icon={Link2} value={totalConnectors} label="Connectors" color="accent-blue" loading={isLoading} />
+          <StatBadge
+            icon={Link2}
+            value={totalConnectors}
+            label={m.connectors_page_statTotal()}
+            color="accent-blue"
+            loading={isLoading}
+          />
           <StatBadge
             icon={CheckCircle2}
             value={connectedConnectors}
-            label="Connected"
+            label={m.connectors_page_statConnected()}
             color="success"
             loading={isLoading}
           />
-          <StatBadge icon={XCircle} value={oauthConnectors} label="OAuth" color="accent-purple" loading={isLoading} />
+          <StatBadge
+            icon={XCircle}
+            value={oauthConnectors}
+            label={m.connectors_page_statOAuth()}
+            color="accent-purple"
+            loading={isLoading}
+          />
         </Inline>
 
         {/* Filters */}
         <Stack space="space-100">
           <Inline space="space-050" wrap className="text-xs text-muted-foreground">
             <Badge variant="outline" className="border-dashed">
-              {filteredConnectors.length} connector{filteredConnectors.length !== 1 ? 's' : ''}
+              {filteredConnectors.length === 1
+                ? m.connectors_page_connectorCount({ count: filteredConnectors.length })
+                : m.connectors_page_connectorCountPlural({ count: filteredConnectors.length })}
             </Badge>
             <div className="rounded-full border border-border/60 text-xs text-foreground">
               <Box padding="space-025" className="px-3">
                 <Inline space="space-050" align="center">
                   <Filter className="h-3.5 w-3.5 text-muted-foreground" />
                   {activeFilterCount
-                    ? `${activeFilterCount} filter${activeFilterCount > 1 ? 's' : ''} applied`
-                    : 'No filters applied'}
+                    ? m.connectors_page_filterApplied({ count: activeFilterCount })
+                    : m.connectors_page_noFilters()}
                 </Inline>
               </Box>
             </div>
@@ -129,11 +145,11 @@ export function ConnectorListPage() {
               {availableTypes.length > 0 && (
                 <Inline space="space-100" align="start">
                   <Text size="small" weight="medium" className="min-w-[100px] text-muted-foreground pt-1">
-                    Type
+                    {m.connectors_page_filterType()}
                   </Text>
                   <Inline space="space-075" wrap align="center" className="flex-1">
                     <FilterChip active={typeFilter === 'all'} onClick={() => setTypeFilter('all')}>
-                      All
+                      {m.connectors_page_filterAll()}
                     </FilterChip>
                     {availableTypes.map((type) => {
                       const typeDef = CONNECTOR_TYPES.find((t) => t.type === type);
@@ -150,24 +166,24 @@ export function ConnectorListPage() {
               {/* Connection Status Filter */}
               <Inline space="space-100" align="start">
                 <Text size="small" weight="medium" className="min-w-[100px] text-muted-foreground pt-1">
-                  Status
+                  {m.connectors_page_filterStatus()}
                 </Text>
                 <Inline space="space-075" wrap align="center" className="flex-1">
                   <FilterChip active={connectionFilter === 'all'} onClick={() => setConnectionFilter('all')}>
-                    All
+                    {m.connectors_page_filterAll()}
                   </FilterChip>
                   <FilterChip
                     active={connectionFilter === 'connected'}
                     onClick={() => setConnectionFilter('connected')}
                     variant="success"
                   >
-                    Connected
+                    {m.connectors_page_filterConnected()}
                   </FilterChip>
                   <FilterChip
                     active={connectionFilter === 'not_connected'}
                     onClick={() => setConnectionFilter('not_connected')}
                   >
-                    Not connected
+                    {m.connectors_page_filterNotConnected()}
                   </FilterChip>
                 </Inline>
               </Inline>
@@ -199,12 +215,14 @@ export function ConnectorListPage() {
         ) : (
           <EmptyState
             message={
-              typeFilter === 'all' && connectionFilter === 'all' ? 'Chưa có connector nào' : 'Không tìm thấy connector'
+              typeFilter === 'all' && connectionFilter === 'all'
+                ? m.connectors_page_empty()
+                : m.connectors_page_noResults()
             }
             description={
               typeFilter === 'all' && connectionFilter === 'all'
-                ? 'Tạo connector đầu tiên để kết nối với các dịch vụ bên ngoài'
-                : 'Thay đổi bộ lọc để xem các connector khác'
+                ? m.connectors_page_emptyDesc()
+                : m.connectors_page_noResultsDesc()
             }
           />
         )}

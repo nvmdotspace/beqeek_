@@ -2,11 +2,18 @@
  * Auto-Layout Utility with Dagre
  *
  * Automatically arranges workflow nodes using the Dagre graph layout algorithm.
- * Provides left-to-right hierarchical layout with configurable spacing.
+ * Provides hierarchical layout with configurable spacing.
+ *
+ * Supports:
+ * - Top-level nodes via Dagre algorithm
+ * - Compound nodes (conditions, loops) with child positioning
+ * - Overlap prevention
  */
 
 import dagre from 'dagre';
 import type { Node, Edge } from '@xyflow/react';
+import { applyDagreLayout, shouldApplyLayout } from './dagre-layout';
+import { applyCompoundLayout } from './branch-layout';
 
 interface LayoutOptions {
   direction?: 'LR' | 'TB' | 'RL' | 'BT'; // Left-Right, Top-Bottom, Right-Left, Bottom-Top
@@ -253,3 +260,101 @@ export function distributeNodesVertical(nodes: Node[]): Node[] {
     };
   });
 }
+
+/**
+ * Complete auto-layout for workflows with compound nodes
+ *
+ * Steps:
+ * 1. Position children within compound nodes (branches, loops)
+ * 2. Apply Dagre layout to top-level nodes
+ * 3. Prevent overlaps between nodes
+ *
+ * @param nodes - All workflow nodes
+ * @param edges - All workflow edges
+ * @returns Nodes with updated positions
+ *
+ * @example
+ * ```typescript
+ * const handleAutoLayout = () => {
+ *   const layoutedNodes = autoLayout(nodes, edges);
+ *   setNodes(layoutedNodes);
+ * };
+ * ```
+ */
+export function autoLayout(nodes: Node[], edges: Edge[]): Node[] {
+  if (nodes.length === 0) {
+    return nodes;
+  }
+
+  // Step 1: Position children within compound nodes
+  let layoutedNodes = applyCompoundLayout(nodes);
+
+  // Step 2: Apply Dagre to top-level nodes
+  layoutedNodes = applyDagreLayout(layoutedNodes, edges, {
+    direction: 'TB', // Top-to-bottom for workflow clarity
+    nodeSpacing: 60,
+    rankSpacing: 120,
+  });
+
+  // Step 3: Prevent overlaps
+  layoutedNodes = preventOverlaps(layoutedNodes);
+
+  return layoutedNodes;
+}
+
+/**
+ * Detect and fix node overlaps
+ *
+ * Compares all top-level nodes and pushes overlapping nodes down.
+ */
+function preventOverlaps(nodes: Node[]): Node[] {
+  const topLevelNodes = nodes.filter((n) => !n.parentId);
+  const childNodes = nodes.filter((n) => n.parentId);
+
+  // Simple collision detection and resolution
+  for (let i = 0; i < topLevelNodes.length; i++) {
+    const node = topLevelNodes[i];
+    if (!node) continue;
+
+    for (let j = i + 1; j < topLevelNodes.length; j++) {
+      const otherNode = topLevelNodes[j];
+      if (!otherNode) continue;
+
+      if (nodesOverlap(node, otherNode)) {
+        // Push the later node down
+        otherNode.position = {
+          ...otherNode.position,
+          y: otherNode.position.y + 120,
+        };
+      }
+    }
+  }
+
+  return [...topLevelNodes, ...childNodes];
+}
+
+/**
+ * Check if two nodes overlap
+ */
+function nodesOverlap(a: Node, b: Node): boolean {
+  const aWidth = a.measured?.width ?? a.width ?? 200;
+  const aHeight = a.measured?.height ?? a.height ?? 100;
+  const bWidth = b.measured?.width ?? b.width ?? 200;
+  const bHeight = b.measured?.height ?? b.height ?? 100;
+
+  const padding = 20; // Minimum gap between nodes
+
+  return !(
+    a.position.x + Number(aWidth) + padding < b.position.x ||
+    b.position.x + Number(bWidth) + padding < a.position.x ||
+    a.position.y + Number(aHeight) + padding < b.position.y ||
+    b.position.y + Number(bHeight) + padding < a.position.y
+  );
+}
+
+/**
+ * Check if nodes need auto-layout
+ *
+ * Returns true if nodes don't have meaningful positions.
+ */
+export { shouldApplyLayout };

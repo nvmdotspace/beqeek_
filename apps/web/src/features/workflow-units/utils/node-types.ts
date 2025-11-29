@@ -26,7 +26,11 @@ export type NodeType =
   | 'math'
   | 'definition'
   | 'object_lookup'
-  | 'log_logic'; // Separate log for logic category
+  | 'log_logic' // Separate log for logic category
+  // Compound nodes (nested blocks)
+  | 'compound_condition'
+  | 'compound_loop'
+  | 'merge';
 
 export interface BaseNodeData {
   name: string;
@@ -106,6 +110,7 @@ export interface UserOperationData extends BaseNodeData {
 export interface DelayData extends BaseNodeData {
   duration: number; // Milliseconds
   unit?: 'ms' | 's' | 'm' | 'h';
+  callback?: string; // Name/ID of callback to execute after delay
 }
 
 export interface LogData extends BaseNodeData {

@@ -9,8 +9,10 @@
  */
 
 import { memo } from 'react';
-import { MoreVertical, Server, Key, Hash, Clock, Edit, Trash2, Eye } from 'lucide-react';
+import { MoreVertical, Hash, Clock, Edit, Trash2, Eye } from 'lucide-react';
 import { getRouteApi } from '@tanstack/react-router';
+// @ts-expect-error - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 import { Card, CardContent } from '@workspace/ui/components/card';
 import { Badge } from '@workspace/ui/components/badge';
 import { Button } from '@workspace/ui/components/button';
@@ -26,13 +28,8 @@ import { CONNECTOR_TYPES } from '@workspace/beqeek-shared/workflow-connectors';
 import { ROUTES } from '@/shared/route-paths';
 import { cn } from '@workspace/ui/lib/utils';
 import { ConnectorIcon, getConnectorColors } from './connector-icon';
-import {
-  getConnectorFieldCount,
-  isOAuthConnector,
-  hasValidOAuthToken,
-  getFilledFieldCount,
-  formatConnectorUpdateTime,
-} from '../utils/connector-metadata';
+import { ConnectionStatusBadge } from './connection-status-badge';
+import { getConnectorFieldCount, getFilledFieldCount, formatConnectorUpdateTime } from '../utils/connector-metadata';
 
 interface ConnectorListItemProps {
   /** Connector instance */
@@ -55,8 +52,6 @@ export const ConnectorListItem = memo(
 
     // Find connector type metadata
     const connectorType = CONNECTOR_TYPES.find((t) => t.type === connector.connectorType);
-    const isOAuth = isOAuthConnector(connector.connectorType);
-    const hasOAuthToken = hasValidOAuthToken(connector);
     const totalFields = getConnectorFieldCount(connector.connectorType);
     const filledFields = getFilledFieldCount(connector);
     const updatedAtLabel = formatConnectorUpdateTime(connector.updatedAt, locale);
@@ -107,7 +102,7 @@ export const ConnectorListItem = memo(
                   {connector.name}
                 </Heading>
 
-                {/* Inline metadata: Type badge + Server indicator */}
+                {/* Inline metadata: Type badge + Connection status */}
                 <div className="flex items-center gap-1.5 flex-wrap">
                   <Badge
                     variant="outline"
@@ -115,13 +110,7 @@ export const ConnectorListItem = memo(
                   >
                     {connectorType?.name || connector.connectorType}
                   </Badge>
-                  <Badge
-                    variant="outline"
-                    className="flex items-center gap-0.5 text-[10px] whitespace-nowrap h-4 px-1.5 text-muted-foreground"
-                  >
-                    <Server className="h-2.5 w-2.5 shrink-0" />
-                    <span>Server</span>
-                  </Badge>
+                  <ConnectionStatusBadge connector={connector} size="sm" showLabel />
                 </div>
               </div>
             </div>
@@ -136,18 +125,18 @@ export const ConnectorListItem = memo(
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={handleClick}>
                   <Eye className="mr-2 h-4 w-4" />
-                  Xem chi tiết
+                  {m.connectors_list_viewDetail()}
                 </DropdownMenuItem>
                 {onEdit && (
                   <DropdownMenuItem onClick={handleEdit}>
                     <Edit className="mr-2 h-4 w-4" />
-                    Chỉnh sửa
+                    {m.connectors_list_edit()}
                   </DropdownMenuItem>
                 )}
                 {onDelete && (
                   <DropdownMenuItem onClick={handleDelete} className="text-destructive focus:text-destructive">
                     <Trash2 className="mr-2 h-4 w-4" />
-                    Xóa
+                    {m.connectors_list_delete()}
                   </DropdownMenuItem>
                 )}
               </DropdownMenuContent>
@@ -158,18 +147,8 @@ export const ConnectorListItem = memo(
           <div className="mt-3 flex items-center gap-4 text-xs text-muted-foreground">
             <div className="flex items-center gap-1.5">
               <Hash className="h-3 w-3" />
-              <span>
-                {filledFields}/{totalFields} fields
-              </span>
+              <span>{m.connectors_list_fields({ filled: filledFields, total: totalFields })}</span>
             </div>
-            {isOAuth && (
-              <div className="flex items-center gap-1.5">
-                <Key className="h-3 w-3" />
-                <span className={cn(hasOAuthToken ? 'text-accent-green' : 'text-muted-foreground')}>
-                  {hasOAuthToken ? 'OAuth OK' : 'Not connected'}
-                </span>
-              </div>
-            )}
           </div>
 
           {/* Last updated */}

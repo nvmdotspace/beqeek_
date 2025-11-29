@@ -6,6 +6,8 @@
 
 import { useForm } from '@tanstack/react-form';
 import { z } from 'zod';
+// @ts-expect-error - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 import {
   Dialog,
   DialogContent,
@@ -19,10 +21,12 @@ import { Input } from '@workspace/ui/components/input';
 import { Textarea } from '@workspace/ui/components/textarea';
 import { Label } from '@workspace/ui/components/label';
 
-const editConnectorSchema = z.object({
-  name: z.string().min(1, 'Tên connector là bắt buộc').max(100, 'Tên không được quá 100 ký tự'),
-  description: z.string().max(500, 'Mô tả không được quá 500 ký tự').optional(),
-});
+// Schema validation is created dynamically to support i18n
+const editConnectorSchema = () =>
+  z.object({
+    name: z.string().min(1, m.connectors_create_nameRequired()).max(100, m.connectors_create_nameMaxLength()),
+    description: z.string().max(500, m.connectors_create_descMaxLength()).optional(),
+  });
 
 interface EditConnectorDialogProps {
   /** Whether dialog is open */
@@ -78,8 +82,8 @@ export function EditConnectorDialog({
           }}
         >
           <DialogHeader>
-            <DialogTitle>Chỉnh sửa thông tin Connector</DialogTitle>
-            <DialogDescription>Cập nhật tên định danh và mô tả cho connector</DialogDescription>
+            <DialogTitle>{m.connectors_edit_title()}</DialogTitle>
+            <DialogDescription>{m.connectors_edit_subtitle()}</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
@@ -87,17 +91,17 @@ export function EditConnectorDialog({
             <form.Field
               name="name"
               validators={{
-                onChange: editConnectorSchema.shape.name,
+                onChange: editConnectorSchema().shape.name,
               }}
             >
               {(field) => (
                 <div className="space-y-2">
                   <Label htmlFor="connector-name-edit">
-                    Tên định danh <span className="text-destructive">*</span>
+                    {m.connectors_create_nameLabel()} <span className="text-destructive">*</span>
                   </Label>
                   <Input
                     id="connector-name-edit"
-                    placeholder="Ví dụ: Email Marketing"
+                    placeholder={m.connectors_create_namePlaceholder()}
                     value={field.state.value}
                     onChange={(e) => field.handleChange(e.target.value)}
                     onBlur={field.handleBlur}
@@ -111,10 +115,10 @@ export function EditConnectorDialog({
             <form.Field name="description">
               {(field) => (
                 <div className="space-y-2">
-                  <Label htmlFor="connector-description-edit">Mô tả</Label>
+                  <Label htmlFor="connector-description-edit">{m.connectors_create_descLabel()}</Label>
                   <Textarea
                     id="connector-description-edit"
-                    placeholder="Mô tả mục đích sử dụng connector này..."
+                    placeholder={m.connectors_create_descPlaceholder()}
                     value={field.state.value}
                     onChange={(e) => field.handleChange(e.target.value)}
                     onBlur={field.handleBlur}
@@ -128,12 +132,12 @@ export function EditConnectorDialog({
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={handleClose} disabled={isLoading}>
-              Hủy
+              {m.connectors_edit_cancel()}
             </Button>
             <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
               {([canSubmit, isSubmitting]) => (
                 <Button type="submit" disabled={!canSubmit || isSubmitting || isLoading}>
-                  {isLoading ? 'Đang lưu...' : 'Lưu thay đổi'}
+                  {isLoading ? m.connectors_edit_saving() : m.connectors_edit_submit()}
                 </Button>
               )}
             </form.Subscribe>

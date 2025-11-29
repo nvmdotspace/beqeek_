@@ -7,6 +7,8 @@
 import { useState, useMemo, useCallback } from 'react';
 import { getRouteApi } from '@tanstack/react-router';
 import { ArrowLeft } from 'lucide-react';
+// @ts-expect-error - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 import { ROUTES } from '@/shared/route-paths';
 import { CONNECTOR_TYPES, type ConnectorType } from '@workspace/beqeek-shared/workflow-connectors';
 import { ConnectorCard } from '../components/connector-card';
@@ -88,15 +90,15 @@ export function ConnectorSelectPage() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div className="flex-1">
-            <Heading level={1}>Chọn loại Connector</Heading>
+            <Heading level={1}>{m.connectors_select_title()}</Heading>
             <Text size="small" color="muted">
-              Chọn dịch vụ bạn muốn kết nối
+              {m.connectors_select_subtitle()}
             </Text>
           </div>
         </div>
 
         {/* Search */}
-        <SearchInput placeholder="Tìm kiếm connector..." onSearch={setSearchQuery} className="max-w-md" />
+        <SearchInput placeholder={m.connectors_select_search()} onSearch={setSearchQuery} className="max-w-md" />
       </div>
 
       {/* Grid - Compact 2-column layout for better readability */}
@@ -108,8 +110,8 @@ export function ConnectorSelectPage() {
         </div>
       ) : (
         <EmptyState
-          message="Không tìm thấy connector"
-          description={`Không có connector nào khớp với "${searchQuery}". Thử tìm kiếm với từ khóa khác.`}
+          message={m.connectors_select_empty()}
+          description={m.connectors_select_emptyDesc({ query: searchQuery })}
         />
       )}
 

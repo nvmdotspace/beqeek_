@@ -14,6 +14,8 @@ import { X } from 'lucide-react';
 import { Button } from '@workspace/ui/components/button';
 import { useWorkflowEditorStore } from '../../../stores/workflow-editor-store';
 import { NODE_DEFINITIONS } from '../../../utils/node-types';
+import { BranchEdge } from './branch-edge';
+import { LoopEdge } from './loop-edge';
 
 // Category colors using CSS variables for dark/light mode support
 const CATEGORY_COLORS = {
@@ -159,6 +161,8 @@ WorkflowEdge.displayName = 'WorkflowEdge';
 export const EDGE_TYPES = {
   default: WorkflowEdge,
   workflow: WorkflowEdge,
+  branch: BranchEdge, // For compound condition branches (then/else)
+  loop: LoopEdge, // For loop iteration edges (entry, sequential, repeat)
 };
 
 // Default edge options

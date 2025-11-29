@@ -55,7 +55,27 @@ export const isValidConnection = (connection: Connection, nodes: Node[], edges: 
     return false;
   }
 
-  // Rule 3: Prevent circular dependencies using DFS
+  // Rule 3: Prevent connecting to same branch twice for compound_condition nodes
+  if (sourceNode.type === 'compound_condition') {
+    const sourceHandle = connection.sourceHandle;
+    if (sourceHandle === 'then' || sourceHandle === 'else') {
+      const existingBranchEdge = edges.find((e) => e.source === connection.source && e.sourceHandle === sourceHandle);
+
+      if (existingBranchEdge) {
+        console.warn(`Branch "${sourceHandle}" already connected`);
+        return false;
+      }
+    }
+  }
+
+  // Rule 4: Prevent connecting child node to a different parent
+  if (targetNode.parentId && targetNode.parentId !== sourceNode.id) {
+    // Target is a child of a compound node, but source is not its parent
+    console.warn('Cannot connect child to different parent');
+    return false;
+  }
+
+  // Rule 5: Prevent circular dependencies using DFS
   // Build adjacency list from existing edges + new connection
   const adjacencyList = new Map<string, string[]>();
 

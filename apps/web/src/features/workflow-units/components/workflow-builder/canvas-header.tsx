@@ -13,7 +13,7 @@ import { Save, AlertCircle, FileQuestion, Undo2, Redo2, Network, Download } from
 import { useWorkflowEditorStore } from '../../stores/workflow-editor-store';
 import { useUpdateWorkflowEvent } from '../../hooks/use-update-workflow-event';
 import { reactFlowToYAML } from '../../utils/yaml-converter';
-import { autoLayoutNodes } from '../../utils/auto-layout';
+import { autoLayout } from '../../utils/auto-layout';
 import { exportWorkflowToPng } from '../../utils/export-utils';
 import { EditorModeToggle } from './editor-mode-toggle';
 import { EventSelector } from './event-selector';
@@ -83,12 +83,12 @@ export function CanvasHeader({ workspaceId, unitId, onCreateEvent }: CanvasHeade
     }
   }, [currentEvent, workspaceId, nodes, edges, mode, updateEvent, setIsDirty]);
 
-  // Auto-layout handler
+  // Auto-layout handler (supports compound nodes with branches/loops)
   const handleAutoLayout = useCallback(() => {
     if (nodes.length === 0) return;
 
     try {
-      const layoutedNodes = autoLayoutNodes(nodes, edges);
+      const layoutedNodes = autoLayout(nodes, edges);
       setNodes(layoutedNodes);
       toast.success('Nodes arranged automatically');
     } catch (error) {

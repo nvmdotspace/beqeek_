@@ -22,7 +22,7 @@ import { parseWorkflowYAML, parseWorkflowYAMLWithInfo, type ParseOptions } from 
 import { irToReactFlow } from './ir-to-reactflow';
 import { reactFlowToIR } from './reactflow-to-ir';
 import { serializeWorkflowYAML } from './yaml-serializer';
-import type { WorkflowIR, TriggerIR } from './yaml-types';
+import type { WorkflowIR, TriggerIR, CallbackIR } from './yaml-types';
 
 /**
  * Options for YAML to React Flow conversion
@@ -41,6 +41,8 @@ export interface YAMLToReactFlowResult {
   edges: Edge[];
   /** Trigger configuration */
   trigger: TriggerIR;
+  /** Callback definitions (for delay blocks) */
+  callbacks?: CallbackIR[];
   /** Original IR for reference */
   ir: WorkflowIR;
   /** Whether the input was in legacy format */
@@ -82,12 +84,13 @@ export function yamlToReactFlow(yamlString: string, options?: YAMLToReactFlowOpt
   const { ir, wasLegacy } = parseWorkflowYAMLWithInfo(yamlString, options);
 
   // Convert IR → React Flow nodes/edges
-  const { nodes, edges, trigger } = irToReactFlow(ir);
+  const { nodes, edges, trigger, callbacks } = irToReactFlow(ir);
 
   return {
     nodes,
     edges,
     trigger,
+    callbacks,
     ir, // Return IR for reference/debugging
     wasLegacy,
   };
@@ -193,7 +196,7 @@ export function roundTripTest(yamlString: string): {
 }
 
 // Re-export types and errors for convenience
-export type { WorkflowIR, StepIR, TriggerIR } from './yaml-types';
+export type { WorkflowIR, StepIR, TriggerIR, CallbackIR } from './yaml-types';
 export { YAMLParseError, isLegacyYAML } from './yaml-parser';
 export { YAMLSerializeError } from './yaml-serializer';
 export { CircularDependencyError } from './topological-sort';

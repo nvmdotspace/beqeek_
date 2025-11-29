@@ -76,10 +76,12 @@ export function NodeFormRouter({ node, onUpdate }: NodeFormRouterProps) {
 
     // Logic
     case 'condition':
+    case 'compound_condition':
       return <ConditionForm data={node.data} onUpdate={onUpdate} />;
     case 'match':
       return <MatchForm data={node.data} onUpdate={onUpdate} />;
     case 'loop':
+    case 'compound_loop':
       return <LoopForm data={node.data} onUpdate={onUpdate} />;
     case 'math':
       return <MathForm data={node.data} onUpdate={onUpdate} />;

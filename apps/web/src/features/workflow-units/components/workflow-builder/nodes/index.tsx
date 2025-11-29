@@ -4,6 +4,9 @@
  */
 import { type NodeProps } from '@xyflow/react';
 import { BaseWorkflowNode } from './base-workflow-node';
+import { CompoundConditionNode } from './compound-condition-node';
+import { CompoundLoopNode } from './compound-loop-node';
+import { MergeNode } from './merge-node';
 import type {
   TriggerScheduleData,
   TriggerWebhookData,
@@ -311,10 +314,13 @@ export const LogLogicNode = (props: NodeProps) => {
 
 // Node registry for React Flow
 export const NODE_TYPES = {
+  // Trigger nodes
   trigger_schedule: TriggerScheduleNode,
   trigger_webhook: TriggerWebhookNode,
   trigger_form: TriggerFormNode,
   trigger_table: TriggerTableNode,
+
+  // Action nodes
   table_operation: TableOperationNode,
   table_comment_create: TableCommentCreateNode,
   table_comment_get_one: TableCommentGetOneNode,
@@ -324,6 +330,8 @@ export const NODE_TYPES = {
   user_operation: UserOperationNode,
   delay: DelayNode,
   log: LogNode,
+
+  // Logic nodes (simple mode)
   condition: ConditionNode,
   match: MatchNode,
   loop: LoopNode,
@@ -331,4 +339,11 @@ export const NODE_TYPES = {
   definition: DefinitionNode,
   object_lookup: ObjectLookupNode,
   log_logic: LogLogicNode,
+
+  // Compound nodes (for nested blocks)
+  compound_condition: CompoundConditionNode,
+  compound_loop: CompoundLoopNode,
+
+  // Merge node (for branch rejoining)
+  merge: MergeNode,
 };

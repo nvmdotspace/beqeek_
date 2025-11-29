@@ -30,7 +30,7 @@
  * ```
  */
 
-import type { WorkflowIR, StepIR, TriggerIR } from './yaml-types';
+import type { WorkflowIR, StepIR, TriggerIR, CallbackIR } from './yaml-types';
 
 /**
  * Legacy block structure from PHP/Blockly
@@ -57,6 +57,7 @@ interface LegacyStage {
  */
 interface LegacyYAML {
   stages: LegacyStage[];
+  callbacks?: LegacyBlock[];
 }
 
 /**
@@ -88,10 +89,24 @@ function generateStepId(type: string, index: number): string {
 }
 
 /**
- * Flatten nested blocks into linear steps array
+ * Counter for generating unique step IDs within a conversion session
+ */
+let stepCounter = 0;
+
+/**
+ * Reset the step counter (used at the start of each conversion)
+ */
+function resetStepCounter(): void {
+  stepCounter = 0;
+}
+
+/**
+ * Flatten nested blocks into linear steps array (LEGACY - for backward compatibility)
  *
  * Blockly format can have nested blocks inside blocks.
  * This function flattens them while preserving execution order.
+ *
+ * @deprecated Use convertBlocksPreservingNesting for compound nodes
  */
 function flattenBlocks(blocks: LegacyBlock[], prefix: string = ''): StepIR[] {
   const steps: StepIR[] = [];
@@ -138,6 +153,83 @@ function flattenBlocks(blocks: LegacyBlock[], prefix: string = ''): StepIR[] {
 
   for (const block of blocks) {
     processBlock(block);
+  }
+
+  return steps;
+}
+
+/**
+ * Convert blocks while preserving nested structure for compound nodes
+ *
+ * This function converts legacy blocks to StepIR while preserving:
+ * - branches (then/else) for condition blocks
+ * - nested_blocks for loop and match blocks
+ *
+ * @param blocks - Array of legacy blocks to convert
+ * @param prefix - Optional prefix for step IDs
+ * @returns Array of StepIR with preserved nesting
+ */
+function convertBlocksPreservingNesting(blocks: LegacyBlock[], prefix: string = ''): StepIR[] {
+  const steps: StepIR[] = [];
+
+  for (const block of blocks) {
+    stepCounter++;
+    const stepId = prefix ? `${prefix}_${stepCounter}` : generateStepId(block.type, stepCounter);
+
+    // Create base step from block
+    const step: StepIR = {
+      id: stepId,
+      name: block.name || `step_${stepCounter}`,
+      type: mapBlockType(block.type),
+      config: mapBlockInputToConfig(block.type, block.input || {}),
+    };
+
+    // Handle condition blocks - preserve then/else as branches
+    if (block.type === 'condition') {
+      const branches: StepIR['branches'] = {};
+
+      if (block.then && block.then.length > 0) {
+        branches.then = convertBlocksPreservingNesting(block.then, `${stepId}_then`);
+      }
+
+      if (block.else && block.else.length > 0) {
+        branches.else = convertBlocksPreservingNesting(block.else, `${stepId}_else`);
+      }
+
+      // Only add branches if at least one exists
+      if (branches.then || branches.else) {
+        step.branches = branches;
+      }
+    }
+
+    // Handle loop blocks - preserve blocks as nested_blocks
+    if (block.type === 'loop' && block.blocks && block.blocks.length > 0) {
+      step.nested_blocks = convertBlocksPreservingNesting(block.blocks, `${stepId}_loop`);
+    }
+
+    // Handle match blocks - preserve blocks as nested_blocks
+    if (block.type === 'match' && block.blocks && block.blocks.length > 0) {
+      step.nested_blocks = convertBlocksPreservingNesting(block.blocks, `${stepId}_match`);
+    }
+
+    // Handle regular nested blocks (non-branching containers)
+    // These become sequential dependencies in the parent's context
+    if (block.blocks && block.blocks.length > 0 && !['condition', 'loop', 'match'].includes(block.type)) {
+      // For non-compound blocks, nested children become siblings after parent
+      const nestedSteps = convertBlocksPreservingNesting(block.blocks, `${stepId}_nested`);
+
+      // First nested step depends on parent
+      if (nestedSteps.length > 0 && nestedSteps[0]) {
+        nestedSteps[0].depends_on = [stepId];
+      }
+
+      // Add nested steps after current step
+      steps.push(step);
+      steps.push(...nestedSteps);
+      continue;
+    }
+
+    steps.push(step);
   }
 
   return steps;
@@ -208,6 +300,10 @@ function mapBlockInputToConfig(type: string, input: Record<string, unknown>): Re
 
     case 'delay':
       // Duration is already in correct format
+      // Preserve callback field for linking to callbacks section
+      if ('callback' in config) {
+        // Keep callback as-is - it references a callback by name
+      }
       break;
 
     case 'loop':
@@ -249,18 +345,57 @@ function inferTriggerType(eventSourceType?: string): TriggerIR['type'] {
 }
 
 /**
+ * Convert a single legacy callback block to CallbackIR format
+ */
+function convertCallbackBlock(block: LegacyBlock, index: number, preserveNesting: boolean = true): CallbackIR {
+  const callbackId = block.name || `callback_${index + 1}`;
+
+  // Convert nested blocks if present
+  const nestedSteps: StepIR[] = [];
+  if (block.blocks && block.blocks.length > 0) {
+    const convertedSteps = preserveNesting
+      ? convertBlocksPreservingNesting(block.blocks, callbackId)
+      : flattenBlocks(block.blocks, callbackId);
+    nestedSteps.push(...convertedSteps);
+  }
+
+  return {
+    id: callbackId,
+    name: block.name || `callback_${index + 1}`,
+    type: mapBlockType(block.type),
+    config: mapBlockInputToConfig(block.type, block.input || {}),
+    steps: nestedSteps.length > 0 ? nestedSteps : undefined,
+  };
+}
+
+/**
+ * Options for legacy YAML conversion
+ */
+export interface ConvertLegacyOptions {
+  /** Preserve nested structure for compound nodes (default: true) */
+  preserveNesting?: boolean;
+}
+
+/**
  * Convert legacy YAML object to new IR format
  *
  * @param legacyYaml - Parsed legacy YAML object
  * @param eventSourceType - Optional event source type for trigger inference
  * @param eventSourceParams - Optional event source params for trigger config
+ * @param options - Optional conversion options
  * @returns WorkflowIR in new format
  */
 export function convertLegacyToIR(
   legacyYaml: LegacyYAML,
   eventSourceType?: string,
   eventSourceParams?: Record<string, unknown>,
+  options?: ConvertLegacyOptions,
 ): WorkflowIR {
+  const preserveNesting = options?.preserveNesting ?? true;
+
+  // Reset step counter for fresh conversion
+  resetStepCounter();
+
   const allSteps: StepIR[] = [];
   let previousStageLastStep: string | undefined;
 
@@ -271,8 +406,10 @@ export function convertLegacyToIR(
 
     if (!stage) continue;
 
-    // Flatten blocks in this stage
-    const stageSteps = flattenBlocks(stage.blocks || [], stagePrefix);
+    // Convert blocks - use preserveNesting or flatten based on option
+    const stageSteps = preserveNesting
+      ? convertBlocksPreservingNesting(stage.blocks || [], stagePrefix)
+      : flattenBlocks(stage.blocks || [], stagePrefix);
 
     // Connect first step of this stage to last step of previous stage
     if (previousStageLastStep && stageSteps.length > 0 && stageSteps[0]) {
@@ -286,9 +423,20 @@ export function convertLegacyToIR(
 
     allSteps.push(...stageSteps);
 
-    // Track last step for next stage connection
+    // Track last step for next stage connection (find the last top-level step)
     if (stageSteps.length > 0) {
       previousStageLastStep = stageSteps[stageSteps.length - 1]?.id;
+    }
+  }
+
+  // Process callbacks section (for delay blocks)
+  const callbacks: CallbackIR[] = [];
+  if (legacyYaml.callbacks && legacyYaml.callbacks.length > 0) {
+    for (let i = 0; i < legacyYaml.callbacks.length; i++) {
+      const callbackBlock = legacyYaml.callbacks[i];
+      if (callbackBlock) {
+        callbacks.push(convertCallbackBlock(callbackBlock, i, preserveNesting));
+      }
     }
   }
 
@@ -311,11 +459,18 @@ export function convertLegacyToIR(
     });
   }
 
-  return {
+  const result: WorkflowIR = {
     version: '1.0',
     trigger,
     steps: allSteps,
   };
+
+  // Only include callbacks if there are any
+  if (callbacks.length > 0) {
+    result.callbacks = callbacks;
+  }
+
+  return result;
 }
 
 /**

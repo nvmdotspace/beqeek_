@@ -32,6 +32,23 @@ export interface StepIR {
     x: number;
     y: number;
   };
+
+  /**
+   * Conditional branches for 'condition' type steps.
+   * Mutually exclusive with nested_blocks.
+   */
+  branches?: {
+    /** Steps executed when condition is true */
+    then?: StepIR[];
+    /** Steps executed when condition is false */
+    else?: StepIR[];
+  };
+
+  /**
+   * Nested blocks for 'loop' and 'match' type steps.
+   * Mutually exclusive with branches.
+   */
+  nested_blocks?: StepIR[];
 }
 
 /**
@@ -47,6 +64,28 @@ export interface EdgeIR {
 }
 
 /**
+ * Callback step configuration (for delay blocks)
+ * Callbacks are executed asynchronously after a delay completes
+ */
+export interface CallbackIR {
+  /** Unique identifier for the callback */
+  id: string;
+  /** Display name shown in UI */
+  name: string;
+  /** Node type (must match React Flow node types) */
+  type: string;
+  /** Node-specific configuration */
+  config: Record<string, unknown>;
+  /** Array of nested steps within this callback */
+  steps?: StepIR[];
+  /** Optional position for manual layout preservation */
+  position?: {
+    x: number;
+    y: number;
+  };
+}
+
+/**
  * Complete workflow in Intermediate Representation format
  */
 export interface WorkflowIR {
@@ -56,6 +95,8 @@ export interface WorkflowIR {
   trigger: TriggerIR;
   /** Array of workflow steps (topologically sorted for execution) */
   steps: StepIR[];
+  /** Array of callback steps (executed after delay blocks) */
+  callbacks?: CallbackIR[];
   /** Optional metadata */
   metadata?: {
     description?: string;
