@@ -13,10 +13,15 @@ interface TableCommentGetOneFormProps {
 }
 
 export function TableCommentGetOneForm({ data, onUpdate }: TableCommentGetOneFormProps) {
-  const name = (data.name as string) || 'get_comment';
-  const connector = (data.connector as string) || '';
-  const recordId = (data.recordId as string) || '';
-  const commentId = (data.commentId as string) || '';
+  const config = (data.config as Record<string, unknown>) || {};
+  const name = (data.label as string) || 'get_comment';
+  const connector = (config.connector as string) || '';
+  const recordId = (config.recordId as string) || '';
+  const commentId = (config.commentId as string) || '';
+
+  const updateConfig = (updates: Record<string, unknown>) => {
+    onUpdate({ config: { ...config, ...updates } });
+  };
 
   return (
     <div className="space-y-4">
@@ -24,7 +29,7 @@ export function TableCommentGetOneForm({ data, onUpdate }: TableCommentGetOneFor
         <Input
           id="comment-name"
           value={name}
-          onChange={(e) => onUpdate({ name: e.target.value })}
+          onChange={(e) => onUpdate({ label: e.target.value })}
           placeholder="get_comment"
         />
       </FormField>
@@ -38,7 +43,7 @@ export function TableCommentGetOneForm({ data, onUpdate }: TableCommentGetOneFor
         <Input
           id="comment-connector"
           value={connector}
-          onChange={(e) => onUpdate({ connector: e.target.value })}
+          onChange={(e) => updateConfig({ connector: e.target.value })}
           placeholder="Enter table ID"
           className="font-mono"
         />
@@ -53,7 +58,7 @@ export function TableCommentGetOneForm({ data, onUpdate }: TableCommentGetOneFor
         <Input
           id="comment-record-id"
           value={recordId}
-          onChange={(e) => onUpdate({ recordId: e.target.value })}
+          onChange={(e) => updateConfig({ recordId: e.target.value })}
           placeholder="$[trigger.record_id]"
           className="font-mono"
         />
@@ -63,7 +68,7 @@ export function TableCommentGetOneForm({ data, onUpdate }: TableCommentGetOneFor
         <Input
           id="comment-id"
           value={commentId}
-          onChange={(e) => onUpdate({ commentId: e.target.value })}
+          onChange={(e) => updateConfig({ commentId: e.target.value })}
           placeholder="$[trigger.comment_id]"
           className="font-mono"
         />

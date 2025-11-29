@@ -14,11 +14,16 @@ interface MathFormProps {
 }
 
 export function MathForm({ data, onUpdate }: MathFormProps) {
-  const name = (data.name as string) || 'math';
-  const operation = (data.operation as string) || 'add';
-  const operandA = (data.operandA as string) || '';
-  const operandB = (data.operandB as string) || '';
-  const precision = (data.precision as number) ?? 2;
+  const config = (data.config as Record<string, unknown>) || {};
+  const name = (data.label as string) || 'math';
+  const operation = (config.operation as string) || 'add';
+  const operandA = (config.operandA as string) || '';
+  const operandB = (config.operandB as string) || '';
+  const precision = (config.precision as number) ?? 2;
+
+  const updateConfig = (updates: Record<string, unknown>) => {
+    onUpdate({ config: { ...config, ...updates } });
+  };
 
   const isBinaryOperation = ['add', 'subtract', 'multiply', 'divide', 'modulo', 'power', 'min', 'max'].includes(
     operation,
@@ -28,11 +33,11 @@ export function MathForm({ data, onUpdate }: MathFormProps) {
   return (
     <div className="space-y-4">
       <FormField label="Name" htmlFor="math-name" description="Unique identifier for this step" required>
-        <Input id="math-name" value={name} onChange={(e) => onUpdate({ name: e.target.value })} placeholder="math" />
+        <Input id="math-name" value={name} onChange={(e) => onUpdate({ label: e.target.value })} placeholder="math" />
       </FormField>
 
       <FormField label="Operation" htmlFor="math-operation" description="Mathematical operation to perform" required>
-        <Select value={operation} onValueChange={(value) => onUpdate({ operation: value })}>
+        <Select value={operation} onValueChange={(value) => updateConfig({ operation: value })}>
           <SelectTrigger>
             <SelectValue placeholder="Select operation" />
           </SelectTrigger>
@@ -66,7 +71,7 @@ export function MathForm({ data, onUpdate }: MathFormProps) {
         <Input
           id="math-operand-a"
           value={operandA}
-          onChange={(e) => onUpdate({ operandA: e.target.value })}
+          onChange={(e) => updateConfig({ operandA: e.target.value })}
           placeholder="$[trigger.quantity]"
           className="font-mono"
         />
@@ -82,7 +87,7 @@ export function MathForm({ data, onUpdate }: MathFormProps) {
           <Input
             id="math-operand-b"
             value={operandB}
-            onChange={(e) => onUpdate({ operandB: e.target.value })}
+            onChange={(e) => updateConfig({ operandB: e.target.value })}
             placeholder="$[trigger.price]"
             className="font-mono"
           />
@@ -96,7 +101,7 @@ export function MathForm({ data, onUpdate }: MathFormProps) {
           min={0}
           max={10}
           value={precision}
-          onChange={(e) => onUpdate({ precision: parseInt(e.target.value) || 0 })}
+          onChange={(e) => updateConfig({ precision: parseInt(e.target.value) || 0 })}
           placeholder="2"
         />
       </FormField>

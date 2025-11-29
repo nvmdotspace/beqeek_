@@ -30,18 +30,24 @@ function generateUUID(): string {
 type SnippetType = 'curl' | 'javascript' | 'python';
 
 export function TriggerWebhookForm({ data, onUpdate }: TriggerWebhookFormProps) {
-  const webhookId = (data.webhookId as string) || '';
-  const name = (data.name as string) || '';
+  const config = (data.config as Record<string, unknown>) || {};
+  const name = (data.label as string) || '';
+  const webhookId = (config.webhookId as string) || '';
   const [copied, setCopied] = useState(false);
   const [copiedSnippet, setCopiedSnippet] = useState<SnippetType | null>(null);
   const [isSnippetsOpen, setIsSnippetsOpen] = useState(false);
 
+  const updateConfig = (updates: Record<string, unknown>) => {
+    onUpdate({ config: { ...config, ...updates } });
+  };
+
   // Auto-generate webhook ID if not present
   useEffect(() => {
     if (!webhookId) {
-      onUpdate({ webhookId: generateUUID() });
+      updateConfig({ webhookId: generateUUID() });
     }
-  }, [webhookId, onUpdate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Construct full webhook URL
   const webhookUrl = webhookId ? `https://app.beqeek.com/api/webhook/${webhookId}` : '';
@@ -58,8 +64,9 @@ export function TriggerWebhookForm({ data, onUpdate }: TriggerWebhookFormProps) 
   }, [webhookUrl]);
 
   const handleRegenerate = useCallback(() => {
-    onUpdate({ webhookId: generateUUID() });
-  }, [onUpdate]);
+    updateConfig({ webhookId: generateUUID() });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [config]);
 
   // Code snippets
   const snippets: Record<SnippetType, string> = {
@@ -115,7 +122,7 @@ requests.post(
         <Input
           id="trigger-name"
           value={name}
-          onChange={(e) => onUpdate({ name: e.target.value })}
+          onChange={(e) => onUpdate({ label: e.target.value })}
           placeholder="my_webhook_trigger"
           aria-invalid={!name}
           className={!name ? 'border-destructive focus-visible:ring-destructive' : ''}
@@ -131,7 +138,7 @@ requests.post(
           <Input
             id="trigger-webhook-id"
             value={webhookId}
-            onChange={(e) => onUpdate({ webhookId: e.target.value })}
+            onChange={(e) => updateConfig({ webhookId: e.target.value })}
             placeholder="xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
             className="font-mono text-sm"
           />

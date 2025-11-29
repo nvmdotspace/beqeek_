@@ -15,28 +15,35 @@ interface LogFormProps {
 }
 
 export function LogForm({ data, onUpdate }: LogFormProps) {
-  const name = (data.name as string) || 'log';
-  const message = (data.message as string) || '';
-  const level = (data.level as string) || 'info';
-  const context = typeof data.context === 'string' ? data.context : JSON.stringify(data.context || {}, null, 2);
+  // IR converter stores: data.label (name) and data.config.* (config fields)
+  const config = (data.config as Record<string, unknown>) || {};
+  const name = (data.label as string) || 'log';
+  const message = (config.message as string) || '';
+  const level = (config.level as string) || 'info';
+  const context = typeof config.context === 'string' ? config.context : JSON.stringify(config.context || {}, null, 2);
+
+  // Helper to update config fields while preserving structure
+  const updateConfig = (updates: Record<string, unknown>) => {
+    onUpdate({ config: { ...config, ...updates } });
+  };
 
   return (
     <div className="space-y-4">
       <FormField label="Name" htmlFor="log-name" description="Unique identifier for this step" required>
-        <Input id="log-name" value={name} onChange={(e) => onUpdate({ name: e.target.value })} placeholder="log" />
+        <Input id="log-name" value={name} onChange={(e) => onUpdate({ label: e.target.value })} placeholder="log" />
       </FormField>
 
       <FormField label="Message" htmlFor="log-message" description="Log message with variable support" required>
         <Input
           id="log-message"
           value={message}
-          onChange={(e) => onUpdate({ message: e.target.value })}
+          onChange={(e) => updateConfig({ message: e.target.value })}
           placeholder="Processing order $[trigger.order_id]..."
         />
       </FormField>
 
       <FormField label="Level" htmlFor="log-level" description="Log severity level" required>
-        <Select value={level} onValueChange={(value) => onUpdate({ level: value })}>
+        <Select value={level} onValueChange={(value) => updateConfig({ level: value })}>
           <SelectTrigger>
             <SelectValue placeholder="Select level" />
           </SelectTrigger>
@@ -50,7 +57,7 @@ export function LogForm({ data, onUpdate }: LogFormProps) {
       </FormField>
 
       <FormField label="Context" htmlFor="log-context" description="Additional data to include in log">
-        <ValueBuilder value={context} onChange={(value) => onUpdate({ context: value })} mode="object" />
+        <ValueBuilder value={context} onChange={(value) => updateConfig({ context: value })} mode="object" />
       </FormField>
 
       <div className="rounded-md bg-muted p-3 text-xs">

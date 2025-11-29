@@ -21,39 +21,44 @@ interface MatchFormProps {
 }
 
 export function MatchForm({ data, onUpdate }: MatchFormProps) {
-  const name = (data.name as string) || 'match';
-  const value = (data.value as string) || '';
-  const rawCases = data.cases as MatchCase[] | undefined;
+  const config = (data.config as Record<string, unknown>) || {};
+  const name = (data.label as string) || 'match';
+  const value = (config.value as string) || '';
+  const rawCases = config.cases as MatchCase[] | undefined;
   const cases: MatchCase[] = rawCases?.length ? rawCases : [{ value: '', branch: '' }];
-  const defaultBranch = (data.defaultBranch as string) || '';
+  const defaultBranch = (config.defaultBranch as string) || '';
 
   const [localCases, setLocalCases] = useState<MatchCase[]>(cases);
+
+  const updateConfig = (updates: Record<string, unknown>) => {
+    onUpdate({ config: { ...config, ...updates } });
+  };
 
   const handleCaseChange = (index: number, field: 'value' | 'branch', newValue: string) => {
     const updated: MatchCase[] = localCases.map((c, i) =>
       i === index ? { value: c.value, branch: c.branch, [field]: newValue } : c,
     );
     setLocalCases(updated);
-    onUpdate({ cases: updated });
+    updateConfig({ cases: updated });
   };
 
   const addCase = () => {
     const updated = [...localCases, { value: '', branch: '' }];
     setLocalCases(updated);
-    onUpdate({ cases: updated });
+    updateConfig({ cases: updated });
   };
 
   const removeCase = (index: number) => {
     if (localCases.length <= 1) return;
     const updated = localCases.filter((_, i) => i !== index);
     setLocalCases(updated);
-    onUpdate({ cases: updated });
+    updateConfig({ cases: updated });
   };
 
   return (
     <div className="space-y-4">
       <FormField label="Name" htmlFor="match-name" description="Unique identifier for this step" required>
-        <Input id="match-name" value={name} onChange={(e) => onUpdate({ name: e.target.value })} placeholder="match" />
+        <Input id="match-name" value={name} onChange={(e) => onUpdate({ label: e.target.value })} placeholder="match" />
       </FormField>
 
       <FormField
@@ -65,7 +70,7 @@ export function MatchForm({ data, onUpdate }: MatchFormProps) {
         <Input
           id="match-value"
           value={value}
-          onChange={(e) => onUpdate({ value: e.target.value })}
+          onChange={(e) => updateConfig({ value: e.target.value })}
           placeholder="$[trigger.type]"
           className="font-mono"
         />
@@ -114,7 +119,7 @@ export function MatchForm({ data, onUpdate }: MatchFormProps) {
         <Input
           id="match-default"
           value={defaultBranch}
-          onChange={(e) => onUpdate({ defaultBranch: e.target.value })}
+          onChange={(e) => updateConfig({ defaultBranch: e.target.value })}
           placeholder="handle_unknown"
         />
       </FormField>

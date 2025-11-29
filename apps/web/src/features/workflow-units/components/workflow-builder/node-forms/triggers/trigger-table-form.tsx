@@ -16,10 +16,15 @@ interface TriggerTableFormProps {
 }
 
 export function TriggerTableForm({ data, onUpdate }: TriggerTableFormProps) {
-  const name = (data.name as string) || 'table_trigger';
-  const tableId = (data.tableId as string) || '';
-  const actionId = (data.actionId as string) || '';
-  const webhookId = (data.webhookId as string) || '';
+  const config = (data.config as Record<string, unknown>) || {};
+  const name = (data.label as string) || 'table_trigger';
+  const tableId = (config.tableId as string) || '';
+  const actionId = (config.actionId as string) || '';
+  const webhookId = (config.webhookId as string) || '';
+
+  const updateConfig = (updates: Record<string, unknown>) => {
+    onUpdate({ config: { ...config, ...updates } });
+  };
 
   return (
     <div className="space-y-4">
@@ -27,7 +32,7 @@ export function TriggerTableForm({ data, onUpdate }: TriggerTableFormProps) {
         <Input
           id="trigger-name"
           value={name}
-          onChange={(e) => onUpdate({ name: e.target.value })}
+          onChange={(e) => onUpdate({ label: e.target.value })}
           placeholder="table_trigger"
         />
       </FormField>
@@ -36,7 +41,7 @@ export function TriggerTableForm({ data, onUpdate }: TriggerTableFormProps) {
         <Input
           id="trigger-table-id"
           value={tableId}
-          onChange={(e) => onUpdate({ tableId: e.target.value })}
+          onChange={(e) => updateConfig({ tableId: e.target.value })}
           placeholder="Enter table ID"
           className="font-mono"
         />
@@ -48,7 +53,7 @@ export function TriggerTableForm({ data, onUpdate }: TriggerTableFormProps) {
         description="Which table action triggers this workflow"
         required
       >
-        <Select value={actionId || 'create'} onValueChange={(value) => onUpdate({ actionId: value })}>
+        <Select value={actionId || 'create'} onValueChange={(value) => updateConfig({ actionId: value })}>
           <SelectTrigger>
             <SelectValue placeholder="Select action" />
           </SelectTrigger>
@@ -65,7 +70,7 @@ export function TriggerTableForm({ data, onUpdate }: TriggerTableFormProps) {
         <Input
           id="trigger-webhook-id"
           value={webhookId}
-          onChange={(e) => onUpdate({ webhookId: e.target.value })}
+          onChange={(e) => updateConfig({ webhookId: e.target.value })}
           placeholder="Auto-generated UUID"
           className="font-mono text-sm"
         />

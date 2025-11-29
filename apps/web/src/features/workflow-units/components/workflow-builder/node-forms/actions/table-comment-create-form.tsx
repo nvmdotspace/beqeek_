@@ -14,11 +14,16 @@ interface TableCommentCreateFormProps {
 }
 
 export function TableCommentCreateForm({ data, onUpdate }: TableCommentCreateFormProps) {
-  const name = (data.name as string) || 'create_comment';
-  const connector = (data.connector as string) || '';
-  const recordId = (data.recordId as string) || '';
-  const content = (data.content as string) || '';
-  const parentId = (data.parentId as string) || '';
+  const config = (data.config as Record<string, unknown>) || {};
+  const name = (data.label as string) || 'create_comment';
+  const connector = (config.connector as string) || '';
+  const recordId = (config.recordId as string) || '';
+  const content = (config.content as string) || '';
+  const parentId = (config.parentId as string) || '';
+
+  const updateConfig = (updates: Record<string, unknown>) => {
+    onUpdate({ config: { ...config, ...updates } });
+  };
 
   return (
     <div className="space-y-4">
@@ -26,7 +31,7 @@ export function TableCommentCreateForm({ data, onUpdate }: TableCommentCreateFor
         <Input
           id="comment-name"
           value={name}
-          onChange={(e) => onUpdate({ name: e.target.value })}
+          onChange={(e) => onUpdate({ label: e.target.value })}
           placeholder="create_comment"
         />
       </FormField>
@@ -40,7 +45,7 @@ export function TableCommentCreateForm({ data, onUpdate }: TableCommentCreateFor
         <Input
           id="comment-connector"
           value={connector}
-          onChange={(e) => onUpdate({ connector: e.target.value })}
+          onChange={(e) => updateConfig({ connector: e.target.value })}
           placeholder="Enter table ID"
           className="font-mono"
         />
@@ -55,7 +60,7 @@ export function TableCommentCreateForm({ data, onUpdate }: TableCommentCreateFor
         <Input
           id="comment-record-id"
           value={recordId}
-          onChange={(e) => onUpdate({ recordId: e.target.value })}
+          onChange={(e) => updateConfig({ recordId: e.target.value })}
           placeholder="$[trigger.record_id]"
           className="font-mono"
         />
@@ -65,7 +70,7 @@ export function TableCommentCreateForm({ data, onUpdate }: TableCommentCreateFor
         <Textarea
           id="comment-content"
           value={content}
-          onChange={(e) => onUpdate({ content: e.target.value })}
+          onChange={(e) => updateConfig({ content: e.target.value })}
           placeholder="Enter comment content..."
           className="min-h-[100px]"
         />
@@ -79,7 +84,7 @@ export function TableCommentCreateForm({ data, onUpdate }: TableCommentCreateFor
         <Input
           id="comment-parent-id"
           value={parentId}
-          onChange={(e) => onUpdate({ parentId: e.target.value })}
+          onChange={(e) => updateConfig({ parentId: e.target.value })}
           placeholder="Leave empty for top-level comment"
           className="font-mono"
         />

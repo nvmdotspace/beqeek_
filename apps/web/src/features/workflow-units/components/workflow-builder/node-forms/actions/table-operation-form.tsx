@@ -15,16 +15,23 @@ interface TableOperationFormProps {
 }
 
 export function TableOperationForm({ data, onUpdate }: TableOperationFormProps) {
-  const name = (data.name as string) || 'table_op';
-  const connector = (data.connector as string) || '';
-  const action = (data.action as string) || 'get_list';
-  const record = (data.record as string) || '';
-  const query = (data.query as string) || '';
-  const dataField = typeof data.data === 'string' ? data.data : JSON.stringify(data.data || {}, null, 2);
+  // IR converter stores: data.label (name) and data.config.* (config fields)
+  const config = (data.config as Record<string, unknown>) || {};
+  const name = (data.label as string) || 'table_op';
+  const connector = (config.connector as string) || '';
+  const action = (config.action as string) || 'get_list';
+  const record = (config.record as string) || '';
+  const query = (config.query as string) || '';
+  const dataField = typeof config.data === 'string' ? config.data : JSON.stringify(config.data || {}, null, 2);
 
   const showRecord = action === 'get_one' || action === 'update' || action === 'delete';
   const showQuery = action === 'get_list';
   const showData = action === 'create' || action === 'update';
+
+  // Helper to update config fields while preserving structure
+  const updateConfig = (updates: Record<string, unknown>) => {
+    onUpdate({ config: { ...config, ...updates } });
+  };
 
   return (
     <div className="space-y-4">
@@ -32,7 +39,7 @@ export function TableOperationForm({ data, onUpdate }: TableOperationFormProps) 
         <Input
           id="table-name"
           value={name}
-          onChange={(e) => onUpdate({ name: e.target.value })}
+          onChange={(e) => onUpdate({ label: e.target.value })}
           placeholder="table_op"
         />
       </FormField>
@@ -46,14 +53,14 @@ export function TableOperationForm({ data, onUpdate }: TableOperationFormProps) 
         <Input
           id="table-connector"
           value={connector}
-          onChange={(e) => onUpdate({ connector: e.target.value })}
+          onChange={(e) => updateConfig({ connector: e.target.value })}
           placeholder="Enter table ID"
           className="font-mono"
         />
       </FormField>
 
       <FormField label="Action" htmlFor="table-action" description="CRUD operation to perform" required>
-        <Select value={action} onValueChange={(value) => onUpdate({ action: value })}>
+        <Select value={action} onValueChange={(value) => updateConfig({ action: value })}>
           <SelectTrigger>
             <SelectValue placeholder="Select action" />
           </SelectTrigger>
@@ -77,7 +84,7 @@ export function TableOperationForm({ data, onUpdate }: TableOperationFormProps) 
           <Input
             id="table-record"
             value={record}
-            onChange={(e) => onUpdate({ record: e.target.value })}
+            onChange={(e) => updateConfig({ record: e.target.value })}
             placeholder="$[trigger.record_id]"
             className="font-mono"
           />
@@ -86,13 +93,13 @@ export function TableOperationForm({ data, onUpdate }: TableOperationFormProps) 
 
       {showQuery && (
         <FormField label="Query" htmlFor="table-query" description="Filter and sort parameters">
-          <ValueBuilder value={query} onChange={(value) => onUpdate({ query: value })} mode="object" />
+          <ValueBuilder value={query} onChange={(value) => updateConfig({ query: value })} mode="object" />
         </FormField>
       )}
 
       {showData && (
         <FormField label="Data" htmlFor="table-data" description="Record data to create/update" required>
-          <ValueBuilder value={dataField} onChange={(value) => onUpdate({ data: value })} mode="object" />
+          <ValueBuilder value={dataField} onChange={(value) => updateConfig({ data: value })} mode="object" />
         </FormField>
       )}
     </div>

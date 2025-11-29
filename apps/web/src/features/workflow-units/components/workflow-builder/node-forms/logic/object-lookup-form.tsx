@@ -13,10 +13,15 @@ interface ObjectLookupFormProps {
 }
 
 export function ObjectLookupForm({ data, onUpdate }: ObjectLookupFormProps) {
-  const name = (data.name as string) || 'lookup';
-  const object = (data.object as string) || '';
-  const key = (data.key as string) || '';
-  const defaultValue = (data.defaultValue as string) || '';
+  const config = (data.config as Record<string, unknown>) || {};
+  const name = (data.label as string) || 'lookup';
+  const object = (config.object as string) || '';
+  const key = (config.key as string) || '';
+  const defaultValue = (config.defaultValue as string) || '';
+
+  const updateConfig = (updates: Record<string, unknown>) => {
+    onUpdate({ config: { ...config, ...updates } });
+  };
 
   return (
     <div className="space-y-4">
@@ -24,7 +29,7 @@ export function ObjectLookupForm({ data, onUpdate }: ObjectLookupFormProps) {
         <Input
           id="lookup-name"
           value={name}
-          onChange={(e) => onUpdate({ name: e.target.value })}
+          onChange={(e) => onUpdate({ label: e.target.value })}
           placeholder="lookup"
         />
       </FormField>
@@ -38,7 +43,7 @@ export function ObjectLookupForm({ data, onUpdate }: ObjectLookupFormProps) {
         <Input
           id="lookup-object"
           value={object}
-          onChange={(e) => onUpdate({ object: e.target.value })}
+          onChange={(e) => updateConfig({ object: e.target.value })}
           placeholder="$[trigger.data]"
           className="font-mono"
         />
@@ -53,7 +58,7 @@ export function ObjectLookupForm({ data, onUpdate }: ObjectLookupFormProps) {
         <Input
           id="lookup-key"
           value={key}
-          onChange={(e) => onUpdate({ key: e.target.value })}
+          onChange={(e) => updateConfig({ key: e.target.value })}
           placeholder="user.profile.name"
           className="font-mono"
         />
@@ -63,7 +68,7 @@ export function ObjectLookupForm({ data, onUpdate }: ObjectLookupFormProps) {
         <Input
           id="lookup-default"
           value={defaultValue}
-          onChange={(e) => onUpdate({ defaultValue: e.target.value })}
+          onChange={(e) => updateConfig({ defaultValue: e.target.value })}
           placeholder="null"
           className="font-mono"
         />

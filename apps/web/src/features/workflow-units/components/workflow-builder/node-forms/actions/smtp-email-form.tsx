@@ -14,14 +14,19 @@ interface SmtpEmailFormProps {
 }
 
 export function SmtpEmailForm({ data, onUpdate }: SmtpEmailFormProps) {
-  const name = (data.name as string) || 'send_email';
-  const connector = (data.connector as string) || '';
-  const to = (data.to as string) || '';
-  const toName = (data.toName as string) || '';
-  const cc = (data.cc as string) || '';
-  const bcc = (data.bcc as string) || '';
-  const subject = (data.subject as string) || '';
-  const body = (data.body as string) || '';
+  const config = (data.config as Record<string, unknown>) || {};
+  const name = (data.label as string) || 'send_email';
+  const connector = (config.connector as string) || '';
+  const to = (config.to as string) || '';
+  const toName = (config.toName as string) || '';
+  const cc = (config.cc as string) || '';
+  const bcc = (config.bcc as string) || '';
+  const subject = (config.subject as string) || '';
+  const body = (config.body as string) || '';
+
+  const updateConfig = (updates: Record<string, unknown>) => {
+    onUpdate({ config: { ...config, ...updates } });
+  };
 
   return (
     <div className="space-y-4">
@@ -29,7 +34,7 @@ export function SmtpEmailForm({ data, onUpdate }: SmtpEmailFormProps) {
         <Input
           id="email-name"
           value={name}
-          onChange={(e) => onUpdate({ name: e.target.value })}
+          onChange={(e) => onUpdate({ label: e.target.value })}
           placeholder="send_email"
         />
       </FormField>
@@ -38,7 +43,7 @@ export function SmtpEmailForm({ data, onUpdate }: SmtpEmailFormProps) {
         <Input
           id="email-connector"
           value={connector}
-          onChange={(e) => onUpdate({ connector: e.target.value })}
+          onChange={(e) => updateConfig({ connector: e.target.value })}
           placeholder="Enter SMTP connector ID"
           className="font-mono"
         />
@@ -48,7 +53,7 @@ export function SmtpEmailForm({ data, onUpdate }: SmtpEmailFormProps) {
         <Input
           id="email-to"
           value={to}
-          onChange={(e) => onUpdate({ to: e.target.value })}
+          onChange={(e) => updateConfig({ to: e.target.value })}
           placeholder="recipient@example.com"
         />
       </FormField>
@@ -57,7 +62,7 @@ export function SmtpEmailForm({ data, onUpdate }: SmtpEmailFormProps) {
         <Input
           id="email-to-name"
           value={toName}
-          onChange={(e) => onUpdate({ toName: e.target.value })}
+          onChange={(e) => updateConfig({ toName: e.target.value })}
           placeholder="Recipient Name"
         />
       </FormField>
@@ -66,7 +71,7 @@ export function SmtpEmailForm({ data, onUpdate }: SmtpEmailFormProps) {
         <Input
           id="email-cc"
           value={cc}
-          onChange={(e) => onUpdate({ cc: e.target.value })}
+          onChange={(e) => updateConfig({ cc: e.target.value })}
           placeholder="cc1@example.com, cc2@example.com"
         />
       </FormField>
@@ -75,7 +80,7 @@ export function SmtpEmailForm({ data, onUpdate }: SmtpEmailFormProps) {
         <Input
           id="email-bcc"
           value={bcc}
-          onChange={(e) => onUpdate({ bcc: e.target.value })}
+          onChange={(e) => updateConfig({ bcc: e.target.value })}
           placeholder="bcc@example.com"
         />
       </FormField>
@@ -84,7 +89,7 @@ export function SmtpEmailForm({ data, onUpdate }: SmtpEmailFormProps) {
         <Input
           id="email-subject"
           value={subject}
-          onChange={(e) => onUpdate({ subject: e.target.value })}
+          onChange={(e) => updateConfig({ subject: e.target.value })}
           placeholder="Your order confirmation"
         />
       </FormField>
@@ -93,7 +98,7 @@ export function SmtpEmailForm({ data, onUpdate }: SmtpEmailFormProps) {
         <Textarea
           id="email-body"
           value={body}
-          onChange={(e) => onUpdate({ body: e.target.value })}
+          onChange={(e) => updateConfig({ body: e.target.value })}
           placeholder="Hello $[trigger.name],\n\nThank you for your order..."
           className="min-h-[150px]"
         />

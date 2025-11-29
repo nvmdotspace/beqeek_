@@ -15,13 +15,18 @@ interface ConditionFormProps {
 }
 
 export function ConditionForm({ data, onUpdate }: ConditionFormProps) {
-  const name = (data.name as string) || 'condition';
-  const operator = (data.operator as string) || 'equals';
-  const leftOperand = (data.leftOperand as string) || '';
-  const rightOperand = (data.rightOperand as string) || '';
-  const expression = (data.expression as string) || '';
-  const thenBranch = (data.thenBranch as string) || '';
-  const elseBranch = (data.elseBranch as string) || '';
+  const config = (data.config as Record<string, unknown>) || {};
+  const name = (data.label as string) || 'condition';
+  const operator = (config.operator as string) || 'equals';
+  const leftOperand = (config.leftOperand as string) || '';
+  const rightOperand = (config.rightOperand as string) || '';
+  const expression = (config.expression as string) || '';
+  const thenBranch = (config.thenBranch as string) || '';
+  const elseBranch = (config.elseBranch as string) || '';
+
+  const updateConfig = (updates: Record<string, unknown>) => {
+    onUpdate({ config: { ...config, ...updates } });
+  };
 
   const isAdvanced = operator === 'expression';
 
@@ -31,13 +36,13 @@ export function ConditionForm({ data, onUpdate }: ConditionFormProps) {
         <Input
           id="condition-name"
           value={name}
-          onChange={(e) => onUpdate({ name: e.target.value })}
+          onChange={(e) => onUpdate({ label: e.target.value })}
           placeholder="condition"
         />
       </FormField>
 
       <FormField label="Operator" htmlFor="condition-operator" description="Comparison type" required>
-        <Select value={operator} onValueChange={(value) => onUpdate({ operator: value })}>
+        <Select value={operator} onValueChange={(value) => updateConfig({ operator: value })}>
           <SelectTrigger>
             <SelectValue placeholder="Select operator" />
           </SelectTrigger>
@@ -70,7 +75,7 @@ export function ConditionForm({ data, onUpdate }: ConditionFormProps) {
             <Input
               id="condition-left"
               value={leftOperand}
-              onChange={(e) => onUpdate({ leftOperand: e.target.value })}
+              onChange={(e) => updateConfig({ leftOperand: e.target.value })}
               placeholder="$[trigger.status]"
               className="font-mono"
             />
@@ -80,7 +85,7 @@ export function ConditionForm({ data, onUpdate }: ConditionFormProps) {
             <Input
               id="condition-right"
               value={rightOperand}
-              onChange={(e) => onUpdate({ rightOperand: e.target.value })}
+              onChange={(e) => updateConfig({ rightOperand: e.target.value })}
               placeholder="active"
               className="font-mono"
             />
@@ -91,7 +96,7 @@ export function ConditionForm({ data, onUpdate }: ConditionFormProps) {
           <Textarea
             id="condition-expression"
             value={expression}
-            onChange={(e) => onUpdate({ expression: e.target.value })}
+            onChange={(e) => updateConfig({ expression: e.target.value })}
             placeholder="$[trigger.amount] > 100 && $[trigger.status] == 'pending'"
             className="font-mono text-sm min-h-[80px]"
           />
@@ -102,7 +107,7 @@ export function ConditionForm({ data, onUpdate }: ConditionFormProps) {
         <Input
           id="condition-then"
           value={thenBranch}
-          onChange={(e) => onUpdate({ thenBranch: e.target.value })}
+          onChange={(e) => updateConfig({ thenBranch: e.target.value })}
           placeholder="process_order"
         />
       </FormField>
@@ -111,7 +116,7 @@ export function ConditionForm({ data, onUpdate }: ConditionFormProps) {
         <Input
           id="condition-else"
           value={elseBranch}
-          onChange={(e) => onUpdate({ elseBranch: e.target.value })}
+          onChange={(e) => updateConfig({ elseBranch: e.target.value })}
           placeholder="reject_order"
         />
       </FormField>

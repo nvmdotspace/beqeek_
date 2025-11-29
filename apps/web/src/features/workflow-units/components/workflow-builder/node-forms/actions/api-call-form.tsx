@@ -15,24 +15,36 @@ interface ApiCallFormProps {
 }
 
 export function ApiCallForm({ data, onUpdate }: ApiCallFormProps) {
-  const name = (data.name as string) || 'api_call';
-  const method = (data.method as string) || 'GET';
-  const url = (data.url as string) || '';
-  const requestType = (data.requestType as string) || 'json';
-  const responseFormat = (data.responseFormat as string) || 'json';
-  const headers = typeof data.headers === 'string' ? data.headers : JSON.stringify(data.headers || {}, null, 2);
-  const payload = typeof data.payload === 'string' ? data.payload : JSON.stringify(data.payload || {}, null, 2);
+  // IR converter stores: data.label (name) and data.config.* (config fields)
+  const config = (data.config as Record<string, unknown>) || {};
+  const name = (data.label as string) || 'api_call';
+  const method = (config.method as string) || 'GET';
+  const url = (config.url as string) || '';
+  const requestType = (config.requestType as string) || 'json';
+  const responseFormat = (config.responseFormat as string) || 'json';
+  const headers = typeof config.headers === 'string' ? config.headers : JSON.stringify(config.headers || {}, null, 2);
+  const payload = typeof config.payload === 'string' ? config.payload : JSON.stringify(config.payload || {}, null, 2);
 
   const showPayload = method !== 'GET' && method !== 'DELETE';
+
+  // Helper to update config fields while preserving structure
+  const updateConfig = (updates: Record<string, unknown>) => {
+    onUpdate({ config: { ...config, ...updates } });
+  };
 
   return (
     <div className="space-y-4">
       <FormField label="Name" htmlFor="api-name" description="Unique identifier for this step" required>
-        <Input id="api-name" value={name} onChange={(e) => onUpdate({ name: e.target.value })} placeholder="api_call" />
+        <Input
+          id="api-name"
+          value={name}
+          onChange={(e) => onUpdate({ label: e.target.value })}
+          placeholder="api_call"
+        />
       </FormField>
 
       <FormField label="Method" htmlFor="api-method" description="HTTP request method" required>
-        <Select value={method} onValueChange={(value) => onUpdate({ method: value })}>
+        <Select value={method} onValueChange={(value) => updateConfig({ method: value })}>
           <SelectTrigger>
             <SelectValue placeholder="Select method" />
           </SelectTrigger>
@@ -50,13 +62,13 @@ export function ApiCallForm({ data, onUpdate }: ApiCallFormProps) {
         <Input
           id="api-url"
           value={url}
-          onChange={(e) => onUpdate({ url: e.target.value })}
+          onChange={(e) => updateConfig({ url: e.target.value })}
           placeholder="https://api.example.com/endpoint"
         />
       </FormField>
 
       <FormField label="Request Type" htmlFor="api-request-type" description="Content-Type for request body">
-        <Select value={requestType} onValueChange={(value) => onUpdate({ requestType: value })}>
+        <Select value={requestType} onValueChange={(value) => updateConfig({ requestType: value })}>
           <SelectTrigger>
             <SelectValue placeholder="Select type" />
           </SelectTrigger>
@@ -69,7 +81,7 @@ export function ApiCallForm({ data, onUpdate }: ApiCallFormProps) {
       </FormField>
 
       <FormField label="Response Format" htmlFor="api-response-format" description="Expected response format">
-        <Select value={responseFormat} onValueChange={(value) => onUpdate({ responseFormat: value })}>
+        <Select value={responseFormat} onValueChange={(value) => updateConfig({ responseFormat: value })}>
           <SelectTrigger>
             <SelectValue placeholder="Select format" />
           </SelectTrigger>
@@ -82,12 +94,12 @@ export function ApiCallForm({ data, onUpdate }: ApiCallFormProps) {
       </FormField>
 
       <FormField label="Headers" htmlFor="api-headers" description="Optional request headers">
-        <ValueBuilder value={headers} onChange={(value) => onUpdate({ headers: value })} mode="object" />
+        <ValueBuilder value={headers} onChange={(value) => updateConfig({ headers: value })} mode="object" />
       </FormField>
 
       {showPayload && (
         <FormField label="Payload" htmlFor="api-payload" description="Request body data">
-          <ValueBuilder value={payload} onChange={(value) => onUpdate({ payload: value })} mode="any" />
+          <ValueBuilder value={payload} onChange={(value) => updateConfig({ payload: value })} mode="any" />
         </FormField>
       )}
     </div>

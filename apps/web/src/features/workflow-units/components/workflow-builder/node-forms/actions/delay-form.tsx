@@ -14,16 +14,23 @@ interface DelayFormProps {
 }
 
 export function DelayForm({ data, onUpdate }: DelayFormProps) {
-  const name = (data.name as string) || 'delay';
-  const durationValue = (data.durationValue as number) || (data.duration as number) || 1;
-  const durationUnit = (data.durationUnit as string) || (data.unit as string) || 'seconds';
-  const targetTime = (data.targetTime as string) || '';
-  const callback = (data.callback as string) || '';
+  // IR converter stores: data.label (name) and data.config.* (config fields)
+  const config = (data.config as Record<string, unknown>) || {};
+  const name = (data.label as string) || 'delay';
+  const durationValue = (config.durationValue as number) || (config.duration as number) || 1;
+  const durationUnit = (config.durationUnit as string) || (config.unit as string) || 'seconds';
+  const targetTime = (config.targetTime as string) || '';
+  const callback = (config.callback as string) || '';
+
+  // Helper to update config fields while preserving structure
+  const updateConfig = (updates: Record<string, unknown>) => {
+    onUpdate({ config: { ...config, ...updates } });
+  };
 
   return (
     <div className="space-y-4">
       <FormField label="Name" htmlFor="delay-name" description="Unique identifier for this step" required>
-        <Input id="delay-name" value={name} onChange={(e) => onUpdate({ name: e.target.value })} placeholder="delay" />
+        <Input id="delay-name" value={name} onChange={(e) => onUpdate({ label: e.target.value })} placeholder="delay" />
       </FormField>
 
       <div className="grid grid-cols-2 gap-3">
@@ -33,13 +40,13 @@ export function DelayForm({ data, onUpdate }: DelayFormProps) {
             type="number"
             min={0}
             value={durationValue}
-            onChange={(e) => onUpdate({ durationValue: parseInt(e.target.value) || 0 })}
+            onChange={(e) => updateConfig({ durationValue: parseInt(e.target.value) || 0 })}
             placeholder="1"
           />
         </FormField>
 
         <FormField label="Unit" htmlFor="delay-unit" description="Time unit" required>
-          <Select value={durationUnit} onValueChange={(value) => onUpdate({ durationUnit: value })}>
+          <Select value={durationUnit} onValueChange={(value) => updateConfig({ durationUnit: value })}>
             <SelectTrigger>
               <SelectValue placeholder="Select unit" />
             </SelectTrigger>
@@ -63,7 +70,7 @@ export function DelayForm({ data, onUpdate }: DelayFormProps) {
         <Input
           id="delay-target"
           value={targetTime}
-          onChange={(e) => onUpdate({ targetTime: e.target.value })}
+          onChange={(e) => updateConfig({ targetTime: e.target.value })}
           placeholder="2024-12-25T09:00:00Z"
           className="font-mono text-sm"
         />
@@ -73,7 +80,7 @@ export function DelayForm({ data, onUpdate }: DelayFormProps) {
         <Input
           id="delay-callback"
           value={callback}
-          onChange={(e) => onUpdate({ callback: e.target.value })}
+          onChange={(e) => updateConfig({ callback: e.target.value })}
           placeholder="on_delay_complete"
         />
       </FormField>

@@ -16,10 +16,15 @@ interface TriggerFormFormProps {
 }
 
 export function TriggerFormForm({ data, onUpdate }: TriggerFormFormProps) {
-  const name = (data.name as string) || 'form_trigger';
-  const formId = (data.formId as string) || '';
-  const webhookId = (data.webhookId as string) || '';
-  const actionId = (data.actionId as string) || '';
+  const config = (data.config as Record<string, unknown>) || {};
+  const name = (data.label as string) || 'form_trigger';
+  const formId = (config.formId as string) || '';
+  const webhookId = (config.webhookId as string) || '';
+  const actionId = (config.actionId as string) || '';
+
+  const updateConfig = (updates: Record<string, unknown>) => {
+    onUpdate({ config: { ...config, ...updates } });
+  };
 
   return (
     <div className="space-y-4">
@@ -27,7 +32,7 @@ export function TriggerFormForm({ data, onUpdate }: TriggerFormFormProps) {
         <Input
           id="trigger-name"
           value={name}
-          onChange={(e) => onUpdate({ name: e.target.value })}
+          onChange={(e) => onUpdate({ label: e.target.value })}
           placeholder="form_trigger"
         />
       </FormField>
@@ -36,7 +41,7 @@ export function TriggerFormForm({ data, onUpdate }: TriggerFormFormProps) {
         <Input
           id="trigger-form-id"
           value={formId}
-          onChange={(e) => onUpdate({ formId: e.target.value })}
+          onChange={(e) => updateConfig({ formId: e.target.value })}
           placeholder="Enter form ID"
           className="font-mono"
         />
@@ -46,14 +51,14 @@ export function TriggerFormForm({ data, onUpdate }: TriggerFormFormProps) {
         <Input
           id="trigger-webhook-id"
           value={webhookId}
-          onChange={(e) => onUpdate({ webhookId: e.target.value })}
+          onChange={(e) => updateConfig({ webhookId: e.target.value })}
           placeholder="Auto-generated UUID"
           className="font-mono text-sm"
         />
       </FormField>
 
       <FormField label="Action" htmlFor="trigger-action" description="Which form action triggers this workflow">
-        <Select value={actionId || 'submit'} onValueChange={(value) => onUpdate({ actionId: value })}>
+        <Select value={actionId || 'submit'} onValueChange={(value) => updateConfig({ actionId: value })}>
           <SelectTrigger>
             <SelectValue placeholder="Select action" />
           </SelectTrigger>

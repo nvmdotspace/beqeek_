@@ -15,11 +15,16 @@ interface UserOperationFormProps {
 }
 
 export function UserOperationForm({ data, onUpdate }: UserOperationFormProps) {
-  const name = (data.name as string) || 'user_op';
-  const action = (data.action as string) || 'get';
-  const userId = (data.userId as string) || '';
-  const query = typeof data.query === 'string' ? data.query : JSON.stringify(data.query || {}, null, 2);
-  const userData = typeof data.data === 'string' ? data.data : JSON.stringify(data.data || {}, null, 2);
+  const config = (data.config as Record<string, unknown>) || {};
+  const name = (data.label as string) || 'user_op';
+  const action = (config.action as string) || 'get';
+  const userId = (config.userId as string) || '';
+  const query = typeof config.query === 'string' ? config.query : JSON.stringify(config.query || {}, null, 2);
+  const userData = typeof config.data === 'string' ? config.data : JSON.stringify(config.data || {}, null, 2);
+
+  const updateConfig = (updates: Record<string, unknown>) => {
+    onUpdate({ config: { ...config, ...updates } });
+  };
 
   const showUserId = action === 'get' || action === 'update' || action === 'delete';
   const showQuery = action === 'get_list';
@@ -28,11 +33,16 @@ export function UserOperationForm({ data, onUpdate }: UserOperationFormProps) {
   return (
     <div className="space-y-4">
       <FormField label="Name" htmlFor="user-name" description="Unique identifier for this step" required>
-        <Input id="user-name" value={name} onChange={(e) => onUpdate({ name: e.target.value })} placeholder="user_op" />
+        <Input
+          id="user-name"
+          value={name}
+          onChange={(e) => onUpdate({ label: e.target.value })}
+          placeholder="user_op"
+        />
       </FormField>
 
       <FormField label="Action" htmlFor="user-action" description="User operation to perform" required>
-        <Select value={action} onValueChange={(value) => onUpdate({ action: value })}>
+        <Select value={action} onValueChange={(value) => updateConfig({ action: value })}>
           <SelectTrigger>
             <SelectValue placeholder="Select action" />
           </SelectTrigger>
@@ -56,7 +66,7 @@ export function UserOperationForm({ data, onUpdate }: UserOperationFormProps) {
           <Input
             id="user-id"
             value={userId}
-            onChange={(e) => onUpdate({ userId: e.target.value })}
+            onChange={(e) => updateConfig({ userId: e.target.value })}
             placeholder="$[trigger.user_id]"
             className="font-mono"
           />
@@ -68,7 +78,7 @@ export function UserOperationForm({ data, onUpdate }: UserOperationFormProps) {
           <Textarea
             id="user-query"
             value={query}
-            onChange={(e) => onUpdate({ query: e.target.value })}
+            onChange={(e) => updateConfig({ query: e.target.value })}
             placeholder={'{\n  "role": "admin"\n}'}
             className="font-mono text-sm min-h-[80px]"
           />
@@ -80,7 +90,7 @@ export function UserOperationForm({ data, onUpdate }: UserOperationFormProps) {
           <Textarea
             id="user-data"
             value={userData}
-            onChange={(e) => onUpdate({ data: e.target.value })}
+            onChange={(e) => updateConfig({ data: e.target.value })}
             placeholder={'{\n  "name": "John Doe",\n  "email": "john@example.com"\n}'}
             className="font-mono text-sm min-h-[100px]"
           />

@@ -15,13 +15,18 @@ interface GoogleSheetFormProps {
 }
 
 export function GoogleSheetForm({ data, onUpdate }: GoogleSheetFormProps) {
-  const name = (data.name as string) || 'google_sheet';
-  const connector = (data.connector as string) || '';
-  const spreadsheetId = (data.spreadsheetId as string) || '';
-  const sheetName = (data.sheetName as string) || '';
-  const operation = (data.operation as string) || 'read';
-  const range = (data.range as string) || '';
-  const values = (data.values as string) || '';
+  const config = (data.config as Record<string, unknown>) || {};
+  const name = (data.label as string) || 'google_sheet';
+  const connector = (config.connector as string) || '';
+  const spreadsheetId = (config.spreadsheetId as string) || '';
+  const sheetName = (config.sheetName as string) || '';
+  const operation = (config.operation as string) || 'read';
+  const range = (config.range as string) || '';
+  const values = (config.values as string) || '';
+
+  const updateConfig = (updates: Record<string, unknown>) => {
+    onUpdate({ config: { ...config, ...updates } });
+  };
 
   const showValues = operation === 'write' || operation === 'append' || operation === 'update';
 
@@ -31,7 +36,7 @@ export function GoogleSheetForm({ data, onUpdate }: GoogleSheetFormProps) {
         <Input
           id="sheet-name"
           value={name}
-          onChange={(e) => onUpdate({ name: e.target.value })}
+          onChange={(e) => onUpdate({ label: e.target.value })}
           placeholder="google_sheet"
         />
       </FormField>
@@ -44,7 +49,7 @@ export function GoogleSheetForm({ data, onUpdate }: GoogleSheetFormProps) {
         <Input
           id="sheet-connector"
           value={connector}
-          onChange={(e) => onUpdate({ connector: e.target.value })}
+          onChange={(e) => updateConfig({ connector: e.target.value })}
           placeholder="Enter connector ID"
           className="font-mono"
         />
@@ -59,7 +64,7 @@ export function GoogleSheetForm({ data, onUpdate }: GoogleSheetFormProps) {
         <Input
           id="sheet-spreadsheet-id"
           value={spreadsheetId}
-          onChange={(e) => onUpdate({ spreadsheetId: e.target.value })}
+          onChange={(e) => updateConfig({ spreadsheetId: e.target.value })}
           placeholder="1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms"
           className="font-mono text-sm"
         />
@@ -69,13 +74,13 @@ export function GoogleSheetForm({ data, onUpdate }: GoogleSheetFormProps) {
         <Input
           id="sheet-sheet-name"
           value={sheetName}
-          onChange={(e) => onUpdate({ sheetName: e.target.value })}
+          onChange={(e) => updateConfig({ sheetName: e.target.value })}
           placeholder="Sheet1"
         />
       </FormField>
 
       <FormField label="Operation" htmlFor="sheet-operation" description="Type of operation to perform" required>
-        <Select value={operation} onValueChange={(value) => onUpdate({ operation: value })}>
+        <Select value={operation} onValueChange={(value) => updateConfig({ operation: value })}>
           <SelectTrigger>
             <SelectValue placeholder="Select operation" />
           </SelectTrigger>
@@ -92,7 +97,7 @@ export function GoogleSheetForm({ data, onUpdate }: GoogleSheetFormProps) {
         <Input
           id="sheet-range"
           value={range}
-          onChange={(e) => onUpdate({ range: e.target.value })}
+          onChange={(e) => updateConfig({ range: e.target.value })}
           placeholder="A1:D10"
           className="font-mono"
         />
@@ -107,7 +112,7 @@ export function GoogleSheetForm({ data, onUpdate }: GoogleSheetFormProps) {
           <Textarea
             id="sheet-values"
             value={values}
-            onChange={(e) => onUpdate({ values: e.target.value })}
+            onChange={(e) => updateConfig({ values: e.target.value })}
             placeholder="Name,Email,Phone&#10;John,john@example.com,0901234567"
             className="font-mono text-sm min-h-[100px]"
           />

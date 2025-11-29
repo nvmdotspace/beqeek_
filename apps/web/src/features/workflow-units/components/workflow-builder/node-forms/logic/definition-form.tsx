@@ -24,11 +24,16 @@ interface DefinitionFormProps {
 }
 
 export function DefinitionForm({ data, onUpdate }: DefinitionFormProps) {
-  const name = (data.name as string) || 'definition';
-  const rawVars = data.variables as Variable[] | undefined;
+  const config = (data.config as Record<string, unknown>) || {};
+  const name = (data.label as string) || 'definition';
+  const rawVars = config.variables as Variable[] | undefined;
   const variables: Variable[] = rawVars?.length ? rawVars : [{ key: '', value: '', type: 'string' }];
 
   const [localVars, setLocalVars] = useState<Variable[]>(variables);
+
+  const updateConfig = (updates: Record<string, unknown>) => {
+    onUpdate({ config: { ...config, ...updates } });
+  };
 
   const handleVarChange = (index: number, field: keyof Variable, newValue: string) => {
     const updated: Variable[] = localVars.map((v, i) =>
@@ -42,20 +47,20 @@ export function DefinitionForm({ data, onUpdate }: DefinitionFormProps) {
         : v,
     );
     setLocalVars(updated);
-    onUpdate({ variables: updated });
+    updateConfig({ variables: updated });
   };
 
   const addVariable = () => {
     const updated = [...localVars, { key: '', value: '', type: 'string' as const }];
     setLocalVars(updated);
-    onUpdate({ variables: updated });
+    updateConfig({ variables: updated });
   };
 
   const removeVariable = (index: number) => {
     if (localVars.length <= 1) return;
     const updated = localVars.filter((_, i) => i !== index);
     setLocalVars(updated);
-    onUpdate({ variables: updated });
+    updateConfig({ variables: updated });
   };
 
   return (
@@ -64,7 +69,7 @@ export function DefinitionForm({ data, onUpdate }: DefinitionFormProps) {
         <Input
           id="def-name"
           value={name}
-          onChange={(e) => onUpdate({ name: e.target.value })}
+          onChange={(e) => onUpdate({ label: e.target.value })}
           placeholder="definition"
         />
       </FormField>

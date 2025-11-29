@@ -14,18 +14,23 @@ interface LoopFormProps {
 }
 
 export function LoopForm({ data, onUpdate }: LoopFormProps) {
-  const name = (data.name as string) || 'loop';
-  const collection = (data.collection as string) || '';
-  const iterator = (data.iterator as string) || 'item';
-  const indexVar = (data.indexVar as string) || 'index';
-  const mode = (data.mode as string) || 'sequential';
-  const bodyStage = (data.bodyStage as string) || '';
-  const maxIterations = (data.maxIterations as number) || 0;
+  const config = (data.config as Record<string, unknown>) || {};
+  const name = (data.label as string) || 'loop';
+  const collection = (config.collection as string) || '';
+  const iterator = (config.iterator as string) || 'item';
+  const indexVar = (config.indexVar as string) || 'index';
+  const mode = (config.mode as string) || 'sequential';
+  const bodyStage = (config.bodyStage as string) || '';
+  const maxIterations = (config.maxIterations as number) || 0;
+
+  const updateConfig = (updates: Record<string, unknown>) => {
+    onUpdate({ config: { ...config, ...updates } });
+  };
 
   return (
     <div className="space-y-4">
       <FormField label="Name" htmlFor="loop-name" description="Unique identifier for this step" required>
-        <Input id="loop-name" value={name} onChange={(e) => onUpdate({ name: e.target.value })} placeholder="loop" />
+        <Input id="loop-name" value={name} onChange={(e) => onUpdate({ label: e.target.value })} placeholder="loop" />
       </FormField>
 
       <FormField
@@ -37,7 +42,7 @@ export function LoopForm({ data, onUpdate }: LoopFormProps) {
         <Input
           id="loop-collection"
           value={collection}
-          onChange={(e) => onUpdate({ collection: e.target.value })}
+          onChange={(e) => updateConfig({ collection: e.target.value })}
           placeholder="$[trigger.items]"
           className="font-mono"
         />
@@ -48,7 +53,7 @@ export function LoopForm({ data, onUpdate }: LoopFormProps) {
           <Input
             id="loop-iterator"
             value={iterator}
-            onChange={(e) => onUpdate({ iterator: e.target.value })}
+            onChange={(e) => updateConfig({ iterator: e.target.value })}
             placeholder="item"
             className="font-mono"
           />
@@ -58,7 +63,7 @@ export function LoopForm({ data, onUpdate }: LoopFormProps) {
           <Input
             id="loop-index"
             value={indexVar}
-            onChange={(e) => onUpdate({ indexVar: e.target.value })}
+            onChange={(e) => updateConfig({ indexVar: e.target.value })}
             placeholder="index"
             className="font-mono"
           />
@@ -66,7 +71,7 @@ export function LoopForm({ data, onUpdate }: LoopFormProps) {
       </div>
 
       <FormField label="Execution Mode" htmlFor="loop-mode" description="How iterations are processed">
-        <Select value={mode} onValueChange={(value) => onUpdate({ mode: value })}>
+        <Select value={mode} onValueChange={(value) => updateConfig({ mode: value })}>
           <SelectTrigger>
             <SelectValue placeholder="Select mode" />
           </SelectTrigger>
@@ -82,7 +87,7 @@ export function LoopForm({ data, onUpdate }: LoopFormProps) {
         <Input
           id="loop-body"
           value={bodyStage}
-          onChange={(e) => onUpdate({ bodyStage: e.target.value })}
+          onChange={(e) => updateConfig({ bodyStage: e.target.value })}
           placeholder="process_item"
         />
       </FormField>
@@ -93,7 +98,7 @@ export function LoopForm({ data, onUpdate }: LoopFormProps) {
           type="number"
           min={0}
           value={maxIterations}
-          onChange={(e) => onUpdate({ maxIterations: parseInt(e.target.value) || 0 })}
+          onChange={(e) => updateConfig({ maxIterations: parseInt(e.target.value) || 0 })}
           placeholder="0"
         />
       </FormField>

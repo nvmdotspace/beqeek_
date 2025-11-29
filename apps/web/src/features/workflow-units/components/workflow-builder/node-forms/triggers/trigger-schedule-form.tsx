@@ -13,8 +13,13 @@ interface TriggerScheduleFormProps {
 }
 
 export function TriggerScheduleForm({ data, onUpdate }: TriggerScheduleFormProps) {
-  const expression = (data.expression as string) || '0 * * * *';
-  const name = (data.name as string) || 'schedule_trigger';
+  const config = (data.config as Record<string, unknown>) || {};
+  const name = (data.label as string) || 'schedule_trigger';
+  const expression = (config.expression as string) || '0 * * * *';
+
+  const updateConfig = (updates: Record<string, unknown>) => {
+    onUpdate({ config: { ...config, ...updates } });
+  };
 
   return (
     <div className="space-y-4">
@@ -22,7 +27,7 @@ export function TriggerScheduleForm({ data, onUpdate }: TriggerScheduleFormProps
         <Input
           id="trigger-name"
           value={name}
-          onChange={(e) => onUpdate({ name: e.target.value })}
+          onChange={(e) => onUpdate({ label: e.target.value })}
           placeholder="schedule_trigger"
         />
       </FormField>
@@ -36,7 +41,7 @@ export function TriggerScheduleForm({ data, onUpdate }: TriggerScheduleFormProps
         <Input
           id="trigger-cron"
           value={expression}
-          onChange={(e) => onUpdate({ expression: e.target.value })}
+          onChange={(e) => updateConfig({ expression: e.target.value })}
           placeholder="0 * * * *"
           className="font-mono"
         />
