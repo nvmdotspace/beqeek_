@@ -4,7 +4,6 @@ import { useLanguageStore } from '@/stores/language-store';
 // @ts-expect-error - Paraglide runtime doesn't have TypeScript declarations
 import { baseLocale, isLocale } from '@/paraglide/generated/runtime.js';
 
-import { ThemeProvider } from './theme-provider';
 import { ApiErrorBoundary } from '@/components/api-error-boundary';
 import { queryClient } from '@/shared/query-client';
 import { Toaster } from '@workspace/ui/components/sonner';
@@ -26,15 +25,13 @@ function LanguageDetector({ children }: { children: React.ReactNode }) {
 
 export const AppProviders = ({ children }: { children: React.ReactNode }) => {
   return (
-    <ThemeProvider>
-      <QueryClientProvider client={queryClient}>
-        <ApiErrorBoundary>
-          <LanguageDetector>
-            {children}
-            <Toaster position="top-center" richColors />
-          </LanguageDetector>
-        </ApiErrorBoundary>
-      </QueryClientProvider>
-    </ThemeProvider>
+    <QueryClientProvider client={queryClient}>
+      <ApiErrorBoundary>
+        <LanguageDetector>
+          {children}
+          <Toaster position="top-center" richColors />
+        </LanguageDetector>
+      </ApiErrorBoundary>
+    </QueryClientProvider>
   );
 };

@@ -65,9 +65,26 @@ function applyTheme(theme: Theme) {
 /**
  * Initialize theme on app load
  * Call this in your app entry point
+ *
+ * NOTE: We read directly from localStorage because Zustand's persist
+ * middleware rehydrates asynchronously. Reading from the store state
+ * would return the default value ('system') before rehydration completes.
  */
 export function initializeTheme() {
-  const theme = useThemeStore.getState().theme;
+  // Read directly from localStorage to avoid async rehydration issue
+  let theme: Theme = 'system';
+  try {
+    const stored = localStorage.getItem('beqeek-theme-storage');
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (parsed?.state?.theme) {
+        theme = parsed.state.theme;
+      }
+    }
+  } catch {
+    // Fallback to system theme if localStorage read fails
+  }
+
   applyTheme(theme);
 
   // Listen for system theme changes when using 'system' mode

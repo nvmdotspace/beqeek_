@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { getRouteApi } from '@tanstack/react-router';
 import { WorkflowCanvas } from '../components/workflow-builder/workflow-canvas';
 import { NodePalette } from '../components/workflow-builder/node-palette';
-import { NodeConfigDrawer } from '../components/workflow-builder/node-config-drawer';
+import { NodeConfigPanel } from '../components/workflow-builder/node-config-panel';
 import { YamlEditor } from '../components/workflow-builder/yaml-editor';
 import { CanvasHeader } from '../components/workflow-builder/canvas-header';
 import { CreateEventDialog } from '../components/dialogs/create-event-dialog';
@@ -17,11 +17,11 @@ const route = getRouteApi('/$locale/workspaces/$workspaceId/workflow-units/$unit
  * Workflow Event Editor Page
  * Visual workflow builder with React Flow
  *
- * Optimized layout:
- * - Event selector in header (replaces EventListSidebar)
+ * Layout (make.com style):
+ * - Event selector in header
  * - Node Palette sidebar (left) for drag-and-drop nodes
  * - Canvas (center) - maximized width
- * - Config drawer slides from right when node selected
+ * - Config panel (right) - inline, no overlay/blur background
  */
 export default function WorkflowEventEditorPage() {
   const { workspaceId, unitId, eventId } = route.useParams();
@@ -67,8 +67,8 @@ export default function WorkflowEventEditorPage() {
                 <WorkflowCanvas />
               </div>
 
-              {/* Node Config Drawer (slides from right when node selected) */}
-              <NodeConfigDrawer />
+              {/* Node Config Panel - Inline right panel (make.com style, no overlay) */}
+              <NodeConfigPanel />
             </>
           ) : (
             <div className="flex-1 overflow-hidden">

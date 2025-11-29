@@ -8,6 +8,7 @@ import {
   useNodesState,
   useEdgesState,
   addEdge,
+  MarkerType,
   type Connection,
   type OnNodesChange,
   type OnEdgesChange,
@@ -16,9 +17,11 @@ import {
   type ColorMode,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
+import './edges/edge-styles.css';
 import { Button } from '@workspace/ui/components/button';
 import { Save, Play } from 'lucide-react';
 import { NODE_TYPES } from './nodes';
+import { EDGE_TYPES, DEFAULT_EDGE_OPTIONS } from './edges';
 import { useWorkflowEditorStore } from '../../stores/workflow-editor-store';
 import { isValidConnection } from '../../utils/connection-validator';
 import { useTheme } from '@/providers/theme-provider';
@@ -143,6 +146,7 @@ export const WorkflowCanvas = () => {
   }, []);
 
   const nodeTypes = useMemo(() => NODE_TYPES, []);
+  const edgeTypes = useMemo(() => EDGE_TYPES, []);
 
   const handleSave = () => {
     // Phase 4: Convert nodes/edges to YAML
@@ -178,15 +182,20 @@ export const WorkflowCanvas = () => {
         onEdgesChange={handleEdgesChange}
         onConnect={handleConnect}
         nodeTypes={nodeTypes}
+        edgeTypes={edgeTypes}
+        defaultEdgeOptions={DEFAULT_EDGE_OPTIONS}
         colorMode={colorMode}
         fitView
         attributionPosition="bottom-right"
         deleteKeyCode="Delete"
         multiSelectionKeyCode="Control"
+        connectionLineStyle={{ stroke: 'var(--muted-foreground)', strokeWidth: 2 }}
+        connectionRadius={30}
       >
         <Background gap={16} size={1} />
         <Controls />
         <MiniMap
+          position="bottom-left"
           nodeColor={(node) => {
             // Use CSS custom properties from design tokens
             if (node.type?.startsWith('trigger_')) return 'var(--accent-blue)';

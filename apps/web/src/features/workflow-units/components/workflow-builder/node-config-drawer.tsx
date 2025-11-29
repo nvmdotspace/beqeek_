@@ -6,7 +6,7 @@
  * Replaces the fixed NodeConfigPanel sidebar.
  */
 
-import { useEffect, useCallback } from 'react';
+import { useCallback } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@workspace/ui/components/sheet';
 import { Stack } from '@workspace/ui/components/primitives';
 import { Text } from '@workspace/ui/components/typography';
@@ -18,16 +18,8 @@ import { getWorkflowIcon } from '../../utils/workflow-icons';
 import { NodeFormRouter } from './node-forms';
 
 export function NodeConfigDrawer() {
-  const {
-    nodes,
-    selectedNodeIds,
-    isConfigDrawerOpen,
-    openConfigDrawer,
-    closeConfigDrawer,
-    setSelectedNodeIds,
-    mode,
-    updateNodeData,
-  } = useWorkflowEditorStore();
+  const { nodes, selectedNodeIds, isConfigDrawerOpen, closeConfigDrawer, setSelectedNodeIds, updateNodeData } =
+    useWorkflowEditorStore();
 
   const selectedNode = nodes.find((n) => selectedNodeIds.includes(n.id));
   const nodeDef = selectedNode ? NODE_DEFINITIONS.find((d) => d.type === selectedNode.type) : null;
@@ -42,12 +34,11 @@ export function NodeConfigDrawer() {
     [selectedNode, updateNodeData],
   );
 
-  // Open drawer when node is selected (in visual mode)
-  useEffect(() => {
-    if (selectedNodeIds.length > 0 && mode === 'visual' && !isConfigDrawerOpen) {
-      openConfigDrawer();
-    }
-  }, [selectedNodeIds, mode, isConfigDrawerOpen, openConfigDrawer]);
+  // NOTE: Auto-open drawer on node select has been removed.
+  // Users can now:
+  // 1. Click and drag nodes freely without opening the drawer
+  // 2. Click the Edit button on the hover toolbar to open the drawer
+  // 3. Double-click the node (if implemented in canvas)
 
   // Handle drawer close - also clear selection
   const handleOpenChange = (open: boolean) => {

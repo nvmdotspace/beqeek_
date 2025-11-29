@@ -45,6 +45,7 @@ interface WorkflowEditorState {
   selectAllNodes: () => void;
   deselectAllNodes: () => void;
   deleteSelectedNodes: () => void;
+  deleteNode: (nodeId: string) => void;
   copySelectedNodes: () => void;
   pasteNodes: (offset?: { x: number; y: number }) => void;
 
@@ -149,6 +150,21 @@ export const useWorkflowEditorStore = create<WorkflowEditorState>()(
               nodes: newNodes,
               edges: newEdges,
               selectedNodeIds: [],
+              isDirty: true,
+            };
+          }),
+
+        // Delete a single node by ID
+        deleteNode: (nodeId: string) =>
+          set((state) => {
+            const newNodes = state.nodes.filter((n) => n.id !== nodeId);
+            const newEdges = state.edges.filter((e) => e.source !== nodeId && e.target !== nodeId);
+
+            return {
+              nodes: newNodes,
+              edges: newEdges,
+              selectedNodeIds: state.selectedNodeIds.filter((id) => id !== nodeId),
+              isConfigDrawerOpen: state.selectedNodeIds.includes(nodeId) ? false : state.isConfigDrawerOpen,
               isDirty: true,
             };
           }),
