@@ -19,7 +19,6 @@ export const WorkspaceGrid = ({ workspaces, onFavorite }: WorkspaceGridProps) =>
           spanMd={6} // Tablet: 2 columns (768px+)
           spanLg={4} // Desktop: 3 columns (1024px+)
           spanXl={3} // Large: 4 columns (1440px+)
-          span2xl={2.4} // Extra Large: 5 columns (1768px+)
         >
           <WorkspaceCardCompact workspace={workspace} onFavorite={onFavorite} />
         </GridItem>

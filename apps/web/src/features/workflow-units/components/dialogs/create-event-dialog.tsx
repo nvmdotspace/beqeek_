@@ -44,8 +44,8 @@ export function CreateEventDialog({ open, onOpenChange, workspaceId, unitId }: C
     const timestamp = Date.now();
     const timestampHex = timestamp.toString(16).padStart(12, '0');
     const randomBytes = Array.from({ length: 16 }, () => Math.floor(Math.random() * 256));
-    randomBytes[6] = (randomBytes[6] & 0x0f) | 0x70;
-    randomBytes[8] = (randomBytes[8] & 0x3f) | 0x80;
+    randomBytes[6] = (randomBytes[6]! & 0x0f) | 0x70;
+    randomBytes[8] = (randomBytes[8]! & 0x3f) | 0x80;
     const randomHex = randomBytes.map((b) => b.toString(16).padStart(2, '0')).join('');
     return `${timestampHex.slice(0, 8)}-${timestampHex.slice(8, 12)}-7${randomHex.slice(1, 4)}-${randomHex.slice(4, 8)}-${randomHex.slice(8, 20)}`;
   };

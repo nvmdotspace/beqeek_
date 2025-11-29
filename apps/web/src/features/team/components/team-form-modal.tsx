@@ -20,7 +20,7 @@ import { ROUTES } from '@/shared/route-paths';
 // @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
 
-const route = getRouteApi(ROUTES.WORKSPACE.TEAM);
+const route = getRouteApi(ROUTES.WORKSPACE.TEAM_INDEX);
 
 interface TeamFormModalProps {
   open: boolean;

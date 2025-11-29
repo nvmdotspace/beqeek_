@@ -60,7 +60,7 @@ export interface ContainerProps extends React.HTMLAttributes<HTMLDivElement>, Va
    * HTML element to render as
    * @default 'div'
    */
-  as?: keyof JSX.IntrinsicElements;
+  as?: React.ElementType;
 }
 
 export const Container = React.forwardRef<HTMLDivElement, ContainerProps>(

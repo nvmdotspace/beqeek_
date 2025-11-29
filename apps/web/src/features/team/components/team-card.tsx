@@ -16,7 +16,7 @@ import { cn } from '@workspace/ui/lib/utils';
 // @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
 
-const route = getRouteApi(ROUTES.WORKSPACE.TEAM);
+const route = getRouteApi(ROUTES.WORKSPACE.TEAM_INDEX);
 
 interface TeamCardProps {
   team: WorkspaceTeam;

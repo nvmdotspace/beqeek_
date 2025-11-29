@@ -19,7 +19,6 @@ import { Card } from '../../../card.js';
 import { ScrollArea, ScrollBar } from '../../../scroll-area.js';
 import { cn } from '../../../../lib/utils.js';
 
-// @ts-expect-error - tunnel-rat types issue
 const t = tunnel();
 
 export type { DragEndEvent } from '@dnd-kit/core';

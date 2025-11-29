@@ -75,7 +75,7 @@ export function useUpdateRole(workspaceId: string, options?: UseUpdateRoleOption
     },
     ...options?.mutationOptions,
     // Merge onSuccess callbacks to ensure cache invalidation always runs
-    onSuccess: (data, variables, context) => {
+    onSuccess: (data, variables, context, mutation) => {
       // Always invalidate cache first
       queryClient.invalidateQueries({
         queryKey: ['workspace-team-roles', workspaceId, variables.request.constraints.workspaceTeamId],
@@ -84,7 +84,7 @@ export function useUpdateRole(workspaceId: string, options?: UseUpdateRoleOption
       queryClient.invalidateQueries({ queryKey: ['workspace-teams', workspaceId] });
 
       // Then call user's onSuccess if provided
-      options?.mutationOptions?.onSuccess?.(data, variables, context);
+      options?.mutationOptions?.onSuccess?.(data, variables, context, mutation);
     },
   });
 }

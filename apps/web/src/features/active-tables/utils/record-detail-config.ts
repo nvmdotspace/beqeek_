@@ -49,16 +49,16 @@ export function validateDetailConfig(
   const fieldNames = new Set(fields.map((f) => f.name));
 
   // Check title field
-  if (!fieldNames.has(config.titleField)) {
+  if (config.titleField && !fieldNames.has(config.titleField)) {
     errors.push(`Title field "${config.titleField}" not found in table schema`);
   }
 
   // Check other fields
   const allConfigFields = [
-    ...config.subLineFields,
-    ...config.tailFields,
-    ...(config.column1Fields || []),
-    ...(config.column2Fields || []),
+    ...(config.subLineFields ?? []),
+    ...(config.tailFields ?? []),
+    ...(config.column1Fields ?? []),
+    ...(config.column2Fields ?? []),
   ];
 
   allConfigFields.forEach((fieldName) => {

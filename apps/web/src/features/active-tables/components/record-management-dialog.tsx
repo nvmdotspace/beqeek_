@@ -23,7 +23,7 @@ type FieldValue = string | number | boolean | string[] | null;
 
 const getDefaultValueForField = (field: ActiveFieldConfig): FieldValue => {
   switch (field.type) {
-    case 'BOOLEAN':
+    case 'CHECKBOX_YES_NO':
       return false;
     case 'INTEGER':
     case 'NUMERIC':
@@ -86,7 +86,6 @@ export const RecordManagementDialog = ({
     switch (field.type) {
       case 'SHORT_TEXT':
       case 'EMAIL':
-      case 'PHONE':
       case 'URL':
         return (
           <form.Field
@@ -251,7 +250,7 @@ export const RecordManagementDialog = ({
           </form.Field>
         );
 
-      case 'BOOLEAN':
+      case 'CHECKBOX_YES_NO':
         return (
           <form.Field name={fieldName}>
             {(formField) => {

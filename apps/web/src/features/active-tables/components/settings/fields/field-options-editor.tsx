@@ -14,6 +14,7 @@ import { Badge } from '@workspace/ui/components/badge';
 import { ScrollArea } from '@workspace/ui/components/scroll-area';
 import { cn } from '@workspace/ui/lib/utils';
 import type { FieldOption } from '@workspace/active-tables-core';
+// @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
 
 export interface FieldOptionsEditorProps {

@@ -26,7 +26,7 @@ import type { WorkspaceTeam } from '../types/team';
 // @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
 
-const route = getRouteApi(ROUTES.WORKSPACE.TEAM);
+const route = getRouteApi(ROUTES.WORKSPACE.TEAM_INDEX);
 
 export function TeamsPage() {
   const { workspaceId } = route.useParams();

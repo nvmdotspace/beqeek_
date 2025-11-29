@@ -120,8 +120,11 @@ export const ROUTES = {
     /** Workflows: /$locale/workspaces/$workspaceId/workflows */
     WORKFLOWS: '/$locale/workspaces/$workspaceId/workflows' as const,
 
-    /** Team management: /$locale/workspaces/$workspaceId/team/ */
-    TEAM: '/$locale/workspaces/$workspaceId/team/' as const,
+    /** Team list - use for navigation */
+    TEAM: '/$locale/workspaces/$workspaceId/team' as const,
+
+    /** Team list index route - use for getRouteApi() */
+    TEAM_INDEX: '/$locale/workspaces/$workspaceId/team/' as const,
 
     /** Team detail: /$locale/workspaces/$workspaceId/team/$teamId */
     TEAM_DETAIL: '/$locale/workspaces/$workspaceId/team/$teamId' as const,

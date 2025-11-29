@@ -71,7 +71,7 @@ function getCategoryFromType(nodeType: string | undefined): keyof typeof CATEGOR
 export const WorkflowEdge = memo(
   ({ id, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, source, selected }: EdgeProps) => {
     const [isHovered, setIsHovered] = useState(false);
-    const { nodes, setEdges } = useWorkflowEditorStore();
+    const { nodes, edges, setEdges } = useWorkflowEditorStore();
 
     // Get source node to determine color
     const sourceNode = nodes.find((n) => n.id === source);
@@ -92,7 +92,7 @@ export const WorkflowEdge = memo(
     // Handle edge deletion
     const handleDelete = (e: React.MouseEvent) => {
       e.stopPropagation();
-      setEdges((edges) => edges.filter((edge) => edge.id !== id));
+      setEdges(edges.filter((edge) => edge.id !== id));
     };
 
     const isActive = isHovered || selected;
