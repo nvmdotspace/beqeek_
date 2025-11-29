@@ -75,9 +75,6 @@ export const ROUTES = {
     /** Forms list: /$locale/workspaces/$workspaceId/workflow-forms */
     LIST: '/$locale/workspaces/$workspaceId/workflow-forms' as const,
 
-    /** Template selection: /$locale/workspaces/$workspaceId/workflow-forms/select */
-    SELECT: '/$locale/workspaces/$workspaceId/workflow-forms/select' as const,
-
     /** Form builder detail: /$locale/workspaces/$workspaceId/workflow-forms/$formId */
     FORM_DETAIL: '/$locale/workspaces/$workspaceId/workflow-forms/$formId' as const,
   },

@@ -22,6 +22,7 @@ import { useWorkflowForms } from '../hooks';
 import { FormListItem } from '../components/form-list-item';
 import { FormListSkeleton } from '../components/form-list-skeleton';
 import { EmptyState } from '../components/empty-state';
+import { CreateFormDialog } from '../components/create-form-dialog';
 import type { FormType } from '../types';
 
 const route = getRouteApi(ROUTES.WORKFLOW_FORMS.LIST);
@@ -32,6 +33,7 @@ export function WorkflowFormsList() {
   const currentWorkspace = useSidebarStore((state) => state.currentWorkspace);
   const [searchQuery, setSearchQuery] = useState('');
   const [formTypeFilter, setFormTypeFilter] = useState<FormType | 'all'>('all');
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
   const { data, isLoading, error } = useWorkflowForms(workspaceId);
   const forms = data?.data ?? [];
@@ -86,11 +88,7 @@ export function WorkflowFormsList() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <Button
-              variant="brand-primary"
-              size="sm"
-              onClick={() => navigate({ to: ROUTES.WORKFLOW_FORMS.SELECT, params: { locale, workspaceId } })}
-            >
+            <Button variant="brand-primary" size="sm" onClick={() => setIsCreateDialogOpen(true)}>
               Tạo Form
             </Button>
           </div>
@@ -160,18 +158,7 @@ export function WorkflowFormsList() {
           <EmptyState
             message={searchQuery ? 'Không tìm thấy form nào' : 'Chưa có form nào'}
             action={
-              !searchQuery ? (
-                <Button
-                  onClick={() =>
-                    navigate({
-                      to: ROUTES.WORKFLOW_FORMS.SELECT,
-                      params: { locale, workspaceId },
-                    })
-                  }
-                >
-                  Tạo form đầu tiên
-                </Button>
-              ) : undefined
+              !searchQuery ? <Button onClick={() => setIsCreateDialogOpen(true)}>Tạo form đầu tiên</Button> : undefined
             }
           />
         ) : (
@@ -186,6 +173,12 @@ export function WorkflowFormsList() {
           </Grid>
         )}
       </Stack>
+
+      <CreateFormDialog
+        open={isCreateDialogOpen}
+        onClose={() => setIsCreateDialogOpen(false)}
+        workspaceId={workspaceId}
+      />
     </Box>
   );
 }

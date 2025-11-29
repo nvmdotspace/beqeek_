@@ -18,19 +18,22 @@ export const FORM_TYPES: FormTypeDefinition[] = [
     type: 'BASIC',
     name: 'Form Cơ bản',
     description: 'Form cơ bản với các trường văn bản và email.',
-    logo: 'https://img.icons8.com/color/64/000000/form.png',
+    logo: '',
+    icon: 'FileText',
   },
   {
     type: 'SUBSCRIPTION',
     name: 'Form Đăng ký',
     description: 'Form dành cho đăng ký nhận thông tin hoặc bản tin.',
-    logo: 'https://img.icons8.com/color/64/000000/newsletter.png',
+    logo: '',
+    icon: 'Mail',
   },
   {
     type: 'SURVEY',
     name: 'Form Khảo sát',
     description: 'Form khảo sát với các trường tùy chọn và câu hỏi.',
-    logo: 'https://img.icons8.com/color/64/000000/survey.png',
+    logo: '',
+    icon: 'ClipboardList',
   },
 ];
 

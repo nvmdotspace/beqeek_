@@ -103,6 +103,8 @@ export interface FormTypeDefinition {
   description: string;
   /** Icon/logo URL */
   logo: string;
+  /** Optional Lucide icon name */
+  icon?: string;
 }
 
 /**
