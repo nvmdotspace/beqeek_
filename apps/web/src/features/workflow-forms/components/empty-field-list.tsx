@@ -7,6 +7,8 @@
 
 import { Button } from '@workspace/ui/components/button';
 import { Plus } from 'lucide-react';
+// @ts-expect-error - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 
 interface EmptyFieldListProps {
   onAddField: () => void;
@@ -39,11 +41,11 @@ export function EmptyFieldList({ onAddField }: EmptyFieldListProps) {
           </svg>
         </div>
       </div>
-      <h3 className="text-lg font-semibold mb-2">Chưa có field nào</h3>
-      <p className="text-sm text-muted-foreground mb-4">Thêm field đầu tiên để xây dựng form của bạn</p>
+      <h3 className="text-lg font-semibold mb-2">{m.workflowForms_emptyField_title()}</h3>
+      <p className="text-sm text-muted-foreground mb-4">{m.workflowForms_emptyField_description()}</p>
       <Button onClick={onAddField}>
         <Plus className="w-4 h-4 mr-2" />
-        Thêm Field
+        {m.workflowForms_emptyField_addButton()}
       </Button>
     </div>
   );

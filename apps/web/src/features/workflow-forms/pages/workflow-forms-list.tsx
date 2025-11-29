@@ -24,6 +24,8 @@ import { FormListSkeleton } from '../components/form-list-skeleton';
 import { EmptyState } from '../components/empty-state';
 import { CreateFormDialog } from '../components/create-form-dialog';
 import type { FormType } from '../types';
+// @ts-expect-error - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 
 const route = getRouteApi(ROUTES.WORKFLOW_FORMS.LIST);
 
@@ -69,11 +71,11 @@ export function WorkflowFormsList() {
         {/* TODO: Migrate to primitives when responsive gap support is added */}
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <Stack space="space-025">
-            <Heading level={1}>Biểu mẫu</Heading>
+            <Heading level={1}>{m.workflowForms_page_title()}</Heading>
             <Text size="small" color="muted">
               {currentWorkspace?.workspaceName
                 ? `Workspace • ${currentWorkspace.workspaceName}`
-                : 'Quản lý biểu mẫu workflow'}
+                : m.workflowForms_page_subtitle()}
             </Text>
           </Stack>
 
@@ -82,14 +84,14 @@ export function WorkflowFormsList() {
             <div className="relative w-full sm:w-72">
               <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="Tìm kiếm form theo tên hoặc mô tả..."
+                placeholder={m.workflowForms_page_searchPlaceholder()}
                 className="h-10 rounded-lg border-border/60 pl-8"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
             <Button variant="brand-primary" size="sm" onClick={() => setIsCreateDialogOpen(true)}>
-              Tạo Form
+              {m.workflowForms_page_createButton()}
             </Button>
           </div>
         </div>
@@ -98,7 +100,7 @@ export function WorkflowFormsList() {
         <Inline space="space-250" align="center" wrap className="gap-y-[var(--space-250)]">
           <Badge variant="outline" className="flex items-center gap-1.5">
             <FileText className="h-3.5 w-3.5" />
-            <span>{totalForms} biểu mẫu</span>
+            <span>{m.workflowForms_page_formsCount({ count: totalForms })}</span>
           </Badge>
         </Inline>
 
@@ -106,13 +108,15 @@ export function WorkflowFormsList() {
         <Stack space="space-100">
           <Inline space="space-050" wrap className="text-xs text-muted-foreground">
             <Badge variant="outline" className="border-dashed">
-              {filteredForms.length} biểu mẫu
+              {m.workflowForms_page_formsCount({ count: filteredForms.length })}
             </Badge>
             <div className="rounded-full border border-border/60 text-xs text-foreground">
               <Box padding="space-025" className="px-3">
                 <Inline space="space-050" align="center">
                   <Filter className="h-3.5 w-3.5 text-muted-foreground" />
-                  {activeFilterCount ? `${activeFilterCount} filter active` : 'No filters applied'}
+                  {activeFilterCount
+                    ? m.workflowForms_page_filterActive({ count: activeFilterCount })
+                    : m.workflowForms_page_noFilters()}
                 </Inline>
               </Box>
             </div>
@@ -123,27 +127,27 @@ export function WorkflowFormsList() {
               {/* Form Type Filter */}
               <Inline space="space-100" align="start">
                 <Text size="small" weight="medium" className="min-w-[100px] text-muted-foreground pt-1">
-                  Loại form
+                  {m.workflowForms_page_filterLabel()}
                 </Text>
                 <Inline space="space-075" wrap align="center" className="flex-1">
                   <FilterChip active={formTypeFilter === 'all'} onClick={() => setFormTypeFilter('all')}>
-                    Tất cả
+                    {m.workflowForms_page_filterAll()}
                   </FilterChip>
                   <FilterChip active={formTypeFilter === 'BASIC'} onClick={() => setFormTypeFilter('BASIC')}>
-                    Cơ bản ({formTypeCounts.BASIC})
+                    {m.workflowForms_type_basicWithCount({ count: formTypeCounts.BASIC })}
                   </FilterChip>
                   <FilterChip
                     active={formTypeFilter === 'SUBSCRIPTION'}
                     onClick={() => setFormTypeFilter('SUBSCRIPTION')}
                   >
-                    Đăng ký ({formTypeCounts.SUBSCRIPTION})
+                    {m.workflowForms_type_subscriptionWithCount({ count: formTypeCounts.SUBSCRIPTION })}
                   </FilterChip>
                   <FilterChip
                     active={formTypeFilter === 'SURVEY'}
                     onClick={() => setFormTypeFilter('SURVEY')}
                     variant="warning"
                   >
-                    Khảo sát ({formTypeCounts.SURVEY})
+                    {m.workflowForms_type_surveyWithCount({ count: formTypeCounts.SURVEY })}
                   </FilterChip>
                 </Inline>
               </Inline>
@@ -156,9 +160,11 @@ export function WorkflowFormsList() {
           <FormListSkeleton count={6} />
         ) : filteredForms.length === 0 ? (
           <EmptyState
-            message={searchQuery ? 'Không tìm thấy form nào' : 'Chưa có form nào'}
+            message={searchQuery ? m.workflowForms_empty_noResults() : m.workflowForms_empty_noForms()}
             action={
-              !searchQuery ? <Button onClick={() => setIsCreateDialogOpen(true)}>Tạo form đầu tiên</Button> : undefined
+              !searchQuery ? (
+                <Button onClick={() => setIsCreateDialogOpen(true)}>{m.workflowForms_empty_createFirst()}</Button>
+              ) : undefined
             }
           />
         ) : (

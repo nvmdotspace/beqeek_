@@ -18,6 +18,8 @@ import { Alert, AlertDescription } from '@workspace/ui/components/alert';
 import { AlertCircle, Loader2 } from 'lucide-react';
 import { useUpdateWorkflowUnit } from '../../hooks/use-update-workflow-unit';
 import type { WorkflowUnit } from '../../api/types';
+// @ts-expect-error - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 
 const editWorkflowUnitSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100, 'Name must be 100 characters or less'),
@@ -92,9 +94,9 @@ export function EditWorkflowUnitDialog({ open, onOpenChange, workspaceId, unit }
         aria-describedby="edit-workflow-unit-description"
       >
         <DialogHeader>
-          <DialogTitle>Edit Workflow Unit</DialogTitle>
+          <DialogTitle>{m.workflowUnits_dialog_editTitle()}</DialogTitle>
           <DialogDescription id="edit-workflow-unit-description">
-            Update the name and description of your workflow unit
+            {m.workflowUnits_dialog_editDescription()}
           </DialogDescription>
         </DialogHeader>
 
@@ -102,12 +104,12 @@ export function EditWorkflowUnitDialog({ open, onOpenChange, workspaceId, unit }
           {/* Name Field */}
           <div className="space-y-2">
             <Label htmlFor="edit-name">
-              Name <span className="text-destructive">*</span>
+              {m.workflowUnits_form_nameLabel()} <span className="text-destructive">*</span>
             </Label>
             <Input
               id="edit-name"
               data-autofocus="true"
-              placeholder="Enter workflow unit name"
+              placeholder={m.workflowUnits_form_namePlaceholder()}
               {...form.register('name')}
               aria-invalid={!!form.formState.errors.name}
               aria-describedby={form.formState.errors.name ? 'edit-name-error' : undefined}
@@ -121,10 +123,10 @@ export function EditWorkflowUnitDialog({ open, onOpenChange, workspaceId, unit }
 
           {/* Description Field */}
           <div className="space-y-2">
-            <Label htmlFor="edit-description">Description</Label>
+            <Label htmlFor="edit-description">{m.workflowUnits_form_descriptionLabel()}</Label>
             <Textarea
               id="edit-description"
-              placeholder="Enter description (optional)"
+              placeholder={m.workflowUnits_form_descriptionPlaceholder()}
               rows={3}
               {...form.register('description')}
             />
@@ -135,20 +137,18 @@ export function EditWorkflowUnitDialog({ open, onOpenChange, workspaceId, unit }
             <Alert variant="destructive">
               <AlertCircle className="size-4" />
               <AlertDescription>
-                {updateMutation.error instanceof Error
-                  ? updateMutation.error.message
-                  : 'Failed to update workflow unit'}
+                {updateMutation.error instanceof Error ? updateMutation.error.message : m.workflowUnits_error_update()}
               </AlertDescription>
             </Alert>
           )}
 
           <DialogFooter>
             <Button type="button" variant="ghost" onClick={handleCancel} disabled={updateMutation.isPending}>
-              Cancel
+              {m.common_cancel()}
             </Button>
             <Button type="submit" disabled={updateMutation.isPending}>
               {updateMutation.isPending && <Loader2 className="size-4 mr-2 animate-spin" />}
-              Save Changes
+              {m.common_saveChanges()}
             </Button>
           </DialogFooter>
         </form>

@@ -16,6 +16,8 @@ import { useFormBuilderStore } from '../stores/form-builder-store';
 import { FieldConfigDialog } from './field-config-dialog';
 
 import type { Field } from '../types';
+// @ts-expect-error - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 
 interface FieldListItemProps {
   field: Field;
@@ -42,7 +44,7 @@ export function FieldListItem({ field, index, isDraggedOver, isBeingDragged }: F
   };
 
   const handleDelete = () => {
-    if (confirm(`Xóa field "${field.label}"? Không thể hoàn tác.`)) {
+    if (confirm(m.workflowForms_fieldListItem_deleteConfirm({ label: field.label }))) {
       removeField(index);
     }
   };
@@ -62,7 +64,7 @@ export function FieldListItem({ field, index, isDraggedOver, isBeingDragged }: F
           {...attributes}
           {...listeners}
           className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground p-1.5 rounded-md hover:bg-muted/40 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1"
-          aria-label={`Kéo để sắp xếp ${field.label}`}
+          aria-label={m.workflowForms_fieldListItem_dragToReorder({ label: field.label })}
           tabIndex={0}
         >
           <GripVertical className="h-5 w-5" />
@@ -74,7 +76,7 @@ export function FieldListItem({ field, index, isDraggedOver, isBeingDragged }: F
             <span className="font-medium">{field.label}</span>
             {field.required && (
               <Badge variant="destructive" className="h-5 text-xs">
-                Bắt buộc
+                {m.workflowForms_fieldListItem_required()}
               </Badge>
             )}
           </div>
@@ -87,7 +89,9 @@ export function FieldListItem({ field, index, isDraggedOver, isBeingDragged }: F
             {field.placeholder && (
               <>
                 <span>•</span>
-                <span className="text-xs">Placeholder: {field.placeholder}</span>
+                <span className="text-xs">
+                  {m.workflowForms_fieldListItem_placeholder({ text: field.placeholder })}
+                </span>
               </>
             )}
           </div>
@@ -95,7 +99,12 @@ export function FieldListItem({ field, index, isDraggedOver, isBeingDragged }: F
 
         {/* Actions */}
         <div className="flex gap-1">
-          <Button variant="ghost" size="icon" onClick={handleEdit} aria-label={`Chỉnh sửa field ${field.label}`}>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleEdit}
+            aria-label={m.workflowForms_fieldListItem_editField({ label: field.label })}
+          >
             <Edit className="h-4 w-4" />
           </Button>
           <Button
@@ -103,7 +112,7 @@ export function FieldListItem({ field, index, isDraggedOver, isBeingDragged }: F
             size="icon"
             onClick={handleDelete}
             className="text-destructive hover:text-destructive"
-            aria-label={`Xóa field ${field.label}`}
+            aria-label={m.workflowForms_fieldListItem_deleteField({ label: field.label })}
           >
             <Trash2 className="h-4 w-4" />
           </Button>

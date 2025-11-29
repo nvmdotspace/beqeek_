@@ -24,15 +24,17 @@ import { cn } from '@workspace/ui/lib/utils';
 import { ROUTES } from '@/shared/route-paths';
 
 import type { FormInstance, FormType } from '../types';
+// @ts-expect-error - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 
 const route = getRouteApi(ROUTES.WORKFLOW_FORMS.LIST);
 
 // Form type configuration with colors and icons
-const getFormTypeConfig = (formType: FormType) => {
+const getFormTypeConfig = (formType: FormType, getLabel: (type: FormType) => string) => {
   switch (formType) {
     case 'BASIC':
       return {
-        label: 'Cơ bản',
+        label: getLabel('BASIC'),
         icon: FileText,
         bg: 'bg-accent-blue-subtle',
         text: 'text-accent-blue',
@@ -40,7 +42,7 @@ const getFormTypeConfig = (formType: FormType) => {
       };
     case 'SUBSCRIPTION':
       return {
-        label: 'Đăng ký',
+        label: getLabel('SUBSCRIPTION'),
         icon: Mail,
         bg: 'bg-accent-purple-subtle',
         text: 'text-accent-purple',
@@ -48,7 +50,7 @@ const getFormTypeConfig = (formType: FormType) => {
       };
     case 'SURVEY':
       return {
-        label: 'Khảo sát',
+        label: getLabel('SURVEY'),
         icon: ListChecks,
         bg: 'bg-warning-subtle',
         text: 'text-warning',
@@ -66,7 +68,17 @@ export function FormListItem({ form, onDelete }: FormListItemProps) {
   const { locale, workspaceId } = route.useParams();
   const navigate = route.useNavigate();
 
-  const formTypeConfig = useMemo(() => getFormTypeConfig(form.formType), [form.formType]);
+  const getFormTypeLabel = (type: FormType) => {
+    switch (type) {
+      case 'BASIC':
+        return m.workflowForms_type_basic();
+      case 'SUBSCRIPTION':
+        return m.workflowForms_type_subscription();
+      case 'SURVEY':
+        return m.workflowForms_type_survey();
+    }
+  };
+  const formTypeConfig = useMemo(() => getFormTypeConfig(form.formType, getFormTypeLabel), [form.formType]);
   const FormIcon = formTypeConfig.icon;
   const fieldCount = form.config?.fields?.length ?? 0;
   const locale_display = 'vi-VN';
@@ -146,7 +158,7 @@ export function FormListItem({ form, onDelete }: FormListItemProps) {
                 }}
               >
                 <Eye className="mr-2 h-4 w-4" />
-                Xem chi tiết
+                {m.workflowForms_listItem_viewDetail()}
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={(e) => {
@@ -158,7 +170,7 @@ export function FormListItem({ form, onDelete }: FormListItemProps) {
                 }}
               >
                 <Edit className="mr-2 h-4 w-4" />
-                Chỉnh sửa
+                {m.workflowForms_listItem_edit()}
               </DropdownMenuItem>
               {onDelete && (
                 <DropdownMenuItem
@@ -169,7 +181,7 @@ export function FormListItem({ form, onDelete }: FormListItemProps) {
                   className="text-destructive focus:text-destructive"
                 >
                   <Trash2 className="mr-2 h-4 w-4" />
-                  Xóa
+                  {m.workflowForms_listItem_delete()}
                 </DropdownMenuItem>
               )}
             </DropdownMenuContent>
@@ -180,9 +192,7 @@ export function FormListItem({ form, onDelete }: FormListItemProps) {
         <div className="mt-3 flex items-center gap-4 text-xs text-muted-foreground">
           <div className="flex items-center gap-1.5">
             <FileText className="h-3 w-3" />
-            <span>
-              {fieldCount} {fieldCount === 1 ? 'field' : 'fields'}
-            </span>
+            <span>{m.workflowForms_listItem_fieldCount({ count: fieldCount })}</span>
           </div>
         </div>
 
@@ -196,7 +206,7 @@ export function FormListItem({ form, onDelete }: FormListItemProps) {
         {/* Updated date */}
         {updatedAtLabel && (
           <Text size="small" color="muted" className="mt-2">
-            Cập nhật lúc {updatedAtLabel}
+            {m.workflowForms_listItem_updatedAt({ date: updatedAtLabel })}
           </Text>
         )}
       </CardContent>

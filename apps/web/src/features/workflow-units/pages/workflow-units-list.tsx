@@ -17,6 +17,8 @@ import { DeleteConfirmDialog } from '../components/dialogs/delete-confirm-dialog
 import { StatBadge } from '@/features/workspace/components/stat-badge';
 import { useSidebarStore } from '@/stores/sidebar-store';
 import type { WorkflowUnit } from '../api/types';
+// @ts-expect-error - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 
 const route = getRouteApi('/$locale/workspaces/$workspaceId/workflow-units/');
 
@@ -50,9 +52,9 @@ export default function WorkflowUnitsListPage() {
     return (
       <Box padding="space-300">
         <Alert variant="destructive">
-          <AlertTitle>Error Loading Workflow Units</AlertTitle>
+          <AlertTitle>{m.common_error()}</AlertTitle>
           <AlertDescription>
-            {error instanceof Error ? error.message : 'Failed to load workflow units. Please try again.'}
+            {error instanceof Error ? error.message : m.workflowUnits_page_errorLoad()}
           </AlertDescription>
         </Alert>
       </Box>
@@ -65,11 +67,11 @@ export default function WorkflowUnitsListPage() {
         {/* Header section with title, search, and buttons */}
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <Stack space="space-025">
-            <Heading level={1}>Workflow Units</Heading>
+            <Heading level={1}>{m.workflowUnits_page_title()}</Heading>
             <Text size="small" color="muted">
               {currentWorkspace?.workspaceName
                 ? `Workspace • ${currentWorkspace.workspaceName}`
-                : 'Manage your workflow automation units'}
+                : m.workflowUnits_page_subtitle()}
             </Text>
           </Stack>
 
@@ -77,7 +79,7 @@ export default function WorkflowUnitsListPage() {
             <div className="relative w-full sm:w-72">
               <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="Search workflow units..."
+                placeholder={m.workflowUnits_page_searchPlaceholder()}
                 className="h-10 rounded-lg border-border/60 pl-8"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -92,7 +94,7 @@ export default function WorkflowUnitsListPage() {
                 <RefreshCw className={cn('h-4 w-4', isFetching && 'animate-spin')} />
               </Button>
               <Button variant="brand-primary" size="sm" onClick={() => setCreateOpen(true)} disabled={!workspaceId}>
-                Create
+                {m.common_create()}
               </Button>
             </Inline>
           </div>
@@ -100,26 +102,38 @@ export default function WorkflowUnitsListPage() {
 
         {/* Stat badges section */}
         <Inline space="space-250" align="center" wrap className="gap-y-[var(--space-250)]">
-          <StatBadge icon={Boxes} value={totalUnits} label="Units" color="accent-blue" loading={isLoading} />
+          <StatBadge
+            icon={Boxes}
+            value={totalUnits}
+            label={m.workflowUnits_stat_units()}
+            color="accent-blue"
+            loading={isLoading}
+          />
           <StatBadge
             icon={Calendar}
             value={scheduledUnits}
-            label="Scheduled"
+            label={m.workflowUnits_stat_scheduled()}
             color="accent-purple"
             loading={isLoading}
           />
-          <StatBadge icon={Globe} value={activeUnits} label="Active" color="success" loading={isLoading} />
+          <StatBadge
+            icon={Globe}
+            value={activeUnits}
+            label={m.workflowUnits_stat_active()}
+            color="success"
+            loading={isLoading}
+          />
         </Inline>
 
         {/* Summary info */}
         <Stack space="space-100">
           <Inline space="space-050" wrap className="text-xs text-muted-foreground">
             <Badge variant="outline" className="border-dashed">
-              {filteredUnits.length} {filteredUnits.length === 1 ? 'unit' : 'units'}
+              {m.workflowUnits_page_unitsCount({ count: filteredUnits.length })}
             </Badge>
             {search && (
               <Badge variant="secondary" className="border-dashed">
-                Filtered from {totalUnits} total
+                {m.workflowUnits_page_filteredFrom({ count: totalUnits })}
               </Badge>
             )}
           </Inline>
@@ -143,14 +157,14 @@ export default function WorkflowUnitsListPage() {
           <div className="flex flex-col items-center justify-center py-12 text-center rounded-xl border-2 border-dashed border-border bg-muted/20">
             <Boxes className="h-12 w-12 mb-4 text-muted-foreground" />
             <Heading level={3} className="mb-2">
-              No workflow units yet
+              {m.workflowUnits_empty_title()}
             </Heading>
             <Text color="muted" className="mb-4 max-w-md">
-              Create your first workflow unit to start automating business processes
+              {m.workflowUnits_empty_description()}
             </Text>
             <Button onClick={() => setCreateOpen(true)}>
               <Plus className="size-4 mr-2" />
-              Create First Unit
+              {m.workflowUnits_empty_createFirst()}
             </Button>
           </div>
         )}
@@ -160,13 +174,13 @@ export default function WorkflowUnitsListPage() {
           <div className="flex flex-col items-center justify-center py-12 text-center rounded-xl border-2 border-dashed border-border bg-muted/20">
             <Search className="h-12 w-12 mb-4 text-muted-foreground" />
             <Heading level={3} className="mb-2">
-              No results found
+              {m.workflowUnits_empty_noResults()}
             </Heading>
             <Text color="muted" className="mb-4">
-              No workflow units match "{search}"
+              {m.workflowUnits_empty_noResultsDescription({ query: search })}
             </Text>
             <Button variant="outline" onClick={() => setSearch('')}>
-              Clear search
+              {m.workflowUnits_empty_clearSearch()}
             </Button>
           </div>
         )}

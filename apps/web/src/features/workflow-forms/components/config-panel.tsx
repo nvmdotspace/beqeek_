@@ -16,6 +16,8 @@ import { useFormBuilderStore } from '../stores/form-builder-store';
 import { FieldList } from './field-list';
 
 import type { FormInstance } from '../types';
+// @ts-expect-error - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 
 interface ConfigPanelProps {
   form: FormInstance;
@@ -59,24 +61,24 @@ export function ConfigPanel({ form }: ConfigPanelProps) {
 
           {/* Form Type */}
           <Stack space="space-050">
-            <Label htmlFor="formType">Loại Form</Label>
+            <Label htmlFor="formType">{m.workflowForms_configPanel_formType()}</Label>
             <Input id="formType" value={form.formType} readOnly />
           </Stack>
 
           {/* Submit Button Text */}
           <Stack space="space-050">
-            <Label htmlFor="submitText">Nút Gửi</Label>
+            <Label htmlFor="submitText">{m.workflowForms_configPanel_submitButton()}</Label>
             <Input
               id="submitText"
               value={submitButtonText}
               onChange={(e) => setSubmitButtonText(e.target.value)}
-              placeholder="Nhập text cho nút gửi"
+              placeholder={m.workflowForms_configPanel_submitButtonPlaceholder()}
             />
           </Stack>
 
           {/* Field List */}
           <Stack space="space-050">
-            <Label>Danh sách Fields</Label>
+            <Label>{m.workflowForms_configPanel_fieldList()}</Label>
             <FieldList />
           </Stack>
         </Stack>

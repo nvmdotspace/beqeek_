@@ -16,6 +16,8 @@ import { useFormBuilderStore } from '../stores/form-builder-store';
 import { FieldListItem } from './field-list-item';
 import { FieldConfigDialog } from './field-config-dialog';
 import { EmptyFieldList } from './empty-field-list';
+// @ts-expect-error - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 
 export function FieldList() {
   const { fields, reorderFields } = useFormBuilderStore();
@@ -68,13 +70,13 @@ export function FieldList() {
         <div className="flex items-center justify-between">
           <div>
             <p className="text-xs text-muted-foreground mt-1">
-              Tổng: {fields.length} field{fields.length !== 1 ? 's' : ''} • Bắt buộc:{' '}
-              {fields.filter((f) => f.required).length}
+              {m.workflowForms_fieldList_total({ count: fields.length })} •{' '}
+              {m.workflowForms_fieldList_required({ count: fields.filter((f) => f.required).length })}
             </p>
           </div>
           <Button onClick={() => setShowAddDialog(true)} size="sm">
             <Plus className="w-4 h-4 mr-2" />
-            Thêm Field
+            {m.workflowForms_fieldList_addField()}
           </Button>
         </div>
 

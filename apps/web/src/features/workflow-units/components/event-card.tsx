@@ -18,6 +18,8 @@ import {
 import { Calendar, Webhook, FormInput, Table, MoreVertical, Edit, Trash } from 'lucide-react';
 import { cn } from '@workspace/ui/lib/utils';
 import type { WorkflowEvent, EventSourceType } from '../api/types';
+// @ts-expect-error - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 
 const TRIGGER_ICONS: Record<EventSourceType, React.ElementType> = {
   SCHEDULE: Calendar,
@@ -26,11 +28,19 @@ const TRIGGER_ICONS: Record<EventSourceType, React.ElementType> = {
   ACTIVE_TABLE: Table,
 };
 
-const TRIGGER_LABELS: Record<EventSourceType, string> = {
-  SCHEDULE: 'Schedule',
-  WEBHOOK: 'Webhook',
-  OPTIN_FORM: 'Form',
-  ACTIVE_TABLE: 'Table',
+const getTriggerLabel = (type: EventSourceType): string => {
+  switch (type) {
+    case 'SCHEDULE':
+      return m.workflowEvents_trigger_schedule();
+    case 'WEBHOOK':
+      return m.workflowEvents_trigger_webhook();
+    case 'OPTIN_FORM':
+      return m.workflowEvents_trigger_form();
+    case 'ACTIVE_TABLE':
+      return m.workflowEvents_trigger_table();
+    default:
+      return type;
+  }
 };
 
 interface EventCardProps {
@@ -71,14 +81,14 @@ export function EventCard({ event, isSelected, onSelect, onToggleActive, onEdit,
           <CardTitle className="text-base font-medium">{event.eventName}</CardTitle>
           <div className="flex items-center gap-2 shrink-0">
             <Badge variant={event.eventActive ? 'default' : 'secondary'}>
-              {event.eventActive ? 'Active' : 'Inactive'}
+              {event.eventActive ? m.workflowEvents_card_active() : m.workflowEvents_card_inactive()}
             </Badge>
             {(onEdit || onDelete) && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
                   <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                     <MoreVertical className="h-4 w-4" />
-                    <span className="sr-only">Open menu</span>
+                    <span className="sr-only">{m.workflowEvents_card_openMenu()}</span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
@@ -90,7 +100,7 @@ export function EventCard({ event, isSelected, onSelect, onToggleActive, onEdit,
                       }}
                     >
                       <Edit className="h-4 w-4 mr-2" />
-                      Edit
+                      {m.workflowEvents_card_edit()}
                     </DropdownMenuItem>
                   )}
                   {onDelete && (
@@ -102,7 +112,7 @@ export function EventCard({ event, isSelected, onSelect, onToggleActive, onEdit,
                       className="text-destructive focus:text-destructive"
                     >
                       <Trash className="h-4 w-4 mr-2" />
-                      Delete
+                      {m.workflowEvents_card_delete()}
                     </DropdownMenuItem>
                   )}
                 </DropdownMenuContent>
@@ -115,7 +125,7 @@ export function EventCard({ event, isSelected, onSelect, onToggleActive, onEdit,
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Icon className="h-4 w-4" />
-            <span>{TRIGGER_LABELS[event.eventSourceType]}</span>
+            <span>{getTriggerLabel(event.eventSourceType)}</span>
           </div>
           {onToggleActive && (
             <Switch

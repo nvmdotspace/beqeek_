@@ -28,6 +28,8 @@ import { FieldOptionsEditor } from './field-options-editor';
 import { validateField, generateFieldName, requiresOptions } from '../utils/field-validation';
 
 import type { Field, FieldType, Option } from '../types';
+// @ts-expect-error - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 
 interface FieldConfigDialogProps {
   open: boolean;
@@ -35,17 +37,17 @@ interface FieldConfigDialogProps {
   editIndex?: number;
 }
 
-// Field type labels mapping
-const FIELD_TYPE_LABELS: Record<FieldType, string> = {
-  text: 'Text (Văn bản ngắn)',
-  email: 'Email',
-  number: 'Number (Số)',
-  textarea: 'Textarea (Văn bản dài)',
-  select: 'Select (Danh sách tùy chọn)',
-  checkbox: 'Checkbox',
-  date: 'Date (Ngày)',
-  'datetime-local': 'Datetime (Ngày giờ)',
-};
+// Field type labels - must be accessed inside component for i18n
+const getFieldTypeLabels = (): Record<FieldType, string> => ({
+  text: m.workflowForms_fieldConfig_typeText(),
+  email: m.workflowForms_fieldConfig_typeEmail(),
+  number: m.workflowForms_fieldConfig_typeNumber(),
+  textarea: m.workflowForms_fieldConfig_typeTextarea(),
+  select: m.workflowForms_fieldConfig_typeSelect(),
+  checkbox: m.workflowForms_fieldConfig_typeCheckbox(),
+  date: m.workflowForms_fieldConfig_typeDate(),
+  'datetime-local': m.workflowForms_fieldConfig_typeDatetime(),
+});
 
 export function FieldConfigDialog({ open, onClose, editIndex }: FieldConfigDialogProps) {
   const { fields, addField, updateField } = useFormBuilderStore();
@@ -131,28 +133,32 @@ export function FieldConfigDialog({ open, onClose, editIndex }: FieldConfigDialo
     onClose();
   };
 
+  const FIELD_TYPE_LABELS = getFieldTypeLabels();
+
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-3xl max-h-[90vh] p-0">
         <form onSubmit={handleSubmit}>
           <DialogHeader className="p-6 pb-4">
-            <DialogTitle>{isEditing ? 'Chỉnh sửa Field' : 'Thêm Field'}</DialogTitle>
-            <DialogDescription>Cấu hình thông tin cho field của form.</DialogDescription>
+            <DialogTitle>
+              {isEditing ? m.workflowForms_fieldConfig_editTitle() : m.workflowForms_fieldConfig_addTitle()}
+            </DialogTitle>
+            <DialogDescription>{m.workflowForms_fieldConfig_description()}</DialogDescription>
           </DialogHeader>
 
           <ScrollArea className="max-h-[60vh] px-6">
             <div className="space-y-6 pb-6">
               {/* Field Type Section */}
               <div className="space-y-4">
-                <h3 className="text-base font-semibold">Loại Field</h3>
+                <h3 className="text-base font-semibold">{m.workflowForms_fieldConfig_fieldTypeSection()}</h3>
                 <div className="space-y-2">
                   <Label htmlFor="fieldType">
-                    Loại Field <span className="text-destructive">*</span>
+                    {m.workflowForms_fieldConfig_fieldTypeLabel()} <span className="text-destructive">*</span>
                   </Label>
                   <Select value={fieldType} onValueChange={(v) => setFieldType(v as FieldType)}>
                     <SelectTrigger className="border border-input rounded-md bg-background text-foreground">
-                      <SelectValue placeholder="Chọn loại field">
-                        {fieldType ? FIELD_TYPE_LABELS[fieldType] : 'Chọn loại field'}
+                      <SelectValue placeholder={m.workflowForms_fieldConfig_selectFieldType()}>
+                        {fieldType ? FIELD_TYPE_LABELS[fieldType] : m.workflowForms_fieldConfig_selectFieldType()}
                       </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
@@ -173,61 +179,65 @@ export function FieldConfigDialog({ open, onClose, editIndex }: FieldConfigDialo
 
               {/* Basic Configuration Section */}
               <div className="space-y-4">
-                <h3 className="text-base font-semibold">Cấu hình cơ bản</h3>
+                <h3 className="text-base font-semibold">{m.workflowForms_fieldConfig_basicConfigSection()}</h3>
 
                 {/* Label */}
                 <div className="space-y-2">
                   <Label htmlFor="label">
-                    Nhãn Field <span className="text-destructive">*</span>
+                    {m.workflowForms_fieldConfig_labelField()} <span className="text-destructive">*</span>
                   </Label>
                   <Input
                     id="label"
                     value={label}
                     onChange={(e) => setLabel(e.target.value)}
-                    placeholder="Ví dụ: Họ và Tên, Email, Số điện thoại"
+                    placeholder={m.workflowForms_fieldConfig_labelPlaceholder()}
                     required
                     className="border border-input rounded-md bg-background text-foreground"
                   />
-                  <p className="text-xs text-muted-foreground">Nhãn hiển thị cho người dùng</p>
+                  <p className="text-xs text-muted-foreground">{m.workflowForms_fieldConfig_labelHint()}</p>
                 </div>
 
                 {/* Name (Variable) */}
                 <div className="space-y-2">
-                  <Label htmlFor="name">Tên biến (Name)</Label>
+                  <Label htmlFor="name">{m.workflowForms_fieldConfig_nameField()}</Label>
                   <Input
                     id="name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder={label ? `Tự động: ${generateFieldName(label)}` : 'Tự động tạo từ nhãn'}
+                    placeholder={
+                      label
+                        ? m.workflowForms_fieldConfig_nameAutoGenerated({ name: generateFieldName(label) })
+                        : m.workflowForms_fieldConfig_nameAutoFromLabel()
+                    }
                     className="border border-input rounded-md bg-background text-foreground font-mono text-sm"
                   />
-                  <p className="text-xs text-muted-foreground">Để trống để tự động tạo từ nhãn field</p>
+                  <p className="text-xs text-muted-foreground">{m.workflowForms_fieldConfig_nameHint()}</p>
                 </div>
 
                 {/* Placeholder */}
                 {fieldType !== 'checkbox' && (
                   <div className="space-y-2">
-                    <Label htmlFor="placeholder">Placeholder</Label>
+                    <Label htmlFor="placeholder">{m.workflowForms_fieldConfig_placeholderField()}</Label>
                     <Input
                       id="placeholder"
                       value={placeholder}
                       onChange={(e) => setPlaceholder(e.target.value)}
-                      placeholder="Văn bản gợi ý cho người dùng"
+                      placeholder={m.workflowForms_fieldConfig_placeholderPlaceholder()}
                       className="border border-input rounded-md bg-background text-foreground"
                     />
-                    <p className="text-xs text-muted-foreground">Văn bản hiển thị khi field trống</p>
+                    <p className="text-xs text-muted-foreground">{m.workflowForms_fieldConfig_placeholderHint()}</p>
                   </div>
                 )}
 
                 {/* Default Value */}
                 <div className="space-y-2">
-                  <Label htmlFor="defaultValue">Giá trị mặc định</Label>
+                  <Label htmlFor="defaultValue">{m.workflowForms_fieldConfig_defaultValueField()}</Label>
                   {fieldType === 'textarea' ? (
                     <Textarea
                       id="defaultValue"
                       value={defaultValue}
                       onChange={(e) => setDefaultValue(e.target.value)}
-                      placeholder="Giá trị mặc định (tùy chọn)"
+                      placeholder={m.workflowForms_fieldConfig_defaultValuePlaceholder()}
                       rows={3}
                       className="border border-input rounded-md bg-background text-foreground"
                     />
@@ -237,20 +247,20 @@ export function FieldConfigDialog({ open, onClose, editIndex }: FieldConfigDialo
                       type={fieldType === 'number' ? 'number' : fieldType === 'date' ? 'date' : 'text'}
                       value={defaultValue}
                       onChange={(e) => setDefaultValue(e.target.value)}
-                      placeholder="Giá trị mặc định (tùy chọn)"
+                      placeholder={m.workflowForms_fieldConfig_defaultValuePlaceholder()}
                       className="border border-input rounded-md bg-background text-foreground"
                     />
                   )}
-                  <p className="text-xs text-muted-foreground">Giá trị khởi tạo khi form được mở</p>
+                  <p className="text-xs text-muted-foreground">{m.workflowForms_fieldConfig_defaultValueHint()}</p>
                 </div>
 
                 {/* Required Toggle */}
                 <div className="flex items-center justify-between rounded-lg border p-4">
                   <div className="space-y-0.5">
                     <Label htmlFor="required" className="text-sm font-medium">
-                      Bắt buộc nhập
+                      {m.workflowForms_fieldConfig_requiredField()}
                     </Label>
-                    <p className="text-sm text-muted-foreground">Người dùng phải điền trường này</p>
+                    <p className="text-sm text-muted-foreground">{m.workflowForms_fieldConfig_requiredHint()}</p>
                   </div>
                   <Switch id="required" checked={required} onCheckedChange={setRequired} />
                 </div>
@@ -275,10 +285,10 @@ export function FieldConfigDialog({ open, onClose, editIndex }: FieldConfigDialo
 
           <DialogFooter className="p-6 pt-4 border-t">
             <Button type="button" variant="outline" onClick={handleClose}>
-              Hủy
+              {m.common_cancel()}
             </Button>
             <Button type="submit" disabled={!label.trim()}>
-              {isEditing ? 'Cập nhật' : 'Thêm Field'}
+              {isEditing ? m.workflowForms_fieldConfig_update() : m.workflowForms_fieldConfig_addField()}
             </Button>
           </DialogFooter>
         </form>

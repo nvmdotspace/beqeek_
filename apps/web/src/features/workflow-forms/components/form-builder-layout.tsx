@@ -17,6 +17,8 @@ import { PreviewPanel } from './preview-panel';
 import { FormSettingsDialog } from './form-settings-dialog';
 
 import type { FormInstance } from '../types';
+// @ts-expect-error - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 
 interface FormBuilderLayoutProps {
   form: FormInstance;
@@ -49,10 +51,10 @@ export function FormBuilderLayout({ form, onSave, onDelete, isSaving, isDeleting
 
             <Inline space="space-050">
               <Button onClick={onSave} disabled={isSaving}>
-                {isSaving ? 'Đang lưu...' : 'Lưu'}
+                {isSaving ? m.workflowForms_builder_saving() : m.workflowForms_builder_save()}
               </Button>
               <Button variant="destructive" onClick={onDelete} disabled={isDeleting}>
-                {isDeleting ? 'Đang xóa...' : 'Xóa'}
+                {isDeleting ? m.workflowForms_builder_deleting() : m.workflowForms_builder_delete()}
               </Button>
               <Button variant="outline" size="icon" onClick={() => setShowSettings(true)}>
                 <Settings className="h-5 w-5" />

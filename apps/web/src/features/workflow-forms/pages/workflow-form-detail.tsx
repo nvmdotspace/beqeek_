@@ -8,12 +8,15 @@
 import { useEffect } from 'react';
 import { getRouteApi } from '@tanstack/react-router';
 import { Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 import { ROUTES } from '@/shared/route-paths';
 
 import { useWorkflowForm, useUpdateWorkflowForm, useDeleteWorkflowForm } from '../hooks';
 import { useFormBuilderStore } from '../stores/form-builder-store';
 import { FormBuilderLayout } from '../components/form-builder-layout';
+// @ts-expect-error - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 
 const route = getRouteApi(ROUTES.WORKFLOW_FORMS.FORM_DETAIL);
 
@@ -57,17 +60,18 @@ export function WorkflowFormDetail() {
       });
 
       // Show success message (toast notification)
-      console.log('Form saved successfully');
+      toast.success(m.workflowForms_detail_saveSuccess());
     } catch (err) {
       console.error('Failed to save form:', err);
       // Show error message (toast notification)
+      toast.error(m.workflowForms_detail_saveFailed());
     }
   };
 
   const handleDelete = async () => {
     if (!form) return;
 
-    const confirmed = confirm(`Xóa vĩnh viễn form "${form.name}"? Không thể hoàn tác.`);
+    const confirmed = confirm(m.workflowForms_detail_deleteConfirm({ name: form.name }));
     if (!confirmed) return;
 
     try {
@@ -81,6 +85,7 @@ export function WorkflowFormDetail() {
     } catch (err) {
       console.error('Failed to delete form:', err);
       // Show error message (toast notification)
+      toast.error(m.workflowForms_detail_deleteFailed());
     }
   };
 
@@ -99,14 +104,14 @@ export function WorkflowFormDetail() {
   if (!form) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <p className="text-muted-foreground">Form không tồn tại.</p>
+        <p className="text-muted-foreground">{m.workflowForms_detail_formNotFound()}</p>
       </div>
     );
   }
 
   return (
     <FormBuilderLayout
-      form={form}
+      form={{ ...form, name: title || form.name }}
       onSave={handleSave}
       onDelete={handleDelete}
       isSaving={updateMutation.isPending}

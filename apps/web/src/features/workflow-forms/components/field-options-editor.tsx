@@ -11,6 +11,8 @@ import { Label } from '@workspace/ui/components/label';
 import { Plus, Trash2 } from 'lucide-react';
 
 import type { Option } from '../types';
+// @ts-expect-error - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 
 interface FieldOptionsEditorProps {
   options: Option[];
@@ -34,19 +36,19 @@ export function FieldOptionsEditor({ options, onChange }: FieldOptionsEditorProp
   return (
     <div className="space-y-2">
       <Label>
-        Tùy chọn <span className="text-destructive">*</span>
+        {m.workflowForms_options_label()} <span className="text-destructive">*</span>
       </Label>
       <div className="space-y-2">
         {options.map((option, index) => (
           <div key={index} className="flex gap-2">
             <Input
-              placeholder="Tên tùy chọn"
+              placeholder={m.workflowForms_options_namePlaceholder()}
               value={option.text}
               onChange={(e) => handleUpdateOption(index, 'text', e.target.value)}
               className="flex-1 border border-input rounded-md bg-background text-foreground"
             />
             <Input
-              placeholder="Giá trị"
+              placeholder={m.workflowForms_options_valuePlaceholder()}
               value={option.value}
               onChange={(e) => handleUpdateOption(index, 'value', e.target.value)}
               className="flex-1 border border-input rounded-md bg-background text-foreground"
@@ -57,7 +59,7 @@ export function FieldOptionsEditor({ options, onChange }: FieldOptionsEditorProp
               size="icon"
               onClick={() => handleRemoveOption(index)}
               disabled={options.length === 1}
-              title="Xóa tùy chọn"
+              title={m.workflowForms_options_deleteOption()}
             >
               <Trash2 className="w-4 h-4" />
             </Button>
@@ -65,7 +67,7 @@ export function FieldOptionsEditor({ options, onChange }: FieldOptionsEditorProp
         ))}
         <Button type="button" variant="outline" className="w-full" onClick={handleAddOption}>
           <Plus className="w-4 h-4 mr-2" />
-          Thêm tùy chọn
+          {m.workflowForms_options_addOption()}
         </Button>
       </div>
     </div>

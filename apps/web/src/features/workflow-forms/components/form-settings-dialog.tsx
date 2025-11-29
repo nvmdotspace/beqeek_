@@ -22,6 +22,8 @@ import { Textarea } from '@workspace/ui/components/textarea';
 import { useFormBuilderStore } from '../stores/form-builder-store';
 
 import type { FormInstance } from '../types';
+// @ts-expect-error - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 
 interface FormSettingsDialogProps {
   open: boolean;
@@ -48,7 +50,7 @@ export function FormSettingsDialog({ open, onClose, form }: FormSettingsDialogPr
     setError('');
 
     if (!localTitle.trim()) {
-      setError('Tên form không được để trống');
+      setError(m.workflowForms_settings_nameRequired());
       return;
     }
 
@@ -65,20 +67,20 @@ export function FormSettingsDialog({ open, onClose, form }: FormSettingsDialogPr
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Cài đặt Form</DialogTitle>
-          <DialogDescription>Chỉnh sửa thông tin cơ bản của form.</DialogDescription>
+          <DialogTitle>{m.workflowForms_settings_title()}</DialogTitle>
+          <DialogDescription>{m.workflowForms_settings_description()}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
           <div className="space-y-2">
             <Label htmlFor="form-title">
-              Tên Form <span className="text-destructive">*</span>
+              {m.workflowForms_settings_nameLabel()} <span className="text-destructive">*</span>
             </Label>
             <Input
               id="form-title"
               value={localTitle}
               onChange={(e) => setLocalTitle(e.target.value)}
-              placeholder="Nhập tên form"
+              placeholder={m.workflowForms_settings_namePlaceholder()}
               required
               aria-invalid={!!error}
               className="border border-input rounded-md bg-background text-foreground transition-all placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring aria-invalid:border-destructive"
@@ -86,16 +88,16 @@ export function FormSettingsDialog({ open, onClose, form }: FormSettingsDialogPr
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="form-description">Mô tả</Label>
+            <Label htmlFor="form-description">{m.workflowForms_settings_descLabel()}</Label>
             <Textarea
               id="form-description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Nhập mô tả form (tùy chọn)"
+              placeholder={m.workflowForms_settings_descPlaceholder()}
               rows={3}
               className="border border-input rounded-md bg-background text-foreground transition-all placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring"
             />
-            <p className="text-xs text-muted-foreground">Mô tả chỉ cập nhật khi lưu form.</p>
+            <p className="text-xs text-muted-foreground">{m.workflowForms_settings_descHint()}</p>
           </div>
 
           {error && (
@@ -107,10 +109,10 @@ export function FormSettingsDialog({ open, onClose, form }: FormSettingsDialogPr
 
         <DialogFooter>
           <Button type="button" variant="outline" onClick={handleClose}>
-            Hủy
+            {m.common_cancel()}
           </Button>
           <Button type="button" onClick={handleSave} disabled={!localTitle.trim()}>
-            Lưu
+            {m.workflowForms_settings_save()}
           </Button>
         </DialogFooter>
       </DialogContent>

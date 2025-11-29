@@ -16,6 +16,8 @@ import { useNavigate } from '@tanstack/react-router';
 import { ROUTES } from '@/shared/route-paths';
 import { cn } from '@workspace/ui/lib/utils';
 import type { WorkflowUnit } from '../api/types';
+// @ts-expect-error - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 
 interface WorkflowUnitCardProps {
   unit: WorkflowUnit;
@@ -102,7 +104,7 @@ export const WorkflowUnitCard = memo(({ unit, workspaceId, locale, onEdit, onDel
                         'border-accent-blue/30 text-accent-blue',
                       )}
                     >
-                      Workflow Unit
+                      {m.workflowUnits_card_badge()}
                     </Badge>
                   </Inline>
                 </Stack>
@@ -119,22 +121,22 @@ export const WorkflowUnitCard = memo(({ unit, workspaceId, locale, onEdit, onDel
                   onClick={(e) => e.stopPropagation()}
                 >
                   <MoreVertical className="h-4 w-4" />
-                  <span className="sr-only">Open menu</span>
+                  <span className="sr-only">{m.workflowUnits_card_openMenu()}</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
                 <DropdownMenuItem onClick={handleManageEvents}>
                   <Settings className="mr-2 h-4 w-4" />
-                  Manage Events
+                  {m.workflowUnits_card_manageEvents()}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleEdit}>
                   <Edit className="mr-2 h-4 w-4" />
-                  Edit Unit
+                  {m.workflowUnits_card_edit()}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleDelete} className="text-destructive focus:text-destructive">
                   <Trash2 className="mr-2 h-4 w-4" />
-                  Delete
+                  {m.workflowUnits_card_delete()}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

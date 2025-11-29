@@ -22,6 +22,8 @@ import { EditWorkflowUnitDialog } from '../components/dialogs/edit-workflow-unit
 import { DeleteConfirmDialog } from '../components/dialogs/delete-confirm-dialog';
 import { CreateEventDialog } from '../components/dialogs/create-event-dialog';
 import { EventCard } from '../components/event-card';
+// @ts-expect-error - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 
 const route = getRouteApi('/$locale/workspaces/$workspaceId/workflow-units/$unitId/');
 
@@ -40,9 +42,9 @@ export default function WorkflowUnitDetailPage() {
       <Box padding="space-300">
         <Alert variant="destructive">
           <AlertCircle className="size-4" />
-          <AlertTitle>Error Loading Workflow Unit</AlertTitle>
+          <AlertTitle>{m.common_error()}</AlertTitle>
           <AlertDescription>
-            {error instanceof Error ? error.message : 'Failed to load workflow unit. Please try again.'}
+            {error instanceof Error ? error.message : m.workflowUnits_detail_errorLoad()}
           </AlertDescription>
         </Alert>
       </Box>
@@ -66,8 +68,8 @@ export default function WorkflowUnitDetailPage() {
       <Box padding="space-300">
         <Alert>
           <AlertCircle className="size-4" />
-          <AlertTitle>Workflow Unit Not Found</AlertTitle>
-          <AlertDescription>The workflow unit you are looking for does not exist.</AlertDescription>
+          <AlertTitle>{m.workflowUnits_detail_notFound()}</AlertTitle>
+          <AlertDescription>{m.workflowUnits_detail_notFoundDescription()}</AlertDescription>
         </Alert>
       </Box>
     );
@@ -80,12 +82,14 @@ export default function WorkflowUnitDetailPage() {
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink href={`/${locale}/workspaces/${workspaceId}`}>Workspace</BreadcrumbLink>
+              <BreadcrumbLink href={`/${locale}/workspaces/${workspaceId}`}>
+                {m.workflowUnits_detail_breadcrumb_workspace()}
+              </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
               <BreadcrumbLink href={`/${locale}/workspaces/${workspaceId}/workflow-units`}>
-                Workflow Units
+                {m.workflowUnits_detail_breadcrumb_list()}
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
@@ -120,11 +124,11 @@ export default function WorkflowUnitDetailPage() {
             <Inline space="space-100">
               <Button variant="outline" size="sm" onClick={() => setEditOpen(true)}>
                 <Edit className="size-4 mr-2" />
-                Edit
+                {m.workflowUnits_detail_edit()}
               </Button>
               <Button variant="outline" size="sm" onClick={() => setDeleteOpen(true)}>
                 <Trash className="size-4 mr-2" />
-                Delete
+                {m.workflowUnits_detail_delete()}
               </Button>
             </Inline>
           </Inline>
@@ -132,7 +136,7 @@ export default function WorkflowUnitDetailPage() {
           {/* Badge + Metadata Row */}
           <Inline space="space-200" align="center" className="text-sm text-muted-foreground">
             <Badge variant="outline" className="border-accent-blue/30 text-accent-blue">
-              Workflow Unit
+              {m.workflowUnits_detail_badge()}
             </Badge>
             <Text size="small" color="muted">
               •
@@ -140,14 +144,14 @@ export default function WorkflowUnitDetailPage() {
             <Inline space="space-050" align="center">
               <Calendar className="h-3.5 w-3.5" />
               <Text size="small" color="muted">
-                Created {new Date(unit.createdAt).toLocaleDateString()}
+                {m.workflowUnits_detail_created({ date: new Date(unit.createdAt).toLocaleDateString() })}
               </Text>
             </Inline>
             <Text size="small" color="muted">
               •
             </Text>
             <Text size="small" color="muted">
-              Updated {new Date(unit.updatedAt).toLocaleDateString()}
+              {m.workflowUnits_detail_updated({ date: new Date(unit.updatedAt).toLocaleDateString() })}
             </Text>
           </Inline>
 
@@ -165,10 +169,10 @@ export default function WorkflowUnitDetailPage() {
         {/* Workflow Events Section */}
         <Box>
           <Inline justify="between" align="center" className="mb-4">
-            <Heading level={2}>Workflow Events</Heading>
+            <Heading level={2}>{m.workflowEvents_title()}</Heading>
             <Button size="sm" onClick={() => setCreateEventOpen(true)}>
               <Plus className="size-4 mr-2" />
-              Create Event
+              {m.workflowEvents_createButton()}
             </Button>
           </Inline>
 
@@ -206,14 +210,14 @@ export default function WorkflowUnitDetailPage() {
             <div className="flex flex-col items-center justify-center py-16 text-center rounded-xl border-2 border-dashed border-border bg-muted/20">
               <Calendar className="h-12 w-12 mb-4 text-muted-foreground" />
               <Heading level={3} className="mb-2">
-                No workflow events yet
+                {m.workflowEvents_empty_title()}
               </Heading>
               <Text color="muted" className="mb-4 max-w-md">
-                Create your first event to start triggering workflows
+                {m.workflowEvents_empty_description()}
               </Text>
               <Button onClick={() => setCreateEventOpen(true)}>
                 <Plus className="size-4 mr-2" />
-                Create First Event
+                {m.workflowEvents_empty_createFirst()}
               </Button>
             </div>
           )}

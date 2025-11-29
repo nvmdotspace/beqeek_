@@ -14,6 +14,8 @@ import { useDeleteWorkflowUnit } from '../../hooks/use-delete-workflow-unit';
 import { useNavigate } from '@tanstack/react-router';
 import { ROUTES } from '@/shared/route-paths';
 import type { WorkflowUnit } from '../../api/types';
+// @ts-expect-error - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 
 interface DeleteConfirmDialogProps {
   open: boolean;
@@ -52,19 +54,16 @@ export function DeleteConfirmDialog({ open, onOpenChange, workspaceId, locale, u
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Delete Workflow Unit</AlertDialogTitle>
+          <AlertDialogTitle>{m.workflowUnits_dialog_deleteTitle()}</AlertDialogTitle>
           <AlertDialogDescription>
-            Are you sure you want to delete <strong>{unit.name}</strong>?
+            <span dangerouslySetInnerHTML={{ __html: m.workflowUnits_dialog_deleteConfirm({ name: unit.name }) }} />
           </AlertDialogDescription>
         </AlertDialogHeader>
 
         {/* Warning Alert */}
         <Alert>
           <AlertCircle className="size-4" />
-          <AlertDescription>
-            This action will permanently delete the workflow unit and all associated workflow events. This cannot be
-            undone.
-          </AlertDescription>
+          <AlertDescription>{m.workflowUnits_dialog_deleteWarning()}</AlertDescription>
         </Alert>
 
         {/* Error Alert */}
@@ -72,20 +71,20 @@ export function DeleteConfirmDialog({ open, onOpenChange, workspaceId, locale, u
           <Alert variant="destructive">
             <AlertCircle className="size-4" />
             <AlertDescription>
-              {deleteMutation.error instanceof Error ? deleteMutation.error.message : 'Failed to delete workflow unit'}
+              {deleteMutation.error instanceof Error ? deleteMutation.error.message : m.workflowUnits_error_delete()}
             </AlertDescription>
           </Alert>
         )}
 
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={deleteMutation.isPending}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel disabled={deleteMutation.isPending}>{m.common_cancel()}</AlertDialogCancel>
           <AlertDialogAction
             onClick={handleDelete}
             disabled={deleteMutation.isPending}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
             {deleteMutation.isPending && <Loader2 className="size-4 mr-2 animate-spin" />}
-            Delete
+            {m.workflowUnits_dialog_deleteButton()}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

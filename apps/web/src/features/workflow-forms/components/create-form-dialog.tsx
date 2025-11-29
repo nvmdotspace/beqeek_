@@ -33,6 +33,8 @@ import { useCreateWorkflowForm } from '../hooks';
 import { FORM_CONFIGS, FORM_TYPES } from '../constants';
 
 import type { FormType } from '../types';
+// @ts-expect-error - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 
 const route = getRouteApi(ROUTES.WORKFLOW_FORMS.LIST);
 
@@ -89,18 +91,18 @@ export function CreateFormDialog({
     setError('');
 
     if (!name.trim()) {
-      setError('Tên form không được để trống');
+      setError(m.workflowForms_createDialog_nameRequired());
       return;
     }
 
     if (!selectedTemplate) {
-      setError('Vui lòng chọn loại form');
+      setError(m.workflowForms_createDialog_selectType());
       return;
     }
 
     const config = FORM_CONFIGS[selectedTemplate];
     if (!config) {
-      setError('Không tìm thấy cấu hình form');
+      setError(m.workflowForms_createDialog_configNotFound());
       return;
     }
 
@@ -120,7 +122,7 @@ export function CreateFormDialog({
         params: { locale, workspaceId, formId: result.data.id },
       });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Tạo form thất bại');
+      setError(err instanceof Error ? err.message : m.workflowForms_createDialog_createFailed());
     }
   };
 
@@ -130,8 +132,8 @@ export function CreateFormDialog({
         {step === 'select' ? (
           <div className="flex flex-col h-[600px]">
             <DialogHeader className="px-6 py-4 border-b">
-              <DialogTitle>Chọn Mẫu Form</DialogTitle>
-              <DialogDescription>Chọn một mẫu để bắt đầu xây dựng form của bạn.</DialogDescription>
+              <DialogTitle>{m.workflowForms_createDialog_selectTemplate()}</DialogTitle>
+              <DialogDescription>{m.workflowForms_createDialog_selectDescription()}</DialogDescription>
             </DialogHeader>
 
             <div className="flex-1 overflow-y-auto p-6 bg-muted/30">
@@ -169,9 +171,9 @@ export function CreateFormDialog({
         ) : (
           <form onSubmit={handleSubmit} className="flex flex-col">
             <DialogHeader className="px-6 py-4 border-b">
-              <DialogTitle>Thông tin Form</DialogTitle>
+              <DialogTitle>{m.workflowForms_createDialog_formInfo()}</DialogTitle>
               <DialogDescription>
-                Đang tạo form từ mẫu{' '}
+                {m.workflowForms_createDialog_creatingFrom()}{' '}
                 <span className="font-medium text-foreground">
                   {FORM_TYPES.find((t) => t.type === selectedTemplate)?.name}
                 </span>
@@ -181,13 +183,13 @@ export function CreateFormDialog({
             <div className="p-6 space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="name">
-                  Tên Form <span className="text-destructive">*</span>
+                  {m.workflowForms_createDialog_nameLabel()} <span className="text-destructive">*</span>
                 </Label>
                 <Input
                   id="name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Nhập tên form"
+                  placeholder={m.workflowForms_createDialog_namePlaceholder()}
                   required
                   autoFocus
                   className="bg-background"
@@ -195,12 +197,12 @@ export function CreateFormDialog({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="description">Mô tả</Label>
+                <Label htmlFor="description">{m.workflowForms_createDialog_descriptionLabel()}</Label>
                 <Textarea
                   id="description"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Nhập mô tả form (tùy chọn)"
+                  placeholder={m.workflowForms_createDialog_descriptionPlaceholder()}
                   rows={3}
                   className="bg-background resize-none"
                 />
@@ -213,14 +215,16 @@ export function CreateFormDialog({
 
             <DialogFooter className="px-6 py-4 border-t bg-muted/30">
               <Button type="button" variant="ghost" onClick={handleBack} disabled={createMutation.isPending}>
-                Quay lại
+                {m.workflowForms_createDialog_back()}
               </Button>
               <div className="flex gap-2">
                 <Button type="button" variant="outline" onClick={handleClose} disabled={createMutation.isPending}>
-                  Hủy
+                  {m.common_cancel()}
                 </Button>
                 <Button type="submit" disabled={!name.trim() || createMutation.isPending}>
-                  {createMutation.isPending ? 'Đang tạo...' : 'Tạo Form'}
+                  {createMutation.isPending
+                    ? m.workflowForms_createDialog_creating()
+                    : m.workflowForms_createDialog_createForm()}
                 </Button>
               </div>
             </DialogFooter>

@@ -22,6 +22,8 @@ import { Loader2 } from 'lucide-react';
 import { TriggerConfigForm } from '../trigger-config-form';
 import { useCreateWorkflowEvent } from '../../hooks/use-create-workflow-event';
 import type { EventSourceType, EventSourceParams } from '../../api/types';
+// @ts-expect-error - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 
 interface CreateEventDialogProps {
   open: boolean;
@@ -99,21 +101,21 @@ export function CreateEventDialog({ open, onOpenChange, workspaceId, unitId }: C
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Create Workflow Event</DialogTitle>
-          <DialogDescription className="text-sm">Create a new event to trigger your workflow</DialogDescription>
+          <DialogTitle>{m.workflowEvents_dialog_createTitle()}</DialogTitle>
+          <DialogDescription className="text-sm">{m.workflowEvents_dialog_createDescription()}</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Event Name */}
           <div className="space-y-1.5">
             <Label htmlFor="event-name" className="text-sm font-medium">
-              Event Name *
+              {m.workflowEvents_form_nameLabel()}
             </Label>
             <Input
               id="event-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Daily customer sync"
+              placeholder={m.workflowEvents_form_namePlaceholder()}
               required
               maxLength={100}
               disabled={createEvent.isPending}
@@ -124,13 +126,13 @@ export function CreateEventDialog({ open, onOpenChange, workspaceId, unitId }: C
           {/* Description */}
           <div className="space-y-1.5">
             <Label htmlFor="event-description" className="text-sm font-medium">
-              Description (optional)
+              {m.workflowEvents_form_descriptionLabel()}
             </Label>
             <Textarea
               id="event-description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Syncs customer data from CRM to database every day at 9 AM"
+              placeholder={m.workflowEvents_form_descriptionPlaceholder()}
               rows={2}
               maxLength={500}
               disabled={createEvent.isPending}
@@ -140,7 +142,7 @@ export function CreateEventDialog({ open, onOpenChange, workspaceId, unitId }: C
 
           {/* Trigger Configuration */}
           <div className="border-t pt-4 space-y-3">
-            <h3 className="text-sm font-semibold">Trigger Configuration</h3>
+            <h3 className="text-sm font-semibold">{m.workflowEvents_dialog_triggerConfig()}</h3>
             <TriggerConfigForm
               workspaceId={workspaceId}
               triggerType={triggerType}
@@ -158,11 +160,11 @@ export function CreateEventDialog({ open, onOpenChange, workspaceId, unitId }: C
               onClick={() => handleOpenChange(false)}
               disabled={createEvent.isPending}
             >
-              Cancel
+              {m.common_cancel()}
             </Button>
             <Button type="submit" size="sm" disabled={!name.trim() || createEvent.isPending}>
               {createEvent.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Create Event
+              {m.workflowEvents_createButton()}
             </Button>
           </DialogFooter>
         </form>

@@ -19,6 +19,8 @@ import { AlertCircle, Loader2 } from 'lucide-react';
 import { useCreateWorkflowUnit } from '../../hooks/use-create-workflow-unit';
 import { useNavigate } from '@tanstack/react-router';
 import { ROUTES } from '@/shared/route-paths';
+// @ts-expect-error - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 
 const createWorkflowUnitSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100, 'Name must be 100 characters or less'),
@@ -92,9 +94,9 @@ export function CreateWorkflowUnitDialog({ open, onOpenChange, workspaceId, loca
         aria-describedby="create-workflow-unit-description"
       >
         <DialogHeader>
-          <DialogTitle>Create Workflow Unit</DialogTitle>
+          <DialogTitle>{m.workflowUnits_dialog_createTitle()}</DialogTitle>
           <DialogDescription id="create-workflow-unit-description">
-            Create a new workflow unit to organize your automation workflows
+            {m.workflowUnits_dialog_createDescription()}
           </DialogDescription>
         </DialogHeader>
 
@@ -102,12 +104,12 @@ export function CreateWorkflowUnitDialog({ open, onOpenChange, workspaceId, loca
           {/* Name Field */}
           <div className="space-y-2">
             <Label htmlFor="name">
-              Name <span className="text-destructive">*</span>
+              {m.workflowUnits_form_nameLabel()} <span className="text-destructive">*</span>
             </Label>
             <Input
               id="name"
               data-autofocus="true"
-              placeholder="Enter workflow unit name"
+              placeholder={m.workflowUnits_form_namePlaceholder()}
               {...form.register('name')}
               aria-invalid={!!form.formState.errors.name}
               aria-describedby={form.formState.errors.name ? 'name-error' : undefined}
@@ -121,10 +123,10 @@ export function CreateWorkflowUnitDialog({ open, onOpenChange, workspaceId, loca
 
           {/* Description Field */}
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">{m.workflowUnits_form_descriptionLabel()}</Label>
             <Textarea
               id="description"
-              placeholder="Enter description (optional)"
+              placeholder={m.workflowUnits_form_descriptionPlaceholder()}
               rows={3}
               {...form.register('description')}
             />
@@ -135,20 +137,18 @@ export function CreateWorkflowUnitDialog({ open, onOpenChange, workspaceId, loca
             <Alert variant="destructive">
               <AlertCircle className="size-4" />
               <AlertDescription>
-                {createMutation.error instanceof Error
-                  ? createMutation.error.message
-                  : 'Failed to create workflow unit'}
+                {createMutation.error instanceof Error ? createMutation.error.message : m.workflowUnits_error_create()}
               </AlertDescription>
             </Alert>
           )}
 
           <DialogFooter>
             <Button type="button" variant="ghost" onClick={handleCancel} disabled={createMutation.isPending}>
-              Cancel
+              {m.common_cancel()}
             </Button>
             <Button type="submit" disabled={createMutation.isPending}>
               {createMutation.isPending && <Loader2 className="size-4 mr-2 animate-spin" />}
-              Create
+              {m.common_create()}
             </Button>
           </DialogFooter>
         </form>
