@@ -11,6 +11,8 @@ import { Loader2 } from 'lucide-react';
 
 import type { User } from '@/shared/api/types';
 import { useUpdateUserProfile } from '../hooks/use-update-user-profile';
+// @ts-expect-error - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 
 const profileSchema = z.object({
   fullName: z.string().min(1, 'Full name is required').max(100, 'Name cannot exceed 100 characters'),
@@ -37,8 +39,8 @@ export function ProfileForm({ user }: ProfileFormProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Personal Information</CardTitle>
-        <CardDescription>Update your personal details and contact information</CardDescription>
+        <CardTitle>{m.userProfile_form_title()}</CardTitle>
+        <CardDescription>{m.userProfile_form_desc()}</CardDescription>
       </CardHeader>
       <CardContent>
         <form
@@ -53,16 +55,16 @@ export function ProfileForm({ user }: ProfileFormProps) {
             {/* Identity Section */}
             <Stack space="space-300">
               <Heading level={3} className="text-base font-medium">
-                Identity
+                {m.userProfile_form_identitySection()}
               </Heading>
               <Separator />
 
               {/* Username (read-only) */}
               <Stack space="space-100">
-                <Label htmlFor="username">Username</Label>
+                <Label htmlFor="username">{m.userProfile_form_usernameLabel()}</Label>
                 <Input id="username" value={user.globalUser?.username || ''} disabled className="bg-muted" />
                 <Text size="small" color="muted">
-                  Username cannot be changed
+                  {m.userProfile_form_usernameHint()}
                 </Text>
               </Stack>
 
@@ -77,7 +79,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
                   <Stack space="space-100">
                     <Label htmlFor="fullName">
                       <Inline space="space-050" align="center">
-                        <span>Full Name</span>
+                        <span>{m.userProfile_form_fullNameLabel()}</span>
                         <Text as="span" color="destructive">
                           *
                         </Text>
@@ -85,7 +87,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
                     </Label>
                     <Input
                       id="fullName"
-                      placeholder="Enter your full name"
+                      placeholder={m.userProfile_form_fullNamePlaceholder()}
                       value={field.state.value}
                       onChange={(e) => field.handleChange(e.target.value)}
                       onBlur={field.handleBlur}
@@ -105,7 +107,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
             {/* Contact Section */}
             <Stack space="space-300">
               <Heading level={3} className="text-base font-medium">
-                Contact
+                {m.userProfile_form_contactSection()}
               </Heading>
               <Separator />
 
@@ -120,7 +122,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
                   <Stack space="space-100">
                     <Label htmlFor="email">
                       <Inline space="space-050" align="center">
-                        <span>Email</span>
+                        <span>{m.userProfile_form_emailLabel()}</span>
                         <Text as="span" color="destructive">
                           *
                         </Text>
@@ -129,7 +131,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
                     <Input
                       id="email"
                       type="email"
-                      placeholder="Enter your email"
+                      placeholder={m.userProfile_form_emailPlaceholder()}
                       value={field.state.value}
                       onChange={(e) => field.handleChange(e.target.value)}
                       onBlur={field.handleBlur}
@@ -150,7 +152,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
             <Inline justify="start">
               <Button type="submit" disabled={isPending}>
                 {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Save Changes
+                {m.userProfile_form_saveChanges()}
               </Button>
             </Inline>
           </Stack>

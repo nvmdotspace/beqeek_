@@ -1184,5 +1184,65 @@
   "workflowForms_options_namePlaceholder": "Tên tùy chọn",
   "workflowForms_options_valuePlaceholder": "Giá trị",
   "workflowForms_options_deleteOption": "Xóa tùy chọn",
-  "workflowForms_options_addOption": "Thêm tùy chọn"
+  "workflowForms_options_addOption": "Thêm tùy chọn",
+
+  "userProfile_breadcrumb_settings": "Cài đặt",
+  "userProfile_breadcrumb_profile": "Hồ sơ",
+  "userProfile_title": "Hồ sơ người dùng",
+
+  "userProfile_tab_profile": "Hồ sơ",
+  "userProfile_tab_settings": "Cài đặt",
+  "userProfile_tab_billing": "Thanh toán",
+
+  "userProfile_settings_appearanceTitle": "Giao diện",
+  "userProfile_settings_appearanceDesc": "Tùy chỉnh giao diện ứng dụng",
+  "userProfile_settings_themeLabel": "Giao diện",
+  "userProfile_settings_themeLight": "Sáng",
+  "userProfile_settings_themeDark": "Tối",
+  "userProfile_settings_themeSystem": "Hệ thống",
+
+  "userProfile_settings_languageTitle": "Ngôn ngữ",
+  "userProfile_settings_languageDesc": "Chọn ngôn ngữ ưa thích",
+  "userProfile_settings_langVietnamese": "Tiếng Việt",
+  "userProfile_settings_langEnglish": "English",
+
+  "userProfile_settings_shortcutsTitle": "Phím tắt",
+  "userProfile_settings_shortcutsDesc": "Xem tất cả phím tắt có sẵn",
+  "userProfile_settings_viewShortcuts": "Xem phím tắt",
+
+  "userProfile_billing_title": "Thanh toán",
+  "userProfile_billing_desc": "Quản lý đăng ký và thông tin thanh toán",
+  "userProfile_billing_noSubscription": "Chưa có gói đăng ký",
+  "userProfile_billing_underDevelopment": "Tính năng thanh toán đang được phát triển.",
+  "userProfile_billing_upgradePlan": "Nâng cấp gói",
+
+  "userProfile_error_title": "Lỗi",
+  "userProfile_error_loadFailed": "Không thể tải hồ sơ: {message}",
+  "userProfile_notFound_title": "Không tìm thấy hồ sơ",
+  "userProfile_notFound_desc": "Không thể tải hồ sơ của bạn. Vui lòng đảm bảo bạn đã đăng nhập và có quyền truy cập workspace này.",
+
+  "userProfile_form_personalInfo": "Thông tin cá nhân",
+  "userProfile_form_personalInfoDesc": "Cập nhật thông tin cá nhân và liên hệ",
+  "userProfile_form_identitySection": "Danh tính",
+  "userProfile_form_contactSection": "Liên hệ",
+  "userProfile_form_usernameLabel": "Tên đăng nhập",
+  "userProfile_form_usernameHint": "Tên đăng nhập không thể thay đổi",
+  "userProfile_form_fullNameLabel": "Họ và tên",
+  "userProfile_form_fullNamePlaceholder": "Nhập họ và tên",
+  "userProfile_form_fullNameRequired": "Họ và tên là bắt buộc",
+  "userProfile_form_fullNameMaxLength": "Tên không được vượt quá 100 ký tự",
+  "userProfile_form_emailLabel": "Email",
+  "userProfile_form_emailPlaceholder": "Nhập email",
+  "userProfile_form_emailInvalid": "Địa chỉ email không hợp lệ",
+  "userProfile_form_saveChanges": "Lưu thay đổi",
+
+  "userProfile_avatar_changeAvatar": "Thay đổi ảnh đại diện",
+  "userProfile_avatar_uploadLabel": "Tải lên ảnh đại diện",
+  "userProfile_avatar_dialogTitle": "Cập nhật ảnh đại diện",
+  "userProfile_avatar_preview": "Xem trước",
+  "userProfile_avatar_cancel": "Hủy",
+  "userProfile_avatar_upload": "Tải lên",
+  "userProfile_avatar_uploading": "Đang tải lên...",
+  "userProfile_avatar_invalidType": "Vui lòng chọn file ảnh hợp lệ (JPG, PNG, GIF, WebP)",
+  "userProfile_avatar_fileTooLarge": "Kích thước file phải nhỏ hơn 5MB"
 }

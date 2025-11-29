@@ -49,38 +49,43 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
-            // React core - tách React và React-DOM
-            if (id.includes('react/') && !id.includes('react-dom') && !id.includes('react-hook-form')) {
-              return 'react-core';
-            }
-            if (id.includes('react-dom')) return 'react-dom';
+            // IMPORTANT: Check specific packages BEFORE generic patterns
+            // Order matters - more specific checks first!
 
-            // UI libraries - tách thành chunks riêng
-            if (id.includes('@radix-ui')) return 'radix-ui';
-            if (id.includes('lucide-react')) return 'lucide-icons';
-
-            // TanStack ecosystem - tách từng package
+            // TanStack ecosystem - check BEFORE 'react/' pattern
             if (id.includes('@tanstack/react-query')) return 'tanstack-query';
             if (id.includes('@tanstack/react-router')) return 'tanstack-router';
             if (id.includes('@tanstack/react-table')) return 'tanstack-table';
             if (id.includes('@tanstack/react-form')) return 'tanstack-form';
 
-            // DnD Kit - có thể lớn
+            // UI libraries - check BEFORE 'react/' pattern
+            if (id.includes('@radix-ui')) return 'radix-ui';
+            if (id.includes('lucide-react')) return 'lucide-icons';
+
+            // Form libraries
+            if (id.includes('react-hook-form') || id.includes('@hookform')) return 'react-hook-form';
+            if (id.includes('zod')) return 'zod';
+
+            // Flow chart library - large
+            if (id.includes('@xyflow')) return 'xyflow';
+
+            // DnD Kit
             if (id.includes('@dnd-kit')) return 'dnd-kit';
+
+            // Monaco Editor - large
+            if (id.includes('monaco-editor') || id.includes('monaco-yaml')) return 'monaco';
 
             // Utilities
             if (id.includes('date-fns')) return 'date-fns';
             if (id.includes('axios')) return 'axios';
             if (id.includes('crypto-js')) return 'crypto-js';
 
-            // Monaco Editor - tách riêng vì lớn
-            if (id.includes('monaco-editor')) return 'monaco-editor';
-            if (id.includes('monaco-yaml')) return 'monaco-yaml';
+            // React core - AFTER all specific checks
+            // Use exact path matching to avoid false positives
+            if (id.includes('/react-dom/')) return 'react-dom';
+            if (id.match(/\/node_modules\/react\//) || id.includes('/scheduler/')) return 'react-core';
 
-            // DON'T split zustand - causes circular dependency with stores
-            // if (id.includes('zustand')) return 'zustand';
-
-            // Còn lại vào vendor (nên nhỏ hơn nhiều)
+            // Remaining vendor packages
             return 'vendor';
           }
         },

@@ -2,17 +2,15 @@ import { Box, Stack, Inline } from '@workspace/ui/components/primitives';
 import { Text } from '@workspace/ui/components/typography';
 import { Heading } from '@workspace/ui/components/typography';
 import { cn } from '@workspace/ui/lib/utils';
-import * as LucideIcons from 'lucide-react';
 import { NODE_DEFINITIONS, type NodeDefinition } from '../../utils/node-types';
+import { getWorkflowIcon } from '../../utils/workflow-icons';
 
 interface NodePaletteItemProps {
   definition: NodeDefinition;
 }
 
 const NodePaletteItem = ({ definition }: NodePaletteItemProps) => {
-  const IconComponent = LucideIcons[definition.icon as keyof typeof LucideIcons] as React.ComponentType<{
-    className?: string;
-  }>;
+  const IconComponent = getWorkflowIcon(definition.icon);
 
   const onDragStart = (event: React.DragEvent) => {
     event.dataTransfer.setData('application/reactflow', definition.type);

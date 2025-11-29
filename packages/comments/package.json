@@ -4,40 +4,33 @@
   "description": "React comment system component library for Beqeek Active Tables",
   "private": true,
   "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
   "sideEffects": [
     "**/*.css"
   ],
-  "files": [
-    "dist",
-    "src/components/editor/styles.css"
-  ],
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
     },
     "./types": {
-      "import": "./dist/types/index.js",
-      "types": "./dist/types/index.d.ts"
+      "types": "./src/types/index.ts",
+      "default": "./src/types/index.ts"
     },
     "./components": {
-      "import": "./dist/components/index.js",
-      "types": "./dist/components/index.d.ts"
+      "types": "./src/components/index.ts",
+      "default": "./src/components/index.ts"
     },
     "./hooks": {
-      "import": "./dist/hooks/index.js",
-      "types": "./dist/hooks/index.d.ts"
+      "types": "./src/hooks/index.ts",
+      "default": "./src/hooks/index.ts"
     },
     "./utils": {
-      "import": "./dist/utils/index.js",
-      "types": "./dist/utils/index.d.ts"
+      "types": "./src/utils/index.ts",
+      "default": "./src/utils/index.ts"
     },
     "./styles": "./src/components/editor/styles.css"
   },
   "scripts": {
-    "build": "tsc",
     "check-types": "tsc --noEmit",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
   },

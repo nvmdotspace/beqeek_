@@ -3,11 +3,11 @@ import { Handle, Position } from '@xyflow/react';
 import { Box, Stack, Inline } from '@workspace/ui/components/primitives';
 import { Text } from '@workspace/ui/components/typography';
 import { cn } from '@workspace/ui/lib/utils';
-import * as LucideIcons from 'lucide-react';
 import type { NodeCategory, BaseNodeData } from '../../../utils/node-types';
+import { getWorkflowIcon } from '../../../utils/workflow-icons';
 
 interface BaseWorkflowNodeProps {
-  icon: keyof typeof LucideIcons;
+  icon: string;
   category: NodeCategory;
   label: string;
   summary?: string;
@@ -21,7 +21,7 @@ interface BaseWorkflowNodeProps {
  */
 export const BaseWorkflowNode = memo(({ icon, category, label, summary, selected, data }: BaseWorkflowNodeProps) => {
   // Get icon component dynamically
-  const IconComponent = LucideIcons[icon] as React.ComponentType<{ className?: string }>;
+  const IconComponent = getWorkflowIcon(icon);
 
   // Category-based colors (design tokens)
   const categoryColors = {

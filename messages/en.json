@@ -919,31 +919,26 @@
   "validation_password_too_short": "Password must be at least 6 characters",
   "validation_team_required": "Please select a team",
   "validation_role_required": "Please select a role",
-
   "workflowUnits_page_title": "Workflow Units",
   "workflowUnits_page_subtitle": "Manage your workflow automation units",
   "workflowUnits_page_searchPlaceholder": "Search workflow units...",
   "workflowUnits_page_unitsCount": "{count} units",
   "workflowUnits_page_filteredFrom": "Filtered from {count} total",
   "workflowUnits_page_errorLoad": "Failed to load workflow units. Please try again.",
-
   "workflowUnits_empty_title": "No workflow units yet",
   "workflowUnits_empty_description": "Create your first workflow unit to start automating business processes",
   "workflowUnits_empty_createFirst": "Create First Unit",
   "workflowUnits_empty_noResults": "No results found",
   "workflowUnits_empty_noResultsDescription": "No workflow units match \"{query}\"",
   "workflowUnits_empty_clearSearch": "Clear search",
-
   "workflowUnits_card_badge": "Workflow Unit",
   "workflowUnits_card_openMenu": "Open menu",
   "workflowUnits_card_manageEvents": "Manage Events",
   "workflowUnits_card_edit": "Edit Unit",
   "workflowUnits_card_delete": "Delete",
-
   "workflowUnits_stat_units": "Units",
   "workflowUnits_stat_scheduled": "Scheduled",
   "workflowUnits_stat_active": "Active",
-
   "workflowUnits_dialog_createTitle": "Create Workflow Unit",
   "workflowUnits_dialog_createDescription": "Create a new workflow unit to organize your automation workflows",
   "workflowUnits_dialog_editTitle": "Edit Workflow Unit",
@@ -952,18 +947,15 @@
   "workflowUnits_dialog_deleteConfirm": "Are you sure you want to delete <strong>{name}</strong>?",
   "workflowUnits_dialog_deleteWarning": "This action will permanently delete the workflow unit and all associated workflow events. This cannot be undone.",
   "workflowUnits_dialog_deleteButton": "Delete",
-
   "workflowUnits_form_nameLabel": "Name",
   "workflowUnits_form_namePlaceholder": "Enter workflow unit name",
   "workflowUnits_form_nameRequired": "Name is required",
   "workflowUnits_form_nameMaxLength": "Name must be 100 characters or less",
   "workflowUnits_form_descriptionLabel": "Description",
   "workflowUnits_form_descriptionPlaceholder": "Enter description (optional)",
-
   "workflowUnits_error_create": "Failed to create workflow unit",
   "workflowUnits_error_update": "Failed to update workflow unit",
   "workflowUnits_error_delete": "Failed to delete workflow unit",
-
   "workflowUnits_detail_breadcrumb_workspace": "Workspace",
   "workflowUnits_detail_breadcrumb_list": "Workflow Units",
   "workflowUnits_detail_errorLoad": "Failed to load workflow unit. Please try again.",
@@ -974,36 +966,29 @@
   "workflowUnits_detail_badge": "Workflow Unit",
   "workflowUnits_detail_created": "Created {date}",
   "workflowUnits_detail_updated": "Updated {date}",
-
   "workflowEvents_title": "Workflow Events",
   "workflowEvents_createButton": "Create Event",
   "workflowEvents_empty_title": "No workflow events yet",
   "workflowEvents_empty_description": "Create your first event to start triggering workflows",
   "workflowEvents_empty_createFirst": "Create First Event",
-
   "workflowEvents_dialog_createTitle": "Create Workflow Event",
   "workflowEvents_dialog_createDescription": "Create a new event to trigger your workflow",
   "workflowEvents_dialog_triggerConfig": "Trigger Configuration",
-
   "workflowEvents_form_nameLabel": "Event Name *",
   "workflowEvents_form_namePlaceholder": "Daily customer sync",
   "workflowEvents_form_descriptionLabel": "Description (optional)",
   "workflowEvents_form_descriptionPlaceholder": "Syncs customer data from CRM to database every day at 9 AM",
-
   "workflowEvents_card_active": "Active",
   "workflowEvents_card_inactive": "Inactive",
   "workflowEvents_card_openMenu": "Open menu",
   "workflowEvents_card_edit": "Edit",
   "workflowEvents_card_delete": "Delete",
-
   "workflowEvents_trigger_schedule": "Schedule",
   "workflowEvents_trigger_webhook": "Webhook",
   "workflowEvents_trigger_form": "Form",
   "workflowEvents_trigger_table": "Table",
-
   "common_create": "Create",
   "common_saveChanges": "Save Changes",
-
   "workflowForms_page_title": "Forms",
   "workflowForms_page_subtitle": "Manage workflow forms",
   "workflowForms_page_searchPlaceholder": "Search forms by name or description...",
@@ -1013,24 +998,20 @@
   "workflowForms_page_filterAll": "All",
   "workflowForms_page_filterActive": "{count} filter active",
   "workflowForms_page_noFilters": "No filters applied",
-
   "workflowForms_type_basic": "Basic",
   "workflowForms_type_subscription": "Subscription",
   "workflowForms_type_survey": "Survey",
   "workflowForms_type_basicWithCount": "Basic ({count})",
   "workflowForms_type_subscriptionWithCount": "Subscription ({count})",
   "workflowForms_type_surveyWithCount": "Survey ({count})",
-
   "workflowForms_empty_noForms": "No forms yet",
   "workflowForms_empty_noResults": "No forms found",
   "workflowForms_empty_createFirst": "Create first form",
-
   "workflowForms_card_viewDetails": "View details",
   "workflowForms_card_edit": "Edit",
   "workflowForms_card_delete": "Delete",
   "workflowForms_card_fieldsCount": "{count} fields",
   "workflowForms_card_updatedAt": "Updated at {date}",
-
   "workflowForms_detail_formNotFound": "Form not found.",
   "workflowForms_detail_saveSuccess": "Form saved successfully",
   "workflowForms_detail_saveFailed": "Failed to save form",
@@ -1040,7 +1021,6 @@
   "workflowForms_detail_save": "Save",
   "workflowForms_detail_deleting": "Deleting...",
   "workflowForms_detail_delete": "Delete",
-
   "workflowForms_createDialog_selectTemplate": "Select Template",
   "workflowForms_createDialog_selectDescription": "Choose a template to start building your form.",
   "workflowForms_createDialog_formInfo": "Form Information",
@@ -1056,13 +1036,11 @@
   "workflowForms_createDialog_back": "Back",
   "workflowForms_createDialog_creating": "Creating...",
   "workflowForms_createDialog_createForm": "Create Form",
-
   "workflowForms_config_formId": "Form ID",
   "workflowForms_config_formType": "Form Type",
   "workflowForms_config_submitButton": "Submit Button",
   "workflowForms_config_submitPlaceholder": "Enter submit button text",
   "workflowForms_config_fieldList": "Field List",
-
   "workflowForms_settings_title": "Form Settings",
   "workflowForms_settings_description": "Edit basic form information.",
   "workflowForms_settings_nameLabel": "Form Name",
@@ -1071,7 +1049,6 @@
   "workflowForms_settings_descriptionLabel": "Description",
   "workflowForms_settings_descriptionPlaceholder": "Enter form description (optional)",
   "workflowForms_settings_descriptionNote": "Description will only be updated when saving the form.",
-
   "workflowForms_fieldDialog_addTitle": "Add Field",
   "workflowForms_fieldDialog_editTitle": "Edit Field",
   "workflowForms_fieldDialog_description": "Configure the field information for your form.",
@@ -1094,7 +1071,6 @@
   "workflowForms_fieldDialog_requiredHint": "User must fill this field",
   "workflowForms_fieldDialog_addButton": "Add Field",
   "workflowForms_fieldDialog_updateButton": "Update",
-
   "workflowForms_fieldType_text": "Text (Short text)",
   "workflowForms_fieldType_email": "Email",
   "workflowForms_fieldType_number": "Number",
@@ -1103,31 +1079,25 @@
   "workflowForms_fieldType_checkbox": "Checkbox",
   "workflowForms_fieldType_date": "Date",
   "workflowForms_fieldType_datetime": "Datetime",
-
   "workflowForms_fieldList_total": "Total: {count} fields",
   "workflowForms_fieldList_required": "Required: {count}",
   "workflowForms_fieldList_addField": "Add Field",
-
   "workflowForms_emptyField_title": "No fields yet",
   "workflowForms_emptyField_description": "Add the first field to build your form",
   "workflowForms_emptyField_addButton": "Add Field",
-
   "workflowForms_listItem_viewDetail": "View detail",
   "workflowForms_listItem_edit": "Edit",
   "workflowForms_listItem_delete": "Delete",
   "workflowForms_listItem_fieldCount": "{count} fields",
   "workflowForms_listItem_updatedAt": "Updated at {date}",
-
   "workflowForms_builder_save": "Save",
   "workflowForms_builder_saving": "Saving...",
   "workflowForms_builder_delete": "Delete",
   "workflowForms_builder_deleting": "Deleting...",
-
   "workflowForms_configPanel_formType": "Form Type",
   "workflowForms_configPanel_submitButton": "Submit Button",
   "workflowForms_configPanel_submitButtonPlaceholder": "Enter submit button text",
   "workflowForms_configPanel_fieldList": "Field List",
-
   "workflowForms_fieldConfig_addTitle": "Add Field",
   "workflowForms_fieldConfig_editTitle": "Edit Field",
   "workflowForms_fieldConfig_description": "Configure the field information for your form.",
@@ -1160,7 +1130,6 @@
   "workflowForms_fieldConfig_requiredHint": "User must fill this field",
   "workflowForms_fieldConfig_addField": "Add Field",
   "workflowForms_fieldConfig_update": "Update",
-
   "workflowForms_settings_title": "Form Settings",
   "workflowForms_settings_description": "Edit basic form information.",
   "workflowForms_settings_nameLabel": "Form Name",
@@ -1170,17 +1139,75 @@
   "workflowForms_settings_descPlaceholder": "Enter form description (optional)",
   "workflowForms_settings_descHint": "Description will only be updated when saving the form.",
   "workflowForms_settings_save": "Save",
-
   "workflowForms_fieldListItem_dragToReorder": "Drag to reorder {label}",
   "workflowForms_fieldListItem_required": "Required",
   "workflowForms_fieldListItem_placeholder": "Placeholder: {text}",
   "workflowForms_fieldListItem_editField": "Edit field {label}",
   "workflowForms_fieldListItem_deleteField": "Delete field {label}",
   "workflowForms_fieldListItem_deleteConfirm": "Delete field \"{label}\"? This cannot be undone.",
-
   "workflowForms_options_label": "Options",
   "workflowForms_options_namePlaceholder": "Option name",
   "workflowForms_options_valuePlaceholder": "Value",
   "workflowForms_options_deleteOption": "Delete option",
-  "workflowForms_options_addOption": "Add option"
+  "workflowForms_options_addOption": "Add option",
+
+  "userProfile_breadcrumb_settings": "Settings",
+  "userProfile_breadcrumb_profile": "Profile",
+  "userProfile_title": "User Profile",
+
+  "userProfile_tab_profile": "Profile",
+  "userProfile_tab_settings": "Settings",
+  "userProfile_tab_billing": "Billing",
+
+  "userProfile_settings_appearanceTitle": "Appearance",
+  "userProfile_settings_appearanceDesc": "Customize how the application looks",
+  "userProfile_settings_themeLabel": "Theme",
+  "userProfile_settings_themeLight": "Light",
+  "userProfile_settings_themeDark": "Dark",
+  "userProfile_settings_themeSystem": "System",
+
+  "userProfile_settings_languageTitle": "Language",
+  "userProfile_settings_languageDesc": "Choose your preferred language",
+  "userProfile_settings_langVietnamese": "Tiếng Việt",
+  "userProfile_settings_langEnglish": "English",
+
+  "userProfile_settings_shortcutsTitle": "Keyboard Shortcuts",
+  "userProfile_settings_shortcutsDesc": "View all available keyboard shortcuts",
+  "userProfile_settings_viewShortcuts": "View Shortcuts",
+
+  "userProfile_billing_title": "Billing",
+  "userProfile_billing_desc": "Manage your subscription and billing information",
+  "userProfile_billing_noSubscription": "No Active Subscription",
+  "userProfile_billing_underDevelopment": "Billing features are currently under development.",
+  "userProfile_billing_upgradePlan": "Upgrade Plan",
+
+  "userProfile_error_title": "Error",
+  "userProfile_error_loadFailed": "Failed to load profile: {message}",
+  "userProfile_notFound_title": "Profile Not Found",
+  "userProfile_notFound_desc": "Unable to load your profile. Please ensure you are logged in and have access to this workspace.",
+
+  "userProfile_form_personalInfo": "Personal Information",
+  "userProfile_form_personalInfoDesc": "Update your personal details and contact information",
+  "userProfile_form_identitySection": "Identity",
+  "userProfile_form_contactSection": "Contact",
+  "userProfile_form_usernameLabel": "Username",
+  "userProfile_form_usernameHint": "Username cannot be changed",
+  "userProfile_form_fullNameLabel": "Full Name",
+  "userProfile_form_fullNamePlaceholder": "Enter your full name",
+  "userProfile_form_fullNameRequired": "Full name is required",
+  "userProfile_form_fullNameMaxLength": "Name cannot exceed 100 characters",
+  "userProfile_form_emailLabel": "Email",
+  "userProfile_form_emailPlaceholder": "Enter your email",
+  "userProfile_form_emailInvalid": "Invalid email address",
+  "userProfile_form_saveChanges": "Save Changes",
+
+  "userProfile_avatar_changeAvatar": "Change avatar",
+  "userProfile_avatar_uploadLabel": "Upload avatar image",
+  "userProfile_avatar_dialogTitle": "Update Avatar",
+  "userProfile_avatar_preview": "Preview",
+  "userProfile_avatar_cancel": "Cancel",
+  "userProfile_avatar_upload": "Upload",
+  "userProfile_avatar_uploading": "Uploading...",
+  "userProfile_avatar_invalidType": "Please select a valid image file (JPG, PNG, GIF, WebP)",
+  "userProfile_avatar_fileTooLarge": "File size must be less than 5MB"
 }

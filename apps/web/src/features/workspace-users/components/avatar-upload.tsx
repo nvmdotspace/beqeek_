@@ -8,6 +8,8 @@ import { toast } from 'sonner';
 
 import { useUploadAvatar } from '../hooks/use-upload-avatar';
 import { getUserInitials } from '../utils/user-initials';
+// @ts-expect-error - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 
 interface AvatarUploadProps {
   currentAvatar?: string | null;
@@ -53,13 +55,13 @@ export function AvatarUpload({ currentAvatar, fullName, size = 'lg' }: AvatarUpl
 
     // Validate file type
     if (!ACCEPTED_TYPES.includes(file.type)) {
-      toast.error('Please select a valid image file (JPG, PNG, GIF, WebP)');
+      toast.error(m.userProfile_avatar_invalidType());
       return;
     }
 
     // Validate file size
     if (file.size > MAX_FILE_SIZE) {
-      toast.error('File size must be less than 5MB');
+      toast.error(m.userProfile_avatar_fileTooLarge());
       return;
     }
 
@@ -105,10 +107,10 @@ export function AvatarUpload({ currentAvatar, fullName, size = 'lg' }: AvatarUpl
         onKeyDown={handleKeyDown}
         role="button"
         tabIndex={0}
-        aria-label="Change avatar"
+        aria-label={m.userProfile_avatar_changeAvatar()}
       >
         <Avatar className={sizeClasses[size]}>
-          <AvatarImage src={currentAvatar || undefined} alt={fullName || 'User avatar'} />
+          <AvatarImage src={currentAvatar || undefined} alt={fullName || m.userProfile_avatar_userAvatar()} />
           <AvatarFallback className="text-xl">{getUserInitials(fullName)}</AvatarFallback>
         </Avatar>
         <Box className="absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity flex items-center justify-center">
@@ -120,28 +122,32 @@ export function AvatarUpload({ currentAvatar, fullName, size = 'lg' }: AvatarUpl
           accept={ACCEPTED_TYPES.join(',')}
           onChange={handleFileSelect}
           className="sr-only"
-          aria-label="Upload avatar image"
+          aria-label={m.userProfile_avatar_uploadImage()}
         />
       </Box>
 
       <Dialog open={dialogOpen} onOpenChange={handleClose}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Update Avatar</DialogTitle>
+            <DialogTitle>{m.userProfile_avatar_updateTitle()}</DialogTitle>
           </DialogHeader>
           <Inline justify="center" className="py-[var(--space-300)]">
             {preview && (
-              <img src={preview} alt="Preview" className="w-40 h-40 rounded-full object-cover border-4 border-muted" />
+              <img
+                src={preview}
+                alt={m.userProfile_avatar_preview()}
+                className="w-40 h-40 rounded-full object-cover border-4 border-muted"
+              />
             )}
           </Inline>
           <DialogFooter>
             <Inline space="space-100" justify="end">
               <Button variant="outline" onClick={handleClose} disabled={isPending}>
-                Cancel
+                {m.userProfile_avatar_cancel()}
               </Button>
               <Button onClick={handleUpload} disabled={isPending}>
                 {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {isPending ? 'Uploading...' : 'Upload'}
+                {isPending ? m.userProfile_avatar_uploading() : m.userProfile_avatar_upload()}
               </Button>
             </Inline>
           </DialogFooter>

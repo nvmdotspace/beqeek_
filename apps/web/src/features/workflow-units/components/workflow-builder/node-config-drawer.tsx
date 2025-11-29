@@ -12,9 +12,9 @@ import { Stack } from '@workspace/ui/components/primitives';
 import { Text } from '@workspace/ui/components/typography';
 import { Badge } from '@workspace/ui/components/badge';
 import { ScrollArea } from '@workspace/ui/components/scroll-area';
-import * as LucideIcons from 'lucide-react';
 import { useWorkflowEditorStore } from '../../stores/workflow-editor-store';
 import { NODE_DEFINITIONS } from '../../utils/node-types';
+import { getWorkflowIcon } from '../../utils/workflow-icons';
 import { NodeFormRouter } from './node-forms';
 
 export function NodeConfigDrawer() {
@@ -58,9 +58,7 @@ export function NodeConfigDrawer() {
   };
 
   // Get icon component
-  const IconComponent = nodeDef?.icon
-    ? (LucideIcons[nodeDef.icon as keyof typeof LucideIcons] as React.ComponentType<{ className?: string }>)
-    : null;
+  const IconComponent = nodeDef?.icon ? getWorkflowIcon(nodeDef.icon) : null;
 
   // Category colors for badge
   const categoryColors = {

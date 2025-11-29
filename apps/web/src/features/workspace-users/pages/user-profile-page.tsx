@@ -17,6 +17,8 @@ import { AvatarUpload } from '../components/avatar-upload';
 import { useThemeStore } from '@/stores/theme-store';
 import { useLanguageStore } from '@/stores/language-store';
 import { ROUTES } from '@/shared/route-paths';
+// @ts-expect-error - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 
 const route = getRouteApi(ROUTES.WORKSPACE.PROFILE);
 
@@ -42,11 +44,11 @@ export function UserProfilePage() {
         {/* Breadcrumb / Header */}
         <Stack space="space-100">
           <Inline space="space-100" align="center" className="text-muted-foreground text-sm">
-            <span>Settings</span>
+            <span>{m.userProfile_breadcrumb_settings()}</span>
             <span>/</span>
-            <span className="text-foreground font-medium">Profile</span>
+            <span className="text-foreground font-medium">{m.userProfile_breadcrumb_profile()}</span>
           </Inline>
-          <Heading level={1}>User Profile</Heading>
+          <Heading level={1}>{m.userProfile_title()}</Heading>
         </Stack>
 
         {/* Profile Header Card */}
@@ -70,9 +72,9 @@ export function UserProfilePage() {
         {/* Tabs */}
         <Tabs defaultValue={tab || 'profile'}>
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="profile">Profile</TabsTrigger>
-            <TabsTrigger value="settings">Settings</TabsTrigger>
-            <TabsTrigger value="billing">Billing</TabsTrigger>
+            <TabsTrigger value="profile">{m.userProfile_tab_profile()}</TabsTrigger>
+            <TabsTrigger value="settings">{m.userProfile_tab_settings()}</TabsTrigger>
+            <TabsTrigger value="billing">{m.userProfile_tab_billing()}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="profile" className="mt-[var(--space-300)]">
@@ -103,12 +105,12 @@ function SettingsTab() {
       {/* Theme Settings */}
       <Card>
         <CardHeader>
-          <CardTitle>Appearance</CardTitle>
-          <CardDescription>Customize how the application looks</CardDescription>
+          <CardTitle>{m.userProfile_settings_appearanceTitle()}</CardTitle>
+          <CardDescription>{m.userProfile_settings_appearanceDesc()}</CardDescription>
         </CardHeader>
         <CardContent>
           <Stack space="space-150">
-            <Label>Theme</Label>
+            <Label>{m.userProfile_settings_themeLabel()}</Label>
             <RadioGroup
               value={theme}
               onValueChange={(value) => setTheme(value as 'light' | 'dark' | 'system')}
@@ -121,7 +123,7 @@ function SettingsTab() {
                 <RadioGroupItem value="light" id="theme-light" className="sr-only" />
                 <Sun className="mb-[var(--space-150)] h-6 w-6" />
                 <Text size="small" weight="medium" as="span">
-                  Light
+                  {m.userProfile_settings_themeLight()}
                 </Text>
               </Label>
               <Label
@@ -131,7 +133,7 @@ function SettingsTab() {
                 <RadioGroupItem value="dark" id="theme-dark" className="sr-only" />
                 <Moon className="mb-[var(--space-150)] h-6 w-6" />
                 <Text size="small" weight="medium" as="span">
-                  Dark
+                  {m.userProfile_settings_themeDark()}
                 </Text>
               </Label>
               <Label
@@ -141,7 +143,7 @@ function SettingsTab() {
                 <RadioGroupItem value="system" id="theme-system" className="sr-only" />
                 <Monitor className="mb-[var(--space-150)] h-6 w-6" />
                 <Text size="small" weight="medium" as="span">
-                  System
+                  {m.userProfile_settings_themeSystem()}
                 </Text>
               </Label>
             </RadioGroup>
@@ -152,8 +154,8 @@ function SettingsTab() {
       {/* Language Settings */}
       <Card>
         <CardHeader>
-          <CardTitle>Language</CardTitle>
-          <CardDescription>Choose your preferred language</CardDescription>
+          <CardTitle>{m.userProfile_settings_languageTitle()}</CardTitle>
+          <CardDescription>{m.userProfile_settings_languageDesc()}</CardDescription>
         </CardHeader>
         <CardContent>
           <RadioGroup value={locale} onValueChange={setLanguage} className="grid grid-cols-2 gap-[var(--space-200)]">
@@ -164,7 +166,7 @@ function SettingsTab() {
               <RadioGroupItem value="vi" id="lang-vi" className="sr-only" />
               <Globe className="h-5 w-5" />
               <Text weight="medium" as="span">
-                Tiếng Việt
+                {m.userProfile_settings_langVietnamese()}
               </Text>
             </Label>
             <Label
@@ -174,7 +176,7 @@ function SettingsTab() {
               <RadioGroupItem value="en" id="lang-en" className="sr-only" />
               <Globe className="h-5 w-5" />
               <Text weight="medium" as="span">
-                English
+                {m.userProfile_settings_langEnglish()}
               </Text>
             </Label>
           </RadioGroup>
@@ -184,13 +186,13 @@ function SettingsTab() {
       {/* Keyboard Shortcuts */}
       <Card>
         <CardHeader>
-          <CardTitle>Keyboard Shortcuts</CardTitle>
-          <CardDescription>View all available keyboard shortcuts</CardDescription>
+          <CardTitle>{m.userProfile_settings_shortcutsTitle()}</CardTitle>
+          <CardDescription>{m.userProfile_settings_shortcutsDesc()}</CardDescription>
         </CardHeader>
         <CardContent>
           <Button variant="outline" onClick={() => window.open('/keyboard-shortcuts', '_blank')}>
             <ExternalLink className="mr-2 h-4 w-4" />
-            View Shortcuts
+            {m.userProfile_settings_viewShortcuts()}
           </Button>
         </CardContent>
       </Card>
@@ -202,19 +204,19 @@ function BillingTab() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Billing</CardTitle>
-        <CardDescription>Manage your subscription and billing information</CardDescription>
+        <CardTitle>{m.userProfile_billing_title()}</CardTitle>
+        <CardDescription>{m.userProfile_billing_desc()}</CardDescription>
       </CardHeader>
       <CardContent className="min-h-[200px] flex flex-col items-center justify-center text-center gap-2">
         <div className="p-4 rounded-full bg-muted">
           <Globe className="h-8 w-8 text-muted-foreground" />
         </div>
         <Heading level={3} className="text-base font-medium">
-          No Active Subscription
+          {m.userProfile_billing_noSubscription()}
         </Heading>
-        <Text color="muted">Billing features are currently under development.</Text>
+        <Text color="muted">{m.userProfile_billing_underDevelopment()}</Text>
         <Button variant="outline" className="mt-2" disabled>
-          Upgrade Plan
+          {m.userProfile_billing_upgradePlan()}
         </Button>
       </CardContent>
     </Card>
@@ -251,10 +253,10 @@ function ProfileError({ error }: { error: Error }) {
     <Container maxWidth="md" padding="gutter" className="py-[var(--space-400)]">
       <Card>
         <CardHeader>
-          <CardTitle className="text-destructive">Error</CardTitle>
+          <CardTitle className="text-destructive">{m.userProfile_error_title()}</CardTitle>
         </CardHeader>
         <CardContent>
-          <Text color="muted">Failed to load profile: {error.message}</Text>
+          <Text color="muted">{m.userProfile_error_loadFailed({ message: error.message })}</Text>
         </CardContent>
       </Card>
     </Container>
@@ -266,12 +268,10 @@ function ProfileNotFound() {
     <Container maxWidth="md" padding="gutter" className="py-[var(--space-400)]">
       <Card>
         <CardHeader>
-          <CardTitle>Profile Not Found</CardTitle>
+          <CardTitle>{m.userProfile_notFound_title()}</CardTitle>
         </CardHeader>
         <CardContent>
-          <Text color="muted">
-            Unable to load your profile. Please ensure you are logged in and have access to this workspace.
-          </Text>
+          <Text color="muted">{m.userProfile_notFound_desc()}</Text>
         </CardContent>
       </Card>
     </Container>
