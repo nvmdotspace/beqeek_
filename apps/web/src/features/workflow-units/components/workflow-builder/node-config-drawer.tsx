@@ -6,24 +6,41 @@
  * Replaces the fixed NodeConfigPanel sidebar.
  */
 
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@workspace/ui/components/sheet';
-import { Box, Stack } from '@workspace/ui/components/primitives';
+import { Stack } from '@workspace/ui/components/primitives';
 import { Text } from '@workspace/ui/components/typography';
-import { Alert, AlertDescription } from '@workspace/ui/components/alert';
 import { Badge } from '@workspace/ui/components/badge';
 import { ScrollArea } from '@workspace/ui/components/scroll-area';
-import { Info } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import { useWorkflowEditorStore } from '../../stores/workflow-editor-store';
 import { NODE_DEFINITIONS } from '../../utils/node-types';
+import { NodeFormRouter } from './node-forms';
 
 export function NodeConfigDrawer() {
-  const { nodes, selectedNodeIds, isConfigDrawerOpen, openConfigDrawer, closeConfigDrawer, setSelectedNodeIds, mode } =
-    useWorkflowEditorStore();
+  const {
+    nodes,
+    selectedNodeIds,
+    isConfigDrawerOpen,
+    openConfigDrawer,
+    closeConfigDrawer,
+    setSelectedNodeIds,
+    mode,
+    updateNodeData,
+  } = useWorkflowEditorStore();
 
   const selectedNode = nodes.find((n) => selectedNodeIds.includes(n.id));
   const nodeDef = selectedNode ? NODE_DEFINITIONS.find((d) => d.type === selectedNode.type) : null;
+
+  // Handle node data update from forms
+  const handleNodeUpdate = useCallback(
+    (data: Record<string, unknown>) => {
+      if (selectedNode) {
+        updateNodeData(selectedNode.id, data);
+      }
+    },
+    [selectedNode, updateNodeData],
+  );
 
   // Open drawer when node is selected (in visual mode)
   useEffect(() => {
@@ -54,7 +71,7 @@ export function NodeConfigDrawer() {
 
   return (
     <Sheet open={isConfigDrawerOpen} onOpenChange={handleOpenChange}>
-      <SheetContent side="right" className="w-80 sm:w-96 sm:max-w-md p-0">
+      <SheetContent side="right" className="w-[360px] sm:w-[420px] md:w-[480px] sm:max-w-lg p-0">
         {selectedNode && nodeDef ? (
           <>
             <SheetHeader className="p-4 pb-0">
@@ -94,35 +111,8 @@ export function NodeConfigDrawer() {
                   </Text>
                 </Stack>
 
-                {/* Placeholder alert */}
-                <Alert role="note">
-                  <Info className="size-4" aria-hidden="true" />
-                  <AlertDescription>
-                    <Text size="small">
-                      Configuration forms will be implemented in future phases based on node type.
-                    </Text>
-                  </AlertDescription>
-                </Alert>
-
-                {/* Display current node data */}
-                <Stack space="space-150">
-                  <Text weight="semibold" size="small" id="drawer-node-data-label">
-                    Current Data
-                  </Text>
-                  <Box
-                    padding="space-200"
-                    backgroundColor="muted"
-                    borderRadius="md"
-                    className="font-mono text-xs overflow-auto max-h-80"
-                    role="region"
-                    aria-labelledby="drawer-node-data-label"
-                    tabIndex={0}
-                  >
-                    <pre className="whitespace-pre-wrap break-all" aria-label="Node configuration data in JSON format">
-                      {JSON.stringify(selectedNode.data, null, 2)}
-                    </pre>
-                  </Box>
-                </Stack>
+                {/* Node Configuration Form */}
+                <NodeFormRouter node={selectedNode} onUpdate={handleNodeUpdate} />
               </div>
             </ScrollArea>
           </>

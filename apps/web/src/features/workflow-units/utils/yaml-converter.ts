@@ -18,11 +18,18 @@
  */
 
 import type { Node, Edge } from '@xyflow/react';
-import { parseWorkflowYAML } from './yaml-parser';
+import { parseWorkflowYAML, parseWorkflowYAMLWithInfo, type ParseOptions } from './yaml-parser';
 import { irToReactFlow } from './ir-to-reactflow';
 import { reactFlowToIR } from './reactflow-to-ir';
 import { serializeWorkflowYAML } from './yaml-serializer';
 import type { WorkflowIR, TriggerIR } from './yaml-types';
+
+/**
+ * Options for YAML to React Flow conversion
+ */
+export interface YAMLToReactFlowOptions extends ParseOptions {
+  // Can add more options here in the future
+}
 
 /**
  * Result of YAML to React Flow conversion
@@ -36,6 +43,8 @@ export interface YAMLToReactFlowResult {
   trigger: TriggerIR;
   /** Original IR for reference */
   ir: WorkflowIR;
+  /** Whether the input was in legacy format */
+  wasLegacy: boolean;
 }
 
 /**
@@ -43,28 +52,34 @@ export interface YAMLToReactFlowResult {
  *
  * Complete pipeline: YAML String → IR → React Flow
  *
+ * Supports both:
+ * - New format: trigger/steps (React Flow native)
+ * - Legacy format: stages/blocks (PHP/Blockly) - auto-converted
+ *
  * @param yamlString - Raw YAML workflow definition
- * @returns Object with nodes, edges, trigger, and IR
+ * @param options - Optional conversion options (eventSourceType, eventSourceParams)
+ * @returns Object with nodes, edges, trigger, IR, and wasLegacy flag
  * @throws {YAMLParseError} If YAML is invalid
  * @throws {Error} If conversion fails
  *
  * @example
  * ```typescript
- * try {
- *   const { nodes, edges, trigger } = yamlToReactFlow(event.yamlContent);
- *   setNodes(nodes);
- *   setEdges(edges);
- *   setTrigger(trigger);
- * } catch (error) {
- *   if (error instanceof YAMLParseError) {
- *     toast.error(`Invalid YAML: ${error.message}`);
- *   }
+ * // Basic usage
+ * const { nodes, edges, trigger } = yamlToReactFlow(event.yamlContent);
+ *
+ * // With event context for legacy format
+ * const { nodes, edges, trigger, wasLegacy } = yamlToReactFlow(event.yaml, {
+ *   eventSourceType: event.eventSourceType,
+ *   eventSourceParams: event.eventSourceParams
+ * });
+ * if (wasLegacy) {
+ *   toast.info('Workflow converted from legacy format');
  * }
  * ```
  */
-export function yamlToReactFlow(yamlString: string): YAMLToReactFlowResult {
-  // Parse YAML → IR with validation
-  const ir = parseWorkflowYAML(yamlString);
+export function yamlToReactFlow(yamlString: string, options?: YAMLToReactFlowOptions): YAMLToReactFlowResult {
+  // Parse YAML → IR with validation (handles legacy format automatically)
+  const { ir, wasLegacy } = parseWorkflowYAMLWithInfo(yamlString, options);
 
   // Convert IR → React Flow nodes/edges
   const { nodes, edges, trigger } = irToReactFlow(ir);
@@ -74,6 +89,7 @@ export function yamlToReactFlow(yamlString: string): YAMLToReactFlowResult {
     edges,
     trigger,
     ir, // Return IR for reference/debugging
+    wasLegacy,
   };
 }
 
@@ -124,16 +140,23 @@ export function reactFlowToYAML(nodes: Node[], edges: Edge[], trigger: TriggerIR
 /**
  * Validate YAML without full conversion (lightweight check)
  *
+ * Supports both new and legacy formats.
+ *
  * @param yamlString - YAML string to validate
- * @returns Validation result with success flag and error message
+ * @param options - Optional parse options
+ * @returns Validation result with success flag, error message, and format info
  */
-export function validateWorkflowYAML(yamlString: string): {
+export function validateWorkflowYAML(
+  yamlString: string,
+  options?: YAMLToReactFlowOptions,
+): {
   valid: boolean;
   error?: string;
+  wasLegacy?: boolean;
 } {
   try {
-    parseWorkflowYAML(yamlString);
-    return { valid: true };
+    const { wasLegacy } = parseWorkflowYAMLWithInfo(yamlString, options);
+    return { valid: true, wasLegacy };
   } catch (error) {
     return {
       valid: false,
@@ -171,6 +194,7 @@ export function roundTripTest(yamlString: string): {
 
 // Re-export types and errors for convenience
 export type { WorkflowIR, StepIR, TriggerIR } from './yaml-types';
-export { YAMLParseError } from './yaml-parser';
+export { YAMLParseError, isLegacyYAML } from './yaml-parser';
 export { YAMLSerializeError } from './yaml-serializer';
 export { CircularDependencyError } from './topological-sort';
+export { isLegacyFormat, convertLegacyToIR } from './legacy-yaml-adapter';

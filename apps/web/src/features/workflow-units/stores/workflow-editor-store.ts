@@ -25,6 +25,9 @@ interface WorkflowEditorState {
   updateNodes: (nodes: Node[]) => void;
   updateEdges: (edges: Edge[]) => void;
 
+  // Node data update (for config forms)
+  updateNodeData: (nodeId: string, data: Record<string, unknown>) => void;
+
   // YAML editor state
   yamlContent: string;
   yamlError: string | null;
@@ -104,6 +107,15 @@ export const useWorkflowEditorStore = create<WorkflowEditorState>()(
         setEdges: (edges) => set({ edges, isDirty: true }),
         updateNodes: (nodes) => set({ nodes, isDirty: true }),
         updateEdges: (edges) => set({ edges, isDirty: true }),
+
+        // Update specific node's data (for config forms)
+        updateNodeData: (nodeId, data) =>
+          set((state) => ({
+            nodes: state.nodes.map((node) =>
+              node.id === nodeId ? { ...node, data: { ...node.data, ...data } } : node,
+            ),
+            isDirty: true,
+          })),
 
         setYamlContent: (yamlContent) => set({ yamlContent, isDirty: true }),
         setYamlError: (yamlError) => set({ yamlError }),
@@ -221,14 +233,24 @@ export const useWorkflowEditorStore = create<WorkflowEditorState>()(
             });
 
             // Parse YAML and load into canvas
+            // Pass event context to handle legacy PHP/Blockly format
             if (event.yaml && event.yaml !== '{}') {
-              const { nodes, edges } = yamlToReactFlow(event.yaml);
+              const { nodes, edges, wasLegacy } = yamlToReactFlow(event.yaml, {
+                eventSourceType: event.eventSourceType,
+                eventSourceParams: event.eventSourceParams as unknown as Record<string, unknown>,
+              });
+
+              // Log if legacy format was detected
+              if (wasLegacy) {
+                console.info('[WorkflowEditor] Legacy YAML format detected, converted to new format');
+              }
+
               set({
                 nodes,
                 edges,
                 yamlContent: event.yaml,
                 isLoading: false,
-                isDirty: false,
+                isDirty: wasLegacy, // Mark dirty if converted so user can save new format
                 parseError: null,
               });
             } else {

@@ -48,11 +48,12 @@ export const MetadataSchema = z.object({
 
 /**
  * Schema for complete workflow IR
+ * Note: steps can be empty for new/blank workflows
  */
 export const WorkflowIRSchema = z.object({
   version: z.string().default('1.0'),
   trigger: TriggerIRSchema,
-  steps: z.array(StepIRSchema).min(1, 'Workflow must contain at least one step'),
+  steps: z.array(StepIRSchema), // Allow empty steps for new workflows
   metadata: MetadataSchema.optional(),
 });
 

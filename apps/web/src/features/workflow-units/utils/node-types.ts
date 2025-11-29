@@ -9,20 +9,23 @@ export type NodeType =
   | 'trigger_webhook'
   | 'trigger_form'
   | 'trigger_table'
-  // Actions (7)
+  // Actions (10)
   | 'table_operation'
+  | 'table_comment_create'
+  | 'table_comment_get_one'
   | 'smtp_email'
   | 'google_sheet'
   | 'api_call'
   | 'user_operation'
   | 'delay'
   | 'log'
-  // Logic (6)
+  // Logic (7)
   | 'condition'
   | 'match'
   | 'loop'
   | 'math'
   | 'definition'
+  | 'object_lookup'
   | 'log_logic'; // Separate log for logic category
 
 export interface BaseNodeData {
@@ -56,6 +59,19 @@ export interface TableOperationData extends BaseNodeData {
   connector: string; // Table ID
   action: 'get_list' | 'get_one' | 'create' | 'update' | 'delete';
   config?: Record<string, unknown>;
+}
+
+export interface TableCommentCreateData extends BaseNodeData {
+  connector: string; // Table ID
+  recordId: string; // Record to attach comment to
+  content: string; // Comment content
+  parentId?: string; // Parent comment ID for replies
+}
+
+export interface TableCommentGetOneData extends BaseNodeData {
+  connector: string; // Table ID
+  recordId: string; // Record ID
+  commentId: string; // Comment ID to retrieve
 }
 
 export interface SmtpEmailData extends BaseNodeData {
@@ -130,6 +146,12 @@ export interface DefinitionData extends BaseNodeData {
   variables: Record<string, unknown>; // Variable definitions
 }
 
+export interface ObjectLookupData extends BaseNodeData {
+  object: string; // Object expression (e.g., $[trigger.data])
+  key: string; // Key path to lookup (e.g., "user.name")
+  defaultValue?: string; // Default if key not found
+}
+
 // Union type for all node data
 export type WorkflowNodeData =
   | TriggerScheduleData
@@ -137,6 +159,8 @@ export type WorkflowNodeData =
   | TriggerFormData
   | TriggerTableData
   | TableOperationData
+  | TableCommentCreateData
+  | TableCommentGetOneData
   | SmtpEmailData
   | GoogleSheetData
   | ApiCallData
@@ -147,7 +171,8 @@ export type WorkflowNodeData =
   | MatchData
   | LoopData
   | MathData
-  | DefinitionData;
+  | DefinitionData
+  | ObjectLookupData;
 
 // Node categories for palette organization
 export type NodeCategory = 'trigger' | 'action' | 'logic';
@@ -205,6 +230,22 @@ export const NODE_DEFINITIONS: NodeDefinition[] = [
     icon: 'Database',
     description: 'CRUD operations on Active Tables',
     defaultData: { name: 'table_op', connector: '', action: 'get_list' },
+  },
+  {
+    type: 'table_comment_create',
+    label: 'Create Comment',
+    category: 'action',
+    icon: 'MessageSquarePlus',
+    description: 'Create comment on table record',
+    defaultData: { name: 'create_comment', connector: '', recordId: '', content: '' },
+  },
+  {
+    type: 'table_comment_get_one',
+    label: 'Get Comment',
+    category: 'action',
+    icon: 'MessageSquare',
+    description: 'Get a specific comment from table record',
+    defaultData: { name: 'get_comment', connector: '', recordId: '', commentId: '' },
   },
   {
     type: 'smtp_email',
@@ -295,6 +336,14 @@ export const NODE_DEFINITIONS: NodeDefinition[] = [
     icon: 'Variable',
     description: 'Define variables',
     defaultData: { name: 'definition', variables: {} },
+  },
+  {
+    type: 'object_lookup',
+    label: 'Object Lookup',
+    category: 'logic',
+    icon: 'Search',
+    description: 'Get value from object by key path',
+    defaultData: { name: 'lookup', object: '', key: '' },
   },
   {
     type: 'log_logic',

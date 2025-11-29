@@ -6,13 +6,12 @@
  * Supports dark/light theme switching.
  */
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Editor, { Monaco } from '@monaco-editor/react';
 import type { editor } from 'monaco-editor';
 import { Alert, AlertDescription } from '@workspace/ui/components/alert';
 import { AlertCircle } from 'lucide-react';
 import { useWorkflowEditorStore } from '../../stores/workflow-editor-store';
-import { useTheme } from '@/providers/theme-provider';
 
 interface YamlEditorProps {
   workspaceId: string;
@@ -20,12 +19,39 @@ interface YamlEditorProps {
 
 export function YamlEditor({ workspaceId }: YamlEditorProps) {
   const { yamlContent, yamlError, setYamlContent, setYamlError } = useWorkflowEditorStore();
-  const { resolvedTheme } = useTheme();
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
   const monacoRef = useRef<Monaco | null>(null);
 
-  // Determine Monaco theme based on app theme
-  const monacoTheme = resolvedTheme === 'dark' ? 'vs-dark' : 'vs-light';
+  // Detect dark mode from DOM (more reliable than context)
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    if (typeof document === 'undefined') return false;
+    return document.documentElement.classList.contains('dark');
+  });
+
+  // Watch for dark mode changes via MutationObserver
+  useEffect(() => {
+    const observer = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        if (mutation.attributeName === 'class') {
+          const isDark = document.documentElement.classList.contains('dark');
+          setIsDarkMode(isDark);
+        }
+      }
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+
+    // Set initial value
+    setIsDarkMode(document.documentElement.classList.contains('dark'));
+
+    return () => observer.disconnect();
+  }, []);
+
+  // Determine Monaco theme based on detected dark mode
+  const monacoTheme = isDarkMode ? 'vs-dark' : 'light';
 
   // Handle editor mount
   const handleEditorDidMount = (editor: editor.IStandaloneCodeEditor, monaco: Monaco) => {
@@ -36,6 +62,13 @@ export function YamlEditor({ workspaceId }: YamlEditorProps) {
     // Note: monaco-yaml auto-registers itself when imported
     // We'll configure it in a separate effect
   };
+
+  // Update Monaco theme when app theme changes
+  useEffect(() => {
+    if (monacoRef.current) {
+      monacoRef.current.editor.setTheme(monacoTheme);
+    }
+  }, [monacoTheme]);
 
   // Configure monaco-yaml after mount
   useEffect(() => {
@@ -83,6 +116,7 @@ export function YamlEditor({ workspaceId }: YamlEditorProps) {
       {/* Monaco Editor */}
       <div className="flex-1" aria-label="YAML code input area">
         <Editor
+          key={monacoTheme}
           height="100%"
           language="yaml"
           value={yamlContent}

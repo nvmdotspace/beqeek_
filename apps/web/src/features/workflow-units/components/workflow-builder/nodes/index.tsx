@@ -10,6 +10,8 @@ import type {
   TriggerFormData,
   TriggerTableData,
   TableOperationData,
+  TableCommentCreateData,
+  TableCommentGetOneData,
   SmtpEmailData,
   GoogleSheetData,
   ApiCallData,
@@ -21,6 +23,7 @@ import type {
   LoopData,
   MathData,
   DefinitionData,
+  ObjectLookupData,
 } from '../../../utils/node-types';
 
 // Trigger Nodes
@@ -91,6 +94,34 @@ export const TableOperationNode = (props: NodeProps) => {
       category="action"
       label="Table Operation"
       summary={`${data.action || 'get_list'}`}
+    />
+  );
+};
+
+export const TableCommentCreateNode = (props: NodeProps) => {
+  const data = props.data as unknown as TableCommentCreateData;
+  return (
+    <BaseWorkflowNode
+      {...props}
+      data={data}
+      icon="MessageSquarePlus"
+      category="action"
+      label="Create Comment"
+      summary={data.content ? data.content.slice(0, 30) + '...' : 'Not configured'}
+    />
+  );
+};
+
+export const TableCommentGetOneNode = (props: NodeProps) => {
+  const data = props.data as unknown as TableCommentGetOneData;
+  return (
+    <BaseWorkflowNode
+      {...props}
+      data={data}
+      icon="MessageSquare"
+      category="action"
+      label="Get Comment"
+      summary={data.commentId ? `ID: ${data.commentId.slice(0, 12)}...` : 'Not configured'}
     />
   );
 };
@@ -250,6 +281,20 @@ export const DefinitionNode = (props: NodeProps) => {
   );
 };
 
+export const ObjectLookupNode = (props: NodeProps) => {
+  const data = props.data as unknown as ObjectLookupData;
+  return (
+    <BaseWorkflowNode
+      {...props}
+      data={data}
+      icon="Search"
+      category="logic"
+      label="Object Lookup"
+      summary={data.key ? `${data.object || 'obj'}.${data.key}` : 'Not configured'}
+    />
+  );
+};
+
 export const LogLogicNode = (props: NodeProps) => {
   const data = props.data as unknown as LogData;
   return (
@@ -271,6 +316,8 @@ export const NODE_TYPES = {
   trigger_form: TriggerFormNode,
   trigger_table: TriggerTableNode,
   table_operation: TableOperationNode,
+  table_comment_create: TableCommentCreateNode,
+  table_comment_get_one: TableCommentGetOneNode,
   smtp_email: SmtpEmailNode,
   google_sheet: GoogleSheetNode,
   api_call: ApiCallNode,
@@ -282,5 +329,6 @@ export const NODE_TYPES = {
   loop: LoopNode,
   math: MathNode,
   definition: DefinitionNode,
+  object_lookup: ObjectLookupNode,
   log_logic: LogLogicNode,
 };
