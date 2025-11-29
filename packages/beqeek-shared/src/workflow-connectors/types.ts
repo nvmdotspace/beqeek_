@@ -54,6 +54,8 @@ export interface ConnectorTypeDefinition {
   description: string;
   /** Logo URL or path */
   logo: string;
+  /** Optional Lucide icon name */
+  icon?: string;
 }
 
 // ============================================================================

@@ -17,6 +17,13 @@ import { Card, CardContent } from '@workspace/ui/components/card';
 import { Text } from '@workspace/ui/components/typography';
 import type { ConnectorTypeDefinition } from '@workspace/beqeek-shared/workflow-connectors';
 
+import { Mail, Table } from 'lucide-react';
+
+const ICON_MAP: Record<string, React.ElementType> = {
+  Mail: Mail,
+  Table: Table,
+};
+
 interface ConnectorCardProps {
   /** Connector type definition */
   connectorType: ConnectorTypeDefinition;
@@ -25,6 +32,8 @@ interface ConnectorCardProps {
 }
 
 export function ConnectorCard({ connectorType, onClick }: ConnectorCardProps) {
+  const IconComponent = connectorType.icon ? ICON_MAP[connectorType.icon] : null;
+
   return (
     <Card
       className="hover:shadow-md hover:scale-[1.01] hover:border-primary/40 transition-all cursor-pointer border-border/60"
@@ -46,6 +55,10 @@ export function ConnectorCard({ connectorType, onClick }: ConnectorCardProps) {
           <div className="flex-shrink-0">
             {connectorType.logo ? (
               <img src={connectorType.logo} alt={connectorType.name} className="size-10 object-contain rounded-lg" />
+            ) : IconComponent ? (
+              <div className="size-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                <IconComponent className="size-6" />
+              </div>
             ) : (
               <div className="size-10 rounded-lg bg-primary/20 flex items-center justify-center">
                 <div className="size-5 bg-primary/40 rounded" />

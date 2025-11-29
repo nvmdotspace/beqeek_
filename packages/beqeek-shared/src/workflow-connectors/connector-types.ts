@@ -22,7 +22,8 @@ export const CONNECTOR_TYPES: ConnectorTypeDefinition[] = [
     type: CONNECTOR_TYPE_SMTP,
     name: 'SMTP',
     description: 'Kết nối với máy chủ SMTP để gửi email.',
-    logo: '/images/email.png',
+    logo: '',
+    icon: 'Mail',
   },
   {
     type: CONNECTOR_TYPE_GOOGLE_SHEETS,
@@ -47,5 +48,6 @@ export const CONNECTOR_TYPES: ConnectorTypeDefinition[] = [
     name: 'Bảng',
     description: 'Kết nối với bảng để quản lý dữ liệu',
     logo: '',
+    icon: 'Table',
   },
 ];
