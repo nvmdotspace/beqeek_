@@ -14,7 +14,7 @@ export function PricingSection({ onSignup }: PricingSectionProps) {
       price: '0 VNĐ',
       period: '/tháng',
       buttonText: 'Thử Ngay',
-      buttonStyle: 'bg-white/5 hover:bg-white/10',
+      buttonStyle: 'bg-accent-green/20 hover:bg-accent-green/30 border border-accent-green/50',
       borderStyle: 'border-accent-green/50 hover:border-accent-green',
       checkColor: 'text-accent-green',
       features: ['Thử nghiệm 7 ngày', 'Tùy chỉnh cơ bản', 'Bảo mật end-to-end', 'Quản lý 10 nghiệp vụ'],
@@ -24,7 +24,7 @@ export function PricingSection({ onSignup }: PricingSectionProps) {
       price: '630.000 VNĐ',
       period: '/tháng',
       buttonText: 'Chọn Gói',
-      buttonStyle: 'bg-accent-blue hover:bg-accent-blue/90 shadow-lg shadow-accent-blue/25',
+      buttonStyle: 'bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/25',
       borderStyle: 'border-white/5 hover:border-white/10',
       checkColor: 'text-blue-400',
       textStyle: 'text-slate-300',
@@ -41,7 +41,7 @@ export function PricingSection({ onSignup }: PricingSectionProps) {
       price: 'Liên Hệ',
       period: '',
       buttonText: 'Liên Hệ',
-      buttonStyle: 'bg-white/5 hover:bg-white/10',
+      buttonStyle: 'bg-white/10 hover:bg-white/15 border border-white/20',
       borderStyle: 'border-white/5 hover:border-white/10',
       checkColor: 'text-accent-blue',
       features: [
@@ -66,7 +66,7 @@ export function PricingSection({ onSignup }: PricingSectionProps) {
         <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto items-start">
           {plans.map((plan, index) => (
             <div key={index} className={`glass p-8 rounded-2xl border ${plan.borderStyle} transition-all`}>
-              <Heading level={4} className="text-lg mb-2 text-white">
+              <Heading level={3} className="text-lg mb-2 text-white">
                 {plan.name}
               </Heading>
               <div className="text-3xl font-bold text-white mb-1">

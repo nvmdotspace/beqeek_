@@ -29,22 +29,22 @@ export function Navbar({ onLogin, onSignup }: NavbarProps) {
           </div>
 
           {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center space-x-1">
+          <nav className="hidden md:flex items-center space-x-1" aria-label="Điều hướng chính">
             <a
               href="#features"
-              className="px-4 py-2 text-sm font-medium text-slate-400 hover:text-white transition-colors rounded-full hover:bg-white/5"
+              className="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors rounded-full hover:bg-white/5"
             >
               Đặc Điểm
             </a>
             <a
               href="#benefits"
-              className="px-4 py-2 text-sm font-medium text-slate-400 hover:text-white transition-colors rounded-full hover:bg-white/5"
+              className="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors rounded-full hover:bg-white/5"
             >
               Lợi Ích
             </a>
             <a
               href="#pricing"
-              className="px-4 py-2 text-sm font-medium text-slate-400 hover:text-white transition-colors rounded-full hover:bg-white/5"
+              className="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors rounded-full hover:bg-white/5"
             >
               Giá
             </a>
@@ -54,13 +54,13 @@ export function Navbar({ onLogin, onSignup }: NavbarProps) {
           <div className="flex items-center gap-4">
             <button
               onClick={onLogin}
-              className="hidden md:inline-flex items-center justify-center px-5 py-2 text-sm font-medium rounded-full text-white bg-white/5 border border-white/10 hover:bg-white/10 transition-all backdrop-blur-sm"
+              className="hidden md:inline-flex items-center justify-center px-5 py-2 text-sm font-medium rounded-full text-white bg-white/10 border border-white/20 hover:bg-white/15 transition-all backdrop-blur-sm"
             >
               Đăng Nhập
             </button>
             <button
               onClick={onSignup}
-              className="inline-flex items-center justify-center px-5 py-2 text-sm font-semibold rounded-full text-white bg-accent-blue hover:bg-accent-blue/90 shadow-[0_0_20px_-5px_rgba(59,130,246,0.5)] transition-all hover:shadow-[0_0_25px_-5px_rgba(59,130,246,0.6)]"
+              className="inline-flex items-center justify-center px-5 py-2 text-sm font-semibold rounded-full text-white bg-blue-600 hover:bg-blue-700 shadow-[0_0_20px_-5px_rgba(59,130,246,0.5)] transition-all hover:shadow-[0_0_25px_-5px_rgba(59,130,246,0.6)]"
             >
               Đăng Ký
             </button>

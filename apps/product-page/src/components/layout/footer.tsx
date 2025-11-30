@@ -11,17 +11,25 @@ export function Footer() {
             </div>
             <span className="text-xl font-bold text-white">BEQEEK</span>
           </div>
-          <div className="text-slate-500 text-sm text-center md:text-left">
+          <div className="text-slate-300 text-sm text-center md:text-left">
             &copy; 2025 BEQEEK. Tất cả quyền được bảo lưu.
             <br />
             Liên hệ: support@beqeek.com
           </div>
           <div className="flex gap-6">
-            <a href="#" className="text-slate-500 hover:text-white transition-colors">
-              <Twitter className="h-5 w-5" />
+            <a
+              href="https://twitter.com/beqeek"
+              aria-label="Theo dõi BEQEEK trên Twitter"
+              className="text-slate-400 hover:text-white transition-colors"
+            >
+              <Twitter className="h-5 w-5" aria-hidden="true" />
             </a>
-            <a href="#" className="text-slate-500 hover:text-white transition-colors">
-              <Github className="h-5 w-5" />
+            <a
+              href="https://github.com/beqeek"
+              aria-label="Xem mã nguồn BEQEEK trên GitHub"
+              className="text-slate-400 hover:text-white transition-colors"
+            >
+              <Github className="h-5 w-5" aria-hidden="true" />
             </a>
           </div>
         </div>

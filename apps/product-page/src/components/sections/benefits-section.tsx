@@ -48,7 +48,7 @@ export function BenefitsSection() {
               >
                 {benefit.icon}
               </div>
-              <Heading level={4} className="text-xl mb-3 text-white">
+              <Heading level={3} className="text-xl mb-3 text-white">
                 {benefit.title}
               </Heading>
               <Text color="muted">{benefit.description}</Text>

@@ -42,7 +42,7 @@ export function HeroSection({ onSignup }: HeroSectionProps) {
               <Button
                 onClick={onSignup}
                 size="lg"
-                className="h-12 px-8 rounded-full bg-accent-blue text-white font-bold hover:bg-accent-blue/90 shadow-lg shadow-accent-blue/20"
+                className="h-12 px-8 rounded-full bg-blue-600 text-white font-bold hover:bg-blue-700 shadow-lg shadow-blue-600/20"
               >
                 Đăng ký dùng thử miễn phí
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -76,9 +76,14 @@ export function HeroSection({ onSignup }: HeroSectionProps) {
               </div>
               {/* Dashboard Image */}
               <img
-                src="/assets/saas_multiview_dashboard.png"
-                alt="BEQEEK Multiview Dashboard"
+                src="/assets/saas_multiview_dashboard.webp"
+                alt="BEQEEK Multiview Dashboard - Giao diện quản lý đa chế độ xem với bảng dữ liệu, Kanban và báo cáo"
                 className="w-full h-auto"
+                width={1200}
+                height={800}
+                loading="eager"
+                fetchPriority="high"
+                decoding="async"
               />
             </div>
           </div>
