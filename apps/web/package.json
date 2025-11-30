@@ -74,6 +74,7 @@
     "@vitest/ui": "^4.0.8",
     "@workspace/eslint-config": "workspace:*",
     "@workspace/typescript-config": "workspace:*",
+    "babel-plugin-transform-imports": "^2.0.0",
     "eslint": "^9.36.0",
     "jsdom": "^27.2.0",
     "pngjs": "^7.0.0",

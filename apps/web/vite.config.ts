@@ -80,6 +80,53 @@ export default defineConfig({
             if (id.includes('axios')) return 'axios';
             if (id.includes('crypto-js')) return 'crypto-js';
 
+            // Rich text editor - Lexical (large)
+            if (id.includes('lexical') || id.includes('@lexical')) return 'lexical';
+
+            // Markdown
+            if (
+              id.includes('react-markdown') ||
+              id.includes('remark') ||
+              id.includes('unified') ||
+              id.includes('mdast') ||
+              id.includes('micromark')
+            )
+              return 'markdown';
+
+            // Query builder
+            if (id.includes('react-querybuilder')) return 'querybuilder';
+
+            // Virtualization
+            if (id.includes('react-window') || id.includes('react-virtualized')) return 'virtualization';
+
+            // YAML processing
+            if (id.includes('js-yaml') || id.includes('yaml')) return 'yaml';
+
+            // State management
+            // if (id.includes('zustand') || id.includes('zundo')) return 'zustand';
+
+            // D3 ecosystem (used by xyflow, dagre)
+            if (id.includes('/d3-') || id.includes('/d3/')) return 'xyflow';
+
+            // Graph libraries (used with xyflow)
+            if (id.includes('graphlib')) return 'xyflow';
+            if (id.includes('dagre')) return 'xyflow';
+
+            // Syntax highlighting
+            if (id.includes('prismjs')) return 'prismjs';
+
+            // Lodash - common utility
+            if (id.includes('lodash')) return 'lodash';
+
+            // Misc utilities
+            if (id.includes('sonner')) return 'sonner';
+            if (id.includes('html-to-image')) return 'html-to-image';
+            if (id.includes('cronstrue')) return 'cronstrue';
+            if (id.includes('idb')) return 'idb';
+
+            // Clipboard, classnames, etc (tiny utils - keep in vendor)
+            if (id.includes('clsx') || id.includes('class-variance') || id.includes('tailwind-merge')) return 'vendor';
+
             // React core - AFTER all specific checks
             // Use exact path matching to avoid false positives
             if (id.includes('/react-dom/')) return 'react-dom';
@@ -93,6 +140,11 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    include: ['monaco-editor', 'monaco-yaml'],
+    include: ['monaco-editor', 'monaco-yaml', 'lucide-react'],
+    exclude: [],
+  },
+  esbuild: {
+    // Force tree-shaking for lucide-react by treating as side-effect free
+    treeShaking: true,
   },
 });

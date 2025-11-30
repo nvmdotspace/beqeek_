@@ -110,7 +110,7 @@ export function AvatarUpload({ currentAvatar, fullName, size = 'lg' }: AvatarUpl
         aria-label={m.userProfile_avatar_changeAvatar()}
       >
         <Avatar className={sizeClasses[size]}>
-          <AvatarImage src={currentAvatar || undefined} alt={fullName || m.userProfile_avatar_userAvatar()} />
+          <AvatarImage src={currentAvatar || undefined} alt={fullName || m.userProfile_avatar_preview()} />
           <AvatarFallback className="text-xl">{getUserInitials(fullName)}</AvatarFallback>
         </Avatar>
         <Box className="absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity flex items-center justify-center">
@@ -122,14 +122,14 @@ export function AvatarUpload({ currentAvatar, fullName, size = 'lg' }: AvatarUpl
           accept={ACCEPTED_TYPES.join(',')}
           onChange={handleFileSelect}
           className="sr-only"
-          aria-label={m.userProfile_avatar_uploadImage()}
+          aria-label={m.userProfile_avatar_uploadLabel()}
         />
       </Box>
 
       <Dialog open={dialogOpen} onOpenChange={handleClose}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{m.userProfile_avatar_updateTitle()}</DialogTitle>
+            <DialogTitle>{m.userProfile_avatar_dialogTitle()}</DialogTitle>
           </DialogHeader>
           <Inline justify="center" className="py-[var(--space-300)]">
             {preview && (

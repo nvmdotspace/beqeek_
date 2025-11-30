@@ -39,8 +39,8 @@ export function ProfileForm({ user }: ProfileFormProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{m.userProfile_form_title()}</CardTitle>
-        <CardDescription>{m.userProfile_form_desc()}</CardDescription>
+        <CardTitle>{m.userProfile_form_personalInfo()}</CardTitle>
+        <CardDescription>{m.userProfile_form_personalInfoDesc()}</CardDescription>
       </CardHeader>
       <CardContent>
         <form
