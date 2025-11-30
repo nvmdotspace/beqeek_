@@ -49,12 +49,13 @@ export default function WorkflowEventEditorPage() {
 
   return (
     <ErrorBoundary>
-      <div className="h-screen flex flex-col">
+      {/* Full height container - uses calc to fill remaining viewport height */}
+      <div className="h-[calc(100vh-4rem)] flex flex-col overflow-hidden">
         {/* Canvas Header with Event Selector */}
         <CanvasHeader workspaceId={workspaceId} unitId={unitId} onCreateEvent={() => setShowCreateDialog(true)} />
 
         {/* Main Editor Area */}
-        <div className="flex-1 flex overflow-hidden">
+        <div className="flex-1 flex overflow-hidden min-h-0">
           {mode === 'visual' ? (
             <>
               {/* Node Palette - Left Sidebar */}

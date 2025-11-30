@@ -358,4 +358,22 @@ export const NODE_DEFINITIONS: NodeDefinition[] = [
     description: 'Debug logging',
     defaultData: { name: 'debug_log', message: '', level: 'debug' },
   },
+
+  // Compound nodes (nested blocks) - Not shown in palette, used for rendering
+  {
+    type: 'compound_condition',
+    label: 'Condition',
+    category: 'logic',
+    icon: 'GitBranch',
+    description: 'Condition with nested then/else branches',
+    defaultData: { name: 'condition', condition: '' },
+  },
+  {
+    type: 'compound_loop',
+    label: 'Loop',
+    category: 'logic',
+    icon: 'Repeat',
+    description: 'Loop with nested steps',
+    defaultData: { name: 'loop', collection: '', itemVar: 'item' },
+  },
 ];

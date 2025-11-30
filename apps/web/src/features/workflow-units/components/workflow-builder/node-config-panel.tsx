@@ -60,11 +60,12 @@ export function NodeConfigPanel() {
     <div
       className={cn(
         'w-[400px] h-full bg-background border-l border-border flex-shrink-0',
+        'flex flex-col', // Use flex column layout
         'animate-in slide-in-from-right-5 duration-200',
       )}
     >
-      {/* Header */}
-      <div className="flex items-center gap-3 p-4 border-b border-border">
+      {/* Header - fixed height */}
+      <div className="flex items-center gap-3 p-4 border-b border-border shrink-0">
         {IconComponent && (
           <div className={cn('p-2 rounded-lg', categoryColors[nodeDef.category])} aria-hidden="true">
             <IconComponent className="h-5 w-5" />
@@ -81,8 +82,8 @@ export function NodeConfigPanel() {
         </Button>
       </div>
 
-      {/* Content */}
-      <ScrollArea className="h-[calc(100%-73px)]">
+      {/* Content - flex-1 takes remaining space */}
+      <ScrollArea className="flex-1 min-h-0">
         <div className="p-4 space-y-4">
           {/* Node Description */}
           {nodeDef.description && (
