@@ -50,7 +50,7 @@ export default function WorkflowEventEditorPage() {
   return (
     <ErrorBoundary>
       {/* Full height container - uses calc to fill remaining viewport height */}
-      <div className="h-[calc(100vh-4rem)] flex flex-col overflow-hidden">
+      <div className="absolute inset-0 flex flex-col overflow-hidden">
         {/* Canvas Header with Event Selector */}
         <CanvasHeader workspaceId={workspaceId} unitId={unitId} onCreateEvent={() => setShowCreateDialog(true)} />
 

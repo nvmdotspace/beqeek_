@@ -78,9 +78,9 @@ export const NodePalette = () => {
 
   return (
     <Box
-      padding="space-300"
+      padding="none"
       backgroundColor="background"
-      className="h-full overflow-y-auto"
+      className="h-full overflow-y-auto px-6 pt-6"
       role="region"
       aria-label="Node palette - drag or press Enter on a node to add it to the canvas"
     >

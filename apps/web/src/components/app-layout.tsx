@@ -188,7 +188,7 @@ export const AppLayout = ({ children, showSidebar = true, pageTitle, pageIcon }:
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-auto hide-scrollbar-mobile pb-16 md:pb-0">{children}</main>
+        <main className="flex-1 overflow-auto hide-scrollbar-mobile pb-16 md:pb-0 relative">{children}</main>
       </div>
     </div>
   );
