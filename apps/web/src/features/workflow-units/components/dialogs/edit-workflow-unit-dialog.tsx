@@ -147,7 +147,7 @@ export function EditWorkflowUnitDialog({ open, onOpenChange, workspaceId, unit }
               {m.common_cancel()}
             </Button>
             <Button type="submit" disabled={updateMutation.isPending}>
-              {updateMutation.isPending && <Loader2 className="size-4 mr-2 animate-spin" />}
+              {updateMutation.isPending && <Loader2 className="size-4 animate-spin" />}
               {m.common_saveChanges()}
             </Button>
           </DialogFooter>

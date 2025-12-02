@@ -206,7 +206,7 @@ export function ConsoleViewer({
               disabled={logs.length === 0}
               aria-label="Export logs to clipboard"
             >
-              <Download className="h-4 w-4 mr-2" aria-hidden="true" />
+              <Download className="h-4 w-4" aria-hidden="true" />
               Export
             </Button>
             <Button
@@ -216,7 +216,7 @@ export function ConsoleViewer({
               disabled={totalLogs === 0}
               aria-label="Clear all logs"
             >
-              <Trash2 className="h-4 w-4 mr-2" aria-hidden="true" />
+              <Trash2 className="h-4 w-4" aria-hidden="true" />
               Clear
             </Button>
           </div>

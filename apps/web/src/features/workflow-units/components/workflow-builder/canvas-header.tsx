@@ -239,7 +239,7 @@ export function CanvasHeader({ workspaceId, unitId, onCreateEvent }: CanvasHeade
             title="Auto-layout nodes (Cmd+Shift+L)"
             aria-label="Auto-layout nodes"
           >
-            <Network className="h-4 w-4 mr-2" aria-hidden="true" />
+            <Network className="h-4 w-4" aria-hidden="true" />
             {m.workflowCanvas_autoLayout()}
           </Button>
 
@@ -252,7 +252,7 @@ export function CanvasHeader({ workspaceId, unitId, onCreateEvent }: CanvasHeade
             title="Export workflow as PNG"
             aria-label="Export workflow as PNG"
           >
-            <Download className="h-4 w-4 mr-2" aria-hidden="true" />
+            <Download className="h-4 w-4" aria-hidden="true" />
             {isExporting ? m.workflowCanvas_exporting() : m.workflowCanvas_exportPng()}
           </Button>
 
@@ -270,7 +270,7 @@ export function CanvasHeader({ workspaceId, unitId, onCreateEvent }: CanvasHeade
             size="sm"
             aria-label={updateEvent.isPending ? m.workflowCanvas_saving() : m.workflowCanvas_saveWorkflow()}
           >
-            <Save className="h-4 w-4 mr-2" aria-hidden="true" />
+            <Save className="h-4 w-4" aria-hidden="true" />
             {updateEvent.isPending ? m.workflowCanvas_saving() : m.workflowCanvas_saveWorkflow()}
           </Button>
         </div>

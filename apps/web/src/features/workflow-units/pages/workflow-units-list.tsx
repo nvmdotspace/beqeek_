@@ -163,7 +163,7 @@ export default function WorkflowUnitsListPage() {
               {m.workflowUnits_empty_description()}
             </Text>
             <Button onClick={() => setCreateOpen(true)}>
-              <Plus className="size-4 mr-2" />
+              <Plus className="size-4" />
               {m.workflowUnits_empty_createFirst()}
             </Button>
           </div>

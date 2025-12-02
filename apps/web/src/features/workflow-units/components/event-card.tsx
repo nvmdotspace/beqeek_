@@ -99,7 +99,7 @@ export function EventCard({ event, isSelected, onSelect, onToggleActive, onEdit,
                         onEdit(event);
                       }}
                     >
-                      <Edit className="h-4 w-4 mr-2" />
+                      <Edit className="h-4 w-4" />
                       {m.workflowEvents_card_edit()}
                     </DropdownMenuItem>
                   )}
@@ -111,7 +111,7 @@ export function EventCard({ event, isSelected, onSelect, onToggleActive, onEdit,
                       }}
                       className="text-destructive focus:text-destructive"
                     >
-                      <Trash className="h-4 w-4 mr-2" />
+                      <Trash className="h-4 w-4" />
                       {m.workflowEvents_card_delete()}
                     </DropdownMenuItem>
                   )}

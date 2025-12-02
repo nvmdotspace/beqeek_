@@ -163,7 +163,7 @@ export function CreateEventDialog({ open, onOpenChange, workspaceId, unitId }: C
               {m.common_cancel()}
             </Button>
             <Button type="submit" size="sm" disabled={!name.trim() || createEvent.isPending}>
-              {createEvent.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {createEvent.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
               {m.workflowEvents_createButton()}
             </Button>
           </DialogFooter>

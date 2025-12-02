@@ -123,11 +123,11 @@ export default function WorkflowUnitDetailPage() {
             {/* Actions - Right aligned */}
             <Inline space="space-100">
               <Button variant="outline" size="sm" onClick={() => setEditOpen(true)}>
-                <Edit className="size-4 mr-2" />
+                <Edit className="size-4" />
                 {m.workflowUnits_detail_edit()}
               </Button>
               <Button variant="outline" size="sm" onClick={() => setDeleteOpen(true)}>
-                <Trash className="size-4 mr-2" />
+                <Trash className="size-4" />
                 {m.workflowUnits_detail_delete()}
               </Button>
             </Inline>
@@ -171,7 +171,7 @@ export default function WorkflowUnitDetailPage() {
           <Inline justify="between" align="center" className="mb-4">
             <Heading level={2}>{m.workflowEvents_title()}</Heading>
             <Button size="sm" onClick={() => setCreateEventOpen(true)}>
-              <Plus className="size-4 mr-2" />
+              <Plus className="size-4" />
               {m.workflowEvents_createButton()}
             </Button>
           </Inline>
@@ -216,7 +216,7 @@ export default function WorkflowUnitDetailPage() {
                 {m.workflowEvents_empty_description()}
               </Text>
               <Button onClick={() => setCreateEventOpen(true)}>
-                <Plus className="size-4 mr-2" />
+                <Plus className="size-4" />
                 {m.workflowEvents_empty_createFirst()}
               </Button>
             </div>

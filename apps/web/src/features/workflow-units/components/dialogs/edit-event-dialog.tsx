@@ -130,7 +130,7 @@ export function EditEventDialog({ open, onOpenChange, workspaceId, event }: Edit
               {m.common_cancel()}
             </Button>
             <Button type="submit" disabled={!name.trim() || updateEvent.isPending}>
-              {updateEvent.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {updateEvent.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
               {m.common_saveChanges()}
             </Button>
           </DialogFooter>
