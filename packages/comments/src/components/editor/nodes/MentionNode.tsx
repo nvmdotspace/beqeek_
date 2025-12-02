@@ -132,23 +132,29 @@ export class MentionNode extends TextNode {
   }
 
   canInsertTextBefore(): boolean {
-    return true; // Allow cursor to move before mention
+    return false; // Prevent editing inside mention
   }
 
   canInsertTextAfter(): boolean {
-    return true; // Allow cursor to move after mention
+    return false; // Prevent editing inside mention
+  }
+
+  // Prevent splitting the mention node when pressing backspace/delete in the middle
+  canBeTransformed(): boolean {
+    return false;
   }
 }
 
 /**
- * Create a mention node with Slack-like format
- * Text content will be `<@userId|name>` for storage, but display as `@name`
+ * Create a mention node
+ * Text content is `@name` for display, Slack-like format `<@userId|name>` only in exportDOM
  */
 export function $createMentionNode(mentionName: string, userId?: string): MentionNode {
-  // Store as Slack-like format: <@userId|name>
-  const textContent = userId ? `<@${userId}|${mentionName}>` : `@${mentionName}`;
+  // Store display format as text content (what user sees and edits)
+  const textContent = `@${mentionName}`;
   const mentionNode = new MentionNode(mentionName, userId, textContent);
-  mentionNode.setMode('segmented').toggleDirectionless();
+  // Use 'token' mode to make mention behave as atomic unit (delete entire mention at once)
+  mentionNode.setMode('token').toggleDirectionless();
   return $applyNodeReplacement(mentionNode);
 }
 

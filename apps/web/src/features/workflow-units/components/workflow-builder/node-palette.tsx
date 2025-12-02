@@ -4,6 +4,8 @@ import { Heading } from '@workspace/ui/components/typography';
 import { cn } from '@workspace/ui/lib/utils';
 import { NODE_DEFINITIONS, type NodeDefinition } from '../../utils/node-types';
 import { getWorkflowIcon } from '../../utils/workflow-icons';
+// @ts-expect-error - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 
 interface NodePaletteItemProps {
   definition: NodeDefinition;
@@ -87,16 +89,16 @@ export const NodePalette = () => {
       <Stack space="space-400">
         {/* Header */}
         <Heading level={4} className="text-base" id="node-palette-heading">
-          Node Palette
+          {m.workflowCanvas_nodePalette()}
         </Heading>
 
         {/* Triggers Section */}
         <section aria-labelledby="triggers-heading">
           <Stack space="space-200">
             <Text weight="semibold" size="small" color="muted" id="triggers-heading">
-              Triggers
+              {m.workflowCanvas_triggers()}
             </Text>
-            <Stack space="space-150" role="group" aria-label="Trigger nodes">
+            <Stack space="space-150" role="group" aria-label={m.workflowCanvas_triggerNodes()}>
               {triggers.map((def) => (
                 <NodePaletteItem key={def.type} definition={def} />
               ))}
@@ -108,9 +110,9 @@ export const NodePalette = () => {
         <section aria-labelledby="actions-heading">
           <Stack space="space-200">
             <Text weight="semibold" size="small" color="muted" id="actions-heading">
-              Actions
+              {m.workflowCanvas_actions()}
             </Text>
-            <Stack space="space-150" role="group" aria-label="Action nodes">
+            <Stack space="space-150" role="group" aria-label={m.workflowCanvas_actionNodes()}>
               {actions.map((def) => (
                 <NodePaletteItem key={def.type} definition={def} />
               ))}
@@ -122,9 +124,9 @@ export const NodePalette = () => {
         <section aria-labelledby="logic-heading">
           <Stack space="space-200">
             <Text weight="semibold" size="small" color="muted" id="logic-heading">
-              Logic
+              {m.workflowCanvas_logic()}
             </Text>
-            <Stack space="space-150" role="group" aria-label="Logic nodes">
+            <Stack space="space-150" role="group" aria-label={m.workflowCanvas_logicNodes()}>
               {logic.map((def) => (
                 <NodePaletteItem key={def.type} definition={def} />
               ))}

@@ -216,6 +216,13 @@ export const LogNode = (props: NodeProps) => {
 // Logic Nodes
 export const ConditionNode = (props: NodeProps) => {
   const data = props.data as unknown as ConditionData;
+  // Handle condition being object (expressions from query builder) or string
+  const conditionSummary =
+    typeof data.condition === 'string'
+      ? data.condition
+      : typeof data.condition === 'object' && data.condition
+        ? 'Expression configured'
+        : 'No condition set';
   return (
     <BaseWorkflowNode
       {...props}
@@ -223,7 +230,7 @@ export const ConditionNode = (props: NodeProps) => {
       icon="GitBranch"
       category="logic"
       label="Condition"
-      summary={data.condition || 'No condition set'}
+      summary={conditionSummary}
     />
   );
 };

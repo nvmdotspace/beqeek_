@@ -58,11 +58,6 @@ export const WorkflowCanvas = () => {
   const handleNodesChange: OnNodesChange = useCallback(
     (changes) => {
       onNodesChange(changes);
-      // Update store after local state changes
-      setNodes((nds) => {
-        setStoreNodes(nds);
-        return nds;
-      });
 
       // Update selected nodes
       const selectedIds = changes
@@ -75,20 +70,25 @@ export const WorkflowCanvas = () => {
         setSelectedNodeIds(selectedIds);
       }
     },
-    [onNodesChange, setNodes, setStoreNodes, setSelectedNodeIds],
+    [onNodesChange, setSelectedNodeIds],
   );
+
+  // Sync local nodes to store after changes (debounced to avoid setState during render)
+  useEffect(() => {
+    setStoreNodes(nodes);
+  }, [nodes, setStoreNodes]);
 
   const handleEdgesChange: OnEdgesChange = useCallback(
     (changes) => {
       onEdgesChange(changes);
-      // Update store after local state changes
-      setEdges((eds) => {
-        setStoreEdges(eds);
-        return eds;
-      });
     },
-    [onEdgesChange, setEdges, setStoreEdges],
+    [onEdgesChange],
   );
+
+  // Sync local edges to store after changes
+  useEffect(() => {
+    setStoreEdges(edges);
+  }, [edges, setStoreEdges]);
 
   const handleConnect: OnConnect = useCallback(
     (connection: Connection) => {
@@ -97,13 +97,9 @@ export const WorkflowCanvas = () => {
         return;
       }
 
-      setEdges((eds) => {
-        const updated = addEdge(connection, eds);
-        setStoreEdges(updated);
-        return updated;
-      });
+      setEdges((eds) => addEdge(connection, eds));
     },
-    [nodes, edges, setEdges, setStoreEdges],
+    [nodes, edges, setEdges],
   );
 
   // Handle drop event from node palette
@@ -131,13 +127,9 @@ export const WorkflowCanvas = () => {
         data: { name: `${type}_${Date.now()}` },
       };
 
-      setNodes((nds) => {
-        const updated = [...nds, newNode];
-        setStoreNodes(updated);
-        return updated;
-      });
+      setNodes((nds) => [...nds, newNode]);
     },
-    [setNodes, setStoreNodes],
+    [setNodes],
   );
 
   const onDragOver = useCallback((event: React.DragEvent<HTMLDivElement>) => {

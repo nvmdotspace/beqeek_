@@ -3,6 +3,8 @@ import { toast } from 'sonner';
 import { workflowUnitsApi } from '../api/workflow-units-api';
 import { workflowUnitsQueryKey } from './use-workflow-units';
 import type { CreateWorkflowUnitRequest } from '../api/types';
+// @ts-expect-error - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 
 /**
  * Hook to create a new workflow unit
@@ -17,11 +19,11 @@ export const useCreateWorkflowUnit = () => {
       queryClient.invalidateQueries({
         queryKey: workflowUnitsQueryKey(variables.workspaceId),
       });
-      toast.success('Workflow unit created successfully');
+      toast.success(m.workflowUnits_toast_created());
     },
     onError: (error) => {
-      toast.error('Failed to create workflow unit', {
-        description: error instanceof Error ? error.message : 'Please try again',
+      toast.error(m.workflowUnits_error_create(), {
+        description: error instanceof Error ? error.message : m.common_tryAgain(),
       });
     },
   });

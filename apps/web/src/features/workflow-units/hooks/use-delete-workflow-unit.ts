@@ -3,6 +3,8 @@ import { toast } from 'sonner';
 import { workflowUnitsApi } from '../api/workflow-units-api';
 import { workflowUnitsQueryKey } from './use-workflow-units';
 import { workflowUnitQueryKey } from './use-workflow-unit';
+// @ts-expect-error - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 
 /**
  * Hook to delete a workflow unit
@@ -21,11 +23,11 @@ export const useDeleteWorkflowUnit = () => {
       queryClient.invalidateQueries({
         queryKey: workflowUnitQueryKey(variables.workspaceId, variables.unitId),
       });
-      toast.success('Workflow unit deleted successfully');
+      toast.success(m.workflowUnits_toast_deleted());
     },
     onError: (error) => {
-      toast.error('Failed to delete workflow unit', {
-        description: error instanceof Error ? error.message : 'Please try again',
+      toast.error(m.workflowUnits_error_delete(), {
+        description: error instanceof Error ? error.message : m.common_tryAgain(),
       });
     },
   });

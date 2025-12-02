@@ -4,6 +4,8 @@ import { workflowEventsApi } from '../api/workflow-events-api';
 import { workflowEventsQueryKey } from './use-workflow-events';
 import { workflowEventQueryKey } from './use-workflow-event';
 import type { WorkflowEvent } from '../api/types';
+// @ts-expect-error - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 
 /**
  * Hook to toggle event active status
@@ -60,8 +62,8 @@ export const useToggleEventActive = () => {
           context.previousEvents,
         );
       }
-      toast.error('Failed to toggle event status', {
-        description: error instanceof Error ? error.message : 'Please try again',
+      toast.error(m.workflowEvents_toast_toggleFailed(), {
+        description: error instanceof Error ? error.message : m.common_tryAgain(),
       });
     },
     onSuccess: (updatedEvent, variables) => {
@@ -72,7 +74,9 @@ export const useToggleEventActive = () => {
       queryClient.invalidateQueries({
         queryKey: workflowEventsQueryKey(variables.workspaceId, updatedEvent.workflowUnit),
       });
-      toast.success(`Event ${updatedEvent.eventActive ? 'activated' : 'deactivated'}`);
+      toast.success(
+        updatedEvent.eventActive ? m.workflowEvents_toast_activated() : m.workflowEvents_toast_deactivated(),
+      );
     },
   });
 };

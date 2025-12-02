@@ -3,6 +3,8 @@ import { toast } from 'sonner';
 import { workflowEventsApi } from '../api/workflow-events-api';
 import { workflowEventsQueryKey } from './use-workflow-events';
 import type { CreateWorkflowEventRequest } from '../api/types';
+// @ts-expect-error - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 
 /**
  * Hook to create a new workflow event
@@ -22,11 +24,11 @@ export const useCreateWorkflowEvent = () => {
       queryClient.invalidateQueries({
         queryKey: workflowEventsQueryKey(variables.workspaceId),
       });
-      toast.success('Event created successfully');
+      toast.success(m.workflowEvents_toast_created());
     },
     onError: (error) => {
-      toast.error('Failed to create event', {
-        description: error instanceof Error ? error.message : 'Please try again',
+      toast.error(m.workflowEvents_toast_createFailed(), {
+        description: error instanceof Error ? error.message : m.common_tryAgain(),
       });
     },
   });

@@ -23,6 +23,8 @@ import { useWorkflowEditorStore } from '../../stores/workflow-editor-store';
 import { EditEventDialog } from '../dialogs/edit-event-dialog';
 import { DeleteEventDialog } from '../dialogs/delete-event-dialog';
 import type { WorkflowEvent, EventSourceType } from '../../api/types';
+// @ts-expect-error - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 
 const route = getRouteApi('/$locale/workspaces/$workspaceId/workflow-units/$unitId/events/$eventId/edit');
 
@@ -104,8 +106,8 @@ export function EventSelector({ workspaceId, unitId, onCreateEvent }: EventSelec
                       <EventIcon className="h-4 w-4 flex-shrink-0 text-muted-foreground" aria-hidden="true" />
                       <span className={`truncate ${isSelected ? 'font-medium' : ''}`}>{event.eventName}</span>
                       {!event.eventActive && (
-                        <Badge variant="outline" className="text-xs flex-shrink-0">
-                          Inactive
+                        <Badge variant="warning" className="text-xs flex-shrink-0">
+                          {m.workflowEvents_card_inactive()}
                         </Badge>
                       )}
                     </span>

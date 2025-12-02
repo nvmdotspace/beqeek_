@@ -4,6 +4,8 @@ import { workflowUnitsApi } from '../api/workflow-units-api';
 import { workflowUnitsQueryKey } from './use-workflow-units';
 import { workflowUnitQueryKey } from './use-workflow-unit';
 import type { UpdateWorkflowUnitRequest } from '../api/types';
+// @ts-expect-error - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 
 /**
  * Hook to update an existing workflow unit
@@ -29,11 +31,11 @@ export const useUpdateWorkflowUnit = () => {
       queryClient.invalidateQueries({
         queryKey: workflowUnitQueryKey(variables.workspaceId, variables.unitId),
       });
-      toast.success('Workflow unit updated successfully');
+      toast.success(m.workflowUnits_toast_updated());
     },
     onError: (error) => {
-      toast.error('Failed to update workflow unit', {
-        description: error instanceof Error ? error.message : 'Please try again',
+      toast.error(m.workflowUnits_error_update(), {
+        description: error instanceof Error ? error.message : m.common_tryAgain(),
       });
     },
   });

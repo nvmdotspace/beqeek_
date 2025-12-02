@@ -19,6 +19,8 @@ import { EditorModeToggle } from './editor-mode-toggle';
 import { EventSelector } from './event-selector';
 import { toast } from 'sonner';
 import { useCallback, useEffect, useState } from 'react';
+// @ts-expect-error - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 
 interface CanvasHeaderProps {
   workspaceId: string;
@@ -67,18 +69,18 @@ export function CanvasHeader({ workspaceId, unitId, onCreateEvent }: CanvasHeade
         {
           onSuccess: () => {
             setIsDirty(false);
-            toast.success('Workflow saved successfully');
+            toast.success(m.workflowCanvas_toast_saved());
           },
           onError: (error) => {
-            toast.error('Failed to save workflow', {
-              description: error instanceof Error ? error.message : 'Please try again',
+            toast.error(m.workflowCanvas_toast_saveFailed(), {
+              description: error instanceof Error ? error.message : m.common_tryAgain(),
             });
           },
         },
       );
     } catch (error) {
-      toast.error('Failed to save workflow', {
-        description: error instanceof Error ? error.message : 'Check your workflow for errors',
+      toast.error(m.workflowCanvas_toast_saveFailed(), {
+        description: error instanceof Error ? error.message : m.workflowCanvas_toast_checkErrors(),
       });
     }
   }, [currentEvent, workspaceId, nodes, edges, mode, updateEvent, setIsDirty]);
@@ -90,10 +92,10 @@ export function CanvasHeader({ workspaceId, unitId, onCreateEvent }: CanvasHeade
     try {
       const layoutedNodes = autoLayout(nodes, edges);
       setNodes(layoutedNodes);
-      toast.success('Nodes arranged automatically');
+      toast.success(m.workflowCanvas_toast_autoLayout());
     } catch (error) {
-      toast.error('Failed to auto-layout', {
-        description: error instanceof Error ? error.message : 'Please try again',
+      toast.error(m.workflowCanvas_toast_autoLayoutFailed(), {
+        description: error instanceof Error ? error.message : m.common_tryAgain(),
       });
     }
   }, [nodes, edges, setNodes]);
@@ -101,7 +103,7 @@ export function CanvasHeader({ workspaceId, unitId, onCreateEvent }: CanvasHeade
   // Export handler
   const handleExport = useCallback(async () => {
     if (nodes.length === 0) {
-      toast.error('Cannot export empty workflow');
+      toast.error(m.workflowCanvas_toast_cannotExportEmpty());
       return;
     }
 
@@ -109,10 +111,10 @@ export function CanvasHeader({ workspaceId, unitId, onCreateEvent }: CanvasHeade
     try {
       const fileName = currentEvent?.eventName.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'workflow';
       await exportWorkflowToPng('workflow-canvas', { fileName });
-      toast.success('Workflow exported successfully');
+      toast.success(m.workflowCanvas_toast_exported());
     } catch (error) {
-      toast.error('Failed to export workflow', {
-        description: error instanceof Error ? error.message : 'Please try again',
+      toast.error(m.workflowCanvas_toast_exportFailed(), {
+        description: error instanceof Error ? error.message : m.common_tryAgain(),
       });
     } finally {
       setIsExporting(false);
@@ -166,7 +168,7 @@ export function CanvasHeader({ workspaceId, unitId, onCreateEvent }: CanvasHeade
           </div>
           <div className="flex items-center gap-2 text-muted-foreground" role="status">
             <FileQuestion className="h-5 w-5" aria-hidden="true" />
-            <span className="text-sm">Select an event to start editing</span>
+            <span className="text-sm">{m.workflowCanvas_selectEventToStart()}</span>
           </div>
         </div>
       </div>
@@ -180,7 +182,7 @@ export function CanvasHeader({ workspaceId, unitId, onCreateEvent }: CanvasHeade
         <Alert variant="destructive" role="alert">
           <AlertCircle className="h-4 w-4" aria-hidden="true" />
           <AlertDescription>
-            <strong>Failed to load workflow:</strong> {parseError}
+            <strong>{m.workflowCanvas_failedToLoad()}:</strong> {parseError}
           </AlertDescription>
         </Alert>
       </div>
@@ -193,8 +195,8 @@ export function CanvasHeader({ workspaceId, unitId, onCreateEvent }: CanvasHeade
         {/* Event Selector + Mode Toggle */}
         <div className="flex items-center gap-3">
           <EventSelector workspaceId={workspaceId} unitId={unitId} onCreateEvent={onCreateEvent} />
-          <Badge variant={currentEvent.eventActive ? 'default' : 'secondary'}>
-            {currentEvent.eventActive ? 'Active' : 'Inactive'}
+          <Badge variant={currentEvent.eventActive ? 'success' : 'warning'}>
+            {currentEvent.eventActive ? m.workflowEvents_card_active() : m.workflowEvents_card_inactive()}
           </Badge>
           <Separator orientation="vertical" className="h-6" />
           <EditorModeToggle />
@@ -238,7 +240,7 @@ export function CanvasHeader({ workspaceId, unitId, onCreateEvent }: CanvasHeade
             aria-label="Auto-layout nodes"
           >
             <Network className="h-4 w-4 mr-2" aria-hidden="true" />
-            Auto-Layout
+            {m.workflowCanvas_autoLayout()}
           </Button>
 
           {/* Export PNG */}
@@ -251,7 +253,7 @@ export function CanvasHeader({ workspaceId, unitId, onCreateEvent }: CanvasHeade
             aria-label="Export workflow as PNG"
           >
             <Download className="h-4 w-4 mr-2" aria-hidden="true" />
-            {isExporting ? 'Exporting...' : 'Export PNG'}
+            {isExporting ? m.workflowCanvas_exporting() : m.workflowCanvas_exportPng()}
           </Button>
 
           <Separator orientation="vertical" className="h-6" />
@@ -259,17 +261,17 @@ export function CanvasHeader({ workspaceId, unitId, onCreateEvent }: CanvasHeade
           {/* Save Button + Dirty State */}
           {isDirty && (
             <span className="text-sm text-muted-foreground" role="status" aria-live="polite">
-              Unsaved changes
+              {m.workflowCanvas_unsavedChanges()}
             </span>
           )}
           <Button
             onClick={handleManualSave}
             disabled={!isDirty || updateEvent.isPending}
             size="sm"
-            aria-label={updateEvent.isPending ? 'Saving workflow' : 'Save workflow'}
+            aria-label={updateEvent.isPending ? m.workflowCanvas_saving() : m.workflowCanvas_saveWorkflow()}
           >
             <Save className="h-4 w-4 mr-2" aria-hidden="true" />
-            {updateEvent.isPending ? 'Saving...' : 'Save Workflow'}
+            {updateEvent.isPending ? m.workflowCanvas_saving() : m.workflowCanvas_saveWorkflow()}
           </Button>
         </div>
       </div>

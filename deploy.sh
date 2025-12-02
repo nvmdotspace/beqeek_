@@ -77,9 +77,9 @@ deploy_docker() {
     # Build and run with docker compose
     if [ -f "compose.yml" ]; then
         log_info "Using docker compose..."
-        docker compose down 2>/dev/null || true
-        docker compose build
-        docker compose up -d --remove-orphans
+        docker compose rm -f -s web 2>/dev/null || true
+        docker compose build web
+        docker compose up -d --remove-orphans web
 
         # Wait for container to be ready
         log_info "Waiting for container to be ready..."

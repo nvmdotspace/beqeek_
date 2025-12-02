@@ -4,6 +4,8 @@ import { workflowEventsApi } from '../api/workflow-events-api';
 import { workflowEventsQueryKey } from './use-workflow-events';
 import { workflowEventQueryKey } from './use-workflow-event';
 import type { WorkflowEvent } from '../api/types';
+// @ts-expect-error - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 
 /**
  * Hook to delete a workflow event
@@ -44,8 +46,8 @@ export const useDeleteWorkflowEvent = () => {
           context.previousEvents,
         );
       }
-      toast.error('Failed to delete event', {
-        description: error instanceof Error ? error.message : 'Please try again',
+      toast.error(m.workflowEvents_toast_deleteFailed(), {
+        description: error instanceof Error ? error.message : m.common_tryAgain(),
       });
     },
     onSuccess: (_, variables, context) => {
@@ -56,7 +58,7 @@ export const useDeleteWorkflowEvent = () => {
       queryClient.removeQueries({
         queryKey: workflowEventQueryKey(variables.workspaceId, variables.eventId),
       });
-      toast.success('Event deleted successfully');
+      toast.success(m.workflowEvents_toast_deleted());
     },
   });
 };

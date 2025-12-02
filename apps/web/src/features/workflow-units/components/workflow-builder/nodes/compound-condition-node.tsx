@@ -13,7 +13,7 @@ import { useWorkflowEditorStore } from '../../../stores/workflow-editor-store';
 
 export interface CompoundConditionData {
   label: string;
-  condition: string;
+  condition: string | Record<string, unknown>; // Can be string or expression object
   hasThenBranch: boolean;
   hasElseBranch: boolean;
   config?: Record<string, unknown>;
@@ -97,7 +97,11 @@ export const CompoundConditionNode = memo(({ data, selected }: CompoundCondition
 
         {/* Condition preview */}
         <div className="p-2 text-xs font-mono text-muted-foreground border-b border-border bg-background/50">
-          {data.condition || 'No condition set'}
+          {typeof data.condition === 'string'
+            ? data.condition
+            : typeof data.condition === 'object' && data.condition
+              ? 'Expression configured'
+              : 'No condition set'}
         </div>
 
         {/* Branch labels with execution order indicator */}

@@ -80,7 +80,7 @@ export function EventCard({ event, isSelected, onSelect, onToggleActive, onEdit,
         <div className="flex items-start justify-between gap-2">
           <CardTitle className="text-base font-medium">{event.eventName}</CardTitle>
           <div className="flex items-center gap-2 shrink-0">
-            <Badge variant={event.eventActive ? 'default' : 'secondary'}>
+            <Badge variant={event.eventActive ? 'success' : 'warning'}>
               {event.eventActive ? m.workflowEvents_card_active() : m.workflowEvents_card_inactive()}
             </Badge>
             {(onEdit || onDelete) && (

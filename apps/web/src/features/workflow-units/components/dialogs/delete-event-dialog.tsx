@@ -21,6 +21,8 @@ import { Alert, AlertDescription } from '@workspace/ui/components/alert';
 import { AlertTriangle, Loader2 } from 'lucide-react';
 import { useDeleteWorkflowEvent } from '../../hooks/use-delete-workflow-event';
 import type { WorkflowEvent } from '../../api/types';
+// @ts-expect-error - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 
 interface DeleteEventDialogProps {
   open: boolean;
@@ -65,25 +67,23 @@ export function DeleteEventDialog({ open, onOpenChange, workspaceId, event }: De
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-destructive">
             <AlertTriangle className="h-5 w-5" />
-            Delete Workflow Event
+            {m.workflowEvents_dialog_deleteTitle()}
           </DialogTitle>
-          <DialogDescription>
-            This action cannot be undone. This will permanently delete the event and all associated workflow steps.
-          </DialogDescription>
+          <DialogDescription>{m.workflowEvents_dialog_deleteDescription()}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           <Alert variant="destructive">
             <AlertDescription>
-              <strong>Event Name:</strong> {event.eventName}
+              <strong>{m.workflowEvents_dialog_eventName()}:</strong> {event.eventName}
               <br />
-              <strong>Trigger Type:</strong> {event.eventSourceType}
+              <strong>{m.workflowEvents_dialog_triggerType()}:</strong> {event.eventSourceType}
             </AlertDescription>
           </Alert>
 
           <div className="space-y-2">
             <Label htmlFor="confirm-delete">
-              Type <strong className="font-mono">{event.eventName}</strong> to confirm:
+              {m.workflowEvents_dialog_typeToConfirm()} <strong className="font-mono">{event.eventName}</strong>
             </Label>
             <Input
               id="confirm-delete"
@@ -103,7 +103,7 @@ export function DeleteEventDialog({ open, onOpenChange, workspaceId, event }: De
             onClick={() => handleOpenChange(false)}
             disabled={deleteEvent.isPending}
           >
-            Cancel
+            {m.common_cancel()}
           </Button>
           <Button
             type="button"
@@ -112,7 +112,7 @@ export function DeleteEventDialog({ open, onOpenChange, workspaceId, event }: De
             disabled={!isDeleteEnabled || deleteEvent.isPending}
           >
             {deleteEvent.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Delete Event
+            {m.workflowEvents_dialog_deleteButton()}
           </Button>
         </DialogFooter>
       </DialogContent>

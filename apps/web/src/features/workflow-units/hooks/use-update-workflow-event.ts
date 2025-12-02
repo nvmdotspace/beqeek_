@@ -4,6 +4,8 @@ import { workflowEventsApi } from '../api/workflow-events-api';
 import { workflowEventsQueryKey } from './use-workflow-events';
 import { workflowEventQueryKey } from './use-workflow-event';
 import type { UpdateWorkflowEventRequest, WorkflowEvent } from '../api/types';
+// @ts-expect-error - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 
 /**
  * Hook to update an existing workflow event
@@ -47,8 +49,8 @@ export const useUpdateWorkflowEvent = () => {
           context.previousEvent,
         );
       }
-      toast.error('Failed to update event', {
-        description: error instanceof Error ? error.message : 'Please try again',
+      toast.error(m.workflowEvents_toast_updateFailed(), {
+        description: error instanceof Error ? error.message : m.common_tryAgain(),
       });
     },
     onSuccess: (updatedEvent, variables) => {
@@ -59,7 +61,7 @@ export const useUpdateWorkflowEvent = () => {
       queryClient.invalidateQueries({
         queryKey: workflowEventsQueryKey(variables.workspaceId, updatedEvent.workflowUnit),
       });
-      toast.success('Event updated successfully');
+      toast.success(m.workflowEvents_toast_updated());
     },
   });
 };

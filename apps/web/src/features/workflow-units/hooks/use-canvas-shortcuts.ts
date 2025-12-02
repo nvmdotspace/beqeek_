@@ -12,6 +12,8 @@
 import { useEffect, useCallback, useRef } from 'react';
 import { useWorkflowEditorStore } from '../stores/workflow-editor-store';
 import { toast } from 'sonner';
+// @ts-expect-error - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 
 interface UseCanvasShortcutsOptions {
   /** Whether shortcuts are enabled (disabled when editing text inputs, etc.) */
@@ -44,22 +46,22 @@ export function useCanvasShortcuts(options: UseCanvasShortcutsOptions = {}) {
   const handleSelectAll = useCallback(() => {
     if (nodes.length === 0) return;
     selectAllNodes();
-    toast.success(`Selected ${nodes.length} node${nodes.length > 1 ? 's' : ''}`);
+    toast.success(m.workflowCanvas_toast_selected({ count: nodes.length }));
   }, [nodes.length, selectAllNodes]);
 
   const handleCopy = useCallback(() => {
     if (selectedNodeIds.length === 0) {
-      toast.info('No nodes selected to copy');
+      toast.info(m.workflowCanvas_toast_noNodesToCopy());
       return;
     }
     copySelectedNodes();
     pasteCountRef.current = 0; // Reset paste offset on new copy
-    toast.success(`Copied ${selectedNodeIds.length} node${selectedNodeIds.length > 1 ? 's' : ''}`);
+    toast.success(m.workflowCanvas_toast_copied({ count: selectedNodeIds.length }));
   }, [selectedNodeIds.length, copySelectedNodes]);
 
   const handlePaste = useCallback(() => {
     if (!clipboard || clipboard.nodes.length === 0) {
-      toast.info('Clipboard is empty');
+      toast.info(m.workflowCanvas_toast_clipboardEmpty());
       return;
     }
 
@@ -68,7 +70,7 @@ export function useCanvasShortcuts(options: UseCanvasShortcutsOptions = {}) {
     const offset = { x: 50 * pasteCountRef.current, y: 50 * pasteCountRef.current };
 
     pasteNodes(offset);
-    toast.success(`Pasted ${clipboard.nodes.length} node${clipboard.nodes.length > 1 ? 's' : ''}`);
+    toast.success(m.workflowCanvas_toast_pasted({ count: clipboard.nodes.length }));
   }, [clipboard, pasteNodes]);
 
   const handleDelete = useCallback(() => {
@@ -76,7 +78,7 @@ export function useCanvasShortcuts(options: UseCanvasShortcutsOptions = {}) {
 
     const count = selectedNodeIds.length;
     deleteSelectedNodes();
-    toast.success(`Deleted ${count} node${count > 1 ? 's' : ''}`);
+    toast.success(m.workflowCanvas_toast_deleted({ count }));
   }, [selectedNodeIds.length, deleteSelectedNodes]);
 
   const handleDeselect = useCallback(() => {
