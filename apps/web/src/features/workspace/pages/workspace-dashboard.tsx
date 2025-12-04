@@ -50,7 +50,7 @@ export const WorkspaceDashboardPage = () => {
                 color="accent-blue"
                 loading={isLoading}
               />
-              <StatBadge icon={Table} value={24} label="Modules" color="primary" loading={isLoading} />
+              <StatBadge icon={Table} value={24} label="Apps" color="primary" loading={isLoading} />
               <StatBadge icon={Zap} value={8} label="Workflows" color="accent-purple" loading={isLoading} />
               <StatBadge
                 icon={Users}

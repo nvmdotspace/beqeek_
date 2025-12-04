@@ -2,16 +2,18 @@
  * GanttRangeFilter Component
  *
  * Date range filter for Gantt chart view following Beqeek Design System.
- * Features:
- * - Segmented control for range type selection (day/week/month/quarter)
- * - Navigation buttons with cohesive button group styling
- * - "Today" quick action button
+ * Uses shadcn Tabs component for accessible segmented control.
+ *
+ * Design references:
+ * - shadcn/ui Tabs: https://ui.shadcn.com/docs/components/tabs
+ * - Monday.com Gantt: zoom levels (day/week/month/year)
+ * - Wrike Gantt: date range navigation with prev/next
  *
  * @see docs/design-system.md
  */
 
 import { useMemo, useCallback } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, CalendarDays } from 'lucide-react';
 import {
   startOfDay,
   endOfDay,
@@ -32,6 +34,7 @@ import {
 } from 'date-fns';
 import { vi } from 'date-fns/locale';
 
+import { Tabs, TabsList, TabsTrigger } from '@workspace/ui/components/tabs';
 import { Button } from '@workspace/ui/components/button';
 import { cn } from '@workspace/ui/lib/utils';
 
@@ -172,58 +175,43 @@ export function GanttRangeFilter({
   }, [onAnchorDateChange]);
 
   return (
-    <div className={cn('flex items-center gap-3', className)}>
-      {/* Segmented Control for Range Type */}
-      <div className="inline-flex items-center rounded-md border border-input bg-muted p-0.5">
-        {RANGE_OPTIONS.map((opt) => (
-          <button
-            key={opt.value}
-            type="button"
-            onClick={() => onRangeTypeChange(opt.value)}
-            className={cn(
-              'px-3 py-1 text-sm font-medium rounded-sm transition-all',
-              'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
-              rangeType === opt.value
-                ? 'bg-background text-foreground shadow-sm'
-                : 'text-muted-foreground hover:text-foreground hover:bg-background/50',
-            )}
-          >
-            {opt.label}
-          </button>
-        ))}
-      </div>
+    <div className={cn('flex items-center gap-2', className)}>
+      {/* Zoom Level Tabs - using shadcn Tabs for accessibility */}
+      <Tabs value={rangeType} onValueChange={(v) => onRangeTypeChange(v as GanttRangeType)}>
+        <TabsList className="h-8">
+          {RANGE_OPTIONS.map((opt) => (
+            <TabsTrigger key={opt.value} value={opt.value} className="h-7 px-3 text-xs">
+              {opt.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
 
-      {/* Navigation Group */}
-      <div className="inline-flex items-center rounded-md border border-input">
-        {/* Prev Button */}
+      {/* Date Navigation - compact button group */}
+      <div className="flex items-center">
         <Button
-          variant="ghost"
-          size="sm"
-          className="h-8 w-8 rounded-r-none border-r border-input p-0 hover:bg-muted"
+          variant="outline"
+          size="icon"
+          className="h-8 w-8 rounded-r-none"
           onClick={handlePrev}
           aria-label="Kỳ trước"
         >
           <ChevronLeft className="h-4 w-4" />
         </Button>
 
-        {/* Date Label */}
-        <button
-          type="button"
+        <Button
+          variant="outline"
+          className={cn('h-8 min-w-[140px] rounded-none border-x-0 font-medium', isCurrent && 'text-primary')}
           onClick={handleToday}
-          className={cn(
-            'h-8 px-3 text-sm font-medium min-w-[160px]',
-            'hover:bg-muted transition-colors',
-            'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring',
-          )}
+          aria-label="Về hôm nay"
         >
           {rangeLabel}
-        </button>
+        </Button>
 
-        {/* Next Button */}
         <Button
-          variant="ghost"
-          size="sm"
-          className="h-8 w-8 rounded-l-none border-l border-input p-0 hover:bg-muted"
+          variant="outline"
+          size="icon"
+          className="h-8 w-8 rounded-l-none"
           onClick={handleNext}
           aria-label="Kỳ sau"
         >
@@ -231,9 +219,10 @@ export function GanttRangeFilter({
         </Button>
       </div>
 
-      {/* Today Button - only show when not on current period */}
+      {/* Today Quick Action - only show when navigated away */}
       {!isCurrent && (
-        <Button variant="outline" size="sm" className="h-8" onClick={handleToday}>
+        <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={handleToday}>
+          <CalendarDays className="h-3.5 w-3.5" />
           Hôm nay
         </Button>
       )}

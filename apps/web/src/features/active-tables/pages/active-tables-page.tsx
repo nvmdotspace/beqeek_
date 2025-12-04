@@ -290,13 +290,7 @@ export const ActiveTablesPage = () => {
 
         {/* Stat badges section */}
         <Inline space="space-250" align="center" wrap className="gap-y-[var(--space-250)]">
-          <StatBadge
-            icon={Database}
-            value={totalTables}
-            label="Modules"
-            color="accent-blue"
-            loading={isTablesLoading}
-          />
+          <StatBadge icon={Database} value={totalTables} label="Apps" color="accent-blue" loading={isTablesLoading} />
           <StatBadge
             icon={ShieldCheck}
             value={encryptedTables}
