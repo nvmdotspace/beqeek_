@@ -9,8 +9,14 @@ import { getRouteApi } from '@tanstack/react-router';
 import { RecordDetail } from '@workspace/active-tables-core';
 import { COMMENTS_POSITION_HIDDEN, REFERENCE_FIELD_TYPES, type RecordDetailConfig } from '@workspace/beqeek-shared';
 import type { Table, FieldConfig } from '@workspace/active-tables-core';
-import { CommentSection, type Comment as PackageComment, type CommentUser } from '@workspace/comments';
+import {
+  CommentSection,
+  type Comment as PackageComment,
+  type CommentUser,
+  type CommentI18n,
+} from '@workspace/comments';
 import { Card, CardContent, CardHeader } from '@workspace/ui/components/card';
+import { m } from '@/paraglide/generated/messages.js';
 import { Heading } from '@workspace/ui/components/typography';
 import { MessageSquare } from 'lucide-react';
 import { toast } from 'sonner';
@@ -276,6 +282,68 @@ export default function RecordDetailPage() {
     }));
   }, [workspaceUsers]);
 
+  // Build i18n for CommentSection
+  const commentI18n = useMemo(
+    (): Partial<CommentI18n> => ({
+      // Common
+      loading: m.activeTables_comments_loading(),
+      cancel: m.activeTables_comments_cancel(),
+      save: m.activeTables_comments_save(),
+      delete: m.activeTables_comments_delete(),
+      edit: m.activeTables_comments_edit(),
+      clear: m.activeTables_comments_clear(),
+      // Comment actions
+      copyLink: m.activeTables_comments_copyLink(),
+      reply: m.activeTables_comments_reply(),
+      selected: m.activeTables_comments_selected(),
+      upvote: m.activeTables_comments_upvote(),
+      comment: m.activeTables_comments_comment(),
+      // Placeholders
+      placeholder: m.activeTables_comments_placeholder(),
+      editPlaceholder: m.activeTables_comments_editPlaceholder(),
+      // Messages
+      loadMore: m.activeTables_comments_loadMore(),
+      empty: m.activeTables_comments_empty(),
+      errorUnexpected: m.activeTables_comments_errorUnexpected(),
+      // Delete dialog
+      deleteTitle: m.activeTables_comments_deleteTitle(),
+      deleteConfirmation: m.activeTables_comments_deleteConfirm(),
+      // Reply indicator
+      replyingTo: m.activeTables_comments_replyingTo(),
+      replyingToCount: (count: number) =>
+        count > 1 ? `${m.activeTables_comments_replyingTo()} ${count}` : m.activeTables_comments_replyingTo(),
+      moreMessages: (count: number) => `+${count}`,
+      showMore: (count: number) => `${m.activeTables_comments_loadMore()} (${count})`,
+      showLess: m.activeTables_comments_showLess(),
+      // Toolbar tooltips
+      toolbar: {
+        bold: m.activeTables_comments_toolbar_bold(),
+        italic: m.activeTables_comments_toolbar_italic(),
+        underline: m.activeTables_comments_toolbar_underline(),
+        strikethrough: m.activeTables_comments_toolbar_strikethrough(),
+        bulletedList: m.activeTables_comments_toolbar_bulletedList(),
+        insertLink: m.activeTables_comments_toolbar_insertLink(),
+        inlineCode: m.activeTables_comments_toolbar_inlineCode(),
+        codeBlock: m.activeTables_comments_toolbar_codeBlock(),
+        fontSize: m.activeTables_comments_toolbar_fontSize(),
+        textColor: m.activeTables_comments_toolbar_textColor(),
+        textAlign: m.activeTables_comments_toolbar_textAlign(),
+        attachImage: m.activeTables_comments_toolbar_attachImage(),
+        mentionSomeone: m.activeTables_comments_toolbar_mentionSomeone(),
+        insertEmoji: m.activeTables_comments_toolbar_insertEmoji(),
+        toggleFormatting: m.activeTables_comments_toolbar_toggleFormatting(),
+      },
+      // Link editor
+      linkEditor: {
+        confirm: m.activeTables_comments_linkEditor_confirm(),
+        cancel: m.activeTables_comments_linkEditor_cancel(),
+        editLink: m.activeTables_comments_linkEditor_editLink(),
+        removeLink: m.activeTables_comments_linkEditor_removeLink(),
+      },
+    }),
+    [],
+  );
+
   // Handle comments change from CommentSection (for local state updates - fallback only)
   const handleCommentsChange = useCallback((_newComments: PackageComment[]) => {
     // This is only called when API callbacks are not provided
@@ -370,13 +438,13 @@ export default function RecordDetailPage() {
                   <CardHeader className="pb-3 flex-shrink-0">
                     <Heading level={4} className="flex items-center gap-2">
                       <MessageSquare className="h-4 w-4" />
-                      Comments
+                      {m.activeTables_comments_title()}
                     </Heading>
                   </CardHeader>
                   <CardContent className="flex-1 overflow-hidden p-0">
                     {isLoadingComments ? (
                       <div className="flex items-center justify-center h-full text-muted-foreground">
-                        Loading comments...
+                        {m.activeTables_comments_loading()}
                       </div>
                     ) : currentUser ? (
                       <div className="h-full overflow-y-auto px-4 pb-4">
@@ -396,11 +464,12 @@ export default function RecordDetailPage() {
                           hasNextPage={hasNextPage}
                           isFetchingNextPage={isFetchingNextPage}
                           onLoadMore={fetchNextPage}
+                          i18n={commentI18n}
                         />
                       </div>
                     ) : (
                       <div className="flex items-center justify-center h-full text-muted-foreground">
-                        Please login to comment
+                        {m.activeTables_comments_loginRequired()}
                       </div>
                     )}
                   </CardContent>

@@ -302,7 +302,7 @@ export function CommentSection({
       </div>
 
       {value.length === 0 && !isFetchingNextPage && (
-        <div className="text-center text-muted-foreground py-8">{i18n.empty}</div>
+        <div className="text-center text-sm text-muted-foreground py-8">{i18n.empty}</div>
       )}
     </div>
   );
