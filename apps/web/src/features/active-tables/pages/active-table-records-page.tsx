@@ -38,6 +38,7 @@ import { RecordsLiveAnnouncer } from '../components/records-live-announcer';
 import { QuickFiltersBar, type QuickFilterValue } from '../components/quick-filters-bar';
 import { ViewModeSelector, type ViewMode } from '../components/view-mode-selector';
 import { ViewConfigSelector } from '../components/view-config-selector';
+import { GanttRangeFilter, calculateDateRange, type GanttRangeType } from '../components/gantt-range-filter';
 
 const LoadingState = () => (
   <Stack space="space-100">
@@ -157,6 +158,15 @@ export const ActiveTableRecordsPage = () => {
     setSearchQuery(urlSearchValue);
   }, [searchParams.search]);
 
+  // Gantt range filter state - in memory only (no URL sync)
+  const [ganttRangeType, setGanttRangeType] = useState<GanttRangeType>('month');
+  const [ganttAnchorDate, setGanttAnchorDate] = useState<Date>(() => new Date());
+
+  // Calculate gantt date range from type and anchor date
+  const ganttDateRange = useMemo(() => {
+    return calculateDateRange(ganttRangeType, ganttAnchorDate);
+  }, [ganttRangeType, ganttAnchorDate]);
+
   // Convert quick filters to API filtering format with encryption
   const apiFilters = useMemo(() => {
     if (quickFilters.length === 0 && !searchQuery.trim()) {
@@ -257,6 +267,7 @@ export const ActiveTableRecordsPage = () => {
     enabled: !!table?.config && viewMode === 'gantt' && !!currentGanttConfig,
     encryptionKey: encryption.encryptionKey,
     filters: apiFilters,
+    dateRange: ganttDateRange,
   });
 
   // Unified state based on current view mode
@@ -624,13 +635,23 @@ export const ActiveTableRecordsPage = () => {
               />
             )}
 
-            {viewMode === 'gantt' && ganttConfigs.length > 1 && (
-              <ViewConfigSelector
-                type="gantt"
-                configs={ganttConfigs}
-                currentConfigId={currentGanttConfig?.ganttScreenId || ''}
-                onConfigChange={handleScreenConfigChange}
-              />
+            {viewMode === 'gantt' && (
+              <>
+                <GanttRangeFilter
+                  rangeType={ganttRangeType}
+                  anchorDate={ganttAnchorDate}
+                  onRangeTypeChange={setGanttRangeType}
+                  onAnchorDateChange={setGanttAnchorDate}
+                />
+                {ganttConfigs.length > 1 && (
+                  <ViewConfigSelector
+                    type="gantt"
+                    configs={ganttConfigs}
+                    currentConfigId={currentGanttConfig?.ganttScreenId || ''}
+                    onConfigChange={handleScreenConfigChange}
+                  />
+                )}
+              </>
             )}
           </Stack>
         </Box>

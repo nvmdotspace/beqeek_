@@ -4,13 +4,14 @@
  * Separate API call for Gantt chart view with:
  * - Default pageSize: 100 (timeline view needs all tasks)
  * - Automatic refetch when gantt config changes
- * - Date range filtering support
+ * - Date range filtering support (day/week/month/quarter)
  *
  * @see use-infinite-active-table-records.ts for List view
  */
 
 import { useQuery } from '@tanstack/react-query';
 import { useState, useEffect, useMemo } from 'react';
+import { format } from 'date-fns';
 import { fetchActiveTableRecords } from '../api/active-records-api';
 import { decryptRecords } from '@workspace/active-tables-core';
 import { CommonUtils } from '@workspace/encryption-core';
@@ -18,6 +19,11 @@ import type { TableRecord, Table, GanttConfig } from '@workspace/active-tables-c
 import type { ActiveRecordsResponse } from '../types';
 
 const GANTT_DEFAULT_PAGE_SIZE = 100;
+
+export interface GanttDateRange {
+  start: Date;
+  end: Date;
+}
 
 export interface UseGanttRecordsOptions {
   /** Number of records to fetch (default: 100) */
@@ -28,8 +34,10 @@ export interface UseGanttRecordsOptions {
   enabled?: boolean;
   /** Encryption key for E2EE tables */
   encryptionKey?: string | null;
-  /** Filters to apply */
+  /** Filters to apply (quick filters) */
   filters?: Record<string, unknown>;
+  /** Date range filter for Gantt timeline */
+  dateRange?: GanttDateRange;
 }
 
 /**
@@ -53,62 +61,118 @@ export function useGanttRecords(
     enabled = true,
     encryptionKey,
     filters,
+    dateRange,
   } = options ?? {};
 
   const [isDecrypting, setIsDecrypting] = useState(false);
   const [decryptionError, setDecryptionError] = useState<Error | null>(null);
   const [decryptedRecords, setDecryptedRecords] = useState<TableRecord[]>([]);
 
+  // Build combined filters (quick filters + date range)
+  const combinedFilters = useMemo(() => {
+    if (!ganttConfig) return filters;
+
+    const result: Record<string, unknown> = { ...filters };
+    const recordFilters: Record<string, unknown> = {
+      ...(filters?.record && typeof filters.record === 'object' ? filters.record : {}),
+    };
+
+    // Add date range filter using startDateField with "between" operator
+    // API syntax: "fieldName:operator": [value1, value2]
+    if (dateRange && ganttConfig.startDateField) {
+      const startDateStr = format(dateRange.start, 'yyyy-MM-dd HH:mm:ss');
+      const endDateStr = format(dateRange.end, 'yyyy-MM-dd HH:mm:ss');
+      recordFilters[`${ganttConfig.startDateField}:between`] = [startDateStr, endDateStr];
+    }
+
+    if (Object.keys(recordFilters).length > 0) {
+      result.record = recordFilters;
+    }
+
+    return Object.keys(result).length > 0 ? result : undefined;
+  }, [filters, dateRange, ganttConfig]);
+
   // Encrypt filters for E2E tables
   const encryptedFilters = useMemo(() => {
-    if (!filters || !table) return filters;
+    if (!combinedFilters || !table) return combinedFilters;
 
     const needsEncryption = table.config.e2eeEncryption || table.config.encryptionKey;
-    if (!needsEncryption) return filters;
+    if (!needsEncryption) return combinedFilters;
 
     const encrypted: Record<string, unknown> = {};
 
-    if (filters.record && typeof filters.record === 'object') {
+    if (combinedFilters.record && typeof combinedFilters.record === 'object') {
       const recordFilters: Record<string, unknown> = {};
-      Object.entries(filters.record).forEach(([fieldName, value]) => {
+      Object.entries(combinedFilters.record).forEach(([fieldKey, value]) => {
         if (value !== '' && value !== undefined && value !== null) {
-          const tableDetail = {
-            id: table.id,
-            name: table.name,
-            config: {
-              ...table.config,
-              fields:
-                table.config.fields?.map((field) => ({
-                  ...field,
-                  required: field.required ?? false,
-                })) ?? [],
-            },
-          };
-          recordFilters[fieldName] = CommonUtils.encryptTableData(tableDetail, fieldName, value);
+          // Check if this is an operator-based filter (e.g., "fieldName:between")
+          const isOperatorFilter = fieldKey.includes(':');
+
+          if (isOperatorFilter) {
+            // For date range filters with operators, handle OPE encryption if needed
+            const [fieldName, operator] = fieldKey.split(':');
+            const field = table.config.fields?.find((f) => f.name === fieldName);
+
+            if (field && Array.isArray(value) && (operator === 'between' || operator === 'not_between')) {
+              // OPE encrypt date values for encrypted tables
+              const tableDetail = {
+                id: table.id,
+                name: table.name,
+                config: {
+                  ...table.config,
+                  fields:
+                    table.config.fields?.map((f) => ({
+                      ...f,
+                      required: f.required ?? false,
+                    })) ?? [],
+                },
+              };
+              const encryptedValues = value.map((v) => CommonUtils.encryptTableData(tableDetail, fieldName, v));
+              recordFilters[fieldKey] = encryptedValues;
+            } else {
+              // Pass through other operator filters
+              recordFilters[fieldKey] = value;
+            }
+          } else {
+            // Standard equality filter encryption
+            const tableDetail = {
+              id: table.id,
+              name: table.name,
+              config: {
+                ...table.config,
+                fields:
+                  table.config.fields?.map((field) => ({
+                    ...field,
+                    required: field.required ?? false,
+                  })) ?? [],
+              },
+            };
+            recordFilters[fieldKey] = CommonUtils.encryptTableData(tableDetail, fieldKey, value);
+          }
         }
       });
       encrypted.record = recordFilters;
     }
 
     // Handle search query
-    if (filters.fulltext && typeof filters.fulltext === 'string' && filters.fulltext.trim()) {
+    if (combinedFilters.fulltext && typeof combinedFilters.fulltext === 'string' && combinedFilters.fulltext.trim()) {
       const searchEncryptionKey = table.config.e2eeEncryption ? encryptionKey : table.config.encryptionKey;
       if (searchEncryptionKey) {
-        encrypted.fulltext = CommonUtils.hashKeyword(filters.fulltext.trim(), searchEncryptionKey).join(' ');
+        encrypted.fulltext = CommonUtils.hashKeyword(combinedFilters.fulltext.trim(), searchEncryptionKey).join(' ');
       } else {
-        encrypted.fulltext = filters.fulltext.trim();
+        encrypted.fulltext = combinedFilters.fulltext.trim();
       }
     }
 
     // Copy other filter properties
-    Object.entries(filters).forEach(([key, value]) => {
+    Object.entries(combinedFilters).forEach(([key, value]) => {
       if (key !== 'record' && key !== 'fulltext') {
         encrypted[key] = value;
       }
     });
 
     return encrypted;
-  }, [filters, table, encryptionKey]);
+  }, [combinedFilters, table, encryptionKey]);
 
   // Query key includes ganttScreenId for separate caching per chart
   const queryKey = useMemo(
