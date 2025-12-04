@@ -185,48 +185,55 @@ export const ActiveTableDetailPage = () => {
 
   return (
     <div className="space-y-6 p-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="space-y-2">
-          <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-            <Button variant="ghost" size="sm" className="h-8 px-2" onClick={handleBack}>
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              {m.activeTables_detail_backToList()}
-            </Button>
-            {workGroup ? (
-              <Badge variant="outline" size="compact" className="flex items-center gap-2">
-                <ListTree className="h-3.5 w-3.5" />
-                {workGroup.name}
-              </Badge>
-            ) : null}
-          </div>
-
-          <Heading level={1}>{table.name}</Heading>
-          {table.description ? (
-            <Text size="small" color="muted" className="max-w-2xl leading-relaxed">
-              {table.description}
-            </Text>
+      {/* Header Section */}
+      <div className="space-y-3">
+        {/* Row 1: Back button + WorkGroup badge */}
+        <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+          <Button variant="ghost" size="sm" className="h-8 px-2" onClick={handleBack}>
+            <ArrowLeft className="h-4 w-4" />
+            {m.activeTables_detail_backToList()}
+          </Button>
+          {workGroup ? (
+            <Badge variant="outline" size="compact" className="flex items-center gap-1.5">
+              <ListTree className="h-3.5 w-3.5" />
+              {workGroup.name}
+            </Badge>
           ) : null}
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          {encryptionBadge}
-          <Badge variant="outline" size="compact" className="flex items-center gap-1">
-            <LinkIcon className="h-3.5 w-3.5" />
-            {m.activeTables_detail_tableType({ type: table.tableType })}
-          </Badge>
-          <Badge variant="outline" size="compact" className="flex items-center gap-1">
-            <Lock className="h-3.5 w-3.5" />
-            {m.activeTables_detail_fieldCount({ count: table.config?.fields?.length ?? 0 })}
-          </Badge>
-          <div className="flex gap-2">
+        {/* Row 2: Title + Action buttons */}
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="space-y-1">
+            <Heading level={1}>{table.name}</Heading>
+            {table.description ? (
+              <Text size="small" color="muted" className="max-w-2xl leading-relaxed">
+                {table.description}
+              </Text>
+            ) : null}
+          </div>
+
+          <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={handleViewSettings}>
-              <Settings2 className="mr-2 h-4 w-4" />
-              Settings
+              <Settings2 className="h-4 w-4" />
+              {m.navigation_settings()}
             </Button>
-            <Button variant="outline" size="sm" onClick={handleViewRecords}>
+            <Button size="sm" onClick={handleViewRecords}>
               {m.activeTables_detail_viewRecords()}
             </Button>
           </div>
+        </div>
+
+        {/* Row 3: Metadata badges */}
+        <div className="flex flex-wrap items-center gap-2">
+          {encryptionBadge}
+          <Badge variant="outline" size="compact" className="flex items-center gap-1.5">
+            <LinkIcon className="h-3.5 w-3.5" />
+            {m.activeTables_detail_tableType({ type: table.tableType })}
+          </Badge>
+          <Badge variant="outline" size="compact" className="flex items-center gap-1.5">
+            <Lock className="h-3.5 w-3.5" />
+            {m.activeTables_detail_fieldCount({ count: table.config?.fields?.length ?? 0 })}
+          </Badge>
         </div>
       </div>
 
