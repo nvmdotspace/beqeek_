@@ -10,6 +10,9 @@ import { Popover, PopoverContent, PopoverTrigger } from '@workspace/ui/component
 import { stripHtmlTags } from '@workspace/beqeek-shared';
 
 import type { Comment } from '../types/comment.js';
+import type { CommentI18n } from '../types/i18n.js';
+
+import { defaultI18n } from '../types/i18n.js';
 
 export interface ReplyReferenceBadgeProps {
   /** IDs of comments this is replying to */
@@ -18,6 +21,8 @@ export interface ReplyReferenceBadgeProps {
   comments: Comment[];
   /** Callback when clicking on a reference to jump to it */
   onJumpToComment?: (id: string) => void;
+  /** Internationalization strings */
+  i18n?: Partial<CommentI18n>;
 }
 
 function getInitials(name: string): string {
@@ -45,7 +50,14 @@ function truncateText(text: string, maxLength: number): string {
   return plainText.slice(0, maxLength) + '...';
 }
 
-export function ReplyReferenceBadge({ replyToIds, comments, onJumpToComment }: ReplyReferenceBadgeProps) {
+export function ReplyReferenceBadge({
+  replyToIds,
+  comments,
+  onJumpToComment,
+  i18n: i18nProp,
+}: ReplyReferenceBadgeProps) {
+  const i18n = { ...defaultI18n, ...i18nProp };
+
   if (replyToIds.length === 0) return null;
 
   const replyingComments = replyToIds
@@ -80,7 +92,7 @@ export function ReplyReferenceBadge({ replyToIds, comments, onJumpToComment }: R
           className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors mb-1.5"
         >
           <CornerDownRight className="h-3 w-3 flex-shrink-0" />
-          <span>Replying to {replyingComments.length} messages</span>
+          <span>{i18n.replyingToCount(replyingComments.length)}</span>
         </button>
       </PopoverTrigger>
       <PopoverContent className="w-72 p-2" align="start">
@@ -104,7 +116,7 @@ export function ReplyReferenceBadge({ replyToIds, comments, onJumpToComment }: R
           ))}
           {replyingComments.length > 5 && (
             <div className="text-xs text-muted-foreground text-center py-1">
-              +{replyingComments.length - 5} more messages
+              {i18n.moreMessages(replyingComments.length - 5)}
             </div>
           )}
         </div>

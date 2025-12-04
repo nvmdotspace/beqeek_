@@ -10,7 +10,10 @@ import { Button } from '@workspace/ui/components/button';
 
 import type { Comment } from '../types/comment.js';
 import type { CommentUser } from '../types/user.js';
+import type { CommentI18n } from '../types/i18n.js';
 import type { MentionUser } from './editor/plugins/MentionsPlugin.js';
+
+import { defaultI18n } from '../types/i18n.js';
 
 import { CommentCard } from './CommentCard.js';
 import { CommentEditor } from './editor/CommentEditor.js';
@@ -53,6 +56,8 @@ export interface CommentSectionProps {
   isFetchingNextPage?: boolean;
   /** Callback to load more comments */
   onLoadMore?: () => void;
+  /** Internationalization strings */
+  i18n?: Partial<CommentI18n>;
 }
 
 export function CommentSection({
@@ -76,7 +81,9 @@ export function CommentSection({
   hasNextPage,
   isFetchingNextPage,
   onLoadMore,
+  i18n: i18nProp,
 }: CommentSectionProps) {
+  const i18n = { ...defaultI18n, ...i18nProp };
   const [newCommentText, setNewCommentText] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editorKey, setEditorKey] = useState(0);
@@ -98,7 +105,7 @@ export function CommentSection({
         return error.message;
       }
     }
-    return 'An unexpected error occurred. Please try again.';
+    return i18n.errorUnexpected;
   };
 
   // Toggle reply selection (multi-reply)
@@ -216,9 +223,7 @@ export function CommentSection({
 
   // Placeholder text based on reply state
   const editorPlaceholder =
-    replyingToIds.length > 0
-      ? `Replying to ${replyingToIds.length} message${replyingToIds.length > 1 ? 's' : ''}...`
-      : 'Write a comment...';
+    replyingToIds.length > 0 ? `${i18n.replyingToCount(replyingToIds.length)}...` : i18n.placeholder;
 
   return (
     <div className={`comment-section space-y-4 ${className || ''}`}>
@@ -228,6 +233,7 @@ export function CommentSection({
         comments={value}
         onRemove={handleRemoveReplyTarget}
         onClearAll={handleClearReplyTargets}
+        i18n={i18n}
       />
 
       {/* New Comment Editor */}
@@ -237,13 +243,14 @@ export function CommentSection({
         onChange={setNewCommentText}
         currentUser={currentUser}
         placeholder={editorPlaceholder}
-        submitText={replyingToIds.length > 0 ? 'Reply' : 'Comment'}
+        submitText={replyingToIds.length > 0 ? i18n.reply : i18n.comment}
         onSubmit={handleSubmitNewComment}
         onImageUpload={onImageUpload}
         mentionUsers={mentionUsers}
         onMentionSearch={onMentionSearch}
         compactMode={compactMode}
         isSubmitting={isSubmitting}
+        i18n={i18n}
       />
 
       {/* Comments List - FLAT (no nesting) */}
@@ -267,6 +274,7 @@ export function CommentSection({
             onMentionSearch={onMentionSearch}
             onFetchComment={onFetchComment}
             onJumpToComment={handleJumpToComment}
+            i18n={i18n}
           />
         ))}
 
@@ -283,10 +291,10 @@ export function CommentSection({
               {isFetchingNextPage ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Loading...
+                  {i18n.loading}
                 </>
               ) : (
-                'Load more comments'
+                i18n.loadMore
               )}
             </Button>
           </div>
@@ -294,7 +302,7 @@ export function CommentSection({
       </div>
 
       {value.length === 0 && !isFetchingNextPage && (
-        <div className="text-center text-muted-foreground py-8">No comments yet. Be the first to comment!</div>
+        <div className="text-center text-muted-foreground py-8">{i18n.empty}</div>
       )}
     </div>
   );

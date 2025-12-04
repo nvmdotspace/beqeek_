@@ -26,7 +26,10 @@ import { SendHorizontal, ALargeSmall, Smile, Paperclip, AtSign } from 'lucide-re
 import { Popover, PopoverContent, PopoverTrigger } from '@workspace/ui/components/popover';
 
 import type { CommentUser } from '../../types/user.js';
+import type { CommentI18n } from '../../types/i18n.js';
 import type { MentionUser } from './plugins/MentionsPlugin.js';
+
+import { defaultI18n } from '../../types/i18n.js';
 
 import { ImageNode } from './nodes/ImageNode.js';
 import { EnterKeyPlugin } from './plugins/EnterKeyPlugin.js';
@@ -45,6 +48,7 @@ export interface CommentEditorProps {
   placeholder?: string;
   currentUser: CommentUser;
   submitText?: string;
+  cancelText?: string;
   onSubmit?: () => void;
   onCancel?: () => void;
   showCancel?: boolean;
@@ -56,14 +60,17 @@ export interface CommentEditorProps {
   className?: string;
   /** Whether the comment is being submitted (shows loading state) */
   isSubmitting?: boolean;
+  /** Internationalization strings */
+  i18n?: Partial<CommentI18n>;
 }
 
 export function CommentEditor({
   value,
   onChange,
-  placeholder = 'Write a comment...',
+  placeholder,
   currentUser,
-  submitText = 'Comment',
+  submitText,
+  cancelText,
   onSubmit,
   onCancel,
   showCancel = false,
@@ -73,7 +80,12 @@ export function CommentEditor({
   compactMode = false,
   className,
   isSubmitting = false,
+  i18n: i18nProp,
 }: CommentEditorProps) {
+  const i18n = { ...defaultI18n, ...i18nProp };
+  const resolvedPlaceholder = placeholder ?? i18n.placeholder;
+  const resolvedSubmitText = submitText ?? i18n.comment;
+  const resolvedCancelText = cancelText ?? i18n.cancel;
   const [showFormatToolbar, setShowFormatToolbar] = useState(false);
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
   const [emojiToInsert, setEmojiToInsert] = useState<string | null>(null);
@@ -186,7 +198,7 @@ export function CommentEditor({
           {/* Collapsible Format Toolbar (Google Chat style) */}
           {showFormatToolbar && (
             <div className="format-toolbar-container px-3 py-2 bg-muted/30 border-b border-input">
-              <FormatToolbar compactMode={compactMode} />
+              <FormatToolbar compactMode={compactMode} i18n={i18n} />
             </div>
           )}
 
@@ -196,10 +208,10 @@ export function CommentEditor({
               contentEditable={
                 <ContentEditable
                   className="editor-input min-h-[60px] max-h-[200px] overflow-y-auto focus:outline-none text-sm px-4 py-3"
-                  aria-placeholder={placeholder}
+                  aria-placeholder={resolvedPlaceholder}
                   placeholder={
                     <div className="editor-placeholder text-muted-foreground pointer-events-none text-sm px-4 py-3 absolute top-0 left-0 right-0">
-                      {placeholder}
+                      {resolvedPlaceholder}
                     </div>
                   }
                 />
@@ -228,7 +240,7 @@ export function CommentEditor({
                 size="icon"
                 onClick={() => setShowFormatToolbar(!showFormatToolbar)}
                 className={cn('h-8 w-8 rounded-full', showFormatToolbar && 'bg-primary/10 text-primary')}
-                title="Toggle formatting"
+                title={i18n.toolbar.toggleFormatting}
               >
                 <ALargeSmall className="h-4 w-4" />
               </Button>
@@ -241,7 +253,7 @@ export function CommentEditor({
                     variant="ghost"
                     size="icon"
                     className="h-8 w-8 rounded-full"
-                    title="Insert emoji"
+                    title={i18n.toolbar.insertEmoji}
                   >
                     <Smile className="h-4 w-4" />
                   </Button>
@@ -269,7 +281,7 @@ export function CommentEditor({
                 size="icon"
                 onClick={handleImageUpload}
                 className="h-8 w-8 rounded-full"
-                title="Attach image"
+                title={i18n.toolbar.attachImage}
               >
                 <Paperclip className="h-4 w-4" />
               </Button>
@@ -281,7 +293,7 @@ export function CommentEditor({
                 size="icon"
                 onClick={handleMentionTrigger}
                 className="h-8 w-8 rounded-full"
-                title="Mention someone (@)"
+                title={i18n.toolbar.mentionSomeone}
               >
                 <AtSign className="h-4 w-4" />
               </Button>
@@ -291,7 +303,7 @@ export function CommentEditor({
             <div className="flex items-center gap-2">
               {showCancel && (
                 <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
-                  Cancel
+                  {resolvedCancelText}
                 </Button>
               )}
               <Button
@@ -305,7 +317,7 @@ export function CommentEditor({
                     ? 'bg-primary text-primary-foreground hover:bg-primary/90'
                     : 'bg-muted text-muted-foreground cursor-not-allowed',
                 )}
-                title={isSubmitting ? 'Sending...' : submitText}
+                title={isSubmitting ? i18n.loading : resolvedSubmitText}
               >
                 {isSubmitting ? (
                   <div className="h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
