@@ -207,7 +207,8 @@ export function useGanttRecords(
     refetchOnWindowFocus: false,
   });
 
-  const rawRecords = query.data?.data ?? [];
+  // Memoize rawRecords to prevent infinite loop in useEffect
+  const rawRecords = useMemo(() => query.data?.data ?? [], [query.data?.data]);
 
   // Decrypt records if needed
   useEffect(() => {

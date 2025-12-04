@@ -1,7 +1,9 @@
 import { useMemo, useState, useEffect, useCallback } from 'react';
-import { ArrowLeft, Plus, Search, FileText, Shield } from 'lucide-react';
+import { ArrowLeft, Plus, Search, FileText, Shield, Settings2 } from 'lucide-react';
 import { getRouteApi } from '@tanstack/react-router';
 
+// @ts-expect-error - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 import { useActiveTable } from '../hooks/use-active-tables';
 import { useInfiniteActiveTableRecords } from '../hooks/use-infinite-active-table-records';
 import { useKanbanRecords } from '../hooks/use-kanban-records';
@@ -304,8 +306,8 @@ export const ActiveTableRecordsPage = () => {
 
   const handleBack = () => {
     navigate({
-      to: ROUTES.ACTIVE_TABLES.TABLE_DETAIL,
-      params: { locale, workspaceId, tableId },
+      to: ROUTES.ACTIVE_TABLES.LIST,
+      params: { locale, workspaceId },
     });
   };
 
@@ -315,6 +317,13 @@ export const ActiveTableRecordsPage = () => {
       document.activeElement.blur();
     }
     setIsCreateDialogOpen(true);
+  };
+
+  const handleViewSettings = () => {
+    navigate({
+      to: ROUTES.ACTIVE_TABLES.TABLE_SETTINGS,
+      params: { locale, workspaceId, tableId },
+    });
   };
 
   const handleCreateSuccess = (recordId: string) => {
@@ -454,7 +463,7 @@ export const ActiveTableRecordsPage = () => {
           <Button variant="ghost" onClick={handleBack}>
             <Inline space="space-050" align="center">
               <ArrowLeft className="h-4 w-4" />
-              Back to Table
+              {m.activeTables_detail_backToList()}
             </Inline>
           </Button>
           <ErrorCard
@@ -475,7 +484,7 @@ export const ActiveTableRecordsPage = () => {
           <Button variant="ghost" onClick={handleBack}>
             <Inline space="space-050" align="center">
               <ArrowLeft className="h-4 w-4" />
-              Back to List
+              {m.activeTables_detail_backToList()}
             </Inline>
           </Button>
           <Card className="border-destructive/40 bg-destructive/10">
@@ -497,7 +506,7 @@ export const ActiveTableRecordsPage = () => {
           <Button variant="ghost" onClick={handleBack}>
             <Inline space="space-050" align="center">
               <ArrowLeft className="h-4 w-4" />
-              Back to Table
+              {m.activeTables_detail_backToList()}
             </Inline>
           </Button>
           <ErrorCard
@@ -539,14 +548,16 @@ export const ActiveTableRecordsPage = () => {
               </Text>
             </Stack>
 
-            <Inline space="space-050">
-              <Button onClick={handleCreateRecord} size="sm">
-                <Inline space="space-050" align="center">
-                  <Plus className="h-4 w-4" />
-                  Tạo bản ghi
-                </Inline>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={handleViewSettings}>
+                <Settings2 className="h-4 w-4" />
+                {m.navigation_settings()}
               </Button>
-            </Inline>
+              <Button onClick={handleCreateRecord} size="sm">
+                <Plus className="h-4 w-4" />
+                {m.activeTables_records_createRecord()}
+              </Button>
+            </div>
           </div>
 
           {/* Stats badges */}
