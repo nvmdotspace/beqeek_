@@ -129,7 +129,7 @@ export function EventSelector({ workspaceId, unitId, onCreateEvent }: EventSelec
                             setEditingEvent(event);
                           }}
                         >
-                          <Pencil className="h-4 w-4 mr-2" aria-hidden="true" />
+                          <Pencil className="h-4 w-4" aria-hidden="true" />
                           Edit
                         </DropdownMenuItem>
                         <DropdownMenuItem
@@ -139,7 +139,7 @@ export function EventSelector({ workspaceId, unitId, onCreateEvent }: EventSelec
                             setDeletingEvent(event);
                           }}
                         >
-                          <Trash2 className="h-4 w-4 mr-2" aria-hidden="true" />
+                          <Trash2 className="h-4 w-4" aria-hidden="true" />
                           Delete
                         </DropdownMenuItem>
                       </DropdownMenuContent>
@@ -155,7 +155,7 @@ export function EventSelector({ workspaceId, unitId, onCreateEvent }: EventSelec
 
           {/* Create Event Button */}
           <DropdownMenuItem onSelect={onCreateEvent} className="cursor-pointer">
-            <Plus className="h-4 w-4 mr-2" aria-hidden="true" />
+            <Plus className="h-4 w-4" aria-hidden="true" />
             Create Event
           </DropdownMenuItem>
         </DropdownMenuContent>

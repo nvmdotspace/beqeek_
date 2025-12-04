@@ -15,13 +15,20 @@ import { Button } from '@workspace/ui/components/button';
 import { Separator } from '@workspace/ui/components/separator';
 import { TOGGLE_LINK_COMMAND } from '@lexical/link';
 
+import type { CommentI18n } from '../../types/i18n.js';
+
+import { defaultI18n } from '../../types/i18n.js';
+
 export interface FormatToolbarProps {
   /** Compact mode hides some features */
   compactMode?: boolean;
   className?: string;
+  /** Internationalization strings */
+  i18n?: Partial<CommentI18n>;
 }
 
-export function FormatToolbar({ compactMode = false, className }: FormatToolbarProps) {
+export function FormatToolbar({ compactMode = false, className, i18n: i18nProp }: FormatToolbarProps) {
+  const i18n = { ...defaultI18n, ...i18nProp };
   const [editor] = useLexicalComposerContext();
   const [isBold, setIsBold] = useState(false);
   const [isItalic, setIsItalic] = useState(false);
@@ -77,7 +84,7 @@ export function FormatToolbar({ compactMode = false, className }: FormatToolbarP
         size="icon"
         onClick={() => handleFormat('bold')}
         className={`h-7 w-7 rounded ${isBold ? 'bg-primary/20 text-primary' : ''}`}
-        title="Bold (Ctrl+B)"
+        title={i18n.toolbar.bold}
         type="button"
       >
         <Bold className="h-4 w-4" />
@@ -89,7 +96,7 @@ export function FormatToolbar({ compactMode = false, className }: FormatToolbarP
         size="icon"
         onClick={() => handleFormat('italic')}
         className={`h-7 w-7 rounded ${isItalic ? 'bg-primary/20 text-primary' : ''}`}
-        title="Italic (Ctrl+I)"
+        title={i18n.toolbar.italic}
         type="button"
       >
         <Italic className="h-4 w-4" />
@@ -101,7 +108,7 @@ export function FormatToolbar({ compactMode = false, className }: FormatToolbarP
         size="icon"
         onClick={() => handleFormat('underline')}
         className={`h-7 w-7 rounded ${isUnderline ? 'bg-primary/20 text-primary' : ''}`}
-        title="Underline (Ctrl+U)"
+        title={i18n.toolbar.underline}
         type="button"
       >
         <Underline className="h-4 w-4" />
@@ -113,7 +120,7 @@ export function FormatToolbar({ compactMode = false, className }: FormatToolbarP
         size="icon"
         onClick={() => handleFormat('strikethrough')}
         className={`h-7 w-7 rounded ${isStrikethrough ? 'bg-primary/20 text-primary' : ''}`}
-        title="Strikethrough"
+        title={i18n.toolbar.strikethrough}
         type="button"
       >
         <Strikethrough className="h-4 w-4" />
@@ -127,7 +134,7 @@ export function FormatToolbar({ compactMode = false, className }: FormatToolbarP
         size="icon"
         onClick={handleInsertBulletList}
         className="h-7 w-7 rounded"
-        title="Bulleted list"
+        title={i18n.toolbar.bulletedList}
         type="button"
       >
         <List className="h-4 w-4" />
@@ -141,7 +148,7 @@ export function FormatToolbar({ compactMode = false, className }: FormatToolbarP
         size="icon"
         onClick={handleInsertLink}
         className="h-7 w-7 rounded"
-        title="Insert link"
+        title={i18n.toolbar.insertLink}
         type="button"
       >
         <LinkIcon className="h-4 w-4" />
@@ -155,7 +162,7 @@ export function FormatToolbar({ compactMode = false, className }: FormatToolbarP
         size="icon"
         onClick={() => handleFormat('code')}
         className={`h-7 w-7 rounded ${isCode ? 'bg-primary/20 text-primary' : ''}`}
-        title="Inline code"
+        title={i18n.toolbar.inlineCode}
         type="button"
       >
         <Code className="h-4 w-4" />
@@ -167,7 +174,7 @@ export function FormatToolbar({ compactMode = false, className }: FormatToolbarP
         size="icon"
         onClick={handleInsertCodeBlock}
         className="h-7 w-7 rounded"
-        title="Code block"
+        title={i18n.toolbar.codeBlock}
         type="button"
       >
         <FileCode2 className="h-4 w-4" />

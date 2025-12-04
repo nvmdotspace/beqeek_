@@ -126,16 +126,16 @@ export const WorkflowUnitCard = memo(({ unit, workspaceId, locale, onEdit, onDel
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
                 <DropdownMenuItem onClick={handleManageEvents}>
-                  <Settings className="mr-2 h-4 w-4" />
+                  <Settings className="h-4 w-4" />
                   {m.workflowUnits_card_manageEvents()}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleEdit}>
-                  <Edit className="mr-2 h-4 w-4" />
+                  <Edit className="h-4 w-4" />
                   {m.workflowUnits_card_edit()}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleDelete} className="text-destructive focus:text-destructive">
-                  <Trash2 className="mr-2 h-4 w-4" />
+                  <Trash2 className="h-4 w-4" />
                   {m.workflowUnits_card_delete()}
                 </DropdownMenuItem>
               </DropdownMenuContent>

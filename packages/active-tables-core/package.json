@@ -61,16 +61,16 @@
     "@workspace/beqeek-shared": "workspace:*",
     "@workspace/encryption-core": "workspace:*",
     "@workspace/ui": "workspace:*",
-    "crypto-js": "^4.2.0",
-    "date-fns": "^4.1.0",
-    "lexical": "^0.22.0",
-    "lucide-react": "^0.544.0",
-    "zustand": "^5.0.8"
+    "lexical": "^0.22.0"
   },
   "peerDependencies": {
     "@tanstack/react-table": "^8.0.0",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1",
+    "crypto-js": "^4.2.0",
+    "date-fns": "^4.1.0",
+    "lucide-react": "^0.544.0",
+    "zustand": "^5.0.8"
   },
   "devDependencies": {
     "@tanstack/react-table": "^8.20.6",

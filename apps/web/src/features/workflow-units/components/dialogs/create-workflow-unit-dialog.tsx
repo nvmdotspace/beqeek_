@@ -147,7 +147,7 @@ export function CreateWorkflowUnitDialog({ open, onOpenChange, workspaceId, loca
               {m.common_cancel()}
             </Button>
             <Button type="submit" disabled={createMutation.isPending}>
-              {createMutation.isPending && <Loader2 className="size-4 mr-2 animate-spin" />}
+              {createMutation.isPending && <Loader2 className="size-4 animate-spin" />}
               {m.common_create()}
             </Button>
           </DialogFooter>

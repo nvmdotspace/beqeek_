@@ -111,7 +111,7 @@ export function DeleteEventDialog({ open, onOpenChange, workspaceId, event }: De
             onClick={handleDelete}
             disabled={!isDeleteEnabled || deleteEvent.isPending}
           >
-            {deleteEvent.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {deleteEvent.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
             {m.workflowEvents_dialog_deleteButton()}
           </Button>
         </DialogFooter>

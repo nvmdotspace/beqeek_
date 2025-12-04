@@ -83,7 +83,7 @@ export function DeleteConfirmDialog({ open, onOpenChange, workspaceId, locale, u
             disabled={deleteMutation.isPending}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
-            {deleteMutation.isPending && <Loader2 className="size-4 mr-2 animate-spin" />}
+            {deleteMutation.isPending && <Loader2 className="size-4 animate-spin" />}
             {m.workflowUnits_dialog_deleteButton()}
           </AlertDialogAction>
         </AlertDialogFooter>

@@ -29,7 +29,10 @@ import { cn } from '@workspace/ui/lib/utils';
 
 import type { Comment, CommentChange } from '../types/comment.js';
 import type { CommentUser } from '../types/user.js';
+import type { CommentI18n } from '../types/i18n.js';
 import type { MentionUser } from './editor/plugins/MentionsPlugin.js';
+
+import { defaultI18n } from '../types/i18n.js';
 
 import { CommentEditor } from './editor/CommentEditor.js';
 import { CommentPreview } from './CommentPreview.js';
@@ -61,6 +64,8 @@ export interface CommentCardProps {
   onFetchComment?: (commentId: string) => Promise<string | null>;
   /** Callback when clicking on a reply reference */
   onJumpToComment?: (commentId: string) => void;
+  /** Internationalization strings */
+  i18n?: Partial<CommentI18n>;
 }
 
 export function CommentCard({
@@ -80,7 +85,9 @@ export function CommentCard({
   onMentionSearch,
   onFetchComment,
   onJumpToComment,
+  i18n: i18nProp,
 }: CommentCardProps) {
+  const i18n = { ...defaultI18n, ...i18nProp };
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isFetchingForEdit, setIsFetchingForEdit] = useState(false);
@@ -185,17 +192,17 @@ export function CommentCard({
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={handleCopyLink}>
                   <Copy className="h-4 w-4 mr-2" />
-                  Copy link
+                  {i18n.copyLink}
                 </DropdownMenuItem>
                 {isOwner && (
                   <>
                     <DropdownMenuItem onClick={handleStartEdit} disabled={isFetchingForEdit}>
                       <Pencil className="h-4 w-4 mr-2" />
-                      {isFetchingForEdit ? 'Loading...' : 'Edit'}
+                      {isFetchingForEdit ? i18n.loading : i18n.edit}
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => setIsDeleteDialogOpen(true)} className="text-destructive">
                       <Trash2 className="h-4 w-4 mr-2" />
-                      Delete
+                      {i18n.delete}
                     </DropdownMenuItem>
                   </>
                 )}
@@ -208,6 +215,7 @@ export function CommentCard({
             replyToIds={comment.replyToIds || []}
             comments={allComments}
             onJumpToComment={onJumpToComment}
+            i18n={i18n}
           />
 
           {/* Comment Content */}
@@ -217,14 +225,16 @@ export function CommentCard({
                 value={editedText}
                 onChange={setEditedText}
                 currentUser={currentUser}
-                placeholder="Edit comment..."
-                submitText="Save"
+                placeholder={i18n.editPlaceholder}
+                submitText={i18n.save}
+                cancelText={i18n.cancel}
                 onSubmit={handleSaveEdit}
                 onCancel={handleCancelEdit}
                 showCancel={true}
                 onImageUpload={onImageUpload}
                 mentionUsers={mentionUsers}
                 onMentionSearch={onMentionSearch}
+                i18n={i18n}
               />
             </div>
           ) : (
@@ -267,7 +277,7 @@ export function CommentCard({
                   onClick={handleUpvote}
                 >
                   {upvoteCount > 0 && <span className="text-xs mr-1">{upvoteCount}</span>}
-                  Upvote
+                  {i18n.upvote}
                 </Button>
               )}
               {/* Reply button - toggles selection for multi-reply */}
@@ -281,7 +291,7 @@ export function CommentCard({
                 onClick={onToggleReply}
               >
                 <MessageCircle className="h-3.5 w-3.5 mr-1" />
-                <span className="text-xs">{isSelected ? 'Selected' : 'Reply'}</span>
+                <span className="text-xs">{isSelected ? i18n.selected : i18n.reply}</span>
               </Button>
             </div>
           )}
@@ -292,13 +302,11 @@ export function CommentCard({
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent className="max-w-md">
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete comment?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete this comment? This action cannot be undone.
-            </AlertDialogDescription>
+            <AlertDialogTitle>{i18n.deleteTitle}</AlertDialogTitle>
+            <AlertDialogDescription>{i18n.deleteConfirmation}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{i18n.cancel}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
                 onDelete();
@@ -306,7 +314,7 @@ export function CommentCard({
               }}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Delete
+              {i18n.delete}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -202,11 +202,11 @@ export const WorkflowCanvas = () => {
 
         <Panel position="top-right" className="flex gap-2" role="toolbar" aria-label="Canvas actions">
           <Button size="sm" variant="outline" onClick={handleSave} aria-label="Save workflow">
-            <Save className="size-4 mr-2" aria-hidden="true" />
+            <Save className="size-4" aria-hidden="true" />
             Save
           </Button>
           <Button size="sm" variant="outline" onClick={handleTest} aria-label="Test workflow">
-            <Play className="size-4 mr-2" aria-hidden="true" />
+            <Play className="size-4" aria-hidden="true" />
             Test
           </Button>
         </Panel>

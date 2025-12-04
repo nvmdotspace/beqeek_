@@ -11,6 +11,9 @@ import { Button } from '@workspace/ui/components/button';
 import { stripHtmlTags } from '@workspace/beqeek-shared';
 
 import type { Comment } from '../types/comment.js';
+import type { CommentI18n } from '../types/i18n.js';
+
+import { defaultI18n } from '../types/i18n.js';
 
 export interface ReplyIndicatorProps {
   /** IDs of comments being replied to */
@@ -23,6 +26,8 @@ export interface ReplyIndicatorProps {
   onClearAll: () => void;
   /** Max visible items before collapsing (default: 2) */
   maxVisible?: number;
+  /** Internationalization strings */
+  i18n?: Partial<CommentI18n>;
 }
 
 function getInitials(name: string): string {
@@ -50,7 +55,15 @@ function truncateText(text: string, maxLength: number): string {
   return plainText.slice(0, maxLength) + '...';
 }
 
-export function ReplyIndicator({ replyingToIds, comments, onRemove, onClearAll, maxVisible = 2 }: ReplyIndicatorProps) {
+export function ReplyIndicator({
+  replyingToIds,
+  comments,
+  onRemove,
+  onClearAll,
+  maxVisible = 2,
+  i18n: i18nProp,
+}: ReplyIndicatorProps) {
+  const i18n = { ...defaultI18n, ...i18nProp };
   const [showAll, setShowAll] = useState(false);
 
   if (replyingToIds.length === 0) return null;
@@ -67,11 +80,11 @@ export function ReplyIndicator({ replyingToIds, comments, onRemove, onClearAll, 
       <div className="flex items-center justify-between mb-2">
         <span className="text-sm font-medium text-muted-foreground flex items-center gap-1">
           <CornerDownRight className="h-3.5 w-3.5" />
-          Replying to {replyingToIds.length > 1 ? `${replyingToIds.length} messages` : ''}
+          {i18n.replyingTo} {replyingToIds.length > 1 ? `${replyingToIds.length}` : ''}
         </span>
         <Button variant="ghost" size="sm" className="h-6 px-2 text-xs" onClick={onClearAll}>
           <X className="h-3 w-3 mr-1" />
-          Cancel
+          {i18n.cancel}
         </Button>
       </div>
 
@@ -101,14 +114,14 @@ export function ReplyIndicator({ replyingToIds, comments, onRemove, onClearAll, 
       {hiddenCount > 0 && !showAll && (
         <Button variant="ghost" size="sm" className="h-6 px-2 text-xs mt-1.5 w-full" onClick={() => setShowAll(true)}>
           <ChevronDown className="h-3 w-3 mr-1" />
-          Show {hiddenCount} more
+          {i18n.showMore(hiddenCount)}
         </Button>
       )}
 
       {showAll && replyingComments.length > maxVisible && (
         <Button variant="ghost" size="sm" className="h-6 px-2 text-xs mt-1.5 w-full" onClick={() => setShowAll(false)}>
           <ChevronUp className="h-3 w-3 mr-1" />
-          Collapse
+          {i18n.showLess}
         </Button>
       )}
     </div>

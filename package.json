@@ -42,8 +42,12 @@
     "overrides": {
       "slate": "^0.118.1",
       "slate-react": "^0.119.0",
-      "react": "^19.1.1",
-      "react-dom": "^19.1.1"
+      "react": "^19.2.1",
+      "react-dom": "^19.2.1",
+      "date-fns": "^4.1.0",
+      "zustand": "^5.0.8",
+      "lucide-react": "^0.544.0",
+      "crypto-js": "^4.2.0"
     }
   },
   "lint-staged": {
