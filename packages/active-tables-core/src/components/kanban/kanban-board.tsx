@@ -219,16 +219,26 @@ export function KanbanBoard({
   // Validation
   if (!statusField) {
     return (
-      <div className="p-8 text-center text-red-600 dark:text-red-400">
-        {messages?.error || 'Error'}: Status field &quot;{config.statusField}&quot; not found
+      <div className="flex flex-col items-center justify-center gap-3 p-8 text-center">
+        <div className="text-red-600 dark:text-red-400 font-medium">{messages?.error || 'Lỗi cấu hình Kanban'}</div>
+        <div className="text-sm text-muted-foreground">
+          Trường trạng thái &quot;{config.statusField}&quot; không tồn tại trong bảng.
+          <br />
+          Vui lòng vào Cài đặt để cập nhật cấu hình Kanban.
+        </div>
       </div>
     );
   }
 
   if (!headlineField) {
     return (
-      <div className="p-8 text-center text-red-600 dark:text-red-400">
-        {messages?.error || 'Error'}: Headline field &quot;{config.kanbanHeadlineField}&quot; not found
+      <div className="flex flex-col items-center justify-center gap-3 p-8 text-center">
+        <div className="text-red-600 dark:text-red-400 font-medium">{messages?.error || 'Lỗi cấu hình Kanban'}</div>
+        <div className="text-sm text-muted-foreground">
+          Trường tiêu đề &quot;{config.kanbanHeadlineField}&quot; không tồn tại trong bảng.
+          <br />
+          Vui lòng vào Cài đặt để cập nhật cấu hình Kanban.
+        </div>
       </div>
     );
   }
