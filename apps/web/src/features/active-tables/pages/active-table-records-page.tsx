@@ -4,6 +4,8 @@ import { getRouteApi } from '@tanstack/react-router';
 
 import { useActiveTable } from '../hooks/use-active-tables';
 import { useInfiniteActiveTableRecords } from '../hooks/use-infinite-active-table-records';
+import { useKanbanRecords } from '../hooks/use-kanban-records';
+import { useGanttRecords } from '../hooks/use-gantt-records';
 import { useTableEncryption } from '../hooks/use-table-encryption';
 import { useUpdateRecordField, useBatchUpdateRecord } from '../hooks/use-update-record';
 import { useListContext } from '../hooks/use-list-context';
@@ -182,24 +184,88 @@ export const ActiveTableRecordsPage = () => {
     return filtering;
   }, [quickFilters, searchQuery, table?.config?.fields, table?.config?.e2eeEncryption, encryption.encryptionKey]);
 
-  // Use infinite scroll hook for records with automatic decryption
+  const displayTable: Table | null = table ?? null;
+
+  // Get current view configurations (needed before hooks)
+  const kanbanConfigs = displayTable?.config?.kanbanConfigs || [];
+  const ganttConfigs = displayTable?.config?.ganttCharts || [];
+
+  // Get current selected config or default to first
+  const currentKanbanConfig = useMemo(() => {
+    if (screenId && viewMode === 'kanban') {
+      return kanbanConfigs.find((c) => c.kanbanScreenId === screenId) || kanbanConfigs[0];
+    }
+    return kanbanConfigs[0];
+  }, [kanbanConfigs, screenId, viewMode]);
+
+  const currentGanttConfig = useMemo(() => {
+    if (screenId && viewMode === 'gantt') {
+      return ganttConfigs.find((c) => c.ganttScreenId === screenId) || ganttConfigs[0];
+    }
+    return ganttConfigs[0];
+  }, [ganttConfigs, screenId, viewMode]);
+
+  // ============================================
+  // View-specific data fetching hooks
+  // Each view has its own API call for independent data management
+  // ============================================
+
+  // List View: Infinite scroll with 50 records per page
   const {
-    records,
-    isLoading: recordsLoading,
-    isFetching,
+    records: listRecords,
+    isLoading: listLoading,
+    isFetching: listFetching,
     isFetchingNextPage,
     hasNextPage,
     fetchNextPage,
-    error: recordsError,
-    isDecrypting,
+    error: listError,
+    isDecrypting: listDecrypting,
     isFilterChange,
   } = useInfiniteActiveTableRecords(workspaceId, tableId, table ?? null, {
     pageSize: 50,
     direction: 'desc',
-    enabled: !!table?.config,
+    enabled: !!table?.config && viewMode === 'list',
     encryptionKey: encryption.encryptionKey,
     filters: apiFilters,
   });
+
+  // Kanban View: Single fetch with 100 records (no infinite scroll)
+  const {
+    records: kanbanRecords,
+    isLoading: kanbanLoading,
+    isFetching: kanbanFetching,
+    error: kanbanError,
+    isDecrypting: kanbanDecrypting,
+  } = useKanbanRecords(workspaceId, tableId, table ?? null, currentKanbanConfig ?? null, {
+    pageSize: 100,
+    direction: 'desc',
+    enabled: !!table?.config && viewMode === 'kanban' && !!currentKanbanConfig,
+    encryptionKey: encryption.encryptionKey,
+    filters: apiFilters,
+  });
+
+  // Gantt View: Single fetch with 100 records (no infinite scroll)
+  const {
+    records: ganttRecords,
+    isLoading: ganttLoading,
+    isFetching: ganttFetching,
+    error: ganttError,
+    isDecrypting: ganttDecrypting,
+  } = useGanttRecords(workspaceId, tableId, table ?? null, currentGanttConfig ?? null, {
+    pageSize: 100,
+    direction: 'asc', // Gantt sorts by start date ascending
+    enabled: !!table?.config && viewMode === 'gantt' && !!currentGanttConfig,
+    encryptionKey: encryption.encryptionKey,
+    filters: apiFilters,
+  });
+
+  // Unified state based on current view mode
+  const records = viewMode === 'kanban' ? kanbanRecords : viewMode === 'gantt' ? ganttRecords : listRecords;
+  const recordsLoading = viewMode === 'kanban' ? kanbanLoading : viewMode === 'gantt' ? ganttLoading : listLoading;
+  const isFetching = viewMode === 'kanban' ? kanbanFetching : viewMode === 'gantt' ? ganttFetching : listFetching;
+  const recordsError = viewMode === 'kanban' ? kanbanError : viewMode === 'gantt' ? ganttError : listError;
+  const isDecrypting =
+    viewMode === 'kanban' ? kanbanDecrypting : viewMode === 'gantt' ? ganttDecrypting : listDecrypting;
 
   // Initialize record update mutation for kanban DnD
   const updateRecordMutation = useUpdateRecordField(workspaceId ?? '', tableId ?? '', table ?? null);
@@ -218,33 +284,12 @@ export const ActiveTableRecordsPage = () => {
     enabled: viewMode === 'list',
   });
 
-  const displayTable: Table | null = table ?? null;
-
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false);
   const [recordToUpdate, setRecordToUpdate] = useState<TableRecord | null>(null);
 
   // Records are now filtered server-side, so we just use them directly
   const filteredRecords = records;
-
-  // Get current view configurations
-  const kanbanConfigs = displayTable?.config?.kanbanConfigs || [];
-  const ganttConfigs = displayTable?.config?.ganttCharts || [];
-
-  // Get current selected config or default to first
-  const currentKanbanConfig = useMemo(() => {
-    if (screenId && viewMode === 'kanban') {
-      return kanbanConfigs.find((c) => c.kanbanScreenId === screenId) || kanbanConfigs[0];
-    }
-    return kanbanConfigs[0];
-  }, [kanbanConfigs, screenId, viewMode]);
-
-  const currentGanttConfig = useMemo(() => {
-    if (screenId && viewMode === 'gantt') {
-      return ganttConfigs.find((c) => c.ganttScreenId === screenId) || ganttConfigs[0];
-    }
-    return ganttConfigs[0];
-  }, [ganttConfigs, screenId, viewMode]);
 
   const handleBack = () => {
     navigate({
