@@ -2,31 +2,25 @@
  * Gantt Records Hook
  *
  * Separate API call for Gantt chart view with:
- * - Default pageSize: 100 (timeline view needs all tasks)
+ * - Default pageSize: 1000 (timeline view needs all tasks for visualization)
  * - Automatic refetch when gantt config changes
- * - Date range filtering support (day/week/month/quarter)
+ * - NO date range filtering (range selector only affects chart rendering, not API)
  *
  * @see use-infinite-active-table-records.ts for List view
  */
 
 import { useQuery } from '@tanstack/react-query';
 import { useState, useEffect, useMemo } from 'react';
-import { format } from 'date-fns';
 import { fetchActiveTableRecords } from '../api/active-records-api';
 import { decryptRecords } from '@workspace/active-tables-core';
 import { CommonUtils } from '@workspace/encryption-core';
 import type { TableRecord, Table, GanttConfig } from '@workspace/active-tables-core';
 import type { ActiveRecordsResponse } from '../types';
 
-const GANTT_DEFAULT_PAGE_SIZE = 100;
-
-export interface GanttDateRange {
-  start: Date;
-  end: Date;
-}
+const GANTT_DEFAULT_PAGE_SIZE = 1000;
 
 export interface UseGanttRecordsOptions {
-  /** Number of records to fetch (default: 100) */
+  /** Number of records to fetch (default: 1000) */
   pageSize?: number;
   /** Sort direction */
   direction?: 'asc' | 'desc';
@@ -34,10 +28,8 @@ export interface UseGanttRecordsOptions {
   enabled?: boolean;
   /** Encryption key for E2EE tables */
   encryptionKey?: string | null;
-  /** Filters to apply (quick filters) */
+  /** Filters to apply (quick filters only, no date range) */
   filters?: Record<string, unknown>;
-  /** Date range filter for Gantt timeline */
-  dateRange?: GanttDateRange;
 }
 
 /**
@@ -61,59 +53,36 @@ export function useGanttRecords(
     enabled = true,
     encryptionKey,
     filters,
-    dateRange,
   } = options ?? {};
 
   const [isDecrypting, setIsDecrypting] = useState(false);
   const [decryptionError, setDecryptionError] = useState<Error | null>(null);
   const [decryptedRecords, setDecryptedRecords] = useState<TableRecord[]>([]);
 
-  // Build combined filters (quick filters + date range)
-  const combinedFilters = useMemo(() => {
-    if (!ganttConfig) return filters;
-
-    const result: Record<string, unknown> = { ...filters };
-    const recordFilters: Record<string, unknown> = {
-      ...(filters?.record && typeof filters.record === 'object' ? filters.record : {}),
-    };
-
-    // Add date range filter using startDateField with "between" operator
-    // API syntax: "fieldName:operator": [value1, value2]
-    if (dateRange && ganttConfig.startDateField) {
-      const startDateStr = format(dateRange.start, 'yyyy-MM-dd HH:mm:ss');
-      const endDateStr = format(dateRange.end, 'yyyy-MM-dd HH:mm:ss');
-      recordFilters[`${ganttConfig.startDateField}:between`] = [startDateStr, endDateStr];
-    }
-
-    if (Object.keys(recordFilters).length > 0) {
-      result.record = recordFilters;
-    }
-
-    return Object.keys(result).length > 0 ? result : undefined;
-  }, [filters, dateRange, ganttConfig]);
-
   // Encrypt filters for E2E tables
   const encryptedFilters = useMemo(() => {
-    if (!combinedFilters || !table) return combinedFilters;
+    if (!filters || !table) return filters;
 
     const needsEncryption = table.config.e2eeEncryption || table.config.encryptionKey;
-    if (!needsEncryption) return combinedFilters;
+    if (!needsEncryption) return filters;
 
     const encrypted: Record<string, unknown> = {};
 
-    if (combinedFilters.record && typeof combinedFilters.record === 'object') {
+    if (filters.record && typeof filters.record === 'object') {
       const recordFilters: Record<string, unknown> = {};
-      Object.entries(combinedFilters.record).forEach(([fieldKey, value]) => {
+      Object.entries(filters.record).forEach(([fieldKey, value]) => {
         if (value !== '' && value !== undefined && value !== null) {
           // Check if this is an operator-based filter (e.g., "fieldName:between")
           const isOperatorFilter = fieldKey.includes(':');
 
           if (isOperatorFilter) {
             // For date range filters with operators, handle OPE encryption if needed
-            const [fieldName, operator] = fieldKey.split(':');
+            const parts = fieldKey.split(':');
+            const fieldName = parts[0];
+            const operator = parts[1];
             const field = table.config.fields?.find((f) => f.name === fieldName);
 
-            if (field && Array.isArray(value) && (operator === 'between' || operator === 'not_between')) {
+            if (fieldName && field && Array.isArray(value) && (operator === 'between' || operator === 'not_between')) {
               // OPE encrypt date values for encrypted tables
               const tableDetail = {
                 id: table.id,
@@ -155,24 +124,24 @@ export function useGanttRecords(
     }
 
     // Handle search query
-    if (combinedFilters.fulltext && typeof combinedFilters.fulltext === 'string' && combinedFilters.fulltext.trim()) {
+    if (filters.fulltext && typeof filters.fulltext === 'string' && filters.fulltext.trim()) {
       const searchEncryptionKey = table.config.e2eeEncryption ? encryptionKey : table.config.encryptionKey;
       if (searchEncryptionKey) {
-        encrypted.fulltext = CommonUtils.hashKeyword(combinedFilters.fulltext.trim(), searchEncryptionKey).join(' ');
+        encrypted.fulltext = CommonUtils.hashKeyword(filters.fulltext.trim(), searchEncryptionKey).join(' ');
       } else {
-        encrypted.fulltext = combinedFilters.fulltext.trim();
+        encrypted.fulltext = filters.fulltext.trim();
       }
     }
 
     // Copy other filter properties
-    Object.entries(combinedFilters).forEach(([key, value]) => {
+    Object.entries(filters).forEach(([key, value]) => {
       if (key !== 'record' && key !== 'fulltext') {
         encrypted[key] = value;
       }
     });
 
     return encrypted;
-  }, [combinedFilters, table, encryptionKey]);
+  }, [filters, table, encryptionKey]);
 
   // Query key includes ganttScreenId for separate caching per chart
   const queryKey = useMemo(

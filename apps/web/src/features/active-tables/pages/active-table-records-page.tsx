@@ -40,7 +40,7 @@ import { RecordsLiveAnnouncer } from '../components/records-live-announcer';
 import { QuickFiltersBar, type QuickFilterValue } from '../components/quick-filters-bar';
 import { ViewModeSelector, type ViewMode } from '../components/view-mode-selector';
 import { ViewConfigSelector } from '../components/view-config-selector';
-import { GanttRangeFilter, calculateDateRange, type GanttRangeType } from '../components/gantt-range-filter';
+import { GanttRangeFilter, type GanttRangeType } from '../components/gantt-range-filter';
 
 const LoadingState = () => (
   <Stack space="space-100">
@@ -162,14 +162,9 @@ export const ActiveTableRecordsPage = () => {
     setSearchQuery(urlSearchValue);
   }, [searchParams.search]);
 
-  // Gantt range filter state - in memory only (no URL sync)
+  // Gantt range filter state - for chart rendering only (not API filtering)
+  // Default to 'month' to auto-select current month
   const [ganttRangeType, setGanttRangeType] = useState<GanttRangeType>('month');
-  const [ganttAnchorDate, setGanttAnchorDate] = useState<Date>(() => new Date());
-
-  // Calculate gantt date range from type and anchor date
-  const ganttDateRange = useMemo(() => {
-    return calculateDateRange(ganttRangeType, ganttAnchorDate);
-  }, [ganttRangeType, ganttAnchorDate]);
 
   // Convert quick filters to API filtering format with encryption
   const apiFilters = useMemo(() => {
@@ -258,7 +253,8 @@ export const ActiveTableRecordsPage = () => {
     filters: apiFilters,
   });
 
-  // Gantt View: Single fetch with 100 records (no infinite scroll)
+  // Gantt View: Single fetch with 1000 records (no infinite scroll, no date filter)
+  // Range selector (Tuần/Tháng/Quý) only affects chart rendering, not API call
   const {
     records: ganttRecords,
     isLoading: ganttLoading,
@@ -266,12 +262,10 @@ export const ActiveTableRecordsPage = () => {
     error: ganttError,
     isDecrypting: ganttDecrypting,
   } = useGanttRecords(workspaceId, tableId, table ?? null, currentGanttConfig ?? null, {
-    pageSize: 100,
     direction: 'asc', // Gantt sorts by start date ascending
     enabled: !!table?.config && viewMode === 'gantt' && !!currentGanttConfig,
     encryptionKey: encryption.encryptionKey,
     filters: apiFilters,
-    dateRange: ganttDateRange,
   });
 
   // Unified state based on current view mode
@@ -623,6 +617,8 @@ export const ActiveTableRecordsPage = () => {
               <div className="relative w-full sm:w-72">
                 <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
+                  id="record-search"
+                  name="record-search"
                   type="text"
                   placeholder="Tìm kiếm bản ghi..."
                   value={localSearchInput}
@@ -650,12 +646,7 @@ export const ActiveTableRecordsPage = () => {
 
             {viewMode === 'gantt' && (
               <>
-                <GanttRangeFilter
-                  rangeType={ganttRangeType}
-                  anchorDate={ganttAnchorDate}
-                  onRangeTypeChange={setGanttRangeType}
-                  onAnchorDateChange={setGanttAnchorDate}
-                />
+                <GanttRangeFilter rangeType={ganttRangeType} onRangeTypeChange={setGanttRangeType} />
                 {ganttConfigs.length > 1 && (
                   <ViewConfigSelector
                     type="gantt"
