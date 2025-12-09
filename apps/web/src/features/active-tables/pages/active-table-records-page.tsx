@@ -40,7 +40,8 @@ import { RecordsLiveAnnouncer } from '../components/records-live-announcer';
 import { QuickFiltersBar, type QuickFilterValue } from '../components/quick-filters-bar';
 import { ViewModeSelector, type ViewMode } from '../components/view-mode-selector';
 import { ViewConfigSelector } from '../components/view-config-selector';
-import { GanttRangeFilter, type GanttRangeType } from '../components/gantt-range-filter';
+// TODO: GanttRangeFilter tạm ẩn - chưa có ý tưởng hiển thị
+// import { GanttRangeFilter, type GanttRangeType } from '../components/gantt-range-filter';
 
 const LoadingState = () => (
   <Stack space="space-100">
@@ -162,9 +163,8 @@ export const ActiveTableRecordsPage = () => {
     setSearchQuery(urlSearchValue);
   }, [searchParams.search]);
 
-  // Gantt range filter state - for chart rendering only (not API filtering)
-  // Default to 'month' to auto-select current month
-  const [ganttRangeType, setGanttRangeType] = useState<GanttRangeType>('month');
+  // TODO: GanttRangeFilter tạm ẩn - chưa có ý tưởng hiển thị
+  // const [ganttRangeType, setGanttRangeType] = useState<GanttRangeType>('month');
 
   // Convert quick filters to API filtering format with encryption
   const apiFilters = useMemo(() => {
@@ -646,7 +646,8 @@ export const ActiveTableRecordsPage = () => {
 
             {viewMode === 'gantt' && (
               <>
-                <GanttRangeFilter rangeType={ganttRangeType} onRangeTypeChange={setGanttRangeType} />
+                {/* TODO: GanttRangeFilter tạm ẩn - chưa có ý tưởng hiển thị */}
+                {/* <GanttRangeFilter rangeType={ganttRangeType} onRangeTypeChange={setGanttRangeType} /> */}
                 {ganttConfigs.length > 1 && (
                   <ViewConfigSelector
                     type="gantt"
