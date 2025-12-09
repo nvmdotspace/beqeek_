@@ -55,6 +55,8 @@ export interface CommentsState {
   deleteComment: (commentId: string) => Promise<void>;
   /** Fetch single comment content for editing */
   fetchCommentForEdit: (commentId: string) => Promise<string | null>;
+  /** Fetch comments by IDs (for reply references on other pages) */
+  fetchCommentsByIds: (ids: string[]) => Promise<PackageComment[]>;
   /** Current user for comments */
   currentUser: CommentUser | null;
 }
@@ -331,6 +333,21 @@ export function useRecordComments(
     [workspaceId, tableId, recordId, encryptionKey],
   );
 
+  // Fetch comments by IDs (for reply references on other pages)
+  const fetchCommentsByIds = useCallback(
+    async (ids: string[]): Promise<PackageComment[]> => {
+      if (ids.length === 0) return [];
+      try {
+        const response = await commentsApi.fetchCommentsByIds(workspaceId, tableId, recordId, ids);
+        return response.data.map((c) => serverToPackageComment(c, encryptionKey, userLookup));
+      } catch (error) {
+        console.error('[Comments] Failed to fetch comments by IDs:', error);
+        return [];
+      }
+    },
+    [workspaceId, tableId, recordId, encryptionKey, userLookup],
+  );
+
   const handleFetchNextPage = useCallback(() => {
     if (hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
@@ -351,6 +368,7 @@ export function useRecordComments(
     updateComment,
     deleteComment,
     fetchCommentForEdit,
+    fetchCommentsByIds,
     currentUser: null, // Will be set by parent component
   };
 }

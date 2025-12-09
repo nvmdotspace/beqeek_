@@ -45,6 +45,8 @@ export interface CommentSectionProps {
   onDeleteComment?: (commentId: string) => Promise<void>;
   /** Async callback to fetch fresh comment content before editing (for API integration) */
   onFetchComment?: (commentId: string) => Promise<string | null>;
+  /** Async callback to fetch comments by IDs (for reply references on other pages) */
+  onFetchReplyComments?: (ids: string[]) => Promise<Comment[]>;
   /** Callback when an error occurs (for displaying error messages) */
   onError?: (error: string) => void;
   /** Callback when jumping to a comment reference */
@@ -76,6 +78,7 @@ export function CommentSection({
   onUpdateComment,
   onDeleteComment,
   onFetchComment,
+  onFetchReplyComments,
   onError,
   onJumpToComment,
   hasNextPage,
@@ -274,6 +277,7 @@ export function CommentSection({
             onMentionSearch={onMentionSearch}
             onFetchComment={onFetchComment}
             onJumpToComment={handleJumpToComment}
+            onFetchReplyComments={onFetchReplyComments}
             i18n={i18n}
           />
         ))}

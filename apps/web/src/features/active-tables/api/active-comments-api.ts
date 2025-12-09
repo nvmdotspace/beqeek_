@@ -114,3 +114,15 @@ export const deleteComment = (workspaceId: string, tableId: string, recordId: st
     method: 'POST',
     data: {},
   });
+
+// Fetch comments by IDs (for reply references that may be on other pages)
+export const fetchCommentsByIds = (workspaceId: string, tableId: string, recordId: string, ids: string[]) =>
+  apiRequest<CommentsResponse>({
+    url: commentsEndpoint(workspaceId, tableId, recordId),
+    method: 'POST',
+    data: {
+      filtering: {
+        'id:in': ids,
+      },
+    },
+  });
