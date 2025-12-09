@@ -4,7 +4,7 @@
  * Supports lazy loading for comments on other pages (pagination)
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { CornerDownRight, Loader2 } from 'lucide-react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@workspace/ui/components/avatar';
@@ -69,26 +69,30 @@ export function ReplyReferenceBadge({
   const [isLoading, setIsLoading] = useState(false);
   const [fetchedComments, setFetchedComments] = useState<Comment[]>([]);
 
-  if (replyToIds.length === 0) return null;
-
   // Find comments from current page
-  const localComments = replyToIds
-    .map((id) => comments.find((c) => c.id === id))
-    .filter((c): c is Comment => c !== undefined);
+  const localComments = useMemo(
+    () => replyToIds.map((id) => comments.find((c) => c.id === id)).filter((c): c is Comment => c !== undefined),
+    [replyToIds, comments],
+  );
 
   // Find missing IDs (not in current page, not in cache)
-  const missingIds = replyToIds.filter((id) => !comments.find((c) => c.id === id) && !replyCommentsCache.has(id));
+  const missingIds = useMemo(
+    () => replyToIds.filter((id) => !comments.find((c) => c.id === id) && !replyCommentsCache.has(id)),
+    [replyToIds, comments],
+  );
 
   // Get cached comments
-  const cachedComments = replyToIds
-    .map((id) => replyCommentsCache.get(id))
-    .filter((c): c is Comment => c !== undefined);
+  const cachedComments = useMemo(
+    () => replyToIds.map((id) => replyCommentsCache.get(id)).filter((c): c is Comment => c !== undefined),
+    [replyToIds],
+  );
 
   // Combine all available comments (local + cached + fetched)
-  const allReplyComments = [...localComments, ...cachedComments, ...fetchedComments];
-
-  // Deduplicate by ID
-  const replyingComments = Array.from(new Map(allReplyComments.map((c) => [c.id, c])).values());
+  const replyingComments = useMemo(() => {
+    const allReplyComments = [...localComments, ...cachedComments, ...fetchedComments];
+    // Deduplicate by ID
+    return Array.from(new Map(allReplyComments.map((c) => [c.id, c])).values());
+  }, [localComments, cachedComments, fetchedComments]);
 
   // Fetch missing comments when popover opens
   const handleOpenChange = useCallback(
@@ -112,11 +116,10 @@ export function ReplyReferenceBadge({
     [missingIds, onFetchReplyComments],
   );
 
-  // For single reply case, also need to handle missing comment
-  const singleReplyMissing = replyToIds.length === 1 && replyingComments.length === 0;
-
   // Handle single reply click - fetch if missing
   const handleSingleReplyClick = useCallback(async () => {
+    if (replyToIds.length === 0) return;
+
     const targetId = replyToIds[0]!;
 
     // If comment is available, just jump to it
@@ -142,6 +145,13 @@ export function ReplyReferenceBadge({
       }
     }
   }, [replyToIds, replyingComments, missingIds, onFetchReplyComments, onJumpToComment]);
+
+  // ============================================
+  // EARLY RETURNS (after all hooks)
+  // ============================================
+
+  // No reply IDs - render nothing
+  if (replyToIds.length === 0) return null;
 
   // No comments found and no way to fetch - show count only
   if (replyingComments.length === 0 && !onFetchReplyComments) {
