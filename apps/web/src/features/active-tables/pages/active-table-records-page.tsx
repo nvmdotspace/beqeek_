@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect, useCallback } from 'react';
+import { useMemo, useState, useEffect, useCallback, useRef } from 'react';
 import { ArrowLeft, Plus, Search, FileText, Shield, Settings2 } from 'lucide-react';
 import { getRouteApi } from '@tanstack/react-router';
 
@@ -6,7 +6,7 @@ import { getRouteApi } from '@tanstack/react-router';
 import { m } from '@/paraglide/generated/messages.js';
 import { useActiveTable } from '../hooks/use-active-tables';
 import { useInfiniteActiveTableRecords } from '../hooks/use-infinite-active-table-records';
-import { useKanbanRecords } from '../hooks/use-kanban-records';
+import { useKanbanColumnRecords } from '../hooks/use-kanban-column-records';
 import { useGanttRecords } from '../hooks/use-gantt-records';
 import { useTableEncryption } from '../hooks/use-table-encryption';
 import { useUpdateRecordField, useBatchUpdateRecord } from '../hooks/use-update-record';
@@ -134,24 +134,26 @@ export const ActiveTableRecordsPage = () => {
     [navigate, locale, workspaceId, tableId, searchParams],
   );
 
-  // Sync filters with URL
+  // Sync filters with URL - use ref to track previous value and avoid infinite loops
+  const prevFiltersRef = useRef<string | undefined>(searchParams.filters);
+
   useEffect(() => {
     const filtersParam = quickFilters.length > 0 ? encodeURIComponent(JSON.stringify(quickFilters)) : undefined;
 
-    // Only update URL if filters actually changed
-    const currentFiltersParam = searchParams.filters;
-    if (filtersParam !== currentFiltersParam) {
+    // Only update URL if filters actually changed from what we last set
+    if (filtersParam !== prevFiltersRef.current) {
+      prevFiltersRef.current = filtersParam;
       navigate({
         to: ROUTES.ACTIVE_TABLES.TABLE_RECORDS,
         params: { locale, workspaceId, tableId },
-        search: {
-          ...searchParams,
+        search: (prev) => ({
+          ...prev,
           filters: filtersParam,
-        },
+        }),
         replace: true, // Use replace to avoid adding to history
       });
     }
-  }, [quickFilters, navigate, locale, workspaceId, tableId, searchParams]);
+  }, [quickFilters, navigate, locale, workspaceId, tableId]);
 
   // Sync local search input and searchQuery when URL changes (e.g., browser back/forward)
   useEffect(() => {
@@ -241,15 +243,15 @@ export const ActiveTableRecordsPage = () => {
     filters: apiFilters,
   });
 
-  // Kanban View: Single fetch with 100 records (no infinite scroll)
+  // Kanban View: Separate API call per column (status value)
   const {
     records: kanbanRecords,
     isLoading: kanbanLoading,
     isFetching: kanbanFetching,
     error: kanbanError,
     isDecrypting: kanbanDecrypting,
-  } = useKanbanRecords(workspaceId, tableId, table ?? null, currentKanbanConfig ?? null, {
-    pageSize: 100,
+  } = useKanbanColumnRecords(workspaceId, tableId, table ?? null, currentKanbanConfig ?? null, {
+    pageSize: 50,
     direction: 'desc',
     enabled: !!table?.config && viewMode === 'kanban' && !!currentKanbanConfig,
     encryptionKey: encryption.encryptionKey,
