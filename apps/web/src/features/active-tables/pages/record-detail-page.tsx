@@ -16,6 +16,7 @@ import {
   type CommentI18n,
 } from '@workspace/comments';
 import { Card, CardContent, CardHeader } from '@workspace/ui/components/card';
+// @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
 import { Heading } from '@workspace/ui/components/typography';
 import { MessageSquare } from 'lucide-react';
@@ -192,6 +193,7 @@ export default function RecordDetailPage() {
     updateComment,
     deleteComment,
     fetchCommentForEdit,
+    fetchCommentsByIds,
     isLoading: isLoadingComments,
     hasNextPage,
     isFetchingNextPage,
@@ -460,6 +462,7 @@ export default function RecordDetailPage() {
                           onUpdateComment={updateComment}
                           onDeleteComment={deleteComment}
                           onFetchComment={fetchCommentForEdit}
+                          onFetchReplyComments={fetchCommentsByIds}
                           onError={handleCommentError}
                           hasNextPage={hasNextPage}
                           isFetchingNextPage={isFetchingNextPage}

@@ -64,6 +64,8 @@ export interface CommentCardProps {
   onFetchComment?: (commentId: string) => Promise<string | null>;
   /** Callback when clicking on a reply reference */
   onJumpToComment?: (commentId: string) => void;
+  /** Callback to fetch comments by IDs (for pagination support) */
+  onFetchReplyComments?: (ids: string[]) => Promise<Comment[]>;
   /** Internationalization strings */
   i18n?: Partial<CommentI18n>;
 }
@@ -85,6 +87,7 @@ export function CommentCard({
   onMentionSearch,
   onFetchComment,
   onJumpToComment,
+  onFetchReplyComments,
   i18n: i18nProp,
 }: CommentCardProps) {
   const i18n = { ...defaultI18n, ...i18nProp };
@@ -215,6 +218,7 @@ export function CommentCard({
             replyToIds={comment.replyToIds || []}
             comments={allComments}
             onJumpToComment={onJumpToComment}
+            onFetchReplyComments={onFetchReplyComments}
             i18n={i18n}
           />
 
