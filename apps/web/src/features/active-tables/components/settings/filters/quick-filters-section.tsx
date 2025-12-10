@@ -216,7 +216,7 @@ export function QuickFiltersSection({ quickFilters, fields, onChange }: QuickFil
                 {m.settings_quickFilters_fieldLabel()} <span className="text-destructive">{m.common_required()}</span>
               </Label>
               <Select value={selectedFieldName} onValueChange={setSelectedFieldName}>
-                <SelectTrigger>
+                <SelectTrigger id="filter-field">
                   <SelectValue placeholder={m.settings_quickFilters_fieldPlaceholder()} />
                 </SelectTrigger>
                 <SelectContent>

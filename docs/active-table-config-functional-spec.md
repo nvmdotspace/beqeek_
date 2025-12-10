@@ -660,7 +660,9 @@ Ví dụ:
         "startDateField": "start_date",
         "endDateField": "duo_date",
         "progressField": null,
-        "dependencyField": null
+        "dependencyField": null,
+        "statusField": "status",
+        "statusCompleteValue": "completed"
       }
     ],
     "encryptionKey": "IvmrHQzycueDW7jgW9BftcCbrf20RUUt",
@@ -1162,7 +1164,9 @@ Mỗi phần tử trong mảng `ganttCharts` là một đối tượng với c�
   "startDateField": "string",
   "endDateField": "string",
   "progressField": "string",
-  "dependencyField": "string"
+  "dependencyField": "string",
+  "statusField": "string",
+  "statusCompleteValue": "string"
 }
 ```
 
@@ -1182,6 +1186,10 @@ Mỗi phần tử trong mảng `ganttCharts` là một đối tượng với c�
   - **UI Control**: `select#gantt-progress-field`
 - **`dependencyField`**: (Tùy chọn) `name` của trường chứa ID của các nhiệm vụ phụ thuộc (để vẽ các đường liên kết giữa các nhiệm vụ).
   - **UI Control**: `select#gantt-dependency-field`
+- **`statusField`**: (Tùy chọn) `name` của trường `SELECT_ONE` sẽ được dùng để xác định trạng thái của nhiệm vụ.
+  - **UI Control**: `select#gantt-status-field`
+- **`statusCompleteValue`**: (Tùy chọn) Giá trị của `statusField` đại diện cho trạng thái "Hoàn thành".
+  - **UI Control**: `select#gantt-status-complete-value`
 
 #### 2.8.3. Các loại trường hợp lệ
 
@@ -1191,6 +1199,8 @@ Dựa trên mã nguồn (`active-tables-v2.blade.php`):
 - **`startDateField`**, **`endDateField`**: Chỉ các trường có loại `DATE` hoặc `DATETIME` là hợp lệ.
 - **`progressField`**: Chỉ các trường có loại `INTEGER` hoặc `NUMERIC` là hợp lệ.
 - **`dependencyField`**: Chỉ các trường có loại `SELECT_LIST_RECORD` là hợp lệ, vì nó cần tham chiếu đến các bản ghi (nhiệm vụ) khác trong cùng bảng.
+- **`statusField`**: Chỉ các trường có loại `SELECT_ONE` là hợp lệ.
+- **`statusCompleteValue`**: Là một giá trị từ các `options` của `statusField`.
 
 ### 2.9. Đối tượng `Permissions Config` (Phân quyền Hành động)
 

@@ -43,18 +43,18 @@ Endpoint này hỗ trợ hai kiểu phân trang: **offset-based** (mặc định
 
 **3. Lọc (Filtering):**
 
-Hệ thống lọc mạnh mẽ dựa trên thư viện `AlchemistRestfulApi`. Cú pháp chung là `filtering[group][field][operator]=value`.
+Hệ thống lọc mạnh mẽ dựa trên thư viện `AlchemistRestfulApi`. Cú pháp chung là `filtering[group][field:operator]=value`. (`[group]` là tuỳ chọn; `:operator` cũng là tuỳ chọn, khi khuyết thiếu sẽ api server sẽ hiểu là `eq`)
 
 #### **Các Nhóm Lọc (Filtering Groups)**
 
-| Nhóm                       | Kiểu dữ liệu | Cú pháp ví dụ                                      | Mô tả                                                                                                                                |
-| :------------------------- | :----------- | :------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------- |
-| `id`                       | mixed        | `filtering[id][in]=rec_1,rec_2`                    | Lọc theo ID bản ghi. Hỗ trợ toán tử `eq`, `in`.                                                                                      |
-| `fulltext`                 | string       | `filtering[fulltext][eq]=search term`              | Tìm kiếm toàn văn bản (full-text search). Hỗ trợ toán tử `eq`.                                                                       |
-| `record`                   | mixed        | `filtering[record][status][eq]=active`             | Lọc trên các trường dữ liệu tùy chỉnh của bản ghi. Các toán tử hỗ trợ phụ thuộc vào kiểu dữ liệu của trường (xem chi tiết bên dưới). |
-| `valueUpdatedAt`           | datetime     | `filtering[valueUpdatedAt][status][gt]=...`        | Lọc theo thời gian cập nhật của một trường cụ thể. Áp dụng cho các trường kiểu lựa chọn (select, list, checkbox).                    |
-| `historicalValueUpdatedAt` | datetime     | `filtering[historicalValueUpdatedAt][...][gt]=...` | Lọc theo thời gian cập nhật giá trị lịch sử của một trường. Áp dụng cho các trường kiểu lựa chọn đơn (select one).                   |
-| `historicalValue`          | mixed        | `filtering[historicalValue][eq]=...`               | Lọc theo giá trị lịch sử. Hỗ trợ toán tử `eq`.                                                                                       |
+| Nhóm                       | Kiểu dữ liệu | Cú pháp ví dụ                                                                                                                                           | Mô tả                                                                                                                                |
+| :------------------------- | :----------- | :------------------------------------------------------------------------------------------------------------------------------------------------------ | :----------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                       | mixed        | `filtering[id:in][]=732878538910205329`                                                                                                                 | Lọc theo ID bản ghi. Hỗ trợ toán tử `eq`, `in`.                                                                                      |
+| `fulltext`                 | string       | `filtering[fulltext]=ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb 3e23e8160039594a33894f6564e1b1348bbd7a0088d42c4acb73eeaed59c009d` | Tìm kiếm toàn văn bản (full-text search). Hỗ trợ toán tử `eq`.                                                                       |
+| `record`                   | mixed        | `filtering[record][status:eq]=20bc534fb1cdf23178878ddbf795f550f76eb149475ec0b6d3eea85194c81322`                                                         | Lọc trên các trường dữ liệu tùy chỉnh của bản ghi. Các toán tử hỗ trợ phụ thuộc vào kiểu dữ liệu của trường (xem chi tiết bên dưới). |
+| `valueUpdatedAt`           | datetime     | `filtering[valueUpdatedAt][status:gt]={encryptedValue}`                                                                                                 | Lọc theo thời gian cập nhật của một trường cụ thể. Áp dụng cho các trường kiểu lựa chọn (select, list, checkbox).                    |
+| `historicalValueUpdatedAt` | datetime     | `filtering[historicalValueUpdatedAt][status:gt]={encryptedValue}`                                                                                       | Lọc theo thời gian cập nhật giá trị lịch sử của một trường. Áp dụng cho các trường kiểu lựa chọn đơn (select one).                   |
+| `historicalValue`          | mixed        | `filtering[historicalValue][eq]=20bc534fb1cdf23178878ddbf795f550f76eb149475ec0b6d3eea85194c81322`                                                       | Lọc theo giá trị lịch sử (dùng để bổ trợ cho `historicalValueUpdatedAt`). Hỗ trợ toán tử `eq`.                                       |
 
 **Lưu ý về Giá trị Lọc khi có Mã hóa (E2EE):**
 
@@ -69,7 +69,7 @@ Vì bảng được bật mã hóa đầu cuối, giá trị (`value`) bạn tru
     - Giá trị truyền vào phải là **hash của giá trị** (value hash).
   - **Trường hợp 2: Toán tử so sánh thứ tự (`lt`, `gt`, `lte`, `gte`, `between`, `not_between`)**
     - Chỉ áp dụng cho các trường `opeEncryptFields`.
-    - Giá trị truyền vào phải là **dữ liệu đã được mã hóa** (encrypted data).
+    - Giá trị truyền vào phải là **dữ liệu đã được mã hóa** (encrypted value).
 
 **Lưu ý về Lọc các Trường Dữ liệu Không Mã hóa (Unencrypted Fields):**
 
@@ -91,7 +91,41 @@ Các toán tử (`operator`) có sẵn cho nhóm `record` phụ thuộc vào ki�
 #### **Chi tiết Lọc theo Thời gian Cập nhật (nhóm `valueUpdatedAt` & `historicalValueUpdatedAt`)**
 
 - **Toán tử hỗ trợ:** `eq`, `ne`, `lt`, `gt`, `lte`, `gte`, `between`, `not_between`.
-- **Giá trị:** Giá trị phải là một timestamp hoặc định dạng ngày giờ hợp lệ (ví dụ: `2025-10-22 12:00:00`).
+- **Giá trị:** Giá trị phải là định dạng ngày giờ hợp lệ (ví dụ: `2025-10-22 12:00:00`).
+- **Lưu ý:** Khi lọc theo `historicalValueUpdatedAt`, bạn cần cung cấp giá trị lịch sử (historicalValue) của trường đó.
+
+#### **Phân biệt `valueUpdatedAt` và `historicalValueUpdatedAt`**
+
+Hai nhóm lọc này đều liên quan đến thời gian cập nhật của một trường, nhưng chúng có mục đích và cách sử dụng khác nhau:
+
+- **`valueUpdatedAt`**:
+  - **Tác dụng:** Lọc các bản ghi dựa trên thời điểm **giá trị hiện tại** của một trường được cập nhật lần cuối.
+  - **Áp dụng cho:** Các trường có thể chọn một hoặc nhiều giá trị (ví dụ: `SELECT_ONE`, `SELECT_ONE_RECORD`, `SELECT_ONE_WORKSPACE_USER`, `CHECKBOX_LIST`, `SELECT_LIST`, `SELECT_LIST_RECORD`, `SELECT_LIST_WORKSPACE_USER`).
+  - **Mục tiêu:** Tìm các bản ghi mà giá trị của một trường cụ thể đã được thay đổi trong một khoảng thời gian nhất định (ví dụ: "Tìm tất cả các công việc có trường `status` được cập nhật trong 24 giờ qua").
+  - **Ví dụ:** Bạn muốn tìm các bản ghi mà trường `priority` (độ ưu tiên) được thay đổi gần đây.
+    ```json
+    "filtering": {
+        "valueUpdatedAt": {
+            "priority:gt": "2025-12-04 00:00:00"
+        }
+    }
+    ```
+    Yêu cầu này sẽ trả về tất cả các bản ghi có trường `priority` được cập nhật sau nửa đêm ngày 4 tháng 12, bất kể giá trị trước đó là gì.
+
+- **`historicalValueUpdatedAt`**:
+  - **Tác dụng:** Lọc các bản ghi dựa trên thời điểm một trường được thay đổi **khỏi một giá trị cũ cụ thể (giá trị lịch sử)**.
+  - **Áp dụng cho:** Chỉ hỗ trợ các trường (`SELECT_ONE`, `SELECT_ONE_RECORD`, `SELECT_ONE_WORKSPACE_USER`) được theo dõi lịch sử.
+  - **Mục tiêu:** Tìm các bản ghi đã từng có một giá trị nhất định và được thay đổi sang giá trị đó vào một thời điểm cụ thể (ví dụ: "Tìm tất cả các công việc đã từng ở trạng thái `Pending` và đã được chuyển sang trạng thái này sau ngày 1 tháng 12").
+  - **Lưu ý quan trọng:** Khi sử dụng `historicalValueUpdatedAt`, bạn **bắt buộc** phải sử dụng kèm bộ lọc `historicalValue` để chỉ định giá trị lịch sử mà bạn muốn truy vấn.
+  - **Ví dụ:** Để tìm các bản ghi mà trường `status` **từng là** `Pending` và đã được cập nhật sang giá trị này sau ngày 1 tháng 12.
+    ```json
+    "filtering": {
+        "historicalValue": "{hash_của_giá_trị_Pending}",
+        "historicalValueUpdatedAt": {
+            "status:gt": "2025-12-01 00:00:00"
+        }
+    }
+    ```
 
 **4. Nhóm (Grouping):**
 

@@ -13,7 +13,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useState, useEffect, useMemo } from 'react';
 import { fetchActiveTableRecords } from '../api/active-records-api';
 import { decryptRecords } from '@workspace/active-tables-core';
-import { CommonUtils } from '@workspace/encryption-core';
+import { CommonUtils, HMAC } from '@workspace/encryption-core';
 import type { TableRecord, Table, GanttConfig } from '@workspace/active-tables-core';
 import type { ActiveRecordsResponse } from '../types';
 
@@ -59,18 +59,70 @@ export function useGanttRecords(
   const [decryptionError, setDecryptionError] = useState<Error | null>(null);
   const [decryptedRecords, setDecryptedRecords] = useState<TableRecord[]>([]);
 
-  // Encrypt filters for E2E tables
+  // Build default status filter to exclude completed tasks
+  // Only applied when ganttConfig has statusField and statusCompleteValue
+  const defaultStatusFilter = useMemo(() => {
+    if (!ganttConfig?.statusField || !ganttConfig?.statusCompleteValue || !table) {
+      return null;
+    }
+
+    const statusField = ganttConfig.statusField;
+    const statusCompleteValue = ganttConfig.statusCompleteValue;
+    const needsEncryption = table.config.e2eeEncryption || table.config.encryptionKey;
+    const tableEncryptionKey = table.config.e2eeEncryption ? encryptionKey : table.config.encryptionKey;
+
+    // Hash the statusCompleteValue for SELECT_ONE field type
+    let hashedValue: string = statusCompleteValue;
+    if (needsEncryption && tableEncryptionKey) {
+      // Use HMAC.hash for SELECT_ONE value (same as CommonUtils.encryptTableData for SELECT_ONE)
+      hashedValue = HMAC.hash(statusCompleteValue, tableEncryptionKey);
+    }
+
+    return {
+      fieldName: statusField,
+      operator: 'ne', // not equal
+      value: hashedValue,
+    };
+  }, [ganttConfig?.statusField, ganttConfig?.statusCompleteValue, table, encryptionKey]);
+
+  // Encrypt filters for E2E tables and add default status filter
   const encryptedFilters = useMemo(() => {
-    if (!filters || !table) return filters;
+    // Start with base filters from quick filters or empty object
+    const baseFilters = filters ? { ...filters } : {};
+
+    if (!table) {
+      // No table yet, just return base filters with default status filter if available
+      if (defaultStatusFilter) {
+        const filterKey = `${defaultStatusFilter.fieldName}:${defaultStatusFilter.operator}`;
+        baseFilters.record = {
+          ...(baseFilters.record as Record<string, unknown>),
+          [filterKey]: defaultStatusFilter.value,
+        };
+      }
+      return Object.keys(baseFilters).length > 0 ? baseFilters : undefined;
+    }
 
     const needsEncryption = table.config.e2eeEncryption || table.config.encryptionKey;
-    if (!needsEncryption) return filters;
 
+    // For non-encrypted tables, just merge filters and return
+    if (!needsEncryption) {
+      if (defaultStatusFilter) {
+        const filterKey = `${defaultStatusFilter.fieldName}:${defaultStatusFilter.operator}`;
+        baseFilters.record = {
+          ...(baseFilters.record as Record<string, unknown>),
+          [filterKey]: defaultStatusFilter.value,
+        };
+      }
+      return Object.keys(baseFilters).length > 0 ? baseFilters : undefined;
+    }
+
+    // For encrypted tables, encrypt all filters
     const encrypted: Record<string, unknown> = {};
 
-    if (filters.record && typeof filters.record === 'object') {
+    // Process quick filters from record (equality filters)
+    if (baseFilters.record && typeof baseFilters.record === 'object') {
       const recordFilters: Record<string, unknown> = {};
-      Object.entries(filters.record).forEach(([fieldKey, value]) => {
+      Object.entries(baseFilters.record as Record<string, unknown>).forEach(([fieldKey, value]) => {
         if (value !== '' && value !== undefined && value !== null) {
           // Check if this is an operator-based filter (e.g., "fieldName:between")
           const isOperatorFilter = fieldKey.includes(':');
@@ -99,7 +151,7 @@ export function useGanttRecords(
               const encryptedValues = value.map((v) => CommonUtils.encryptTableData(tableDetail, fieldName, v));
               recordFilters[fieldKey] = encryptedValues;
             } else {
-              // Pass through other operator filters
+              // Pass through other operator filters as-is
               recordFilters[fieldKey] = value;
             }
           } else {
@@ -110,9 +162,9 @@ export function useGanttRecords(
               config: {
                 ...table.config,
                 fields:
-                  table.config.fields?.map((field) => ({
-                    ...field,
-                    required: field.required ?? false,
+                  table.config.fields?.map((f) => ({
+                    ...f,
+                    required: f.required ?? false,
                   })) ?? [],
               },
             };
@@ -123,25 +175,37 @@ export function useGanttRecords(
       encrypted.record = recordFilters;
     }
 
+    // Add default status filter (already hashed in defaultStatusFilter)
+    // This filter goes into "record" with operator syntax: "statusField:ne"
+    if (defaultStatusFilter) {
+      const filterKey = `${defaultStatusFilter.fieldName}:${defaultStatusFilter.operator}`;
+      encrypted.record = {
+        ...(encrypted.record as Record<string, unknown>),
+        [filterKey]: defaultStatusFilter.value,
+      };
+    }
+
     // Handle search query
-    if (filters.fulltext && typeof filters.fulltext === 'string' && filters.fulltext.trim()) {
+    if (baseFilters.fulltext && typeof baseFilters.fulltext === 'string' && (baseFilters.fulltext as string).trim()) {
       const searchEncryptionKey = table.config.e2eeEncryption ? encryptionKey : table.config.encryptionKey;
       if (searchEncryptionKey) {
-        encrypted.fulltext = CommonUtils.hashKeyword(filters.fulltext.trim(), searchEncryptionKey).join(' ');
+        encrypted.fulltext = CommonUtils.hashKeyword((baseFilters.fulltext as string).trim(), searchEncryptionKey).join(
+          ' ',
+        );
       } else {
-        encrypted.fulltext = filters.fulltext.trim();
+        encrypted.fulltext = (baseFilters.fulltext as string).trim();
       }
     }
 
     // Copy other filter properties
-    Object.entries(filters).forEach(([key, value]) => {
+    Object.entries(baseFilters).forEach(([key, value]) => {
       if (key !== 'record' && key !== 'fulltext') {
         encrypted[key] = value;
       }
     });
 
-    return encrypted;
-  }, [filters, table, encryptionKey]);
+    return Object.keys(encrypted).length > 0 ? encrypted : undefined;
+  }, [filters, table, encryptionKey, defaultStatusFilter]);
 
   // Query key includes ganttScreenId for separate caching per chart
   const queryKey = useMemo(

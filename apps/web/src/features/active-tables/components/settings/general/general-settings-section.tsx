@@ -203,7 +203,7 @@ export function GeneralSettingsSection({ tableId, config, onChange, fields }: Ge
             {m.settings_general_defaultSort()} <span className="text-destructive">{m.common_required()}</span>
           </Label>
           <Select value={defaultSort} onValueChange={(value) => setDefaultSort(value as 'asc' | 'desc')}>
-            <SelectTrigger>
+            <SelectTrigger id="default-sort">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

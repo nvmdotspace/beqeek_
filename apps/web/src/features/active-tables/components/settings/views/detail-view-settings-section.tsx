@@ -138,7 +138,7 @@ export function DetailViewSettingsSection({ config, fields, onChange }: DetailVi
         <div className="space-y-2">
           <Label htmlFor="detail-layout">{m.settings_detailView_layoutType()}</Label>
           <Select value={layout} onValueChange={(value) => handleLayoutChange(value as RecordDetailConfig['layout'])}>
-            <SelectTrigger>
+            <SelectTrigger id="detail-layout">
               <SelectValue>
                 {layout === RECORD_DETAIL_LAYOUT_HEAD_DETAIL
                   ? m.settings_detailView_layoutHeadDetail()
@@ -170,7 +170,7 @@ export function DetailViewSettingsSection({ config, fields, onChange }: DetailVi
               onChange(createUpdatedConfig({ commentsPosition: newValue }));
             }}
           >
-            <SelectTrigger>
+            <SelectTrigger id="comments-position">
               <SelectValue>
                 {commentsPosition === COMMENTS_POSITION_RIGHT_PANEL
                   ? m.settings_detailView_commentsRightPanel()
@@ -210,7 +210,7 @@ export function DetailViewSettingsSection({ config, fields, onChange }: DetailVi
                 onChange(createUpdatedConfig({ headTitleField: value }));
               }}
             >
-              <SelectTrigger>
+              <SelectTrigger id="head-title-field">
                 <SelectValue placeholder={m.settings_detailView_titleFieldPlaceholder()} />
               </SelectTrigger>
               <SelectContent>

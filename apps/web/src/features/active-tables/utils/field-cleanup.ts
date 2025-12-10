@@ -65,6 +65,12 @@ export function findFieldReferences(
           details: `Chart "${gantt.screenName || `Chart ${index + 1}`}" uses this field as end date`,
         });
       }
+      if (gantt.statusField === fieldName) {
+        references.push({
+          location: 'Gantt Settings',
+          details: `Chart "${gantt.screenName || `Chart ${index + 1}`}" uses this field as status field`,
+        });
+      }
     });
   }
 
@@ -186,6 +192,9 @@ export function cleanupFieldReferences(fieldName: string, config: TableConfig): 
         startDateField: gantt.startDateField === fieldName ? '' : gantt.startDateField,
         // Clear end date if it matches
         endDateField: gantt.endDateField === fieldName ? '' : gantt.endDateField,
+        // Clear status field if it matches (also clear statusCompleteValue)
+        statusField: gantt.statusField === fieldName ? undefined : gantt.statusField,
+        statusCompleteValue: gantt.statusField === fieldName ? undefined : gantt.statusCompleteValue,
       }))
       // Remove gantt configs that have empty required fields
       .filter((gantt) => gantt.taskNameField && gantt.startDateField && gantt.endDateField);

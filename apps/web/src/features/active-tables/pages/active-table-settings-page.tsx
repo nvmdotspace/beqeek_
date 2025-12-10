@@ -341,7 +341,7 @@ export const ActiveTableSettingsPage = () => {
               <SettingsTabContent value="gantt">
                 <GanttSettingsSection
                   ganttConfigs={(localConfig.ganttCharts as unknown as GanttConfig[]) || []}
-                  fields={fields.map((f) => ({ name: f.name, label: f.label, type: f.type }))}
+                  fields={fields.map((f) => ({ name: f.name, label: f.label, type: f.type, options: f.options }))}
                   onChange={(newConfigs) =>
                     handleConfigChange({ ganttCharts: newConfigs as unknown as typeof localConfig.ganttCharts })
                   }

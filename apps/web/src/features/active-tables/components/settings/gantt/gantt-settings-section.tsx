@@ -13,6 +13,7 @@ import {
   GANTT_DATE_VALID_FIELD_TYPES,
   GANTT_PROGRESS_VALID_FIELD_TYPES,
   GANTT_DEPENDENCY_VALID_FIELD_TYPES,
+  GANTT_STATUS_VALID_FIELD_TYPES,
   type FieldType,
 } from '@workspace/beqeek-shared';
 import { SettingsSection } from '../settings-layout';
@@ -30,6 +31,13 @@ export interface GanttConfig {
   endDateField: string;
   progressField?: string | null;
   dependencyField?: string | null;
+  statusField?: string | null;
+  statusCompleteValue?: string | null;
+}
+
+export interface FieldOption {
+  text: string;
+  value: string;
 }
 
 export interface GanttSettingsSectionProps {
@@ -37,7 +45,7 @@ export interface GanttSettingsSectionProps {
   ganttConfigs: GanttConfig[];
 
   /** Available fields */
-  fields: Array<{ name: string; label: string; type: string }>;
+  fields: Array<{ name: string; label: string; type: string; options?: FieldOption[] }>;
 
   /** Callback when configs change */
   onChange: (configs: GanttConfig[]) => void;
@@ -63,10 +71,15 @@ export function GanttSettingsSection({ ganttConfigs, fields, onChange }: GanttSe
     () => new Set<FieldType>(GANTT_DEPENDENCY_VALID_FIELD_TYPES.map((type) => type as FieldType)),
     [],
   );
+  const statusFieldSet = useMemo(
+    () => new Set<FieldType>(GANTT_STATUS_VALID_FIELD_TYPES.map((type) => type as FieldType)),
+    [],
+  );
 
   const eligibleDateFields = fields.filter((field) => dateFieldSet.has(field.type as FieldType));
   const eligibleProgressFields = fields.filter((field) => progressFieldSet.has(field.type as FieldType));
   const eligibleDependencyFields = fields.filter((field) => dependencyFieldSet.has(field.type as FieldType));
+  const eligibleStatusFields = fields.filter((field) => statusFieldSet.has(field.type as FieldType));
 
   const canCreateGantt = eligibleDateFields.length >= 2; // Need at least start and end date
 
@@ -145,6 +158,10 @@ export function GanttSettingsSection({ ganttConfigs, fields, onChange }: GanttSe
                 const dependencyField = config.dependencyField
                   ? fields.find((f) => f.name === config.dependencyField)
                   : null;
+                const statusField = config.statusField ? fields.find((f) => f.name === config.statusField) : null;
+                const statusCompleteOption = statusField?.options?.find(
+                  (opt) => opt.value === config.statusCompleteValue,
+                );
 
                 return (
                   <Inline
@@ -190,6 +207,18 @@ export function GanttSettingsSection({ ganttConfigs, fields, onChange }: GanttSe
                             <span className="font-medium">{dependencyField.label}</span>
                           </div>
                         )}
+                        {statusField && (
+                          <div>
+                            <span className="text-muted-foreground">{m.settings_gantt_status()}:</span>{' '}
+                            <span className="font-medium">{statusField.label}</span>
+                          </div>
+                        )}
+                        {statusCompleteOption && (
+                          <div>
+                            <span className="text-muted-foreground">{m.settings_gantt_statusComplete()}:</span>{' '}
+                            <span className="font-medium">{statusCompleteOption.text}</span>
+                          </div>
+                        )}
                       </div>
                     </Stack>
 
@@ -225,6 +254,7 @@ export function GanttSettingsSection({ ganttConfigs, fields, onChange }: GanttSe
           <span>{m.settings_gantt_statsDateFields({ count: eligibleDateFields.length })}</span>
           <span>{m.settings_gantt_statsProgressFields({ count: eligibleProgressFields.length })}</span>
           <span>{m.settings_gantt_statsDependencyFields({ count: eligibleDependencyFields.length })}</span>
+          <span>{m.settings_gantt_statsStatusFields({ count: eligibleStatusFields.length })}</span>
         </Inline>
 
         {/* Info */}
@@ -249,6 +279,7 @@ export function GanttSettingsSection({ ganttConfigs, fields, onChange }: GanttSe
         eligibleDateFields={eligibleDateFields}
         eligibleProgressFields={eligibleProgressFields}
         eligibleDependencyFields={eligibleDependencyFields}
+        eligibleStatusFields={eligibleStatusFields}
       />
     </SettingsSection>
   );

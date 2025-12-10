@@ -173,7 +173,7 @@ export function KanbanFormModal({
                 {m.settings_kanbanModal_statusField()} <span className="text-destructive">{m.common_required()}</span>
               </Label>
               <Select value={statusField} onValueChange={setStatusField}>
-                <SelectTrigger aria-invalid={!!errors.statusField}>
+                <SelectTrigger id="status-field" aria-invalid={!!errors.statusField}>
                   <SelectValue placeholder={m.settings_kanbanModal_statusFieldPlaceholder()}>
                     {statusField
                       ? (() => {
@@ -205,7 +205,7 @@ export function KanbanFormModal({
                 {m.settings_kanbanModal_headlineField()} <span className="text-destructive">{m.common_required()}</span>
               </Label>
               <Select value={headlineField} onValueChange={setHeadlineField}>
-                <SelectTrigger aria-invalid={!!errors.headlineField}>
+                <SelectTrigger id="headline-field" aria-invalid={!!errors.headlineField}>
                   <SelectValue placeholder={m.settings_kanbanModal_headlineFieldPlaceholder()}>
                     {headlineField
                       ? (() => {
