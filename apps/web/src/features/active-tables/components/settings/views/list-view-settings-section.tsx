@@ -162,7 +162,7 @@ export function ListViewSettingsSection({ config, fields, onChange }: ListViewSe
                   handleChange({ titleField: value });
                 }}
               >
-                <SelectTrigger>
+                <SelectTrigger id="title-field">
                   <SelectValue placeholder={m.settings_listView_titleFieldPlaceholder()}>
                     {titleField ? fields.find((f) => f.name === titleField)?.label : undefined}
                   </SelectValue>

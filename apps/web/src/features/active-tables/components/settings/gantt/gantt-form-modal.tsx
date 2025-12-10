@@ -19,7 +19,7 @@ import { Textarea } from '@workspace/ui/components/textarea';
 import { Label } from '@workspace/ui/components/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@workspace/ui/components/select';
 import { generateUUIDv7 } from '@workspace/beqeek-shared';
-import type { GanttConfig } from './gantt-settings-section';
+import type { GanttConfig, FieldOption } from './gantt-settings-section';
 // @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
 
@@ -37,7 +37,7 @@ export interface GanttFormModalProps {
   editingConfig: GanttConfig | null;
 
   /** All available fields */
-  fields: Array<{ name: string; label: string; type: string }>;
+  fields: Array<{ name: string; label: string; type: string; options?: FieldOption[] }>;
 
   /** Fields eligible for date fields */
   eligibleDateFields: Array<{ name: string; label: string; type: string }>;
@@ -47,6 +47,9 @@ export interface GanttFormModalProps {
 
   /** Fields eligible for dependency field */
   eligibleDependencyFields: Array<{ name: string; label: string; type: string }>;
+
+  /** Fields eligible for status field */
+  eligibleStatusFields: Array<{ name: string; label: string; type: string; options?: FieldOption[] }>;
 }
 
 /**
@@ -61,6 +64,7 @@ export function GanttFormModal({
   eligibleDateFields,
   eligibleProgressFields,
   eligibleDependencyFields,
+  eligibleStatusFields,
 }: GanttFormModalProps) {
   const [screenName, setScreenName] = useState('');
   const [screenDescription, setScreenDescription] = useState('');
@@ -69,12 +73,17 @@ export function GanttFormModal({
   const [endDateField, setEndDateField] = useState('');
   const [progressField, setProgressField] = useState<string>('');
   const [dependencyField, setDependencyField] = useState<string>('');
+  const [statusField, setStatusField] = useState<string>('');
+  const [statusCompleteValue, setStatusCompleteValue] = useState<string>('');
   const [errors, setErrors] = useState<{
     screenName?: string;
     taskNameField?: string;
     startDateField?: string;
     endDateField?: string;
   }>({});
+
+  // Get available options for selected status field
+  const statusFieldOptions = eligibleStatusFields.find((f) => f.name === statusField)?.options || [];
 
   // Reset form when modal opens/closes or editing config changes
   useEffect(() => {
@@ -86,6 +95,8 @@ export function GanttFormModal({
       setEndDateField(editingConfig.endDateField);
       setProgressField(editingConfig.progressField || '');
       setDependencyField(editingConfig.dependencyField || '');
+      setStatusField(editingConfig.statusField || '');
+      setStatusCompleteValue(editingConfig.statusCompleteValue || '');
       setErrors({});
     } else if (open && !editingConfig) {
       setScreenName('');
@@ -95,9 +106,18 @@ export function GanttFormModal({
       setEndDateField(eligibleDateFields[1]?.name || eligibleDateFields[0]?.name || '');
       setProgressField('');
       setDependencyField('');
+      setStatusField('');
+      setStatusCompleteValue('');
       setErrors({});
     }
   }, [open, editingConfig, fields, eligibleDateFields]);
+
+  // Reset statusCompleteValue when statusField changes
+  useEffect(() => {
+    if (!statusField) {
+      setStatusCompleteValue('');
+    }
+  }, [statusField]);
 
   const validate = (): boolean => {
     const newErrors: {
@@ -141,6 +161,8 @@ export function GanttFormModal({
       endDateField,
       progressField: progressField || null,
       dependencyField: dependencyField || null,
+      statusField: statusField || null,
+      statusCompleteValue: statusCompleteValue || null,
     };
 
     onSubmit(config);
@@ -202,7 +224,7 @@ export function GanttFormModal({
                 {m.settings_ganttModal_taskNameField()} <span className="text-destructive">{m.common_required()}</span>
               </Label>
               <Select value={taskNameField} onValueChange={setTaskNameField}>
-                <SelectTrigger aria-invalid={!!errors.taskNameField}>
+                <SelectTrigger id="task-name-field" aria-invalid={!!errors.taskNameField}>
                   <SelectValue placeholder={m.settings_ganttModal_taskNameFieldPlaceholder()}>
                     {taskNameField
                       ? (() => {
@@ -234,7 +256,7 @@ export function GanttFormModal({
                 {m.settings_ganttModal_startDateField()} <span className="text-destructive">{m.common_required()}</span>
               </Label>
               <Select value={startDateField} onValueChange={setStartDateField}>
-                <SelectTrigger aria-invalid={!!errors.startDateField}>
+                <SelectTrigger id="start-date-field" aria-invalid={!!errors.startDateField}>
                   <SelectValue placeholder={m.settings_ganttModal_startDateFieldPlaceholder()}>
                     {startDateField
                       ? (() => {
@@ -266,7 +288,7 @@ export function GanttFormModal({
                 {m.settings_ganttModal_endDateField()} <span className="text-destructive">{m.common_required()}</span>
               </Label>
               <Select value={endDateField} onValueChange={setEndDateField}>
-                <SelectTrigger aria-invalid={!!errors.endDateField}>
+                <SelectTrigger id="end-date-field" aria-invalid={!!errors.endDateField}>
                   <SelectValue placeholder={m.settings_ganttModal_endDateFieldPlaceholder()}>
                     {endDateField
                       ? (() => {
@@ -298,7 +320,7 @@ export function GanttFormModal({
                 {m.settings_ganttModal_progressField()}
               </Label>
               <Select value={progressField} onValueChange={setProgressField}>
-                <SelectTrigger>
+                <SelectTrigger id="progress-field">
                   <SelectValue placeholder={m.settings_ganttModal_progressFieldPlaceholder()}>
                     {progressField
                       ? (() => {
@@ -327,7 +349,7 @@ export function GanttFormModal({
                 {m.settings_ganttModal_dependencyField()}
               </Label>
               <Select value={dependencyField} onValueChange={setDependencyField}>
-                <SelectTrigger>
+                <SelectTrigger id="dependency-field">
                   <SelectValue placeholder={m.settings_ganttModal_dependencyFieldPlaceholder()}>
                     {dependencyField
                       ? (() => {
@@ -349,6 +371,66 @@ export function GanttFormModal({
               </Select>
               <p className="text-xs text-muted-foreground">{m.settings_ganttModal_dependencyFieldHelp()}</p>
             </div>
+
+            {/* Status Field (Optional) */}
+            <div className="space-y-2">
+              <Label htmlFor="status-field" className="text-sm font-medium">
+                {m.settings_ganttModal_statusField()}
+              </Label>
+              <Select value={statusField} onValueChange={setStatusField}>
+                <SelectTrigger id="status-field">
+                  <SelectValue placeholder={m.settings_ganttModal_statusFieldPlaceholder()}>
+                    {statusField
+                      ? (() => {
+                          if (statusField === '') return m.common_none();
+                          const selectedField = eligibleStatusFields.find((f) => f.name === statusField);
+                          return selectedField ? selectedField.label : statusField;
+                        })()
+                      : null}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">{m.common_none()}</SelectItem>
+                  {eligibleStatusFields.map((field) => (
+                    <SelectItem key={field.name} value={field.name}>
+                      {field.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">{m.settings_ganttModal_statusFieldHelp()}</p>
+            </div>
+
+            {/* Status Complete Value (Optional, only when statusField is selected) */}
+            {statusField && statusFieldOptions.length > 0 && (
+              <div className="space-y-2">
+                <Label htmlFor="status-complete-value" className="text-sm font-medium">
+                  {m.settings_ganttModal_statusCompleteValue()}
+                </Label>
+                <Select value={statusCompleteValue} onValueChange={setStatusCompleteValue}>
+                  <SelectTrigger id="status-complete-value">
+                    <SelectValue placeholder={m.settings_ganttModal_statusCompleteValuePlaceholder()}>
+                      {statusCompleteValue
+                        ? (() => {
+                            if (statusCompleteValue === '') return m.common_none();
+                            const selectedOption = statusFieldOptions.find((opt) => opt.value === statusCompleteValue);
+                            return selectedOption ? selectedOption.text : statusCompleteValue;
+                          })()
+                        : null}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">{m.common_none()}</SelectItem>
+                    {statusFieldOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.text}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">{m.settings_ganttModal_statusCompleteValueHelp()}</p>
+              </div>
+            )}
           </div>
 
           <DialogFooter>

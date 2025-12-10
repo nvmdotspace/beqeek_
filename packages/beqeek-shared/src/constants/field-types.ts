@@ -194,8 +194,14 @@ export const GANTT_PROGRESS_VALID_FIELD_TYPES = [FIELD_TYPE_INTEGER, FIELD_TYPE_
  */
 export const GANTT_DEPENDENCY_VALID_FIELD_TYPES = [FIELD_TYPE_SELECT_LIST_RECORD] as const;
 
+/**
+ * Field types valid for Gantt status field
+ */
+export const GANTT_STATUS_VALID_FIELD_TYPES = [FIELD_TYPE_SELECT_ONE] as const;
+
 export type QuickFilterValidFieldType = (typeof QUICK_FILTER_VALID_FIELD_TYPES)[number];
 export type KanbanStatusValidFieldType = (typeof KANBAN_STATUS_VALID_FIELD_TYPES)[number];
 export type GanttDateValidFieldType = (typeof GANTT_DATE_VALID_FIELD_TYPES)[number];
 export type GanttProgressValidFieldType = (typeof GANTT_PROGRESS_VALID_FIELD_TYPES)[number];
 export type GanttDependencyValidFieldType = (typeof GANTT_DEPENDENCY_VALID_FIELD_TYPES)[number];
+export type GanttStatusValidFieldType = (typeof GANTT_STATUS_VALID_FIELD_TYPES)[number];

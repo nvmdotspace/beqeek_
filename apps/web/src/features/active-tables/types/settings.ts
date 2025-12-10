@@ -231,6 +231,12 @@ export interface GanttConfigFormData {
 
   /** Dependency field (optional) */
   dependencyField?: string;
+
+  /** Status field (optional, SELECT_ONE type) */
+  statusField?: string;
+
+  /** Status complete value (optional, value from statusField options) */
+  statusCompleteValue?: string;
 }
 
 /**

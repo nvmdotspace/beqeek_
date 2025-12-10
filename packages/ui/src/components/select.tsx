@@ -7,7 +7,7 @@ interface SelectProps {
   children: React.ReactNode;
 }
 
-interface SelectTriggerProps {
+interface SelectTriggerProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
   className?: string;
 }

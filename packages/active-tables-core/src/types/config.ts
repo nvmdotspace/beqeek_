@@ -67,6 +67,12 @@ export interface GanttConfig {
 
   /** Optional field name for dependencies */
   dependencyField?: string;
+
+  /** Optional field name for status (SELECT_ONE type) */
+  statusField?: string;
+
+  /** Optional value representing completion status from statusField options */
+  statusCompleteValue?: string;
 }
 
 /** Field ordering configuration for custom layouts */

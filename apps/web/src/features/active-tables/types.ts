@@ -83,6 +83,8 @@ export interface GanttChart {
   endDateField: string;
   progressField?: string;
   dependencyField?: string;
+  statusField?: string;
+  statusCompleteValue?: string;
 }
 
 export interface ActiveTableConfig {
