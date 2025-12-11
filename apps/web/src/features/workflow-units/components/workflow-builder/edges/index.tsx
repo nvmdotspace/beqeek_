@@ -21,11 +21,28 @@ import {
   DropdownMenuSeparator,
   DropdownMenuLabel,
 } from '@workspace/ui/components/dropdown-menu';
+import { cn } from '@workspace/ui/lib/utils';
 import { useWorkflowEditorStore } from '../../../stores/workflow-editor-store';
-import { NODE_DEFINITIONS, type NodeDefinition } from '../../../utils/node-types';
+import { NODE_DEFINITIONS, type NodeDefinition, type NodeCategory } from '../../../utils/node-types';
 import { getWorkflowIcon } from '../../../utils/workflow-icons';
 import { BranchEdge } from './branch-edge';
 import { LoopEdge } from './loop-edge';
+
+// Category-based icon styles (matching node-palette.tsx)
+const CATEGORY_STYLES: Record<NodeCategory, { bg: string; text: string }> = {
+  trigger: {
+    bg: 'bg-blue-100 dark:bg-blue-500/20',
+    text: 'text-blue-600 dark:text-blue-400',
+  },
+  action: {
+    bg: 'bg-violet-100 dark:bg-violet-500/20',
+    text: 'text-violet-600 dark:text-violet-400',
+  },
+  logic: {
+    bg: 'bg-orange-100 dark:bg-orange-500/20',
+    text: 'text-orange-600 dark:text-orange-400',
+  },
+};
 
 // Pre-compute insertable nodes outside component to avoid recalculation
 const INSERTABLE_NODES = NODE_DEFINITIONS.filter(
@@ -189,13 +206,16 @@ export const WorkflowEdge = memo(
     const renderMenuItem = useCallback(
       (def: NodeDefinition) => {
         const IconComponent = getWorkflowIcon(def.icon);
+        const styles = CATEGORY_STYLES[def.category];
         return (
           <DropdownMenuItem
             key={def.type}
             onClick={() => handleInsertNode(def.type)}
             className="flex cursor-pointer items-center gap-2"
           >
-            {IconComponent && <IconComponent className="size-4 text-muted-foreground" />}
+            <div className={cn('flex h-6 w-6 shrink-0 items-center justify-center rounded-md', styles.bg, styles.text)}>
+              {IconComponent && <IconComponent className="size-3.5" />}
+            </div>
             <span>{def.label}</span>
           </DropdownMenuItem>
         );

@@ -15,6 +15,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Alert, AlertDescription } from '@workspace/ui/components/alert';
 import { InfoIcon } from 'lucide-react';
 import type { EventSourceType, EventSourceParams } from '../api/types';
+// @ts-expect-error - Paraglide generates JS without .d.ts files
+import { m } from '@/paraglide/generated/messages.js';
 
 interface TriggerConfigFormProps {
   workspaceId: string;
@@ -23,6 +25,16 @@ interface TriggerConfigFormProps {
   onTriggerTypeChange: (type: EventSourceType) => void;
   onTriggerParamsChange: (params: EventSourceParams) => void;
 }
+
+const getTriggerTypeLabel = (type: EventSourceType): string => {
+  const labels: Record<EventSourceType, () => string> = {
+    SCHEDULE: () => m.workflowTrigger_type_schedule(),
+    WEBHOOK: () => m.workflowTrigger_type_webhook(),
+    OPTIN_FORM: () => m.workflowTrigger_type_form(),
+    ACTIVE_TABLE: () => m.workflowTrigger_type_table(),
+  };
+  return labels[type]();
+};
 
 export function TriggerConfigForm({
   workspaceId,
@@ -35,16 +47,18 @@ export function TriggerConfigForm({
     <div className="space-y-6">
       {/* Trigger Type Selector */}
       <div className="space-y-2">
-        <Label>Trigger Type</Label>
+        <Label>{m.workflowTrigger_type_label()}</Label>
         <Select value={triggerType} onValueChange={(value) => onTriggerTypeChange(value as EventSourceType)}>
           <SelectTrigger>
-            <SelectValue placeholder="Select trigger type" />
+            <SelectValue placeholder={m.workflowTrigger_type_placeholder()}>
+              {getTriggerTypeLabel(triggerType)}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="SCHEDULE">Schedule (Cron)</SelectItem>
-            <SelectItem value="WEBHOOK">Webhook</SelectItem>
-            <SelectItem value="OPTIN_FORM">Form Submission</SelectItem>
-            <SelectItem value="ACTIVE_TABLE">Table Event</SelectItem>
+            <SelectItem value="SCHEDULE">{m.workflowTrigger_type_schedule()}</SelectItem>
+            <SelectItem value="WEBHOOK">{m.workflowTrigger_type_webhook()}</SelectItem>
+            <SelectItem value="OPTIN_FORM">{m.workflowTrigger_type_form()}</SelectItem>
+            <SelectItem value="ACTIVE_TABLE">{m.workflowTrigger_type_table()}</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -97,7 +111,7 @@ function ScheduleTriggerFields({
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="cron-expression">Cron Expression</Label>
+        <Label htmlFor="cron-expression">{m.workflowTrigger_cronExpression_label()}</Label>
         <Input
           id="cron-expression"
           value={expression}
@@ -105,14 +119,12 @@ function ScheduleTriggerFields({
           placeholder="0 9 * * 1"
           className="font-mono"
         />
-        <p className="text-xs text-muted-foreground">Example: "0 9 * * 1" runs every Monday at 9 AM</p>
+        <p className="text-xs text-muted-foreground">{m.workflowTrigger_cronExpression_hint()}</p>
       </div>
 
       <Alert>
         <InfoIcon className="h-4 w-4" />
-        <AlertDescription>
-          Advanced cron builder with timezone selection will be available in a future update.
-        </AlertDescription>
+        <AlertDescription>{m.workflowTrigger_schedule_alert()}</AlertDescription>
       </Alert>
     </div>
   );
@@ -128,22 +140,20 @@ function WebhookTriggerFields({
   params: { webhookId: string };
   onChange: (params: { webhookId: string }) => void;
 }) {
-  const webhookId = params?.webhookId || crypto.randomUUID();
+  // Use stable webhookId - only generate once if not provided
+  const [webhookId] = useState(() => params?.webhookId || crypto.randomUUID());
 
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="webhook-id">Webhook ID</Label>
+        <Label htmlFor="webhook-id">{m.workflowTrigger_webhookId_label()}</Label>
         <Input id="webhook-id" value={webhookId} readOnly className="font-mono bg-muted" />
-        <p className="text-xs text-muted-foreground">This ID will be used to generate the webhook URL</p>
+        <p className="text-xs text-muted-foreground">{m.workflowTrigger_webhookId_hint()}</p>
       </div>
 
       <Alert>
         <InfoIcon className="h-4 w-4" />
-        <AlertDescription>
-          Webhook URL display, security token management, and HTTP method selection will be available in a future
-          update.
-        </AlertDescription>
+        <AlertDescription>{m.workflowTrigger_webhook_alert()}</AlertDescription>
       </Alert>
     </div>
   );
@@ -175,16 +185,18 @@ function FormTriggerFields({
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="form-id">Form ID</Label>
-        <Input id="form-id" value={formId} onChange={(e) => handleChange(e.target.value)} placeholder="Enter form ID" />
+        <Label htmlFor="form-id">{m.workflowTrigger_formId_label()}</Label>
+        <Input
+          id="form-id"
+          value={formId}
+          onChange={(e) => handleChange(e.target.value)}
+          placeholder={m.workflowTrigger_formId_placeholder()}
+        />
       </div>
 
       <Alert>
         <InfoIcon className="h-4 w-4" />
-        <AlertDescription>
-          Form selection dropdown, action checkboxes (submit/approve/reject), and field conditions will be available in
-          a future update.
-        </AlertDescription>
+        <AlertDescription>{m.workflowTrigger_form_alert()}</AlertDescription>
       </Alert>
     </div>
   );
@@ -217,21 +229,18 @@ function TableTriggerFields({
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="table-id">Table ID</Label>
+        <Label htmlFor="table-id">{m.workflowTrigger_tableId_label()}</Label>
         <Input
           id="table-id"
           value={tableId}
           onChange={(e) => handleChange(e.target.value)}
-          placeholder="Enter table ID"
+          placeholder={m.workflowTrigger_tableId_placeholder()}
         />
       </div>
 
       <Alert>
         <InfoIcon className="h-4 w-4" />
-        <AlertDescription>
-          Table selection dropdown, action checkboxes (create/update/delete), and field conditions will be available in
-          a future update.
-        </AlertDescription>
+        <AlertDescription>{m.workflowTrigger_table_alert()}</AlertDescription>
       </Alert>
     </div>
   );

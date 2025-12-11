@@ -75,7 +75,18 @@ export const isValidConnection = (connection: Connection, nodes: Node[], edges: 
     return false;
   }
 
-  // Rule 5: Prevent circular dependencies using DFS
+  // Rule 5: Prevent multiple incoming connections to the same node
+  // (depends_on currently only supports single value)
+  // Exception: merge nodes can have multiple inputs
+  if (targetNode.type !== 'merge') {
+    const existingIncomingEdge = edges.find((e) => e.target === connection.target);
+    if (existingIncomingEdge) {
+      console.warn('Node already has an incoming connection (depends_on only supports single value)');
+      return false;
+    }
+  }
+
+  // Rule 6: Prevent circular dependencies using DFS
   // Build adjacency list from existing edges + new connection
   const adjacencyList = new Map<string, string[]>();
 

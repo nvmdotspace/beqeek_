@@ -6,7 +6,7 @@ import { Text } from '@workspace/ui/components/typography';
 import { cn } from '@workspace/ui/lib/utils';
 import { NODE_DEFINITIONS, type NodeDefinition } from '../../utils/node-types';
 import { getWorkflowIcon } from '../../utils/workflow-icons';
-import { useCandidateNodeState } from '../../stores/workflow-editor-store';
+import { useCandidateNodeState, useWorkflowEditorStore } from '../../stores/workflow-editor-store';
 // @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
 
@@ -122,7 +122,17 @@ const NodePaletteItem = ({ definition, onActivateCandidate }: NodePaletteItemPro
 
 export const NodePalette = () => {
   const { setCandidateNode } = useCandidateNodeState();
+  const currentEvent = useWorkflowEditorStore((state) => state.currentEvent);
+  const currentEventId = useWorkflowEditorStore((state) => state.currentEventId);
+  const isLoading = useWorkflowEditorStore((state) => state.isLoading);
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Hide triggers when:
+  // 1. Event is loaded and has trigger type
+  // 2. Event is being loaded (currentEventId set but data not yet loaded)
+  // This prevents showing triggers during page reload while waiting for API response
+  const hasTriggerType =
+    !!currentEvent?.eventSourceType || (!!currentEventId && isLoading) || (!!currentEventId && !currentEvent);
 
   // Filter nodes based on search query
   const filteredNodes = NODE_DEFINITIONS.filter((node) => {
@@ -131,8 +141,8 @@ export const NodePalette = () => {
     return node.label.toLowerCase().includes(query) || node.description?.toLowerCase().includes(query);
   });
 
-  // Group nodes
-  const triggers = filteredNodes.filter((d) => d.category === 'trigger');
+  // Group nodes - hide triggers if event has trigger type
+  const triggers = hasTriggerType ? [] : filteredNodes.filter((d) => d.category === 'trigger');
   const actions = filteredNodes.filter((d) => d.category === 'action');
   const logic = filteredNodes.filter(
     (d) => d.category === 'logic' && !d.type.startsWith('compound_') && d.type !== 'merge',

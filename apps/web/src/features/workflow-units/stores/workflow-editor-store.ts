@@ -170,9 +170,12 @@ export const useWorkflowEditorStore = create<WorkflowEditorState>()(
           })),
 
         // Delete selected nodes and their connected edges
+        // Note: Start node (id='start-node') cannot be deleted
         deleteSelectedNodes: () =>
           set((state) => {
-            const selectedSet = new Set(state.selectedNodeIds);
+            // Filter out start node from selection - it cannot be deleted
+            const deletableIds = state.selectedNodeIds.filter((id) => id !== 'start-node');
+            const selectedSet = new Set(deletableIds);
             if (selectedSet.size === 0) return state;
 
             const newNodes = state.nodes.filter((n) => !selectedSet.has(n.id));
@@ -187,8 +190,12 @@ export const useWorkflowEditorStore = create<WorkflowEditorState>()(
           }),
 
         // Delete a single node by ID
+        // Note: Start node (id='start-node') cannot be deleted
         deleteNode: (nodeId: string) =>
           set((state) => {
+            // Prevent deletion of start node
+            if (nodeId === 'start-node') return state;
+
             const newNodes = state.nodes.filter((n) => n.id !== nodeId);
             const newEdges = state.edges.filter((e) => e.source !== nodeId && e.target !== nodeId);
 
@@ -202,9 +209,12 @@ export const useWorkflowEditorStore = create<WorkflowEditorState>()(
           }),
 
         // Copy selected nodes to clipboard
+        // Note: Start node cannot be copied
         copySelectedNodes: () =>
           set((state) => {
-            const selectedSet = new Set(state.selectedNodeIds);
+            // Filter out start node from selection - it cannot be copied
+            const copyableIds = state.selectedNodeIds.filter((id) => id !== 'start-node');
+            const selectedSet = new Set(copyableIds);
             if (selectedSet.size === 0) return state;
 
             const selectedNodes = state.nodes.filter((n) => selectedSet.has(n.id));
@@ -284,6 +294,21 @@ export const useWorkflowEditorStore = create<WorkflowEditorState>()(
               currentEventId: event.id,
             });
 
+            // Create start node from event trigger type
+            const startNode = {
+              id: 'start-node',
+              type: 'start',
+              position: { x: 250, y: 50 },
+              data: {
+                name: 'start',
+                triggerType: event.eventSourceType,
+                triggerParams: event.eventSourceParams as unknown as Record<string, unknown>,
+                _isStartNode: true,
+              },
+              deletable: false, // Prevent deletion
+              draggable: true,
+            };
+
             // Parse YAML and load into canvas
             // Pass event context to handle legacy PHP/Blockly format
             if (event.yaml && event.yaml !== '{}') {
@@ -297,8 +322,9 @@ export const useWorkflowEditorStore = create<WorkflowEditorState>()(
                 console.info('[WorkflowEditor] Legacy YAML format detected, converted to new format');
               }
 
+              // Add start node at the beginning
               set({
-                nodes,
+                nodes: [startNode, ...nodes],
                 edges,
                 yamlContent: event.yaml,
                 isLoading: false,
@@ -306,9 +332,9 @@ export const useWorkflowEditorStore = create<WorkflowEditorState>()(
                 parseError: null,
               });
             } else {
-              // Empty event - no workflow steps yet
+              // Empty event - only start node
               set({
-                nodes: [],
+                nodes: [startNode],
                 edges: [],
                 yamlContent: '',
                 isLoading: false,

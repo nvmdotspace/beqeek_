@@ -17,8 +17,25 @@ import {
   DropdownMenuSeparator,
   DropdownMenuLabel,
 } from '@workspace/ui/components/dropdown-menu';
-import { NODE_DEFINITIONS, type NodeDefinition } from '../../utils/node-types';
+import { cn } from '@workspace/ui/lib/utils';
+import { NODE_DEFINITIONS, type NodeDefinition, type NodeCategory } from '../../utils/node-types';
 import { getWorkflowIcon } from '../../utils/workflow-icons';
+
+// Category-based icon styles (matching node-palette.tsx)
+const CATEGORY_STYLES: Record<NodeCategory, { bg: string; text: string }> = {
+  trigger: {
+    bg: 'bg-blue-100 dark:bg-blue-500/20',
+    text: 'text-blue-600 dark:text-blue-400',
+  },
+  action: {
+    bg: 'bg-violet-100 dark:bg-violet-500/20',
+    text: 'text-violet-600 dark:text-violet-400',
+  },
+  logic: {
+    bg: 'bg-orange-100 dark:bg-orange-500/20',
+    text: 'text-orange-600 dark:text-orange-400',
+  },
+};
 
 interface EdgeBlockSelectorProps {
   edgeId: string;
@@ -50,13 +67,16 @@ export const EdgeBlockSelector = memo(
 
     const renderMenuItem = (def: NodeDefinition) => {
       const IconComponent = getWorkflowIcon(def.icon);
+      const styles = CATEGORY_STYLES[def.category];
       return (
         <DropdownMenuItem
           key={def.type}
           onClick={() => handleSelect(def.type)}
           className="flex items-center gap-2 cursor-pointer"
         >
-          {IconComponent && <IconComponent className="size-4 text-muted-foreground" />}
+          <div className={cn('flex h-6 w-6 shrink-0 items-center justify-center rounded-md', styles.bg, styles.text)}>
+            {IconComponent && <IconComponent className="size-3.5" />}
+          </div>
           <span>{def.label}</span>
         </DropdownMenuItem>
       );
