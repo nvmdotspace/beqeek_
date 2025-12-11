@@ -114,7 +114,10 @@ export const BaseWorkflowNode = memo(({ icon, category, label, summary, selected
           selected ? 'shadow-lg' : 'shadow-sm hover:shadow-md',
         )}
         style={{
-          borderColor: selected ? styles.accent : 'var(--border)',
+          // Use individual border properties to avoid mixing shorthand and non-shorthand
+          borderTopColor: selected ? styles.accent : 'var(--border)',
+          borderRightColor: selected ? styles.accent : 'var(--border)',
+          borderBottomColor: selected ? styles.accent : 'var(--border)',
           borderLeftWidth: '3px',
           borderLeftColor: styles.accent,
         }}

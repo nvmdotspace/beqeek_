@@ -4,14 +4,16 @@ import { Heading } from '@workspace/ui/components/typography';
 import { cn } from '@workspace/ui/lib/utils';
 import { NODE_DEFINITIONS, type NodeDefinition } from '../../utils/node-types';
 import { getWorkflowIcon } from '../../utils/workflow-icons';
+import { useCandidateNodeState } from '../../stores/workflow-editor-store';
 // @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
 
 interface NodePaletteItemProps {
   definition: NodeDefinition;
+  onActivateCandidate: (definition: NodeDefinition) => void;
 }
 
-const NodePaletteItem = ({ definition }: NodePaletteItemProps) => {
+const NodePaletteItem = ({ definition, onActivateCandidate }: NodePaletteItemProps) => {
   const IconComponent = getWorkflowIcon(definition.icon);
 
   const onDragStart = (event: React.DragEvent) => {
@@ -19,16 +21,16 @@ const NodePaletteItem = ({ definition }: NodePaletteItemProps) => {
     event.dataTransfer.effectAllowed = 'move';
   };
 
+  // Handle click to activate candidate node mode (Dify-style)
+  const onClick = () => {
+    onActivateCandidate(definition);
+  };
+
   // Handle keyboard activation for accessibility
   const onKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
-      // Create a custom event that the canvas can listen for
-      const customEvent = new CustomEvent('workflow:add-node', {
-        detail: { type: definition.type },
-        bubbles: true,
-      });
-      event.currentTarget.dispatchEvent(customEvent);
+      onActivateCandidate(definition);
     }
   };
 
@@ -46,16 +48,17 @@ const NodePaletteItem = ({ definition }: NodePaletteItemProps) => {
       borderRadius="md"
       border="default"
       className={cn(
-        'cursor-move transition-all',
+        'cursor-pointer transition-all',
         'focus:outline-none focus:ring-2 focus:ring-offset-2',
         categoryColors[definition.category],
       )}
       draggable
       onDragStart={onDragStart}
+      onClick={onClick}
       onKeyDown={onKeyDown}
       role="button"
       tabIndex={0}
-      aria-label={`Add ${definition.label} node to canvas. Drag or press Enter to add.`}
+      aria-label={`Add ${definition.label} node to canvas. Click to place or drag to position.`}
       aria-describedby={`desc-${definition.type}`}
       title={definition.description}
     >
@@ -73,10 +76,30 @@ const NodePaletteItem = ({ definition }: NodePaletteItemProps) => {
 };
 
 export const NodePalette = () => {
-  // Group nodes by category
+  const { setCandidateNode } = useCandidateNodeState();
+
+  // Group nodes by category (exclude compound nodes from palette)
   const triggers = NODE_DEFINITIONS.filter((d) => d.category === 'trigger');
   const actions = NODE_DEFINITIONS.filter((d) => d.category === 'action');
-  const logic = NODE_DEFINITIONS.filter((d) => d.category === 'logic');
+  const logic = NODE_DEFINITIONS.filter(
+    (d) => d.category === 'logic' && !d.type.startsWith('compound_') && d.type !== 'merge',
+  );
+
+  // Handle activating candidate node mode
+  const handleActivateCandidate = (definition: NodeDefinition) => {
+    const timestamp = Date.now();
+    const candidateNode = {
+      id: `${definition.type}-${timestamp}`,
+      type: definition.type,
+      position: { x: 0, y: 0 }, // Will be updated on placement
+      data: {
+        name: `${definition.type}_${timestamp}`,
+        _isCandidate: true,
+        ...definition.defaultData,
+      },
+    };
+    setCandidateNode(candidateNode);
+  };
 
   return (
     <Box
@@ -100,7 +123,7 @@ export const NodePalette = () => {
             </Text>
             <Stack space="space-150" role="group" aria-label={m.workflowCanvas_triggerNodes()}>
               {triggers.map((def) => (
-                <NodePaletteItem key={def.type} definition={def} />
+                <NodePaletteItem key={def.type} definition={def} onActivateCandidate={handleActivateCandidate} />
               ))}
             </Stack>
           </Stack>
@@ -114,7 +137,7 @@ export const NodePalette = () => {
             </Text>
             <Stack space="space-150" role="group" aria-label={m.workflowCanvas_actionNodes()}>
               {actions.map((def) => (
-                <NodePaletteItem key={def.type} definition={def} />
+                <NodePaletteItem key={def.type} definition={def} onActivateCandidate={handleActivateCandidate} />
               ))}
             </Stack>
           </Stack>
@@ -128,7 +151,7 @@ export const NodePalette = () => {
             </Text>
             <Stack space="space-150" role="group" aria-label={m.workflowCanvas_logicNodes()}>
               {logic.map((def) => (
-                <NodePaletteItem key={def.type} definition={def} />
+                <NodePaletteItem key={def.type} definition={def} onActivateCandidate={handleActivateCandidate} />
               ))}
             </Stack>
           </Stack>

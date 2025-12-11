@@ -1,6 +1,9 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { temporal } from 'zundo';
+import { useShallow } from 'zustand/react/shallow';
+import { produce } from 'immer';
+import { isEqual } from 'lodash-es';
 import type { Node, Edge } from '@xyflow/react';
 import type { WorkflowEvent } from '../api/types';
 import { yamlToReactFlow } from '../utils/yaml-converter';
@@ -10,6 +13,14 @@ export type EditorMode = 'visual' | 'yaml';
 interface ClipboardData {
   nodes: Node[];
   edges: Edge[];
+}
+
+// Mouse position for candidate node tracking
+interface MousePosition {
+  pageX: number;
+  pageY: number;
+  elementX: number;
+  elementY: number;
 }
 
 interface WorkflowEditorState {
@@ -74,6 +85,14 @@ interface WorkflowEditorState {
   openConfigDrawer: () => void;
   closeConfigDrawer: () => void;
 
+  // Candidate node (ghost node preview during drag from palette)
+  candidateNode: Node | null;
+  mousePosition: MousePosition;
+  setCandidateNode: (node: Node | null) => void;
+  setMousePosition: (position: MousePosition) => void;
+  placeCandidateNode: (position: { x: number; y: number }) => void;
+  cancelCandidateNode: () => void;
+
   // Reset
   reset: () => void;
 }
@@ -94,6 +113,8 @@ const initialState = {
   isPaletteOpen: false,
   isConfigDrawerOpen: false,
   clipboard: null as ClipboardData | null,
+  candidateNode: null as Node | null,
+  mousePosition: { pageX: 0, pageY: 0, elementX: 0, elementY: 0 } as MousePosition,
 };
 
 export const useWorkflowEditorStore = create<WorkflowEditorState>()(
@@ -109,12 +130,15 @@ export const useWorkflowEditorStore = create<WorkflowEditorState>()(
         updateNodes: (nodes) => set({ nodes, isDirty: true }),
         updateEdges: (edges) => set({ edges, isDirty: true }),
 
-        // Update specific node's data (for config forms)
+        // Update specific node's data (for config forms) - uses Immer for cleaner syntax
         updateNodeData: (nodeId, data) =>
           set((state) => ({
-            nodes: state.nodes.map((node) =>
-              node.id === nodeId ? { ...node, data: { ...node.data, ...data } } : node,
-            ),
+            nodes: produce(state.nodes, (draft) => {
+              const node = draft.find((n) => n.id === nodeId);
+              if (node) {
+                node.data = { ...node.data, ...data };
+              }
+            }),
             isDirty: true,
           })),
 
@@ -123,18 +147,26 @@ export const useWorkflowEditorStore = create<WorkflowEditorState>()(
 
         setSelectedNodeIds: (selectedNodeIds) => set({ selectedNodeIds }),
 
-        // Select all nodes
+        // Select all nodes - uses Immer for cleaner syntax
         selectAllNodes: () =>
           set((state) => ({
             selectedNodeIds: state.nodes.map((n) => n.id),
-            nodes: state.nodes.map((n) => ({ ...n, selected: true })),
+            nodes: produce(state.nodes, (draft) => {
+              draft.forEach((n) => {
+                n.selected = true;
+              });
+            }),
           })),
 
-        // Deselect all nodes
+        // Deselect all nodes - uses Immer for cleaner syntax
         deselectAllNodes: () =>
           set((state) => ({
             selectedNodeIds: [],
-            nodes: state.nodes.map((n) => ({ ...n, selected: false })),
+            nodes: produce(state.nodes, (draft) => {
+              draft.forEach((n) => {
+                n.selected = false;
+              });
+            }),
           })),
 
         // Delete selected nodes and their connected edges
@@ -187,7 +219,7 @@ export const useWorkflowEditorStore = create<WorkflowEditorState>()(
             };
           }),
 
-        // Paste nodes from clipboard
+        // Paste nodes from clipboard - uses Immer for cleaner syntax
         pasteNodes: (offset = { x: 50, y: 50 }) =>
           set((state) => {
             if (!state.clipboard || state.clipboard.nodes.length === 0) return state;
@@ -223,8 +255,12 @@ export const useWorkflowEditorStore = create<WorkflowEditorState>()(
               target: idMap.get(edge.target) || edge.target,
             }));
 
-            // Deselect existing nodes, add new ones
-            const updatedNodes = state.nodes.map((n) => ({ ...n, selected: false }));
+            // Deselect existing nodes using Immer
+            const updatedNodes = produce(state.nodes, (draft) => {
+              draft.forEach((n) => {
+                n.selected = false;
+              });
+            });
 
             return {
               nodes: [...updatedNodes, ...newNodes],
@@ -298,20 +334,64 @@ export const useWorkflowEditorStore = create<WorkflowEditorState>()(
         openConfigDrawer: () => set({ isConfigDrawerOpen: true }),
         closeConfigDrawer: () => set({ isConfigDrawerOpen: false }),
 
+        // Candidate node actions (ghost node preview)
+        setCandidateNode: (candidateNode) => set({ candidateNode }),
+        setMousePosition: (mousePosition) => set({ mousePosition }),
+        placeCandidateNode: (position) =>
+          set((state) => {
+            if (!state.candidateNode) return state;
+
+            // Create the actual node from candidate
+            const newNode: Node = {
+              ...state.candidateNode,
+              position,
+              data: {
+                ...state.candidateNode.data,
+                _isCandidate: false,
+              },
+            };
+
+            return {
+              nodes: produce(state.nodes, (draft) => {
+                draft.push(newNode);
+              }),
+              candidateNode: null,
+              isDirty: true,
+            };
+          }),
+        cancelCandidateNode: () => set({ candidateNode: null }),
+
         reset: () => set(initialState),
       }),
       {
         // Zundo configuration
         limit: 50, // Keep 50 history steps
+        // Use lodash isEqual for better performance than JSON.stringify
         equality: (pastState, currentState) => {
-          // Only track changes to nodes and edges
-          return (
-            JSON.stringify(pastState.nodes) === JSON.stringify(currentState.nodes) &&
-            JSON.stringify(pastState.edges) === JSON.stringify(currentState.edges)
-          );
+          return isEqual(pastState.nodes, currentState.nodes) && isEqual(pastState.edges, currentState.edges);
         },
       },
     ),
     { name: 'WorkflowEditor' },
   ),
 );
+
+// ============================================================================
+// Selector Hooks - Optimized for specific use cases
+// ============================================================================
+
+/**
+ * Select only candidate node state (for ghost preview)
+ * Uses useShallow to prevent unnecessary re-renders
+ */
+export const useCandidateNodeState = () =>
+  useWorkflowEditorStore(
+    useShallow((state) => ({
+      candidateNode: state.candidateNode,
+      mousePosition: state.mousePosition,
+      setCandidateNode: state.setCandidateNode,
+      setMousePosition: state.setMousePosition,
+      placeCandidateNode: state.placeCandidateNode,
+      cancelCandidateNode: state.cancelCandidateNode,
+    })),
+  );

@@ -61,3 +61,14 @@ pnpm --filter web check-types  # Type check
 - Vietnamese (`vi`) is default locale, English (`en`) supported
 - E2EE keys stored locally only - NEVER send to server
 - Dev server: `localhost:4173`
+
+  ***
+
+  📝 Note for Claude Code agents
+
+  IMPORTANT: Before announcing task completion related to React hooks/effects, the agent MUST verify:
+  1. Dependency array check: Is every value in deps a primitive or stable reference?
+  2. Circular dependency check: Effect A → setState B → Effect B → setState A?
+  3. High-frequency state check: Which state updates > 10 times/second? Is selector separation needed?
+  4. Build verification: Run pnpm build and pnpm check-types before reporting done
+  5. Console log test: Add console.count() in suspected effects to verify no loops
