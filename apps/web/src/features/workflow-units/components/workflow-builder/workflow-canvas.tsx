@@ -5,7 +5,6 @@ import {
   Background,
   Controls,
   MiniMap,
-  Panel,
   useNodesState,
   useEdgesState,
   addEdge,
@@ -19,8 +18,6 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import './edges/edge-styles.css';
-import { Button } from '@workspace/ui/components/button';
-import { Save, Play } from 'lucide-react';
 import { NODE_TYPES } from './nodes';
 import { EDGE_TYPES, DEFAULT_EDGE_OPTIONS } from './edges';
 import { useWorkflowEditorStore } from '../../stores/workflow-editor-store';
@@ -184,20 +181,6 @@ export const WorkflowCanvas = () => {
   const nodeTypes = useMemo(() => NODE_TYPES, []);
   const edgeTypes = useMemo(() => EDGE_TYPES, []);
 
-  const handleSave = () => {
-    // Phase 4: Convert nodes/edges to YAML
-    if (import.meta.env.DEV) {
-      console.log('Save workflow', { nodes, edges });
-    }
-  };
-
-  const handleTest = () => {
-    // Phase 7: Test execution via API
-    if (import.meta.env.DEV) {
-      console.log('Test workflow', { nodes, edges });
-    }
-  };
-
   // Map resolved theme to React Flow ColorMode
   const colorMode: ColorMode = resolvedTheme === 'dark' ? 'dark' : 'light';
 
@@ -243,17 +226,6 @@ export const WorkflowCanvas = () => {
             backgroundColor: 'var(--background)',
           }}
         />
-
-        <Panel position="top-right" className="flex gap-2" role="toolbar" aria-label="Canvas actions">
-          <Button size="sm" variant="outline" onClick={handleSave} aria-label="Save workflow">
-            <Save className="size-4" aria-hidden="true" />
-            Save
-          </Button>
-          <Button size="sm" variant="outline" onClick={handleTest} aria-label="Test workflow">
-            <Play className="size-4" aria-hidden="true" />
-            Test
-          </Button>
-        </Panel>
 
         {/* Candidate node preview - ghost node that follows mouse during palette drag */}
         <CandidateNode />
