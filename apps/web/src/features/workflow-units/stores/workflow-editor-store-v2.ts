@@ -134,8 +134,7 @@ export const useClipboardState = () =>
 
 /**
  * Select only candidate node state (for ghost preview)
- * NOTE: mousePosition is intentionally excluded to prevent 60fps re-renders
- * Use useMousePosition() separately in components that need mouse tracking
+ * Includes mousePosition for convenience; use useMousePosition() if you only need position updates
  */
 export const useCandidateNodeState = () =>
   useWorkflowEditorStore(

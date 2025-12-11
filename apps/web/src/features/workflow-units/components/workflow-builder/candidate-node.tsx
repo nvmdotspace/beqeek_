@@ -9,7 +9,6 @@
 import { memo, useEffect, useRef } from 'react';
 import { useViewport, useReactFlow } from '@xyflow/react';
 import { useCandidateNodeState } from '../../stores/workflow-editor-store';
-import { BaseWorkflowNode } from './nodes/base-workflow-node';
 import { NODE_DEFINITIONS } from '../../utils/node-types';
 import { getWorkflowIcon } from '../../utils/workflow-icons';
 

@@ -9,7 +9,7 @@
  * because it blocks React Flow's drag events.
  */
 
-import { memo, useState, useCallback, useRef } from 'react';
+import { memo, useState, useCallback, useRef, useEffect } from 'react';
 import { Handle, Position, useNodeId, useReactFlow } from '@xyflow/react';
 import { Plus } from 'lucide-react';
 import {
@@ -61,6 +61,17 @@ export const SourceHandleWithMenu = memo(({ handleClassName, handleBgClass }: So
   // Track mouse state to differentiate click vs drag
   const mouseDownPos = useRef<{ x: number; y: number; time: number } | null>(null);
   const hasDragged = useRef(false);
+  // Store cleanup function reference for unmount
+  const cleanupRef = useRef<(() => void) | null>(null);
+
+  // Cleanup any dangling event listeners on unmount
+  useEffect(() => {
+    return () => {
+      cleanupRef.current?.();
+      mouseDownPos.current = null;
+      hasDragged.current = false;
+    };
+  }, []);
 
   // Store actions
   const setNodes = useWorkflowEditorStore((state) => state.setNodes);
@@ -130,6 +141,14 @@ export const SourceHandleWithMenu = memo(({ handleClassName, handleBgClass }: So
       }
     };
 
+    const cleanup = () => {
+      mouseDownPos.current = null;
+      hasDragged.current = false;
+      document.removeEventListener('mousemove', handleGlobalMouseMove);
+      document.removeEventListener('mouseup', handleGlobalMouseUp);
+      cleanupRef.current = null;
+    };
+
     const handleGlobalMouseUp = () => {
       const timeDiff = Date.now() - (mouseDownPos.current?.time || 0);
 
@@ -138,11 +157,11 @@ export const SourceHandleWithMenu = memo(({ handleClassName, handleBgClass }: So
         setIsMenuOpen(true);
       }
 
-      mouseDownPos.current = null;
-      hasDragged.current = false;
-      document.removeEventListener('mousemove', handleGlobalMouseMove);
-      document.removeEventListener('mouseup', handleGlobalMouseUp);
+      cleanup();
     };
+
+    // Store cleanup for unmount
+    cleanupRef.current = cleanup;
 
     document.addEventListener('mousemove', handleGlobalMouseMove);
     document.addEventListener('mouseup', handleGlobalMouseUp);

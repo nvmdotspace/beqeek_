@@ -8,7 +8,7 @@
  * trigger forms (Schedule, Webhook, Form, Table) will be added in future phases.
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Label } from '@workspace/ui/components/label';
 import { Input } from '@workspace/ui/components/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@workspace/ui/components/select';
@@ -142,6 +142,13 @@ function WebhookTriggerFields({
 }) {
   // Use stable webhookId - only generate once if not provided
   const [webhookId] = useState(() => params?.webhookId || crypto.randomUUID());
+
+  // Sync generated webhookId to parent on mount
+  useEffect(() => {
+    if (!params?.webhookId && webhookId) {
+      onChange({ webhookId });
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="space-y-4">
