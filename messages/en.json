@@ -586,6 +586,7 @@
   "common_open": "Open",
   "common_copy": "Copy",
   "common_copied": "Copied",
+  "common_search": "Search",
   "settings_quickFilters_title": "Quick Filters Configuration",
   "settings_quickFilters_description": "Create quick filters for common queries displayed at the top of the list view",
   "settings_quickFilters_addButton": "Add Quick Filter",

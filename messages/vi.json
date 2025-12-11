@@ -591,6 +591,7 @@
   "common_open": "Mở",
   "common_copy": "Sao chép",
   "common_copied": "Đã sao chép",
+  "common_search": "Tìm kiếm",
   "settings_quickFilters_title": "Cấu hình bộ lọc nhanh",
   "settings_quickFilters_description": "Tạo bộ lọc nhanh cho các truy vấn thường dùng hiển thị ở đầu danh sách",
   "settings_quickFilters_addButton": "Thêm bộ lọc nhanh",
