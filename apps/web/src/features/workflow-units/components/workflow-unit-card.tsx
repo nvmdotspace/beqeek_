@@ -1,5 +1,5 @@
 import { memo, useMemo } from 'react';
-import { Boxes, Calendar, MoreVertical, Edit, Trash2, Play, Settings } from 'lucide-react';
+import { Boxes, Calendar, MoreVertical, Edit, Trash2, Settings } from 'lucide-react';
 import { Card, CardContent } from '@workspace/ui/components/card';
 import { Badge } from '@workspace/ui/components/badge';
 import { Button } from '@workspace/ui/components/button';

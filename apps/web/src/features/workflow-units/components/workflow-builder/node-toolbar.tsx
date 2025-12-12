@@ -19,11 +19,9 @@ import { cn } from '@workspace/ui/lib/utils';
 import {
   Zap, // Triggers
   Play, // Actions
-  GitBranch, // Logic
-  ChevronRight,
+  GitBranch,
   X,
 } from 'lucide-react';
-import { Button } from '@workspace/ui/components/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@workspace/ui/components/tooltip';
 import { NODE_DEFINITIONS, type NodeDefinition, type NodeCategory } from '../../utils/node-types';
 import { getWorkflowIcon } from '../../utils/workflow-icons';

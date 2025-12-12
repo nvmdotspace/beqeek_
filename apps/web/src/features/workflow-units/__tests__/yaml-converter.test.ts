@@ -296,7 +296,7 @@ steps:
       expect(parsedNodes).toHaveLength(6);
 
       // Verify all dependencies are preserved
-      const mergeNode = parsedNodes.find((n) => n.id === 'merge_results');
+      const _mergeNode = parsedNodes.find((n) => n.id === 'merge_results');
       const edgesToMerge = parsedEdges.filter((e) => e.target === 'merge_results');
       expect(edgesToMerge).toHaveLength(2);
     });

@@ -3,7 +3,6 @@
  */
 import type { Node, Edge } from '@xyflow/react';
 import type { WorkflowEvent } from '../../api/types';
-import type { NodeDefinition } from '../../utils/node-types';
 
 // ============================================================================
 // Canvas Slice Types

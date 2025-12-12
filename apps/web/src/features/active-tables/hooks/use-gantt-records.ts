@@ -15,7 +15,7 @@ import { fetchActiveTableRecords } from '../api/active-records-api';
 import { decryptRecords } from '@workspace/active-tables-core';
 import { CommonUtils, HMAC } from '@workspace/encryption-core';
 import type { TableRecord, Table, GanttConfig } from '@workspace/active-tables-core';
-import type { ActiveRecordsResponse } from '../types';
+import type { ActiveRecordsResponse, ActiveRecordsFiltering } from '../types';
 
 const GANTT_DEFAULT_PAGE_SIZE = 1000;
 
@@ -29,7 +29,7 @@ export interface UseGanttRecordsOptions {
   /** Encryption key for E2EE tables */
   encryptionKey?: string | null;
   /** Filters to apply (quick filters only, no date range) */
-  filters?: Record<string, unknown>;
+  filters?: ActiveRecordsFiltering;
 }
 
 /**
@@ -95,7 +95,7 @@ export function useGanttRecords(
       if (defaultStatusFilter) {
         const filterKey = `${defaultStatusFilter.fieldName}:${defaultStatusFilter.operator}`;
         baseFilters.record = {
-          ...(baseFilters.record as Record<string, unknown>),
+          ...(baseFilters.record ?? {}),
           [filterKey]: defaultStatusFilter.value,
         };
       }
@@ -109,7 +109,7 @@ export function useGanttRecords(
       if (defaultStatusFilter) {
         const filterKey = `${defaultStatusFilter.fieldName}:${defaultStatusFilter.operator}`;
         baseFilters.record = {
-          ...(baseFilters.record as Record<string, unknown>),
+          ...(baseFilters.record ?? {}),
           [filterKey]: defaultStatusFilter.value,
         };
       }

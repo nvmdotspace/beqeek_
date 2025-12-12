@@ -60,7 +60,7 @@ export function KeyValueBuilder({ value, onChange, contextVariables = [] }: KeyV
     if (value !== currentJson) {
       setPairs(newPairs);
     }
-  }, [value]);
+  }, [value, pairs]);
 
   const handleChange = useCallback(
     (index: number, field: 'key' | 'value', newValue: string) => {

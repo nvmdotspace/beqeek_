@@ -23,7 +23,7 @@ export const WorkspaceDashboardPage = () => {
   const totalWorkspaces = data?.meta?.total ?? data?.data?.length ?? 0;
   const workspaces = data?.data ?? [];
 
-  const subtitle = useMemo(() => {
+  const _subtitle = useMemo(() => {
     if (isLoading) return m.workspace_dashboard_loading();
     if (error) return m.workspace_dashboard_error();
     if (totalWorkspaces === 0) return m.workspace_dashboard_noWorkspacesSubtitle();

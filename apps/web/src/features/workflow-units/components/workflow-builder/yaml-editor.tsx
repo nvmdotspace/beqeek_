@@ -14,10 +14,10 @@ import { AlertCircle } from 'lucide-react';
 import { useWorkflowEditorStore } from '../../stores/workflow-editor-store';
 
 interface YamlEditorProps {
-  workspaceId: string;
+  _workspaceId: string;
 }
 
-export function YamlEditor({ workspaceId }: YamlEditorProps) {
+export function YamlEditor({ _workspaceId }: YamlEditorProps) {
   const { yamlContent, yamlError, setYamlContent, setYamlError } = useWorkflowEditorStore();
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
   const monacoRef = useRef<Monaco | null>(null);

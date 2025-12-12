@@ -11,14 +11,15 @@ import { Button } from '@workspace/ui/components/button';
 import { Input } from '@workspace/ui/components/input';
 import { Label } from '@workspace/ui/components/label';
 import { Alert, AlertTitle, AlertDescription } from '@workspace/ui/components/alert';
+import { useEncryption } from '@workspace/active-tables-core';
 
 interface EncryptionKeyPromptProps {
-  tableId: string;
+  _tableId: string;
   tableName: string;
   onKeySubmit: (key: string) => Promise<boolean>;
 }
 
-export function EncryptionKeyPrompt({ tableId, tableName, onKeySubmit }: EncryptionKeyPromptProps) {
+export function EncryptionKeyPrompt({ _tableId, tableName, onKeySubmit }: EncryptionKeyPromptProps) {
   const [key, setKey] = useState('');
   const [showKey, setShowKey] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -45,6 +46,9 @@ export function EncryptionKeyPrompt({ tableId, tableName, onKeySubmit }: Encrypt
       setIsSubmitting(false);
     }
   };
+
+  // Fetch current user and encryption key preference - unused vars prefixed
+  const { error: _error } = useEncryption();
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">

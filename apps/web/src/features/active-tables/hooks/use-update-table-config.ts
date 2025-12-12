@@ -348,7 +348,7 @@ type ExtendedRecordListConfig = TableConfig['recordListConfig'] & {
   displayFields?: string[];
 };
 
-type ExtendedRecordDetailConfig = TableConfig['recordDetailConfig'] & {
+type _ExtendedRecordDetailConfig = TableConfig['recordDetailConfig'] & {
   headTitleField?: string;
   rowTailFields?: string[];
   column1Fields?: string[];

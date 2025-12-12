@@ -8,7 +8,6 @@ import {
   useNodesState,
   useEdgesState,
   addEdge,
-  MarkerType,
   type Connection,
   type OnNodesChange,
   type OnEdgesChange,

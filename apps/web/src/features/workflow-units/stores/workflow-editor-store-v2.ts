@@ -13,7 +13,6 @@ import { devtools } from 'zustand/middleware';
 import { temporal } from 'zundo';
 import { useShallow } from 'zustand/react/shallow';
 import { isEqual } from 'lodash-es';
-import type { Node, Edge } from '@xyflow/react';
 
 import {
   type WorkflowEditorShape,

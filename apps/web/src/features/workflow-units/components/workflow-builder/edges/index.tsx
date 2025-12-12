@@ -10,7 +10,7 @@
  */
 
 import { memo, useState, useCallback, useMemo } from 'react';
-import { BaseEdge, EdgeLabelRenderer, getBezierPath, type EdgeProps, type Edge, useReactFlow } from '@xyflow/react';
+import { BaseEdge, EdgeLabelRenderer, getBezierPath, type EdgeProps, type Edge } from '@xyflow/react';
 import { X, Plus } from 'lucide-react';
 import { Button } from '@workspace/ui/components/button';
 import {

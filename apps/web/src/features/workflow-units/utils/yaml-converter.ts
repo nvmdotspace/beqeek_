@@ -18,7 +18,7 @@
  */
 
 import type { Node, Edge } from '@xyflow/react';
-import { parseWorkflowYAML, parseWorkflowYAMLWithInfo, type ParseOptions } from './yaml-parser';
+import { parseWorkflowYAMLWithInfo, type ParseOptions } from './yaml-parser';
 import { irToReactFlow } from './ir-to-reactflow';
 import { reactFlowToIR } from './reactflow-to-ir';
 import { serializeWorkflowYAML } from './yaml-serializer';

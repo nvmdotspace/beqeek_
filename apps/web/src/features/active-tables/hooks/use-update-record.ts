@@ -170,7 +170,7 @@ export function useUpdateRecordField(workspaceId: string, tableId: string, table
       return { previousQueries };
     },
 
-    onError: (err, variables, context) => {
+    onError: (err, _variables, context) => {
       // Rollback on error - restore all previous queries
       if (context?.previousQueries) {
         context.previousQueries.forEach(({ key, data }) => {
@@ -365,7 +365,7 @@ export function useBatchUpdateRecord(workspaceId: string, tableId: string, table
       return { previousQueries };
     },
 
-    onError: (err, variables, context) => {
+    onError: (err, _variables, context) => {
       // Rollback on error
       if (context?.previousQueries) {
         context.previousQueries.forEach(({ key, data }) => {
@@ -376,7 +376,7 @@ export function useBatchUpdateRecord(workspaceId: string, tableId: string, table
       console.error('Failed to batch update record:', err);
     },
 
-    onSuccess: (data, { recordId }, context) => {
+    onSuccess: (data, { recordId }, _context) => {
       if (!table) return;
 
       // For encrypted tables, optimistic updates don't fully work because:

@@ -31,6 +31,113 @@ export interface ActiveTableQuickFilter {
   fieldName: string;
 }
 
+/**
+ * Filtering operators for API queries
+ * Based on AlchemistRestfulApi library
+ */
+export type FilterOperator =
+  | 'eq' // Equal
+  | 'ne' // Not equal
+  | 'lt' // Less than
+  | 'gt' // Greater than
+  | 'lte' // Less than or equal
+  | 'gte' // Greater than or equal
+  | 'in' // In array
+  | 'not_in' // Not in array
+  | 'between' // Between two values
+  | 'not_between'; // Not between two values
+
+/**
+ * Field filter with optional operator
+ * Format: fieldName or fieldName:operator
+ * Examples: "status", "status:eq", "priority:in"
+ */
+export type FieldFilterKey = string;
+
+/**
+ * Filter value can be a single value or array (for 'in', 'not_in', 'between', 'not_between')
+ */
+export type FilterValue = string | number | boolean | null | Array<string | number>;
+
+/**
+ * Record filtering group
+ * Filters on custom field data
+ * Format: filtering[record][fieldName:operator] = value
+ */
+export type RecordFiltering = Record<FieldFilterKey, FilterValue>;
+
+/**
+ * Value updated at filtering group
+ * Filters on when a field's current value was last updated
+ * Format: filtering[valueUpdatedAt][fieldName:operator] = datetime
+ */
+export type ValueUpdatedAtFiltering = Record<FieldFilterKey, string>;
+
+/**
+ * Historical value updated at filtering group
+ * Filters on when a field was changed FROM a specific historical value
+ * Must be used with historicalValue filter
+ * Format: filtering[historicalValueUpdatedAt][fieldName:operator] = datetime
+ */
+export type HistoricalValueUpdatedAtFiltering = Record<FieldFilterKey, string>;
+
+/**
+ * Complete filtering structure for Active Records API
+ * Based on doc-get-active-records.md
+ *
+ * Filtering Groups:
+ * - id: Filter by record ID (supports eq, in)
+ * - fulltext: Full-text search (hashed keywords for E2EE tables)
+ * - record: Filter by field values (supports various operators based on encryption type)
+ * - valueUpdatedAt: Filter by when a field's current value was updated
+ * - historicalValueUpdatedAt: Filter by when a field was changed from a historical value
+ * - historicalValue: Specify the historical value to filter by (used with historicalValueUpdatedAt)
+ *
+ * @example
+ * // Filter by status field (E2EE - uses hash)
+ * {
+ *   record: {
+ *     status: "20bc534fb1cdf23178878ddbf795f550f76eb149475ec0b6d3eea85194c81322"
+ *   }
+ * }
+ *
+ * @example
+ * // Filter by assignee (unencrypted reference field - uses raw ID)
+ * {
+ *   record: {
+ *     assignee: "806145710083801089"
+ *   }
+ * }
+ *
+ * @example
+ * // Full-text search (E2EE - uses hashed keywords)
+ * {
+ *   fulltext: "hash1 hash2 hash3"
+ * }
+ *
+ * @example
+ * // Filter by record IDs
+ * {
+ *   id: {
+ *     "id:in": ["732878538910205329", "732878538910205330"]
+ *   }
+ * }
+ */
+export interface ActiveRecordsFiltering {
+  /** Filter by record ID(s) */
+  id?: Record<FieldFilterKey, FilterValue>;
+  /** Full-text search (hashed keywords for E2EE) */
+  fulltext?: string;
+  /** Filter by field values */
+  record?: RecordFiltering;
+  /** Filter by when field values were last updated */
+  valueUpdatedAt?: ValueUpdatedAtFiltering;
+  /** Filter by when field was changed from a historical value (requires historicalValue) */
+  historicalValueUpdatedAt?: HistoricalValueUpdatedAtFiltering;
+  /** Historical value to filter by (used with historicalValueUpdatedAt) */
+  historicalValue?: string;
+}
+
 export interface KanbanConfig {
   kanbanScreenId: string;
   screenName: string;

@@ -15,7 +15,7 @@ export const createSelectionSlice: StateCreator<
   [['zustand/devtools', never]],
   [],
   SelectionSlice
-> = (set, get) => ({
+> = (set, _get) => ({
   ...initialSelectionState,
 
   setSelectedNodeIds: (selectedNodeIds) => {

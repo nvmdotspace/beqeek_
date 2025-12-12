@@ -313,7 +313,7 @@ function childrenToSteps(children: Node[], allNodes: Node[], edges: Edge[]): Ste
  * @param nodes - Array of React Flow nodes
  * @returns Metadata object with description and tags
  */
-export function extractMetadataFromNodes(nodes: Node[]): WorkflowIR['metadata'] {
+export function extractMetadataFromNodes(_nodes: Node[]): WorkflowIR['metadata'] {
   // Future: Extract metadata from special "metadata" node or global config
   return undefined;
 }

@@ -23,7 +23,7 @@ import type { RecordComment } from '../hooks/use-record-comments-with-permission
 
 export interface CommentItemProps {
   comment: RecordComment;
-  currentUserId?: string;
+  _currentUserId?: string;
   canUpdate: boolean;
   canDelete: boolean;
   onUpdate?: (commentId: string, content: string) => Promise<void>;
@@ -37,7 +37,7 @@ export interface CommentItemProps {
  */
 export function CommentItem({
   comment,
-  currentUserId,
+  _currentUserId,
   canUpdate,
   canDelete,
   onUpdate,

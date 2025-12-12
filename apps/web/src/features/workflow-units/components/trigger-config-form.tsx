@@ -65,25 +65,31 @@ export function TriggerConfigForm({
 
       {/* Progressive Disclosure based on trigger type */}
       {triggerType === 'SCHEDULE' && (
-        <ScheduleTriggerFields params={triggerParams as any} onChange={(params) => onTriggerParamsChange(params)} />
+        <ScheduleTriggerFields
+          params={triggerParams as { expression: string }}
+          onChange={(params) => onTriggerParamsChange(params)}
+        />
       )}
 
       {triggerType === 'WEBHOOK' && (
-        <WebhookTriggerFields params={triggerParams as any} onChange={(params) => onTriggerParamsChange(params)} />
+        <WebhookTriggerFields
+          params={triggerParams as { webhookId: string }}
+          onChange={(params) => onTriggerParamsChange(params)}
+        />
       )}
 
       {triggerType === 'OPTIN_FORM' && (
         <FormTriggerFields
-          workspaceId={workspaceId}
-          params={triggerParams as any}
+          _workspaceId={workspaceId}
+          params={triggerParams as { formId: string; webhookId: string; actionId?: string }}
           onChange={(params) => onTriggerParamsChange(params)}
         />
       )}
 
       {triggerType === 'ACTIVE_TABLE' && (
         <TableTriggerFields
-          workspaceId={workspaceId}
-          params={triggerParams as any}
+          _workspaceId={workspaceId}
+          params={triggerParams as { tableId: string; actionId: string; webhookId: string }}
           onChange={(params) => onTriggerParamsChange(params)}
         />
       )}
@@ -170,11 +176,11 @@ function WebhookTriggerFields({
  * Form Trigger Fields (Simplified)
  */
 function FormTriggerFields({
-  workspaceId,
+  _workspaceId,
   params,
   onChange,
 }: {
-  workspaceId: string;
+  _workspaceId: string;
   params: { formId: string; webhookId: string; actionId?: string };
   onChange: (params: { formId: string; webhookId: string; actionId?: string }) => void;
 }) {
@@ -213,11 +219,11 @@ function FormTriggerFields({
  * Table Trigger Fields (Simplified)
  */
 function TableTriggerFields({
-  workspaceId,
+  _workspaceId,
   params,
   onChange,
 }: {
-  workspaceId: string;
+  _workspaceId: string;
   params: { tableId: string; actionId: string; webhookId: string };
   onChange: (params: { tableId: string; actionId: string; webhookId: string }) => void;
 }) {

@@ -15,7 +15,6 @@ import {
 import {
   Trash,
   Edit,
-  Loader2,
   AlertCircle,
   Plus,
   Calendar,
@@ -33,7 +32,6 @@ import { useWorkflowEvents } from '../hooks/use-workflow-events';
 import { EditWorkflowUnitDialog } from '../components/dialogs/edit-workflow-unit-dialog';
 import { DeleteConfirmDialog } from '../components/dialogs/delete-confirm-dialog';
 import { CreateEventDialog } from '../components/dialogs/create-event-dialog';
-import { EventCard } from '../components/event-card';
 // @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@workspace/ui/components/table';
@@ -275,7 +273,7 @@ export default function WorkflowUnitDetailPage() {
                         <TableCell onClick={(e) => e.stopPropagation()}>
                           <Switch
                             checked={event.eventActive}
-                            onCheckedChange={(checked) => {
+                            onCheckedChange={(_checked) => {
                               // We need a mutation here usually, or just optimistic update if we had the handler
                               // The previous card had onToggleActive logic, but it wasn't connected in this page file!
                               // Wait, looking at lines 34-39 in original file, there is no mutation defined.

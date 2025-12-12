@@ -194,7 +194,7 @@ export function layoutLoopChildren(
  * @returns Nodes with updated positions and parent sizes
  */
 export function applyCompoundLayout(nodes: Node[], config: Partial<BranchLayoutConfig> = {}): Node[] {
-  const nodeMap = new Map(nodes.map((n) => [n.id, n]));
+  const _nodeMap = new Map(nodes.map((n) => [n.id, n]));
   const updatedNodes: Node[] = [];
   const processedChildIds = new Set<string>();
 

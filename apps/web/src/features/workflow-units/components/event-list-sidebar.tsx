@@ -5,7 +5,7 @@
  * Provides event selection, status toggle, and creation.
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, getRouteApi } from '@tanstack/react-router';
 import { ScrollArea } from '@workspace/ui/components/scroll-area';
 import { Button } from '@workspace/ui/components/button';
@@ -40,12 +40,15 @@ export function EventListSidebar({ workspaceId, unitId, onCreateEvent }: EventLi
   const [editingEvent, setEditingEvent] = useState<WorkflowEvent | null>(null);
   const [deletingEvent, setDeletingEvent] = useState<WorkflowEvent | null>(null);
 
-  const handleSelectEvent = (eventId: string) => {
-    navigate({
-      to: '/$locale/workspaces/$workspaceId/workflow-units/$unitId/events/$eventId/edit',
-      params: { locale, workspaceId, unitId, eventId },
-    });
-  };
+  const handleSelectEvent = useCallback(
+    (eventId: string) => {
+      navigate({
+        to: '/$locale/workspaces/$workspaceId/workflow-units/$unitId/events/$eventId/edit',
+        params: { locale, workspaceId, unitId, eventId },
+      });
+    },
+    [navigate, locale, workspaceId, unitId],
+  );
 
   const handleToggleActive = (eventId: string, active: boolean) => {
     toggleEventActive.mutate({

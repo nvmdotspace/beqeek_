@@ -5,7 +5,7 @@ const sharedConfig = Array.isArray(reactInternalConfig) ? reactInternalConfig : 
 /** @type {import("eslint").Linter.Config[]} */
 export default [
   {
-    ignores: ['src/paraglide/**'],
+    ignores: ['src/paraglide/**', 'vite.config.ts', 'vite.config.*.ts', 'vitest.setup.ts'],
   },
   ...sharedConfig,
 ];

@@ -97,7 +97,7 @@ export function computeConnectionStatus(connector: ConnectorInstance): Connectio
   }
 
   // For credentials connectors, check if required fields are filled
-  const totalFields = getConnectorFieldCount(connector.connectorType);
+  const _totalFields = getConnectorFieldCount(connector.connectorType);
   const filledFields = getFilledFieldCount(connector);
 
   if (filledFields === 0) {

@@ -16,7 +16,7 @@ import { fetchActiveTableRecords } from '../api/active-records-api';
 import { decryptRecords } from '@workspace/active-tables-core';
 import { CommonUtils } from '@workspace/encryption-core';
 import type { TableRecord, Table, KanbanConfig, FieldOption } from '@workspace/active-tables-core';
-import type { ActiveRecordsResponse } from '../types';
+import type { ActiveRecordsResponse, ActiveRecordsFiltering } from '../types';
 
 const KANBAN_COLUMN_PAGE_SIZE = 50;
 
@@ -30,7 +30,7 @@ export interface UseKanbanColumnRecordsOptions {
   /** Encryption key for E2EE tables */
   encryptionKey?: string | null;
   /** Base filters to apply (quick filters, search) */
-  filters?: Record<string, unknown>;
+  filters?: ActiveRecordsFiltering;
 }
 
 export interface ColumnRecordsState {

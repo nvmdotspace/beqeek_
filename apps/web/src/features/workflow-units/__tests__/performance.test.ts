@@ -25,7 +25,7 @@ describe('Performance Tests', () => {
       const ir = generateLargeWorkflow(100);
 
       const startTime = performance.now();
-      const { nodes, edges } = irToReactFlow(ir);
+      const { nodes, edges: _edges } = irToReactFlow(ir);
       const endTime = performance.now();
 
       const duration = endTime - startTime;
@@ -65,7 +65,7 @@ describe('Performance Tests', () => {
       const ir = generateDeeplyNestedConditions(10);
 
       const startTime = performance.now();
-      const { nodes } = irToReactFlow(ir);
+      const { nodes: _nodes } = irToReactFlow(ir);
       const endTime = performance.now();
 
       expect(endTime - startTime).toBeLessThan(2000);
@@ -76,7 +76,7 @@ describe('Performance Tests', () => {
       const ir = generateDeeplyNestedConditions(5);
 
       const startTime = performance.now();
-      const { nodes } = irToReactFlow(ir);
+      const { nodes: _nodes } = irToReactFlow(ir);
       const endTime = performance.now();
 
       expect(endTime - startTime).toBeLessThan(500);
@@ -87,7 +87,7 @@ describe('Performance Tests', () => {
 
       const startTime = performance.now();
       const ir = convertLegacyToIR(legacy, 'WEBHOOK', {});
-      const { nodes } = irToReactFlow(ir);
+      const { nodes: _nodes } = irToReactFlow(ir);
       const endTime = performance.now();
 
       expect(endTime - startTime).toBeLessThan(1000);
@@ -111,7 +111,7 @@ describe('Performance Tests', () => {
       const { nodes, edges } = generateRandomWorkflow(100);
 
       const startTime = performance.now();
-      const layouted = autoLayout(nodes, edges);
+      const _layouted = autoLayout(nodes, edges);
       const endTime = performance.now();
 
       expect(endTime - startTime).toBeLessThan(1000);
@@ -122,7 +122,7 @@ describe('Performance Tests', () => {
       const { nodes, edges } = irToReactFlow(ir);
 
       const startTime = performance.now();
-      const layouted = autoLayout(nodes, edges);
+      const _layouted = autoLayout(nodes, edges);
       const endTime = performance.now();
 
       expect(endTime - startTime).toBeLessThan(500);
@@ -309,7 +309,7 @@ describe('Performance Tests', () => {
       const ir = generateDeeplyNestedConditions(15);
 
       const startTime = performance.now();
-      const { nodes } = irToReactFlow(ir);
+      const { nodes: _nodes } = irToReactFlow(ir);
       const endTime = performance.now();
 
       // Should complete but may be slower

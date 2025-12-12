@@ -54,7 +54,7 @@ export function ArrayBuilder({ value, onChange, contextVariables = [] }: ArrayBu
     if (value !== currentJson) {
       setItems(newItems);
     }
-  }, [value]);
+  }, [value, items]);
 
   const handleChange = useCallback(
     (index: number, newValue: string) => {

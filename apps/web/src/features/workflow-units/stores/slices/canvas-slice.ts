@@ -15,7 +15,7 @@ export const initialCanvasState = {
 
 export const createCanvasSlice: StateCreator<WorkflowEditorShape, [['zustand/devtools', never]], [], CanvasSlice> = (
   set,
-  get,
+  _get,
 ) => ({
   ...initialCanvasState,
 

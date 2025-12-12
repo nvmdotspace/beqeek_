@@ -77,7 +77,7 @@ export function irToReactFlow(ir: WorkflowIR): ReactFlowConversionResult {
  * @param total - Total number of steps
  * @returns Position object with x,y coordinates
  */
-function calculateVerticalPosition(index: number, total: number): { x: number; y: number } {
+function calculateVerticalPosition(index: number, _total: number): { x: number; y: number } {
   const HORIZONTAL_CENTER = 400; // Center horizontally
   const VERTICAL_SPACING = 120; // Space between nodes
   const VERTICAL_START = 100; // Top padding
