@@ -53,7 +53,7 @@ export function CreateConnectorDialog({
   onCreate,
   isLoading = false,
 }: CreateConnectorDialogProps) {
-  const [formState, setFormState] = useState({ name: '', description: '' });
+  const [_formState, setFormState] = useState({ name: '', description: '' });
 
   const form = useForm({
     defaultValues: {

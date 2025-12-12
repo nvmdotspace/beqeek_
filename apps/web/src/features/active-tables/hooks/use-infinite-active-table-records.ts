@@ -20,7 +20,7 @@ import { fetchActiveTableRecords } from '../api/active-records-api';
 import { decryptRecords } from '@workspace/active-tables-core';
 import { CommonUtils } from '@workspace/encryption-core';
 import type { TableRecord, Table } from '@workspace/active-tables-core';
-import type { ActiveRecordsResponse } from '../types';
+import type { ActiveRecordsResponse, ActiveRecordsFiltering } from '../types';
 
 // Use the existing type from API
 type ListRecordsResponse = ActiveRecordsResponse;
@@ -38,7 +38,7 @@ export interface UseInfiniteActiveTableRecordsOptions {
   /** Encryption key for E2EE tables */
   encryptionKey?: string | null;
   /** Filters to apply to records */
-  filters?: Record<string, unknown>;
+  filters?: ActiveRecordsFiltering;
 }
 
 /**
@@ -166,7 +166,7 @@ export function useInfiniteActiveTableRecords(
   const [decryptedRecords, setDecryptedRecords] = useState<TableRecord[]>([]);
 
   // Track previous filters to detect filter changes
-  const prevFiltersRef = useRef<Record<string, unknown> | undefined>(undefined);
+  const prevFiltersRef = useRef<ActiveRecordsFiltering | undefined>(undefined);
   const [isFilterChange, setIsFilterChange] = useState(false);
 
   useEffect(() => {
@@ -266,7 +266,7 @@ export function useInfiniteActiveTableRecords(
     };
 
     void decryptAllRecords();
-  }, [rawRecords, table, encryptionKey, isFilterChange]);
+  }, [rawRecords, table, encryptionKey, isFilterChange, query.isFetching]);
 
   // Reset filter change state when fetch completes
   useEffect(() => {

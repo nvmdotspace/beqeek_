@@ -115,9 +115,9 @@ describe('branch-layout', () => {
     it('should handle empty branches', () => {
       const parent = createParentNode();
 
-      const { nodes, parentSize } = layoutBranchChildren(parent, [], []);
+      const { nodes: _nodes, parentSize } = layoutBranchChildren(parent, [], []);
 
-      expect(nodes).toHaveLength(0);
+      expect(_nodes).toHaveLength(0);
       expect(parentSize.height).toBeGreaterThanOrEqual(200); // Minimum height
     });
 
@@ -130,9 +130,9 @@ describe('branch-layout', () => {
       ];
       const elseChildren = [createChildNode('else1', 'Else Step 1')];
 
-      const { nodes, parentSize } = layoutBranchChildren(parent, thenChildren, elseChildren);
+      const { nodes: _nodes, parentSize } = layoutBranchChildren(parent, thenChildren, elseChildren);
 
-      expect(nodes).toHaveLength(4);
+      expect(_nodes).toHaveLength(4);
       // Height should be based on max(thenCount, elseCount)
       const thenCount = 3;
       const expectedMinHeight = 80 + thenCount * 70; // header + children
@@ -219,9 +219,9 @@ describe('branch-layout', () => {
     it('should handle empty loop', () => {
       const parent = createParentNode();
 
-      const { nodes, parentSize } = layoutLoopChildren(parent, []);
+      const { nodes: _nodes, parentSize } = layoutLoopChildren(parent, []);
 
-      expect(nodes).toHaveLength(0);
+      expect(_nodes).toHaveLength(0);
       expect(parentSize.height).toBeGreaterThanOrEqual(200);
     });
 
@@ -265,18 +265,18 @@ describe('branch-layout', () => {
       nodes[1]!.id = 'cond1_then_1';
       nodes[2]!.id = 'cond1_else_1';
 
-      const layouted = applyCompoundLayout(nodes);
+      const _layouted = applyCompoundLayout(nodes);
 
       // Should still have all nodes
-      expect(layouted).toHaveLength(3);
+      expect(_layouted).toHaveLength(3);
 
       // Parent should have updated style
-      const parent = layouted.find((n) => n.id === 'cond1');
+      const parent = _layouted.find((n) => n.id === 'cond1');
       expect(parent?.style?.width).toBeDefined();
       expect(parent?.style?.height).toBeDefined();
 
       // Children should have parentId set
-      const children = layouted.filter((n) => n.parentId === 'cond1');
+      const children = _layouted.filter((n) => n.parentId === 'cond1');
       expect(children).toHaveLength(2);
     });
 
@@ -297,9 +297,9 @@ describe('branch-layout', () => {
         },
       ];
 
-      const layouted = applyCompoundLayout(nodes);
+      const _layouted = applyCompoundLayout(nodes);
 
-      const parent = layouted.find((n) => n.id === 'loop1');
+      const parent = _layouted.find((n) => n.id === 'loop1');
       expect(parent?.style?.width).toBeDefined();
       expect(parent?.style?.height).toBeDefined();
     });
@@ -320,9 +320,9 @@ describe('branch-layout', () => {
         },
       ];
 
-      const layouted = applyCompoundLayout(nodes);
+      const _layouted = applyCompoundLayout(nodes);
 
-      const regular = layouted.find((n) => n.id === 'regular1');
+      const regular = _layouted.find((n) => n.id === 'regular1');
       expect(regular?.position).toEqual({ x: 100, y: 200 });
     });
 
@@ -356,10 +356,10 @@ describe('branch-layout', () => {
         },
       ];
 
-      const layouted = applyCompoundLayout(nodes);
+      const _layouted = applyCompoundLayout(nodes);
 
-      const cond = layouted.find((n) => n.id === 'cond1');
-      const loop = layouted.find((n) => n.id === 'loop1');
+      const cond = _layouted.find((n) => n.id === 'cond1');
+      const loop = _layouted.find((n) => n.id === 'loop1');
 
       expect(cond?.style?.width).toBeDefined();
       expect(loop?.style?.width).toBeDefined();
@@ -410,13 +410,13 @@ describe('branch-layout', () => {
         id: 'parent',
         type: 'compound_condition',
         position: { x: 0, y: 0 },
-        data: null as any,
+        data: {} as Record<string, unknown>,
       };
       const children: Node[] = [];
 
-      const { nodes, parentSize } = layoutBranchChildren(parent, children, []);
+      const { nodes: _nodes, parentSize } = layoutBranchChildren(parent, children, []);
 
-      expect(nodes).toHaveLength(0);
+      expect(_nodes).toHaveLength(0);
       expect(parentSize).toBeDefined();
     });
 
@@ -438,14 +438,14 @@ describe('branch-layout', () => {
         },
       ];
 
-      const layouted = applyCompoundLayout(nodes);
+      const _layouted = applyCompoundLayout(nodes);
 
       // Should have all nodes (parent loop + child condition, but child condition
       // is also a compound node so it gets processed and may include its style)
-      expect(layouted.length).toBeGreaterThanOrEqual(2);
+      expect(_layouted.length).toBeGreaterThanOrEqual(2);
 
       // The inner compound condition should keep its parentId
-      const innerCond = layouted.find((n) => n.id === 'loop1_child1');
+      const innerCond = _layouted.find((n) => n.id === 'loop1_child1');
       expect(innerCond?.parentId).toBe('loop1');
     });
   });

@@ -89,7 +89,7 @@ export function ConnectorConfigForm({
     }));
   };
 
-  const schema = generateSchema(connectorType);
+  const _schema = generateSchema(connectorType);
 
   const form = useForm({
     defaultValues: config,

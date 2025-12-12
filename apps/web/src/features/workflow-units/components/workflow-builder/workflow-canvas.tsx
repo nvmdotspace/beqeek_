@@ -1,14 +1,13 @@
 import { useCallback, useMemo, useRef, useEffect } from 'react';
+import { setAutoFreeze } from 'immer';
 import {
   ReactFlow,
   Background,
   Controls,
   MiniMap,
-  Panel,
   useNodesState,
   useEdgesState,
   addEdge,
-  MarkerType,
   type Connection,
   type OnNodesChange,
   type OnEdgesChange,
@@ -18,14 +17,13 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import './edges/edge-styles.css';
-import { Button } from '@workspace/ui/components/button';
-import { Save, Play } from 'lucide-react';
 import { NODE_TYPES } from './nodes';
 import { EDGE_TYPES, DEFAULT_EDGE_OPTIONS } from './edges';
 import { useWorkflowEditorStore } from '../../stores/workflow-editor-store';
 import { isValidConnection } from '../../utils/connection-validator';
 import { useThemeStore } from '@/stores/theme-store';
 import { useCanvasShortcuts } from '../../hooks/use-canvas-shortcuts';
+import { CandidateNode } from './candidate-node';
 
 export const WorkflowCanvas = () => {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
@@ -42,16 +40,52 @@ export const WorkflowCanvas = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState(storeNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(storeEdges);
 
+  // Track previous store state to prevent infinite sync loops
+  // Using ref comparison instead of RAF which can have race conditions
+  const prevStoreNodesRef = useRef(storeNodes);
+  const prevStoreEdgesRef = useRef(storeEdges);
+
   // Initialize canvas keyboard shortcuts (Cmd+A, Cmd+C, Cmd+V, Delete, Escape)
   useCanvasShortcuts();
 
-  // Sync local state with store when store changes (e.g., from paste/delete actions)
+  // Performance optimization: Disable Immer's auto-freeze for high-frequency canvas updates
+  // This prevents the overhead of freezing objects on every drag/resize operation
+  // Uses instance counter to handle multiple canvas instances safely
   useEffect(() => {
-    setNodes(storeNodes);
+    // Track how many canvas instances have disabled auto-freeze
+    const currentCount =
+      (window as unknown as { __immerAutoFreezeDisabledCount?: number }).__immerAutoFreezeDisabledCount ?? 0;
+    (window as unknown as { __immerAutoFreezeDisabledCount: number }).__immerAutoFreezeDisabledCount = currentCount + 1;
+
+    if (currentCount === 0) {
+      setAutoFreeze(false);
+    }
+
+    return () => {
+      const count = (window as unknown as { __immerAutoFreezeDisabledCount: number }).__immerAutoFreezeDisabledCount;
+      (window as unknown as { __immerAutoFreezeDisabledCount: number }).__immerAutoFreezeDisabledCount = count - 1;
+
+      // Only re-enable when all canvas instances are unmounted
+      if (count - 1 === 0) {
+        setAutoFreeze(true);
+      }
+    };
+  }, []);
+
+  // Sync local state FROM store when store changes externally (e.g., paste/delete/undo)
+  // Only sync if store actually changed (ref comparison)
+  useEffect(() => {
+    if (storeNodes !== prevStoreNodesRef.current) {
+      prevStoreNodesRef.current = storeNodes;
+      setNodes(storeNodes);
+    }
   }, [storeNodes, setNodes]);
 
   useEffect(() => {
-    setEdges(storeEdges);
+    if (storeEdges !== prevStoreEdgesRef.current) {
+      prevStoreEdgesRef.current = storeEdges;
+      setEdges(storeEdges);
+    }
   }, [storeEdges, setEdges]);
 
   // Sync React Flow state with Zustand store
@@ -73,8 +107,11 @@ export const WorkflowCanvas = () => {
     [onNodesChange, setSelectedNodeIds],
   );
 
-  // Sync local nodes to store after changes (debounced to avoid setState during render)
+  // Sync local nodes TO store after local changes (drag, resize, etc.)
+  // Skip if nodes came from store (same reference as what we just synced)
   useEffect(() => {
+    if (nodes === prevStoreNodesRef.current) return;
+    prevStoreNodesRef.current = nodes;
     setStoreNodes(nodes);
   }, [nodes, setStoreNodes]);
 
@@ -85,8 +122,11 @@ export const WorkflowCanvas = () => {
     [onEdgesChange],
   );
 
-  // Sync local edges to store after changes
+  // Sync local edges TO store after local changes
+  // Skip if edges came from store (same reference as what we just synced)
   useEffect(() => {
+    if (edges === prevStoreEdgesRef.current) return;
+    prevStoreEdgesRef.current = edges;
     setStoreEdges(edges);
   }, [edges, setStoreEdges]);
 
@@ -140,20 +180,6 @@ export const WorkflowCanvas = () => {
   const nodeTypes = useMemo(() => NODE_TYPES, []);
   const edgeTypes = useMemo(() => EDGE_TYPES, []);
 
-  const handleSave = () => {
-    // Phase 4: Convert nodes/edges to YAML
-    if (import.meta.env.DEV) {
-      console.log('Save workflow', { nodes, edges });
-    }
-  };
-
-  const handleTest = () => {
-    // Phase 7: Test execution via API
-    if (import.meta.env.DEV) {
-      console.log('Test workflow', { nodes, edges });
-    }
-  };
-
   // Map resolved theme to React Flow ColorMode
   const colorMode: ColorMode = resolvedTheme === 'dark' ? 'dark' : 'light';
 
@@ -200,16 +226,8 @@ export const WorkflowCanvas = () => {
           }}
         />
 
-        <Panel position="top-right" className="flex gap-2" role="toolbar" aria-label="Canvas actions">
-          <Button size="sm" variant="outline" onClick={handleSave} aria-label="Save workflow">
-            <Save className="size-4" aria-hidden="true" />
-            Save
-          </Button>
-          <Button size="sm" variant="outline" onClick={handleTest} aria-label="Test workflow">
-            <Play className="size-4" aria-hidden="true" />
-            Test
-          </Button>
-        </Panel>
+        {/* Candidate node preview - ghost node that follows mouse during palette drag */}
+        <CandidateNode />
       </ReactFlow>
     </div>
   );

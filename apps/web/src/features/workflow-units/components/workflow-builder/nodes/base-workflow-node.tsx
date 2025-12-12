@@ -1,13 +1,14 @@
 import { memo, useState } from 'react';
 import { Handle, Position, useNodeId } from '@xyflow/react';
 import { Pencil, Trash2 } from 'lucide-react';
-import { Box, Stack, Inline } from '@workspace/ui/components/primitives';
+import { Stack, Inline } from '@workspace/ui/components/primitives';
 import { Text } from '@workspace/ui/components/typography';
 import { Button } from '@workspace/ui/components/button';
 import { cn } from '@workspace/ui/lib/utils';
 import type { NodeCategory, BaseNodeData } from '../../../utils/node-types';
 import { getWorkflowIcon } from '../../../utils/workflow-icons';
 import { useWorkflowEditorStore } from '../../../stores/workflow-editor-store';
+import { SourceHandleWithMenu } from './source-handle-with-menu';
 
 // Category accent colors for handles and borders
 const CATEGORY_STYLES = {
@@ -114,7 +115,10 @@ export const BaseWorkflowNode = memo(({ icon, category, label, summary, selected
           selected ? 'shadow-lg' : 'shadow-sm hover:shadow-md',
         )}
         style={{
-          borderColor: selected ? styles.accent : 'var(--border)',
+          // Use individual border properties to avoid mixing shorthand and non-shorthand
+          borderTopColor: selected ? styles.accent : 'var(--border)',
+          borderRightColor: selected ? styles.accent : 'var(--border)',
+          borderBottomColor: selected ? styles.accent : 'var(--border)',
           borderLeftWidth: '3px',
           borderLeftColor: styles.accent,
         }}
@@ -159,17 +163,8 @@ export const BaseWorkflowNode = memo(({ icon, category, label, summary, selected
             )}
           />
         )}
-        <Handle
-          type="source"
-          position={Position.Bottom}
-          className={cn(
-            '!w-3 !h-3 !rounded-full !border-2 !border-card',
-            '!-bottom-1.5 transition-all duration-200',
-            styles.handleBg,
-            // Expand on hover for easier grabbing
-            'group-hover:!w-4 group-hover:!h-4 group-hover:!-bottom-2',
-          )}
-        />
+        {/* Source handle with menu - click to add node, drag to connect */}
+        <SourceHandleWithMenu handleBgClass={styles.handleBg} />
       </div>
     </div>
   );

@@ -26,7 +26,7 @@ import { SettingsSection } from '../settings-layout';
 import { MultiSelectField } from '../multi-select-field';
 
 // Bottom position constant (not in beqeek-shared yet)
-const COMMENTS_POSITION_BOTTOM = 'bottom' as const;
+const _COMMENTS_POSITION_BOTTOM = 'bottom' as const;
 // @ts-expect-error - Paraglide generates JS without .d.ts files
 import { m } from '@/paraglide/generated/messages.js';
 

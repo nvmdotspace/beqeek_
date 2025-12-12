@@ -119,7 +119,7 @@ export default function RecordDetailPage() {
     isLoading: recordLoading,
     error: recordError,
     permissions,
-    refetch: refetchRecord,
+    refetch: _refetchRecord,
   } = useRecordById(workspaceId, tableId, recordId, table, {
     encryptionKey: encryption.encryptionKey,
   });

@@ -40,7 +40,7 @@ export function TeamsPage() {
 
   // Calculate stats
   const totalTeams = teams.length;
-  const totalMembers = useMemo(() => {
+  const _totalMembers = useMemo(() => {
     // This would need actual member count from API
     // For now, using placeholder
     return teams.reduce((sum, team) => sum + (team.teamRoles?.length || 0), 0);

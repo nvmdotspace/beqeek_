@@ -95,7 +95,7 @@ export function useUpdateRecordField(
 
       return { fieldName, value };
     },
-    onSuccess: (data) => {
+    onSuccess: (_data) => {
       // Invalidate record cache to refetch updated data
       void queryClient.invalidateQueries({
         queryKey: ['record', workspaceId, tableId, recordId],
@@ -130,7 +130,10 @@ export function useUpdateRecordField(
  * @param fieldConfig - Field configuration
  * @returns true if user can edit the field
  */
-export function canEditField(permissions: ActiveTableRecordPermissions | undefined, fieldConfig: FieldConfig): boolean {
+export function canEditField(
+  permissions: ActiveTableRecordPermissions | undefined,
+  _fieldConfig: FieldConfig,
+): boolean {
   if (!permissions) return false;
 
   // Check if user has update permission

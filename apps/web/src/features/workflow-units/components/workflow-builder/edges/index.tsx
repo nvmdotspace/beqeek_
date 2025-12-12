@@ -1,21 +1,55 @@
 /**
  * Custom Edge Components for Workflow Builder
  *
- * Design inspired by Sim.ai:
+ * Design inspired by Sim.ai + Dify:
  * - Clean, minimal edge lines
  * - Smooth bezier curves
  * - Subtle hover effects
  * - Delete button only on hover
+ * - Block insertion on edge hover (Dify-inspired)
  */
 
-import { memo, useState } from 'react';
+import { memo, useState, useCallback, useMemo } from 'react';
 import { BaseEdge, EdgeLabelRenderer, getBezierPath, type EdgeProps, type Edge } from '@xyflow/react';
-import { X } from 'lucide-react';
+import { X, Plus } from 'lucide-react';
 import { Button } from '@workspace/ui/components/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
+} from '@workspace/ui/components/dropdown-menu';
+import { cn } from '@workspace/ui/lib/utils';
 import { useWorkflowEditorStore } from '../../../stores/workflow-editor-store';
-import { NODE_DEFINITIONS } from '../../../utils/node-types';
+import { NODE_DEFINITIONS, type NodeDefinition, type NodeCategory } from '../../../utils/node-types';
+import { getWorkflowIcon } from '../../../utils/workflow-icons';
 import { BranchEdge } from './branch-edge';
 import { LoopEdge } from './loop-edge';
+
+// Category-based icon styles (matching node-palette.tsx)
+const CATEGORY_STYLES: Record<NodeCategory, { bg: string; text: string }> = {
+  trigger: {
+    bg: 'bg-blue-100 dark:bg-blue-500/20',
+    text: 'text-blue-600 dark:text-blue-400',
+  },
+  action: {
+    bg: 'bg-violet-100 dark:bg-violet-500/20',
+    text: 'text-violet-600 dark:text-violet-400',
+  },
+  logic: {
+    bg: 'bg-orange-100 dark:bg-orange-500/20',
+    text: 'text-orange-600 dark:text-orange-400',
+  },
+};
+
+// Pre-compute insertable nodes outside component to avoid recalculation
+const INSERTABLE_NODES = NODE_DEFINITIONS.filter(
+  (def) => def.category !== 'trigger' && !def.type.startsWith('compound_') && def.type !== 'merge',
+);
+const ACTION_NODES = INSERTABLE_NODES.filter((d) => d.category === 'action');
+const LOGIC_NODES = INSERTABLE_NODES.filter((d) => d.category === 'logic');
 
 // Category colors using CSS variables for dark/light mode support
 const CATEGORY_COLORS = {
@@ -69,19 +103,31 @@ function getCategoryFromType(nodeType: string | undefined): keyof typeof CATEGOR
  *    - Edges have 70% opacity by default, 100% on hover
  *    - Delete button appears only on hover to keep canvas clean
  *    - Wider invisible hit area (24px) for easier selection
+ *
+ * 4. BLOCK INSERTION (Dify-inspired):
+ *    - "+" button appears on hover at edge midpoint
+ *    - Click to open dropdown with available node types
+ *    - Insert node between source and target nodes
  */
 export const WorkflowEdge = memo(
-  ({ id, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, source, selected }: EdgeProps) => {
+  ({ id, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, source, target, selected }: EdgeProps) => {
     const [isHovered, setIsHovered] = useState(false);
-    const { nodes, edges, setEdges } = useWorkflowEditorStore();
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-    // Get source node to determine color
-    const sourceNode = nodes.find((n) => n.id === source);
-    const category = getCategoryFromType(sourceNode?.type);
-    const strokeColor = CATEGORY_COLORS[category];
+    // Use separate selectors to minimize re-renders
+    // Only subscribe to the specific data we need
+    const nodes = useWorkflowEditorStore((state) => state.nodes);
+    const setNodes = useWorkflowEditorStore((state) => state.setNodes);
+    const setEdges = useWorkflowEditorStore((state) => state.setEdges);
+
+    // Get source node to determine color - memoize to prevent recalc on unrelated node changes
+    const strokeColor = useMemo(() => {
+      const sourceNode = nodes.find((n) => n.id === source);
+      const category = getCategoryFromType(sourceNode?.type);
+      return CATEGORY_COLORS[category];
+    }, [nodes, source]);
 
     // Calculate bezier path (smooth curves)
-    // Bezier curves provide a more organic, flowing look compared to step paths
     const [edgePath, labelX, labelY] = getBezierPath({
       sourceX,
       sourceY,
@@ -91,14 +137,91 @@ export const WorkflowEdge = memo(
       targetPosition,
     });
 
-    // Handle edge deletion
-    const handleDelete = (e: React.MouseEvent) => {
-      e.stopPropagation();
-      setEdges(edges.filter((edge) => edge.id !== id));
-    };
+    // Handle edge deletion - use functional update to avoid stale closure
+    const handleDelete = useCallback(
+      (e: React.MouseEvent) => {
+        e.stopPropagation();
+        // Use store.getState() to get fresh edges instead of depending on edges in closure
+        const currentEdges = useWorkflowEditorStore.getState().edges;
+        setEdges(currentEdges.filter((edge) => edge.id !== id));
+      },
+      [id, setEdges],
+    );
 
-    const isActive = isHovered || selected;
+    // Handle inserting a new node on this edge
+    // Use store.getState() to avoid depending on nodes/edges arrays which change frequently
+    const handleInsertNode = useCallback(
+      (nodeType: string) => {
+        const timestamp = Date.now();
+        const newNodeId = `${nodeType}-${timestamp}`;
+
+        // Calculate position at edge midpoint
+        const newNodePosition = {
+          x: labelX - 100, // Center the node
+          y: labelY - 40,
+        };
+
+        // Get default data for node type
+        const nodeDef = NODE_DEFINITIONS.find((def) => def.type === nodeType);
+        const newNode = {
+          id: newNodeId,
+          type: nodeType,
+          position: newNodePosition,
+          data: {
+            name: `${nodeType}_${timestamp}`,
+            ...nodeDef?.defaultData,
+          },
+        };
+
+        // Get fresh state to avoid stale closure issues
+        const { nodes: currentNodes, edges: currentEdges } = useWorkflowEditorStore.getState();
+
+        // Create two new edges: source -> new node, new node -> target
+        const newEdges = currentEdges.filter((edge) => edge.id !== id);
+        newEdges.push({
+          id: `edge-${source}-${newNodeId}`,
+          source: source!,
+          target: newNodeId,
+          type: 'workflow',
+        });
+        newEdges.push({
+          id: `edge-${newNodeId}-${target}`,
+          source: newNodeId,
+          target: target!,
+          type: 'workflow',
+        });
+
+        // Update state
+        setNodes([...currentNodes, newNode]);
+        setEdges(newEdges);
+        setIsMenuOpen(false);
+      },
+      [id, labelX, labelY, setEdges, setNodes, source, target],
+    );
+
+    const isActive = isHovered || selected || isMenuOpen;
     const strokeWidth = isActive ? 2 : 1.5;
+
+    // Memoize menu item renderer to prevent recreation on every render
+    const renderMenuItem = useCallback(
+      (def: NodeDefinition) => {
+        const IconComponent = getWorkflowIcon(def.icon);
+        const styles = CATEGORY_STYLES[def.category];
+        return (
+          <DropdownMenuItem
+            key={def.type}
+            onClick={() => handleInsertNode(def.type)}
+            className="flex cursor-pointer items-center gap-2"
+          >
+            <div className={cn('flex h-6 w-6 shrink-0 items-center justify-center rounded-md', styles.bg, styles.text)}>
+              {IconComponent && <IconComponent className="size-3.5" />}
+            </div>
+            <span>{def.label}</span>
+          </DropdownMenuItem>
+        );
+      },
+      [handleInsertNode],
+    );
 
     return (
       <>
@@ -109,7 +232,7 @@ export const WorkflowEdge = memo(
           stroke="transparent"
           strokeWidth={24}
           onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
+          onMouseLeave={() => !isMenuOpen && setIsHovered(false)}
           style={{ cursor: 'pointer' }}
         />
 
@@ -126,7 +249,7 @@ export const WorkflowEdge = memo(
           }}
         />
 
-        {/* Delete button on hover - small and unobtrusive */}
+        {/* Action buttons on hover */}
         {isActive && (
           <EdgeLabelRenderer>
             <div
@@ -135,12 +258,34 @@ export const WorkflowEdge = memo(
                 transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
                 pointerEvents: 'all',
               }}
-              className="nodrag nopan"
+              className="nodrag nopan flex items-center gap-1"
             >
+              {/* Add node button with dropdown */}
+              <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-6 w-6 rounded-full border-border bg-background/95 shadow-md backdrop-blur-sm transition-all hover:scale-110 hover:bg-primary hover:text-primary-foreground"
+                    title="Add node"
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="center" side="bottom" className="max-h-80 w-48 overflow-y-auto">
+                  <DropdownMenuLabel className="text-xs text-muted-foreground">Actions</DropdownMenuLabel>
+                  {ACTION_NODES.map(renderMenuItem)}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuLabel className="text-xs text-muted-foreground">Logic</DropdownMenuLabel>
+                  {LOGIC_NODES.map(renderMenuItem)}
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              {/* Delete button */}
               <Button
                 variant="outline"
                 size="icon"
-                className="h-5 w-5 rounded-full bg-background/95 backdrop-blur-sm border-border shadow-sm hover:bg-destructive hover:text-destructive-foreground hover:border-destructive transition-colors"
+                className="h-5 w-5 rounded-full border-border bg-background/95 shadow-sm backdrop-blur-sm transition-colors hover:border-destructive hover:bg-destructive hover:text-destructive-foreground"
                 onClick={handleDelete}
                 title="Delete connection"
               >

@@ -129,7 +129,7 @@ export function MatchForm({ data, onUpdate }: MatchFormProps) {
         <ul className="space-y-1 text-muted-foreground list-disc list-inside">
           <li>Evaluates the value expression</li>
           <li>Compares against each case in order</li>
-          <li>Executes first matching case's branch</li>
+          <li>Executes first matching case&apos;s branch</li>
           <li>Falls back to default if no match</li>
         </ul>
       </div>

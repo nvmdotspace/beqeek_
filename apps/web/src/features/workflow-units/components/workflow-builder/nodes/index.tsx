@@ -4,6 +4,7 @@
  */
 import { type NodeProps } from '@xyflow/react';
 import { BaseWorkflowNode } from './base-workflow-node';
+import { StartNode } from './start-node';
 import { CompoundConditionNode } from './compound-condition-node';
 import { CompoundLoopNode } from './compound-loop-node';
 import { MergeNode } from './merge-node';
@@ -321,6 +322,9 @@ export const LogLogicNode = (props: NodeProps) => {
 
 // Node registry for React Flow
 export const NODE_TYPES = {
+  // Start node (special - shows event trigger type)
+  start: StartNode,
+
   // Trigger nodes
   trigger_schedule: TriggerScheduleNode,
   trigger_webhook: TriggerWebhookNode,

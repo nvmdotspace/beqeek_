@@ -183,7 +183,7 @@ describe('dagre-layout', () => {
 
       const layouted = applyDagreLayout(nodes, edges, { direction: 'TB' });
 
-      const start = layouted.find((n) => n.id === 'start');
+      const _start = layouted.find((n) => n.id === 'start');
       const branch1 = layouted.find((n) => n.id === 'branch1');
       const branch2 = layouted.find((n) => n.id === 'branch2');
       const end = layouted.find((n) => n.id === 'end');

@@ -24,8 +24,8 @@ interface ActiveTableCardProps {
   onOpen?: (table: ActiveTable) => void;
   onConfigure?: (table: ActiveTable) => void;
   onOpenRecords?: (table: ActiveTable) => void;
-  onOpenComments?: (table: ActiveTable) => void;
-  onOpenAutomations?: (table: ActiveTable) => void;
+  _onOpenComments?: (table: ActiveTable) => void;
+  _onOpenAutomations?: (table: ActiveTable) => void;
   onDelete?: (table: ActiveTable) => void;
 }
 
@@ -35,8 +35,8 @@ export const ActiveTableCard = memo(
     onOpen,
     onConfigure,
     onOpenRecords,
-    onOpenComments,
-    onOpenAutomations,
+    _onOpenComments,
+    _onOpenAutomations,
     onDelete,
   }: ActiveTableCardProps) => {
     const locale = 'en'; // Placeholder for locale

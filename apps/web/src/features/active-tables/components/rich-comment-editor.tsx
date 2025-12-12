@@ -24,9 +24,9 @@ export interface RichCommentEditorProps {
   /** Submit handler */
   onSubmit: (content: string) => Promise<void>;
   /** Workspace users for @mentions */
-  workspaceUsers?: Array<{ id: string; name: string; avatar?: string }>;
+  _workspaceUsers?: Array<{ id: string; name: string; avatar?: string }>;
   /** Image upload handler */
-  onImageUpload?: (file: File) => Promise<string>;
+  _onImageUpload?: (file: File) => Promise<string>;
   /** Loading state */
   isSubmitting?: boolean;
   /** Auto-focus on mount */
@@ -44,22 +44,22 @@ export interface RichCommentEditorProps {
  *   placeholder="Add a comment..."
  *   onSubmit={handleAddComment}
  *   workspaceUsers={users}
- *   onImageUpload={uploadImage}
+ *   _onImageUpload={uploadImage}
  * />
  * ```
  */
 export function RichCommentEditor({
   placeholder = 'Add a comment... (Ctrl+Enter to submit)',
   onSubmit,
-  workspaceUsers,
-  onImageUpload,
+  _workspaceUsers,
+  _onImageUpload,
   isSubmitting = false,
   autoFocus = false,
   className = '',
 }: RichCommentEditorProps) {
   const [content, setContent] = useState('');
   const [isExpanded, setIsExpanded] = useState(false);
-  const editorRef = useRef<HTMLDivElement>(null);
+  const _editorRef = useRef<HTMLDivElement>(null);
 
   // Handle submit
   const handleSubmit = useCallback(async () => {

@@ -17,15 +17,14 @@ import {
   createLegacyLoopWithBlocks,
   createDeeplyNestedConditions,
   getMaxNestingDepth,
-  countTotalSteps,
 } from './fixtures/nested-workflows';
-import type { WorkflowIR, StepIR } from '../utils/yaml-types';
+import type { WorkflowIR } from '../utils/yaml-types';
 
 describe('Nested Workflow Integration', () => {
   describe('IR to ReactFlow Conversion - Conditions', () => {
     it('should convert nested condition to compound node with children', () => {
       const ir = createNestedConditionIR();
-      const { nodes, edges } = irToReactFlow(ir);
+      const { nodes, edges: _edges } = irToReactFlow(ir);
 
       // Should have 1 compound condition + 4 children (2 then + 2 else)
       expect(nodes.length).toBe(5);
@@ -42,7 +41,7 @@ describe('Nested Workflow Integration', () => {
 
     it('should create correct edges for then/else branches', () => {
       const ir = createNestedConditionIR();
-      const { nodes, edges } = irToReactFlow(ir);
+      const { nodes: _nodes, edges } = irToReactFlow(ir);
 
       // Should have edges from condition to first then and first else
       const thenEdge = edges.find((e) => e.label === 'then');
@@ -69,7 +68,7 @@ describe('Nested Workflow Integration', () => {
   describe('IR to ReactFlow Conversion - Loops', () => {
     it('should convert loop to compound node with nested children', () => {
       const ir = createLoopWithBlocksIR();
-      const { nodes, edges } = irToReactFlow(ir);
+      const { nodes, edges: _edges } = irToReactFlow(ir);
 
       // Should have 1 compound loop + 3 children
       expect(nodes.length).toBe(4);
@@ -86,7 +85,7 @@ describe('Nested Workflow Integration', () => {
       const { nodes, edges } = irToReactFlow(ir);
 
       const loopNode = nodes.find((n) => n.type === 'compound_loop');
-      const children = nodes.filter((n) => n.parentId === loopNode?.id);
+      const _children = nodes.filter((n) => n.parentId === loopNode?.id);
 
       // Should have edges connecting children sequentially
       const sequentialEdges = edges.filter(
@@ -121,11 +120,11 @@ describe('Nested Workflow Integration', () => {
   describe('Complex Nested Workflows', () => {
     it('should handle condition inside loop inside condition', () => {
       const ir = createComplexNestedIR();
-      const { nodes, edges } = irToReactFlow(ir);
+      const { nodes, edges: _edges } = irToReactFlow(ir);
 
       // Count node types
       const conditions = nodes.filter((n) => n.type === 'compound_condition' || n.type === 'condition');
-      const loops = nodes.filter((n) => n.type === 'compound_loop' || n.type === 'loop');
+      const _loops = nodes.filter((n) => n.type === 'compound_loop' || n.type === 'loop');
 
       expect(conditions.length).toBeGreaterThanOrEqual(1);
       // Should have nested structures
@@ -166,7 +165,7 @@ describe('Nested Workflow Integration', () => {
       const ir = convertLegacyToIR(legacy, 'WEBHOOK', {});
 
       // IR → ReactFlow
-      const { nodes, edges } = irToReactFlow(ir);
+      const { nodes, edges: _edges } = irToReactFlow(ir);
 
       expect(nodes.some((n) => n.type === 'compound_condition')).toBe(true);
       expect(nodes.filter((n) => n.parentId).length).toBeGreaterThan(0);
@@ -176,7 +175,7 @@ describe('Nested Workflow Integration', () => {
       const legacy = createLegacyLoopWithBlocks();
       const ir = convertLegacyToIR(legacy, 'ACTIVE_TABLE', {});
 
-      const { nodes, edges } = irToReactFlow(ir);
+      const { nodes, edges: _edges } = irToReactFlow(ir);
 
       expect(nodes.some((n) => n.type === 'compound_loop')).toBe(true);
       expect(nodes.filter((n) => n.parentId).length).toBe(3);

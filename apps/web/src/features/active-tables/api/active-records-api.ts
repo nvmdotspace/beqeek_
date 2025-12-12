@@ -1,6 +1,6 @@
 import { apiRequest } from '@/shared/api/http-client';
 
-import type { ActiveRecordsResponse } from '../types';
+import type { ActiveRecordsResponse, ActiveRecordsFiltering } from '../types';
 
 export interface FetchActiveRecordsParams {
   workspaceId: string;
@@ -9,7 +9,7 @@ export interface FetchActiveRecordsParams {
   offset?: number;
   pagingMode?: 'offset' | 'cursor';
   cursor?: string | null;
-  filters?: Record<string, unknown>;
+  filters?: ActiveRecordsFiltering;
   sorting?: Array<{ field: string; direction: 'asc' | 'desc' }>;
   // Additional params for cursor mode
   paging?: 'cursor';

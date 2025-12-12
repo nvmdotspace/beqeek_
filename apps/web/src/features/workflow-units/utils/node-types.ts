@@ -4,6 +4,8 @@
  */
 
 export type NodeType =
+  // Start node (special - cannot be deleted)
+  | 'start'
   // Triggers (4)
   | 'trigger_schedule'
   | 'trigger_webhook'

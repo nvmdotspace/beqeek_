@@ -32,11 +32,11 @@ interface AppLayoutProps {
   children: React.ReactNode;
   showSidebar?: boolean;
   pageTitle?: string;
-  pageIcon?: React.ReactNode;
+  _pageIcon?: React.ReactNode;
 }
 
-export const AppLayout = ({ children, showSidebar = true, pageTitle, pageIcon }: AppLayoutProps) => {
-  const userId = useAuthStore((state) => state.userId);
+export const AppLayout = ({ children, showSidebar = true, pageTitle, _pageIcon }: AppLayoutProps) => {
+  const _userId = useAuthStore((state) => state.userId);
   const logout = useLogout();
   const { user: currentUser, workspaceId } = useCurrentUser();
   const locale = useLanguageStore((state) => state.locale);

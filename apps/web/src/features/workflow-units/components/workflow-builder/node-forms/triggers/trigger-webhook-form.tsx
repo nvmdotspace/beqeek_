@@ -5,7 +5,7 @@
  * Auto-generates webhook ID on creation, provides copy snippets.
  */
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { Input } from '@workspace/ui/components/input';
 import { Button } from '@workspace/ui/components/button';
 import { Badge } from '@workspace/ui/components/badge';
@@ -69,22 +69,25 @@ export function TriggerWebhookForm({ data, onUpdate }: TriggerWebhookFormProps) 
   }, [config]);
 
   // Code snippets
-  const snippets: Record<SnippetType, string> = {
-    curl: `curl -X POST "${webhookUrl}" \\
-  -H "Content-Type: application/json" \\
+  const snippets: Record<SnippetType, string> = useMemo(
+    () => ({
+      curl: `curl -X POST "${webhookUrl}" \\\\
+  -H "Content-Type: application/json" \\\\
   -d '{"data": {"key": "value"}}'`,
-    javascript: `fetch("${webhookUrl}", {
+      javascript: `fetch("${webhookUrl}", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({ data: { key: "value" } })
 });`,
-    python: `import requests
+      python: `import requests
 
 requests.post(
     "${webhookUrl}",
     json={"data": {"key": "value"}}
 )`,
-  };
+    }),
+    [webhookUrl],
+  );
 
   const handleCopySnippet = useCallback(
     async (type: SnippetType) => {

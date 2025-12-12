@@ -30,8 +30,8 @@ import { m } from '@/paraglide/generated/messages.js';
 const route = getRouteApi(ROUTES.WORKFLOW_FORMS.LIST);
 
 export function WorkflowFormsList() {
-  const { workspaceId, locale } = route.useParams();
-  const navigate = route.useNavigate();
+  const { workspaceId, locale: _locale } = route.useParams();
+  const _navigate = route.useNavigate();
   const currentWorkspace = useSidebarStore((state) => state.currentWorkspace);
   const [searchQuery, setSearchQuery] = useState('');
   const [formTypeFilter, setFormTypeFilter] = useState<FormType | 'all'>('all');

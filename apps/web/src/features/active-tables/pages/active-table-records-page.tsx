@@ -19,6 +19,7 @@ import { KanbanBoard, GanttChartView, RecordList, type TableRecord, type Table }
 import { ROUTES } from '@/shared/route-paths';
 import { RECORD_LIST_LAYOUT_GENERIC_TABLE } from '@workspace/beqeek-shared';
 import { toast } from 'sonner';
+import type { ActiveRecordsFiltering } from '../types';
 
 import { Button } from '@workspace/ui/components/button';
 import { Badge } from '@workspace/ui/components/badge';
@@ -167,19 +168,19 @@ export const ActiveTableRecordsPage = () => {
   // const [ganttRangeType, setGanttRangeType] = useState<GanttRangeType>('month');
 
   // Convert quick filters to API filtering format with encryption
-  const apiFilters = useMemo(() => {
+  const apiFilters = useMemo((): ActiveRecordsFiltering | undefined => {
     if (quickFilters.length === 0 && !searchQuery.trim()) {
       return undefined;
     }
 
-    const filtering: any = {};
+    const filtering: ActiveRecordsFiltering = {};
 
     // Add quick filters (encryption handled by the hook for E2E tables)
     if (quickFilters.length > 0 && table?.config?.fields) {
       filtering.record = {};
       quickFilters.forEach((filter) => {
         const field = table.config.fields.find((f) => f.name === filter.fieldName);
-        if (field) {
+        if (field && filtering.record) {
           filtering.record[filter.fieldName] = filter.value;
         }
       });
@@ -191,13 +192,14 @@ export const ActiveTableRecordsPage = () => {
     }
 
     return filtering;
-  }, [quickFilters, searchQuery, table?.config?.fields, table?.config?.e2eeEncryption, encryption.encryptionKey]);
+  }, [quickFilters, searchQuery, table?.config?.fields]);
 
   const displayTable: Table | null = table ?? null;
 
   // Get current view configurations (needed before hooks)
-  const kanbanConfigs = displayTable?.config?.kanbanConfigs || [];
-  const ganttConfigs = displayTable?.config?.ganttCharts || [];
+  // Memoize to prevent creating new array references on every render
+  const kanbanConfigs = useMemo(() => displayTable?.config?.kanbanConfigs || [], [displayTable?.config?.kanbanConfigs]);
+  const ganttConfigs = useMemo(() => displayTable?.config?.ganttCharts || [], [displayTable?.config?.ganttCharts]);
 
   // Get current selected config or default to first
   const currentKanbanConfig = useMemo(() => {
