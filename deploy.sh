@@ -142,8 +142,8 @@ deploy_product_page() {
     docker run -d --name beqeek-product-page -p 84:80 --restart unless-stopped beqeek-product-page
 
     sleep 5
-    if curl -f http://localhost:83/health >/dev/null 2>&1; then
-        log_success "Product Page deployment successful! Running at http://localhost:83"
+    if curl -f http://localhost:84/health >/dev/null 2>&1; then
+        log_success "Product Page deployment successful! Running at http://localhost:84"
     else
         log_error "Health check failed. Check container logs with: docker logs beqeek-product-page"
         exit 1
