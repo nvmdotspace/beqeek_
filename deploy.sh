@@ -139,7 +139,7 @@ deploy_product_page() {
 
     docker stop beqeek-product-page 2>/dev/null || true
     docker rm beqeek-product-page 2>/dev/null || true
-    docker run -d --name beqeek-product-page -p 83:80 --restart unless-stopped beqeek-product-page
+    docker run -d --name beqeek-product-page -p 84:80 --restart unless-stopped beqeek-product-page
 
     sleep 5
     if curl -f http://localhost:83/health >/dev/null 2>&1; then
