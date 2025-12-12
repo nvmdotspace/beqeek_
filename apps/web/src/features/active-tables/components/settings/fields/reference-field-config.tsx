@@ -324,7 +324,7 @@ export function ReferenceFieldConfig({
             className="font-mono text-sm"
           />
           <p className="text-xs text-muted-foreground">
-            Điều kiện SQL để lọc các bản ghi được hiển thị trong dropdown (ví dụ: "status='active'")
+            Điều kiện SQL để lọc các bản ghi được hiển thị trong dropdown (ví dụ: &quot;status=&apos;active&apos;&quot;)
           </p>
         </div>
       )}

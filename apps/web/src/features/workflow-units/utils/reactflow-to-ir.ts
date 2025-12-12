@@ -29,13 +29,6 @@ function isCallbackNestedNode(node: Node): boolean {
 }
 
 /**
- * Check if a node is a compound node (has nested children)
- */
-function isCompoundNode(node: Node): boolean {
-  return node.type === 'compound_condition' || node.type === 'compound_loop';
-}
-
-/**
  * Check if a node is a child of a compound node
  */
 function isChildNode(node: Node): boolean {

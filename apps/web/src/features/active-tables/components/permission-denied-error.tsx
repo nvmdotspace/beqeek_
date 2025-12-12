@@ -29,7 +29,7 @@ export function PermissionDeniedError() {
           {/* Content */}
           <Stack space="space-200" align="center">
             <Heading level={2}>Access Denied</Heading>
-            <Text className="text-muted-foreground">You don't have permission to view this record.</Text>
+            <Text className="text-muted-foreground">You don&apos;t have permission to view this record.</Text>
           </Stack>
 
           {/* Actions */}

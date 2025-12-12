@@ -6,7 +6,7 @@
  */
 
 import { useState } from 'react';
-import { useNavigate } from '@tanstack/react-router';
+import { useRouter } from '@tanstack/react-router';
 import { Button } from '@workspace/ui/components/button';
 import { Heading } from '@workspace/ui/components/typography';
 import { Box, Inline } from '@workspace/ui/components/primitives';
@@ -29,11 +29,11 @@ interface FormBuilderLayoutProps {
 }
 
 export function FormBuilderLayout({ form, onSave, onDelete, isSaving, isDeleting }: FormBuilderLayoutProps) {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [showSettings, setShowSettings] = useState(false);
 
   const handleBack = () => {
-    navigate({ to: -1 as any });
+    router.history.back();
   };
 
   return (

@@ -118,7 +118,7 @@ export function requiresReference(fieldType: FieldType): boolean {
  * Check if field type is valid for Quick Filter
  */
 export function isValidQuickFilterFieldType(fieldType: FieldType): fieldType is QuickFilterValidFieldType {
-  return QUICK_FILTER_VALID_FIELD_TYPES.includes(fieldType as any);
+  return (QUICK_FILTER_VALID_FIELD_TYPES as readonly FieldType[]).includes(fieldType);
 }
 
 /**

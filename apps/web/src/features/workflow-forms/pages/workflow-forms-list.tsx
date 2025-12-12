@@ -38,7 +38,7 @@ export function WorkflowFormsList() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
   const { data, isLoading, error } = useWorkflowForms(workspaceId);
-  const forms = data?.data ?? [];
+  const forms = useMemo(() => data?.data ?? [], [data?.data]);
 
   // Calculate stats
   const totalForms = forms.length;

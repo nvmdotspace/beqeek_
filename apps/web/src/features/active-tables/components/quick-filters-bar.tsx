@@ -22,7 +22,12 @@ import {
   CommandItem,
 } from '@workspace/ui/components/command';
 import type { Table, QuickFilterConfig, FieldConfig, FieldOption } from '@workspace/active-tables-core';
-import { QUICK_FILTER_VALID_FIELD_TYPES } from '@workspace/beqeek-shared';
+import {
+  isValidQuickFilterFieldType,
+  FIELD_TYPE_SELECT_LIST,
+  FIELD_TYPE_SELECT_ONE_WORKSPACE_USER,
+  FIELD_TYPE_SELECT_LIST_WORKSPACE_USER,
+} from '@workspace/beqeek-shared';
 import { cn } from '@workspace/ui/lib/utils';
 
 export interface QuickFilterValue {
@@ -46,17 +51,10 @@ export interface QuickFiltersBarProps {
 }
 
 /**
- * Check if a field is valid for quick filters
- */
-function isValidQuickFilterField(field: FieldConfig): boolean {
-  return QUICK_FILTER_VALID_FIELD_TYPES.includes(field.type as any);
-}
-
-/**
  * Check if field supports multi-select
  */
 function isMultiSelectField(field: FieldConfig): boolean {
-  return field.type === 'SELECT_LIST' || field.type === 'SELECT_LIST_WORKSPACE_USER';
+  return field.type === FIELD_TYPE_SELECT_LIST || field.type === FIELD_TYPE_SELECT_LIST_WORKSPACE_USER;
 }
 
 /**
@@ -71,7 +69,7 @@ function getFilterOptions(field: FieldConfig, workspaceUsers?: WorkspaceUser[]):
 
   // Workspace user fields - convert users to options format
   if (
-    (field.type === 'SELECT_ONE_WORKSPACE_USER' || field.type === 'SELECT_LIST_WORKSPACE_USER') &&
+    (field.type === FIELD_TYPE_SELECT_ONE_WORKSPACE_USER || field.type === FIELD_TYPE_SELECT_LIST_WORKSPACE_USER) &&
     workspaceUsers &&
     workspaceUsers.length > 0
   ) {
@@ -96,21 +94,20 @@ export function QuickFiltersBar({
   workspaceUsers,
   className = '',
 }: QuickFiltersBarProps) {
-  // Get configured quick filters from table config
-  const quickFilterConfigs = table.config?.quickFilters || [];
-
   // Get field configs for quick filters
   const quickFilterFields = useMemo(() => {
+    const quickFilterConfigs = table.config?.quickFilters || [];
+
     return quickFilterConfigs
       .map((qf: QuickFilterConfig) => {
         const field = table.config.fields.find((f) => f.name === qf.fieldName);
-        if (!field || !isValidQuickFilterField(field)) {
+        if (!field || !isValidQuickFilterFieldType(field.type)) {
           return null;
         }
         return field;
       })
       .filter((f): f is FieldConfig => f !== null);
-  }, [quickFilterConfigs, table.config.fields]);
+  }, [table.config.quickFilters, table.config.fields]);
 
   if (quickFilterFields.length === 0) {
     return null;

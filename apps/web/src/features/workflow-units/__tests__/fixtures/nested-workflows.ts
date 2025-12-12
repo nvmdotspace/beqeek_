@@ -8,6 +8,7 @@
  */
 
 import type { WorkflowIR, StepIR } from '../../utils/yaml-types';
+import type { Node, Edge } from '@xyflow/react';
 
 /**
  * Legacy YAML format types (PHP/Blockly)
@@ -455,9 +456,9 @@ export function generateDeeplyNestedConditions(depth: number): WorkflowIR {
 /**
  * Generate random workflow with mix of node types
  */
-export function generateRandomWorkflow(nodeCount: number): { nodes: any[]; edges: any[] } {
-  const nodes: any[] = [];
-  const edges: any[] = [];
+export function generateRandomWorkflow(nodeCount: number): { nodes: Node[]; edges: Edge[] } {
+  const nodes: Node[] = [];
+  const edges: Edge[] = [];
 
   const types = ['log', 'smtp_email', 'api_call', 'condition', 'loop'];
 

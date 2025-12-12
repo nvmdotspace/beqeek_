@@ -78,7 +78,6 @@ export function useCreateRecord(workspaceId: string, tableId: string, table: Tab
         hasLocalStorageKey: !!localStorage.getItem(`table_${tableId}_encryption_key`),
       });
 
-      let payload: CreateRecordRequest;
       let encryptionKey: string | null = null;
 
       if (isE2EE) {
@@ -102,7 +101,7 @@ export function useCreateRecord(workspaceId: string, tableId: string, table: Tab
       }
 
       // Build encrypted payload (both modes require encryption!)
-      payload = buildEncryptedCreatePayload(record, table, encryptionKey);
+      const payload = buildEncryptedCreatePayload(record, table, encryptionKey);
       console.log('[useCreateRecord] Encrypted payload:', payload);
 
       // API endpoint: POST /api/workspace/{workspaceId}/workflow/post/active_tables/{tableId}/records
@@ -171,6 +170,7 @@ function buildEncryptedCreatePayload(
     }
 
     // Encrypt field value using CommonUtils
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const encryptedValue = CommonUtils.encryptTableData(tableDetail as any, fieldName, value);
     payload.record[fieldName] = encryptedValue;
 

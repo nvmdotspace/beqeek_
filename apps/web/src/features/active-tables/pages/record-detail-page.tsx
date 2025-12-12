@@ -8,7 +8,7 @@ import { useState, useMemo, useCallback } from 'react';
 import { getRouteApi } from '@tanstack/react-router';
 import { RecordDetail } from '@workspace/active-tables-core';
 import { COMMENTS_POSITION_HIDDEN, REFERENCE_FIELD_TYPES, type RecordDetailConfig } from '@workspace/beqeek-shared';
-import type { Table, FieldConfig } from '@workspace/active-tables-core';
+import type { Table, FieldConfig, WorkspaceUser } from '@workspace/active-tables-core';
 import {
   CommentSection,
   type Comment as PackageComment,
@@ -213,7 +213,7 @@ export default function RecordDetailPage() {
   // Convert workspaceUsers array to Record format for RecordDetail component
   const userRecordsMap = useMemo(() => {
     if (!workspaceUsers) return undefined;
-    const map: Record<string, any> = {};
+    const map: Record<string, WorkspaceUser> = {};
     workspaceUsers.forEach((user) => {
       map[user.id] = user;
     });

@@ -54,6 +54,7 @@ export function CanvasHeader({ workspaceId, unitId, onCreateEvent }: CanvasHeade
       } else {
         // In visual mode, convert nodes/edges to YAML
         yaml = reactFlowToYAML(nodes, edges, {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           type: currentEvent.eventSourceType.toLowerCase() as any,
           config: currentEvent.eventSourceParams as unknown as Record<string, unknown>,
         });

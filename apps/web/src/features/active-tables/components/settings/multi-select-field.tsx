@@ -41,7 +41,7 @@ export function MultiSelectField({
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
 
-  const normalizedValue = Array.isArray(value) ? value : [];
+  const normalizedValue = useMemo(() => (Array.isArray(value) ? value : []), [value]);
 
   const selectedOptions = useMemo(
     () => options.filter((option) => normalizedValue.includes(option.value)),

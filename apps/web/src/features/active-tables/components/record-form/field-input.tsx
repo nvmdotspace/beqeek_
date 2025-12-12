@@ -24,6 +24,7 @@ import { getActiveTable } from '../../api/active-tables-api';
 
 interface FieldInputProps {
   field: FieldConfig;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   form: UseFormReturn<any>;
   table: Table;
   workspaceId: string;
@@ -37,8 +38,8 @@ export function FieldInput({ field, form, table, workspaceId, disabled = false, 
   // Use CREATE_RECORD_FORM preset: only fetches id,fullName (minimal fields for dropdown)
   const {
     data: workspaceUsersData,
-    isLoading,
-    error,
+    isLoading: _isLoading,
+    error: _error,
   } = useGetWorkspaceUsers(workspaceId, {
     query: 'BASIC_WITH_AVATAR',
     reactQueryOptions: {
@@ -173,6 +174,7 @@ export function FieldInput({ field, form, table, workspaceId, disabled = false, 
  */
 function isUserField(type: string): boolean {
   const userFieldTypes = [FIELD_TYPE_SELECT_ONE_WORKSPACE_USER, FIELD_TYPE_SELECT_LIST_WORKSPACE_USER];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return userFieldTypes.includes(type as any);
 }
 
@@ -181,5 +183,6 @@ function isUserField(type: string): boolean {
  */
 function isReferenceField(type: string): boolean {
   const referenceFieldTypes = [FIELD_TYPE_SELECT_ONE_RECORD, FIELD_TYPE_SELECT_LIST_RECORD];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return referenceFieldTypes.includes(type as any);
 }
