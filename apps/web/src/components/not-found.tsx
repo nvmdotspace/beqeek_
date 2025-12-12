@@ -6,7 +6,7 @@ export const NotFound = () => {
       <div className="text-center">
         <Heading level={2}>Page not found</Heading>
         <Text className="mt-2" color="muted">
-          The page you're looking for doesn't exist.
+          The page you&apos;re looking for doesn&apos;t exist.
         </Text>
       </div>
     </div>

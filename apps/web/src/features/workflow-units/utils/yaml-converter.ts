@@ -27,9 +27,7 @@ import type { WorkflowIR, TriggerIR, CallbackIR } from './yaml-types';
 /**
  * Options for YAML to React Flow conversion
  */
-export interface YAMLToReactFlowOptions extends ParseOptions {
-  // Can add more options here in the future
-}
+export type YAMLToReactFlowOptions = ParseOptions;
 
 /**
  * Result of YAML to React Flow conversion

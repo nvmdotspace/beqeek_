@@ -14,12 +14,12 @@ import { Alert, AlertTitle, AlertDescription } from '@workspace/ui/components/al
 import { useEncryption } from '@workspace/active-tables-core';
 
 interface EncryptionKeyPromptProps {
-  _tableId: string;
+  tableId: string;
   tableName: string;
   onKeySubmit: (key: string) => Promise<boolean>;
 }
 
-export function EncryptionKeyPrompt({ _tableId, tableName, onKeySubmit }: EncryptionKeyPromptProps) {
+export function EncryptionKeyPrompt({ tableId: _tableId, tableName, onKeySubmit }: EncryptionKeyPromptProps) {
   const [key, setKey] = useState('');
   const [showKey, setShowKey] = useState(false);
   const [error, setError] = useState<string | null>(null);

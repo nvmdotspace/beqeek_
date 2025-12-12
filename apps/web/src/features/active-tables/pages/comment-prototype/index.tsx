@@ -585,14 +585,14 @@ export default function MultiReplyCommentsPrototype() {
           </CardHeader>
           <CardContent className="text-sm text-muted-foreground space-y-2">
             <p>
-              <strong>Trả lời đơn:</strong> Click "Trả lời" trên 1 tin nhắn → Viết → Gửi
+              <strong>Trả lời đơn:</strong> Click &quot;Trả lời&quot; trên 1 tin nhắn → Viết → Gửi
             </p>
             <p>
-              <strong>Trả lời nhiều:</strong> Click "Trả lời" trên nhiều tin nhắn → Tất cả sẽ được thêm vào danh sách →
-              Viết 1 tin trả lời tất cả
+              <strong>Trả lời nhiều:</strong> Click &quot;Trả lời&quot; trên nhiều tin nhắn → Tất cả sẽ được thêm vào
+              danh sách → Viết 1 tin trả lời tất cả
             </p>
             <p>
-              <strong>Bỏ chọn:</strong> Click "Trả lời" lần nữa trên tin đã chọn, hoặc click X để xóa
+              <strong>Bỏ chọn:</strong> Click &quot;Trả lời&quot; lần nữa trên tin đã chọn, hoặc click X để xóa
             </p>
           </CardContent>
         </Card>

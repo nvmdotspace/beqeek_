@@ -155,6 +155,7 @@ describe('Edge Cases', () => {
             id: 'step1',
             name: 'Null Config',
             type: 'log',
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             config: null as any,
           },
         ],
@@ -170,6 +171,7 @@ describe('Edge Cases', () => {
         steps: [
           {
             id: 'step1',
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             name: undefined as any,
             type: 'log',
             config: {},
@@ -247,7 +249,9 @@ describe('Edge Cases', () => {
                 type: 'condition',
                 name: 'Null Branches',
                 input: {},
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 then: null as any,
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 else: null as any,
               },
             ],
@@ -319,6 +323,7 @@ describe('Edge Cases', () => {
     });
 
     it('should handle shouldApplyLayout with undefined positions', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const nodes: Node[] = [{ id: 'node1', type: 'log', position: undefined as any, data: {} }];
 
       // Should not throw
